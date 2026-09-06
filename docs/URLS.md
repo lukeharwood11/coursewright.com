@@ -11,7 +11,7 @@
 | Marketing / public site | `coursewright.com/…` | No auth required |
 | Signed-in app | `coursewright.com/my/<org-slug>/…` | Org permalink scopes the session |
 | Account (cross-org) | `coursewright.com/my/settings` | Outside a specific org |
-| Auth | `/login`, `/signup`, invite claim URLs | Outside `/my` |
+| Auth | `/login`, `/signup`, `/invite/<token>` | Outside `/my` |
 | Share / deep links | Short entry URLs that resolve into `/my/…` after login | Account required in P0 — paths TBD |
 
 `<org-slug>` = organization permalink ([FEATURES.md](./FEATURES.md) — changing it warns that links break; no auto-redirect in P0).
@@ -41,7 +41,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 |------|-----|-------|
 | [LOGIN](./pages/LOGIN.md) | `/login` | Email + Google |
 | [SIGNUP](./pages/SIGNUP.md) | `/signup` | Email + Google |
-| Invite claim | <!-- TBD --> | No page file until path locked |
+| [INVITE_CLAIM](./pages/INVITE_CLAIM.md) | `/invite/<token>` | Staff invite (owner / admin / instructor). Sign in first, then accept. **v0: no email send** — copy the link |
 | Auth callback | <!-- TBD — may be Supabase-hosted --> | |
 
 ---
@@ -135,7 +135,6 @@ Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / un
 
 | Concern | Status |
 |---------|--------|
-| Invite claim URLs | TBD |
 | Resource share entry URLs | TBD |
 | Print routes (`…/print` vs query) | TBD — print UX still required on material / unit / this week |
 | Search as a route vs overlay | TBD |
@@ -146,6 +145,6 @@ Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / un
 ## Open questions
 
 1. **Print** — dedicated `/print` child routes vs `?print=1`?
-2. **Share / invite links** — `/invite/<token>`, `/s/<token>`, or other?
+2. **Share / resource links** — `/s/<token>` or other? Staff invites use `/invite/<token>`.
 3. **Search** — overlay only, or `/my/<org-slug>/search`?
 4. **Class list / detail** — paths not locked (Class ≠ Course)

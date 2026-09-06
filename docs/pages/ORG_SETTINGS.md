@@ -19,15 +19,15 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 - Parents are told they cannot change settings.
 - Save org name/metadata; changing **permalink slug** shows a warning that existing links break (no auto-redirect in P0) and requires an explicit confirmation.
 - Set org **type** (co-op / micro-school) and **grade scheme** (K–12 / custom labels).
-- Staff section on this page: invite by email, change roles, remove staff — UI TBD; block remove/demote of last owner or admin.
+- Staff section on this page: invite owner / admin / instructor by email, **copy a claim link** (v0 does not send email), list pending invites. Change roles / remove staff still TBD; block remove/demote of last owner or admin.
 - Billing section is P1 placeholder, **shown only to owners**.
 
 ## Data shown
 
 - Organization **name**, **slug**, **org type**
 - Current **grade scheme** and labels (K–12 preset or custom)
-- Staff list: person name/email, role (owner | admin | instructor), invite/claim status — TBD
-- Pending admin/instructor invites (email, status) — TBD
+- Staff list: person **name** / **email**, **role** (owner | admin | instructor)
+- Pending staff invites: **email**, **role**, copyable `/invite/<token>` link, cancel
 - Billing status — P1, owner only
 
 ## Contents
@@ -47,9 +47,10 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 ### Staff / roles (section)
 
 - List owners, admins, and instructors
-- Invite admins / instructors by email (claimable)
-- Change **admin ↔ instructor** for existing staff
-- Remove admins/instructors
+- Invite owners / admins / instructors by email; copy the claim link (no email send in v0)
+- Pending invites: copy link again, or cancel
+- Change **admin ↔ instructor** for existing staff — TBD
+- Remove admins/instructors — TBD
 - Guard: cannot remove or demote the **last remaining owner or admin**
 
 ### Billing (P1)
@@ -61,12 +62,14 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 
 - Save org settings / slug (with warning)
 - Set grade scheme
-- Invite / change role / remove staff (TBD)
+- Invite staff and copy the claim link; cancel a pending invite
+- Change role / remove staff (TBD)
 
 ## Links to
 
 - [ORG_HOME](./ORG_HOME.md) — back to the organization
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — cross-org account settings (distinct from this page)
+- [INVITE_CLAIM](./INVITE_CLAIM.md) — copied staff invite link (recipient)
 - [LOGIN](./LOGIN.md) — after sign-out (if sign-out lives in chrome)
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 

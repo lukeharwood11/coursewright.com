@@ -13,7 +13,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | User | `profiles` | PK = `auth.users.id`. Email + Google live in Supabase Auth; `profiles` is the PostgREST-facing row. |
 | Organization | `organizations` | |
 | Membership | `memberships` | |
-| AdminInvite | `admin_invites` | Additional **admins** only (FEATURES). Instructors are added as memberships. |
+| AdminInvite | `admin_invites` | Staff invite (owner / admin / instructor). Claimed via copyable `/invite/<token>` or pending-request inbox after login. **v0: no email send.** |
 | StudentProfile | `student_profiles` | |
 | Family | `families` | |
 | FamilyMember | `family_members` | |
@@ -326,17 +326,20 @@ Org staff and parent memberships. Owners and admins may **change** `admin` ↔ `
 
 ### AdminInvite
 
-Email invite for an additional admin. Claimed by signing up / logging in with that email.
+Email invite for **staff** (owner, admin, or instructor — product name for teacher). **v0:** owners/admins copy a claim link; Course Wright does **not** send email. Claimed by opening `/invite/<token>` or by signing in with that email and accepting a pending request.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | uuid | PK |
 | organization_id | uuid | FK → Organization |
-| email | text | Lowercased |
+| email | text | Lowercased — must match the account that claims |
+| role | text | `owner` · `admin` · `instructor` — seat they receive on claim |
 | invited_by | uuid | FK → User |
-| token | text | Unique invite token (returned on insert) |
+| token | text | Unique invite token (returned on insert; used in `/invite/<token>`) |
 | accepted_at | timestamptz | nullable |
 | membership_id | uuid | FK → Membership, nullable |
+
+**Who can invite:** owners and admins. Admins may invite `admin` or `instructor`. Only owners may invite another `owner`. Instructors cannot invite org staff.
 
 ---
 

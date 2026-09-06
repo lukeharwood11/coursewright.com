@@ -23,6 +23,7 @@ export type Database = {
           invited_by: string
           membership_id: string | null
           organization_id: string
+          role: string
           token: string
         }
         Insert: {
@@ -30,9 +31,10 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
-          invited_by: string
+          invited_by?: string
           membership_id?: string | null
           organization_id: string
+          role: string
           token?: string
         }
         Update: {
@@ -43,6 +45,7 @@ export type Database = {
           invited_by?: string
           membership_id?: string | null
           organization_id?: string
+          role?: string
           token?: string
         }
         Relationships: [
@@ -1176,7 +1179,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_staff_invite: { Args: { p_token: string }; Returns: string }
+      get_staff_invite: {
+        Args: { p_token: string }
+        Returns: {
+          accepted_at: string | null
+          email: string
+          email_matches: boolean
+          id: string
+          organization_id: string
+          organization_name: string
+          organization_slug: string
+          role: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

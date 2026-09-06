@@ -13,6 +13,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [PRIVACY](./PRIVACY.md) | `/privacy` (outline for real policy text — live screen is construction until then) |
 | [LOGIN](./LOGIN.md) | `/login` |
 | [SIGNUP](./SIGNUP.md) | `/signup` |
+| [INVITE_CLAIM](./INVITE_CLAIM.md) | `/invite/<token>` |
 | [ORG_PICKER](./ORG_PICKER.md) | `/my` |
 | [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) | `/my/settings` |
 | [ORG_HOME](./ORG_HOME.md) | `/my/<org-slug>` |
@@ -31,7 +32,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [FAMILIES](./FAMILIES.md) | `/my/<org-slug>/families` |
 | [FAMILY](./FAMILY.md) | `/my/<org-slug>/families/<family_id>` |
 
-**No page file yet** (paths TBD in [URLS.md](../URLS.md)): invite claim, resource share entry, dedicated print routes, search route. Print / share / search UX is still required on the locked pages above.
+**No page file yet** (paths TBD in [URLS.md](../URLS.md)): resource share entry, dedicated print routes, search route. Print / share / search UX is still required on the locked pages above.
 
 ---
 
@@ -43,7 +44,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 |------------|-----------------|
 | Organizations / create org / first owner | [ORG_PICKER](./ORG_PICKER.md) |
 | Org permalink slug | [ORG_PICKER](./ORG_PICKER.md), [ORG_SETTINGS](./ORG_SETTINGS.md) |
-| Admin invites / staff roles / last-admin guard | [ORG_SETTINGS](./ORG_SETTINGS.md) |
+| Admin invites / staff roles / last-admin guard | [ORG_SETTINGS](./ORG_SETTINGS.md), [INVITE_CLAIM](./INVITE_CLAIM.md), [ORG_PICKER](./ORG_PICKER.md) (pending requests) |
 | Org grade scheme | [ORG_SETTINGS](./ORG_SETTINGS.md) |
 | Authentication (email + Google) | [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md) |
 | RBAC (owner / admin / instructor / parent) | Role splits on [ORG_HOME](./ORG_HOME.md) + gated pages |
@@ -66,7 +67,6 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 
 | Concern | Status |
 |---------|--------|
-| Invite claim URL | Path TBD — no page file until locked |
 | Resource share entry URL | Path TBD — recipients land on [MATERIAL](./MATERIAL.md) after login |
 | Dedicated print routes | Path TBD — print actions still on material / unit / this week |
 | Class list / detail URLs | TBD — Class is P0 concept; no page file until path locked |

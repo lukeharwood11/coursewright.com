@@ -58,10 +58,10 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Marketing site** | Public home, about, pricing | shipped | Contact / privacy / terms / cookies still construction placeholders |
 | **Authentication** | Sign up, sign in | shipped | **Email + Google** via **Supabase Auth**. Login, signup, session gates live |
 | **Account settings** | Cross-org account page (`/my/settings`) | in progress | View + sign-out live; profile edit still stubbed |
-| **Organizations** | Anyone can create an org; creator is first **owner**; org picker (`/my`) | in progress | Create + list + `/my/:orgSlug` home + org settings identity live; **collapsible org sidebar** on org pages; staff invite/role UI still stubbed |
+| **Organizations** | Anyone can create an org; creator is first **owner**; org picker (`/my`) | in progress | Create + list + `/my/:orgSlug` home + org settings identity live; **collapsible org sidebar** on org pages; staff **invite + copy link** live; change/remove staff still TBD |
 | **Org permalink** | Stable org URL (`slug`) created with the org | shipped | Create + settings change with break-links warning |
 | **Org grade scheme** | Org chooses how grades work (exact / range / custom; presets K–12, Custom) | shipped | Defaults on create; owners/admins edit in org settings |
-| **Admin invites** | Add other admins by email; those emails can be **claimed** by accounts | planned | Schema + RLS ready; no invite UI or claim route |
+| **Admin invites** | Add other admins by email; those emails can be **claimed** by accounts | shipped | v0: invite owner/admin/instructor; **copy a claim link** (no email send); invitee sees pending requests after login |
 | **Student profiles** | Org-level student records — no login required | in progress | Org roster list + profile stub live; edit/invite UI not started. Created when first added to a course or class; linkable later (P2) |
 | **Classes** | Org-scoped **group of students** — separate from a Course | planned | **Decided concept.** How Class relates to course enrollment — **workshop** (see [Classes](#classes-p0)) |
 | **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | in progress | Org roster list + sidebar jump live; class / enroll / parent-link UI not started |
@@ -139,7 +139,7 @@ Until enrollment is locked, keep **Course.enrollment → student_profile** as th
 | **Who can create an org** | **Anyone** (signed-in or as part of signup) |
 | **First owner** | The person who creates the org — they can manage the org **and** (P1) billing |
 | **Admins** | Same org management as owners (name, permalink, grade scheme, staff) except **billing** |
-| **More admins** | Owner/any admin adds **emails**; those people **claim** the admin seat with an account on that email |
+| **More admins** | Owner/any admin adds **emails**; those people **claim** the seat with an account on that email. **v0:** copy a link (no email send); login also shows pending requests |
 | **Multiple admins** | Yes — no single-admin limit |
 | **Change staff roles** | Owners and admins can change **admin ↔ instructor** for existing staff |
 | **Remove staff** | Owners and admins can **remove** admins and instructors from the org |

@@ -1,9 +1,13 @@
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthScreen } from "@/auth/components/AuthScreen";
+import { safeNextPath } from "@/auth/model/safeNext";
 
 export function LoginPage() {
   const location = useLocation();
+  const fromInvite = safeNextPath(
+    new URLSearchParams(location.search).get("next"),
+  ).startsWith("/invite/");
 
   useEffect(() => {
     document.title = "Sign in · Course Wright";
@@ -12,7 +16,11 @@ export function LoginPage() {
   return (
     <AuthScreen
       heading="Welcome back"
-      subcopy="Sign in to see your courses and materials."
+      subcopy={
+        fromInvite
+          ? "Sign in with the email you were invited with to accept."
+          : "Sign in to see your courses and materials."
+      }
       googleLabel="Sign in with Google"
       submitLabel="Continue"
       footer={
