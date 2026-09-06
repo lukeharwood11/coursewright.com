@@ -12,6 +12,10 @@ import {
   familyQueryKeys,
   listFamilies,
 } from "@/roster/databridge/families";
+import {
+  classQueryKeys,
+  listClasses,
+} from "@/roster/databridge/classes";
 import { buildParentNav, buildStaffNav } from "../model/nav";
 
 export function useOrgShellData(orgSlug: string | undefined) {
@@ -39,6 +43,12 @@ export function useOrgShellData(orgSlug: string | undefined) {
     enabled: Boolean(organizationId),
   });
 
+  const classesQuery = useQuery({
+    queryKey: classQueryKeys.list(organizationId ?? 0),
+    queryFn: () => listClasses(organizationId!),
+    enabled: isStaff && Boolean(organizationId),
+  });
+
   const familiesQuery = useQuery({
     queryKey: familyQueryKeys.list(organizationId ?? 0),
     queryFn: () => listFamilies(organizationId!),
@@ -49,6 +59,10 @@ export function useOrgShellData(orgSlug: string | undefined) {
     courses: (coursesQuery.data ?? []).map((course) => ({
       id: String(course.id),
       title: course.title,
+    })),
+    classes: (classesQuery.data ?? []).map((classGroup) => ({
+      id: String(classGroup.id),
+      title: classGroup.title,
     })),
     families: (familiesQuery.data ?? []).map((family) => ({
       id: String(family.id),

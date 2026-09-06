@@ -1,61 +1,59 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/ui/Button";
-import { coursePath, coursesPath } from "@/courses/model/paths";
 import { AddStudentForm } from "@/roster/student-profile/components/AddStudentForm";
 import { ExistingStudentPicker } from "@/roster/student-profile/components/ExistingStudentPicker";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
-import { useCourseRoster } from "./hooks/useCourseRoster";
+import { useClassRoster } from "./hooks/useClassRoster";
 
-export function CourseRosterPage() {
-  const roster = useCourseRoster();
+export function ClassRosterPage() {
+  const roster = useClassRoster();
 
   useEffect(() => {
-    document.title = roster.course
-      ? `Roster · ${roster.course.title} · Course Wright`
-      : "Course roster · Course Wright";
-  }, [roster.course]);
+    document.title = roster.classGroup
+      ? `${roster.classGroup.title} · Course Wright`
+      : "Class · Course Wright";
+  }, [roster.classGroup]);
 
   if (roster.loading) {
     return (
       <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading roster…</p>
+        <p className="text-[14px] text-[var(--ink-soft)]">Loading class…</p>
       </div>
     );
   }
 
-  if (!roster.canEdit || roster.notFound || !roster.course) {
+  if (roster.notFound || !roster.classGroup) {
     return (
       <div className="px-5 py-8 md:px-8">
         <h1
           className="text-[24px] font-semibold text-[var(--ink)]"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          We couldn’t find that course
+          We couldn’t find that class
         </h1>
         <p className="mt-2 text-[14.5px] text-[var(--ink-soft)]">
-          This roster isn’t available.
+          It may have been removed, or you may not have access.
         </p>
         {roster.error ? (
           <p className="mt-2 text-[13px] text-[var(--amber-deep)]">{roster.error}</p>
         ) : null}
         <p className="mt-4 text-[13px]">
           <Link
-            to={coursesPath(roster.organization.slug)}
+            to={`/my/${roster.organization.slug}/roster`}
             className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
           >
-            Back to courses
+            Back to roster
           </Link>
         </p>
       </div>
     );
   }
 
-  const students = roster.enrollments.map((enrollment) => enrollment.student);
-  const enrollmentIdByStudent = new Map(
-    roster.enrollments.map((enrollment) => [enrollment.student.id, enrollment.id]),
+  const students = roster.members.map((member) => member.student);
+  const memberIdByStudent = new Map(
+    roster.members.map((member) => [member.student.id, member.id]),
   );
-  const base = `/my/${roster.organization.slug}`;
 
   return (
     <div className="px-5 py-8 md:px-8">
@@ -63,27 +61,11 @@ export function CourseRosterPage() {
         className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        Course roster
+        {roster.classGroup.title}
       </h1>
-      <p className="mt-1 text-[14px] text-[var(--ink-soft)]">{roster.course.title}</p>
-      <p className="mt-3 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-        Students are optional. You can print materials without anyone on this
-        list.
-      </p>
-      <p className="mt-2 text-[13px]">
-        <Link
-          to={coursePath(roster.organization.slug, roster.course.id)}
-          className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-        >
-          Back to course
-        </Link>
-        <span className="text-[var(--ink-faint)]"> · </span>
-        <Link
-          to={`${base}/roster`}
-          className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-        >
-          Org roster
-        </Link>
+      <p className="mt-1 max-w-xl text-[14px] text-[var(--ink-soft)]">
+        A class is a group of students — not a course. Adding someone here does
+        not enroll them in a course.
       </p>
 
       <div className="mt-6 grid items-start gap-4 lg:grid-cols-2">
@@ -98,9 +80,9 @@ export function CourseRosterPage() {
           />
           {roster.availableStudents.length === 0 ? (
             <p className="text-[14px] leading-relaxed text-[var(--ink-soft)]">
-              {roster.enrollments.length === 0
-                ? "No one in the org yet. Add a new student to create their profile and enroll them."
-                : "Everyone already in the org is enrolled here. Add a new student below."}
+              {roster.members.length === 0
+                ? "No one in the org yet. Add a new student to create their profile and put them in this class."
+                : "Everyone already in the org is in this class. Add a new student below."}
             </p>
           ) : null}
         </section>
@@ -110,7 +92,7 @@ export function CourseRosterPage() {
             Add a new student
           </h3>
           <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-            Creates their org profile and enrolls them in this course.
+            Creates their org profile and adds them to this class.
           </p>
           <div className="mt-4">
             <AddStudentForm
@@ -120,7 +102,7 @@ export function CourseRosterPage() {
               gradeLabels={roster.gradeLabels}
               error={roster.newError}
               saving={roster.addingNew}
-              submitLabel="Add to course"
+              submitLabel="Add to class"
               onNameChange={roster.setName}
               onParentEmailChange={roster.setParentEmail}
               onGradeLevelChange={roster.setGradeLevel}
@@ -131,26 +113,35 @@ export function CourseRosterPage() {
       </div>
 
       <section className="mt-8">
-        <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Enrolled</h2>
+        <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Students</h2>
         <StudentRosterList
           students={students}
           orgSlug={roster.organization.slug}
-          emptyMessage="No students enrolled yet. Printing this course does not require a roster."
+          emptyMessage="No students in this class yet."
           trailing={(student) => {
-            const enrollmentId = enrollmentIdByStudent.get(student.id);
-            if (!enrollmentId) return null;
+            const memberId = memberIdByStudent.get(student.id);
+            if (!memberId) return null;
             return (
               <Button
                 variant="secondary"
-                onClick={() => roster.onUnenroll(enrollmentId)}
-                disabled={roster.unenrollingId === enrollmentId}
+                onClick={() => roster.onRemove(memberId)}
+                disabled={roster.removingId === memberId}
               >
-                {roster.unenrollingId === enrollmentId ? "Removing…" : "Unenroll"}
+                {roster.removingId === memberId ? "Removing…" : "Remove"}
               </Button>
             );
           }}
         />
       </section>
+
+      <p className="mt-6 text-[13px]">
+        <Link
+          to={`/my/${roster.organization.slug}/roster`}
+          className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+        >
+          Back to roster
+        </Link>
+      </p>
     </div>
   );
 }

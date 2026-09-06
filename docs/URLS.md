@@ -133,8 +133,9 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 
 | Page | URL | Notes |
 |------|-----|-------|
-| [ORG_ROSTER](./pages/ORG_ROSTER.md) | `/my/<org-slug>/roster` | Org student profiles |
+| [ORG_ROSTER](./pages/ORG_ROSTER.md) | `/my/<org-slug>/roster` | Org student profiles + class list |
 | [STUDENT_PROFILE](./pages/STUDENT_PROFILE.md) | `/my/<org-slug>/roster/<student_id>` | |
+| [CLASS](./pages/CLASS.md) | `/my/<org-slug>/classes/<class_id>` | Class roster (student group) |
 | [FAMILIES](./pages/FAMILIES.md) | `/my/<org-slug>/families` | Parent directory |
 | [FAMILY](./pages/FAMILY.md) | `/my/<org-slug>/families/<family_id>` | |
 
@@ -153,7 +154,6 @@ Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / un
 | Invite claim URLs | TBD |
 | Resource share entry URLs | TBD |
 | Search as a route vs overlay | TBD |
-| Class list / detail | TBD — Class ≠ Course; paths not locked |
 
 ---
 
@@ -161,4 +161,3 @@ Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / un
 
 1. **Share / invite links** — `/invite/<token>`, `/s/<token>`, or other?
 2. **Search** — overlay only, or `/my/<org-slug>/search`?
-3. **Class list / detail** — paths not locked (Class ≠ Course)

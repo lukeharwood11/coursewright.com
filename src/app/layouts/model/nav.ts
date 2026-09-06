@@ -18,6 +18,7 @@ export type NavSection = {
 
 export type NavLists = {
   courses: Array<{ id: string; title: string }>;
+  classes: Array<{ id: string; title: string }>;
   families: Array<{ id: string; label: string }>;
 };
 
@@ -54,7 +55,13 @@ export function buildStaffNav(orgSlug: string, lists: NavLists): NavSection[] {
       label: "Roster",
       href: `${base}/roster`,
       match: "prefix",
-      children: [],
+      children: childLinks(
+        lists.classes.map((classGroup) => ({
+          id: classGroup.id,
+          label: classGroup.title,
+        })),
+        (id) => `${base}/classes/${id}`,
+      ),
     },
     {
       id: "families",

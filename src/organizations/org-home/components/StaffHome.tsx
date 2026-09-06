@@ -26,7 +26,7 @@ export function StaffHome({
     },
     {
       title: "Roster",
-      description: "Student profiles for this organization.",
+      description: "Students and classes for this organization.",
       to: `${base}/roster`,
       icon: UsersIcon,
     },
