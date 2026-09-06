@@ -16,8 +16,8 @@ Manage **enrollments** for this course instance (course has its own roster). Org
 
 - Manage enrollments for this course only.
 - Enroll an existing org student, or add a new student (creates `student_profile` — name required; optional parent email, grade).
-- Unenroll / adjust enrollment; parent org access requires enrollment in a course with `status = active`.
-- Parent invite by email from course context.
+- Unenroll (withdrawn); parent org access requires enrollment in a course with `status = active`.
+- Parent email can be stored on the new profile; sending the invite is a separate flow.
 - Empty roster allowed — printing materials does not require students.
 
 ## Data shown
@@ -32,14 +32,13 @@ Manage **enrollments** for this course instance (course has its own roster). Org
 - List enrolled student profiles
 - Add student — if new to the org, creates `student_profile` (name required; optional parent email, grade)
 - Unenroll / manage enrollment (active status matters for parent org access rules)
-- Parent email / invite from course context
+- Parent email / invite from course context (email stored; send TBD)
 - Co-teachers may be shown or linked from [COURSE_SETTINGS](./COURSE_SETTINGS.md) — TBD split
 - Empty state: add students optional — **create → print does not require a roster**
 
 ## Primary actions
 
 - Add / remove enrollment
-- Invite parent by email
 - Open [STUDENT_PROFILE](./STUDENT_PROFILE.md)
 
 ## Links to
