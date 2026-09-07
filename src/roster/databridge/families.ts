@@ -1,18 +1,18 @@
 import { requireSupabase } from "./client";
 
 export type FamilySummary = {
-  id: string;
-  organizationId: string;
+  id: number;
+  organizationId: number;
   displayName: string | null;
 };
 
 export const familyQueryKeys = {
-  list: (orgId: string) => ["families", "list", orgId] as const,
-  detail: (id: string) => ["families", "detail", id] as const,
+  list: (orgId: number) => ["families", "list", orgId] as const,
+  detail: (id: number) => ["families", "detail", id] as const,
 };
 
 export async function listFamilies(
-  organizationId: string,
+  organizationId: number,
 ): Promise<FamilySummary[]> {
   const db = requireSupabase();
   const { data, error } = await db
@@ -26,7 +26,7 @@ export async function listFamilies(
   return (data ?? []).map(toFamilySummary);
 }
 
-export async function getFamily(id: string): Promise<FamilySummary | null> {
+export async function getFamily(id: number): Promise<FamilySummary | null> {
   const db = requireSupabase();
   const { data, error } = await db
     .from("families")
@@ -41,8 +41,8 @@ export async function getFamily(id: string): Promise<FamilySummary | null> {
 }
 
 function toFamilySummary(row: {
-  id: string;
-  organization_id: string;
+  id: number;
+  organization_id: number;
   display_name: string | null;
 }): FamilySummary {
   return {

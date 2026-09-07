@@ -5,9 +5,9 @@ import {
   UserGroupIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
-import { Button } from "@/ui/Button";
-import { toastNotImplemented } from "@/ui/toast";
+import { ButtonLink } from "@/ui/Button";
 import { Link } from "react-router-dom";
+import { newCoursePath } from "@/courses/model/paths";
 
 export function StaffHome({
   orgName,
@@ -59,10 +59,10 @@ export function StaffHome({
             sidebar to jump to a course or family.
           </p>
         </div>
-        <Button onClick={() => toastNotImplemented("Create course")}>
+        <ButtonLink to={newCoursePath(orgSlug)}>
           <PlusIcon className="h-5 w-5" aria-hidden />
           Create course
-        </Button>
+        </ButtonLink>
       </div>
 
       <ul className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

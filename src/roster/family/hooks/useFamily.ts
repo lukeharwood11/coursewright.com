@@ -5,13 +5,14 @@ import { familyQueryKeys, getFamily } from "@/roster/databridge/families";
 import { familyLabel } from "@/roster/model/familyLabel";
 
 export function useFamily() {
-  const { familyId } = useParams();
+  const { familyId: familyIdParam } = useParams();
+  const familyId = familyIdParam ? Number(familyIdParam) : NaN;
   const { organization } = useOrgShell();
 
   const query = useQuery({
-    queryKey: familyQueryKeys.detail(familyId ?? ""),
-    queryFn: () => getFamily(familyId ?? ""),
-    enabled: Boolean(familyId),
+    queryKey: familyQueryKeys.detail(familyId),
+    queryFn: () => getFamily(familyId),
+    enabled: Number.isFinite(familyId),
   });
 
   const family = query.data ?? null;

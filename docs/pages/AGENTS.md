@@ -41,7 +41,7 @@ Rules:
 
 1. Use markdown links to the matching file in this folder — e.g. `[COURSE](./COURSE.md)`, not bare paths alone.
 2. Cover primary CTAs, nav, list row opens, “back to…”, post-auth redirects, and create flows that land on another page.
-3. If the destination route is still TBD (invite, share entry, print route), note it under Links to as TBD — do **not** invent a page file.
+3. If the destination route is still TBD (invite, share entry, search), note it under Links to as TBD — do **not** invent a page file.
 4. Keep **Links to** in sync when you add/remove navigation in Contents or Primary actions.
 5. Shared chrome (e.g. org nav on many instructor pages) — list the destinations that chrome exposes from that screen (or say “via org chrome: …” with the same `./PAGE.md` links).
 

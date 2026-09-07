@@ -126,7 +126,7 @@ export function collapsedHref(section: NavSection): string | null {
 }
 
 export function buildAccountNav(
-  organizations: Array<{ id: string; name: string; slug: string }>,
+  organizations: Array<{ id: number; name: string; slug: string }>,
 ): NavSection[] {
   return [
     {
@@ -135,7 +135,7 @@ export function buildAccountNav(
       href: "/my",
       match: "exact",
       children: organizations.slice(0, CHILD_LIMIT).map((organization) => ({
-        id: organization.id,
+        id: String(organization.id),
         label: organization.name,
         href: `/my/${organization.slug}`,
         match: "exact",

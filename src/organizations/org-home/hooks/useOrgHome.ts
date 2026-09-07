@@ -28,8 +28,8 @@ export function useOrgHome(orgSlug: string | undefined) {
   const parentView = role === "parent";
 
   const dashboardQuery = useQuery({
-    queryKey: parentQueryKeys.dashboard(organization?.id ?? "", user.id),
-    queryFn: () => loadParentDashboard(organization?.id ?? "", user.id),
+    queryKey: parentQueryKeys.dashboard(organization?.id ?? 0, user.id),
+    queryFn: () => loadParentDashboard(organization!.id, user.id),
     enabled: parentView && Boolean(organization),
   });
 

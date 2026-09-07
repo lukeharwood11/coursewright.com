@@ -2,10 +2,13 @@ import { Link } from "react-router-dom";
 import { PrinterIcon } from "@heroicons/react/24/outline";
 import { Avatar } from "@/ui/Avatar";
 import { Badge } from "@/ui/Badge";
-import { Button } from "@/ui/Button";
+import { ButtonLink } from "@/ui/Button";
 import { toastNotImplemented } from "@/ui/toast";
 import type { ParentDashboard } from "@/parent/model/dashboard";
 import { formatMaterialDate } from "@/parent/model/thisWeek";
+import { materialPath, materialPrintPath } from "@/materials/model/paths";
+import { coursePath } from "@/courses/model/paths";
+import { printThisWeekPath } from "@/print/model/paths";
 
 export function ParentHome({
   firstName,
@@ -34,13 +37,10 @@ export function ParentHome({
           </h1>
           <p className="mt-1 text-[13.5px] text-[var(--ink-soft)]">{weekLabel}</p>
         </div>
-        <Button
-          variant="secondary"
-          onClick={() => toastNotImplemented("Print this week")}
-        >
+        <ButtonLink variant="secondary" to={printThisWeekPath(orgSlug)}>
           <PrinterIcon className="h-5 w-5" aria-hidden />
           Print this week
-        </Button>
+        </ButtonLink>
       </div>
 
       <p className="mt-2 text-[13px]">
@@ -63,7 +63,9 @@ export function ParentHome({
         </p>
       ) : null}
 
-      {dashboard && !loading ? <ParentDashboardBody dashboard={dashboard} /> : null}
+      {dashboard && !loading ? (
+        <ParentDashboardBody orgSlug={orgSlug} dashboard={dashboard} />
+      ) : null}
 
       <nav
         className="cw-org-chrome fixed inset-x-0 bottom-0 border-t border-[var(--line-soft)] bg-[var(--surface)] md:hidden"
@@ -86,7 +88,13 @@ export function ParentHome({
   );
 }
 
-function ParentDashboardBody({ dashboard }: { dashboard: ParentDashboard }) {
+function ParentDashboardBody({
+  orgSlug,
+  dashboard,
+}: {
+  orgSlug: string;
+  dashboard: ParentDashboard;
+}) {
   if (!dashboard.hasActiveEnrollment) {
     return (
       <p className="mt-6 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
@@ -112,11 +120,18 @@ function ParentDashboardBody({ dashboard }: { dashboard: ParentDashboard }) {
           </h2>
           <ul className="mt-2 flex flex-col gap-2">
             {dashboard.importantNow.map((item) => (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => toastNotImplemented("Open material")}
-                  className="w-full rounded-[6px] bg-[var(--surface)] px-3 py-2 text-left"
+              <li
+                key={item.id}
+                className="flex items-center gap-2 rounded-[6px] bg-[var(--surface)] px-3 py-2"
+              >
+                <Link
+                  to={materialPath({
+                    orgSlug,
+                    courseId: item.courseId,
+                    unitId: item.unitId,
+                    materialId: item.materialId,
+                  })}
+                  className="min-w-0 flex-1 text-left"
                 >
                   <span className="block text-[14px] font-bold text-[var(--ink)]">
                     {item.materialTitle}
@@ -124,7 +139,20 @@ function ParentDashboardBody({ dashboard }: { dashboard: ParentDashboard }) {
                   <span className="text-[12.5px] text-[var(--ink-soft)]">
                     {item.courseTitle}
                   </span>
-                </button>
+                </Link>
+                <ButtonLink
+                  variant="secondary"
+                  className="shrink-0 px-2.5 py-1.5 text-[12px]"
+                  to={materialPrintPath({
+                    orgSlug,
+                    courseId: item.courseId,
+                    unitId: item.unitId,
+                    materialId: item.materialId,
+                  })}
+                >
+                  <PrinterIcon className="h-4 w-4" aria-hidden />
+                  Print
+                </ButtonLink>
               </li>
             ))}
           </ul>
@@ -161,13 +189,12 @@ function ParentDashboardBody({ dashboard }: { dashboard: ParentDashboard }) {
               key={course.id}
               className="mb-2 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]"
             >
-              <button
-                type="button"
-                className="w-full px-4 py-3 text-left text-[15.5px] font-extrabold text-[var(--ink)]"
-                onClick={() => toastNotImplemented("Open course")}
+              <Link
+                to={coursePath(orgSlug, course.id)}
+                className="block w-full px-4 py-3 text-left text-[15.5px] font-extrabold text-[var(--ink)]"
               >
                 {course.title}
-              </button>
+              </Link>
               {course.materials.length === 0 ? (
                 <p className="border-t border-[var(--line-soft)] px-4 py-3 text-[13.5px] text-[var(--ink-faint)]">
                   No dated materials this week.
@@ -179,10 +206,14 @@ function ParentDashboardBody({ dashboard }: { dashboard: ParentDashboard }) {
                       key={material.id}
                       className="flex items-center gap-2 border-t border-[var(--line-soft)] px-4 py-2.5"
                     >
-                      <button
-                        type="button"
+                      <Link
+                        to={materialPath({
+                          orgSlug,
+                          courseId: course.id,
+                          unitId: material.unitId,
+                          materialId: material.id,
+                        })}
                         className="min-w-0 flex-1 text-left"
-                        onClick={() => toastNotImplemented("Open material")}
                       >
                         <span className="block truncate text-[14px] font-semibold text-[var(--ink)]">
                           {material.title}
@@ -192,15 +223,20 @@ function ParentDashboardBody({ dashboard }: { dashboard: ParentDashboard }) {
                             {formatMaterialDate(material.scheduledDate)}
                           </span>
                         ) : null}
-                      </button>
-                      <Button
+                      </Link>
+                      <ButtonLink
                         variant="secondary"
                         className="shrink-0 px-2.5 py-1.5 text-[12px]"
-                        onClick={() => toastNotImplemented("Print")}
+                        to={materialPrintPath({
+                          orgSlug,
+                          courseId: course.id,
+                          unitId: material.unitId,
+                          materialId: material.id,
+                        })}
                       >
                         <PrinterIcon className="h-4 w-4" aria-hidden />
                         Print
-                      </Button>
+                      </ButtonLink>
                     </li>
                   ))}
                 </ul>

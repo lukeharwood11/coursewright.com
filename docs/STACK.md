@@ -21,13 +21,14 @@
 | **Migrations** | **`supabase db migrate`** | Schema changes via Supabase CLI migrations |
 | **UI** | **React** + **Tailwind CSS** | Product UI |
 | **Icons** | **Heroicons** (`@heroicons/react`) | UI icons (MIT); notices in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) |
+| **Print PDF** | **`@react-pdf/renderer`** + **pdf-lib** + **qrcode** | React document tree → blob; pdf-lib merges original PDF files; iframe preview |
 | **Bundler** | **Vite** | SPA build → `dist/` → S3 |
 | **Server/async state** | **TanStack Query** | Data fetching / cache against PostgREST |
 | **Client state** | **Zustand** | UI and local app state |
 | **Project docs site** | **VitePress** | Browseable site generated from markdown (`docs/`, `AGENTS.md`, …) |
 | **UI component docs** | **Storybook** | Develop / document `src/ui` (and related) components in isolation |
 | **CI/CD** | **GitHub Actions** | Lint/typecheck/build; deploy SPA and related pipelines |
-| **Product analytics** | **PostHog** | Product usage / funnels; client SDK in the SPA |
+| **Product analytics** | **PostHog** | Product usage / funnels; client exception capture in the SPA |
 | **Billing (P1)** | **Stripe Billing** *(hypothesis)* | Course Wright charges orgs — not P0 |
 
 ---
@@ -47,7 +48,7 @@
 11. **Markdown → docs site** — Hand-written markdown (`docs/`, root + folder `AGENTS.md`, README) is the source; **VitePress** builds a searchable site so developers can explore the project without hunting through the tree.
 12. **UI docs** — **Storybook** for design-system / component exploration (`src/ui`). Not a replacement for product docs in VitePress.
 13. **CI/CD** — **GitHub Actions** owns check and deploy pipelines (`.github/workflows/`). Terraform apply and SPA publish to S3/CloudFront run from Actions once secrets are available (see [HUMAN_NEEDED.md](./HUMAN_NEEDED.md)).
-14. **Analytics** — **PostHog** for product analytics (page views, key actions, funnels). Wire the browser SDK from the SPA; do not invent a second analytics stack. Project keys come from human setup ([HUMAN_NEEDED.md](./HUMAN_NEEDED.md)). Respect auth/privacy: identify only after login when needed; no PII beyond what product docs allow.
+14. **Analytics** — **PostHog** for product analytics (page views, key actions, funnels) and **error tracking** (exception autocapture + catch-all boundary reports). Wire the browser SDK from the SPA; do not invent a second analytics stack. Project keys come from human setup ([HUMAN_NEEDED.md](./HUMAN_NEEDED.md)). Respect auth/privacy: identify only after login when needed; no PII beyond what product docs allow.
 15. **Search is a first-class data concern** — Schema, indexes, and material metadata must support **cross-facet search** (P0 in [FEATURES.md](./FEATURES.md)). Prefer Postgres full-text / structured filters via PostgREST when they meet the bar; introduce a dedicated search service only if FTS + facets cannot. Do not treat search as a late UI filter over unindexed lists.
 
 ---
@@ -161,8 +162,8 @@ Deploy credentials and env secrets stay in GitHub Actions secrets / environments
 
 | Piece | Role |
 |-------|------|
-| **PostHog** | Product analytics — usage, funnels, feature adoption |
-| **SPA client** | PostHog JS SDK (env: project key + host) |
+| **PostHog** | Product analytics — usage, funnels, feature adoption; client exception capture |
+| **SPA client** | PostHog JS SDK (env: project key + host); `capture_exceptions` + boundary `captureException` |
 | **Human setup** | Create PostHog project(s); keys in env / CI — [HUMAN_NEEDED.md](./HUMAN_NEEDED.md) |
 
 <!-- TBD: event taxonomy, whether session replay is on, separate projects for testing vs production -->

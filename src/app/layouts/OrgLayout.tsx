@@ -1,6 +1,5 @@
 import { Outlet, useOutletContext, useParams } from "react-router-dom";
 import type { AuthedOutletContext } from "@/auth/hooks/useAuthedUser";
-import { AppShellFrame } from "./components/AppShellFrame";
 import { OrgNotFound } from "./components/OrgNotFound";
 import { useOrgShellData } from "./hooks/useOrgShell";
 import { OrgShellContext } from "./OrgShellContext";
@@ -36,9 +35,7 @@ export function OrgLayout() {
         showSearch: shell.showSearch,
       }}
     >
-      <AppShellFrame>
-        <Outlet context={auth} />
-      </AppShellFrame>
+      <Outlet context={auth} />
     </OrgShellContext.Provider>
   );
 }

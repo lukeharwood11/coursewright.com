@@ -3,9 +3,12 @@ import { AccountSettingsPage, LoginPage, SignupPage } from "@/auth";
 import { RedirectIfAuthed, RequireAuth } from "@/app/gates/RequireAuth";
 import { RequireStaff } from "@/app/gates/RequireStaff";
 import { AccountLayout } from "@/app/layouts/AccountLayout";
+import { OrgChrome } from "@/app/layouts/OrgChrome";
 import { OrgLayout } from "@/app/layouts/OrgLayout";
+import { PrintLayout } from "@/app/layouts/PrintLayout";
 import { StubPage } from "@/app/StubPage";
-import { CourseListPage, CoursePage } from "@/courses";
+import { CourseListPage, CoursePage, CourseRosterPage, CourseSettingsPage } from "@/courses";
+import { MaterialEditPage, MaterialPage } from "@/materials";
 import {
   AboutPage,
   ConstructionPage,
@@ -15,12 +18,14 @@ import {
   PricingPage,
 } from "@/marketing";
 import { OrgHomePage, OrgPickerPage, OrgSettingsPage } from "@/organizations";
+import { PrintPage } from "@/print";
 import {
   FamiliesPage,
   FamilyPage,
   OrgRosterPage,
   StudentProfilePage,
 } from "@/roster";
+import { UnitPage } from "@/units";
 
 /**
  * Thin route table. Domain screens live under src/<domain>/<page>/.
@@ -61,49 +66,102 @@ export function AppRoutes() {
           <Route path="/my/settings" element={<AccountSettingsPage />} />
         </Route>
         <Route path="/my/:orgSlug" element={<OrgLayout />}>
-          <Route index element={<OrgHomePage />} />
-          <Route path="settings" element={<OrgSettingsPage />} />
-          <Route
-            path="courses"
-            element={
-              <RequireStaff>
-                <CourseListPage />
-              </RequireStaff>
-            }
-          />
-          <Route path="courses/:courseId" element={<CoursePage />} />
-          <Route
-            path="roster"
-            element={
-              <RequireStaff>
-                <OrgRosterPage />
-              </RequireStaff>
-            }
-          />
-          <Route
-            path="roster/:studentId"
-            element={
-              <RequireStaff>
-                <StudentProfilePage />
-              </RequireStaff>
-            }
-          />
-          <Route
-            path="families"
-            element={
-              <RequireStaff>
-                <FamiliesPage />
-              </RequireStaff>
-            }
-          />
-          <Route
-            path="families/:familyId"
-            element={
-              <RequireStaff>
-                <FamilyPage />
-              </RequireStaff>
-            }
-          />
+          <Route element={<OrgChrome />}>
+            <Route index element={<OrgHomePage />} />
+            <Route path="settings" element={<OrgSettingsPage />} />
+            <Route
+              path="courses"
+              element={
+                <RequireStaff>
+                  <CourseListPage />
+                </RequireStaff>
+              }
+            />
+            <Route path="courses/:courseId" element={<CoursePage />} />
+            <Route
+              path="courses/:courseId/settings"
+              element={
+                <RequireStaff>
+                  <CourseSettingsPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="courses/:courseId/roster"
+              element={
+                <RequireStaff>
+                  <CourseRosterPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="courses/:courseId/units/:unitId"
+              element={<UnitPage />}
+            />
+            <Route
+              path="courses/:courseId/materials/:materialId"
+              element={<MaterialPage />}
+            />
+            <Route
+              path="courses/:courseId/materials/:materialId/edit"
+              element={<MaterialEditPage />}
+            />
+            <Route
+              path="courses/:courseId/units/:unitId/materials/:materialId"
+              element={<MaterialPage />}
+            />
+            <Route
+              path="courses/:courseId/units/:unitId/materials/:materialId/edit"
+              element={<MaterialEditPage />}
+            />
+            <Route
+              path="roster"
+              element={
+                <RequireStaff>
+                  <OrgRosterPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="roster/:studentId"
+              element={
+                <RequireStaff>
+                  <StudentProfilePage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="families"
+              element={
+                <RequireStaff>
+                  <FamiliesPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="families/:familyId"
+              element={
+                <RequireStaff>
+                  <FamilyPage />
+                </RequireStaff>
+              }
+            />
+          </Route>
+          <Route element={<PrintLayout />}>
+            <Route path="print-this-week" element={<PrintPage />} />
+            <Route
+              path="courses/:courseId/materials/:materialId/print"
+              element={<PrintPage />}
+            />
+            <Route
+              path="courses/:courseId/units/:unitId/print"
+              element={<PrintPage />}
+            />
+            <Route
+              path="courses/:courseId/units/:unitId/materials/:materialId/print"
+              element={<PrintPage />}
+            />
+          </Route>
         </Route>
       </Route>
       <Route path="/app" element={<Navigate to="/my" replace />} />

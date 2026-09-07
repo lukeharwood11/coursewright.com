@@ -1,19 +1,19 @@
 import { requireSupabase } from "./client";
 
 export type StudentSummary = {
-  id: string;
-  organizationId: string;
+  id: number;
+  organizationId: number;
   name: string;
   gradeLevel: string | null;
 };
 
 export const studentQueryKeys = {
-  list: (orgId: string) => ["students", "list", orgId] as const,
-  detail: (id: string) => ["students", "detail", id] as const,
+  list: (orgId: number) => ["students", "list", orgId] as const,
+  detail: (id: number) => ["students", "detail", id] as const,
 };
 
 export async function listStudents(
-  organizationId: string,
+  organizationId: number,
 ): Promise<StudentSummary[]> {
   const db = requireSupabase();
   const { data, error } = await db
@@ -26,7 +26,7 @@ export async function listStudents(
   return (data ?? []).map(toStudentSummary);
 }
 
-export async function getStudent(id: string): Promise<StudentSummary | null> {
+export async function getStudent(id: number): Promise<StudentSummary | null> {
   const db = requireSupabase();
   const { data, error } = await db
     .from("student_profiles")
@@ -40,8 +40,8 @@ export async function getStudent(id: string): Promise<StudentSummary | null> {
 }
 
 function toStudentSummary(row: {
-  id: string;
-  organization_id: string;
+  id: number;
+  organization_id: number;
   name: string;
   grade_level: string | null;
 }): StudentSummary {

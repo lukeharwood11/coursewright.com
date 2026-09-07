@@ -81,14 +81,24 @@ export function OrgSettingsPage() {
               : "Only owners and admins can change these settings."}
           </p>
         </div>
-        {settings.canEdit ? (
-          <Button
-            type="submit"
-            form={ORG_SETTINGS_FORM_ID}
-            disabled={settings.saving}
-          >
-            {settings.saving ? "Saving…" : "Save"}
-          </Button>
+        {settings.canEdit && settings.hasChanges ? (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={settings.onCancel}
+              disabled={settings.saving}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form={ORG_SETTINGS_FORM_ID}
+              disabled={settings.saving}
+            >
+              {settings.saving ? "Saving…" : "Save"}
+            </Button>
+          </div>
         ) : null}
       </div>
 
@@ -113,7 +123,7 @@ export function OrgSettingsPage() {
         />
       </div>
 
-      <div className="mt-4 grid items-start gap-4 lg:grid-cols-2">
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <section
           className={`rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5 ${
             settings.showBilling ? "" : "lg:col-span-2"

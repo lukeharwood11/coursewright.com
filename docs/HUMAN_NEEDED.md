@@ -115,3 +115,11 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 ### HN-006 — PostHog project(s) for product analytics
 
 **Completed:** 2026-09-05 — testing keys in `.env.local`; SPA wires `src/infrastructure/posthog/client.ts`. Separate production PostHog project can wait until first prod deploy.
+
+### HN-008 — Deploy `create-course-from-course` Edge Function
+
+**Completed:** 2026-09-06 — deployed to testing project `hlecttkgrfhtzvwnxtyb`. Repeat when production exists (HN-007).
+
+### HN-009 — Apply `materials.position` migration on the live database
+
+**Completed:** 2026-09-06 — `supabase db push` applied `20260907000000_materials_position.sql` to testing project `hlecttkgrfhtzvwnxtyb`.

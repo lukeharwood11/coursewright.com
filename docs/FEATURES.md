@@ -67,30 +67,32 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | in progress | Org roster list + sidebar jump live; class / enroll / parent-link UI not started |
 | **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches parent vs staff home. **P0 roles:** owner, admin, instructor, parent. Owner vs admin = billing. |
 | **Admin account management** | Admins invite, **change roles**, and **remove** admins/instructors | planned | Last owner/admin DB guard ready; no change/remove staff UI |
-| **Homework (P0)** | Dated materials in a unit — appear on parent "this week" when dates fall in Sun–Sat | planned | Parent “this week” filter exists; no authoring UI. **Not** a separate assignment type yet |
-| **Course builder** | Create and organize **courses** within an org (no templates in P0) | in progress | Course list + sidebar jump live; Create course is toast stub; builder UI not started |
-| **Courses (instances)** | Runnable offerings with dates and a roster — from scratch or **copied from another course** | in progress | List + course page stub live. **Templates are P1** |
-| **Create course from course** | Duplicate an existing course’s units/materials into a new independent course | planned | Replaces template-based create for P0. Copy content only — **no roster**, **no live sync** |
-| **Co-teaching** | Multiple instructors per course | planned | Schema ready; manage co-teachers UI not built |
-| **Units** | Materials organized in **units**; each unit may have optional dates | planned | Schema ready; units domain stub — **courses only** in P0 |
-| **Rich materials** | **Add material** kinds: **page** / **link** / **file**; pages are ordered **blocks** | planned | **Decided** v1 kinds. See [Materials & content](#materials--content-creation) |
+| **Homework (P0)** | Dated materials in a unit — appear on parent "this week" when dates fall in Sun–Sat | shipped | `scheduled_date` on add/edit material. Parent “this week” uses unit/material dates. **Not** a separate assignment type |
+| **Course builder** | Create and organize **courses** within an org (no templates in P0) | shipped | Create, course home, units, materials (page/link/file), print/share chrome |
+| **Courses (instances)** | Runnable offerings with dates and a roster — from scratch or **copied from another course** | shipped | Create from scratch + settings + roster. Copy via Function. Catalog: **description**, **location**, **subject / area**. **Templates are P1** |
+| **Create course from course** | Duplicate an existing course’s units/materials into a new independent course | shipped | Edge Function `create-course-from-course` deployed on testing; copy content only — **no roster**, **no live sync**. Copies start unpublished |
+| **Course visibility** | **Published / unpublished** controls whether families can see the course | shipped | Unpublished: instructors/admins. Published: enrolled parents (students when that role exists). New courses start unpublished. Distinct from `status` (active / archived) |
+| **Co-teaching** | Multiple instructors per course | shipped | Course settings: owners/admins add co-teachers (RLS); instructors see the list |
+| **Units** | Materials organized in **units**; each unit may have optional dates | shipped | Course home + unit page; **courses only** in P0 |
+| **Rich materials** | **Add material** kinds: **page** / **link** / **file**; pages are ordered **blocks** | shipped | v1 kinds. Rich text `body.markdown` until canonical store is locked; video blocks are URL embeds |
+| **Material visibility** | **Published / unpublished** controls who can see a material | shipped | Unpublished: instructors/admins. Published: enrolled parents (students when that role exists). New materials start unpublished |
 | **Quizzes (author + print)** | Create quizzes, mark correct answers, print blank (+ instructor answer key) | planned | **Open:** quiz as block type vs separate material kind — see materials section |
-| **File sharing** | Upload and attach files; share with parents as part of course materials | planned | `files` / `file_versions` + Storage bucket RLS ready; upload not wired in app |
-| **Audio & video files** | Video as a **block** on a material page; uploaded audio TBD | planned | Video block kind locked; uploaded file vs URL embed for video **TBD**. See materials section |
-| **Course grade levels** | Courses carry **grade metadata** — multiple grades and/or ranges | planned | `grade_levels[]` on schema; no editor UI. See [Course grade metadata](#course-grade-metadata-p0). Templates get the same model in **P1** |
+| **File sharing** | Upload and attach files; share with parents as part of course materials | shipped | File materials upload to Storage `org-files` with `files` / `file_versions` |
+| **Audio & video files** | Video as a **block** on a material page; uploaded audio TBD | shipped | Video **URL embed** in page blocks (upload vs URL still **TBD**); uploaded audio/video play on file materials |
+| **Course grade levels** | Courses carry **grade metadata** — multiple grades and/or ranges | shipped | Editor on create + course settings. Templates get the same model in **P1** |
 | **Advanced search** | Native, easy, **cross-facet** search — “where do I have this resource?” | planned | GIN `search_vector` indexes ready; search chrome toasts only |
 | **Families / parent directory** | Link students into a **family**; parents belong to a **family profile**; org **parent directory** | in progress | Directory list + sidebar jump live; profile fields beyond names still open |
-| **Print materials** | One-tap print of a material, a unit, or this week's work | planned | Print domain stub; Print buttons toast “not implemented” |
-| **Lesson materials & planning** | Unified storage for course content, files, and plans | planned | Materials/units/files schema ready; no builder UI |
-| **Content versioning** | Versions of course content; who changed what; revert dangerous actions | planned | `material_versions` trigger ready; no revert UI |
-| **Soft deletes** | Content is never hard-deleted | planned | `deleted_at` on content tables; no restore UI |
+| **Print materials** | One-tap print of a material, a unit, or this week's work | shipped | [PRINT](./pages/PRINT.md): `@react-pdf/renderer` + in-app preview, Download / Print. Whole-course print out of P0 |
+| **Lesson materials & planning** | Unified storage for course content, files, and plans | shipped | Course builder authoring on courses |
+| **Content versioning** | Versions of course content; who changed what; revert dangerous actions | shipped | Restore a `material_versions` snapshot from material edit; file blob revert on file materials |
+| **Soft deletes** | Content is never hard-deleted | shipped | Remove/restore on units and materials (`deleted_at`) |
 | **Parent invites (email)** | Invite parents by email to access shared content | planned | Schema + RLS ready; no send UI |
 | **Parent access (link or account)** | Parent clicks invite link **or** signs up / logs in with the **same email** | planned | Auth shipped; invite/resource claim paths not built |
 | **Parent org membership** | Parent becomes a parent in the org when access rules are met | planned | Parent role + RLS in SQL; invite→membership flow not in app |
-| **Share resources with parents** | Share course content and files with enrolled families | planned | Parent RLS + enrollments ready; sharing domain stub |
-| **Parent dashboard** | This calendar week's **dated unit materials** and **Important now** | in progress | Read path + “this week” / important-now UI live on org home; open/print still stubbed |
-| **Resource links** | Send a parent a link that opens a **specific resource** (after they log in) | planned | `share_links` table ready; no create/resolve routes |
-| **Instructor "important now"** | Flag items needing immediate parent attention | planned | Table + parent surfaces it; no instructor flag UI |
+| **Share resources with parents** | Share course content and files with enrolled families | shipped | Copy material URL (account required). Dedicated share-entry path still TBD |
+| **Parent dashboard** | This calendar week's **dated unit materials** and **Important now** | shipped | Open + print wired to course/material/print routes |
+| **Resource links** | Send a parent a link that opens a **specific resource** (after they log in) | shipped | Copy signed-in material URL; `share_links` row recorded. Public entry path still TBD |
+| **Instructor "important now"** | Flag items needing immediate parent attention | shipped | Toggle on material; parent home surfaces it |
 
 ### Roster management (P0)
 
@@ -298,7 +300,7 @@ The smallest complete loop in P0: **create materials → print them (or send a l
 
 | Path | Who | What they do | Notes |
 |------|-----|----------------|-------|
-| **Print** | Anyone looking at materials they can access | One **Print** action → print-friendly page → device print dialog (or Save as PDF) | **The P0 bar.** Must feel instant |
+| **Print** | Anyone looking at materials they can access | One **Print** action → [PRINT](./pages/PRINT.md) (`…/print`) → **generated PDF preview** → Download or Print | **The P0 bar.** Must feel instant |
 | **File sharing** | Instructors → enrolled parents | Files live on materials; parents open/download from the course / dashboard | Same access as other materials |
 | **Resource link** | Instructor sends; parent opens | Link opens **that** material after login | Account required in P0 |
 | **Parent dashboard** | Enrolled parent | This week + important now; **Print** on a material or on this week | Same print bar as creator |
@@ -313,22 +315,26 @@ The smallest complete loop in P0: **create materials → print them (or send a l
 
 **Not P0:** Print whole course.
 
-Do **not** ship a separate “Export” product in P0. Print *is* the export. The browser print dialog already gives Save as PDF.
+Do **not** ship a separate “Export” product name in P0. Print *is* the path to paper and PDF. The `/print` screen **generates a PDF**, shows that file in an in-app viewer, and offers **Download** + **Print**.
 
 **Print must be:**
 
 - **Visible** — a **Print** control on the material, unit, and parent “this week” views. Not behind ··· or Settings
-- **One step after the click** — Course Wright opens a print-friendly page and invokes print. No format picker, no “generate packet” wait unless a large unit truly needs a moment
-- **Readable on paper** — white page, black text, no app chrome, no beige paper background, no wasted ink from decorative fills
-- **Usable on a phone** — Print lands in the **system print / share sheet** (print, Save as PDF, AirDrop). Tech-averse parents should not need a computer to get paper or a PDF
+- **One step after the click** — Course Wright opens [PRINT](./pages/PRINT.md), generates the PDF, and shows the real pages. No format picker. Large unit / week packets may need a brief generate wait
+- **Exact preview** — the viewer shows the **generated PDF** (not only an HTML approximation). What you see is what Download / Print produce
+- **Readable on paper** — white page, black text, no app chrome in the PDF, no beige paper background, no wasted ink from decorative fills
+- **Usable on a phone** — Download the `.pdf` and/or Print via the system sheet. Tech-averse parents should not need a computer
 - **Usable without a roster** — a parent (or instructor) who created an org, built a course, and never added a student can still print
+- **Preview stays available** — Download and Print remain on the screen after the PDF is ready
 
 **Not in P0 print** (defer):
 
-- Designed / branded PDF templates beyond print CSS
+- Heavier branded / marketing-grade PDF templates (P0 = clean ink layout; richer packs later)
 - **Print whole course** — **out of scope for initial release** (material / unit / this week only)
 - Booklet imposition, duplex guides, or print-shop layouts
 - Print without being signed in <!-- TBD: printable public/magic links later, same as magic-link viewing -->
+- Naming the surface **Export** or using `/export` URLs — entry points stay **Print**
+- Persisting generated PDFs / `PrintJob` rows — generate on the fly; no storage table in P0
 
 ### RBAC (P0)
 
@@ -422,8 +428,9 @@ Course
 | **link** | External URL (title + description + URL) |
 | **file** | References an org-scoped **File** (title + description + upload / attach) |
 | **Blocks** | Only on **page** materials |
+| **Visibility** | **unpublished** (instructors/admins only) or **published** (enrolled parents; students when that role exists). New materials start unpublished |
 | **P0 block kinds (on pages)** | **Rich text** (WYSIWYG / Markdown), **video** — extensible later |
-| **Database** | `materials.unit_id` **nullable**. `materials.kind` ∈ `page` · `link` · `file`. Pages use `blocks` rows; link uses `url`; file uses `file_id` |
+| **Database** | `materials.unit_id` **nullable**. `materials.kind` ∈ `page` · `link` · `file`. `materials.visibility` ∈ `published` · `unpublished`. Pages use `blocks` rows; link uses `url`; file uses `file_id` |
 
 **Print:** Print by kind — page → blocks layout; link → title + URL/QR; file → title + print-ready/open. Print unit = materials in order.
 
@@ -463,12 +470,16 @@ One canonical store for rich-text blocks — Markdown, portable block JSON, or H
 **Courses (P0):**
 
 - Created **from scratch** or **from another course** (copies units/materials; independent — no live sync).
+- Optional **description** — short stable blurb for the offering (not the P1 auto-drafted **Summary**).
+- Optional **location** — free text for where the offering meets (not a Class, not meeting times).
+- Optional **subject / area** — free text catalog label (not a taxonomy).
 - Optional **start date** and **end date**.
 - Optional **grade-level metadata** — multiple grades and/or ranges per org grade scheme.
 - Each course has its **own roster** (enrollments).
 - **Multiple instructors** per course (co-teaching).
 - Content is **versioned** and **soft-deleted**; changes can be reverted.
-- **Active course:** `status = active` gates parent org access. Start/end dates are informational (optional), not access gates.
+- **Active course:** `status = active` means the offering is running. Start/end dates are informational (optional), not access gates.
+- **Published course:** `visibility = published` is what enrolled parents can see. New courses and copies start unpublished. Parents need **active + published** (plus enrollment) to see the course. Distinct from archive.
 
 **Course templates (P1):**
 
@@ -492,6 +503,8 @@ One canonical store for rich-text blocks — Markdown, portable block JSON, or H
 - As an **org owner or admin**, I want to **assign roles (owner, admin, instructor, parent)** so that **people only see what they should**.
 - As an **instructor**, I want to **control who can view or edit my course templates** so that **shared blueprints stay consistent**. (**P1**)
 - As an **instructor**, I want to **create a course from scratch or from another course** so that **I can reuse last term’s materials without maintaining a separate template in P0**.
+- As an **instructor**, I want to **set a description, location, and subject on a course** so that **families and staff can tell offerings apart**.
+- As an **instructor**, I want to **publish a course when I’m ready** so that **families don’t see a draft offering**.
 - As an **instructor**, I want to **set start and end dates on a course** so that **families know when the offering runs**.
 - As an **instructor**, I want to **add a student to my course** so that **they're automatically added to the org if they're new**.
 - As an **instructor**, I want to **manage the roster for my course** so that **the right students are enrolled**.
@@ -544,7 +557,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | **Course Wright billing (orgs)** | We charge organizations so they can serve parents | planned | `billing/` SPA stub + owner-only placeholder on org settings. Packaging: per teacher or per course — **hypothesis**. Provider: **Stripe** *(hypothesis)* |
 | **Notifications** | <!-- TBD --> | planned | Email likely |
 | **Reporting** | <!-- TBD --> | planned | |
-| **Designed PDF packets** | Branded / laid-out PDFs beyond browser print CSS | planned | P0 uses browser print / Save as PDF |
+| **Designed PDF packets** | Richer branded PDF layouts beyond the P0 ink packet | planned | P0 already generates + previews a PDF; P1 = stronger brand / layout polish |
 
 ### P1 user stories (draft)
 
@@ -600,7 +613,9 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | Uploaded audio + video with in-app players | **Decided** | Storage files + players; distinct from YouTube embeds |
 | Org-scoped Family + parent directory (P0) | **Decided** | Family from roster; parents belong; names required; other profile fields TBD |
 | Cross-org parent family management | **Decided** | **P2** — not the same as P0 org Family |
-| Active course = `status = active` (dates informational only) | **Decided** | Course.status, parent access |
+| Active course = `status = active` (dates informational only) | **Decided** | Course.status — offering is running; not the same as publish |
+| Course description, location, subject / area | **Decided** | Optional catalog fields; description ≠ P1 Summary; location ≠ Class; subject is free text |
+| Course visibility published / unpublished | **Decided** | Unpublished = instructors/admins; published = enrolled parents (students later). New courses start unpublished. Parents need active + published |
 | File sharing minimum in P0 | **Decided** | File upload, Material attachments, parent access |
 | Product analytics: PostHog | **Decided** | STACK.md; HUMAN_NEEDED for project keys |
 | P0 roles: owner, admin, instructor, parent | **Decided** | RBAC, Membership. Owner vs admin = billing (P1). |
@@ -608,7 +623,8 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | Org permalink slug on create | **Decided** | Unique `Organization.slug`; changing it warns that existing links break (no auto-redirect in P0) |
 | Parents invited by email in P0 | **Decided** | ParentInvite, auth |
 | Parent access via invite → **account required** to view (P0) | **Decided** | Magic links later |
-| Parent org role requires student enrolled in course with status = active | **Decided** | Enrollment, StudentProfile, Membership |
+| Parent org role requires student enrolled in course with status = active | **Decided** | Enrollment, StudentProfile, Membership. Viewing the course also requires `visibility = published` |
+| Material visibility published / unpublished | **Decided** | Unpublished = instructors/admins; published = enrolled parents (students later) |
 | Usability anchor: tech-averse parents | **Decided** | All parent UX |
 | **Course templates are P1** (not in P0 UI) | **Decided** | P0 creates **courses** only; reuse via **create course from another course** |
 | Create course from another course (copy units/materials; no roster; no live sync) | **Decided** | P0 course creation; Function candidate |
@@ -645,10 +661,11 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | SaaS packaging per teacher or per course | **Hypothesis** | Not decided |
 | Parents can receive a link to a specific resource | **Decided** | ShareLink to Material; auth required in P0 |
 | Extreme shareability in P0 | **Decided** | Print + files + resource links; sharing is a core job |
-| Print is P0 and must be super easy | **Decided** | One-tap Print; browser print / Save as PDF; no export wizard |
+| Print is P0 and must be super easy | **Decided** | One-tap Print → generated PDF preview → Download / Print; no export wizard |
 | Print grain: material, unit, this week | **Decided** | **Print whole course out of scope for initial release** |
 | Create → print does not require a roster | **Decided** | Empty org/course can still print |
-| Print uses the browser print dialog (P0) | **Decided** | Save as PDF comes free; custom PDF templates later |
+| Print generates a real PDF and previews it in-app (P0) | **Decided** | Client-side PDF blob + viewer; not HTML-only `window.print()` as the primary path |
+| Print routes: dedicated `/print` children (not `?print=1`, not `/export`) | **Decided** | Material / unit / `print-this-week` — [URLS.md](./URLS.md), [PRINT](./pages/PRINT.md) |
 | Courses have optional start/end dates (informational) | **Decided** | Course entity |
 | Each course has its own roster | **Decided** | Enrollment scoped to course |
 | Instructors manage course roster | **Decided** | RBAC, roster UX |

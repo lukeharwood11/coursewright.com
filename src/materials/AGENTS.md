@@ -4,12 +4,13 @@ Lesson materials: **page** / **link** / **file**, plus ordered **blocks** on pag
 
 ## Scope
 
-- Material placement (title, **description**, kind, optional `unit_id`, dates, important now, sync/override)
+- Material placement (title, **description**, kind, optional `unit_id`, dates, **visibility**, important now, sync/override)
 - **v1 Add material:** `page` · `link` · `file` (into a unit or top-level)
 - **page** → ordered **blocks** (`rich_text`, `video`, …)
 - **link** → `url`; **file** → `file_id` (org File + versions)
 - Soft delete, versions, revert UX
 - Dating: optional material `scheduled_date`; optional unit range only when `unit_id` is set
+- **Visibility:** `unpublished` (instructors/admins) vs `published` (enrolled parents). New materials start unpublished. RLS enforces this — do not rely on UI hiding alone.
 
 ## Rules
 

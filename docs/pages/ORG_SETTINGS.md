@@ -18,6 +18,7 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 - Instructors see the same fields, disabled.
 - Parents are told they cannot change settings.
 - Save org name/metadata; changing **permalink slug** shows a warning that existing links break (no auto-redirect in P0) and requires an explicit confirmation.
+- **Save** and **Cancel** appear only while the form differs from the saved organization. Cancel discards the draft and restores the saved values.
 - Set org **type** (co-op / micro-school) and **grade scheme** (K–12 / custom labels).
 - Staff section on this page: invite by email, change roles, remove staff — UI TBD; block remove/demote of last owner or admin.
 - Billing section is P1 placeholder, **shown only to owners**.
@@ -59,7 +60,8 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 
 ## Primary actions
 
-- Save org settings / slug (with warning)
+- Save org settings / slug (with warning) — only while there are unsaved changes
+- Cancel — discard unsaved changes
 - Set grade scheme
 - Invite / change role / remove staff (TBD)
 

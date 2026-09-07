@@ -1,2 +1,2 @@
-/** Domain public API — stub. See AGENTS.md and docs/FEATURES.md. */
-export {};
+export { createResourceShareLink } from "./databridge/shareLinks";
+export { resourceShareMessage } from "./model/copyLink";

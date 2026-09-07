@@ -18,12 +18,12 @@ function one<T>(value: T | T[] | null | undefined): T | null {
 }
 
 export const parentQueryKeys = {
-  dashboard: (orgId: string, userId: string) =>
+  dashboard: (orgId: number, userId: string) =>
     ["parent", "dashboard", orgId, userId] as const,
 };
 
 export async function loadParentDashboard(
-  organizationId: string,
+  organizationId: number,
   userId: string,
 ): Promise<ParentDashboard> {
   const db = requireSupabase();
@@ -57,14 +57,14 @@ export async function loadParentDashboard(
     db
       .from("enrollments")
       .select(
-        "student_profile_id, status, course:courses(id, title, status, organization_id)",
+        "student_profile_id, status, course:courses(id, title, status, visibility, organization_id)",
       )
       .eq("status", "active")
       .in("student_profile_id", studentIds),
     db
       .from("important_now")
       .select(
-        "id, material_id, course_id, material:materials(title), course:courses(title)",
+        "id, material_id, course_id, material:materials(title, unit_id), course:courses(title)",
       )
       .eq("organization_id", organizationId),
   ]);
@@ -76,6 +76,7 @@ export async function loadParentDashboard(
   const enrollments = (enrollmentsResult.data ?? []).flatMap((row) => {
     const course = one(row.course);
     if (!course || course.organization_id !== organizationId) return [];
+    if (course.status !== "active" || course.visibility !== "published") return [];
     return [
       {
         studentId: row.student_profile_id,
@@ -94,11 +95,12 @@ export async function loadParentDashboard(
     const materialsResult = await db
       .from("materials")
       .select(
-        "id, title, scheduled_date, course_id, status, deleted_at, unit:units(start_date, end_date)",
+        "id, title, scheduled_date, course_id, status, deleted_at, visibility, unit:units(id, start_date, end_date)",
       )
       .in("course_id", courseIds)
       .is("deleted_at", null)
-      .eq("status", "active");
+      .eq("status", "active")
+      .eq("visibility", "published");
 
     if (materialsResult.error) throw new Error(materialsResult.error.message);
 
@@ -111,6 +113,7 @@ export async function loadParentDashboard(
           title: row.title,
           scheduledDate: row.scheduled_date,
           courseId: row.course_id,
+          unitId: unit?.id ?? null,
           unitStart: unit?.start_date ?? null,
           unitEnd: unit?.end_date ?? null,
         },
@@ -129,6 +132,7 @@ export async function loadParentDashboard(
         materialTitle: material.title,
         courseId: row.course_id,
         courseTitle: course.title,
+        unitId: material.unit_id ?? null,
       },
     ];
   });

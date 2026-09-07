@@ -1,6 +1,6 @@
 # Course Wright — Schema (Draft)
 
-> **Status:** Entities implemented in `supabase/migrations/` (types below) **plus planned** `classes` / `class_members` / `blocks`. Product rules stay in this file. **P0** = course builder (**courses only** — Material = page of **blocks**), **classes** (student groups), org management, roster, RBAC, file sharing, parent access, **extreme shareability**. **Course templates** are **P1**.
+> **Status:** Baseline matches `supabase/migrations/` post-squash (`bigserial`/`bigint` app IDs; materials `page`|`link`|`file`; `blocks`; `classes`/`class_members`; `copied_from_course_id`). Product rules stay in this file. **P0** = course builder (**courses only** — Material = page of **blocks**), **classes** (student groups), org management, roster, RBAC, file sharing, parent access, **extreme shareability**. **Course templates** are **P1**.
 
 ---
 
@@ -21,14 +21,14 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | ParentStudentLink | `parent_student_links` | |
 | Enrollment | `enrollments` | |
 | Course | `courses` | P0 |
-| Class | `classes` | **P0** — group of students; **not** a course. Migration TBD |
-| ClassMember | `class_members` | **P0** — student_profile ↔ class. Migration TBD |
+| Class | `classes` | **P0** — group of students; **not** a course |
+| ClassMember | `class_members` | **P0** — student_profile ↔ class |
 | CourseTemplate | `course_templates` | **P1** product — table exists |
 | TemplateAccess | `template_access` | **P1** product — table exists |
 | CourseInstructor | `course_instructors` | |
 | Unit | `units` | |
-| Material | `materials` | **Page** — placement in a unit |
-| Block | `blocks` | Ordered content on a material. Migration TBD (replace opaque `body` for page content) |
+| Material | `materials` | page · link · file; `unit_id` nullable (top-level) |
+| Block | `blocks` | Ordered content on a page material (`rich_text` · `video`; payload in `body` jsonb) |
 | MaterialVersion | `material_versions` | |
 | File | `files` | |
 | FileVersion | `file_versions` | |
@@ -50,7 +50,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | **Audit** | `created_at` / `updated_at` on app rows |
 | **Content deletes** | `deleted_at` (no authenticated hard-delete) |
 
-**Note:** Field tables below may still say `uuid` on some rows from an earlier draft — **bigserial/`bigint` wins** for new and revised app entities. Runtime migrations may still be uuid until a follow-up migration; planning source of truth is this convention.
+**Note:** Field tables below use **`bigint`** for app entity PKs/FKs. Only auth-linked columns (`profiles.id` and FKs to `User` / `auth.users`) stay **`uuid`**. Runtime migrations match this baseline.
 
 ---
 
@@ -87,6 +87,8 @@ A user receives the **parent** role in an organization when **all** of the follo
 
 **Active course** = `Course.status = active`. Optional `start_date` / `end_date` are informational, not access gates.
 
+**Published course** = `Course.visibility = published`. Parents SELECT a course (and its content via `parent_can_view_course`) only when the course is **active and published**. Unpublished courses are instructors/admins only. New courses default unpublished; existing rows stayed published when the column was added.
+
 **P0:** Invite email → parent **must sign up or log in** with that email before viewing. Magic links (no account) are later. **Print** is available on any material/unit/week they can view.
 
 **P0 if enrollments end:** parent User / Membership stays **active**. Visibility rules deferred.
@@ -99,12 +101,14 @@ A user receives the **parent** role in an organization when **all** of the follo
 |---|-----------------|-------------------------|
 | Reusable blueprint | No — a specific offering (may be **copied from** another course) | Yes |
 | `template_id` | Nullable FK — used when templates ship (**P1**); unused in P0 product flows | N/A |
-| `copied_from_course_id` | Optional origin when created from another course (**P0**) — **TBD column** if not already present; informational only, **no live sync** | N/A |
+| `copied_from_course_id` | Optional origin when created from another course (**P0**) — informational only, **no live sync** | N/A |
 | Start / end dates | Optional `start_date`, `end_date` (informational) | No |
+| Catalog | Optional `description`, `location`, `subject` | `description` exists; location/subject not on templates |
+| Visibility | `published` / `unpublished` — parents need **active + published** | N/A |
 | Roster | Yes — `Enrollment` per course | No |
 | Materials | Course units/materials | Template materials; linked copies + promote/sync (**P1**) |
 | Access control | Course instructors (many) + org RBAC | **view / edit / owner** — creator is owner; org admins see all; instructor + view ⇒ can create a course (**P1**) |
-| Active state | `status = active` gates parent access | N/A |
+| Active state | `status = active` means the offering is running | N/A |
 
 ---
 
@@ -114,6 +118,7 @@ A user receives the **parent** role in an organization when **all** of the follo
 2. Does **not** copy roster, enrollments, important-now, or share links.
 3. New course is **independent** — edits do not sync back to the source (template-style sync is **P1**).
 4. Grade metadata **may** copy and remain editable on the new course.
+5. Description, location, and subject **may** copy from the create form (prefilled from the source). The copy starts **unpublished**.
 
 ---
 
@@ -163,10 +168,10 @@ Deprecate is the safe default when content should retire without disrupting live
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| material_id | uuid | FK → Material |
+| id | bigint | PK |
+| material_id | bigint | FK → Material |
 | version | int | monotonic per material, starting at 1 |
-| snapshot | jsonb | content at this version |
+| snapshot | jsonb | material columns + ordered blocks (for pages) at this version |
 | changed_by | uuid | FK → User (`profiles`), nullable |
 | changed_at | timestamptz | |
 | change_type | text | create · update · delete · restore · sync · promote · deprecate |
@@ -175,8 +180,8 @@ Deprecate is the safe default when content should retire without disrupting live
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| file_id | uuid | FK → File |
+| id | bigint | PK |
+| file_id | bigint | FK → File |
 | version | int | monotonic per file, starting at 1 |
 | storage_ref | text | **this version’s** Storage object (blob retained after replace) |
 | filename | text | |
@@ -217,8 +222,8 @@ Multiple instructors per course (co-teaching). **P0.**
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| course_id | uuid | FK → Course |
+| id | bigint | PK |
+| course_id | bigint | FK → Course |
 | user_id | uuid | FK → User (`profiles`) — instructor |
 | unique | (course_id, user_id) | Co-teaching; no extra course-role in P0 |
 
@@ -232,8 +237,8 @@ Multiple instructors per course (co-teaching). **P0.**
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| organization_id | uuid | FK — org-scoped entity |
+| id | bigint | PK |
+| organization_id | bigint | FK — org-scoped entity |
 | filename | text | current version |
 | storage_ref | text | current version’s Storage object path |
 | mime_type | text | current |
@@ -257,7 +262,7 @@ Search is a product requirement — schema must support **text + facets**, not o
 
 | Concern | Notes |
 |---------|-------|
-| **Searchable surfaces** | Material title/body (as indexed), File filename, Course / Template title + description, Unit title, StudentProfile name, Family names, instructor names |
+| **Searchable surfaces** | Material title/body (as indexed), File filename, Course title + description + subject + location, Template title + description, Unit title, StudentProfile name, Family names, instructor names |
 | **Facets (examples)** | course_id, unit_id, material kind, mime_type / media kind, grade levels, important now, date ranges, role-visible org scope |
 | **Access** | Results filtered by same RLS as underlying rows |
 | **Implementation (hypothesis)** | Postgres `tsvector` / GIN indexes + structured `WHERE` facets via PostgREST; escalate later if needed |
@@ -270,17 +275,19 @@ Exact index DDL deferred to migrations; do not ship P0 without a plan for these 
 
 Print is **not a stored entity**. It is a print-friendly view of content the actor can already access.
 
-| Grain | Source |
-|-------|--------|
-| Material | One `Material` (+ attached `File`s) |
-| Unit | All materials in a `Unit`, in `position` order |
-| This week | Dated materials (and Important now) whose dates fall in the current Sunday–Saturday week |
+| Grain | Source | Route |
+|-------|--------|-------|
+| Material | One `Material` (+ attached `File`s) | `…/materials/<id>/print` |
+| Unit | All materials in a `Unit`, in `position` order | `…/units/<id>/print` |
+| This week | Dated materials (and Important now) whose dates fall in the current Sunday–Saturday week | `/my/<org-slug>/print-this-week` |
 
 **Not P0:** print whole course.
 
-**P0 output:** browser print dialog (Save as PDF included). No `PrintJob` / generated-PDF table in P0.
+**P0 output:** client-generated **PDF** shown in an in-app viewer on the print route → **Download** (`.pdf`) and **Print**. No `PrintJob` / persisted-PDF table in P0 — generate on the fly. Do not name routes or primary entry UI **Export**.
 
 Access: same as viewing that material / unit / dashboard. Create → print does **not** require Enrollment.
+
+UI map: [URLS.md](../URLS.md), [PRINT](../pages/PRINT.md).
 
 ---
 
@@ -290,7 +297,7 @@ Access: same as viewing that material / unit / dashboard. Create → print does 
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
+| id | bigint | PK |
 | name | text | |
 | slug | text | **Unique permalink** — generated on create; changeable with UX warning that links will break |
 | org_type | text | `coop` · `micro_school` |
@@ -318,8 +325,8 @@ Org staff and parent memberships. Owners and admins may **change** `admin` ↔ `
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| organization_id | uuid | FK → Organization |
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
 | user_id | uuid | FK → User, **nullable** until invite is claimed |
 | role | text | owner · admin · instructor · parent |
 | status | text | active · invited · suspended |
@@ -330,13 +337,13 @@ Email invite for an additional admin. Claimed by signing up / logging in with th
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| organization_id | uuid | FK → Organization |
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
 | email | text | Lowercased |
 | invited_by | uuid | FK → User |
 | token | text | Unique invite token (returned on insert) |
 | accepted_at | timestamptz | nullable |
-| membership_id | uuid | FK → Membership, nullable |
+| membership_id | bigint | FK → Membership, nullable |
 
 ---
 
@@ -346,14 +353,14 @@ Org-level student record. **No login in P0/P1.**
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| organization_id | uuid | FK → Organization |
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
 | name | text | **Required** — only required field |
 | parent_email | text | **Optional** — for parent invite / linkage when provided |
 | grade_level | text | **Optional** — must be in org `grade_labels` when set |
 | user_id | uuid | FK → User, **nullable** — linked in P2 when student gets an account |
 | created_at | timestamptz | |
-| created_via_course_id | uuid | FK → Course, nullable — course that triggered first enrollment |
+| created_via_course_id | bigint | FK → Course, nullable — course that triggered first enrollment |
 
 No other student-profile fields in P0.
 
@@ -363,8 +370,8 @@ Org-scoped household for the **parent directory**. Builds on roster / parent lin
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| organization_id | uuid | FK → Organization |
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
 | display_name | text | **optional** — members have `display_name` at minimum |
 | created_at | timestamptz | |
 | deleted_at | timestamptz | soft delete |
@@ -373,9 +380,9 @@ Org-scoped household for the **parent directory**. Builds on roster / parent lin
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| family_id | uuid | FK → Family |
-| student_profile_id | uuid | FK, nullable — student in household |
+| id | bigint | PK |
+| family_id | bigint | FK → Family |
+| student_profile_id | bigint | FK, nullable — student in household |
 | parent_user_id | uuid | FK → User, nullable — parent who belongs to the family |
 | display_name | text | **names** on the family profile (may mirror linked profile/user) |
 
@@ -387,10 +394,10 @@ Org-scoped household for the **parent directory**. Builds on roster / parent lin
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| organization_id | uuid | FK → Organization |
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
 | email | text | Parent email (lowercased) |
-| student_profile_id | uuid | FK → StudentProfile |
+| student_profile_id | bigint | FK → StudentProfile |
 | invited_by | uuid | FK → User |
 | token | text | Unique invite link token |
 | accepted_at | timestamptz | nullable |
@@ -400,18 +407,18 @@ Org-scoped household for the **parent directory**. Builds on roster / parent lin
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
+| id | bigint | PK |
 | parent_user_id | uuid | FK → User |
-| student_profile_id | uuid | FK → StudentProfile |
+| student_profile_id | bigint | FK → StudentProfile |
 | unique | (parent_user_id, student_profile_id) | Verified via invite or email match (enforced in claim Function) |
 
 ### Enrollment
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| student_profile_id | uuid | FK → StudentProfile |
-| course_id | uuid | FK → Course |
+| id | bigint | PK |
+| student_profile_id | bigint | FK → StudentProfile |
+| course_id | bigint | FK → Course |
 | status | text | active · completed · withdrawn |
 | enrolled_at | timestamptz | |
 
@@ -423,8 +430,8 @@ Org-scoped **group of students**. Not a Course — no units/materials.
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| organization_id | uuid | FK → Organization |
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
 | title | text | |
 | description | text | nullable — TBD if needed |
 | deleted_at | timestamptz | soft delete |
@@ -434,9 +441,9 @@ Org-scoped **group of students**. Not a Course — no units/materials.
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| class_id | uuid | FK → Class |
-| student_profile_id | uuid | FK → StudentProfile |
+| id | bigint | PK |
+| class_id | bigint | FK → Class |
+| student_profile_id | bigint | FK → StudentProfile |
 | unique | (class_id, student_profile_id) | |
 
 **Open:** Can a student belong to multiple classes? Default assumption **yes** until decided otherwise.
@@ -445,16 +452,19 @@ Org-scoped **group of students**. Not a Course — no units/materials.
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| organization_id | uuid | FK → Organization |
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
 | title | text | |
-| description | text | |
-| template_id | uuid | FK → CourseTemplate, **nullable** — **P1** live link when created from a template; unused in P0 product flows |
-| copied_from_course_id | uuid | FK → Course, **nullable** — **TBD** if migration not yet added; P0 origin when created from another course (informational, no sync) |
+| description | text | optional short blurb — not the P1 **Summary** |
+| location | text | optional where the offering meets (free text) |
+| subject | text | optional subject / area (free text, not a taxonomy) |
+| template_id | bigint | FK → CourseTemplate, **nullable** — **P1** live link when created from a template; unused in P0 product flows |
+| copied_from_course_id | bigint | FK → Course, **nullable** — P0 origin when created from another course (informational, no sync) |
 | start_date | date | nullable — informational |
 | end_date | date | nullable — informational |
 | grade_levels | text[] | **optional** — one or more labels from org `grade_labels` |
-| status | text | **active** · archived — `active` gates parent org access |
+| status | text | **active** · archived — offering is running vs archived |
+| visibility | text | **unpublished** (instructors/admins) · **published** (enrolled parents; students when that role exists). New courses default unpublished |
 
 **Grade levels:** `text[]` of scheme values (exact grades and/or range labels). Same model on `CourseTemplate`.
 
@@ -462,8 +472,8 @@ Org-scoped **group of students**. Not a Course — no units/materials.
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| organization_id | uuid | FK → Organization |
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
 | title | text | |
 | description | text | |
 | grade_levels | text[] | **optional** — same shape as Course.grade_levels |
@@ -474,8 +484,8 @@ Org-scoped **group of students**. Not a Course — no units/materials.
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| template_id | uuid | FK → CourseTemplate |
+| id | bigint | PK |
+| template_id | bigint | FK → CourseTemplate |
 | user_id | uuid | FK → User |
 | permission | text | owner · edit · view — creator defaults to owner |
 
@@ -485,15 +495,15 @@ Optional content grouping on a **course** (P0) or a **template** (P1). Materials
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| organization_id | uuid | FK → Organization |
-| course_id | uuid | FK → Course, nullable |
-| template_id | uuid | FK → CourseTemplate, nullable |
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| course_id | bigint | FK → Course, nullable |
+| template_id | bigint | FK → CourseTemplate, nullable |
 | title | text | |
 | start_date | date | **optional** — unit date range |
 | end_date | date | **optional** — unit date range |
 | position | int | order |
-| copied_from_id | uuid | FK → Unit, nullable — lineage for sync |
+| copied_from_id | bigint | FK → Unit, nullable — lineage for sync |
 | is_overridden | boolean | same override rules as Material |
 | deleted_at | timestamptz | soft delete |
 | deprecated_at | timestamptz | nullable |
@@ -506,18 +516,20 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| organization_id | uuid | FK → Organization |
-| course_id | uuid | FK → Course, nullable |
-| template_id | uuid | FK → CourseTemplate, nullable |
-| unit_id | uuid | FK → Unit, **nullable** — null = **course top-level** material (shown above units) |
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| course_id | bigint | FK → Course, nullable |
+| template_id | bigint | FK → CourseTemplate, nullable |
+| unit_id | bigint | FK → Unit, **nullable** — null = **course top-level** material (shown above units) |
 | title | text | **required** — all kinds |
 | description | text | **optional** — all kinds (page · link · file); short blurb for lists / parents |
 | kind | text | **v1:** `page` · `link` · `file` |
 | url | text | nullable — required when `kind = link` |
-| file_id | uuid | FK → **File**, nullable — required when `kind = file` |
+| file_id | bigint | FK → **File**, nullable — required when `kind = file` |
 | scheduled_date | date | **optional** — when set, used for calendar-week dashboard (wins over unit dates) |
-| copied_from_id | uuid | FK → Material, nullable — source Material when copied (course-from-course **P0**, or template→course **P1**) |
+| visibility | text | **`unpublished`** (instructors/admins) · **`published`** (enrolled parents; students when that role exists). New materials default unpublished |
+| position | int | order within the unit, or among top-level materials when `unit_id` is null |
+| copied_from_id | bigint | FK → Material, nullable — source Material when copied (course-from-course **P0**, or template→course **P1**) |
 | is_overridden | boolean | true once this course copy is edited independently — **stops template sync** (**P1**) |
 | status | text | active · **deprecated** · (soft-deleted via deleted_at) |
 | current_version | int | matches `MaterialVersion.version` |
@@ -525,7 +537,7 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 | deleted_by | uuid | FK → User, nullable |
 | deprecated_at | timestamptz | nullable — deprecate path (**P1**) |
 | deprecated_by | uuid | FK → User, nullable |
-| promoted_to_id | uuid | FK → Material, nullable — **P1** promote |
+| promoted_to_id | bigint | FK → Material, nullable — **P1** promote |
 
 | kind | Content |
 |------|---------|
@@ -541,14 +553,14 @@ Ordered content piece on a **page** material only (`materials.kind = page`).
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
-| organization_id | uuid | FK → Organization |
-| material_id | uuid | FK → Material (`kind = page`) |
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| material_id | bigint | FK → Material (`kind = page`) |
 | position | int | order within the page |
 | kind | text | **P0:** `rich_text` · `video` — extensible |
 | body | jsonb | Kind-specific payload (rich text canonical store TBD; video URL or `file_id`) |
-| file_id | uuid | FK → File, nullable — when block references an uploaded file |
-| copied_from_id | uuid | FK → Block, nullable — lineage on course-from-course / template copy |
+| file_id | bigint | FK → File, nullable — when block references an uploaded file |
+| copied_from_id | bigint | FK → Block, nullable — lineage on course-from-course / template copy |
 | deleted_at | timestamptz | soft delete |
 
 **P0 block kinds (pages):**
@@ -570,17 +582,17 @@ Parent-facing URL. **P0: must be logged in** before the destination is shown.
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | uuid | PK |
+| id | bigint | PK |
 | token | text | Unique |
 | link_type | text | invite · dashboard · **resource** |
-| organization_id | uuid | FK → Organization |
-| course_id | uuid | FK → Course, nullable |
-| student_profile_id | uuid | FK → StudentProfile, nullable |
-| material_id | uuid | FK → Material, nullable — set when `link_type = resource` |
-| parent_invite_id | uuid | FK → ParentInvite, nullable |
+| organization_id | bigint | FK → Organization |
+| course_id | bigint | FK → Course, nullable |
+| student_profile_id | bigint | FK → StudentProfile, nullable |
+| material_id | bigint | FK → Material, nullable — set when `link_type = resource` |
+| parent_invite_id | bigint | FK → ParentInvite, nullable |
 | expires_at | timestamptz | nullable |
 
-**Resource link:** opens that specific material after auth. Same parent access rules (enrolled student, active course).
+**Resource link:** opens that specific material after auth. Same parent access rules (enrolled student, active **published** course, published material).
 
 ### ImportantNow / WeeklyContent
 
@@ -645,7 +657,7 @@ Family cross-org management (extends P0 org Family)
 | Question | Impact | P0 lock |
 |----------|--------|---------|
 | Course ↔ Class enrollment model | Enrollment, Class, Course roster UX | **Workshop** — keep student↔course enrollment until decided |
-| `copied_from_course_id` on Course | Origin tracking for course-from-course | **Add column when wiring create-from-course** (informational; no sync) |
+| `copied_from_course_id` on Course | Origin tracking for course-from-course | **Migrated** (informational; no sync) |
 | Add material kinds page · link · file | Material.kind | **Decided** (v1) |
 | Rich-text block canonical store | Block.body | **Open** |
 | Video block: URL vs uploaded file | Block, File, players | **Open** |
@@ -654,11 +666,14 @@ Family cross-org management (extends P0 org Family)
 | SaaS packaging (per teacher vs per course) | OrgSubscription | P1 |
 | Assignment object shape | Next conversation | Not P0 |
 | Parent visibility after enrollment ends | Membership stays active; what they still see | Deferred |
+| Material visibility published / unpublished | Parents (and future students) see published only | **Decided** — unpublished = instructors/admins |
+| Course visibility published / unpublished | Parents see a course only when active **and** published | **Decided** — unpublished = instructors/admins; new courses unpublished |
+| Course description, location, subject | Catalog fields on Course | **Decided** — optional free text; description ≠ P1 Summary |
 | Family profile fields beyond names | Family, FamilyMember | Names (+ optional family `display_name`) only |
 | Course `grade_levels` storage (array vs join table vs range columns) | Course, CourseTemplate, search facets | **`text[]`** |
 | Search: FTS columns vs materialized search document | Indexes, PostgREST views | **Generated `tsvector` + GIN** on searchable tables |
 | Template product surface | CourseTemplate, TemplateAccess, sync Functions | **P1** — tables may exist; no P0 UI |
-| Migrate old Material kinds/body → page/link/file + Block rows | materials, blocks | **Required** when implementing builder |
+| Material kinds page/link/file + Block rows | materials, blocks | **Migrated** in baseline |
 
 ---
 
@@ -671,6 +686,6 @@ Family cross-org management (extends P0 org Family)
 - **Files:** Supabase Storage bucket `org-files`; `File.storage_ref` is `{organization_id}/{file_id}/{version_id}/{filename}`. Audio/video playback in the SPA for those mime types.
 - **Search:** generated `search_vector` columns + GIN indexes; facets are ordinary columns (`course_id`, `kind`, `mime_type`, `grade_levels`, …) filtered under the same RLS.
 - **Analytics:** PostHog (client) — not a schema entity.
-- Access control via **RLS** (and Storage policies) aligned with Membership roles and parent access rules above. Parent SELECT of course content requires an active `parent` membership, a `ParentStudentLink`, an active `Enrollment`, and `Course.status = active`.
+- Access control via **RLS** (and Storage policies) aligned with Membership roles and parent access rules above. Parent SELECT of a course requires an active `parent` membership, a `ParentStudentLink`, an active `Enrollment`, `Course.status = active`, and `Course.visibility = published`. Parents (and future students) SELECT materials only when `visibility = published` **and** they can view the course. Instructors/admins see unpublished courses and materials.
 - **Migrations:** `supabase db migrate` — see [STACK.md](../STACK.md).
-- **ID format:** App entities use **`bigserial` / `bigint`**. Auth-linked ids (`profiles`, FKs to `auth.users`) stay **`uuid`**. Existing uuid migrations are superseded by this planning convention until migrated.
+- **ID format:** App entities use **`bigserial` / `bigint`**. Auth-linked ids (`profiles`, FKs to `auth.users`) stay **`uuid`**. Baseline migrations match this convention.

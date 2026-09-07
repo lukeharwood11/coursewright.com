@@ -1,2 +1,2 @@
-/** Domain public API — stub. See AGENTS.md and docs/FEATURES.md. */
-export {};
+export { MaterialPage } from "./material/MaterialPage";
+export { MaterialEditPage } from "./material/MaterialEditPage";

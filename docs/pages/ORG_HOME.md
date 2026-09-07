@@ -20,8 +20,8 @@ Same URL for all roles; chrome and body switch by membership role.
 - Usability bar: understand child, course, and what’s needed immediately — no LMS jargon.
 - Show **this calendar week** (Sunday–Saturday) and **Important now**.
 - “This week” materials: effective date in range — material `scheduled_date` if set, else unit date range.
-- **Print this week** and per-material **Print** are first-class (never overflow-only).
-- Parent org access requires linked student enrolled in a course with `status = active` (dates informational only).
+- **Print this week** and per-material **Print** are first-class (never overflow-only) — both land on [PRINT](./PRINT.md).
+- Parent org access requires linked student enrolled in a course with `status = active` **and** `visibility = published` (dates informational only).
 - Progress tab is P1 (dim/inactive until then). Parent summary layer (B) is **P1**, not P0.
 - Empty: no dated work, or not yet on an active enrollment — plain-language next step.
 
@@ -104,7 +104,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - [COURSE](./COURSE.md) — open course context (read-focused)
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — account affordance
 - [ORG_PICKER](./ORG_PICKER.md) — switch org (when multi-org)
-- Print this week — TBD dedicated print route (no page file until path locked)
+- [PRINT](./PRINT.md) — **Print this week** → `/my/<org-slug>/print-this-week`; per-material **Print** → material `…/print`
 
 ### Instructor / owner / admin
 

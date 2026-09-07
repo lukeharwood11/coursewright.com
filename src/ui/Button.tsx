@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Link } from "react-router-dom";
 
-type Variant = "primary" | "secondary" | "google";
+type Variant = "primary" | "secondary" | "google" | "ghost";
 
 const variantClass: Record<Variant, string> = {
   primary:
@@ -10,6 +10,8 @@ const variantClass: Record<Variant, string> = {
     "border-[var(--line)] bg-[var(--surface)] text-[var(--ink)] hover:border-[var(--green)] hover:bg-[var(--green-tint)]",
   google:
     "border-[var(--line)] bg-[var(--surface)] text-[var(--ink)] hover:shadow-[var(--shadow)]",
+  ghost:
+    "justify-start border-dashed border-[var(--line)] bg-transparent text-[var(--ink)] hover:border-[var(--green)] hover:bg-[var(--green-tint)]",
 };
 
 function buttonClassName(variant: Variant, fullWidth: boolean | undefined, extra?: string) {

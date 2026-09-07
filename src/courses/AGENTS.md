@@ -1,20 +1,22 @@
 # AGENTS — `src/courses/`
 
-Course **instances**: offerings with optional dates, roster link, instructors, status.
+Course **instances**: offerings with optional dates, roster, instructors, catalog fields, status, and publish state.
 
 ## Scope
 
 - Course list/detail (builder shell) — **P0**
 - Create from scratch or **from another course** (copy units/materials; Function candidate)
 - Course instructors (co-teaching)
-- `status = active` gates parent org access
+- Catalog: **description**, **location**, **subject / area**
+- `status = active` means the offering is running; `visibility = published` is what enrolled parents can see
 - **P1:** `template_id` live link; promote course / content → template (Function)
 
 ## Rules
 
 - Builder chrome: Print / Share / Add material visible ([STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md)).
 - Units & materials are sibling domains — compose them; don’t duplicate.
-- **P0:** no template UI. Course-from-course is an independent copy — **no live sync**.
+- **P0:** no template UI. Course-from-course is an independent copy — **no live sync**. Copies start unpublished.
+- Course visibility helpers live in `courses/model/` (not materials).
 - **P1:** Template → course sync only for unmodified copies — enforce via backend + clear UI badges (In sync / Overridden).
 
 ## Don’t

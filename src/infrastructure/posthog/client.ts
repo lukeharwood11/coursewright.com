@@ -21,6 +21,8 @@ export function initPostHog() {
     person_profiles: "identified_only",
     capture_pageview: true,
     capture_pageleave: true,
+    // Unhandled window errors + promise rejections; boundary still calls captureException.
+    capture_exceptions: true,
   });
   started = true;
 }

@@ -7,13 +7,14 @@ import {
 } from "@/roster/databridge/students";
 
 export function useStudentProfile() {
-  const { studentId } = useParams();
+  const { studentId: studentIdParam } = useParams();
+  const studentId = studentIdParam ? Number(studentIdParam) : NaN;
   const { organization } = useOrgShell();
 
   const query = useQuery({
-    queryKey: studentQueryKeys.detail(studentId ?? ""),
-    queryFn: () => getStudent(studentId ?? ""),
-    enabled: Boolean(studentId),
+    queryKey: studentQueryKeys.detail(studentId),
+    queryFn: () => getStudent(studentId),
+    enabled: Number.isFinite(studentId),
   });
 
   const student = query.data ?? null;

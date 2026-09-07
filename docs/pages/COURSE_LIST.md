@@ -16,7 +16,7 @@ Browse and create **course instances** (runnable offerings with optional dates a
 
 - Requires org membership with access to courses (instructors/admins; parent visibility TBD).
 - Lists course instances; open row → course builder home.
-- Create course **from scratch** or **from another course** (copies units/materials; independent — no live sync). **Templates are P1** — not offered here in P0.
+- Create course **from scratch** or **from another course** (copies units/materials; independent — no live sync). New courses start **unpublished**. **Templates are P1** — not offered here in P0.
 - Supports findability (list filters TBD; product search is P0 elsewhere).
 
 ## Data shown
@@ -24,7 +24,8 @@ Browse and create **course instances** (runnable offerings with optional dates a
 Per course row (TBD density):
 
 - Course **title**
-- **Status** (e.g. active)
+- Optional **description**, **location**, **subject / area**
+- **Status** (e.g. active) and **unpublished** badge when hidden from families
 - Optional **start/end dates**
 - **Grade metadata** (grades/ranges per org scheme)
 - Instructors (names/avatars TBD)
@@ -32,11 +33,12 @@ Per course row (TBD density):
 
 ## Contents
 
-- List of courses in the org (title, status, dates, grade metadata, instructors — TBD density)
+- List of courses in the org (title, description, location, subject, status, unpublished badge, dates, grade metadata, instructors — TBD density)
 - Facets / findability — advanced search is P0 product-wide; list filters TBD
 - Create course:
-  - **From scratch** — blank course
-  - **From another course** — pick a source course; copies units/materials; no roster; no live sync
+  - **From scratch** — blank course (starts unpublished)
+  - **From another course** — pick a source course; copies units/materials; no roster; no live sync; copy starts unpublished
+  - Optional **description**, **subject / area**, **location** on the form
 - Open → [COURSE](./COURSE.md)
 
 ## Primary actions

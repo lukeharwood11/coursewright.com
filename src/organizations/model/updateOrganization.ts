@@ -1,5 +1,5 @@
 import { K12_GRADE_LABELS } from "./createDefaults";
-import { parseGradeScheme } from "./gradeScheme";
+import { parseGradeLabels, parseGradeScheme } from "./gradeScheme";
 import { parseOrgType } from "./orgType";
 import { isReservedSlug, isValidSlug, slugify } from "./slug";
 
@@ -70,6 +70,41 @@ export function validateUpdateOrganization(
     ok: true,
     value: { name, slug, orgType, gradeScheme, gradeLabels, slugChanged },
   };
+}
+
+export type OrgSettingsDraft = {
+  name: string;
+  slug: string;
+  orgType: string;
+  gradeScheme: string;
+  gradeLabelsText: string;
+};
+
+export type OrgSettingsSaved = {
+  name: string;
+  slug: string;
+  orgType: string;
+  gradeScheme: string;
+  gradeLabels: string[];
+};
+
+function sameLabels(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((label, index) => label === right[index]);
+}
+
+/** True when the draft would persist a different identity, type, or grade scheme. */
+export function orgSettingsHaveChanges(
+  draft: OrgSettingsDraft,
+  saved: OrgSettingsSaved,
+): boolean {
+  if (draft.name.trim() !== saved.name) return true;
+  if (draft.slug !== saved.slug) return true;
+  if (draft.orgType !== saved.orgType) return true;
+  if (draft.gradeScheme !== saved.gradeScheme) return true;
+  if (draft.gradeScheme === "custom") {
+    return !sameLabels(parseGradeLabels(draft.gradeLabelsText), saved.gradeLabels);
+  }
+  return false;
 }
 
 export function organizationWriteErrorMessage(

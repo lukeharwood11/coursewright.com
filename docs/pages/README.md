@@ -26,12 +26,13 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) | `/my/<org-slug>/templates/<template_id>/settings` | **P1** |
 | [UNIT](./UNIT.md) | `/my/<org-slug>/courses/…/units/<unit_id>` (template tree **P1**) |
 | [MATERIAL](./MATERIAL.md) | view `…/materials/<id>`; edit `…/materials/<id>/edit` (top-level or under unit) |
+| [PRINT](./PRINT.md) | `…/materials/<id>/print`; `…/units/<id>/print`; `/my/<org-slug>/print-this-week` |
 | [ORG_ROSTER](./ORG_ROSTER.md) | `/my/<org-slug>/roster` |
 | [STUDENT_PROFILE](./STUDENT_PROFILE.md) | `/my/<org-slug>/roster/<student_id>` |
 | [FAMILIES](./FAMILIES.md) | `/my/<org-slug>/families` |
 | [FAMILY](./FAMILY.md) | `/my/<org-slug>/families/<family_id>` |
 
-**No page file yet** (paths TBD in [URLS.md](../URLS.md)): invite claim, resource share entry, dedicated print routes, search route. Print / share / search UX is still required on the locked pages above.
+**No page file yet** (paths TBD in [URLS.md](../URLS.md)): invite claim, resource share entry, search route. Share / search UX is still required on the locked pages above; print routes are locked — see [PRINT](./PRINT.md).
 
 ---
 
@@ -57,7 +58,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | File / content versioning, soft deletes | [MATERIAL](./MATERIAL.md), [COURSE](./COURSE.md) |
 | Homework = dated materials; Important now | [ORG_HOME](./ORG_HOME.md), [MATERIAL](./MATERIAL.md) |
 | Parent dashboard / access rules | [ORG_HOME](./ORG_HOME.md); claim via [LOGIN](./LOGIN.md) / [SIGNUP](./SIGNUP.md) |
-| Print (material / unit / this week) | [MATERIAL](./MATERIAL.md), [UNIT](./UNIT.md), [ORG_HOME](./ORG_HOME.md) |
+| Print (material / unit / this week) | [PRINT](./PRINT.md); entry from [MATERIAL](./MATERIAL.md), [UNIT](./UNIT.md), [ORG_HOME](./ORG_HOME.md) |
 | Resource links / share with parents | [MATERIAL](./MATERIAL.md) (entry URL TBD) |
 | Advanced search | Product chrome — [ORG_HOME](./ORG_HOME.md) + org chrome; route TBD |
 | Marketing / trust | [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [CONSTRUCTION](./CONSTRUCTION.md) (footer legal/contact until copy exists; [PRIVACY](./PRIVACY.md) outline) |
@@ -68,7 +69,6 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 |---------|--------|
 | Invite claim URL | Path TBD — no page file until locked |
 | Resource share entry URL | Path TBD — recipients land on [MATERIAL](./MATERIAL.md) after login |
-| Dedicated print routes | Path TBD — print actions still on material / unit / this week |
 | Class list / detail URLs | TBD — Class is P0 concept; no page file until path locked |
 | Forms content kind | FEATURES in design — not P0 on [MATERIAL](./MATERIAL.md) |
 | Course templates + ACL / promote / sync | **P1** — [TEMPLATE_LIST](./TEMPLATE_LIST.md), [TEMPLATE](./TEMPLATE.md), [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) |

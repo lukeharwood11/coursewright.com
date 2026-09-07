@@ -16,7 +16,8 @@ Configure the course instance (not content authoring — that’s [COURSE](./COU
 
 - Edit course instance configuration (not unit/material bodies).
 - Optional dates are informational only (not access gates).
-- **Status** (e.g. active) gates parent membership rules together with enrollment.
+- **Status** (active / archived) is whether the offering is running.
+- **Publish / unpublish** controls whether enrolled families can see the course (distinct from status).
 - Manage co-teachers.
 - Soft-delete/archive TBD; no hard deletes of content.
 - **P1:** promote from-scratch course to template or open linked template.
@@ -24,8 +25,9 @@ Configure the course instance (not content authoring — that’s [COURSE](./COU
 ## Data shown
 
 - Course **name** (editable)
+- **Description**, **subject / area**, **location** (optional, editable)
 - **Start date**, **end date** (optional, editable)
-- **Status**
+- **Status** and **visibility** (publish / unpublish)
 - **Grade-level metadata** (multi grade/range per org scheme)
 - **Instructors** assigned to the course
 - Optional origin “created from course …” when applicable (read-only, TBD)
@@ -33,8 +35,10 @@ Configure the course instance (not content authoring — that’s [COURSE](./COU
 ## Contents
 
 - Course name
+- Optional **description**, **subject / area**, **location**
 - Optional **start date** and **end date** (informational only — not access gates)
-- **Status** (e.g. `active`) — parent org role requires student enrolled in a course with `status = active`
+- **Status** (`active` / `archived`) — offering is running vs archived
+- **Publish / unpublish** — families see the course only when it is active **and** published
 - **Grade-level metadata** — optional; multiple grades and/or ranges per org grade scheme
 - **Instructors** — multiple instructors / co-teaching
 - Soft-delete / archive controls — TBD UX; content is soft-deleted only

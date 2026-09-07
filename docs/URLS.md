@@ -114,6 +114,21 @@ Materials may be **top-level** (no unit) or nested under a unit.
 
 ---
 
+## Print (P0)
+
+Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then **Download** or **Print**. Not named Export. **Print whole course** is out of scope.
+
+| Page | URL | Notes |
+|------|-----|-------|
+| [PRINT](./pages/PRINT.md) (material, top-level) | `/my/<org-slug>/courses/<course_id>/materials/<material_id>/print` | Same on template tree (**P1**) |
+| [PRINT](./pages/PRINT.md) (material, in unit) | `…/units/<unit_id>/materials/<material_id>/print` | |
+| [PRINT](./pages/PRINT.md) (unit) | `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print` | Packet in material order |
+| [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Parent dashboard grain; Sun–Sat + important now |
+
+**Do not use** `?print=1` on the source page — print is its own chrome-free screen with a real PDF viewer.
+
+---
+
 ## Roster & families
 
 | Page | URL | Notes |
@@ -137,7 +152,6 @@ Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / un
 |---------|--------|
 | Invite claim URLs | TBD |
 | Resource share entry URLs | TBD |
-| Print routes (`…/print` vs query) | TBD — print UX still required on material / unit / this week |
 | Search as a route vs overlay | TBD |
 | Class list / detail | TBD — Class ≠ Course; paths not locked |
 
@@ -145,7 +159,6 @@ Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / un
 
 ## Open questions
 
-1. **Print** — dedicated `/print` child routes vs `?print=1`?
-2. **Share / invite links** — `/invite/<token>`, `/s/<token>`, or other?
-3. **Search** — overlay only, or `/my/<org-slug>/search`?
-4. **Class list / detail** — paths not locked (Class ≠ Course)
+1. **Share / invite links** — `/invite/<token>`, `/s/<token>`, or other?
+2. **Search** — overlay only, or `/my/<org-slug>/search`?
+3. **Class list / detail** — paths not locked (Class ≠ Course)

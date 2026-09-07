@@ -2,19 +2,20 @@ import type { CalendarWeek } from "./thisWeek";
 import { isInCalendarWeek } from "./thisWeek";
 
 export type ParentDashboardMaterial = {
-  id: string;
+  id: number;
   title: string;
   scheduledDate: string | null;
+  unitId: number | null;
 };
 
 export type ParentDashboardCourse = {
-  id: string;
+  id: number;
   title: string;
   materials: ParentDashboardMaterial[];
 };
 
 export type ParentDashboardStudent = {
-  id: string;
+  id: number;
   name: string;
   gradeLevel: string | null;
   hasActiveEnrollment: boolean;
@@ -22,10 +23,12 @@ export type ParentDashboardStudent = {
 };
 
 export type ParentImportantNowItem = {
-  id: string;
-  materialId: string;
+  id: number;
+  materialId: number;
   materialTitle: string;
+  courseId: number;
   courseTitle: string;
+  unitId: number | null;
 };
 
 export type ParentDashboard = {
@@ -37,27 +40,29 @@ export type ParentDashboard = {
 
 export type ParentDashboardSource = {
   week: CalendarWeek;
-  students: Array<{ id: string; name: string; gradeLevel: string | null }>;
+  students: Array<{ id: number; name: string; gradeLevel: string | null }>;
   enrollments: Array<{
-    studentId: string;
-    courseId: string;
+    studentId: number;
+    courseId: number;
     courseTitle: string;
     courseStatus: string;
   }>;
   materials: Array<{
-    id: string;
+    id: number;
     title: string;
     scheduledDate: string | null;
-    courseId: string;
+    courseId: number;
+    unitId: number | null;
     unitStart: string | null;
     unitEnd: string | null;
   }>;
   importantNow: Array<{
-    id: string;
-    materialId: string;
+    id: number;
+    materialId: number;
     materialTitle: string;
-    courseId: string;
+    courseId: number;
     courseTitle: string;
+    unitId: number | null;
   }>;
 };
 
@@ -88,6 +93,7 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
           id: material.id,
           title: material.title,
           scheduledDate: material.scheduledDate,
+          unitId: material.unitId,
         }));
       return {
         id: enrollment.courseId,

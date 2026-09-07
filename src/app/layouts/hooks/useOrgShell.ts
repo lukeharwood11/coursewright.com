@@ -31,24 +31,27 @@ export function useOrgShellData(orgSlug: string | undefined) {
   const organization = membershipQuery.data?.organization ?? null;
   const role = membershipQuery.data?.role ?? null;
   const isStaff = role ? isStaffRole(role) : false;
-  const organizationId = organization?.id ?? "";
+  const organizationId = organization?.id;
 
   const coursesQuery = useQuery({
-    queryKey: courseQueryKeys.list(organizationId),
-    queryFn: () => listCourses(organizationId),
+    queryKey: courseQueryKeys.list(organizationId ?? 0),
+    queryFn: () => listCourses(organizationId!),
     enabled: Boolean(organizationId),
   });
 
   const familiesQuery = useQuery({
-    queryKey: familyQueryKeys.list(organizationId),
-    queryFn: () => listFamilies(organizationId),
+    queryKey: familyQueryKeys.list(organizationId ?? 0),
+    queryFn: () => listFamilies(organizationId!),
     enabled: isStaff && Boolean(organizationId),
   });
 
   const lists = {
-    courses: coursesQuery.data ?? [],
+    courses: (coursesQuery.data ?? []).map((course) => ({
+      id: String(course.id),
+      title: course.title,
+    })),
     families: (familiesQuery.data ?? []).map((family) => ({
-      id: family.id,
+      id: String(family.id),
       label: familyLabel(family.displayName),
     })),
   };
