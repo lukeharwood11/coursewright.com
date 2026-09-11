@@ -62,6 +62,12 @@ drop trigger if exists parent_invites_before_insert on public.parent_invites;
 drop function if exists private.parent_invites_before_insert();
 drop table if exists public.parent_invites;
 
+-- Old values pointed at parent_invites ids. Do not re-attach them to a
+-- coincidental admin_invites row after the table swap.
+update public.share_links
+set parent_invite_id = null
+where parent_invite_id is not null;
+
 alter table public.share_links
   add constraint share_links_parent_invite_id_fkey
   foreign key (parent_invite_id) references public.admin_invites (id) on delete cascade;
@@ -187,6 +193,7 @@ create trigger admin_invites_normalize
   execute function public.normalize_org_invite();
 
 drop policy if exists organizations_select_pending_staff_invite on public.organizations;
+drop policy if exists organizations_select_pending_invite on public.organizations;
 create policy organizations_select_pending_invite
   on public.organizations
   for select

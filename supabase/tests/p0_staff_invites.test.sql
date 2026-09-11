@@ -1,6 +1,6 @@
 -- Unified email-claim invites: staff + parent on admin_invites (docs/database/SCHEMA.md).
 begin;
-select plan(20);
+select plan(23);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -107,6 +107,12 @@ reset role;
 create temp table invite_tokens as
   select email, role, token from admin_invites;
 
+select is_empty(
+  $$select 1 from memberships
+    where user_id = 'cccccccc-cccc-cccc-cccc-cccccccccccc'$$,
+  'staff invite does not create membership until claim'
+);
+
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'cccccccc-cccc-cccc-cccc-cccccccccccc', true);
 select set_config(
@@ -169,6 +175,12 @@ reset role;
 insert into invite_tokens (email, role, token)
   select email, role, token from admin_invites where role = 'parent';
 
+select is_empty(
+  $$select 1 from memberships
+    where user_id = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'$$,
+  'parent invite does not create membership until claim'
+);
+
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', true);
 select set_config(
@@ -203,6 +215,11 @@ select isnt_empty(
 select is_empty(
   $$select * from courses$$,
   'parent membership without enrollment does not grant course access'
+);
+
+select is_empty(
+  $$select 1 from enrollments$$,
+  'parent claim does not create course enrollment'
 );
 
 reset role;
