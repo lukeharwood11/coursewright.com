@@ -4,11 +4,13 @@ Terraform for Course Wright AWS SPA hosting. **One root module**, many tiers via
 
 ## Scope
 
-- Root module + `modules/spa_site` — S3 + CloudFront (+ ACM/DNS as designed)
-- **`testing.tfvars`** → `justtesting.coursewright.com`
-- **`production.tfvars`** → `coursewright.com`
+- Root module + `modules/spa_site` — S3 + CloudFront OAC + optional Route53
+- **`testing.tfvars`** → `justtesting.coursewright.com` (`coursewright-testing-spa`)
+- **`production.tfvars`** → `coursewright.com` (`coursewright-production-spa`)
 
 Same code path for every tier; only var files change.
+
+**Do not `terraform apply` until HN-003 (AWS creds) and an ISSUED ACM certificate exists in `us-east-1` for the tier domain (HN-005).** Route53 aliases stay off until `manage_dns = true`. Deploy sync/invalidation is not in this module.
 
 ## Remote state
 
@@ -35,8 +37,11 @@ Never mix a tier’s `-var-file` with the other tier’s backend key.
 - Prefer **tfvars per tier** over copy-pasted `envs/testing` and `envs/production` roots.
 - **Separate state per tier** (workspace or backend key) — never apply production with testing state.
 - Parameterize domain, bucket names, aliases, tags (`environment = "testing" | "production"`).
-- SPA fallback for client-side routing (CloudFront → `index.html`).
+- SPA fallback for client-side routing (CloudFront 403/404 → `index.html`).
+- ACM is a **data lookup** of an ISSUED cert — do not invent ARNs; Luke issues the cert first (HN-005).
+- Route53 is **opt-in** (`manage_dns`, default `false`). Parent zone is `coursewright.com` for both apex and `justtesting`.
 - Only AWS resources needed for the static app + DNS/TLS.
+- Tags: `AppName=coursewright`, `Environment=<tier>`, `Owner=Luke Harwood` (provider `default_tags`).
 
 ## Don’t
 
