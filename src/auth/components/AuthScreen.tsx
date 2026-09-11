@@ -70,7 +70,7 @@ export function AuthScreen({
             <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
             <span>
               Accounts aren’t connected yet. Add Supabase URL and anon key to{" "}
-              <code>.env.local</code>.
+              <code>.env.development</code>.
             </span>
           </p>
         )}

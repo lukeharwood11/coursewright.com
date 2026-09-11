@@ -5,11 +5,12 @@ node_modules/
 dist/
 *.tsbuildinfo
 
-# Env / secrets — never commit real keys
+# Env — keep personal overrides private; commit shared public defaults
 .env
 .env.local
 .env.*.local
 !.env.example
+!.env.development
 
 # Logs
 logs/

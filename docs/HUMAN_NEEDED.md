@@ -106,7 +106,7 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ### HN-001 — Create Supabase projects (testing + production)
 
-**Completed:** 2026-09-05 — testing project linked as `hlecttkgrfhtzvwnxtyb` (`coursewright.com`); `.env.local` has URL + anon key; CLI `supabase link` done. Production project deferred → **HN-007**.
+**Completed:** 2026-09-05 — testing project linked as `hlecttkgrfhtzvwnxtyb` (`coursewright.com`); URL + anon key in committed `.env.development`; CLI `supabase link` done. Production project deferred → **HN-007**.
 
 ### HN-002 — Google Cloud OAuth for Sign in with Google
 
@@ -114,7 +114,7 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ### HN-006 — PostHog project(s) for product analytics
 
-**Completed:** 2026-09-05 — testing keys in `.env.local`; SPA wires `src/infrastructure/posthog/client.ts`. Separate production PostHog project can wait until first prod deploy.
+**Completed:** 2026-09-05 — testing keys in committed `.env.development`; SPA wires `src/infrastructure/posthog/client.ts`. Separate production PostHog project can wait until first prod deploy.
 
 ### HN-008 — Deploy `create-course-from-course` Edge Function
 

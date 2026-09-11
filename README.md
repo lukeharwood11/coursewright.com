@@ -35,10 +35,10 @@ Full detail: [docs/STACK.md](./docs/STACK.md).
 
 ```bash
 npm install
-cp .env.example .env.local
-# Fill VITE_SUPABASE_* and VITE_POSTHOG_* (see docs/HUMAN_NEEDED.md)
 npm run dev
 ```
+
+Shared testing keys are in committed `.env.development` (loaded automatically by Vite in dev). Override with a gitignored `.env.local` if needed. Production builds get `VITE_*` from CI/hosting.
 
 | Script | What it does |
 |--------|----------------|
@@ -46,7 +46,7 @@ npm run dev
 | `npm run build` | Typecheck + production build → `dist/` |
 | `npm run preview` | Preview the production build |
 
-Without `.env.local`, the app still loads; auth shows a setup notice until Supabase keys are present.
+Without Supabase env vars, the app still loads; auth shows a setup notice.
 
 ---
 

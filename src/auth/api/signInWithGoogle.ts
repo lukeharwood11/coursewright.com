@@ -5,7 +5,7 @@ export async function signInWithGoogle(nextPath = "/my") {
   if (!isSupabaseConfigured || !supabase) {
     return {
       error:
-        "Sign-in isn’t connected yet. Add Supabase URL and anon key to .env.local.",
+        "Sign-in isn’t connected yet. Add Supabase URL and anon key to .env.development.",
     };
   }
 
