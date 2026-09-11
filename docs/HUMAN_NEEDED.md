@@ -41,27 +41,6 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ---
 
-### HN-004 — Terraform remote state backend
-
-| | |
-|--|--|
-| **Why** | Shared, safe state for testing vs production tiers |
-| **Where** | AWS (bootstrap bucket) |
-| **Placeholder** | `infra/terraform/backend.tf` (`HN-004`) |
-
-**Steps:**
-
-1. Create an S3 bucket for Terraform state (e.g. `coursewright-terraform-state`) with versioning on encryption.
-2. Optionally create a DynamoDB table for state locking (e.g. `coursewright-terraform-locks`).
-3. Decide state key scheme, e.g.:
-   - `spa/testing/terraform.tfstate`
-   - `spa/production/terraform.tfstate`
-4. Give the agent bucket name, region, and lock table name (if any) to fill `backend.tf`.
-
-**Done when:** Agent can uncomment/configure `backend "s3"` and `terraform init` succeeds for a tier.
-
----
-
 ### HN-005 — DNS for `coursewright.com` / `justtesting.coursewright.com`
 
 | | |
@@ -103,6 +82,10 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 ---
 
 ## Completed
+
+### HN-004 — Terraform remote state backend
+
+**Completed:** 2026-09-11 — reuse existing nosh/amia backend (`lukeharwood-dev-tfstate` / `lukeharwood-dev-tf-lock`, `us-east-2`). CourseWright keys only: `spa/testing/terraform.tfstate`, `spa/production/terraform.tfstate`. Init with `backend-testing.hcl` / `backend-production.hcl`. No new bucket or lock table.
 
 ### HN-001 — Create Supabase projects (testing + production)
 
