@@ -12,6 +12,10 @@ import {
   familyQueryKeys,
   listFamilies,
 } from "@/roster/databridge/families";
+import {
+  classQueryKeys,
+  listClasses,
+} from "@/roster/databridge/classes";
 import { buildParentNav, buildStaffNav } from "../model/nav";
 
 export function useOrgShellData(orgSlug: string | undefined) {
@@ -31,24 +35,37 @@ export function useOrgShellData(orgSlug: string | undefined) {
   const organization = membershipQuery.data?.organization ?? null;
   const role = membershipQuery.data?.role ?? null;
   const isStaff = role ? isStaffRole(role) : false;
-  const organizationId = organization?.id ?? "";
+  const organizationId = organization?.id;
 
   const coursesQuery = useQuery({
-    queryKey: courseQueryKeys.list(organizationId),
-    queryFn: () => listCourses(organizationId),
+    queryKey: courseQueryKeys.list(organizationId ?? 0),
+    queryFn: () => listCourses(organizationId!),
     enabled: Boolean(organizationId),
   });
 
+  const classesQuery = useQuery({
+    queryKey: classQueryKeys.list(organizationId ?? 0),
+    queryFn: () => listClasses(organizationId!),
+    enabled: isStaff && Boolean(organizationId),
+  });
+
   const familiesQuery = useQuery({
-    queryKey: familyQueryKeys.list(organizationId),
-    queryFn: () => listFamilies(organizationId),
+    queryKey: familyQueryKeys.list(organizationId ?? 0),
+    queryFn: () => listFamilies(organizationId!),
     enabled: isStaff && Boolean(organizationId),
   });
 
   const lists = {
-    courses: coursesQuery.data ?? [],
+    courses: (coursesQuery.data ?? []).map((course) => ({
+      id: String(course.id),
+      title: course.title,
+    })),
+    classes: (classesQuery.data ?? []).map((classGroup) => ({
+      id: String(classGroup.id),
+      title: classGroup.title,
+    })),
     families: (familiesQuery.data ?? []).map((family) => ({
-      id: family.id,
+      id: String(family.id),
       label: familyLabel(family.displayName),
     })),
   };

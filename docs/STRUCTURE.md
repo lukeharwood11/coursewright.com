@@ -49,7 +49,8 @@ coursewright.com/
 ├── vite.config.ts
 ├── tsconfig.json
 ├── index.html
-├── .env.example              # HN-001 — copy to .env.local
+├── .env.development          # Shared public Vite client env (testing)
+├── .env.example              # Documents required VITE_* keys
 ├── public/
 ├── dist/                     # gitignored — build → S3
 │

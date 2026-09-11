@@ -6,8 +6,8 @@ Student profiles, **classes** (student groups), course enrollments, parent invit
 
 - Student profiles (name required; parent email & grade optional)
 - **Class** — org-scoped group of students (not a course; no materials)
-- Enroll / unenroll in a course; first add may create `student_profile`
-- Parent email linkage + invites
+- Org roster (`org-roster/`), class roster (`class-roster/`), course roster (`course-roster/`), student profile
+- Parent email linkage + invites (copyable `/invite/<token>`; same claim path as staff)
 - Staff assignment UI that belongs with roster (course instructors may live with `courses/`)
 
 ## Rules
@@ -15,7 +15,7 @@ Student profiles, **classes** (student groups), course enrollments, parent invit
 - Students are **profiles**, not accounts (P0/P1).
 - **Class ≠ Course** — do not put units/materials on a class.
 - Course ↔ Class enrollment relationship is **workshop** in FEATURES — do not invent until locked; keep student↔course enrollment as the access gate.
-- Parent access still requires invite + account ([FEATURES.md](../../docs/FEATURES.md)).
+- Parent access still requires invite + account ([FEATURES.md](../../docs/FEATURES.md)). Membership is created on claim; course materials still require enrollment.
 - Follow frontend-development skill page-folder pattern under this domain.
 
 ## Don’t

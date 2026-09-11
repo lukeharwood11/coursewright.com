@@ -14,7 +14,7 @@ App chrome: collapsible sidebar + top bar for signed-in `/my` pages.
 - Keep this layer thin — no course/roster business rules. Lists come from domain `databridge/`.
 - Parent chrome stays simpler than staff (This week, their courses, Progress). Do not dump instructor destinations onto parent screens.
 - Account-level chrome must not show org destinations (courses, roster, families, org settings).
-- Hide chrome when printing.
+- Hide chrome on print routes (`PrintLayout` — no org sidebar). HTML `@media print` also hides `.cw-org-chrome`.
 - Pass through auth `Outlet` context so `useAuthedUser` keeps working.
 
 ## Don’t

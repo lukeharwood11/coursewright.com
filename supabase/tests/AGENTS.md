@@ -16,4 +16,4 @@ pgTAP tests for schema and RLS. Run with `supabase test db` (local).
 ## Don’t
 
 - Grant extra privileges in tests that production migrations do not.
-- Skip the parent access gate (`Course.status = active` + enrollment + link).
+- Skip the parent access gate (`Course.status = active` + `visibility = published` + enrollment + link).

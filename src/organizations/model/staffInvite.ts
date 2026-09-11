@@ -13,12 +13,20 @@ export function isValidInviteEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeInviteEmail(value));
 }
 
-export function staffInvitePath(token: string): string {
+export function invitePath(token: string): string {
   return `/invite/${token}`;
 }
 
+export function inviteUrl(origin: string, token: string): string {
+  return `${origin}${invitePath(token)}`;
+}
+
+export function staffInvitePath(token: string): string {
+  return invitePath(token);
+}
+
 export function staffInviteUrl(origin: string, token: string): string {
-  return `${origin}${staffInvitePath(token)}`;
+  return inviteUrl(origin, token);
 }
 
 export function validateCreateStaffInvite(input: {
@@ -51,7 +59,19 @@ export function validateCreateStaffInvite(input: {
   return { ok: true, value: { email, role } };
 }
 
-export function staffInviteWriteErrorMessage(error: {
+export function validateCreateParentInvite(input: {
+  email: string;
+}):
+  | { ok: true; value: { email: string } }
+  | { ok: false; error: string } {
+  const email = normalizeInviteEmail(input.email);
+  if (!isValidInviteEmail(email)) {
+    return { ok: false, error: "Enter a valid parent email first." };
+  }
+  return { ok: true, value: { email } };
+}
+
+export function inviteWriteErrorMessage(error: {
   code?: string;
   message: string;
 }): string {
@@ -62,9 +82,16 @@ export function staffInviteWriteErrorMessage(error: {
     error.code === "42501" ||
     error.message.toLowerCase().includes("row-level security")
   ) {
-    return "You don’t have permission to invite collaborators.";
+    return "You don’t have permission to create that invite.";
   }
   return error.message;
+}
+
+export function staffInviteWriteErrorMessage(error: {
+  code?: string;
+  message: string;
+}): string {
+  return inviteWriteErrorMessage(error);
 }
 
 const STAFF_ROLE_ORDER: Record<StaffInviteRole, number> = {

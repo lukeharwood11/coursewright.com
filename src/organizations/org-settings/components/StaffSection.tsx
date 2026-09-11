@@ -41,8 +41,8 @@ export function StaffSection({
   roles: StaffInviteRole[];
   formError: string | null;
   inviting: boolean;
-  copiedId: string | null;
-  cancelingId: string | null;
+  copiedId: number | null;
+  cancelingId: number | null;
   lastInviteUrl: string | null;
   lastInvite: PendingStaffInvite | null;
   onEmailChange: (value: string) => void;

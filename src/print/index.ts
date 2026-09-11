@@ -1,2 +1,2 @@
-/** Domain public API — stub. Print layouts land here. See AGENTS.md. */
-export {};
+export { PrintPage } from "./print/PrintPage";
+export { printThisWeekPath } from "./model/paths";

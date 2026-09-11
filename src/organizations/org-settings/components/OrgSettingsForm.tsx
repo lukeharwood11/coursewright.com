@@ -50,7 +50,7 @@ export function OrgSettingsForm({
     <form
       id={ORG_SETTINGS_FORM_ID}
       onSubmit={onSubmit}
-      className="grid items-start gap-4 lg:grid-cols-2"
+      className="grid gap-4 lg:grid-cols-2"
     >
       <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
         <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Organization</h2>
@@ -69,20 +69,38 @@ export function OrgSettingsForm({
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="text-[13px] font-bold text-[var(--ink-soft)]">Permalink</span>
-            <Input
-              className="w-full"
-              value={slug}
-              onChange={(event) => onSlugChange(event.target.value)}
-              disabled={!canEdit}
-              autoComplete="off"
-              spellCheck={false}
-            />
-            <span className="text-[12px] text-[var(--ink-faint)]">
-              Used in your link: coursewright.com/my/{slug || "…"}
+            <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+              Organization type
             </span>
+            <select
+              className={controlClass}
+              value={orgType}
+              onChange={(event) => onOrgTypeChange(event.target.value)}
+              disabled={!canEdit}
+            >
+              {ORG_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {orgTypeLabel(type)}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
+
+        <label className="mt-3 flex flex-col gap-1">
+          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Permalink</span>
+          <Input
+            className="w-full"
+            value={slug}
+            onChange={(event) => onSlugChange(event.target.value)}
+            disabled={!canEdit}
+            autoComplete="off"
+            spellCheck={false}
+          />
+          <span className="text-[12px] text-[var(--ink-faint)]">
+            Used in your link: coursewright.com/my/{slug || "…"}
+          </span>
+        </label>
 
         {slugChanged ? (
           <div className="mt-3 rounded-[10px] border border-[var(--amber)] bg-[var(--amber-tint)] p-3">
@@ -102,22 +120,6 @@ export function OrgSettingsForm({
             </label>
           </div>
         ) : null}
-
-        <label className="mt-3 flex flex-col gap-1">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Organization type</span>
-          <select
-            className={controlClass}
-            value={orgType}
-            onChange={(event) => onOrgTypeChange(event.target.value)}
-            disabled={!canEdit}
-          >
-            {ORG_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {orgTypeLabel(type)}
-              </option>
-            ))}
-          </select>
-        </label>
       </section>
 
       <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">

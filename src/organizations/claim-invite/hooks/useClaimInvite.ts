@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import {
-  claimStaffInvite,
-  getStaffInvite,
+  claimInvite,
+  getInvite,
   staffInviteQueryKeys,
 } from "@/organizations/databridge/staffInvites";
 
@@ -16,12 +16,12 @@ export function useClaimInvite(token: string | undefined) {
 
   const inviteQuery = useQuery({
     queryKey: staffInviteQueryKeys.byToken(trimmed),
-    queryFn: () => getStaffInvite(trimmed),
+    queryFn: () => getInvite(trimmed),
     enabled: Boolean(trimmed),
   });
 
   const claimMutation = useMutation({
-    mutationFn: () => claimStaffInvite(trimmed),
+    mutationFn: () => claimInvite(trimmed),
     onSuccess: async (slug) => {
       await queryClient.invalidateQueries({
         queryKey: orgQueryKeys.memberships(user.id),

@@ -11,8 +11,8 @@ export function PendingInviteList({
   onCancel,
 }: {
   invites: PendingStaffInvite[];
-  copiedId: string | null;
-  cancelingId: string | null;
+  copiedId: number | null;
+  cancelingId: number | null;
   onCopy: (invite: PendingStaffInvite) => void;
   onCancel: (invite: PendingStaffInvite) => void;
 }) {

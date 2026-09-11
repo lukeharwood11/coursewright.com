@@ -18,6 +18,7 @@ export type NavSection = {
 
 export type NavLists = {
   courses: Array<{ id: string; title: string }>;
+  classes: Array<{ id: string; title: string }>;
   families: Array<{ id: string; label: string }>;
 };
 
@@ -54,7 +55,13 @@ export function buildStaffNav(orgSlug: string, lists: NavLists): NavSection[] {
       label: "Roster",
       href: `${base}/roster`,
       match: "prefix",
-      children: [],
+      children: childLinks(
+        lists.classes.map((classGroup) => ({
+          id: classGroup.id,
+          label: classGroup.title,
+        })),
+        (id) => `${base}/classes/${id}`,
+      ),
     },
     {
       id: "families",
@@ -126,7 +133,7 @@ export function collapsedHref(section: NavSection): string | null {
 }
 
 export function buildAccountNav(
-  organizations: Array<{ id: string; name: string; slug: string }>,
+  organizations: Array<{ id: number; name: string; slug: string }>,
 ): NavSection[] {
   return [
     {
@@ -135,7 +142,7 @@ export function buildAccountNav(
       href: "/my",
       match: "exact",
       children: organizations.slice(0, CHILD_LIMIT).map((organization) => ({
-        id: organization.id,
+        id: String(organization.id),
         label: organization.name,
         href: `/my/${organization.slug}`,
         match: "exact",

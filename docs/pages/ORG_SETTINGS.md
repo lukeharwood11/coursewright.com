@@ -18,8 +18,9 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 - Instructors see the same fields, disabled.
 - Parents are told they cannot change settings.
 - Save org name/metadata; changing **permalink slug** shows a warning that existing links break (no auto-redirect in P0) and requires an explicit confirmation.
+- **Save** and **Cancel** appear only while the form differs from the saved organization. Cancel discards the draft and restores the saved values.
 - Set org **type** (co-op / micro-school) and **grade scheme** (K–12 / custom labels).
-- Staff section on this page: invite owner / admin / instructor by email, **copy a claim link** (v0 does not send email), list pending invites. Change roles / remove staff still TBD; block remove/demote of last owner or admin.
+- Staff section on this page: invite owner / admin / instructor by email, **copy a claim link** (v0 does not send email), list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). Change roles / remove staff still TBD; block remove/demote of last owner or admin.
 - Billing section is P1 placeholder, **shown only to owners**.
 
 ## Data shown
@@ -60,7 +61,8 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 
 ## Primary actions
 
-- Save org settings / slug (with warning)
+- Save org settings / slug (with warning) — only while there are unsaved changes
+- Cancel — discard unsaved changes
 - Set grade scheme
 - Invite staff and copy the claim link; cancel a pending invite
 - Change role / remove staff (TBD)
@@ -69,7 +71,7 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 
 - [ORG_HOME](./ORG_HOME.md) — back to the organization
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — cross-org account settings (distinct from this page)
-- [INVITE_CLAIM](./INVITE_CLAIM.md) — copied staff invite link (recipient)
+- [INVITE_CLAIM](./INVITE_CLAIM.md) — copied staff invite link (recipient); parent invites use the same URL from roster
 - [LOGIN](./LOGIN.md) — after sign-out (if sign-out lives in chrome)
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 

@@ -27,12 +27,14 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) | `/my/<org-slug>/templates/<template_id>/settings` | **P1** |
 | [UNIT](./UNIT.md) | `/my/<org-slug>/courses/…/units/<unit_id>` (template tree **P1**) |
 | [MATERIAL](./MATERIAL.md) | view `…/materials/<id>`; edit `…/materials/<id>/edit` (top-level or under unit) |
+| [PRINT](./PRINT.md) | `…/materials/<id>/print`; `…/units/<id>/print`; `/my/<org-slug>/print-this-week` |
 | [ORG_ROSTER](./ORG_ROSTER.md) | `/my/<org-slug>/roster` |
 | [STUDENT_PROFILE](./STUDENT_PROFILE.md) | `/my/<org-slug>/roster/<student_id>` |
+| [CLASS](./CLASS.md) | `/my/<org-slug>/classes/<class_id>` |
 | [FAMILIES](./FAMILIES.md) | `/my/<org-slug>/families` |
 | [FAMILY](./FAMILY.md) | `/my/<org-slug>/families/<family_id>` |
 
-**No page file yet** (paths TBD in [URLS.md](../URLS.md)): resource share entry, dedicated print routes, search route. Print / share / search UX is still required on the locked pages above.
+**No page file yet** (paths TBD in [URLS.md](../URLS.md)): resource share entry, search route. Share / search UX is still required on the locked pages above; print routes are locked — see [PRINT](./PRINT.md).
 
 ---
 
@@ -46,19 +48,19 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Org permalink slug | [ORG_PICKER](./ORG_PICKER.md), [ORG_SETTINGS](./ORG_SETTINGS.md) |
 | Admin invites / staff roles / last-admin guard | [ORG_SETTINGS](./ORG_SETTINGS.md), [INVITE_CLAIM](./INVITE_CLAIM.md), [ORG_PICKER](./ORG_PICKER.md) (pending requests) |
 | Org grade scheme | [ORG_SETTINGS](./ORG_SETTINGS.md) |
-| Authentication (email + Google) | [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md) |
+| Authentication (email password / magic link + Google) | [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md) |
 | RBAC (owner / admin / instructor / parent) | Role splits on [ORG_HOME](./ORG_HOME.md) + gated pages |
-| Student profiles | [ORG_ROSTER](./ORG_ROSTER.md), [STUDENT_PROFILE](./STUDENT_PROFILE.md), [COURSE_ROSTER](./COURSE_ROSTER.md) |
-| Roster / enrollments / parent linkage & invites | [ORG_ROSTER](./ORG_ROSTER.md), [COURSE_ROSTER](./COURSE_ROSTER.md), [STUDENT_PROFILE](./STUDENT_PROFILE.md) |
+| Student profiles | [ORG_ROSTER](./ORG_ROSTER.md), [STUDENT_PROFILE](./STUDENT_PROFILE.md), [COURSE_ROSTER](./COURSE_ROSTER.md), [CLASS](./CLASS.md) |
+| Roster / enrollments / parent linkage & invites | [ORG_ROSTER](./ORG_ROSTER.md), [COURSE_ROSTER](./COURSE_ROSTER.md), [STUDENT_PROFILE](./STUDENT_PROFILE.md), [CLASS](./CLASS.md) |
 | Families / parent directory | [FAMILIES](./FAMILIES.md), [FAMILY](./FAMILY.md) |
 | Course builder — courses only; create from scratch or from another course | [COURSE_LIST](./COURSE_LIST.md), [COURSE](./COURSE.md), [COURSE_SETTINGS](./COURSE_SETTINGS.md) |
 | Units + dating (optional); top-level materials allowed | [COURSE](./COURSE.md), [UNIT](./UNIT.md) |
 | Rich materials — Add: page / link / file; pages use blocks | [MATERIAL](./MATERIAL.md) |
-| Classes (student groups) | TBD page until URL locked — roster-adjacent |
+| Classes (student groups) | [ORG_ROSTER](./ORG_ROSTER.md) (list/create), [CLASS](./CLASS.md) |
 | File / content versioning, soft deletes | [MATERIAL](./MATERIAL.md), [COURSE](./COURSE.md) |
 | Homework = dated materials; Important now | [ORG_HOME](./ORG_HOME.md), [MATERIAL](./MATERIAL.md) |
-| Parent dashboard / access rules | [ORG_HOME](./ORG_HOME.md); claim via [LOGIN](./LOGIN.md) / [SIGNUP](./SIGNUP.md) |
-| Print (material / unit / this week) | [MATERIAL](./MATERIAL.md), [UNIT](./UNIT.md), [ORG_HOME](./ORG_HOME.md) |
+| Parent dashboard / access rules | [ORG_HOME](./ORG_HOME.md); claim via [INVITE_CLAIM](./INVITE_CLAIM.md) / [LOGIN](./LOGIN.md) / [SIGNUP](./SIGNUP.md) |
+| Print (material / unit / this week) | [PRINT](./PRINT.md); entry from [MATERIAL](./MATERIAL.md), [UNIT](./UNIT.md), [ORG_HOME](./ORG_HOME.md) |
 | Resource links / share with parents | [MATERIAL](./MATERIAL.md) (entry URL TBD) |
 | Advanced search | Product chrome — [ORG_HOME](./ORG_HOME.md) + org chrome; route TBD |
 | Marketing / trust | [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [CONSTRUCTION](./CONSTRUCTION.md) (footer legal/contact until copy exists; [PRIVACY](./PRIVACY.md) outline) |
@@ -68,8 +70,6 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Concern | Status |
 |---------|--------|
 | Resource share entry URL | Path TBD — recipients land on [MATERIAL](./MATERIAL.md) after login |
-| Dedicated print routes | Path TBD — print actions still on material / unit / this week |
-| Class list / detail URLs | TBD — Class is P0 concept; no page file until path locked |
 | Forms content kind | FEATURES in design — not P0 on [MATERIAL](./MATERIAL.md) |
 | Course templates + ACL / promote / sync | **P1** — [TEMPLATE_LIST](./TEMPLATE_LIST.md), [TEMPLATE](./TEMPLATE.md), [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) |
 | Quiz online take + autograde | **P1** |

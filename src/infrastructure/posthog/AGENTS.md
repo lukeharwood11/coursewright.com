@@ -5,6 +5,7 @@ PostHog browser analytics client.
 ## Scope
 
 - `client.ts` — init + re-export of the SDK
+- Exception autocapture (`capture_exceptions`) plus manual `captureException` from the app error boundary
 
 ## Rules
 

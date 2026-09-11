@@ -9,6 +9,7 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 - **Permalink `slug`** — generated on create; changing it must warn that existing links break
 - Grade scheme (K–12 / Custom) and org type (co-op / micro-school)
 - Admin invites (email, copyable claim link; v0 does not send email)
+- Parent invites use the **same** `/invite/<token>` claim path (`role = parent`); create UI lives in `roster/`
 - **Staff management** — change admin ↔ instructor; remove admins/instructors (not the last owner or admin)
 - Not: course builder, roster details (those are sibling domains)
 

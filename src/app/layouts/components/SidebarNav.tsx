@@ -83,7 +83,8 @@ function SidebarSection({
   const icons = sectionIcons[section.id] ?? sectionIcons.home;
   const sectionActive =
     navItemIsActive(pathname, section) ||
-    section.children.some((child) => navItemIsActive(pathname, child));
+    section.children.some((child) => navItemIsActive(pathname, child)) ||
+    (section.id === "roster" && /\/classes\//.test(pathname));
   const href = collapsed ? collapsedHref(section) : section.href;
   const showChildren = !collapsed && section.children.length > 0;
   const Icon = sectionActive ? icons.solid : icons.outline;

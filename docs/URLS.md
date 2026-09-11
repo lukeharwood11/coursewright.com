@@ -39,9 +39,9 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 
 | Page | URL | Notes |
 |------|-----|-------|
-| [LOGIN](./pages/LOGIN.md) | `/login` | Email + Google |
-| [SIGNUP](./pages/SIGNUP.md) | `/signup` | Email + Google |
-| [INVITE_CLAIM](./pages/INVITE_CLAIM.md) | `/invite/<token>` | Staff invite (owner / admin / instructor). Sign in first, then accept. **v0: no email send** — copy the link |
+| [LOGIN](./pages/LOGIN.md) | `/login` | Email + password, magic link, Google |
+| [SIGNUP](./pages/SIGNUP.md) | `/signup` | Email OTP / magic link + Google (no password sign-up) |
+| [INVITE_CLAIM](./pages/INVITE_CLAIM.md) | `/invite/<token>` | Parent or staff invite (`parent` / owner / admin / instructor). Sign in first, then accept. **v0: no email send** — copy the link |
 | Auth callback | <!-- TBD — may be Supabase-hosted --> | |
 
 ---
@@ -114,12 +114,28 @@ Materials may be **top-level** (no unit) or nested under a unit.
 
 ---
 
+## Print (P0)
+
+Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then **Download** or **Print**. Not named Export. **Print whole course** is out of scope.
+
+| Page | URL | Notes |
+|------|-----|-------|
+| [PRINT](./pages/PRINT.md) (material, top-level) | `/my/<org-slug>/courses/<course_id>/materials/<material_id>/print` | Same on template tree (**P1**) |
+| [PRINT](./pages/PRINT.md) (material, in unit) | `…/units/<unit_id>/materials/<material_id>/print` | |
+| [PRINT](./pages/PRINT.md) (unit) | `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print` | Packet in material order |
+| [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Parent dashboard grain; Sun–Sat + important now |
+
+**Do not use** `?print=1` on the source page — print is its own chrome-free screen with a real PDF viewer.
+
+---
+
 ## Roster & families
 
 | Page | URL | Notes |
 |------|-----|-------|
-| [ORG_ROSTER](./pages/ORG_ROSTER.md) | `/my/<org-slug>/roster` | Org student profiles |
+| [ORG_ROSTER](./pages/ORG_ROSTER.md) | `/my/<org-slug>/roster` | Org student profiles + class list |
 | [STUDENT_PROFILE](./pages/STUDENT_PROFILE.md) | `/my/<org-slug>/roster/<student_id>` | |
+| [CLASS](./pages/CLASS.md) | `/my/<org-slug>/classes/<class_id>` | Class roster (student group) |
 | [FAMILIES](./pages/FAMILIES.md) | `/my/<org-slug>/families` | Parent directory |
 | [FAMILY](./pages/FAMILY.md) | `/my/<org-slug>/families/<family_id>` | |
 
@@ -136,15 +152,11 @@ Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / un
 | Concern | Status |
 |---------|--------|
 | Resource share entry URLs | TBD |
-| Print routes (`…/print` vs query) | TBD — print UX still required on material / unit / this week |
 | Search as a route vs overlay | TBD |
-| Class list / detail | TBD — Class ≠ Course; paths not locked |
 
 ---
 
 ## Open questions
 
-1. **Print** — dedicated `/print` child routes vs `?print=1`?
-2. **Share / resource links** — `/s/<token>` or other? Staff invites use `/invite/<token>`.
-3. **Search** — overlay only, or `/my/<org-slug>/search`?
-4. **Class list / detail** — paths not locked (Class ≠ Course)
+1. **Share / resource links** — `/s/<token>` or other? Staff invites use `/invite/<token>`.
+2. **Search** — overlay only, or `/my/<org-slug>/search`?

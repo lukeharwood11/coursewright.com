@@ -214,7 +214,7 @@ select is_empty(
 );
 
 reset role;
-update courses set status = 'active';
+update courses set status = 'active', visibility = 'published';
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '33333333-3333-3333-3333-333333333333', true);

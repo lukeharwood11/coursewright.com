@@ -19,7 +19,7 @@ import {
 } from "@/organizations/model/role";
 import { compareStaffRole, staffInviteUrl, validateCreateStaffInvite } from "@/organizations/model/staffInvite";
 
-export function useOrgStaff(organizationId: string, role: OrgRole | null) {
+export function useOrgStaff(organizationId: number | undefined, role: OrgRole | null) {
   const user = useAuthedUser();
   const queryClient = useQueryClient();
   const canInvite = role ? canInviteStaff(role) : false;
@@ -28,20 +28,20 @@ export function useOrgStaff(organizationId: string, role: OrgRole | null) {
   const [email, setEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<StaffInviteRole>(roles[0] ?? "instructor");
   const [formError, setFormError] = useState<string | null>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [lastInviteId, setLastInviteId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [lastInviteId, setLastInviteId] = useState<number | null>(null);
 
   const selectedRole = roles.includes(inviteRole) ? inviteRole : (roles[0] ?? "instructor");
 
   const staffQuery = useQuery({
-    queryKey: staffInviteQueryKeys.staff(organizationId),
-    queryFn: () => listOrgStaff(organizationId),
+    queryKey: staffInviteQueryKeys.staff(organizationId ?? 0),
+    queryFn: () => listOrgStaff(organizationId!),
     enabled: Boolean(organizationId),
   });
 
   const pendingQuery = useQuery({
-    queryKey: staffInviteQueryKeys.org(organizationId),
-    queryFn: () => listOrgPendingInvites(organizationId),
+    queryKey: staffInviteQueryKeys.org(organizationId ?? 0),
+    queryFn: () => listOrgPendingInvites(organizationId!),
     enabled: Boolean(organizationId) && canInvite,
   });
 
@@ -55,7 +55,7 @@ export function useOrgStaff(organizationId: string, role: OrgRole | null) {
       });
       if (!parsed.ok) throw new Error(parsed.error);
       return createStaffInvite({
-        organizationId,
+        organizationId: organizationId!,
         email: parsed.value.email,
         role: parsed.value.role,
         invitedBy: user.id,
@@ -70,7 +70,7 @@ export function useOrgStaff(organizationId: string, role: OrgRole | null) {
       await navigator.clipboard.writeText(url).catch(() => undefined);
       toast("Invite created. Link copied — send it yourself.");
       await queryClient.invalidateQueries({
-        queryKey: staffInviteQueryKeys.org(organizationId),
+        queryKey: staffInviteQueryKeys.org(organizationId ?? 0),
       });
     },
     onError: (error: Error) => {
@@ -84,7 +84,7 @@ export function useOrgStaff(organizationId: string, role: OrgRole | null) {
       toast("Invite canceled.");
       setLastInviteId(null);
       await queryClient.invalidateQueries({
-        queryKey: staffInviteQueryKeys.org(organizationId),
+        queryKey: staffInviteQueryKeys.org(organizationId ?? 0),
       });
     },
     onError: (error: Error) => {

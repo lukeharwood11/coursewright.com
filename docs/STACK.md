@@ -11,7 +11,7 @@
 | **Database** | **Supabase** (Postgres) | Source of truth; org-scoped multi-tenancy |
 | **CRUD API** | **Supabase PostgREST** from the **frontend** | Default path for reads/writes — as much as possible |
 | **Complex backend** | **Supabase Functions** (Edge Functions) | Operations that must not live in the client |
-| **Auth** | **Supabase Auth** | Sessions / users; **email** + **Sign in with Google** |
+| **Auth** | **Supabase Auth** | Sessions / users; **email** (password or magic link) + **Sign in with Google** |
 | **Google sign-in** | **Google Cloud** (OAuth client) wired into Supabase Auth | Provider for Google login |
 | **File storage** | **Supabase Storage** | Lesson files / material attachments (P0 file sharing) |
 | **Frontend hosting** | **AWS S3** + **CloudFront** | Static React app CDN |
@@ -21,13 +21,14 @@
 | **Migrations** | **`supabase db migrate`** | Schema changes via Supabase CLI migrations |
 | **UI** | **React** + **Tailwind CSS** | Product UI |
 | **Icons** | **Heroicons** (`@heroicons/react`) | UI icons (MIT); notices in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) |
+| **Print PDF** | **`@react-pdf/renderer`** + **pdf-lib** + **qrcode** | React document tree → blob; pdf-lib merges original PDF files; iframe preview |
 | **Bundler** | **Vite** | SPA build → `dist/` → S3 |
 | **Server/async state** | **TanStack Query** | Data fetching / cache against PostgREST |
 | **Client state** | **Zustand** | UI and local app state |
 | **Project docs site** | **VitePress** | Browseable site generated from markdown (`docs/`, `AGENTS.md`, …) |
 | **UI component docs** | **Storybook** | Develop / document `src/ui` (and related) components in isolation |
 | **CI/CD** | **GitHub Actions** | Lint/typecheck/build; deploy SPA and related pipelines |
-| **Product analytics** | **PostHog** | Product usage / funnels; client SDK in the SPA |
+| **Product analytics** | **PostHog** | Product usage / funnels; client exception capture in the SPA |
 | **Billing (P1)** | **Stripe Billing** *(hypothesis)* | Course Wright charges orgs — not P0 |
 
 ---
@@ -37,7 +38,7 @@
 1. **PostgREST-first** — Prefer the Supabase client + RLS for create/read/update/delete. Do not put simple CRUD behind a Function by default.
 2. **Functions for complexity** — Use Supabase Functions when the work needs secrets, multi-step transactions, privileged logic, or rules that should not be enforceable by RLS alone (e.g. **course → course copy**, invite claim flows, versioning/revert edge cases; **P1:** template → course copy/sync, promote).
 3. **RLS is the access gate** — Frontend CRUD assumes Row Level Security encodes org/role rules (admin, instructor, parent). Schema and policies must match [FEATURES.md](./FEATURES.md) / [database/SCHEMA.md](./database/SCHEMA.md). Storage policies follow the same org/role intent for file access.
-4. **Auth** — Supabase Auth owns identity. Login screen: **email** and **Sign in with Google** (Google Cloud OAuth → Supabase). Invite claim uses the same email identity rules as product docs.
+4. **Auth** — Supabase Auth owns identity. Login screen: **email + password**, **email magic link**, and **Sign in with Google** (Google Cloud OAuth → Supabase). Signup is Google or email OTP (no password sign-up). Invite claim uses the same email identity rules as product docs.
 5. **Files** — Uploads go to **Supabase Storage**; `File` rows in Postgres hold metadata / `storage_ref`. Prefer Storage + RLS (or signed URLs via Function when needed) over a separate file host. Playback / versioning / escalation design: [FILE_STORAGE.md](./FILE_STORAGE.md).
 6. **TanStack owns server state** — Queries/mutations against PostgREST (and Function calls). **Zustand** owns ephemeral UI state (modals, draft editors, selection) — not a second source of truth for remote data.
 7. **Frontend deploy** — Build the React app → **S3**; serve via **CloudFront**. **Production:** `coursewright.com`. **Testing:** `justtesting.coursewright.com`. No separate app server for the UI. **AWS resources are managed with Terraform** (`infra/terraform/`).
@@ -47,7 +48,7 @@
 11. **Markdown → docs site** — Hand-written markdown (`docs/`, root + folder `AGENTS.md`, README) is the source; **VitePress** builds a searchable site so developers can explore the project without hunting through the tree.
 12. **UI docs** — **Storybook** for design-system / component exploration (`src/ui`). Not a replacement for product docs in VitePress.
 13. **CI/CD** — **GitHub Actions** owns check and deploy pipelines (`.github/workflows/`). Terraform apply and SPA publish to S3/CloudFront run from Actions once secrets are available (see [HUMAN_NEEDED.md](./HUMAN_NEEDED.md)).
-14. **Analytics** — **PostHog** for product analytics (page views, key actions, funnels). Wire the browser SDK from the SPA; do not invent a second analytics stack. Project keys come from human setup ([HUMAN_NEEDED.md](./HUMAN_NEEDED.md)). Respect auth/privacy: identify only after login when needed; no PII beyond what product docs allow.
+14. **Analytics** — **PostHog** for product analytics (page views, key actions, funnels) and **error tracking** (exception autocapture + catch-all boundary reports). Wire the browser SDK from the SPA; do not invent a second analytics stack. Project keys come from human setup ([HUMAN_NEEDED.md](./HUMAN_NEEDED.md)). Respect auth/privacy: identify only after login when needed; no PII beyond what product docs allow.
 15. **Search is a first-class data concern** — Schema, indexes, and material metadata must support **cross-facet search** (P0 in [FEATURES.md](./FEATURES.md)). Prefer Postgres full-text / structured filters via PostgREST when they meet the bar; introduce a dedicated search service only if FTS + facets cannot. Do not treat search as a late UI filter over unindexed lists.
 
 ---
@@ -73,7 +74,7 @@ Exact Function list is implementation detail; the rule is **simple = PostgREST, 
 
 | Method | How |
 |--------|-----|
-| **Email** | Supabase Auth email sign-up / sign-in |
+| **Email** | Supabase Auth email sign-up (OTP) / sign-in (password or magic link) |
 | **Google** | Google Cloud OAuth client → Supabase Auth Google provider |
 
 Product rule unchanged: parents use the **same email** as their invite (see [FEATURES.md](./FEATURES.md)).
@@ -161,8 +162,8 @@ Deploy credentials and env secrets stay in GitHub Actions secrets / environments
 
 | Piece | Role |
 |-------|------|
-| **PostHog** | Product analytics — usage, funnels, feature adoption |
-| **SPA client** | PostHog JS SDK (env: project key + host) |
+| **PostHog** | Product analytics — usage, funnels, feature adoption; client exception capture |
+| **SPA client** | PostHog JS SDK (env: project key + host); `capture_exceptions` + boundary `captureException` |
 | **Human setup** | Create PostHog project(s); keys in env / CI — [HUMAN_NEEDED.md](./HUMAN_NEEDED.md) |
 
 <!-- TBD: event taxonomy, whether session replay is on, separate projects for testing vs production -->

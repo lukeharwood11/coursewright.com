@@ -11,9 +11,10 @@ import {
 } from "@/organizations/model/updateOrganization";
 import { requireSupabase } from "./client";
 import type { OrganizationSummary } from "./memberships";
+export { orgQueryKeys } from "./memberships";
 
 export type OrganizationDetails = {
-  id: string;
+  id: number;
   name: string;
   slug: string;
   orgType: OrgType;
@@ -22,7 +23,7 @@ export type OrganizationDetails = {
 };
 
 type OrganizationRow = {
-  id: string;
+  id: number;
   name: string;
   slug: string;
   org_type: string;
@@ -82,7 +83,7 @@ export async function createOrganization(
 }
 
 export async function getOrganization(
-  id: string,
+  id: number,
 ): Promise<OrganizationDetails | null> {
   const db = requireSupabase();
   const { data, error } = await db
@@ -97,7 +98,7 @@ export async function getOrganization(
 }
 
 export async function updateOrganization(
-  id: string,
+  id: number,
   input: ValidatedUpdateOrganization,
 ): Promise<OrganizationDetails> {
   const db = requireSupabase();

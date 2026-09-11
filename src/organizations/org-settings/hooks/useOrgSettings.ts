@@ -1,5 +1,5 @@
 import type { FormEvent } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -18,7 +18,10 @@ import {
   canManageOrgSettings,
 } from "@/organizations/model/role";
 import { slugify } from "@/organizations/model/slug";
-import { validateUpdateOrganization } from "@/organizations/model/updateOrganization";
+import {
+  orgSettingsHaveChanges,
+  validateUpdateOrganization,
+} from "@/organizations/model/updateOrganization";
 
 export function useOrgSettings(orgSlug: string | undefined) {
   const user = useAuthedUser();
@@ -32,11 +35,11 @@ export function useOrgSettings(orgSlug: string | undefined) {
   });
 
   const membership = membershipQuery.data ?? null;
-  const organizationId = membership?.organization.id ?? "";
+  const organizationId = membership?.organization.id;
 
   const organizationQuery = useQuery({
-    queryKey: orgQueryKeys.detail(organizationId),
-    queryFn: () => getOrganization(organizationId),
+    queryKey: orgQueryKeys.detail(organizationId ?? 0),
+    queryFn: () => getOrganization(organizationId!),
     enabled: Boolean(organizationId),
   });
 
@@ -53,7 +56,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
   const [confirmPermalinkChange, setConfirmPermalinkChange] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const resetForm = useCallback(() => {
     if (!organization) return;
     setName(organization.name);
     setSlug(organization.slug);
@@ -63,6 +66,10 @@ export function useOrgSettings(orgSlug: string | undefined) {
     setConfirmPermalinkChange(false);
     setFormError(null);
   }, [organization]);
+
+  useEffect(() => {
+    resetForm();
+  }, [resetForm]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -120,14 +127,24 @@ export function useOrgSettings(orgSlug: string | undefined) {
     setFormError(null);
   }
 
+  const slugChanged = Boolean(organization && slug !== organization.slug);
+  const hasChanges = organization
+    ? orgSettingsHaveChanges(
+        { name, slug, orgType, gradeScheme, gradeLabelsText },
+        organization,
+      )
+    : false;
+
   function onSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!canEdit) return;
+    if (!canEdit || !hasChanges) return;
     setFormError(null);
     saveMutation.mutate();
   }
 
-  const slugChanged = Boolean(organization && slug !== organization.slug);
+  function onCancel() {
+    resetForm();
+  }
 
   return {
     loading: membershipQuery.isLoading || organizationQuery.isLoading,
@@ -150,6 +167,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
     gradeLabelsText,
     confirmPermalinkChange,
     slugChanged,
+    hasChanges,
     formError,
     saving: saveMutation.isPending,
     onNameChange,
@@ -171,5 +189,6 @@ export function useOrgSettings(orgSlug: string | undefined) {
       setFormError(null);
     },
     onSubmit,
+    onCancel,
   };
 }

@@ -5,18 +5,20 @@
 
 ## Audience
 
-Someone invited as org **owner**, **admin**, or **instructor**. They must have (or create) an account on the **same email** as the invite.
+Someone invited as org **owner**, **admin**, **instructor**, or **parent**. They must have (or create) an account on the **same email** as the invite.
 
 ## Purpose
 
-Accept a staff invite from a copied link. **v0 does not send email** — an owner or admin shares the link themselves.
+Accept an email-claim invite from a copied link. **v0 does not send email** — staff share the link themselves. Parent and staff use the **same** token URL; role is on the invite.
 
 
 ## Behavior
 
 - Unauthenticated visitors are sent to [LOGIN](./LOGIN.md) (with a path back here). New users can [SIGNUP](./SIGNUP.md) first. Invite-aware copy: use the invited email.
-- After sign-in, show the organization name and the role they were invited as.
-- **Accept** claims the seat (same email as the invite) and opens that org’s home.
+- After sign-in, show the organization name and the role they were invited as. Parent invites also show the student name.
+- **Accept** claims the invite (same email) and opens that org’s home.
+  - Staff: creates the staff membership.
+  - Parent: creates parent membership (if needed) and links the parent to the student. **Does not** open course materials by itself — enrollment in an active published course still gates content.
 - If the signed-in email does not match the invite, explain they need the invited email — do not claim.
 - Invalid or unknown token: plain “invite not found.”
 - Already accepted, and this user is already in the org: offer to open the organization.
@@ -25,14 +27,15 @@ Accept a staff invite from a copied link. **v0 does not send email** — an owne
 ## Data shown
 
 - Organization **name**
-- Invited **role** (owner / admin / instructor)
+- Invited **role** (owner / admin / instructor / parent)
+- Student **name** when the invite is for a parent
 - Invited **email** when the signed-in account does not match (so they know which address to use)
 - Error / already-accepted state
 
 ## Contents
 
 - Course Wright wordmark
-- Short explanation: you were invited to help run this organization
+- Short explanation: help run this organization (staff) or view materials for a student (parent)
 - Role badge
 - **Accept invite** (primary)
 - Link back to organizations if they want to wait
@@ -52,4 +55,4 @@ Accept a staff invite from a copied link. **v0 does not send email** — an owne
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Admin invites (v0: copyable link, no email send). Parent invites are a separate feature.
+[FEATURES.md](../FEATURES.md) — Admin invites and parent invites (v0: copyable link, no email send). One token model; role is payload.

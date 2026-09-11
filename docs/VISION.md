@@ -87,7 +87,7 @@ Course Wright is an intuitive LMS for **homeschool co-ops and micro-schools** �
 - **Advanced search** — native, cross-facet find (“where is this resource?”)
 - **Families / parent directory** — org-scoped households from roster; parents belong to a family profile (names + TBD fields)
 - **Extreme shareability** — print, resource links, files; **create → print works with an empty roster**
-- **Print** — one-tap print of a material, a unit packet, or this week's work (browser print / Save as PDF)
+- **Print** — one-tap print of a material, a unit packet, or this week's work (generated PDF preview → Download / Print)
 - **Parent invites** — email-based; **account required** in P0 to view (magic links later)
 - **Parent org access** — gated on student profile enrolled in a course with `status = active`; parent profile stays **active** if enrollment ends (P0)
 - **Parent dashboard** — this **Sunday–Saturday** week + important now

@@ -15,7 +15,7 @@ export function OrgSettingsPage() {
   const { orgSlug } = useParams();
   const shell = useOrgShell();
   const settings = useOrgSettings(orgSlug);
-  const staff = useOrgStaff(settings.organization?.id ?? "", settings.role);
+  const staff = useOrgStaff(settings.organization?.id, settings.role);
 
   useEffect(() => {
     const name = shell.organization.name;
@@ -83,14 +83,24 @@ export function OrgSettingsPage() {
               : "Only owners and admins can change these settings."}
           </p>
         </div>
-        {settings.canEdit ? (
-          <Button
-            type="submit"
-            form={ORG_SETTINGS_FORM_ID}
-            disabled={settings.saving}
-          >
-            {settings.saving ? "Saving…" : "Save"}
-          </Button>
+        {settings.canEdit && settings.hasChanges ? (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={settings.onCancel}
+              disabled={settings.saving}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form={ORG_SETTINGS_FORM_ID}
+              disabled={settings.saving}
+            >
+              {settings.saving ? "Saving…" : "Save"}
+            </Button>
+          </div>
         ) : null}
       </div>
 

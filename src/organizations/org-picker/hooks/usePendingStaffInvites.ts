@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import {
-  claimStaffInvite,
-  listMyPendingStaffInvites,
+  claimInvite,
+  listMyPendingInvites,
   staffInviteQueryKeys,
-  type PendingStaffInvite,
+  type PendingOrgInvite,
 } from "@/organizations/databridge/staffInvites";
 
 export function usePendingStaffInvites() {
@@ -16,11 +16,11 @@ export function usePendingStaffInvites() {
 
   const invitesQuery = useQuery({
     queryKey: staffInviteQueryKeys.mine(user.id),
-    queryFn: () => listMyPendingStaffInvites(user.email ?? ""),
+    queryFn: () => listMyPendingInvites(user.email ?? ""),
   });
 
   const acceptMutation = useMutation({
-    mutationFn: (invite: PendingStaffInvite) => claimStaffInvite(invite.token),
+    mutationFn: (invite: PendingOrgInvite) => claimInvite(invite.token),
     onSuccess: async (slug) => {
       await queryClient.invalidateQueries({
         queryKey: orgQueryKeys.memberships(user.id),
@@ -40,6 +40,6 @@ export function usePendingStaffInvites() {
       ? (acceptMutation.variables?.id ?? null)
       : null,
     acceptError: acceptMutation.error ? acceptMutation.error.message : null,
-    onAccept: (invite: PendingStaffInvite) => acceptMutation.mutate(invite),
+    onAccept: (invite: PendingOrgInvite) => acceptMutation.mutate(invite),
   };
 }

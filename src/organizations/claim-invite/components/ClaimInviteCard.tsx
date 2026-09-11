@@ -3,7 +3,7 @@ import { Badge } from "@/ui/Badge";
 import { Button } from "@/ui/Button";
 import { Wordmark } from "@/ui/Wordmark";
 import { roleBadgeVariant, roleLabel } from "@/organizations/model/role";
-import type { StaffInvitePreview } from "@/organizations/databridge/staffInvites";
+import type { InvitePreview } from "@/organizations/databridge/staffInvites";
 
 export function ClaimInviteCard({
   loading,
@@ -20,7 +20,7 @@ export function ClaimInviteCard({
   loading: boolean;
   loadError: string | null;
   notFound: boolean;
-  invite: StaffInvitePreview | null;
+  invite: InvitePreview | null;
   alreadyAccepted: boolean;
   canAccept: boolean;
   claiming: boolean;
@@ -28,6 +28,8 @@ export function ClaimInviteCard({
   onAccept: () => void;
   onOpenOrg: () => void;
 }) {
+  const isParent = invite?.role === "parent";
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--paper)] px-4 py-12">
       <div
@@ -44,7 +46,9 @@ export function ClaimInviteCard({
           Organization invite
         </h1>
         <p className="mb-5 text-center text-[13.5px] text-[var(--ink-soft)]">
-          You were invited to help run an organization.
+          {isParent
+            ? "You were invited to view course materials for a student."
+            : "You were invited to help run an organization."}
         </p>
 
         {loading ? (
@@ -59,8 +63,7 @@ export function ClaimInviteCard({
 
         {notFound ? (
           <p className="text-center text-[14px] leading-relaxed text-[var(--ink-soft)]">
-            This invite is missing or no longer valid. Ask an owner or admin for a
-            new link.
+            This invite is missing or no longer valid. Ask for a new link.
           </p>
         ) : null}
 
@@ -69,6 +72,11 @@ export function ClaimInviteCard({
             <p className="text-[15.5px] font-extrabold text-[var(--ink)]">
               {invite.organizationName}
             </p>
+            {isParent && invite.studentName ? (
+              <p className="mt-1 text-[13.5px] text-[var(--ink-soft)]">
+                For {invite.studentName}
+              </p>
+            ) : null}
             <p className="mt-2">
               <Badge variant={roleBadgeVariant(invite.role)}>{roleLabel(invite.role)}</Badge>
             </p>
@@ -105,22 +113,16 @@ export function ClaimInviteCard({
               Open {invite.organizationName}
             </Button>
           ) : null}
-          <ButtonLinkLike />
+          <p className="text-center text-[13px]">
+            <Link
+              to="/my"
+              className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+            >
+              Back to organizations
+            </Link>
+          </p>
         </div>
       </div>
     </main>
-  );
-}
-
-function ButtonLinkLike() {
-  return (
-    <p className="text-center text-[13px]">
-      <Link
-        to="/my"
-        className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-      >
-        Back to organizations
-      </Link>
-    </p>
   );
 }

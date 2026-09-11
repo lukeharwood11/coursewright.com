@@ -12,9 +12,9 @@ Browser Supabase client (anon key) and Storage helpers.
 
 - Anon key only in the SPA; never service role.
 - Prefer RLS-friendly patterns; privileged work → Edge Functions.
-- Auth session via this client; Google + email per [STACK.md](../../../docs/STACK.md).
+- Auth session via this client; Google + email (password or magic link) per [STACK.md](../../../docs/STACK.md).
 
 ## Don’t
 
 - Embed multi-step course copy (or **P1** template copy) here — that’s a Function.
-- Commit secrets beyond public anon URL/key patterns in `.env.example`.
+- Commit secrets beyond public anon URL/key patterns (those belong in `.env.development`).

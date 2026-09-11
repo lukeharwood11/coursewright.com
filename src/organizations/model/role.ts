@@ -35,6 +35,11 @@ export function canInviteStaff(role: OrgRole): boolean {
   return role === "owner" || role === "admin";
 }
 
+/** Owners, admins, and instructors invite parents. */
+export function canInviteParent(role: OrgRole): boolean {
+  return isStaffRole(role);
+}
+
 export function parseStaffInviteRole(value: string): StaffInviteRole | null {
   if (value === "owner" || value === "admin" || value === "instructor") {
     return value;

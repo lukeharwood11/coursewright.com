@@ -16,7 +16,7 @@ Choose an organization or create a new one. Cross-org entry before `<org-slug>` 
 
 - Requires signed-in user.
 - Lists orgs the user belongs to; selecting one navigates to that org’s home.
-- **Pending staff invites** for this account’s email (owner / admin / instructor) show as requests to accept — same claim as [INVITE_CLAIM](./INVITE_CLAIM.md). **v0: no email send.**
+- **Pending invites** for this account’s email (staff or parent) show as requests to accept — same claim as [INVITE_CLAIM](./INVITE_CLAIM.md). **v0: no email send.**
 - Create organization: capture name, generate unique permalink slug, set creator as first **owner**, then open new org home.
 - Empty state pushes “create your first org” (roster not required to get value later). Pending invites still appear when the user has requests but no memberships yet.
 
@@ -31,7 +31,7 @@ Choose an organization or create a new one. Cross-org entry before `<org-slug>` 
 ## Contents
 
 - List of orgs the user belongs to (admin, instructor, and/or parent memberships)
-- **Invites** — pending staff requests for this email; **Accept** claims the seat
+- **Invites** — pending requests for this email; **Accept** claims the seat (staff) or parent membership
 - Create organization — name + permalink slug generated on create; creator becomes **first owner**
 - Collapsible **account sidebar**: Organizations (nested org names when present) and Account → [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
 - Empty state: one clear path to create the first org (create → print does not require a roster)
@@ -39,7 +39,7 @@ Choose an organization or create a new one. Cross-org entry before `<org-slug>` 
 ## Primary actions
 
 - Open org → [ORG_HOME](./ORG_HOME.md) `/my/<org-slug>`
-- Accept a pending staff invite → [ORG_HOME](./ORG_HOME.md)
+- Accept a pending invite → [ORG_HOME](./ORG_HOME.md)
 - Create organization
 - Account settings
 

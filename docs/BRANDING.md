@@ -146,10 +146,16 @@ Other drafts kept for reference (not in use):
 | Material date | **Scheduled date** | optional; wins over unit dates for "this week" |
 | Calendar week | **Sunday–Saturday** | parent "this week" |
 | Link to one material | **Resource link** | deep link; login required in P0 |
-| Print a material | **Print** | not Export, not Download packet |
-| Print a unit as one packet | **Print unit** | browser print / Save as PDF |
+| Print materials | **Print** | not Export; preview is a generated PDF |
+| Print preview routes | `…/print`, `/print-this-week` | not `/export`, not `?print=1` |
+| Save the generated file | **Download** | on the print screen only — the `.pdf` |
+| Print a unit as one packet | **Print unit** | generated PDF packet |
 | Print this week's work | **Print this week** | parent dashboard; Sunday–Saturday |
 | Course dates | **Start date** / **End date** | optional offering window |
+| Course description | **Description** | short stable blurb for the offering — not the P1 **Summary** |
+| Course meeting place | **Location** | optional free text — not a Class, not meeting times |
+| Course topic | **Subject / area** | optional free text catalog label — not a taxonomy |
+| Course family access | **Published** / **Unpublished** | unpublished = instructors/admins; published = enrolled parents. Distinct from **Active** / **Archived** |
 | Course grades | **Grade levels** | catalog metadata — multiple grades and/or ranges; not P1 progress grades (**P1 templates** use the same) |
 | Course enrollment | **Roster** / **Enrollment** | who is in a course — may use Class as input (**workshop**) |
 | Stored content | **Materials** | page / link / file in a unit |
@@ -175,7 +181,7 @@ Other drafts kept for reference (not in use):
 | Dated unit material (P0 homework) | **Material** (with dates) | not an assignment object yet |
 | Extra org admin | **Admin invite** | email, claimable |
 | Instructor priority flag | **Important now** | pinned, highlight, urgent |
-| Course context blurb | **Summary** | overview, what's going on — P1, auto-drafted |
+| Course context blurb | **Summary** | **P1** — auto-drafted “what’s going on this week”; not the course **Description** |
 | Parent view (with account) | **Progress** | grades, notes, checklists, homework |
 | Person being taught | **Student** (profile) | student_profile, learner |
 | Student year/level | **Grade level** | optional on student; org chooses exact vs. range |

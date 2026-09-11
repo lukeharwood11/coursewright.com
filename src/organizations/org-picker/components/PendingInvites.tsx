@@ -1,7 +1,7 @@
 import { Button } from "@/ui/Button";
 import { Badge } from "@/ui/Badge";
 import { roleBadgeVariant, roleLabel } from "@/organizations/model/role";
-import type { PendingStaffInvite } from "@/organizations/databridge/staffInvites";
+import type { PendingOrgInvite } from "@/organizations/databridge/staffInvites";
 
 export function PendingInvites({
   invites,
@@ -9,18 +9,25 @@ export function PendingInvites({
   error,
   onAccept,
 }: {
-  invites: PendingStaffInvite[];
-  acceptingId: string | null;
+  invites: PendingOrgInvite[];
+  acceptingId: number | null;
   error: string | null;
-  onAccept: (invite: PendingStaffInvite) => void;
+  onAccept: (invite: PendingOrgInvite) => void;
 }) {
   if (invites.length === 0) return null;
+
+  const hasParent = invites.some((invite) => invite.role === "parent");
+  const hasStaff = invites.some((invite) => invite.role !== "parent");
 
   return (
     <section className="mt-6">
       <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Invites</h2>
       <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-        Someone asked you to help run these organizations. Accept to join.
+        {hasParent && hasStaff
+          ? "Accept to join these organizations."
+          : hasParent
+            ? "You were invited to view materials. Accept to join."
+            : "Someone asked you to help run these organizations. Accept to join."}
       </p>
       {error ? (
         <p className="mt-2 text-[13px] text-[var(--amber-deep)]" role="alert">

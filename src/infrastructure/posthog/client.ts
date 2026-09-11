@@ -2,7 +2,7 @@ import posthog from "posthog-js";
 
 /**
  * PostHog browser analytics.
- * Requires VITE_POSTHOG_KEY (+ optional VITE_POSTHOG_HOST) in `.env.local`.
+ * Requires VITE_POSTHOG_KEY (+ optional VITE_POSTHOG_HOST); see `.env.development`.
  */
 
 const key = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
@@ -21,6 +21,8 @@ export function initPostHog() {
     person_profiles: "identified_only",
     capture_pageview: true,
     capture_pageleave: true,
+    // Unhandled window errors + promise rejections; boundary still calls captureException.
+    capture_exceptions: true,
   });
   started = true;
 }

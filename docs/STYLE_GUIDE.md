@@ -218,21 +218,21 @@ Hide the persistent org sidebar under ~768px (hamburger opens it).
 
 ### Print (P0)
 
-Print is a **layout**, not a different product. Same content, stripped for paper.
+Print builds a **real PDF** and previews that file on dedicated `/print` (and `print-this-week`) routes — see [PRINT](./pages/PRINT.md). Layout rules apply to the **PDF content**, not an HTML print stylesheet as the primary path.
 
 | Rule | Treatment |
 |------|-----------|
 | Page | White. Black ink. No `--paper` beige fill (wastes toner) |
-| Chrome | Hide nav, tabs, avatars, buttons, badges that aren't content |
+| Chrome | No nav/tabs in the PDF. Screen action bar: **Download** / **Print** / **Back** around the PDF viewer |
 | Title | Lora 600 — course name, then unit, then material title |
 | Body | Manrope, ~12–13pt equivalent, ink, generous line-height |
-| Files | If the material is a PDF/image, print that file; if mixed, render in-app content then list remaining attachments |
+| Files | If the material is already a PDF/image, preview that file; otherwise generate a cover / packet PDF |
 | Header (small) | Course Wright wordmark + course title — once, faint, not a branded poster |
-| Page breaks | Prefer keep a material together; unit packets can break between materials |
+| Page breaks | Controlled in the PDF layout; prefer break between materials in unit / this-week packets |
 
-**Print** is a secondary button in the product; on parent “this week” it can sit beside the week range. Label is always **Print**, **Print unit**, or **Print this week** — never Export.
+**Print** is a secondary button in the product; on parent “this week” it can sit beside the week range. Label is always **Print**, **Print unit**, or **Print this week** — never Export. On the print screen itself, **Download** is allowed for the `.pdf`.
 
-Invoking print opens this layout and the browser print dialog (Save as PDF comes free).
+Invoking print navigates to the print route, generates the PDF, and shows it in an in-app viewer.
 
 ---
 

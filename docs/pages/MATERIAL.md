@@ -19,10 +19,10 @@ View (and edit) a single material placement — the thing parents open from this
 ## Behavior
 
 - Load one material placement; RLS/role determines edit vs read.
-- Instructors: edit via `…/edit`, set important now, share resource link, print, version/revert, soft-delete.
-- Parents: read + print + play media; no builder chrome; account required (P0).
+- Instructors: edit via `…/edit`, set important now, **publish / unpublish**, share resource link, print, version/revert, soft-delete.
+- Parents: read + print + play media for **published** materials; unpublished is not listed and not openable (RLS); no builder chrome; account required (P0).
 - View URL is the material path without `/edit`; edit appends `/edit`.
-- Print → print-friendly layout → browser print dialog (Save as PDF free); no export wizard.
+- Print → [PRINT](./PRINT.md) (`…/print`) → generated PDF in-app preview → Download / Print; no export wizard.
 - Instance content promote to template is **P1** (opt-in); overridden copies do not receive template sync for that resource.
 - File replace keeps prior blobs (versioning); audio/video play in-app.
 
@@ -55,6 +55,7 @@ View (and edit) a single material placement — the thing parents open from this
 - **Description** — every material (field always present; may be empty)
 - Course context; optional **unit** name when nested (omit when top-level)
 - Kind badge: page / link / file
+- **Visibility** — unpublished badge for instructors; parents never see unpublished
 - Optional `scheduled_date` (wins over unit dates for “this week”; required for top-level materials to appear in “this week”)
 - Important now flag (instructor)
 
@@ -68,7 +69,7 @@ View (and edit) a single material placement — the thing parents open from this
 
 ### Share & print
 
-- **Print** — one tap → print-friendly layout → browser print / Save as PDF (no export wizard)
+- **Print** — one tap → [PRINT](./PRINT.md) (`…/materials/<id>/print`) → generated PDF preview → Download / Print (no export wizard)
 - **Share** — resource link; recipient must log in (P0); lands on this material after auth
 
 ### Edit
@@ -87,6 +88,7 @@ View (and edit) a single material placement — the thing parents open from this
 - Play audio/video
 - **Edit** → `…/edit` (editors)
 - Toggle important now
+- **Publish / unpublish**
 - Revert version (when exposed)
 
 ## Parent variant
@@ -99,7 +101,7 @@ View (and edit) a single material placement — the thing parents open from this
 - [COURSE](./COURSE.md) — parent course (always; home for top-level materials)
 - [ORG_HOME](./ORG_HOME.md) — parent return to this week / dashboard
 - Via org chrome (instructor/admin): [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
-- Print material — TBD dedicated print route (no page file until path locked)
+- [PRINT](./PRINT.md) — **Print** → `…/materials/<material_id>/print`
 - Resource share entry — TBD (recipients land here after login)
 - **P1:** [TEMPLATE](./TEMPLATE.md) — when under a template
 

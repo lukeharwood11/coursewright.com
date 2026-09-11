@@ -3,24 +3,21 @@ import { parseOrgRole } from "@/organizations/model/role";
 import { requireSupabase } from "./client";
 
 export type OrganizationSummary = {
-  id: string;
+  id: number;
   name: string;
   slug: string;
 };
 
 export type OrgMembership = {
-  membershipId: string;
+  membershipId: number;
   role: OrgRole;
   organization: OrganizationSummary;
 };
 
 type MembershipRow = {
-  id: string;
+  id: number;
   role: string;
-  organization:
-    | OrganizationSummary
-    | OrganizationSummary[]
-    | null;
+  organization: OrganizationSummary | OrganizationSummary[] | null;
 };
 
 function unwrapOrg(
@@ -45,7 +42,7 @@ export const orgQueryKeys = {
   memberships: (userId: string) => ["organizations", "memberships", userId] as const,
   bySlug: (slug: string, userId: string) =>
     ["organizations", "slug", slug, userId] as const,
-  detail: (id: string) => ["organizations", "detail", id] as const,
+  detail: (id: number) => ["organizations", "detail", id] as const,
 };
 
 export async function listMyMemberships(userId: string): Promise<OrgMembership[]> {

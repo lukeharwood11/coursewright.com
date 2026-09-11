@@ -6,6 +6,7 @@ Delivery shell: router, providers, layouts, auth/role gates.
 
 - `App.tsx`, `router.tsx`, `gates/`
 - Layouts: account shell (`/my`), org shells (`layouts/`)
+- Catch-all error UI + boundary (`error/`)
 - Route guards (UX only — RLS is the real gate)
 
 ## Rules
