@@ -10,15 +10,25 @@ Terraform for Course Wright AWS SPA hosting. **One root module**, many tiers via
 
 Same code path for every tier; only var files change.
 
-## Apply
+## Remote state
+
+Shared nosh/amia backend (`lukeharwood-dev-tfstate` / `lukeharwood-dev-tf-lock` in `us-east-2`). CourseWright only adds **keys** — do not create a new bucket or lock table.
+
+`backend.tf` holds bucket/table/region. Per-tier `key` lives in partial backend configs because the S3 backend key is not tfvars-driven.
 
 ```bash
+# Testing
+terraform init -backend-config=backend-testing.hcl
 terraform plan  -var-file=testing.tfvars
 terraform apply -var-file=testing.tfvars
 
+# Production (reconfigure when switching from testing, or first init of this key)
+terraform init -reconfigure -backend-config=backend-production.hcl
 terraform plan  -var-file=production.tfvars
 terraform apply -var-file=production.tfvars
 ```
+
+Never mix a tier’s `-var-file` with the other tier’s backend key.
 
 ## Rules
 

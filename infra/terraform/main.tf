@@ -1,5 +1,5 @@
 # Root module — wires spa_site. Apply with -var-file=testing.tfvars|production.tfvars
-# Blocked on HN-003 (AWS) / HN-004 (state) / HN-005 (DNS) for a real apply.
+# Blocked on HN-003 (AWS) / HN-005 (DNS) for a real apply. Init with the matching backend-*.hcl.
 
 module "spa_site" {
   source = "./modules/spa_site"
