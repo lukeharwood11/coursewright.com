@@ -12,7 +12,7 @@ Browser Supabase client (anon key) and Storage helpers.
 
 - Anon key only in the SPA; never service role.
 - Prefer RLS-friendly patterns; privileged work → Edge Functions.
-- Auth session via this client; Google + email per [STACK.md](../../../docs/STACK.md).
+- Auth session via this client; Google + email (password or magic link) per [STACK.md](../../../docs/STACK.md).
 
 ## Don’t
 

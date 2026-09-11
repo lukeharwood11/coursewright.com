@@ -73,7 +73,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 ### Instructor / owner / admin view
 
-- Collapsible **org sidebar** for Home, Courses, Roster, Families, Settings (course and family names nested when present)
+- Collapsible **org sidebar** for Home, Courses, Roster (nested class names when they exist), Families, Settings (course and family names nested when present)
 - Org overview useful for running the co-op
 - Obvious navigation: [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md) (**P1:** [TEMPLATE_LIST](./TEMPLATE_LIST.md))
 - **Advanced search** in chrome (P0 — overlay vs `/search` route TBD)
@@ -109,7 +109,8 @@ Tech-averse parents must understand what’s going on immediately — which chil
 ### Instructor / owner / admin
 
 - [COURSE_LIST](./COURSE_LIST.md) — courses
-- [ORG_ROSTER](./ORG_ROSTER.md) — org roster
+- [ORG_ROSTER](./ORG_ROSTER.md) — org roster (includes class list)
+- [CLASS](./CLASS.md) — a class opened from roster
 - [FAMILIES](./FAMILIES.md) — family directory
 - [ORG_SETTINGS](./ORG_SETTINGS.md) — org settings
 - [ORG_PICKER](./ORG_PICKER.md) — switch org

@@ -1,6 +1,6 @@
 # AGENTS — `src/auth/`
 
-Sign-up / sign-in: email + Google via Supabase Auth.
+Sign-up / sign-in: email (password or magic link) + Google via Supabase Auth.
 
 ## Scope
 

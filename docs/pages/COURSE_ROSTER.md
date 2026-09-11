@@ -15,9 +15,9 @@ Manage **enrollments** for this course instance (course has its own roster). Org
 ## Behavior
 
 - Manage enrollments for this course only.
-- Add student: if new to org, create `student_profile` (name required; optional parent email, grade).
-- Unenroll / adjust enrollment; parent org access requires enrollment in a course with `status = active`.
-- Parent invite by email from course context.
+- Enroll an existing org student, or add a new student (creates `student_profile` — name required; optional parent email, grade).
+- Unenroll (withdrawn); parent org access requires enrollment in a course with `status = active`.
+- Parent email can be stored on the new profile; sending the invite is a separate flow.
 - Empty roster allowed — printing materials does not require students.
 
 ## Data shown
@@ -32,14 +32,13 @@ Manage **enrollments** for this course instance (course has its own roster). Org
 - List enrolled student profiles
 - Add student — if new to the org, creates `student_profile` (name required; optional parent email, grade)
 - Unenroll / manage enrollment (active status matters for parent org access rules)
-- Parent email / invite from course context
+- Parent email / invite from course context (email stored; send TBD)
 - Co-teachers may be shown or linked from [COURSE_SETTINGS](./COURSE_SETTINGS.md) — TBD split
 - Empty state: add students optional — **create → print does not require a roster**
 
 ## Primary actions
 
 - Add / remove enrollment
-- Invite parent by email
 - Open [STUDENT_PROFILE](./STUDENT_PROFILE.md)
 
 ## Links to
@@ -48,6 +47,7 @@ Manage **enrollments** for this course instance (course has its own roster). Org
 - [COURSE_SETTINGS](./COURSE_SETTINGS.md) — instructors / related settings (TBD split)
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — open student
 - [ORG_ROSTER](./ORG_ROSTER.md) — org-wide roster
+- [CLASS](./CLASS.md) — org classes (does not auto-enroll)
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
 ## Notes

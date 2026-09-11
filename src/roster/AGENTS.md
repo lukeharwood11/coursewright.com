@@ -6,7 +6,7 @@ Student profiles, **classes** (student groups), course enrollments, parent invit
 
 - Student profiles (name required; parent email & grade optional)
 - **Class** — org-scoped group of students (not a course; no materials)
-- Enroll / unenroll in a course; first add may create `student_profile`
+- Org roster (`org-roster/`), class roster (`class-roster/`), course roster (`course-roster/`), student profile
 - Parent email linkage + invites
 - Staff assignment UI that belongs with roster (course instructors may live with `courses/`)
 

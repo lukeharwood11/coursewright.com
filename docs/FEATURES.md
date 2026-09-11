@@ -56,15 +56,15 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | Feature | Description | Status | Notes |
 |---------|-------------|--------|-------|
 | **Marketing site** | Public home, about, pricing | shipped | Contact / privacy / terms / cookies still construction placeholders |
-| **Authentication** | Sign up, sign in | shipped | **Email + Google** via **Supabase Auth**. Login, signup, session gates live |
+| **Authentication** | Sign up, sign in | shipped | **Email (password or magic link) + Google** via **Supabase Auth**. Login has password + magic-link; signup stays Google / email OTP. Session gates live |
 | **Account settings** | Cross-org account page (`/my/settings`) | in progress | View + sign-out live; profile edit still stubbed |
 | **Organizations** | Anyone can create an org; creator is first **owner**; org picker (`/my`) | in progress | Create + list + `/my/:orgSlug` home + org settings identity live; **collapsible org sidebar** on org pages; staff invite/role UI still stubbed |
 | **Org permalink** | Stable org URL (`slug`) created with the org | shipped | Create + settings change with break-links warning |
 | **Org grade scheme** | Org chooses how grades work (exact / range / custom; presets K–12, Custom) | shipped | Defaults on create; owners/admins edit in org settings |
 | **Admin invites** | Add other admins by email; those emails can be **claimed** by accounts | planned | Schema + RLS ready; no invite UI or claim route |
-| **Student profiles** | Org-level student records — no login required | in progress | Org roster list + profile stub live; edit/invite UI not started. Created when first added to a course or class; linkable later (P2) |
-| **Classes** | Org-scoped **group of students** — separate from a Course | planned | **Decided concept.** How Class relates to course enrollment — **workshop** (see [Classes](#classes-p0)) |
-| **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | in progress | Org roster list + sidebar jump live; class / enroll / parent-link UI not started |
+| **Student profiles** | Org-level student records — no login required | shipped | Org roster create/edit + profile page. Created when first added to a course or class; linkable later (P2) |
+| **Classes** | Org-scoped **group of students** — separate from a Course | shipped | Create class, add/remove members. How Class relates to course enrollment — **workshop** (see [Classes](#classes-p0)) |
+| **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | shipped | Org / class / course roster live; parent invite *send* not started |
 | **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches parent vs staff home. **P0 roles:** owner, admin, instructor, parent. Owner vs admin = billing. |
 | **Admin account management** | Admins invite, **change roles**, and **remove** admins/instructors | planned | Last owner/admin DB guard ready; no change/remove staff UI |
 | **Homework (P0)** | Dated materials in a unit — appear on parent "this week" when dates fall in Sun–Sat | shipped | `scheduled_date` on add/edit material. Parent “this week” uses unit/material dates. **Not** a separate assignment type |
@@ -121,16 +121,14 @@ A **Class** is an org-scoped **group of students**. It is **not** a Course.
 | **Members** | Student profiles | Enrollment — **how this relates to Class is open** |
 | **Dates / grade metadata** | TBD | Optional start/end; optional grade levels |
 
-**Decided:** Class and Course are separate concepts.
+**Decided:** Class and Course are separate concepts. Class list lives on the org roster; class roster is `/my/<org-slug>/classes/<class_id>`. Admins and instructors manage classes (same as the roster capability table).
 
 **Open (workshop — do not invent):**
 
 1. Does a Course enroll a **Class** (whole group), **individuals**, or both?
-2. Can one student be in multiple Classes? Multiple Courses?
+2. Can one student be in multiple Classes? Multiple Courses? (schema default: yes to multiple classes)
 3. Does parent “this week” / access still key off **course enrollment** only (current rule), with Class as roster convenience?
-4. Who creates/manages Classes — admin only, or instructors too?
-5. Class fields beyond **name** + members — TBD
-6. URLs / pages for Class list and detail — TBD until path locked
+4. Class fields beyond **name** + members — TBD
 
 Until enrollment is locked, keep **Course.enrollment → student_profile** as the access gate for parents (current rule). Class may feed who you pick when enrolling — TBD.
 

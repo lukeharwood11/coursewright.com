@@ -43,11 +43,11 @@ export function CourseSidebar({
         </p>
       ) : (
         <ul className="mt-3 flex flex-col gap-2">
-          {students.map((student) => (
-            <li key={student.id} className="flex items-center gap-2">
-              <Avatar name={student.name} size={28} />
+          {students.map((enrollment) => (
+            <li key={enrollment.student.id} className="flex items-center gap-2">
+              <Avatar name={enrollment.student.name} size={28} />
               <span className="min-w-0 truncate text-[13.5px] font-semibold text-[var(--ink)]">
-                {student.name}
+                {enrollment.student.name}
               </span>
             </li>
           ))}

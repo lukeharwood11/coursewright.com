@@ -20,6 +20,7 @@ import {
 import { OrgHomePage, OrgPickerPage, OrgSettingsPage } from "@/organizations";
 import { PrintPage } from "@/print";
 import {
+  ClassRosterPage,
   FamiliesPage,
   FamilyPage,
   OrgRosterPage,
@@ -127,6 +128,14 @@ export function AppRoutes() {
               element={
                 <RequireStaff>
                   <StudentProfilePage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="classes/:classId"
+              element={
+                <RequireStaff>
+                  <ClassRosterPage />
                 </RequireStaff>
               }
             />

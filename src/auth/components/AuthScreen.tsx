@@ -7,6 +7,7 @@ import { Input } from "@/ui/Input";
 import { Wordmark } from "@/ui/Wordmark";
 import { GoogleMark } from "./GoogleMark";
 import { signInWithEmail } from "@/auth/api/signInWithEmail";
+import { signInWithPassword } from "@/auth/api/signInWithPassword";
 import { signInWithGoogle } from "@/auth/api/signInWithGoogle";
 import { safeNextPath } from "@/auth/model/safeNext";
 import { isSupabaseConfigured } from "@/infrastructure/supabase/client";
@@ -17,16 +18,22 @@ export function AuthScreen({
   submitLabel,
   googleLabel,
   footer,
+  passwordSignIn = false,
+  magicLinkLabel = "Email me a sign-in link",
 }: {
   heading: string;
   subcopy: string;
   submitLabel: string;
   googleLabel: string;
   footer: ReactNode;
+  /** Login only: email + password primary, magic link as a secondary action. */
+  passwordSignIn?: boolean;
+  magicLinkLabel?: string;
 }) {
   const location = useLocation();
   const nextPath = safeNextPath(new URLSearchParams(location.search).get("next"));
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -38,13 +45,30 @@ export function AuthScreen({
     setBusy(false);
   }
 
-  async function onEmail(e: FormEvent) {
-    e.preventDefault();
+  async function sendMagicLink() {
+    if (!email.trim()) {
+      setMessage("Enter your email to get a sign-in link.");
+      return;
+    }
     setBusy(true);
     setMessage(null);
     const result = await signInWithEmail(email.trim(), nextPath);
     if (result.error) setMessage(result.error);
     else setMessage("Check your email for a sign-in link.");
+    setBusy(false);
+  }
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!passwordSignIn) {
+      await sendMagicLink();
+      return;
+    }
+
+    setBusy(true);
+    setMessage(null);
+    const result = await signInWithPassword(email.trim(), password);
+    if (result.error) setMessage(result.error);
     setBusy(false);
   }
 
@@ -86,7 +110,7 @@ export function AuthScreen({
           <span className="h-px flex-1 bg-[var(--line)]" />
         </div>
 
-        <form onSubmit={onEmail} className="flex flex-col gap-3">
+        <form onSubmit={onSubmit} className="flex flex-col gap-3">
           <label className="flex flex-col gap-1">
             <span className="text-[13px] font-bold text-[var(--ink-soft)]">Email</span>
             <Input
@@ -98,9 +122,32 @@ export function AuthScreen({
               autoComplete="email"
             />
           </label>
+          {passwordSignIn && (
+            <label className="flex flex-col gap-1">
+              <span className="text-[13px] font-bold text-[var(--ink-soft)]">Password</span>
+              <Input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
+            </label>
+          )}
           <Button type="submit" disabled={busy} fullWidth>
             {submitLabel}
           </Button>
+          {passwordSignIn && (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={busy}
+              fullWidth
+              onClick={() => void sendMagicLink()}
+            >
+              {magicLinkLabel}
+            </Button>
+          )}
         </form>
 
         {message && (

@@ -14,7 +14,8 @@ export function LoginPage() {
       heading="Welcome back"
       subcopy="Sign in to see your courses and materials."
       googleLabel="Sign in with Google"
-      submitLabel="Continue"
+      submitLabel="Sign in"
+      passwordSignIn
       footer={
         <>
           <p>
