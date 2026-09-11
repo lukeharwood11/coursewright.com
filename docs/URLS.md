@@ -39,8 +39,8 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 
 | Page | URL | Notes |
 |------|-----|-------|
-| [LOGIN](./pages/LOGIN.md) | `/login` | Email + Google |
-| [SIGNUP](./pages/SIGNUP.md) | `/signup` | Email + Google |
+| [LOGIN](./pages/LOGIN.md) | `/login` | Email + password, magic link, Google |
+| [SIGNUP](./pages/SIGNUP.md) | `/signup` | Email OTP / magic link + Google (no password sign-up) |
 | Invite claim | <!-- TBD --> | No page file until path locked |
 | Auth callback | <!-- TBD — may be Supabase-hosted --> | |
 

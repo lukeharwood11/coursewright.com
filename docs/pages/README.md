@@ -47,7 +47,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Org permalink slug | [ORG_PICKER](./ORG_PICKER.md), [ORG_SETTINGS](./ORG_SETTINGS.md) |
 | Admin invites / staff roles / last-admin guard | [ORG_SETTINGS](./ORG_SETTINGS.md) |
 | Org grade scheme | [ORG_SETTINGS](./ORG_SETTINGS.md) |
-| Authentication (email + Google) | [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md) |
+| Authentication (email password / magic link + Google) | [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md) |
 | RBAC (owner / admin / instructor / parent) | Role splits on [ORG_HOME](./ORG_HOME.md) + gated pages |
 | Student profiles | [ORG_ROSTER](./ORG_ROSTER.md), [STUDENT_PROFILE](./STUDENT_PROFILE.md), [COURSE_ROSTER](./COURSE_ROSTER.md), [CLASS](./CLASS.md) |
 | Roster / enrollments / parent linkage & invites | [ORG_ROSTER](./ORG_ROSTER.md), [COURSE_ROSTER](./COURSE_ROSTER.md), [STUDENT_PROFILE](./STUDENT_PROFILE.md), [CLASS](./CLASS.md) |

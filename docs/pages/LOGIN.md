@@ -9,12 +9,12 @@ Returning users; parents/instructors/admins with accounts. Invitees who already 
 
 ## Purpose
 
-Sign in with **email** or **Google** (Supabase Auth).
+Sign in with **email + password**, an **email magic link**, or **Google** (Supabase Auth).
 
 
 ## Behavior
 
-- Unauthenticated. Offers email and Google sign-in via Supabase Auth.
+- Unauthenticated. Offers Google, email + password, and email magic-link sign-in via Supabase Auth.
 - On success: redirect to `/my` ([ORG_PICKER](./ORG_PICKER.md)), last org, or invite destination when present.
 - Link to signup for new users; invite-aware messaging when arriving from an invite (same email).
 - Account required to view shared content in P0 (no magic-link view yet).
@@ -22,7 +22,7 @@ Sign in with **email** or **Google** (Supabase Auth).
 ## Data shown
 
 - Wordmark and short sign-in copy
-- Auth controls (Google, email fields) — no course/roster data
+- Auth controls (Google, email, password) — no course/roster data
 - Error/validation messages for failed auth (TBD exact copy)
 - Invite context banner when token/context present (TBD)
 
@@ -31,7 +31,8 @@ Sign in with **email** or **Google** (Supabase Auth).
 - Course Wright wordmark
 - Short plain subcopy (e.g. sign in to see courses and materials — style guide voice)
 - Google sign-in
-- Email sign-in
+- Email + password sign-in (primary)
+- Email magic-link sign-in (secondary)
 - Link to [SIGNUP](./SIGNUP.md)
 - Invite-aware messaging when arriving from an invite (TBD path) — same email as invite
 - Phone-friendly centered card layout ([STYLE_GUIDE.md](../STYLE_GUIDE.md))
@@ -39,7 +40,8 @@ Sign in with **email** or **Google** (Supabase Auth).
 ## Primary actions
 
 - Sign in with Google
-- Sign in with email
+- Sign in with email and password
+- Email me a sign-in link
 - Go to sign up
 
 ## After success

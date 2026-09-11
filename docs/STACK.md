@@ -11,7 +11,7 @@
 | **Database** | **Supabase** (Postgres) | Source of truth; org-scoped multi-tenancy |
 | **CRUD API** | **Supabase PostgREST** from the **frontend** | Default path for reads/writes — as much as possible |
 | **Complex backend** | **Supabase Functions** (Edge Functions) | Operations that must not live in the client |
-| **Auth** | **Supabase Auth** | Sessions / users; **email** + **Sign in with Google** |
+| **Auth** | **Supabase Auth** | Sessions / users; **email** (password or magic link) + **Sign in with Google** |
 | **Google sign-in** | **Google Cloud** (OAuth client) wired into Supabase Auth | Provider for Google login |
 | **File storage** | **Supabase Storage** | Lesson files / material attachments (P0 file sharing) |
 | **Frontend hosting** | **AWS S3** + **CloudFront** | Static React app CDN |
@@ -38,7 +38,7 @@
 1. **PostgREST-first** — Prefer the Supabase client + RLS for create/read/update/delete. Do not put simple CRUD behind a Function by default.
 2. **Functions for complexity** — Use Supabase Functions when the work needs secrets, multi-step transactions, privileged logic, or rules that should not be enforceable by RLS alone (e.g. **course → course copy**, invite claim flows, versioning/revert edge cases; **P1:** template → course copy/sync, promote).
 3. **RLS is the access gate** — Frontend CRUD assumes Row Level Security encodes org/role rules (admin, instructor, parent). Schema and policies must match [FEATURES.md](./FEATURES.md) / [database/SCHEMA.md](./database/SCHEMA.md). Storage policies follow the same org/role intent for file access.
-4. **Auth** — Supabase Auth owns identity. Login screen: **email** and **Sign in with Google** (Google Cloud OAuth → Supabase). Invite claim uses the same email identity rules as product docs.
+4. **Auth** — Supabase Auth owns identity. Login screen: **email + password**, **email magic link**, and **Sign in with Google** (Google Cloud OAuth → Supabase). Signup is Google or email OTP (no password sign-up). Invite claim uses the same email identity rules as product docs.
 5. **Files** — Uploads go to **Supabase Storage**; `File` rows in Postgres hold metadata / `storage_ref`. Prefer Storage + RLS (or signed URLs via Function when needed) over a separate file host. Playback / versioning / escalation design: [FILE_STORAGE.md](./FILE_STORAGE.md).
 6. **TanStack owns server state** — Queries/mutations against PostgREST (and Function calls). **Zustand** owns ephemeral UI state (modals, draft editors, selection) — not a second source of truth for remote data.
 7. **Frontend deploy** — Build the React app → **S3**; serve via **CloudFront**. **Production:** `coursewright.com`. **Testing:** `justtesting.coursewright.com`. No separate app server for the UI. **AWS resources are managed with Terraform** (`infra/terraform/`).
@@ -74,7 +74,7 @@ Exact Function list is implementation detail; the rule is **simple = PostgREST, 
 
 | Method | How |
 |--------|-----|
-| **Email** | Supabase Auth email sign-up / sign-in |
+| **Email** | Supabase Auth email sign-up (OTP) / sign-in (password or magic link) |
 | **Google** | Google Cloud OAuth client → Supabase Auth Google provider |
 
 Product rule unchanged: parents use the **same email** as their invite (see [FEATURES.md](./FEATURES.md)).

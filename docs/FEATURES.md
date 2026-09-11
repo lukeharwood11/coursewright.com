@@ -56,7 +56,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | Feature | Description | Status | Notes |
 |---------|-------------|--------|-------|
 | **Marketing site** | Public home, about, pricing | shipped | Contact / privacy / terms / cookies still construction placeholders |
-| **Authentication** | Sign up, sign in | shipped | **Email + Google** via **Supabase Auth**. Login, signup, session gates live |
+| **Authentication** | Sign up, sign in | shipped | **Email (password or magic link) + Google** via **Supabase Auth**. Login has password + magic-link; signup stays Google / email OTP. Session gates live |
 | **Account settings** | Cross-org account page (`/my/settings`) | in progress | View + sign-out live; profile edit still stubbed |
 | **Organizations** | Anyone can create an org; creator is first **owner**; org picker (`/my`) | in progress | Create + list + `/my/:orgSlug` home + org settings identity live; **collapsible org sidebar** on org pages; staff invite/role UI still stubbed |
 | **Org permalink** | Stable org URL (`slug`) created with the org | shipped | Create + settings change with break-links warning |
