@@ -38,11 +38,19 @@ function toMembership(row: MembershipRow): OrgMembership | null {
   };
 }
 
+export type OrgPerson = {
+  userId: string;
+  name: string;
+  email: string;
+  role: OrgRole;
+};
+
 export const orgQueryKeys = {
   memberships: (userId: string) => ["organizations", "memberships", userId] as const,
   bySlug: (slug: string, userId: string) =>
     ["organizations", "slug", slug, userId] as const,
   detail: (id: number) => ["organizations", "detail", id] as const,
+  people: (orgId: number) => ["organizations", "people", orgId] as const,
 };
 
 export async function listMyMemberships(userId: string): Promise<OrgMembership[]> {
@@ -94,4 +102,32 @@ export async function getMembershipByOrgSlug(
     role,
     organization: { id: org.id, name: org.name, slug: org.slug },
   };
+}
+
+export async function listOrgPeople(
+  organizationId: number,
+): Promise<OrgPerson[]> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("memberships")
+    .select("user_id, role, profile:profiles(name, email)")
+    .eq("organization_id", organizationId)
+    .eq("status", "active")
+    .order("created_at", { ascending: true });
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).flatMap((row) => {
+    const role = parseOrgRole(row.role);
+    const profile = Array.isArray(row.profile) ? row.profile[0] : row.profile;
+    if (!role || !profile || !row.user_id) return [];
+    return [
+      {
+        userId: row.user_id,
+        name: profile.name || profile.email,
+        email: profile.email,
+        role,
+      },
+    ];
+  });
 }
