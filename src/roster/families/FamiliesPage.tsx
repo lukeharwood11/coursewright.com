@@ -22,8 +22,9 @@ export function FamiliesPage() {
         Families
       </h1>
       <p className="mt-1 max-w-2xl text-[14px] text-[var(--ink-soft)]">
-        Parent directory for this organization. A family groups students and
-        parents in the roster — it does not grant course access.
+        Parent directory for this organization. A family is a named group of
+        students. Parents show up from parent–student links — not from family
+        membership.
       </p>
       <p className="mt-2 text-[13px]">
         <Link
@@ -39,7 +40,7 @@ export function FamiliesPage() {
           Create a family
         </h2>
         <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-          Name is optional. If you leave it blank, we’ll use the members’ names.
+          Name the household, then add students. Empty families are fine.
         </p>
         <form
           className="mt-4 flex flex-col gap-2 sm:flex-row"

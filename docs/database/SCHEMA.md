@@ -366,13 +366,13 @@ No other student-profile fields in P0.
 
 ### Family
 
-Org-scoped household for the **parent directory**. Builds on roster / parent links. **Not an access gate** — materials, this-week, and print stay enrollment + `ParentStudentLink`.
+Org-scoped **named group of student profiles** for the parent directory (Class-mirror). Empty family is OK. **Not an access gate** — materials, this-week, and print stay enrollment + `ParentStudentLink`.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
-| display_name | text | **optional** — members have `display_name` at minimum |
+| display_name | text | **required in P0 directory UI** (column remains nullable in SQL) |
 | created_at | timestamptz | |
 | deleted_at | timestamptz | soft delete |
 
@@ -383,12 +383,12 @@ Org-scoped household for the **parent directory**. Builds on roster / parent lin
 | id | bigint | PK |
 | family_id | bigint | FK → Family |
 | student_profile_id | bigint | FK, nullable — student in household |
-| parent_user_id | uuid | FK → User, nullable — parent who belongs to the family |
+| parent_user_id | uuid | FK → User, nullable — **unused for P0 app writes**; parents are derived from `ParentStudentLink`. Not an access gate |
 | display_name | text | **names** on the family profile (may mirror linked profile/user) |
 
 **Uniqueness (locked):** at least one of `student_profile_id` / `parent_user_id`; a student profile belongs to at most one family; unique `(family_id, parent_user_id)` when parent is set.
 
-**Rule:** Linking a parent to a family **creates or reuses** `ParentStudentLink` rows for students in that household. Family membership alone does not grant course access. Merge/split UX TBD.
+**P0 app rule:** `family_members` rows are **students** (Class-mirror). Parents appear on a family only via `ParentStudentLink` to those students — a parent may appear on two families that way. Linking a parent creates or reuses those links (or a pending `ParentInvite` if they have no account). Never write enrollments from the directory. Merge/split UX TBD.
 
 ### ParentInvite
 
@@ -669,7 +669,7 @@ Family cross-org management (extends P0 org Family)
 | Material visibility published / unpublished | Parents (and future students) see published only | **Decided** — unpublished = instructors/admins |
 | Course visibility published / unpublished | Parents see a course only when active **and** published | **Decided** — unpublished = instructors/admins; new courses unpublished |
 | Course description, location, subject | Catalog fields on Course | **Decided** — optional free text; description ≠ P1 Summary |
-| Family profile fields beyond names | Family, FamilyMember | Names (+ optional family `display_name`) only |
+| Family profile fields beyond names | Family, FamilyMember | P0 UI: family display name + student names; parents derived from links. Extra fields TBD |
 | Course `grade_levels` storage (array vs join table vs range columns) | Course, CourseTemplate, search facets | **`text[]`** |
 | Search: FTS columns vs materialized search document | Indexes, PostgREST views | **Generated `tsvector` + GIN** on searchable tables |
 | Template product surface | CourseTemplate, TemplateAccess, sync Functions | **P1** — tables may exist; no P0 UI |

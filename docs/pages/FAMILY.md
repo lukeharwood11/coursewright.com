@@ -9,40 +9,41 @@ Admins and instructors (same staff visibility as Classes). Parents may later see
 
 ## Purpose
 
-One **family profile**: household of student profiles + parent users in this org.
+One **family**: a named group of student profiles in this org. Parents appear only when they have `parent_student_links` to those students.
 
 
 ## Behavior
 
-- View one family profile; staff add and remove members.
+- View one family; staff add and remove **student** members (Class-mirror). Empty family is allowed.
 - Add an existing org student who is not already in another family, or create a new student profile and add them.
-- Link a parent who already has a Course Wright account in this organization. That write **creates or reuses** `parent_student_links` for students currently in the household (and when a student is added later, for parents already on the family). Family membership is not an access gate.
-- Remove a member from the family. This does **not** delete parent–student links or course enrollments (same convenience rule as Classes).
+- **Link a parent** by choosing an org account and/or email, and which student(s) in this family. That write **creates or reuses** `parent_student_links`. If the email has no Course Wright account in this org, save a pending `parent_invites` row (send/claim still a separate flow). **Never write enrollments.** **Do not** write `family_members.parent_user_id`.
+- Parents already linked to a student in this family show up automatically (including a parent who is also linked to a student in another family).
+- Remove a student from the family. This does **not** delete parent–student links or course enrollments.
 - A student profile belongs to at most one family.
-- Empty family is allowed.
 - Navigate to member student profiles, the directory, and the org roster.
 
 ## Data shown
 
-- Family identity — optional display name; otherwise member names
+- Family identity — required display name; student names as fallback
 - Student members: names, optional grade, optional parent email → profiles
-- Parent members: names and emails
-- Pickers: org students not in another family; org accounts not already linked to this family
+- Parents (derived): names/emails and which students they are linked to
+- Pending invites for students in this family (email + student), when present
+- Pickers: org students not in another family; org accounts and/or email for linking
 
 ## Contents
 
-- Family identity (display name or derived member names)
-- Access copy: household directory, not a course
+- Family identity (name)
+- Access copy: named student group, not a course; parents from student links
 - Add existing student / add new student
-- Link a parent account
+- Link a parent (account or email; optional per-student vs all students)
 - Student list → [STUDENT_PROFILE](./STUDENT_PROFILE.md) with remove
-- Parent list with remove
+- Parent list (read-only) and pending invites
 - Back to [FAMILIES](./FAMILIES.md) and [ORG_ROSTER](./ORG_ROSTER.md)
 
 ## Primary actions
 
 - Add / remove student members
-- Link / remove parent members (link also ensures student links)
+- Link a parent (create/reuse student links, or save a claim invite)
 - Open a student profile
 
 ## Links to
@@ -54,4 +55,4 @@ One **family profile**: household of student profiles + parent users in this org
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Families & parent directory. Not the P2 cross-org parent family manager. Sending parent invites is still a separate planned flow. Merge/split households is TBD.
+[FEATURES.md](../FEATURES.md) — Families & parent directory. Not the P2 cross-org parent family manager. Invite **send** and **claim** are still planned. Merge/split households is TBD. `family_members.parent_user_id` exists in schema but is unused for P0 app writes.

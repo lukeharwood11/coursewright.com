@@ -4,11 +4,17 @@ import type { ValidatedFamily } from "@/roster/model/family";
 import { requireSupabase } from "./client";
 import type { StudentSummary } from "./students";
 
-export type FamilyParentMember = {
-  memberId: number;
+export type FamilyParent = {
   userId: string;
   name: string;
   email: string;
+  studentIds: number[];
+};
+
+export type PendingParentInvite = {
+  id: number;
+  email: string;
+  studentProfileId: number;
 };
 
 export type FamilyStudentMember = {
@@ -21,19 +27,14 @@ export type FamilyRecord = {
   organizationId: number;
   displayName: string | null;
   students: FamilyStudentMember[];
-  parents: FamilyParentMember[];
+  parents: FamilyParent[];
+  pendingInvites: PendingParentInvite[];
 };
 
 export const familyQueryKeys = {
   list: (orgId: number) => ["families", "list", orgId] as const,
   detail: (id: number) => ["families", "detail", id] as const,
   forStudent: (studentId: number) => ["families", "student", studentId] as const,
-};
-
-type ProfileEmbed = {
-  id: string;
-  name: string;
-  email: string;
 };
 
 type StudentEmbed = {
@@ -47,10 +48,8 @@ type StudentEmbed = {
 type FamilyMemberEmbed = {
   id: number;
   student_profile_id: number | null;
-  parent_user_id: string | null;
   display_name: string;
   student: StudentEmbed | StudentEmbed[] | null;
-  parent: ProfileEmbed | ProfileEmbed[] | null;
 };
 
 type FamilyRow = {
@@ -60,6 +59,12 @@ type FamilyRow = {
   members: FamilyMemberEmbed[] | FamilyMemberEmbed | null;
 };
 
+type ParentLinkRow = {
+  parent_user_id: string;
+  student_profile_id: number;
+  parent: { id: string; name: string; email: string } | { id: string; name: string; email: string }[] | null;
+};
+
 const FAMILY_SELECT = `
   id,
   organization_id,
@@ -67,12 +72,10 @@ const FAMILY_SELECT = `
   members:family_members(
     id,
     student_profile_id,
-    parent_user_id,
     display_name,
     student:student_profiles!family_members_student_profile_id_fkey(
       id, organization_id, name, grade_level, parent_email
-    ),
-    parent:profiles!family_members_parent_user_id_fkey(id, name, email)
+    )
   )
 `;
 
@@ -99,36 +102,98 @@ function toFamilyRecord(row: FamilyRow): FamilyRecord {
     : [];
 
   const students: FamilyStudentMember[] = [];
-  const parents: FamilyParentMember[] = [];
-
   for (const member of memberRows) {
-    if (member.student_profile_id) {
-      const student = unwrapOne(member.student);
-      if (!student) continue;
-      students.push({ memberId: member.id, student: toStudentSummary(student) });
-      continue;
-    }
-
-    if (!member.parent_user_id) continue;
-    const parent = unwrapOne(member.parent);
-    parents.push({
-      memberId: member.id,
-      userId: member.parent_user_id,
-      name: parent?.name || member.display_name,
-      email: parent?.email ?? "",
-    });
+    if (!member.student_profile_id) continue;
+    const student = unwrapOne(member.student);
+    if (!student) continue;
+    students.push({ memberId: member.id, student: toStudentSummary(student) });
   }
-
   students.sort((a, b) => a.student.name.localeCompare(b.student.name));
-  parents.sort((a, b) => a.name.localeCompare(b.name));
 
   return {
     id: row.id,
     organizationId: row.organization_id,
     displayName: row.display_name,
     students,
-    parents,
+    parents: [],
+    pendingInvites: [],
   };
+}
+
+function parentsFromLinks(
+  studentIds: number[],
+  links: ParentLinkRow[],
+): FamilyParent[] {
+  const wanted = new Set(studentIds);
+  const byParent = new Map<string, FamilyParent>();
+
+  for (const link of links) {
+    if (!wanted.has(link.student_profile_id)) continue;
+    const profile = unwrapOne(link.parent);
+    const existing = byParent.get(link.parent_user_id);
+    if (existing) {
+      if (!existing.studentIds.includes(link.student_profile_id)) {
+        existing.studentIds.push(link.student_profile_id);
+      }
+      continue;
+    }
+    byParent.set(link.parent_user_id, {
+      userId: link.parent_user_id,
+      name: profile?.name || profile?.email || "Parent",
+      email: profile?.email ?? "",
+      studentIds: [link.student_profile_id],
+    });
+  }
+
+  return [...byParent.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+async function listParentLinks(studentIds: number[]): Promise<ParentLinkRow[]> {
+  if (studentIds.length === 0) return [];
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("parent_student_links")
+    .select(
+      "parent_user_id, student_profile_id, parent:profiles!parent_student_links_parent_user_id_fkey(id, name, email)",
+    )
+    .in("student_profile_id", studentIds);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []) as ParentLinkRow[];
+}
+
+async function attachParents(families: FamilyRecord[]): Promise<FamilyRecord[]> {
+  const studentIds = families.flatMap((family) =>
+    family.students.map((member) => member.student.id),
+  );
+  const links = await listParentLinks(studentIds);
+  return families.map((family) => ({
+    ...family,
+    parents: parentsFromLinks(
+      family.students.map((member) => member.student.id),
+      links,
+    ),
+  }));
+}
+
+async function listPendingInvites(
+  studentIds: number[],
+): Promise<PendingParentInvite[]> {
+  if (studentIds.length === 0) return [];
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("parent_invites")
+    .select("id, email, student_profile_id")
+    .in("student_profile_id", studentIds)
+    .is("accepted_at", null)
+    .order("created_at");
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    email: row.email,
+    studentProfileId: row.student_profile_id,
+  }));
 }
 
 export async function listFamilies(
@@ -143,7 +208,7 @@ export async function listFamilies(
     .order("display_name");
 
   if (error) throw new Error(error.message);
-  return (data ?? []).map((row) => toFamilyRecord(row as FamilyRow));
+  return attachParents((data ?? []).map((row) => toFamilyRecord(row as FamilyRow)));
 }
 
 export async function getFamily(id: number): Promise<FamilyRecord | null> {
@@ -157,7 +222,13 @@ export async function getFamily(id: number): Promise<FamilyRecord | null> {
 
   if (error) throw new Error(error.message);
   if (!data) return null;
-  return toFamilyRecord(data as FamilyRow);
+
+  const [family] = await attachParents([toFamilyRecord(data as FamilyRow)]);
+  const studentIds = family.students.map((member) => member.student.id);
+  return {
+    ...family,
+    pendingInvites: await listPendingInvites(studentIds),
+  };
 }
 
 export async function createFamily(
@@ -209,6 +280,7 @@ export async function listFamiliesForStudent(
         displayName: familyRow.display_name,
         students: [],
         parents: [],
+        pendingInvites: [],
       },
     ];
   });
@@ -218,45 +290,11 @@ export async function addFamilyStudent(
   familyId: number,
   student: StudentSummary,
 ): Promise<void> {
-  const family = await getFamily(familyId);
-  if (!family) {
-    throw new Error("We couldn’t find that family.");
-  }
-
-  await ensureParentStudentLinks(
-    family.parents.map((parent) => parent.userId),
-    [student.id],
-  );
-
   const db = requireSupabase();
   const { error } = await db.from("family_members").insert({
     family_id: familyId,
     student_profile_id: student.id,
     display_name: student.name,
-  });
-
-  if (error) throw new Error(familyWriteErrorMessage(error));
-}
-
-export async function addFamilyParent(
-  familyId: number,
-  parent: { userId: string; name: string; email: string },
-): Promise<void> {
-  const family = await getFamily(familyId);
-  if (!family) {
-    throw new Error("We couldn’t find that family.");
-  }
-
-  await ensureParentStudentLinks(
-    [parent.userId],
-    family.students.map((member) => member.student.id),
-  );
-
-  const db = requireSupabase();
-  const { error } = await db.from("family_members").insert({
-    family_id: familyId,
-    parent_user_id: parent.userId,
-    display_name: parent.name || parent.email,
   });
 
   if (error) throw new Error(familyWriteErrorMessage(error));
@@ -278,27 +316,53 @@ export async function removeFamilyMember(memberId: number): Promise<void> {
 }
 
 export async function ensureParentStudentLinks(
-  parentUserIds: string[],
+  parentUserId: string,
   studentProfileIds: number[],
 ): Promise<void> {
-  if (parentUserIds.length === 0 || studentProfileIds.length === 0) return;
+  if (studentProfileIds.length === 0) return;
 
   const db = requireSupabase();
   const results = await Promise.all(
-    parentUserIds.flatMap((parentUserId) =>
-      studentProfileIds.map(async (studentProfileId) => {
-        const { error } = await db.from("parent_student_links").insert({
-          parent_user_id: parentUserId,
-          student_profile_id: studentProfileId,
-        });
-        return error;
-      }),
-    ),
+    studentProfileIds.map(async (studentProfileId) => {
+      const { error } = await db.from("parent_student_links").insert({
+        parent_user_id: parentUserId,
+        student_profile_id: studentProfileId,
+      });
+      return error;
+    }),
   );
 
   for (const error of results) {
     if (!error) continue;
     if (error.code === "23505") continue;
     throw new Error(rosterWriteErrorMessage(error));
+  }
+}
+
+export async function createParentInvites(input: {
+  organizationId: number;
+  email: string;
+  studentIds: number[];
+  invitedBy: string;
+}): Promise<void> {
+  if (input.studentIds.length === 0) return;
+
+  const db = requireSupabase();
+  const results = await Promise.all(
+    input.studentIds.map(async (studentProfileId) => {
+      const { error } = await db.from("parent_invites").insert({
+        organization_id: input.organizationId,
+        email: input.email,
+        student_profile_id: studentProfileId,
+        invited_by: input.invitedBy,
+      });
+      return error;
+    }),
+  );
+
+  for (const error of results) {
+    if (!error) continue;
+    if (error.code === "23505") continue;
+    throw new Error(familyWriteErrorMessage(error));
   }
 }

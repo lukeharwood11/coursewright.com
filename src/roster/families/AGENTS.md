@@ -1,5 +1,5 @@
 # AGENTS — `src/roster/families/`
 
-Org-scoped **parent directory**. Families are roster convenience — not an access gate.
+Org-scoped **parent directory**. A family is a **named group of student profiles** (Class-mirror) — not an access gate.
 
-Staff create households, then open [family/](../family/) to add students and link parents. Linking a parent must create or reuse `parent_student_links` for students in that household.
+Parents are **derived** from `parent_student_links` to those students. Do not write `family_members.parent_user_id` for P0.

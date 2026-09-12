@@ -68,10 +68,7 @@ export function useOrgShellData(orgSlug: string | undefined) {
       id: String(family.id),
       label: familyLabel(
         family.displayName,
-        familyMemberNames(
-          family.students.map((member) => member.student),
-          family.parents,
-        ),
+        familyMemberNames(family.students.map((member) => member.student)),
       ),
     })),
   };

@@ -1,6 +1,7 @@
--- Families are directory convenience. Access stays enrollment + parent_student_links.
+-- Families are a named group of student_profiles (Class-mirror).
+-- Parents appear via parent_student_links only — not family_members.parent_user_id.
 begin;
-select plan(10);
+select plan(11);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -52,7 +53,7 @@ select lives_ok(
 select lives_ok(
   $$insert into families (organization_id, display_name)
     select id, 'The Testers' from organizations where name = 'Family Co-op'$$,
-  'owner can create a family'
+  'owner can create a named family'
 );
 
 select lives_ok(
@@ -69,14 +70,6 @@ select lives_ok(
     where f.display_name = 'The Testers'
       and sp.name = 'Sam Sibling'$$,
   'owner can add a student family member'
-);
-
-select lives_ok(
-  $$insert into family_members (family_id, parent_user_id, display_name)
-    select f.id, 'f2222222-2222-2222-2222-222222222222', 'Fay Parent'
-    from families f
-    where f.display_name = 'The Testers'$$,
-  'owner can add a parent family member'
 );
 
 select lives_ok(
@@ -102,6 +95,24 @@ select throws_ok(
   'student belongs to at most one family'
 );
 
+insert into student_profiles (organization_id, name)
+select id, 'Lee Learner' from organizations where name = 'Family Co-op';
+
+insert into family_members (family_id, student_profile_id, display_name)
+select f.id, sp.id, sp.name
+from families f
+join student_profiles sp on sp.organization_id = f.organization_id
+where f.display_name = 'Other household'
+  and sp.name = 'Lee Learner';
+
+select lives_ok(
+  $$insert into parent_student_links (parent_user_id, student_profile_id)
+    select 'f2222222-2222-2222-2222-222222222222', sp.id
+    from student_profiles sp
+    where sp.name = 'Lee Learner'$$,
+  'same parent can link to students in two families'
+);
+
 insert into courses (organization_id, title, status, visibility)
 select id, 'Published offering', 'active', 'published'
 from organizations
@@ -120,8 +131,17 @@ select id, 'f2222222-2222-2222-2222-222222222222', 'parent', 'active'
 from organizations
 where name = 'Family Co-op';
 
+-- Poison-pill: parent_user_id on family_members must not be an access gate.
+insert into family_members (family_id, parent_user_id, display_name)
+select f.id, 'f2222222-2222-2222-2222-222222222222', 'Fay Parent'
+from families f
+where f.display_name = 'The Testers';
+
 delete from parent_student_links
-where parent_user_id = 'f2222222-2222-2222-2222-222222222222';
+where parent_user_id = 'f2222222-2222-2222-2222-222222222222'
+  and student_profile_id = (
+    select id from student_profiles where name = 'Sam Sibling'
+  );
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'f2222222-2222-2222-2222-222222222222', true);
@@ -133,7 +153,7 @@ select set_config(
 
 select is_empty(
   $$select * from courses where title = 'Published offering'$$,
-  'family membership without parent_student_links does not grant course access'
+  'family_members.parent_user_id without parent_student_links does not grant course access'
 );
 
 reset role;
@@ -158,12 +178,17 @@ select results_eq(
 
 reset role;
 delete from family_members
-where parent_user_id = 'f2222222-2222-2222-2222-222222222222';
+where student_profile_id = (
+  select id from student_profiles where name = 'Sam Sibling'
+);
 
 select isnt_empty(
   $$select 1 from parent_student_links
-    where parent_user_id = 'f2222222-2222-2222-2222-222222222222'$$,
-  'removing a family member does not delete parent_student_links'
+    where parent_user_id = 'f2222222-2222-2222-2222-222222222222'
+      and student_profile_id = (
+        select id from student_profiles where name = 'Sam Sibling'
+      )$$,
+  'removing a student from a family does not delete parent_student_links'
 );
 
 set local role authenticated;

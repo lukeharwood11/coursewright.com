@@ -56,6 +56,7 @@ export function FamilyPage() {
   const memberIdByStudent = new Map(
     family.students.map((member) => [member.student.id, member.memberId]),
   );
+  const studentNames = new Map(students.map((student) => [student.id, student.name]));
 
   return (
     <div className="px-5 py-8 md:px-8">
@@ -66,9 +67,9 @@ export function FamilyPage() {
         {family.title}
       </h1>
       <p className="mt-1 max-w-2xl text-[14px] text-[var(--ink-soft)]">
-        A family is a household in the parent directory — not a course. Adding
-        someone here does not share materials. Linking a parent creates or
-        reuses the student link that parent access uses.
+        A family is a named group of students — like a class, not a course.
+        Parents listed here come from parent–student links. Adding someone to
+        the family does not share materials or enroll them.
       </p>
 
       <div className="mt-6 grid items-start gap-4 lg:grid-cols-2">
@@ -84,8 +85,8 @@ export function FamilyPage() {
           {family.availableStudents.length === 0 ? (
             <p className="text-[14px] leading-relaxed text-[var(--ink-soft)]">
               {students.length === 0
-                ? "No one in the org yet, or every student is already in a family. Add a new student to create their profile and put them in this household."
-                : "Every student in the org is already in a family. Add a new student below, or remove someone from another household first."}
+                ? "No one in the org yet, or every student is already in a family. Add a new student to create their profile and put them in this group."
+                : "Every student in the org is already in a family. Add a new student below, or remove someone from another family first."}
             </p>
           ) : null}
         </section>
@@ -117,20 +118,18 @@ export function FamilyPage() {
 
       <section className="mt-4 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
         <LinkParentPicker
-          people={family.availableParents}
-          selectedId={family.selectedParentId}
+          students={students}
+          people={family.orgPeople}
+          linkStudentId={family.linkStudentId}
+          selectedParentId={family.selectedParentId}
+          email={family.linkEmail}
           saving={family.addingParent}
           error={family.parentError}
-          onSelect={family.setSelectedParentId}
+          onStudentSelect={family.setLinkStudentId}
+          onParentSelect={family.setSelectedParentId}
+          onEmailChange={family.setLinkEmail}
           onAdd={family.onAddParent}
         />
-        {family.availableParents.length === 0 ? (
-          <p className="text-[14px] leading-relaxed text-[var(--ink-soft)]">
-            {family.parents.length === 0
-              ? "No other Course Wright accounts in this organization yet. A parent must have an account here before you can link them. Sending invites is a separate flow."
-              : "Everyone already in this organization is linked to this family."}
-          </p>
-        ) : null}
       </section>
 
       <section className="mt-8">
@@ -138,7 +137,7 @@ export function FamilyPage() {
         <StudentRosterList
           students={students}
           orgSlug={family.organization.slug}
-          emptyMessage="No students in this family yet."
+          emptyMessage="No students in this family yet. Empty families are fine."
           trailing={(student) => {
             const memberId = memberIdByStudent.get(student.id);
             if (!memberId) return null;
@@ -158,13 +157,13 @@ export function FamilyPage() {
       <section className="mt-8">
         <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Parents</h2>
         <p className="mt-1 max-w-xl text-[13.5px] text-[var(--ink-soft)]">
-          Removing someone from the family does not change parent–student links
-          or course enrollments.
+          Derived from parent–student links. Removing a student from the family
+          does not drop those links or course enrollments.
         </p>
         <FamilyParentList
           parents={family.parents}
-          removingId={family.removingId}
-          onRemove={family.onRemove}
+          pendingInvites={family.pendingInvites}
+          studentNames={studentNames}
         />
       </section>
 

@@ -10,9 +10,9 @@ export function FamiliesList({
   if (families.length === 0) {
     return (
       <p className="mt-6 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-        No families yet. Create a household, add students from the roster, and
-        link a parent. Linking a parent also creates (or reuses) the student
-        link that controls parent access — family membership itself does not.
+        No families yet. Create a named group, add students from the roster,
+        and link a parent to those students. Parent access stays enrollment plus
+        the student link — family membership itself does not grant materials.
       </p>
     );
   }

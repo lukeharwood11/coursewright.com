@@ -3,14 +3,19 @@ export type FamilyDisplayInput = {
 };
 
 export type ValidatedFamily = {
-  displayName: string | null;
+  displayName: string;
 };
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validateFamily(
   input: FamilyDisplayInput,
 ): { ok: true; value: ValidatedFamily } | { ok: false; error: string } {
   const displayName = input.displayName.trim();
-  return { ok: true, value: { displayName: displayName || null } };
+  if (!displayName) {
+    return { ok: false, error: "Name is required." };
+  }
+  return { ok: true, value: { displayName } };
 }
 
 export function familyLabel(
@@ -26,14 +31,8 @@ export function familyLabel(
   return `${names.slice(0, 2).join(", ")} +${names.length - 2} more`;
 }
 
-export function familyMemberNames(
-  students: Array<{ name: string }>,
-  parents: Array<{ name: string }>,
-): string[] {
-  return [
-    ...students.map((student) => student.name),
-    ...parents.map((parent) => parent.name),
-  ];
+export function familyMemberNames(students: Array<{ name: string }>): string[] {
+  return students.map((student) => student.name);
 }
 
 export function familyCountSummary(
@@ -58,12 +57,24 @@ export function studentIdsInFamilies<
   return taken;
 }
 
-export function peopleNotInFamily<T extends { userId: string }>(
+export function findPersonByEmail<T extends { email: string }>(
   people: T[],
-  linkedUserIds: Iterable<string>,
-): T[] {
-  const taken = new Set(linkedUserIds);
-  return people.filter((person) => !taken.has(person.userId));
+  email: string,
+): T | null {
+  const needle = email.trim().toLowerCase();
+  if (!needle) return null;
+  return people.find((person) => person.email.toLowerCase() === needle) ?? null;
+}
+
+export function parseParentEmail(
+  raw: string,
+): { ok: true; email: string | null } | { ok: false; error: string } {
+  const email = raw.trim().toLowerCase();
+  if (!email) return { ok: true, email: null };
+  if (!EMAIL_PATTERN.test(email)) {
+    return { ok: false, error: "Enter a valid parent email, or choose an account." };
+  }
+  return { ok: true, email };
 }
 
 export function familyWriteErrorMessage(error: {
@@ -74,10 +85,10 @@ export function familyWriteErrorMessage(error: {
     if (error.message.includes("family_members_student_uidx")) {
       return "That student is already in a family.";
     }
-    if (error.message.includes("family_members_family_parent_uidx")) {
-      return "That parent is already in this family.";
+    if (error.message.includes("parent_invites_pending_uidx")) {
+      return "An invite for that email and student is already pending.";
     }
-    return "That person is already in this family.";
+    return "That student is already in a family.";
   }
   if (
     error.code === "42501" ||

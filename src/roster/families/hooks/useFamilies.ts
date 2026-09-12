@@ -61,10 +61,7 @@ export function useFamilies() {
       id: family.id,
       label: familyLabel(
         family.displayName,
-        familyMemberNames(
-          family.students.map((member) => member.student),
-          family.parents,
-        ),
+        familyMemberNames(family.students.map((member) => member.student)),
       ),
       summary: familyCountSummary(family.students.length, family.parents.length),
     })),

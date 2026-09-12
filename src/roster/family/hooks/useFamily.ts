@@ -4,14 +4,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import {
   listOrgPeople,
   orgQueryKeys,
 } from "@/organizations/databridge/memberships";
 import { getOrganization } from "@/organizations/databridge/organizations";
 import {
-  addFamilyParent,
   addFamilyStudent,
+  createParentInvites,
+  ensureParentStudentLinks,
   familyQueryKeys,
   getFamily,
   listFamilies,
@@ -21,15 +23,19 @@ import { createStudent, listStudents, studentQueryKeys } from "@/roster/databrid
 import {
   familyLabel,
   familyMemberNames,
-  peopleNotInFamily,
+  findPersonByEmail,
+  parseParentEmail,
   studentIdsInFamilies,
 } from "@/roster/model/family";
 import { studentsNotIn, validateStudentProfile } from "@/roster/model/studentProfile";
+
+const ALL_STUDENTS = "all";
 
 export function useFamily() {
   const { familyId: familyIdParam } = useParams();
   const familyId = familyIdParam ? Number(familyIdParam) : NaN;
   const { organization } = useOrgShell();
+  const user = useAuthedUser();
   const queryClient = useQueryClient();
   const familyReady = Number.isFinite(familyId);
 
@@ -68,10 +74,7 @@ export function useFamily() {
     studentsQuery.data ?? [],
     occupiedStudentIds,
   );
-  const availableParents = peopleNotInFamily(
-    peopleQuery.data ?? [],
-    (members?.parents ?? []).map((parent) => parent.userId),
-  ).slice().sort((a, b) => {
+  const orgPeople = (peopleQuery.data ?? []).slice().sort((a, b) => {
     if (a.role === "parent" && b.role !== "parent") return -1;
     if (a.role !== "parent" && b.role === "parent") return 1;
     return a.name.localeCompare(b.name);
@@ -83,7 +86,9 @@ export function useFamily() {
   const [parentEmail, setParentEmail] = useState("");
   const [gradeLevel, setGradeLevel] = useState("");
   const [newError, setNewError] = useState<string | null>(null);
+  const [linkStudentId, setLinkStudentId] = useState(ALL_STUDENTS);
   const [selectedParentId, setSelectedParentId] = useState("");
+  const [linkEmail, setLinkEmail] = useState("");
   const [parentError, setParentError] = useState<string | null>(null);
 
   const addExistingMutation = useMutation({
@@ -139,17 +144,56 @@ export function useFamily() {
   const addParentMutation = useMutation({
     mutationFn: async () => {
       if (!familyReady) throw new Error("Family isn’t loaded yet.");
-      const person = availableParents.find((row) => row.userId === selectedParentId);
-      if (!person) {
-        throw new Error("Choose someone with a Course Wright account in this organization.");
+      const familyStudents = members?.students ?? [];
+      if (familyStudents.length === 0) {
+        throw new Error("Add a student before linking a parent.");
       }
-      await addFamilyParent(familyId, person);
+
+      const targetIds =
+        familyStudents.length === 1 || linkStudentId === ALL_STUDENTS
+          ? familyStudents.map((member) => member.student.id)
+          : [Number(linkStudentId)].filter((id) => Number.isFinite(id) && id > 0);
+
+      if (targetIds.length === 0) {
+        throw new Error("Choose a student to link this parent to.");
+      }
+
+      const parsedEmail = parseParentEmail(linkEmail);
+      if (!parsedEmail.ok) throw new Error(parsedEmail.error);
+
+      const selectedPerson = orgPeople.find((row) => row.userId === selectedParentId);
+      const emailedPerson = parsedEmail.email
+        ? findPersonByEmail(orgPeople, parsedEmail.email)
+        : null;
+      const person = selectedPerson ?? emailedPerson;
+
+      if (person) {
+        await ensureParentStudentLinks(person.userId, targetIds);
+        return "linked" as const;
+      }
+
+      if (!parsedEmail.email) {
+        throw new Error("Choose someone in this organization, or enter a parent email.");
+      }
+
+      await createParentInvites({
+        organizationId: organization.id,
+        email: parsedEmail.email,
+        studentIds: targetIds,
+        invitedBy: user.id,
+      });
+      return "invited" as const;
     },
-    onSuccess: async () => {
+    onSuccess: async (result) => {
       setSelectedParentId("");
+      setLinkEmail("");
       setParentError(null);
       await invalidateFamily(queryClient, organization.id, familyId);
-      toast("Parent linked to this family.");
+      toast(
+        result === "invited"
+          ? "Invite saved for that email. Sending it is still a separate step."
+          : "Parent linked to the student.",
+      );
     },
     onError: (error: Error) => {
       setParentError(error.message);
@@ -187,10 +231,7 @@ export function useFamily() {
     belongsHere && family
       ? familyLabel(
           family.displayName,
-          familyMemberNames(
-            family.students.map((member) => member.student),
-            family.parents,
-          ),
+          familyMemberNames(family.students.map((member) => member.student)),
         )
       : null;
 
@@ -200,8 +241,9 @@ export function useFamily() {
     title,
     students: members?.students ?? [],
     parents: members?.parents ?? [],
+    pendingInvites: members?.pendingInvites ?? [],
     availableStudents,
-    availableParents,
+    orgPeople,
     gradeLabels: organizationQuery.data?.gradeLabels ?? [],
     loading: familyQuery.isLoading,
     error: familyQuery.error ? familyQuery.error.message : null,
@@ -212,7 +254,9 @@ export function useFamily() {
     parentEmail,
     gradeLevel,
     newError,
+    linkStudentId,
     selectedParentId,
+    linkEmail,
     parentError,
     addingExisting: addExistingMutation.isPending,
     addingNew: addNewMutation.isPending,
@@ -231,8 +275,13 @@ export function useFamily() {
       setGradeLevel(value);
       setNewError(null);
     },
+    setLinkStudentId,
     setSelectedParentId: (value: string) => {
       setSelectedParentId(value);
+      setParentError(null);
+    },
+    setLinkEmail: (value: string) => {
+      setLinkEmail(value);
       setParentError(null);
     },
     onAddExisting,
