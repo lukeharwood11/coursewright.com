@@ -15,7 +15,7 @@ Student profiles, **classes** (student groups), **families** (parent directory),
 
 - Students are **profiles**, not accounts (P0/P1).
 - **Class ≠ Course** — do not put units/materials on a class.
-- **Family ≠ access** — a family is a named group of `student_profile`s (Class-mirror). Parents appear only via `parent_student_links` to those students. Do not write `family_members.parent_user_id` as an access gate. Linking a parent creates or reuses the student link (invite row if no account). Never write enrollments from this directory.
+- **Family ≠ access** — a family is a named group of `student_profile`s (Class-mirror). Parents appear only via `parent_student_links` to those students. Do not write `family_members.parent_user_id` as an access gate. Linking a parent creates or reuses the student link (`admin_invites` with `role=parent` if no account). Never write enrollments from this directory.
 - Course ↔ Class enrollment relationship is **workshop** in FEATURES — do not invent until locked; keep student↔course enrollment as the access gate.
 - Parent access still requires invite + account ([FEATURES.md](../../docs/FEATURES.md)).
 - Follow frontend-development skill page-folder pattern under this domain.

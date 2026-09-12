@@ -48,6 +48,8 @@ export type Database = {
           invited_by: string
           membership_id: number | null
           organization_id: number
+          role: string
+          student_profile_id: number | null
           token: string
         }
         Insert: {
@@ -58,6 +60,8 @@ export type Database = {
           invited_by: string
           membership_id?: number | null
           organization_id: number
+          role: string
+          student_profile_id?: number | null
           token?: string
         }
         Update: {
@@ -68,6 +72,8 @@ export type Database = {
           invited_by?: string
           membership_id?: number | null
           organization_id?: number
+          role?: string
+          student_profile_id?: number | null
           token?: string
         }
         Relationships: [
@@ -90,6 +96,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_invites_student_profile_id_fkey"
+            columns: ["student_profile_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -968,64 +981,6 @@ export type Database = {
         }
         Relationships: []
       }
-      parent_invites: {
-        Row: {
-          accepted_at: string | null
-          created_at: string
-          email: string
-          expires_at: string | null
-          id: number
-          invited_by: string
-          organization_id: number
-          student_profile_id: number
-          token: string
-        }
-        Insert: {
-          accepted_at?: string | null
-          created_at?: string
-          email: string
-          expires_at?: string | null
-          id?: number
-          invited_by: string
-          organization_id: number
-          student_profile_id: number
-          token?: string
-        }
-        Update: {
-          accepted_at?: string | null
-          created_at?: string
-          email?: string
-          expires_at?: string | null
-          id?: number
-          invited_by?: string
-          organization_id?: number
-          student_profile_id?: number
-          token?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "parent_invites_invited_by_fkey"
-            columns: ["invited_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "parent_invites_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "parent_invites_student_profile_id_fkey"
-            columns: ["student_profile_id"]
-            isOneToOne: false
-            referencedRelation: "student_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       parent_student_links: {
         Row: {
           created_at: string
@@ -1155,7 +1110,7 @@ export type Database = {
             foreignKeyName: "share_links_parent_invite_id_fkey"
             columns: ["parent_invite_id"]
             isOneToOne: false
-            referencedRelation: "parent_invites"
+            referencedRelation: "admin_invites"
             referencedColumns: ["id"]
           },
           {
@@ -1355,7 +1310,38 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_invite: { Args: { p_token: string }; Returns: string }
+      claim_staff_invite: { Args: { p_token: string }; Returns: string }
+      get_invite: {
+        Args: { p_token: string }
+        Returns: {
+          accepted_at: string | null
+          email: string
+          email_matches: boolean
+          id: number
+          organization_id: number
+          organization_name: string
+          organization_slug: string
+          role: string
+          student_name: string | null
+          student_profile_id: number | null
+        }[]
+      }
+      get_staff_invite: {
+        Args: { p_token: string }
+        Returns: {
+          accepted_at: string | null
+          email: string
+          email_matches: boolean
+          id: number
+          organization_id: number
+          organization_name: string
+          organization_slug: string
+          role: string
+          student_name: string | null
+          student_profile_id: number | null
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

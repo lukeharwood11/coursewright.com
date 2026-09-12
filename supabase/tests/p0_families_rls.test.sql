@@ -1,7 +1,7 @@
 -- Families are a named group of student_profiles (Class-mirror).
 -- Parents appear via parent_student_links only — not family_members.parent_user_id.
 begin;
-select plan(11);
+select plan(15);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -78,6 +78,36 @@ select lives_ok(
     from student_profiles sp
     where sp.name = 'Sam Sibling'$$,
   'owner can create a parent-student link'
+);
+
+select lives_ok(
+  $$insert into admin_invites (organization_id, email, role, student_profile_id, invited_by)
+    select o.id, 'pending-parent@example.com', 'parent', sp.id,
+      'f1111111-1111-1111-1111-111111111111'
+    from organizations o
+    join student_profiles sp on sp.organization_id = o.id
+    where o.name = 'Family Co-op' and sp.name = 'Sam Sibling'$$,
+  'owner can save a pending parent invite on admin_invites'
+);
+
+select throws_ok(
+  $$insert into admin_invites (organization_id, email, role, student_profile_id, invited_by)
+    select o.id, 'pending-parent@example.com', 'parent', sp.id,
+      'f1111111-1111-1111-1111-111111111111'
+    from organizations o
+    join student_profiles sp on sp.organization_id = o.id
+    where o.name = 'Family Co-op' and sp.name = 'Sam Sibling'$$,
+  '23505',
+  NULL,
+  'pending parent invite is unique per org, email, and student'
+);
+
+select isnt_empty(
+  $$select 1 from admin_invites
+    where role = 'parent'
+      and email = 'pending-parent@example.com'
+      and accepted_at is null$$,
+  'staff can list pending parent invites for family students'
 );
 
 insert into families (organization_id, display_name)
@@ -202,6 +232,18 @@ select set_config(
 select is_empty(
   $$select * from families$$,
   'unrelated user sees no families'
+);
+
+select throws_ok(
+  $$insert into admin_invites (organization_id, email, role, student_profile_id, invited_by)
+    select o.id, 'outsider-invite@example.com', 'parent', sp.id,
+      'f3333333-3333-3333-3333-333333333333'
+    from organizations o
+    join student_profiles sp on sp.organization_id = o.id
+    where o.name = 'Family Co-op' and sp.name = 'Sam Sibling'$$,
+  '42501',
+  NULL,
+  'unrelated user cannot write parent invites'
 );
 
 select * from finish();

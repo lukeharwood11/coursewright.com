@@ -182,18 +182,24 @@ async function listPendingInvites(
   if (studentIds.length === 0) return [];
   const db = requireSupabase();
   const { data, error } = await db
-    .from("parent_invites")
+    .from("admin_invites")
     .select("id, email, student_profile_id")
+    .eq("role", "parent")
     .in("student_profile_id", studentIds)
     .is("accepted_at", null)
     .order("created_at");
 
   if (error) throw new Error(error.message);
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    email: row.email,
-    studentProfileId: row.student_profile_id,
-  }));
+  return (data ?? []).flatMap((row) => {
+    if (row.student_profile_id == null) return [];
+    return [
+      {
+        id: row.id,
+        email: row.email,
+        studentProfileId: row.student_profile_id,
+      },
+    ];
+  });
 }
 
 export async function listFamilies(
@@ -350,11 +356,12 @@ export async function createParentInvites(input: {
   const db = requireSupabase();
   const results = await Promise.all(
     input.studentIds.map(async (studentProfileId) => {
-      const { error } = await db.from("parent_invites").insert({
+      const { error } = await db.from("admin_invites").insert({
         organization_id: input.organizationId,
         email: input.email,
-        student_profile_id: studentProfileId,
+        role: "parent",
         invited_by: input.invitedBy,
+        student_profile_id: studentProfileId,
       });
       return error;
     }),

@@ -85,7 +85,7 @@ export function familyWriteErrorMessage(error: {
     if (error.message.includes("family_members_student_uidx")) {
       return "That student is already in a family.";
     }
-    if (error.message.includes("parent_invites_pending_uidx")) {
+    if (error.message.includes("admin_invites_pending_parent_uidx")) {
       return "An invite for that email and student is already pending.";
     }
     return "That student is already in a family.";

@@ -81,12 +81,12 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Audio & video files** | Video as a **block** on a material page; uploaded audio TBD | shipped | Video **URL embed** in page blocks (upload vs URL still **TBD**); uploaded audio/video play on file materials |
 | **Course grade levels** | Courses carry **grade metadata** — multiple grades and/or ranges | shipped | Editor on create + course settings. Templates get the same model in **P1** |
 | **Advanced search** | Native, easy, **cross-facet** search — “where do I have this resource?” | planned | GIN `search_vector` indexes ready; search chrome toasts only |
-| **Families / parent directory** | Named group of **student profiles**; parents appear via `parent_student_links`; org **parent directory** | shipped | Class-mirror members. Link parent creates/reuses student links (invite row if no account). **Never enrollments.** `family_members.parent_user_id` unused in P0 app. Extra fields, merge/split, invite send/claim still open |
+| **Families / parent directory** | Named group of **student profiles**; parents appear via `parent_student_links`; org **parent directory** | shipped | Class-mirror members. Link parent creates/reuses student links (`admin_invites` `role=parent` if no account). **Never enrollments.** `family_members.parent_user_id` unused in P0 app. Extra fields, merge/split, invite send/claim still open |
 | **Print materials** | One-tap print of a material, a unit, or this week's work | shipped | [PRINT](./pages/PRINT.md): `@react-pdf/renderer` + in-app preview, Download / Print. Whole-course print out of P0 |
 | **Lesson materials & planning** | Unified storage for course content, files, and plans | shipped | Course builder authoring on courses |
 | **Content versioning** | Versions of course content; who changed what; revert dangerous actions | shipped | Restore a `material_versions` snapshot from material edit; file blob revert on file materials |
 | **Soft deletes** | Content is never hard-deleted | shipped | Remove/restore on units and materials (`deleted_at`) |
-| **Parent invites (email)** | Invite parents by email to access shared content | planned | Schema + RLS ready; family directory can insert a pending invite row when linking an email with no account; send/claim UI not built |
+| **Parent invites (email)** | Invite parents by email to access shared content | planned | Unified `admin_invites` (`role=parent` + `student_profile_id`). Family directory inserts that row when linking an email with no account; send/claim UI not built |
 | **Parent access (link or account)** | Parent clicks invite link **or** signs up / logs in with the **same email** | planned | Auth shipped; invite/resource claim paths not built |
 | **Parent org membership** | Parent becomes a parent in the org when access rules are met | planned | Parent role + RLS in SQL; invite→membership flow not in app |
 | **Share resources with parents** | Share course content and files with enrolled families | shipped | Copy material URL (account required). Dedicated share-entry path still TBD |
@@ -212,7 +212,7 @@ Teachers will ask **“where do I have this resource?”** Search is a **core P0
 
 **Access lock:** Family = named group of `student_profile`s (Class-mirror). Empty family is OK. Access stays course enrollment + `parent_student_links`. A family profile does **not** grant materials, this-week, or print.
 
-Parents appear on a family **only** via existing `parent_student_links` to those students. Do **not** invent a family-membership access table, and do not treat `family_members.parent_user_id` as an access gate (column unused for P0 app writes). Linking a parent reuses or creates `parent_student_links` (and may save a pending `parent_invites` row if they have no account). **Never write enrollments** from this directory. A parent on two families is **yes by default** (via links to students in each).
+Parents appear on a family **only** via existing `parent_student_links` to those students. Do **not** invent a family-membership access table, and do not treat `family_members.parent_user_id` as an access gate (column unused for P0 app writes). Linking a parent reuses or creates `parent_student_links` (and may save a pending `admin_invites` row with `role=parent` and `student_profile_id` if they have no account). **Never write enrollments** from this directory. A parent on two families is **yes by default** (via links to students in each).
 
 | Concept | Detail |
 |---------|--------|
@@ -221,10 +221,10 @@ Parents appear on a family **only** via existing `parent_student_links` to those
 | **Parent directory** | Org list + sidebar of families — find a household without hunting the course roster |
 | **How it forms** | Staff create a named family, then add existing or new student profiles (a student is in at most one family) |
 | **Parents on a family** | Derived from `parent_student_links` to member students — not from family membership rows |
-| **Link parent** | Create or reuse `parent_student_links` for the chosen student(s); if no account, save a claim invite row |
+| **Link parent** | Create or reuse `parent_student_links` for the chosen student(s); if no account, save `admin_invites` with `role=parent` and those `student_profile_id`s |
 | **Visibility** | Owners, admins, and instructors (Class-mirror). Parent-facing family profile is TBD |
 
-**Not P0:** full parent-managed household **across organizations** — that stays **P2** ([Parent family management](#p2--later-long-term)). Sending and claiming parent invites remains a separate planned flow (this page may insert a pending invite row).
+**Not P0:** full parent-managed household **across organizations** — that stays **P2** ([Parent family management](#p2--later-long-term)). Sending and claiming parent invites remains a separate planned flow (this page may insert a pending `admin_invites` row with `role=parent`).
 
 **Open:** extra family profile fields beyond names; merge/split UX; parent-facing family profile.
 
@@ -614,7 +614,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | Advanced search is P0 (native, cross-facet, find resources) | **Decided** | Search UX + indexes; STACK Postgres-first hypothesis |
 | Uploaded audio + video with in-app players | **Decided** | Storage files + players; distinct from YouTube embeds |
 | Org-scoped Family + parent directory (P0) | **Decided** | Named group of student profiles (Class-mirror); parents derived from `parent_student_links`; directory is org list + sidebar |
-| Family membership is not an access gate | **Decided** | Access stays enrollment + `parent_student_links` only. Do not treat `family_members.parent_user_id` as a gate (unused in P0 app). Link parent creates/reuses student links; never enrollments. Parent may appear on two families via multiple student links |
+| Family membership is not an access gate | **Decided** | Access stays enrollment + `parent_student_links` only. Do not treat `family_members.parent_user_id` as a gate (unused in P0 app). Link parent creates/reuses student links (`admin_invites` `role=parent` if no account); never enrollments. Parent may appear on two families via multiple student links |
 | Cross-org parent family management | **Decided** | **P2** — not the same as P0 org Family |
 | Active course = `status = active` (dates informational only) | **Decided** | Course.status — offering is running; not the same as publish |
 | Course description, location, subject / area | **Decided** | Optional catalog fields; description ≠ P1 Summary; location ≠ Class; subject is free text |

@@ -13,11 +13,11 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | User | `profiles` | PK = `auth.users.id`. Email + Google live in Supabase Auth; `profiles` is the PostgREST-facing row. |
 | Organization | `organizations` | |
 | Membership | `memberships` | |
-| AdminInvite | `admin_invites` | Additional **admins** only (FEATURES). Instructors are added as memberships. |
+| AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `parent`. Membership is created on claim. |
 | StudentProfile | `student_profiles` | |
 | Family | `families` | |
 | FamilyMember | `family_members` | |
-| ParentInvite | `parent_invites` | |
+| ParentInvite | `admin_invites` (`role = parent`) | Same token table as staff. `student_profile_id` required for parent. Separate `parent_invites` table retired. |
 | ParentStudentLink | `parent_student_links` | |
 | Enrollment | `enrollments` | |
 | Course | `courses` | P0 |
@@ -333,17 +333,23 @@ Org staff and parent memberships. Owners and admins may **change** `admin` ↔ `
 
 ### AdminInvite
 
-Email invite for an additional admin. Claimed by signing up / logging in with that email.
+Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` (staff) or `parent`. Claimed by signing up / logging in with that email (send/claim UI still planned). **Membership is created on claim.** Parent course access still requires enrollment (see Parent access gate).
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
-| email | text | Lowercased |
+| email | text | Lowercased — must match the account that claims |
+| role | text | `owner` · `admin` · `instructor` · `parent` |
+| student_profile_id | bigint | FK → StudentProfile, **required when `role = parent`**, else null |
 | invited_by | uuid | FK → User |
 | token | text | Unique invite token (returned on insert) |
 | accepted_at | timestamptz | nullable |
 | membership_id | bigint | FK → Membership, nullable |
+
+**Who can invite staff:** owners and admins. Admins may invite `admin` or `instructor`. Only owners may invite another `owner`. Instructors cannot invite org staff.
+
+**Who can invite parents:** owners, admins, and instructors. Parent invites are created from the Families directory / roster when linking an email with no account.
 
 ---
 
@@ -392,16 +398,11 @@ Org-scoped **named group of student profiles** for the parent directory (Class-m
 
 ### ParentInvite
 
-| Field | Type | Notes |
-|-------|------|-------|
-| id | bigint | PK |
-| organization_id | bigint | FK → Organization |
-| email | text | Parent email (lowercased) |
-| student_profile_id | bigint | FK → StudentProfile |
-| invited_by | uuid | FK → User |
-| token | text | Unique invite link token |
-| accepted_at | timestamptz | nullable |
-| expires_at | timestamptz | nullable |
+Stored on `admin_invites` with `role = parent` (same token / claim RPCs as staff). The separate `parent_invites` table is retired.
+
+Parent-specific fields: `student_profile_id` (required), plus the shared email / token / invited_by / accepted_at columns on AdminInvite.
+
+**P0 Families path:** staff save one pending row per chosen student. Send/claim UI is still planned. On claim: create parent membership (if needed) and `parent_student_links`. Do **not** grant course access from the invite alone.
 
 ### ParentStudentLink
 
@@ -589,7 +590,7 @@ Parent-facing URL. **P0: must be logged in** before the destination is shown.
 | course_id | bigint | FK → Course, nullable |
 | student_profile_id | bigint | FK → StudentProfile, nullable |
 | material_id | bigint | FK → Material, nullable — set when `link_type = resource` |
-| parent_invite_id | bigint | FK → ParentInvite, nullable |
+| parent_invite_id | bigint | FK → AdminInvite, nullable (parent-role invite when the share was created from one) |
 | expires_at | timestamptz | nullable |
 
 **Resource link:** opens that specific material after auth. Same parent access rules (enrolled student, active **published** course, published material).
