@@ -5,7 +5,7 @@
 
 ## Audience
 
-Admins and instructors (per directory visibility). Parents may later see their own family — TBD for P0.
+Admins and instructors (same staff visibility as Classes). Parents may later see their own family — TBD for P0.
 
 ## Purpose
 
@@ -14,30 +14,36 @@ One **family profile**: household of student profiles + parent users in this org
 
 ## Behavior
 
-- View one family profile; manage members when UX is locked (add/remove/merge/split TBD).
-- Parents belonging via linked students are part of the family profile.
-- Navigate to member student profiles and back to directory.
+- View one family profile; staff add and remove members.
+- Add an existing org student who is not already in another family, or create a new student profile and add them.
+- Link a parent who already has a Course Wright account in this organization. That write **creates or reuses** `parent_student_links` for students currently in the household (and when a student is added later, for parents already on the family). Family membership is not an access gate.
+- Remove a member from the family. This does **not** delete parent–student links or course enrollments (same convenience rule as Classes).
+- A student profile belongs to at most one family.
+- Empty family is allowed.
+- Navigate to member student profiles, the directory, and the org roster.
 
 ## Data shown
 
-- Family identity — member **names** minimum; additional fields TBD; own display name TBD
-- Student members: names → profiles
-- Parent members: names/emails
-- Related invite/linkage status TBD
+- Family identity — optional display name; otherwise member names
+- Student members: names, optional grade, optional parent email → profiles
+- Parent members: names and emails
+- Pickers: org students not in another family; org accounts not already linked to this family
 
 ## Contents
 
-- Family identity — member **names** at minimum; additional profile fields **TBD**; whether family has its own display name **TBD**
-- Student profiles in the household → [STUDENT_PROFILE](./STUDENT_PROFILE.md)
-- Parent users linked to this family
-- Actions: add/remove members, merge/split — **TBD** (FEATURES open)
-- Back to [FAMILIES](./FAMILIES.md)
+- Family identity (display name or derived member names)
+- Access copy: household directory, not a course
+- Add existing student / add new student
+- Link a parent account
+- Student list → [STUDENT_PROFILE](./STUDENT_PROFILE.md) with remove
+- Parent list with remove
+- Back to [FAMILIES](./FAMILIES.md) and [ORG_ROSTER](./ORG_ROSTER.md)
 
 ## Primary actions
 
-- View members
-- Manage membership (when UX locked)
-- Open student / parent-related invite state
+- Add / remove student members
+- Link / remove parent members (link also ensures student links)
+- Open a student profile
 
 ## Links to
 
@@ -48,4 +54,4 @@ One **family profile**: household of student profiles + parent users in this org
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Families & parent directory. Not the P2 cross-org parent family manager.
+[FEATURES.md](../FEATURES.md) — Families & parent directory. Not the P2 cross-org parent family manager. Sending parent invites is still a separate planned flow. Merge/split households is TBD.

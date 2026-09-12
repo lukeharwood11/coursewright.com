@@ -366,7 +366,7 @@ No other student-profile fields in P0.
 
 ### Family
 
-Org-scoped household for the **parent directory**. Builds on roster / parent links.
+Org-scoped household for the **parent directory**. Builds on roster / parent links. **Not an access gate** — materials, this-week, and print stay enrollment + `ParentStudentLink`.
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -388,7 +388,7 @@ Org-scoped household for the **parent directory**. Builds on roster / parent lin
 
 **Uniqueness (locked):** at least one of `student_profile_id` / `parent_user_id`; a student profile belongs to at most one family; unique `(family_id, parent_user_id)` when parent is set.
 
-**Rule:** A parent linked to a student in the family (via `ParentStudentLink`) **can be** a member of that family. Exact auto-create vs manual group UX TBD.
+**Rule:** Linking a parent to a family **creates or reuses** `ParentStudentLink` rows for students in that household. Family membership alone does not grant course access. Merge/split UX TBD.
 
 ### ParentInvite
 
@@ -686,6 +686,6 @@ Family cross-org management (extends P0 org Family)
 - **Files:** Supabase Storage bucket `org-files`; `File.storage_ref` is `{organization_id}/{file_id}/{version_id}/{filename}`. Audio/video playback in the SPA for those mime types.
 - **Search:** generated `search_vector` columns + GIN indexes; facets are ordinary columns (`course_id`, `kind`, `mime_type`, `grade_levels`, …) filtered under the same RLS.
 - **Analytics:** PostHog (client) — not a schema entity.
-- Access control via **RLS** (and Storage policies) aligned with Membership roles and parent access rules above. Parent SELECT of a course requires an active `parent` membership, a `ParentStudentLink`, an active `Enrollment`, `Course.status = active`, and `Course.visibility = published`. Parents (and future students) SELECT materials only when `visibility = published` **and** they can view the course. Instructors/admins see unpublished courses and materials.
+- Access control via **RLS** (and Storage policies) aligned with Membership roles and parent access rules above. Parent SELECT of a course requires an active `parent` membership, a `ParentStudentLink`, an active `Enrollment`, `Course.status = active`, and `Course.visibility = published`. **Family membership is not part of that gate.** Parents (and future students) SELECT materials only when `visibility = published` **and** they can view the course. Instructors/admins see unpublished courses and materials.
 - **Migrations:** `supabase db migrate` — see [STACK.md](../STACK.md).
 - **ID format:** App entities use **`bigserial` / `bigint`**. Auth-linked ids (`profiles`, FKs to `auth.users`) stay **`uuid`**. Baseline migrations match this convention.

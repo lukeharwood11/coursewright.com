@@ -5,7 +5,7 @@
 
 ## Audience
 
-Admins and instructors (exact visibility TBD — FEATURES leaves admin-only vs instructor-visible open).
+Admins and instructors (same staff visibility as Classes). Parents do not use this directory in P0.
 
 ## Purpose
 
@@ -14,27 +14,30 @@ Org-scoped **parent / family directory** — find households without hunting cou
 
 ## Behavior
 
-- Browse org-scoped family directory (admin and/or instructor — exact visibility TBD).
-- Open a family; create/group households from roster associations (UX TBD).
+- Browse org-scoped family directory (owners, admins, and instructors).
+- Create a family with an optional display name; open it to add students and link parents.
+- Empty state explains grouping a household and that family membership does not grant course access.
 - Org-scoped only (cross-org family management is P2).
 
 ## Data shown
 
-- Family list: household label/names (display name TBD), member summary (students/parents counts or names)
+- Family list: display name when set, otherwise names derived from members; member summary (student and parent counts)
 - Empty state explaining linking households
+- Create field: optional family name
 
 ## Contents
 
+- Create family (optional name)
 - List families (households) in the org
-- Built from roster + parent links; group siblings into one family
 - Open → [FAMILY](./FAMILY.md)
-- Empty state: explain linking parents/students into a household
+- Empty state: create a household, add students, link a parent
+- Jump to related [ORG_ROSTER](./ORG_ROSTER.md) students
 - Cross-org family management is **P2** — this page is org-scoped only
 
 ## Primary actions
 
+- Create family
 - Open family
-- Create / group family (TBD UX)
 - Jump to related [ORG_ROSTER](./ORG_ROSTER.md) students
 
 ## Links to
@@ -45,4 +48,4 @@ Org-scoped **parent / family directory** — find households without hunting cou
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Families & parent directory (P0). Profile fields beyond names still open.
+[FEATURES.md](../FEATURES.md) — Families & parent directory (P0). **Access lock:** family is directory convenience only; materials / this-week / print stay enrollment + `parent_student_links`. Extra profile fields beyond names, merge/split, and a parent-facing family profile remain TBD.
