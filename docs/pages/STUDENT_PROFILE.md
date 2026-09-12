@@ -50,6 +50,7 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 
 - Edit profile fields
 - Open class / course enrollments
+- Open family when grouped
 
 ## Links to
 
