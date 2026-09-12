@@ -47,7 +47,7 @@
 10. **Billing (P1 only)** — **Stripe Billing** is the planned path when org SaaS ships; webhooks → Functions → `OrgSubscription`. Not in P0.
 11. **Markdown → docs site** — Hand-written markdown (`docs/`, root + folder `AGENTS.md`, README) is the source; **VitePress** builds a searchable site so developers can explore the project without hunting through the tree.
 12. **UI docs** — **Storybook** for design-system / component exploration (`src/ui`). Not a replacement for product docs in VitePress.
-13. **CI/CD** — **GitHub Actions** owns check and deploy pipelines (`.github/workflows/`). Terraform apply and SPA publish to S3/CloudFront run from Actions once secrets are available (see [HUMAN_NEEDED.md](./HUMAN_NEEDED.md)).
+13. **CI/CD** — **GitHub Actions** owns check and deploy pipelines (`.github/workflows/`). Terraform plan/apply are **dispatch-only**; SPA publish is Actions `aws s3 sync` + CloudFront invalidate after apply. **Do not dispatch apply** until HN-003 + ISSUED ACM (HN-005). See [HUMAN_NEEDED.md](./HUMAN_NEEDED.md).
 14. **Analytics** — **PostHog** for product analytics (page views, key actions, funnels) and **error tracking** (exception autocapture + catch-all boundary reports). Wire the browser SDK from the SPA; do not invent a second analytics stack. Project keys come from human setup ([HUMAN_NEEDED.md](./HUMAN_NEEDED.md)). Respect auth/privacy: identify only after login when needed; no PII beyond what product docs allow.
 15. **Search is a first-class data concern** — Schema, indexes, and material metadata must support **cross-facet search** (P0 in [FEATURES.md](./FEATURES.md)). Prefer Postgres full-text / structured filters via PostgREST when they meet the bar; introduce a dedicated search service only if FTS + facets cannot. Do not treat search as a late UI filter over unindexed lists.
 
@@ -150,11 +150,16 @@ Product/planning content stays curated markdown; VitePress only publishes/naviga
 |-------|------|
 | **GitHub Actions** | Workflows under `.github/workflows/` |
 | **PR / main checks** | Install, typecheck, build (and tests when they exist) |
-| **Deploy (planned)** | Build SPA → S3 + CloudFront invalidation for **testing** / **production**; Terraform apply when infra changes |
+| **Terraform plan** | `workflow_dispatch` only — [terraform-plan.yml](../.github/workflows/terraform-plan.yml). OIDC → `npm ci` + `npm run build` → repo-root `dist/` → `terraform init` (`backend-*.hcl`) + `plan` (`*.tfvars`) → artifacts |
+| **Terraform apply** | `workflow_dispatch` only — [terraform-apply.yml](../.github/workflows/terraform-apply.yml). Download matching plan + `dist/` → `apply tf.plan` → **Actions** `aws s3 sync` + CloudFront invalidate (no Terraform `null_resource`) |
 
-Deploy credentials and env secrets stay in GitHub Actions secrets / environments — not in the repo. Human setup for AWS/Supabase keys: [HUMAN_NEEDED.md](./HUMAN_NEEDED.md).
+Input `tier`: `testing` \| `production`. Production jobs use GitHub Environment `production` (required reviewers — HN-010). OIDC role `arn:aws:iam::891612573605:role/github-oidc`, Terraform **1.9.x**, region `us-east-1`.
 
-<!-- TBD: branch → environment mapping, required status checks, Supabase migrate/Functions deploy from CI vs manual -->
+**Do not dispatch apply** until Luke’s ACM cert is **ISSUED** in `us-east-1` (HN-005) and HN-003 AWS/OIDC access is confirmed.
+
+Deploy credentials stay in GitHub Actions OIDC / environments — not in the repo. Human setup: [HUMAN_NEEDED.md](./HUMAN_NEEDED.md).
+
+<!-- TBD: PR/main check workflow, required status checks, Supabase migrate/Functions deploy from CI vs manual -->
 
 ---
 
@@ -192,7 +197,7 @@ Product behavior: [FEATURES.md](./FEATURES.md). Schema must index searchable fie
 | SaaS packaging (per teacher vs per course) | Hypothesis only |
 | VitePress config / sidebar / where docs site is hosted | <!-- TBD --> |
 | Storybook layout / which components get stories first | <!-- TBD --> |
-| Actions: branch → env, migrate/Functions deploy | <!-- TBD --> |
+| PR/main checks; migrate/Functions deploy from CI | <!-- TBD --> |
 | PostHog: event taxonomy / session replay / env split | <!-- TBD --> |
 | Search: Postgres FTS vs dedicated index | Hypothesis — start Postgres-first |
 

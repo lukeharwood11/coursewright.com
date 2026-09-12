@@ -1,0 +1,115 @@
+# CourseWright Terraform plan (nosh-style, adapted).
+#
+# Dispatch only. Testing first; production uses GitHub Environment approval.
+# Do not apply the saved plan until Luke’s ISSUED us-east-1 ACM (HN-005) and
+# HN-003 AWS/OIDC creds. See docs/HUMAN_NEEDED.md.
+#
+# Differs from SayNosh.com: Vite app is at repo root (not web/); Terraform root
+# is infra/terraform/; init uses backend-*.hcl; plan uses matching *.tfvars.
+
+name: Terraform Plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: Environment to plan (testing first; production is gated)
+        required: true
+        type: choice
+        default: testing
+        options:
+          - testing
+          - production
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ROLE_TO_ASSUME: arn:aws:iam::891612573605:role/github-oidc
+  TERRAFORM_VERSION: "1.9.8"
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+
+jobs:
+  plan:
+    name: Plan (${{ inputs.tier }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.tier }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          audience: sts.amazonaws.com
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      # Testing keys are committed in .env.development. Vite production builds
+      # do not load that file, so copy it for the testing tier only. Production
+      # reads VITE_* from the GitHub Environment (HN-007 / HN-010).
+      - name: Build (testing)
+        if: inputs.tier == 'testing'
+        run: |
+          cp .env.development .env.production
+          npm run build
+
+      - name: Build (production)
+        if: inputs.tier == 'production'
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
+          VITE_POSTHOG_HOST: ${{ vars.VITE_POSTHOG_HOST }}
+        run: npm run build
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform Init and Plan
+        working-directory: infra/terraform
+        run: |
+          terraform init -backend-config=backend-${{ inputs.tier }}.hcl
+          set +e
+          terraform plan -var-file=${{ inputs.tier }}.tfvars -out=tf.plan -detailed-exitcode
+          exitcode=$?
+          set -e
+          if [ "$exitcode" -eq 1 ]; then
+            exit 1
+          fi
+          exit 0
+
+      - name: Show Plan Output
+        working-directory: infra/terraform
+        run: terraform show tf.plan
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-${{ inputs.tier }}
+          path: infra/terraform/tf.plan
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload Application Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: application-${{ inputs.tier }}
+          path: dist/
+          retention-days: 1
+          if-no-files-found: error

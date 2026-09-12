@@ -5,7 +5,7 @@ AWS hosting for the SPA. App API remains Supabase.
 ## Scope
 
 - Terraform under `terraform/`
-- Deploy notes for uploading `dist/` to S3
+- Deploy notes for uploading `dist/` to S3 (GHA apply steps, not Terraform)
 
 ## Environments
 

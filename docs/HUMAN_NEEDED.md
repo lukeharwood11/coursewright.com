@@ -26,19 +26,19 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 | | |
 |--|--|
-| **Why** | `spa_site` is a real S3 + CloudFront module; apply creates billable AWS resources. Still blocked on credentials. |
-| **Where** | AWS IAM / CLI |
-| **Placeholder** | `infra/terraform/providers.tf` (`HN-003`) |
+| **Why** | `spa_site` is a real S3 + CloudFront module; apply creates billable AWS resources. GHA plan/apply workflows exist but **must not be used for live apply** until this item and HN-005 (ISSUED ACM) are done. |
+| **Where** | AWS IAM / CLI; GitHub Actions OIDC |
+| **Placeholder** | `infra/terraform/providers.tf` (`HN-003`); `.github/workflows/terraform-plan.yml` / `terraform-apply.yml` |
 
 **Steps:**
 
 1. Ensure an AWS account exists for Course Wright.
-2. Create an IAM user or role for Terraform/CI with permissions for S3, CloudFront, ACM (read/list for the cert data source), and Route53 (only if `manage_dns` will be enabled).
-3. Provide credentials to the local/CI environment (`AWS_PROFILE`, or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`) — **not** committed to git.
-4. Confirm region `us-east-1` (required for CloudFront ACM).
-5. **Do not apply** until ACM certs in HN-005 are **ISSUED** in `us-east-1`. `terraform plan` will fail the ACM data lookup until then.
+2. CI assumes existing OIDC role `arn:aws:iam::891612573605:role/github-oidc` (trust for this repo is assumed). Confirm that role can read/write S3 + CloudFront + ACM (data lookup) + the shared Terraform state backend (`lukeharwood-dev-tfstate` / `lukeharwood-dev-tf-lock` in `us-east-2`), and Route53 only if `manage_dns` will be enabled.
+3. For local Terraform, provide credentials (`AWS_PROFILE`, or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`) — **not** committed to git. CI does not use long-lived access keys.
+4. Confirm region `us-east-1` for the SPA stack (required for CloudFront ACM).
+5. **Do not `terraform apply` and do not dispatch `terraform-apply.yml`** until ACM certs in HN-005 are **ISSUED** in `us-east-1`. `terraform plan` will fail the ACM data lookup until then. Plan/apply YAML is code-only until this + HN-005 land.
 
-**Done when:** `aws sts get-caller-identity` works in the environment that will run Terraform, and a human has explicitly approved apply for a tier.
+**Done when:** `aws sts get-caller-identity` works for the OIDC role (and any local profile), and a human has explicitly approved apply for a tier.
 
 ---
 
@@ -68,18 +68,37 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ---
 
+### HN-010 — GitHub Environment gates for Terraform plan/apply
+
+| | |
+|--|--|
+| **Why** | Production plan/apply jobs set `environment: production`. Without a GitHub Environment with required reviewers, prod apply is not actually gated. Production Vite `VITE_*` values also live on that Environment. |
+| **Where** | GitHub repo **Settings → Environments** (`lukeharwood11/coursewright.com`) |
+| **Placeholder** | `.github/workflows/terraform-plan.yml` / `terraform-apply.yml` (`environment: ${{ inputs.tier }}`) |
+
+**Steps:**
+
+1. Create Environment **`testing`** (optional protection; no required reviewers). First dispatch may auto-create it.
+2. Create Environment **`production`** and add **required reviewers** (Luke / Dave) so production plan and apply wait for approval.
+3. On **`production`**, set GitHub Environment **variables** (publishable only): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` (from HN-007 when the production Supabase project exists). Testing builds copy committed `.env.development`; do not put service-role keys in GitHub.
+4. Still **do not dispatch apply** until HN-003 and HN-005 (ISSUED ACM) are done.
+
+**Done when:** Dispatching `terraform-plan.yml` / `terraform-apply.yml` with `tier=production` pauses for Environment approval; testing does not.
+
+---
+
 ### HN-007 — Supabase production project (optional until first prod deploy)
 
 | | |
 |--|--|
 | **Why** | Separate production Auth/DB from the testing project |
 | **Where** | [Supabase Dashboard](https://supabase.com/dashboard) |
-| **Placeholder** | CI / production env secrets (not wired yet) |
+| **Placeholder** | GitHub Environment `production` vars on `terraform-plan.yml` (HN-010) |
 
 **Steps:**
 
 1. Create a production project (name suggestion: `coursewright-production`).
-2. Copy **Project URL** + **anon** key into production deploy secrets (not git).
+2. Copy **Project URL** + **anon** key into the GitHub Environment `production` variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) used by `terraform-plan.yml` (not git). See HN-010.
 3. Enable Google provider with the same OAuth client (add production callback URL).
 4. Add production Site URL + redirect URLs under Auth settings.
 
