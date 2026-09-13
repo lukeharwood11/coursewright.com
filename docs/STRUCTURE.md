@@ -166,10 +166,11 @@ supabase/
 ```text
 infra/
 ├── README.md
-└── terraform/                # one root module; tiers via tfvars
+├── tfvars/                   # tier values (sibling to terraform/)
+│   ├── testing.tfvars        # justtesting.coursewright.com
+│   └── production.tfvars     # coursewright.com
+└── terraform/                # one root module; tiers via ../tfvars
     ├── AGENTS.md
-    ├── testing.tfvars        # justtesting.coursewright.com
-    ├── production.tfvars     # coursewright.com
     ├── modules/
     │   └── spa_site/         # S3 + CloudFront + ACM/DNS
     └── …                     # main.tf, variables.tf, backend; state per tier <!-- TBD -->
@@ -177,12 +178,13 @@ infra/
 
 | Tier | Domain | Var file |
 |------|--------|----------|
-| Testing | `justtesting.coursewright.com` | `testing.tfvars` |
-| Production | `coursewright.com` | `production.tfvars` |
+| Testing | `justtesting.coursewright.com` | `infra/tfvars/testing.tfvars` |
+| Production | `coursewright.com` | `infra/tfvars/production.tfvars` |
 
 ```bash
-terraform apply -var-file=testing.tfvars
-terraform apply -var-file=production.tfvars
+cd infra/terraform
+terraform apply -var-file=../tfvars/testing.tfvars
+terraform apply -var-file=../tfvars/production.tfvars
 ```
 
 **Terraform manages:** S3 buckets, CloudFront distributions, TLS certs (ACM), DNS records as needed for those hosts.

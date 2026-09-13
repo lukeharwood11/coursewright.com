@@ -14,20 +14,14 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "manage_dns" {
-  type        = bool
-  description = "When true, spa_site creates Route53 A/AAAA aliases. Default false until HN-005."
-  default     = false
-}
-
 variable "route53_zone_name" {
   type        = string
-  description = "Parent Route53 hosted zone for manage_dns (coursewright.com for both tiers)"
+  description = "Parent Route53 hosted zone (coursewright.com for both tiers)"
   default     = "coursewright.com"
 }
 
 variable "acm_certificate_domain" {
   type        = string
-  default     = null
-  description = "Optional ACM lookup domain if it differs from domain_name (e.g. wildcard *.coursewright.com). HN-005."
+  default     = "coursewright.com"
+  description = "ACM domain to look up in us-east-1. One cert covers coursewright.com and *.coursewright.com (HN-005)."
 }

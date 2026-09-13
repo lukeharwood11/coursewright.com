@@ -2,7 +2,7 @@
 # role arn:aws:iam::891612573605:role/github-oidc (see terraform-plan.yml / terraform-apply.yml).
 # Do not commit access keys. The spa_site module is real: apply creates S3 + CloudFront.
 # Do not apply (local or GHA terraform-apply.yml) until an ISSUED ACM cert exists in
-# us-east-1 for the tier domain (HN-005). GitHub Environment gates: HN-010.
+# us-east-1 for coursewright.com + *.coursewright.com (HN-005). GitHub Environment gates: HN-010.
 
 terraform {
   required_version = ">= 1.5.0"
@@ -21,7 +21,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      AppName     = "coursewright"
+      AppName     = "coursewright.com"
       Environment = var.environment
       Owner       = "Luke Harwood"
     }

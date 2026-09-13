@@ -22,7 +22,7 @@ Early scaffolding. Product behavior is documented under [`docs/`](./docs/); the 
 
 - **Frontend:** React, Vite, Tailwind CSS, Heroicons, TanStack Query, Zustand  
 - **Backend:** Supabase (Postgres + PostgREST + Auth + Storage + Edge Functions)  
-- **Hosting:** AWS S3 + CloudFront (Terraform; `testing.tfvars` / `production.tfvars`)  
+- **Hosting:** AWS S3 + CloudFront (Terraform; `infra/tfvars/testing.tfvars` / `production.tfvars`)  
 - **Project docs:** VitePress (markdown → searchable site)  
 - **UI docs:** Storybook  
 - **CI/CD:** GitHub Actions  
@@ -92,8 +92,8 @@ See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) and [docs/STRUCTURE.md](./doc
 3. Terraform tiers:
    ```bash
    cd infra/terraform
-   terraform plan  -var-file=testing.tfvars
-   terraform apply -var-file=production.tfvars
+   terraform plan  -var-file=../tfvars/testing.tfvars
+   terraform apply -var-file=../tfvars/production.tfvars
    ```
    Keep **separate state** per tier.
 

@@ -1,11 +1,8 @@
-# CloudFront + OAC + (optional) Route53. Modeled on SayNosh.com terraform/cdn.tf.
+# CloudFront + OAC + Route53. Modeled on SayNosh.com terraform/cdn.tf.
 #
 # HUMAN_NEEDED HN-005 — data.aws_acm_certificate looks up an ISSUED cert for
-# local.acm_domain in us-east-1. Luke must request/validate that cert before
-# terraform plan/apply. Do not invent ARNs.
-#
-# Route53 A/AAAA aliases are gated on var.manage_dns (default false) so validate
-# and plan can run before DNS host is decided.
+# local.acm_domain (coursewright.com + *.coursewright.com) in us-east-1.
+# Luke must request/validate that cert before terraform plan/apply. Do not invent ARNs.
 
 data "aws_acm_certificate" "spa_certificate" {
   domain      = local.acm_domain
@@ -14,7 +11,6 @@ data "aws_acm_certificate" "spa_certificate" {
 }
 
 data "aws_route53_zone" "parent" {
-  count        = var.manage_dns ? 1 : 0
   name         = var.route53_zone_name
   private_zone = false
 }
@@ -142,8 +138,7 @@ resource "aws_s3_bucket_policy" "spa_bucket_policy" {
 }
 
 resource "aws_route53_record" "spa_record_ipv4" {
-  count   = var.manage_dns ? 1 : 0
-  zone_id = data.aws_route53_zone.parent[0].zone_id
+  zone_id = data.aws_route53_zone.parent.zone_id
   name    = var.domain_name
   type    = "A"
 
@@ -155,8 +150,7 @@ resource "aws_route53_record" "spa_record_ipv4" {
 }
 
 resource "aws_route53_record" "spa_record_ipv6" {
-  count   = var.manage_dns ? 1 : 0
-  zone_id = data.aws_route53_zone.parent[0].zone_id
+  zone_id = data.aws_route53_zone.parent.zone_id
   name    = var.domain_name
   type    = "AAAA"
 

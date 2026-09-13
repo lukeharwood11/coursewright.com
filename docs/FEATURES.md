@@ -692,7 +692,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | HUMAN_NEEDED.md for cloud blockers | **Decided** | Agents stub + document human steps; no fake secrets |
 | File storage | **Decided** | Supabase Storage — STACK.md |
 | Frontend hosting | **Decided** | AWS S3 + CloudFront — STACK.md |
-| Infrastructure as code | **Decided** | Terraform + testing.tfvars / production.tfvars — STACK.md |
+| Infrastructure as code | **Decided** | Terraform + infra/tfvars — STACK.md |
 | Custom domain | **Decided** | coursewright.com (prod); justtesting.coursewright.com (testing) |
 | Migrations | **Decided** | `supabase db migrate` — STACK.md |
 | Billing provider (P1) | **Hypothesis** | Stripe Billing — STACK.md; not P0 |

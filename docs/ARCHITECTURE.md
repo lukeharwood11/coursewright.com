@@ -171,7 +171,7 @@ justtesting.coursewright.com  → CloudFront → S3 (test SPA)
 
 SPA only on CloudFront. API is Supabase, not an origin on the CDN (except the static app).
 
-**IaC:** **Terraform** under `infra/terraform/` — one stack, **`testing.tfvars` / `production.tfvars`** for tiers (separate state per tier). Supabase schema and Functions stay outside Terraform — see [STACK.md](./STACK.md) / [STRUCTURE.md](./STRUCTURE.md).
+**IaC:** **Terraform** under `infra/terraform/` — one stack, **`infra/tfvars/testing.tfvars` / `production.tfvars`** for tiers (separate state per tier). Supabase schema and Functions stay outside Terraform — see [STACK.md](./STACK.md) / [STRUCTURE.md](./STRUCTURE.md).
 
 ---
 

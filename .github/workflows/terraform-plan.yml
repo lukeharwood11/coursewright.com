@@ -5,7 +5,7 @@
 # HN-003 AWS/OIDC creds. See docs/HUMAN_NEEDED.md.
 #
 # Differs from SayNosh.com: Vite app is at repo root (not web/); Terraform root
-# is infra/terraform/; init uses backend-*.hcl; plan uses matching *.tfvars.
+# is infra/terraform/; init uses backend-*.hcl; plan uses ../tfvars/*.tfvars.
 
 name: Terraform Plan
 
@@ -86,7 +86,7 @@ jobs:
         run: |
           terraform init -backend-config=backend-${{ inputs.tier }}.hcl
           set +e
-          terraform plan -var-file=${{ inputs.tier }}.tfvars -out=tf.plan -detailed-exitcode
+          terraform plan -var-file=../tfvars/${{ inputs.tier }}.tfvars -out=tf.plan -detailed-exitcode
           exitcode=$?
           set -e
           if [ "$exitcode" -eq 1 ]; then

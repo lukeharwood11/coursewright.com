@@ -4,7 +4,7 @@
 # The S3 `key` is not var-driven; pass a partial backend config per tier:
 #   terraform init -backend-config=backend-testing.hcl
 #   terraform init -reconfigure -backend-config=backend-production.hcl
-# Pair the matching -var-file=testing.tfvars | production.tfvars after init.
+# Pair the matching -var-file=../tfvars/testing.tfvars | ../tfvars/production.tfvars after init.
 # Switching tiers requires -reconfigure so Terraform picks up the other key.
 
 terraform {

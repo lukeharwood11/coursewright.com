@@ -5,14 +5,15 @@ AWS hosting for the SPA. App API remains Supabase.
 ## Scope
 
 - Terraform under `terraform/`
+- Tier values under `tfvars/`
 - Deploy notes for uploading `dist/` to S3 (GHA apply steps, not Terraform)
 
 ## Environments
 
 | Env | Domain | Terraform |
 |-----|--------|-----------|
-| production | `coursewright.com` | `-var-file=production.tfvars` |
-| testing | `justtesting.coursewright.com` | `-var-file=testing.tfvars` |
+| production | `coursewright.com` | `-var-file=../tfvars/production.tfvars` |
+| testing | `justtesting.coursewright.com` | `-var-file=../tfvars/testing.tfvars` |
 
 ## Rules
 

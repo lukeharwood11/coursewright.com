@@ -15,7 +15,7 @@
 | **Google sign-in** | **Google Cloud** (OAuth client) wired into Supabase Auth | Provider for Google login |
 | **File storage** | **Supabase Storage** | Lesson files / material attachments (P0 file sharing) |
 | **Frontend hosting** | **AWS S3** + **CloudFront** | Static React app CDN |
-| **IaC** | **Terraform** | AWS SPA hosting; **`testing.tfvars` / `production.tfvars`** for tiers |
+| **IaC** | **Terraform** | AWS SPA hosting; **`infra/tfvars/testing.tfvars` / `production.tfvars`** for tiers |
 | **Custom domain** | **coursewright.com** | Production app (owned) |
 | **Testing domain** | **justtesting.coursewright.com** | Non-production / testing site |
 | **Migrations** | **`supabase db migrate`** | Schema changes via Supabase CLI migrations |
@@ -95,7 +95,7 @@ API traffic goes to **Supabase** (PostgREST, Auth, Storage, Functions) — not t
 
 Terraform does **not** replace Supabase CLI for schema (`supabase db migrate`) or Edge Function deploys. It owns **AWS** (and optional DNS) for the SPA.
 
-**Tiers:** same Terraform root; select tier with `-var-file=testing.tfvars` or `-var-file=production.tfvars`. Keep **separate state** per tier.
+**Tiers:** same Terraform root; select tier with `-var-file=../tfvars/testing.tfvars` or `-var-file=../tfvars/production.tfvars` (from `infra/terraform/`). Keep **separate state** per tier.
 
 ---
 

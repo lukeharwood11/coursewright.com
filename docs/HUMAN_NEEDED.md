@@ -33,7 +33,7 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 **Steps:**
 
 1. Ensure an AWS account exists for Course Wright.
-2. CI assumes existing OIDC role `arn:aws:iam::891612573605:role/github-oidc` (trust for this repo is assumed). Confirm that role can read/write S3 + CloudFront + ACM (data lookup) + the shared Terraform state backend (`lukeharwood-dev-tfstate` / `lukeharwood-dev-tf-lock` in `us-east-2`), and Route53 only if `manage_dns` will be enabled.
+2. CI assumes existing OIDC role `arn:aws:iam::891612573605:role/github-oidc` (trust for this repo is assumed). Confirm that role can read/write S3 + CloudFront + ACM (data lookup) + Route53 + the shared Terraform state backend (`lukeharwood-dev-tfstate` / `lukeharwood-dev-tf-lock` in `us-east-2`).
 3. For local Terraform, provide credentials (`AWS_PROFILE`, or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`) — **not** committed to git. CI does not use long-lived access keys.
 4. Confirm region `us-east-1` for the SPA stack (required for CloudFront ACM).
 5. **Do not `terraform apply` and do not dispatch `terraform-apply.yml`** until ACM certs in HN-005 are **ISSUED** in `us-east-1`. `terraform plan` will fail the ACM data lookup until then. Plan/apply YAML is code-only until this + HN-005 land.
@@ -46,25 +46,23 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 | | |
 |--|--|
-| **Why** | CloudFront custom aliases need an **ISSUED** ACM cert in `us-east-1`. Route53 aliases are optional until DNS host is decided (`manage_dns` defaults to `false`). |
-| **Where** | ACM (`us-east-1`) + DNS host for `coursewright.com` (Route53 or external registrar) |
-| **Placeholder** | `infra/terraform/modules/spa_site/cdn.tf` (ACM data source); `testing.tfvars` / `production.tfvars` (`manage_dns`) |
+| **Why** | CloudFront custom aliases need an **ISSUED** ACM cert in `us-east-1`. Terraform always creates Route53 A/AAAA aliases in the `coursewright.com` zone. |
+| **Where** | ACM (`us-east-1`) + Route53 hosted zone for `coursewright.com` |
+| **Placeholder** | `infra/terraform/modules/spa_site/cdn.tf` (ACM data source + Route53 records) |
 
 **Steps:**
 
-1. Confirm where DNS is hosted (Route53 vs other).
-2. In **ACM `us-east-1`**, request and **issue** certificates covering each tier hostname:
-   - testing: `justtesting.coursewright.com`
-   - production: `coursewright.com`
-   - Alternatively one wildcard `*.coursewright.com` (and an apex cert for production). If the issued name differs from `domain_name`, set `acm_certificate_domain` in the matching tfvars so the data source can find it.
-3. Complete ACM DNS validation (add the CNAMEs ACM provides at the DNS host). Wait until status is **Issued**. Terraform does **not** create the cert — it looks up an existing ISSUED cert (`data.aws_acm_certificate`).
-4. Leave `manage_dns = false` (default) until Route53 is confirmed. `terraform validate` does not need DNS; apply of S3/CloudFront still needs the issued cert (step 2–3) plus HN-003.
-5. If Route53 hosts `coursewright.com`: set `manage_dns = true` and keep `route53_zone_name = "coursewright.com"` (parent zone for both apex and the `justtesting` subdomain). Terraform will create A/AAAA aliases to CloudFront.
-6. If DNS stays outside Route53: keep `manage_dns = false`. After CloudFront exists, point records manually using outputs `cloudfront_domain` / `cloudfront_distribution_id`:
+1. Confirm Route53 hosts the public zone for `coursewright.com` (parent zone for both apex and `justtesting`).
+2. In **ACM `us-east-1`**, request and **issue** one certificate covering:
+   - `coursewright.com`
+   - `*.coursewright.com`
+   Terraform looks this up via `acm_certificate_domain` (default `coursewright.com`).
+3. Complete ACM DNS validation (add the CNAMEs ACM provides in Route53). Wait until status is **Issued**. Terraform does **not** create the cert — it looks up an existing ISSUED cert (`data.aws_acm_certificate`).
+4. After HN-003 + this issued cert: `terraform apply` for each tier creates CloudFront and Route53 A/AAAA aliases:
    - `justtesting.coursewright.com` → testing distribution
-   - `coursewright.com` (and optionally `www`) → production distribution
+   - `coursewright.com` → production distribution
 
-**Done when:** ISSUED ACM certs exist in `us-east-1` for each tier (or wildcard + `acm_certificate_domain` override), and either `manage_dns` is enabled against the Route53 zone or a human will create aliases from Terraform outputs.
+**Done when:** An ISSUED ACM cert exists in `us-east-1` for `coursewright.com` + `*.coursewright.com`, and the Route53 zone for `coursewright.com` is ready for Terraform-managed aliases.
 
 ---
 
