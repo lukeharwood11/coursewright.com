@@ -7,7 +7,7 @@ import {
   orgQueryKeys,
 } from "@/organizations/databridge/memberships";
 import { isStaffRole } from "@/organizations/model/role";
-import { familyLabel } from "@/roster/model/familyLabel";
+import { familyLabel, familyMemberNames } from "@/roster/model/family";
 import {
   familyQueryKeys,
   listFamilies,
@@ -66,7 +66,10 @@ export function useOrgShellData(orgSlug: string | undefined) {
     })),
     families: (familiesQuery.data ?? []).map((family) => ({
       id: String(family.id),
-      label: familyLabel(family.displayName),
+      label: familyLabel(
+        family.displayName,
+        familyMemberNames(family.students.map((member) => member.student)),
+      ),
     })),
   };
 

@@ -26,60 +26,45 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 | | |
 |--|--|
-| **Why** | S3 / CloudFront / ACM / DNS for SPA hosting |
+| **Why** | `spa_site` is a real S3 + CloudFront module; apply creates billable AWS resources. Still blocked on credentials. |
 | **Where** | AWS IAM / CLI |
 | **Placeholder** | `infra/terraform/providers.tf` (`HN-003`) |
 
 **Steps:**
 
 1. Ensure an AWS account exists for Course Wright.
-2. Create an IAM user or role for Terraform/CI with permissions for S3, CloudFront, ACM, Route53 (if DNS is in Route53), and IAM as needed for the module.
+2. Create an IAM user or role for Terraform/CI with permissions for S3, CloudFront, ACM (read/list for the cert data source), and Route53 (only if `manage_dns` will be enabled).
 3. Provide credentials to the local/CI environment (`AWS_PROFILE`, or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`) — **not** committed to git.
-4. Confirm default region preference (suggestion: `us-east-1` for CloudFront/ACM ease) and tell the agent.
+4. Confirm region `us-east-1` (required for CloudFront ACM).
+5. **Do not apply** until ACM certs in HN-005 are **ISSUED** in `us-east-1`. `terraform plan` will fail the ACM data lookup until then.
 
-**Done when:** `aws sts get-caller-identity` works in the environment that will run Terraform.
-
----
-
-### HN-004 — Terraform remote state backend
-
-| | |
-|--|--|
-| **Why** | Shared, safe state for testing vs production tiers |
-| **Where** | AWS (bootstrap bucket) |
-| **Placeholder** | `infra/terraform/backend.tf` (`HN-004`) |
-
-**Steps:**
-
-1. Create an S3 bucket for Terraform state (e.g. `coursewright-terraform-state`) with versioning on encryption.
-2. Optionally create a DynamoDB table for state locking (e.g. `coursewright-terraform-locks`).
-3. Decide state key scheme, e.g.:
-   - `spa/testing/terraform.tfstate`
-   - `spa/production/terraform.tfstate`
-4. Give the agent bucket name, region, and lock table name (if any) to fill `backend.tf`.
-
-**Done when:** Agent can uncomment/configure `backend "s3"` and `terraform init` succeeds for a tier.
+**Done when:** `aws sts get-caller-identity` works in the environment that will run Terraform, and a human has explicitly approved apply for a tier.
 
 ---
 
-### HN-005 — DNS for `coursewright.com` / `justtesting.coursewright.com`
+### HN-005 — DNS + ACM for `coursewright.com` / `justtesting.coursewright.com`
 
 | | |
 |--|--|
-| **Why** | CloudFront + TLS need DNS validation and aliases |
-| **Where** | DNS host for `coursewright.com` (Route53 or external registrar) |
-| **Placeholder** | `infra/terraform/testing.tfvars`, `production.tfvars` (`HN-005`) |
+| **Why** | CloudFront custom aliases need an **ISSUED** ACM cert in `us-east-1`. Route53 aliases are optional until DNS host is decided (`manage_dns` defaults to `false`). |
+| **Where** | ACM (`us-east-1`) + DNS host for `coursewright.com` (Route53 or external registrar) |
+| **Placeholder** | `infra/terraform/modules/spa_site/cdn.tf` (ACM data source); `testing.tfvars` / `production.tfvars` (`manage_dns`) |
 
 **Steps:**
 
 1. Confirm where DNS is hosted (Route53 vs other).
-2. If Route53: note hosted zone ID for `coursewright.com` and tell the agent (so Terraform can create records) **or** plan to create records manually from Terraform outputs.
-3. After ACM certificate is requested (via Terraform later): add the validation CNAMEs ACM provides.
-4. After CloudFront distributions exist: point:
+2. In **ACM `us-east-1`**, request and **issue** certificates covering each tier hostname:
+   - testing: `justtesting.coursewright.com`
+   - production: `coursewright.com`
+   - Alternatively one wildcard `*.coursewright.com` (and an apex cert for production). If the issued name differs from `domain_name`, set `acm_certificate_domain` in the matching tfvars so the data source can find it.
+3. Complete ACM DNS validation (add the CNAMEs ACM provides at the DNS host). Wait until status is **Issued**. Terraform does **not** create the cert — it looks up an existing ISSUED cert (`data.aws_acm_certificate`).
+4. Leave `manage_dns = false` (default) until Route53 is confirmed. `terraform validate` does not need DNS; apply of S3/CloudFront still needs the issued cert (step 2–3) plus HN-003.
+5. If Route53 hosts `coursewright.com`: set `manage_dns = true` and keep `route53_zone_name = "coursewright.com"` (parent zone for both apex and the `justtesting` subdomain). Terraform will create A/AAAA aliases to CloudFront.
+6. If DNS stays outside Route53: keep `manage_dns = false`. After CloudFront exists, point records manually using outputs `cloudfront_domain` / `cloudfront_distribution_id`:
    - `justtesting.coursewright.com` → testing distribution
    - `coursewright.com` (and optionally `www`) → production distribution
 
-**Done when:** Agent knows DNS host + whether Terraform should manage records or only output values for manual DNS.
+**Done when:** ISSUED ACM certs exist in `us-east-1` for each tier (or wildcard + `acm_certificate_domain` override), and either `manage_dns` is enabled against the Route53 zone or a human will create aliases from Terraform outputs.
 
 ---
 
@@ -103,6 +88,10 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 ---
 
 ## Completed
+
+### HN-004 — Terraform remote state backend
+
+**Completed:** 2026-09-11 — reuse existing nosh/amia backend (`lukeharwood-dev-tfstate` / `lukeharwood-dev-tf-lock`, `us-east-2`). CourseWright keys only: `spa/testing/terraform.tfstate`, `spa/production/terraform.tfstate`. Init with `backend-testing.hcl` / `backend-production.hcl`. No new bucket or lock table.
 
 ### HN-001 — Create Supabase projects (testing + production)
 

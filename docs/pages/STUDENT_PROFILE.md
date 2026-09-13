@@ -16,7 +16,7 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 
 - View/edit one `student_profile` (no student login in P0/P1).
 - Edit name, optional parent email, optional grade (must match org grade scheme when set).
-- Show course enrollments and class membership.
+- Show course enrollments, class membership, and family membership.
 - Creating profiles often happens on first course or class add; this page manages the canonical org record.
 - **Invite parent:** if a parent email is saved, create a parent invite and **copy `/invite/<token>`** (v0 does not send email). Same claim path as staff.
 
@@ -27,6 +27,7 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 - **Grade level** (optional, editable; scheme-constrained)
 - Enrollments: course title + status + link to that course roster
 - Class memberships: class name + link
+- Family membership: household label + link (at most one family)
 - Parent invite / claim status (pending link, copyable claim URL, or accepted)
 
 ## Contents
@@ -41,8 +42,8 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 
 - Enrollments in courses in this org → links to those [COURSE_ROSTER](./COURSE_ROSTER.md) contexts
 - Classes in this org → [CLASS](./CLASS.md)
+- Family in this org → [FAMILY](./FAMILY.md)
 - Parent invite / claim status on this page; copy `/invite/<token>` (no email send)
-- Family membership → [FAMILY](./FAMILY.md) when grouped (display TBD)
 - No student login controls (accounts = P2)
 
 ## Primary actions
@@ -50,6 +51,7 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 - Edit profile fields
 - Create parent invite and copy the claim link; cancel a pending invite
 - Open class / course enrollments
+- Open family when grouped
 
 ## Links to
 

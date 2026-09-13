@@ -11,6 +11,11 @@ import {
   listClassesForStudent,
 } from "@/roster/databridge/classes";
 import {
+  familyQueryKeys,
+  listFamiliesForStudent,
+} from "@/roster/databridge/families";
+import { familyLabel } from "@/roster/model/family";
+import {
   enrollmentQueryKeys,
   listStudentEnrollments,
 } from "@/roster/databridge/enrollments";
@@ -50,6 +55,12 @@ export function useStudentProfile() {
   const classesQuery = useQuery({
     queryKey: classQueryKeys.forStudent(studentId),
     queryFn: () => listClassesForStudent(studentId),
+    enabled: Number.isFinite(studentId) && belongsHere,
+  });
+
+  const familiesQuery = useQuery({
+    queryKey: familyQueryKeys.forStudent(studentId),
+    queryFn: () => listFamiliesForStudent(studentId),
     enabled: Number.isFinite(studentId) && belongsHere,
   });
 
@@ -105,6 +116,10 @@ export function useStudentProfile() {
     gradeLabels: organizationQuery.data?.gradeLabels ?? [],
     enrollments: enrollmentsQuery.data ?? [],
     classes: classesQuery.data ?? [],
+    families: (familiesQuery.data ?? []).map((row) => ({
+      id: row.id,
+      label: familyLabel(row.displayName),
+    })),
     loading: query.isLoading,
     error: query.error ? query.error.message : null,
     notFound: !query.isLoading && (!student || !belongsHere),

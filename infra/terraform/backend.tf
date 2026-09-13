@@ -1,16 +1,17 @@
-# HUMAN_NEEDED HN-004 — configure remote state after bootstrap bucket exists.
-# Uncomment and fill, then use separate state keys per tier (testing vs production).
+# Remote state uses the EXISTING shared nosh/amia S3 backend.
+# Do not create a CourseWright-only state bucket or DynamoDB lock table — only new keys.
 #
-# terraform {
-#   backend "s3" {
-#     bucket         = "REPLACE_ME_coursewright-terraform-state"
-#     key            = "spa/REPLACE_TIER/terraform.tfstate"
-#     region         = "us-east-1"
-#     dynamodb_table = "REPLACE_ME_coursewright-terraform-locks"
-#     encrypt        = true
-#   }
-# }
+# The S3 `key` is not var-driven; pass a partial backend config per tier:
+#   terraform init -backend-config=backend-testing.hcl
+#   terraform init -reconfigure -backend-config=backend-production.hcl
+# Pair the matching -var-file=testing.tfvars | production.tfvars after init.
+# Switching tiers requires -reconfigure so Terraform picks up the other key.
 
 terraform {
-  # Local backend until HN-004 is complete. Do not use for shared/prod without remote state.
+  backend "s3" {
+    bucket         = "lukeharwood-dev-tfstate"
+    region         = "us-east-2"
+    dynamodb_table = "lukeharwood-dev-tf-lock"
+    encrypt        = true
+  }
 }
