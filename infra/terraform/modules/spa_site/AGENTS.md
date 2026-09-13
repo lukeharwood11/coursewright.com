@@ -12,6 +12,6 @@ S3 + CloudFront hosting for the CourseWright SPA. Pattern follows [SayNosh.com t
 
 ## Don’t
 
-- Do not add a `null_resource` / local-exec that syncs `dist/` or invalidates CloudFront on every apply. Deploy upload is a later concern.
+- Do not add a `null_resource` / local-exec that syncs `dist/` or invalidates CloudFront on every apply. Deploy upload is GitHub Actions (`terraform-apply.yml`), not this module.
 - Do not invent ACM cert ARNs or Route53 zone IDs.
 - Do not `terraform apply` until HN-003 (AWS creds) **and** an ISSUED ACM cert exists for the tier domain (HN-005).

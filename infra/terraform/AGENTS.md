@@ -10,7 +10,7 @@ Terraform for Course Wright AWS SPA hosting. **One root module**, many tiers via
 
 Same code path for every tier; only var files change.
 
-**Do not `terraform apply` until HN-003 (AWS creds) and an ISSUED ACM certificate exists in `us-east-1` for the tier domain (HN-005).** Route53 aliases stay off until `manage_dns = true`. Deploy sync/invalidation is not in this module.
+**Do not `terraform apply` (local or GHA) until HN-003 (AWS/OIDC) and an ISSUED ACM certificate exists in `us-east-1` for the tier domain (HN-005).** Route53 aliases stay off until `manage_dns = true`. Deploy sync/invalidation is **not** in this module — GitHub Actions `terraform-apply.yml` runs `aws s3 sync` + CloudFront invalidate as shell steps (never a `null_resource`).
 
 ## Remote state
 
@@ -31,6 +31,8 @@ terraform apply -var-file=production.tfvars
 ```
 
 Never mix a tier’s `-var-file` with the other tier’s backend key.
+
+CI (`.github/workflows/terraform-plan.yml` / `terraform-apply.yml`) uses the same pairing via dispatch input `tier`. **Do not dispatch apply** until HN-005 ACM is ISSUED and HN-003 is done.
 
 ## Rules
 

@@ -1,6 +1,6 @@
-# Private origin bucket for the Vite SPA. Deploy upload/invalidation is a later
-# concern — do not add a null_resource that syncs on every apply (nosh does;
-# CourseWright skips that for now).
+# Private origin bucket for the Vite SPA. Deploy upload/invalidation is GitHub
+# Actions (terraform-apply.yml: aws s3 sync + CloudFront invalidate) — do not
+# add a null_resource that syncs on every apply.
 
 resource "aws_s3_bucket" "spa_bucket" {
   bucket = local.bucket_name

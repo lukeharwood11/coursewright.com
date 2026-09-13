@@ -59,6 +59,7 @@ coursewright.com/
 ├── infra/                    # Terraform (AWS) + deploy notes
 │   └── terraform/
 └── .github/                  # GitHub Actions (CI/CD)
+    └── workflows/            # terraform-plan.yml + terraform-apply.yml (dispatch only)
 ```
 
 ---
@@ -207,7 +208,7 @@ Same stack definition for every tier — **do not** fork separate `envs/testing`
 | Modal / selection state | Domain `stores/` or small `app` store — Zustand |
 | Server list/cache | TanStack Query in domain `api/` |
 | Supabase client setup | `src/infrastructure/supabase/` |
-| Deploy SPA | Build `dist/` → upload to S3; AWS resources via **Terraform** |
+| Deploy SPA | GHA `terraform-apply.yml`: `aws s3 sync dist/` + CloudFront invalidate; AWS resources via **Terraform** |
 
 ---
 
