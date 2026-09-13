@@ -8,7 +8,7 @@ Student profiles, **classes** (student groups), **families** (parent directory),
 - **Class** — org-scoped group of students (not a course; no materials)
 - **Family** — org-scoped household in the parent directory (not a course; no materials)
 - Org roster (`org-roster/`), class roster (`class-roster/`), families directory (`families/`), family profile (`family/`), course roster (`course-roster/`), student profile
-- Parent email linkage + invites
+- Parent email linkage + invites (copyable `/invite/<token>`; same claim path as staff)
 - Staff assignment UI that belongs with roster (course instructors may live with `courses/`)
 
 ## Rules
@@ -17,7 +17,7 @@ Student profiles, **classes** (student groups), **families** (parent directory),
 - **Class ≠ Course** — do not put units/materials on a class.
 - **Family ≠ access** — a family is a named group of `student_profile`s (Class-mirror). Parents appear only via `parent_student_links` to those students. Do not write `family_members.parent_user_id` as an access gate. Linking a parent creates or reuses the student link (`admin_invites` with `role=parent` if no account). Never write enrollments from this directory.
 - Course ↔ Class enrollment relationship is **workshop** in FEATURES — do not invent until locked; keep student↔course enrollment as the access gate.
-- Parent access still requires invite + account ([FEATURES.md](../../docs/FEATURES.md)).
+- Parent access still requires invite + account ([FEATURES.md](../../docs/FEATURES.md)). Membership is created on claim; course materials still require enrollment.
 - Follow frontend-development skill page-folder pattern under this domain.
 
 ## Don’t

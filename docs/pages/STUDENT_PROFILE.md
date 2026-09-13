@@ -18,7 +18,7 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 - Edit name, optional parent email, optional grade (must match org grade scheme when set).
 - Show course enrollments, class membership, and family membership.
 - Creating profiles often happens on first course or class add; this page manages the canonical org record.
-- Send/resend parent invite is **not** on this page yet (email can be stored).
+- **Invite parent:** if a parent email is saved, create a parent invite and **copy `/invite/<token>`** (v0 does not send email). Same claim path as staff.
 
 ## Data shown
 
@@ -28,7 +28,7 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 - Enrollments: course title + status + link to that course roster
 - Class memberships: class name + link
 - Family membership: household label + link (at most one family)
-- Parent email (editable; invite send TBD)
+- Parent invite / claim status (pending link, copyable claim URL, or accepted)
 
 ## Contents
 
@@ -43,18 +43,20 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 - Enrollments in courses in this org → links to those [COURSE_ROSTER](./COURSE_ROSTER.md) contexts
 - Classes in this org → [CLASS](./CLASS.md)
 - Family in this org → [FAMILY](./FAMILY.md)
-- Parent email stored for later invite / linkage
+- Parent invite / claim status on this page; copy `/invite/<token>` (no email send)
 - No student login controls (accounts = P2)
 
 ## Primary actions
 
 - Edit profile fields
+- Create parent invite and copy the claim link; cancel a pending invite
 - Open class / course enrollments
 - Open family when grouped
 
 ## Links to
 
 - [ORG_ROSTER](./ORG_ROSTER.md) — back to roster
+- [INVITE_CLAIM](./INVITE_CLAIM.md) — copied parent invite link (recipient)
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — course enrollment contexts
 - [CLASS](./CLASS.md) — class membership
 - [FAMILY](./FAMILY.md) — household when grouped

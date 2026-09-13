@@ -13,7 +13,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | User | `profiles` | PK = `auth.users.id`. Email + Google live in Supabase Auth; `profiles` is the PostgREST-facing row. |
 | Organization | `organizations` | |
 | Membership | `memberships` | |
-| AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `parent`. Membership is created on claim. |
+| AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `parent`. Claimed via copyable `/invite/<token>` or pending-request inbox after login. **v0: no email send.** Membership is created on claim. |
 | StudentProfile | `student_profiles` | |
 | Family | `families` | |
 | FamilyMember | `family_members` | |
@@ -79,17 +79,21 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 
 ### Parent access gate
 
-A user receives the **parent** role in an organization when **all** of the following are true:
+**Membership** (parent role) is created when the invited email **claims** a parent invite — same token path as staff. Claiming also writes `parent_student_links`.
 
-1. Their **email** matches a parent invite (or linked student profile record).
-2. They have at least one **student profile** associated with them.
-3. That student profile has an **enrollment** in a course with **`status = active`** within the organization.
+**Course access** still keys off enrollment, not the invite:
+
+1. Active **parent** membership in the organization.
+2. A `parent_student_links` row for that user.
+3. That student profile has an **enrollment** in a course with **`status = active`** and **`visibility = published`**.
+
+A claimed parent with no enrollment can open the org (empty “this week”) but cannot SELECT courses.
 
 **Active course** = `Course.status = active`. Optional `start_date` / `end_date` are informational, not access gates.
 
 **Published course** = `Course.visibility = published`. Parents SELECT a course (and its content via `parent_can_view_course`) only when the course is **active and published**. Unpublished courses are instructors/admins only. New courses default unpublished; existing rows stayed published when the column was added.
 
-**P0:** Invite email → parent **must sign up or log in** with that email before viewing. Magic links (no account) are later. **Print** is available on any material/unit/week they can view.
+**P0:** Invite email → parent **must sign up or log in** with that email before viewing. Magic links (no account) are later. **v0 does not send email** — staff copy `/invite/<token>`. **Print** is available on any material/unit/week they can view.
 
 **P0 if enrollments end:** parent User / Membership stays **active**. Visibility rules deferred.
 
@@ -333,7 +337,7 @@ Org staff and parent memberships. Owners and admins may **change** `admin` ↔ `
 
 ### AdminInvite
 
-Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` (staff) or `parent`. Claimed by signing up / logging in with that email (send/claim UI still planned). **Membership is created on claim.** Parent course access still requires enrollment (see Parent access gate).
+Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` (staff) or `parent`. **v0:** copy a claim link; Course Wright does **not** send email. Claimed by opening `/invite/<token>` or by signing in with that email and accepting a pending request. **Membership is created on claim.** Parent course access still requires enrollment (see Parent access gate).
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -343,13 +347,13 @@ Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor
 | role | text | `owner` · `admin` · `instructor` · `parent` |
 | student_profile_id | bigint | FK → StudentProfile, **required when `role = parent`**, else null |
 | invited_by | uuid | FK → User |
-| token | text | Unique invite token (returned on insert) |
+| token | text | Unique invite token (returned on insert; used in `/invite/<token>`) |
 | accepted_at | timestamptz | nullable |
 | membership_id | bigint | FK → Membership, nullable |
 
 **Who can invite staff:** owners and admins. Admins may invite `admin` or `instructor`. Only owners may invite another `owner`. Instructors cannot invite org staff.
 
-**Who can invite parents:** owners, admins, and instructors. Parent invites are created from the Families directory / roster when linking an email with no account.
+**Who can invite parents:** owners, admins, and instructors. Parent invites are created from roster / student profile (copyable `/invite/<token>`), and from the Families directory when linking an email with no account. Not from org settings.
 
 ---
 
@@ -402,7 +406,7 @@ Stored on `admin_invites` with `role = parent` (same token / claim RPCs as staff
 
 Parent-specific fields: `student_profile_id` (required), plus the shared email / token / invited_by / accepted_at columns on AdminInvite.
 
-**P0 Families path:** staff save one pending row per chosen student. Send/claim UI is still planned. On claim: create parent membership (if needed) and `parent_student_links`. Do **not** grant course access from the invite alone.
+**v0:** staff copy `/invite/<token>` from student profile / course roster; no email send. Families directory also writes a pending row when linking an email with no account. On claim: create parent membership (if needed) and `parent_student_links`. Do **not** grant course access from the invite alone.
 
 ### ParentStudentLink
 

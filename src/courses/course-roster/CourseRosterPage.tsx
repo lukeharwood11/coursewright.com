@@ -6,9 +6,12 @@ import { AddStudentForm } from "@/roster/student-profile/components/AddStudentFo
 import { ExistingStudentPicker } from "@/roster/student-profile/components/ExistingStudentPicker";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
 import { useCourseRoster } from "./hooks/useCourseRoster";
+import { useCourseParentInvites } from "./hooks/useCourseParentInvites";
 
 export function CourseRosterPage() {
   const roster = useCourseRoster();
+  const students = roster.enrollments.map((enrollment) => enrollment.student);
+  const parentInvites = useCourseParentInvites(students);
 
   useEffect(() => {
     document.title = roster.course
@@ -51,7 +54,6 @@ export function CourseRosterPage() {
     );
   }
 
-  const students = roster.enrollments.map((enrollment) => enrollment.student);
   const enrollmentIdByStudent = new Map(
     roster.enrollments.map((enrollment) => [enrollment.student.id, enrollment.id]),
   );
@@ -138,15 +140,42 @@ export function CourseRosterPage() {
           emptyMessage="No students enrolled yet. Printing this course does not require a roster."
           trailing={(student) => {
             const enrollmentId = enrollmentIdByStudent.get(student.id);
-            if (!enrollmentId) return null;
+            const pending = parentInvites.pendingByStudent.get(student.id);
+            const linked = parentInvites.linkedStudentIds.has(student.id);
             return (
-              <Button
-                variant="secondary"
-                onClick={() => roster.onUnenroll(enrollmentId)}
-                disabled={roster.unenrollingId === enrollmentId}
-              >
-                {roster.unenrollingId === enrollmentId ? "Removing…" : "Unenroll"}
-              </Button>
+              <span className="flex flex-wrap items-center justify-end gap-2">
+                {parentInvites.canInvite && linked ? (
+                  <span className="text-[12.5px] text-[var(--ink-faint)]">Parent linked</span>
+                ) : null}
+                {parentInvites.canInvite && pending && !linked ? (
+                  <Button
+                    variant="secondary"
+                    onClick={() => parentInvites.onCopy(student.id)}
+                  >
+                    {parentInvites.copiedId === pending.id ? "Copied" : "Copy invite"}
+                  </Button>
+                ) : null}
+                {parentInvites.canInvite && student.parentEmail && !pending && !linked ? (
+                  <Button
+                    variant="secondary"
+                    onClick={() => parentInvites.onInvite(student)}
+                    disabled={parentInvites.invitingStudentId === student.id}
+                  >
+                    {parentInvites.invitingStudentId === student.id
+                      ? "Inviting…"
+                      : "Invite parent"}
+                  </Button>
+                ) : null}
+                {enrollmentId ? (
+                  <Button
+                    variant="secondary"
+                    onClick={() => roster.onUnenroll(enrollmentId)}
+                    disabled={roster.unenrollingId === enrollmentId}
+                  >
+                    {roster.unenrollingId === enrollmentId ? "Removing…" : "Unenroll"}
+                  </Button>
+                ) : null}
+              </span>
             );
           }}
         />

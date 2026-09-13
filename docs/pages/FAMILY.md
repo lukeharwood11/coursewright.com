@@ -16,7 +16,7 @@ One **family**: a named group of student profiles in this org. Parents appear on
 
 - View one family; staff add and remove **student** members (Class-mirror). Empty family is allowed.
 - Add an existing org student who is not already in another family, or create a new student profile and add them.
-- **Link a parent** by choosing an org account and/or email, and which student(s) in this family. That write **creates or reuses** `parent_student_links`. If the email has no Course Wright account in this org, save a pending `admin_invites` row with `role=parent` and the chosen `student_profile_id`(s) (send/claim still a separate flow). **Never write enrollments.** **Do not** write `family_members.parent_user_id` or `parent_invites`.
+- **Link a parent** by choosing an org account and/or email, and which student(s) in this family. That write **creates or reuses** `parent_student_links`. If the email has no Course Wright account in this org, save a pending `admin_invites` row with `role=parent` and the chosen `student_profile_id`(s). Copy/claim is on [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md) / [INVITE_CLAIM](./INVITE_CLAIM.md) — this page does not copy the link. **Never write enrollments.** **Do not** write `family_members.parent_user_id` or `parent_invites`.
 - Parents already linked to a student in this family show up automatically (including a parent who is also linked to a student in another family).
 - Remove a student from the family. This does **not** delete parent–student links or course enrollments.
 - A student profile belongs to at most one family.
@@ -55,4 +55,4 @@ One **family**: a named group of student profiles in this org. Parents appear on
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Families & parent directory. Not the P2 cross-org parent family manager. Invite **send** and **claim** are still planned. Merge/split households is TBD. `family_members.parent_user_id` exists in schema but is unused for P0 app writes.
+[FEATURES.md](../FEATURES.md) — Families & parent directory. Not the P2 cross-org parent family manager. This page inserts pending `admin_invites`; copy/claim lives on student profile and course roster. Merge/split households is TBD. `family_members.parent_user_id` exists in schema but is unused for P0 app writes.

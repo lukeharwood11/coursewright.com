@@ -48,4 +48,4 @@ Org-scoped **parent / family directory** — find named student groups (househol
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Families & parent directory (P0). **Access lock:** family is a named group of students (Class-mirror). Parents are derived from `parent_student_links`. Materials / this-week / print stay enrollment + that student link. Extra profile fields, merge/split, parent-facing profile, and invite send/claim remain TBD.
+[FEATURES.md](../FEATURES.md) — Families & parent directory (P0). **Access lock:** family is a named group of students (Class-mirror). Parents are derived from `parent_student_links`. Materials / this-week / print stay enrollment + that student link. Copy/claim UI is on student profile and course roster, not this directory. Extra profile fields, merge/split, and parent-facing profile remain TBD.
