@@ -17,7 +17,7 @@ import {
   canManageBilling,
   canManageOrgSettings,
 } from "@/organizations/model/role";
-import { slugify } from "@/organizations/model/slug";
+import { formatSlugInput } from "@/organizations/model/slug";
 import {
   orgSettingsHaveChanges,
   validateUpdateOrganization,
@@ -122,7 +122,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
   }
 
   function onSlugChange(value: string) {
-    setSlug(slugify(value));
+    setSlug(formatSlugInput(value));
     setConfirmPermalinkChange(false);
     setFormError(null);
   }

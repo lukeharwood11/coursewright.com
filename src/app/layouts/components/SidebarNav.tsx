@@ -7,7 +7,6 @@ import {
   Cog6ToothIcon,
   HomeIcon,
   UserCircleIcon,
-  UserGroupIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -17,7 +16,6 @@ import {
   Cog6ToothIcon as Cog6ToothSolidIcon,
   HomeIcon as HomeSolidIcon,
   UserCircleIcon as UserCircleSolidIcon,
-  UserGroupIcon as UserGroupSolidIcon,
   UsersIcon as UsersSolidIcon,
 } from "@heroicons/react/24/solid";
 import { toastNotImplemented } from "@/ui/toast";
@@ -36,7 +34,6 @@ const sectionIcons: Record<string, { outline: IconComponent; solid: IconComponen
   home: { outline: HomeIcon, solid: HomeSolidIcon },
   courses: { outline: BookOpenIcon, solid: BookOpenSolidIcon },
   roster: { outline: UsersIcon, solid: UsersSolidIcon },
-  families: { outline: UserGroupIcon, solid: UserGroupSolidIcon },
   settings: { outline: Cog6ToothIcon, solid: Cog6ToothSolidIcon },
   progress: { outline: ChartBarIcon, solid: ChartBarSolidIcon },
 };

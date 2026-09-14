@@ -1,17 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { getProfile } from "@/auth/api/profiles";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
-import { listCourses, courseQueryKeys } from "@/courses/databridge/courses";
+import { courseQueryKeys, listCourses } from "@/courses/databridge/courses";
 import {
   getMembershipByOrgSlug,
   orgQueryKeys,
 } from "@/organizations/databridge/memberships";
 import { isStaffRole } from "@/organizations/model/role";
-import { familyLabel, familyMemberNames } from "@/roster/model/family";
-import {
-  familyQueryKeys,
-  listFamilies,
-} from "@/roster/databridge/families";
 import {
   classQueryKeys,
   listClasses,
@@ -49,27 +44,16 @@ export function useOrgShellData(orgSlug: string | undefined) {
     enabled: isStaff && Boolean(organizationId),
   });
 
-  const familiesQuery = useQuery({
-    queryKey: familyQueryKeys.list(organizationId ?? 0),
-    queryFn: () => listFamilies(organizationId!),
-    enabled: isStaff && Boolean(organizationId),
-  });
+  const courseRows = Array.isArray(coursesQuery.data) ? coursesQuery.data : [];
 
   const lists = {
-    courses: (coursesQuery.data ?? []).map((course) => ({
+    courses: courseRows.map((course) => ({
       id: String(course.id),
       title: course.title,
     })),
     classes: (classesQuery.data ?? []).map((classGroup) => ({
       id: String(classGroup.id),
       title: classGroup.title,
-    })),
-    families: (familiesQuery.data ?? []).map((family) => ({
-      id: String(family.id),
-      label: familyLabel(
-        family.displayName,
-        familyMemberNames(family.students.map((member) => member.student)),
-      ),
     })),
   };
 

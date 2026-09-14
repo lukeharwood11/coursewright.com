@@ -17,6 +17,7 @@ import { validateCourseSettings } from "@/courses/model/createCourse";
 import { allowedGradeLevels, toggleGradeLevel } from "@/courses/model/gradeLevels";
 import { getOrganization, orgQueryKeys } from "@/organizations/databridge/organizations";
 import { canManageOrgSettings, isStaffRole } from "@/organizations/model/role";
+import type { CourseIconValue } from "@/courses/model/courseIcon";
 import type { CourseVisibility } from "@/courses/model/visibility";
 
 export function useCourseSettings() {
@@ -54,6 +55,7 @@ export function useCourseSettings() {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [subject, setSubject] = useState("");
+  const [iconKey, setIconKey] = useState<CourseIconValue>(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [status, setStatus] = useState("active");
@@ -67,6 +69,7 @@ export function useCourseSettings() {
     setDescription(course.description);
     setLocation(course.location);
     setSubject(course.subject);
+    setIconKey(course.iconKey);
     setStartDate(course.startDate ?? "");
     setEndDate(course.endDate ?? "");
     setStatus(course.status);
@@ -80,6 +83,7 @@ export function useCourseSettings() {
         description,
         location,
         subject,
+        iconKey,
         startDate,
         endDate,
         gradeLevels: allowedGradeLevels(
@@ -98,6 +102,9 @@ export function useCourseSettings() {
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.list(organization.id),
       });
+      await queryClient.invalidateQueries({
+        queryKey: courseQueryKeys.listWithCatalog(organization.id),
+      });
     },
     onError: (error: Error) => setFormError(error.message),
   });
@@ -111,6 +118,9 @@ export function useCourseSettings() {
       });
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.list(organization.id),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: courseQueryKeys.listWithCatalog(organization.id),
       });
     },
   });
@@ -156,6 +166,8 @@ export function useCourseSettings() {
     setLocation,
     subject,
     setSubject,
+    iconKey,
+    setIconKey,
     startDate,
     setStartDate,
     endDate,

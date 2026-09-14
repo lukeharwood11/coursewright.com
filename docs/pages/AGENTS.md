@@ -52,12 +52,12 @@ Org pages share a **collapsible sidebar** (overlay drawer on small screens). Whe
 - [ORG_HOME](./ORG_HOME.md)
 - [COURSE_LIST](./COURSE_LIST.md)
 - [ORG_ROSTER](./ORG_ROSTER.md)
-- [FAMILIES](./FAMILIES.md)
 - [ORG_SETTINGS](./ORG_SETTINGS.md)
 - [ORG_PICKER](./ORG_PICKER.md) — switch org
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
-- Advanced search — TBD overlay vs route (P0 product chrome; always available)
+- Search — staff chrome overlay (pages / courses / materials); dedicated route still TBD
 
 [TEMPLATE_LIST](./TEMPLATE_LIST.md) is **P1** — do not put templates in P0 org chrome.
+[FAMILIES](./FAMILIES.md) / [FAMILY](./FAMILY.md) remain product outlines but are **not currently in org chrome or routes**.
 
 Parent chrome is simpler — see [ORG_HOME](./ORG_HOME.md) parent variant; do not dump instructor nav onto parent screens. Parent sidebar: This week, their courses, Progress.

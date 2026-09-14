@@ -62,6 +62,66 @@ export function studentsNotIn<T extends { id: number }>(
   return students.filter((student) => !taken.has(student.id));
 }
 
+export type NewStudentDraft = {
+  name: string;
+  parentEmail: string;
+  gradeLevel: string;
+};
+
+export function emptyStudentDraft(gradeLevel = ""): NewStudentDraft {
+  return { name: "", parentEmail: "", gradeLevel };
+}
+
+/** One name per line; blank lines ignored. */
+export function parseStudentNamesPaste(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+export function validateStudentBatch(
+  drafts: NewStudentDraft[],
+  gradeLabels: string[],
+):
+  | { ok: true; values: ValidatedStudentProfile[] }
+  | { ok: false; error: string } {
+  const values: ValidatedStudentProfile[] = [];
+  for (let index = 0; index < drafts.length; index += 1) {
+    const draft = drafts[index];
+    const blank =
+      !draft.name.trim() && !draft.parentEmail.trim() && !draft.gradeLevel.trim();
+    if (blank) continue;
+    const parsed = validateStudentProfile({
+      name: draft.name,
+      parentEmail: draft.parentEmail,
+      gradeLevel: draft.gradeLevel,
+      gradeLabels,
+    });
+    if (!parsed.ok) {
+      return { ok: false, error: `Student ${index + 1}: ${parsed.error}` };
+    }
+    values.push(parsed.value);
+  }
+  if (values.length === 0) {
+    return { ok: false, error: "Add at least one student name." };
+  }
+  return { ok: true, values };
+}
+
+export function toggleIdInSet(ids: number[], id: number): number[] {
+  return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
+}
+
+export function mergeSelectedIds(
+  current: number[],
+  addIds: number[],
+): number[] {
+  const next = new Set(current);
+  for (const id of addIds) next.add(id);
+  return [...next];
+}
+
 export function rosterWriteErrorMessage(error: {
   code?: string;
   message: string;

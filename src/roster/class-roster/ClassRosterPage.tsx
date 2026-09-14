@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/ui/Button";
-import { AddStudentForm } from "@/roster/student-profile/components/AddStudentForm";
-import { ExistingStudentPicker } from "@/roster/student-profile/components/ExistingStudentPicker";
+import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
 import { useClassRoster } from "./hooks/useClassRoster";
 
@@ -68,52 +67,17 @@ export function ClassRosterPage() {
         not enroll them in a course.
       </p>
 
-      <div className="mt-6 grid items-start gap-4 lg:grid-cols-2">
-        <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-          <ExistingStudentPicker
-            students={roster.availableStudents}
-            selectedId={roster.selectedId}
-            saving={roster.addingExisting}
-            error={roster.existingError}
-            onSelect={roster.setSelectedId}
-            onAdd={roster.onAddExisting}
-          />
-          {roster.availableStudents.length === 0 ? (
-            <p className="text-[14px] leading-relaxed text-[var(--ink-soft)]">
-              {roster.members.length === 0
-                ? "No one in the org yet. Add a new student to create their profile and put them in this class."
-                : "Everyone already in the org is in this class. Add a new student below."}
-            </p>
-          ) : null}
-        </section>
-
-        <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-          <h3 className="text-[13px] font-bold text-[var(--ink-soft)]">
-            Add a new student
-          </h3>
-          <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-            Creates their org profile and adds them to this class.
-          </p>
-          <div className="mt-4">
-            <AddStudentForm
-              name={roster.name}
-              parentEmail={roster.parentEmail}
-              gradeLevel={roster.gradeLevel}
-              gradeLabels={roster.gradeLabels}
-              error={roster.newError}
-              saving={roster.addingNew}
-              submitLabel="Add to class"
-              onNameChange={roster.setName}
-              onParentEmailChange={roster.setParentEmail}
-              onGradeLevelChange={roster.setGradeLevel}
-              onSubmit={roster.onAddNew}
-            />
-          </div>
-        </section>
-      </div>
-
       <section className="mt-8">
-        <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Students</h2>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">
+            Students
+          </h2>
+          {!roster.panelOpen ? (
+            <Button type="button" onClick={roster.openPanel}>
+              Add students
+            </Button>
+          ) : null}
+        </div>
         <StudentRosterList
           students={students}
           orgSlug={roster.organization.slug}
@@ -133,6 +97,47 @@ export function ClassRosterPage() {
           }}
         />
       </section>
+
+      <AddStudentsPanel
+        open={roster.panelOpen}
+        onClose={roster.closePanel}
+        title="Add students"
+        disclaimer="Adding here does not enroll anyone in a course. Use a course roster to enroll."
+        tab={roster.tab}
+        onTabChange={roster.setTab}
+        students={roster.availableStudents}
+        selectedIds={roster.selectedIds}
+        existingError={roster.existingError}
+        existingSaving={roster.addingExisting}
+        existingConfirmLabel={(count) =>
+          count === 1 ? "Add 1 student" : `Add ${count} students`
+        }
+        existingEmptyMessage={
+          roster.members.length === 0
+            ? "No one in the org yet. Create new students to put them in this class."
+            : "Everyone already in the org is in this class. Create new students below."
+        }
+        onToggle={roster.onToggle}
+        onSelectFiltered={roster.onSelectFiltered}
+        onClear={roster.onClearSelection}
+        onConfirmExisting={roster.onConfirmExisting}
+        drafts={roster.drafts}
+        pasteText={roster.pasteText}
+        gradeLabels={roster.gradeLabels}
+        newError={roster.newError}
+        newSaving={roster.addingNew}
+        newSubmitLabel={(count) =>
+          count === 1
+            ? "Create and add 1 student"
+            : `Create and add ${count} students`
+        }
+        onDraftChange={roster.setDraft}
+        onAddRow={roster.onAddRow}
+        onRemoveRow={roster.onRemoveRow}
+        onPasteTextChange={roster.setPasteText}
+        onApplyPaste={roster.onApplyPaste}
+        onSubmitNew={roster.onSubmitNew}
+      />
 
       <p className="mt-6 text-[13px]">
         <Link

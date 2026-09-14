@@ -26,6 +26,7 @@ Configure the course instance (not content authoring — that’s [COURSE](./COU
 
 - Course **name** (editable)
 - **Description**, **subject / area**, **location** (optional, editable)
+- **Icon** (optional catalog icon for course list cards)
 - **Start date**, **end date** (optional, editable)
 - **Status** and **visibility** (publish / unpublish)
 - **Grade-level metadata** (multi grade/range per org scheme)
@@ -35,7 +36,7 @@ Configure the course instance (not content authoring — that’s [COURSE](./COU
 ## Contents
 
 - Course name
-- Optional **description**, **subject / area**, **location**
+- Optional **description**, **subject / area**, **location**, **icon**
 - Optional **start date** and **end date** (informational only — not access gates)
 - **Status** (`active` / `archived`) — offering is running vs archived
 - **Publish / unpublish** — families see the course only when it is active **and** published
@@ -53,7 +54,7 @@ Configure the course instance (not content authoring — that’s [COURSE](./COU
 
 - [COURSE](./COURSE.md) — back to course builder
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — roster (related)
-- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
+- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 - **P1:** [TEMPLATE](./TEMPLATE.md) — view linked template / after promote
 
 ## Notes

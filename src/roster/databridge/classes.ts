@@ -144,11 +144,39 @@ export async function addClassMember(
   classId: number,
   studentProfileId: number,
 ): Promise<void> {
+  await addClassMembers(classId, [studentProfileId]);
+}
+
+export async function addClassMembers(
+  classId: number,
+  studentProfileIds: number[],
+): Promise<void> {
+  const uniqueIds = [
+    ...new Set(studentProfileIds.filter((id) => Number.isFinite(id) && id > 0)),
+  ];
+  if (uniqueIds.length === 0) return;
+
   const db = requireSupabase();
-  const { error } = await db.from("class_members").insert({
-    class_id: classId,
-    student_profile_id: studentProfileId,
-  });
+  const { data: existingRows, error: existingError } = await db
+    .from("class_members")
+    .select("student_profile_id")
+    .eq("class_id", classId)
+    .in("student_profile_id", uniqueIds);
+
+  if (existingError) throw new Error(rosterWriteErrorMessage(existingError));
+
+  const already = new Set(
+    (existingRows ?? []).map((row) => row.student_profile_id),
+  );
+  const toInsert = uniqueIds.filter((id) => !already.has(id));
+  if (toInsert.length === 0) return;
+
+  const { error } = await db.from("class_members").insert(
+    toInsert.map((studentProfileId) => ({
+      class_id: classId,
+      student_profile_id: studentProfileId,
+    })),
+  );
 
   if (error) throw new Error(rosterWriteErrorMessage(error));
 }

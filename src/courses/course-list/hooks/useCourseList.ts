@@ -8,22 +8,32 @@ import {
   courseQueryKeys,
   createCourse,
   listCourses,
+  listCoursesCatalogMeta,
 } from "@/courses/databridge/courses";
+import type { CourseIconValue } from "@/courses/model/courseIcon";
 import { validateCreateCourse } from "@/courses/model/createCourse";
 import { allowedGradeLevels, toggleGradeLevel } from "@/courses/model/gradeLevels";
 import { coursePath } from "@/courses/model/paths";
 import { getOrganization, orgQueryKeys } from "@/organizations/databridge/organizations";
+import { staffDashboardQueryKey } from "@/organizations/databridge/staffDashboard";
 
 export function useCourseList() {
   const { organization } = useOrgShell();
   const query = useQuery({
-    queryKey: courseQueryKeys.list(organization.id),
-    queryFn: () => listCourses(organization.id),
+    queryKey: courseQueryKeys.listWithCatalog(organization.id),
+    queryFn: async () => {
+      const courses = await listCourses(organization.id);
+      const catalogByCourseId = await listCoursesCatalogMeta(
+        courses.map((course) => course.id),
+      );
+      return { courses, catalogByCourseId };
+    },
   });
 
   return {
     organization,
-    courses: query.data ?? [],
+    courses: query.data?.courses ?? [],
+    catalogByCourseId: query.data?.catalogByCourseId ?? {},
     loading: query.isLoading,
     error: query.error ? query.error.message : null,
   };
@@ -40,6 +50,7 @@ export function useCreateCourse() {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [subject, setSubject] = useState("");
+  const [iconKey, setIconKey] = useState<CourseIconValue>(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [status, setStatus] = useState("active");
@@ -63,6 +74,7 @@ export function useCreateCourse() {
       setDescription("");
       setLocation("");
       setSubject("");
+      setIconKey(null);
       setStartDate("");
       setEndDate("");
       setStatus("active");
@@ -86,6 +98,7 @@ export function useCreateCourse() {
     setDescription((current) => current || source.description);
     setLocation((current) => current || source.location);
     setSubject((current) => current || source.subject);
+    setIconKey((current) => current ?? source.iconKey);
   }, [open, sourceCourseId, coursesQuery.data]);
 
   const mutation = useMutation({
@@ -95,6 +108,7 @@ export function useCreateCourse() {
         description,
         location,
         subject,
+        iconKey,
         startDate,
         endDate,
         gradeLevels: allowedGradeLevels(
@@ -115,6 +129,7 @@ export function useCreateCourse() {
           description: parsed.value.description,
           location: parsed.value.location,
           subject: parsed.value.subject,
+          iconKey: parsed.value.iconKey,
           startDate: parsed.value.startDate,
           endDate: parsed.value.endDate,
           gradeLevels: parsed.value.gradeLevels,
@@ -126,6 +141,12 @@ export function useCreateCourse() {
     onSuccess: async (course) => {
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.list(organization.id),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: courseQueryKeys.listWithCatalog(organization.id),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: staffDashboardQueryKey(organization.id),
       });
       navigate(coursePath(organization.slug, course.id));
     },
@@ -149,6 +170,7 @@ export function useCreateCourse() {
     setDescription(source.description);
     setLocation(source.location);
     setSubject(source.subject);
+    setIconKey(source.iconKey);
   }
 
   function onSubmit(event: FormEvent) {
@@ -168,6 +190,8 @@ export function useCreateCourse() {
     setLocation,
     subject,
     setSubject,
+    iconKey,
+    setIconKey,
     startDate,
     setStartDate,
     endDate,

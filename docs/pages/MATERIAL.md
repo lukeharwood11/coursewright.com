@@ -100,7 +100,7 @@ View (and edit) a single material placement — the thing parents open from this
 - [UNIT](./UNIT.md) — parent unit when nested
 - [COURSE](./COURSE.md) — parent course (always; home for top-level materials)
 - [ORG_HOME](./ORG_HOME.md) — parent return to this week / dashboard
-- Via org chrome (instructor/admin): [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
+- Via org chrome (instructor/admin): [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 - [PRINT](./PRINT.md) — **Print** → `…/materials/<material_id>/print`
 - Resource share entry — TBD (recipients land here after login)
 - **P1:** [TEMPLATE](./TEMPLATE.md) — when under a template

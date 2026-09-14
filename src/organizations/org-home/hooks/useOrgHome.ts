@@ -6,6 +6,10 @@ import {
   getMembershipByOrgSlug,
   orgQueryKeys,
 } from "@/organizations/databridge/memberships";
+import {
+  loadStaffDashboard,
+  staffDashboardQueryKey,
+} from "@/organizations/databridge/staffDashboard";
 import { loadParentDashboard, parentQueryKeys } from "@/parent/databridge/dashboard";
 import { isStaffRole } from "@/organizations/model/role";
 
@@ -26,11 +30,18 @@ export function useOrgHome(orgSlug: string | undefined) {
   const organization = membershipQuery.data?.organization ?? null;
   const role = membershipQuery.data?.role ?? null;
   const parentView = role === "parent";
+  const staffView = role ? isStaffRole(role) : false;
 
   const dashboardQuery = useQuery({
     queryKey: parentQueryKeys.dashboard(organization?.id ?? 0, user.id),
     queryFn: () => loadParentDashboard(organization!.id, user.id),
     enabled: parentView && Boolean(organization),
+  });
+
+  const staffDashboardQuery = useQuery({
+    queryKey: staffDashboardQueryKey(organization?.id ?? 0),
+    queryFn: () => loadStaffDashboard(organization!.id),
+    enabled: staffView && Boolean(organization),
   });
 
   const profileName = profileQuery.data?.name ?? "";
@@ -42,12 +53,17 @@ export function useOrgHome(orgSlug: string | undefined) {
     notFound: !membershipQuery.isLoading && !membershipQuery.data,
     organization,
     role,
-    isStaff: role ? isStaffRole(role) : false,
+    isStaff: staffView,
     firstName: firstNameFrom(profileName, profileEmail),
     profileName,
     profileEmail,
     dashboard: dashboardQuery.data ?? null,
     dashboardLoading: parentView && dashboardQuery.isLoading,
     dashboardError: dashboardQuery.error ? dashboardQuery.error.message : null,
+    staffDashboard: staffDashboardQuery.data ?? null,
+    staffDashboardLoading: staffView && staffDashboardQuery.isLoading,
+    staffDashboardError: staffDashboardQuery.error
+      ? staffDashboardQuery.error.message
+      : null,
   };
 }

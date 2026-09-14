@@ -64,7 +64,7 @@ export async function loadParentDashboard(
     db
       .from("important_now")
       .select(
-        "id, material_id, course_id, material:materials(title, unit_id), course:courses(title)",
+        "id, material_id, course_id, material:materials(title, description, unit_id), course:courses(title)",
       )
       .eq("organization_id", organizationId),
   ]);
@@ -130,6 +130,7 @@ export async function loadParentDashboard(
         id: row.id,
         materialId: row.material_id,
         materialTitle: material.title,
+        materialDescription: material.description,
         courseId: row.course_id,
         courseTitle: course.title,
         unitId: material.unit_id ?? null,

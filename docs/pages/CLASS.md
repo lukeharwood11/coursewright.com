@@ -14,39 +14,41 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 
 ## Behavior
 
-- Load one class in the org; staff can add and remove student profiles.
-- Add an existing org student, or create a new student profile (name required; optional parent email and grade) and add them in one step.
+- List-first member list; **Add students** opens a progressive panel.
+- **From roster** — multi-select eligible org students (filter, select all, clear).
+- **New students** — batch create org profiles and add them to this class in one confirm.
 - First-time add creates the org `student_profile` when they are new.
-- Removing a student from the class does **not** unenroll them from courses (course enrollment stays student ↔ course until that workshop is locked).
+- Removing a student from the class does **not** unenroll them from courses.
 - Empty class is allowed.
+- Disclaimer: membership here does not enroll in a course — use [COURSE_ROSTER](./COURSE_ROSTER.md) (Class may be a batch preset there).
 
 ## Data shown
 
 - Class **name** (title)
 - Members: **name**, optional **grade**, optional parent email
-- Add-student fields: name (required), parent email, grade (org scheme)
-- Picker of org students not already in the class
+- Batch picker of org students not already in the class
+- New-student draft rows: name (required), parent email, grade (org scheme)
 
 ## Contents
 
-- Class name
 - Member list → [STUDENT_PROFILE](./STUDENT_PROFILE.md)
-- Add existing student / add new student
-- Remove from class
+- **Add students** panel (batch existing + batch new)
+- Remove from class on each row
 - Empty state: add students when ready
 - Back to [ORG_ROSTER](./ORG_ROSTER.md) (class list lives there)
 
 ## Primary actions
 
-- Add / remove class members
+- Add / remove class members (batch add preferred)
 - Open a student profile
 
 ## Links to
 
 - [ORG_ROSTER](./ORG_ROSTER.md) — class list and org students
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — open a member
-- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
+- [COURSE_ROSTER](./COURSE_ROSTER.md) — enroll in a course (Class as preset)
+- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Classes (P0). Course ↔ Class enrollment is **workshop** — this page does not enroll a class into a course.
+[FEATURES.md](../FEATURES.md) — Classes (P0). Course enrolls individuals; Class is a batch preset into enroll, not a live link.

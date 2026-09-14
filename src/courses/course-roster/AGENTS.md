@@ -1,4 +1,3 @@
 # AGENTS — `src/courses/course-roster/`
 
-Course enrollments. Enroll an existing org student or create-and-enroll. Empty roster is allowed — create → print does not require students.
-
+Course enrollments. List-first enrolled students; **Enroll students** opens batch multi-select (optional Class preset) or batch create-and-enroll. Empty roster is allowed — create → print does not require students.

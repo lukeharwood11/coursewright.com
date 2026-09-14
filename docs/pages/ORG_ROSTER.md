@@ -14,11 +14,12 @@ Org-level people directory for **student profiles** and **classes**. Course enro
 
 ## Behavior
 
-- Org-level student directory for admins/instructors.
-- Add a student (name required; optional parent email and grade per org scheme).
+- Directory-first: searchable student list is the primary surface.
+- **Select students** on the list (checkboxes, select all matching) → **Add to class** or **Enroll in course** (pick destination; batch write).
+- **Add students** opens a batch create panel (multi-row and/or paste names one-per-line; name required; optional parent email and grade per org scheme).
 - Find students by name, grade, or parent email (list filter; P0 advanced search is a separate chrome job).
-- Create a **class** (name only) and open it to manage members.
-- Open student profile; navigate to families; course enrollments are edited on course roster.
+- **Classes** listed below; **Create class** is compact (name only) — open the class to manage members, or assign from the student selection bar.
+- Open student profile; course enrollments can also be edited on course roster.
 - Staff invite/roles are **not** managed here ([ORG_SETTINGS](./ORG_SETTINGS.md)).
 - Empty org is fine — create → print does not require a roster.
 
@@ -26,35 +27,32 @@ Org-level people directory for **student profiles** and **classes**. Course enro
 
 - Student list: **name**, optional **grade**, optional parent email
 - Class list: class **name**
-- Add-student fields: name, parent email, grade
+- Batch add fields: name rows, optional parent email / grade, paste names
 - Empty state when no profiles yet
 
 ## Contents
 
-- Add student form
-- List student profiles in the org (search/filter)
-- Create class; list classes → [CLASS](./CLASS.md)
-- Optional grade level shown per org grade scheme
-- Link to [FAMILIES](./FAMILIES.md) parent directory
+- Students list + find filter + **Add students**
+- Classes list + create class → [CLASS](./CLASS.md)
 - Open → [STUDENT_PROFILE](./STUDENT_PROFILE.md)
-- Empty state: add a student here, or when first enrolled in a course or class
+- Empty state: add students here, or when first enrolled in a course or class
 
 ## Primary actions
 
-- Add student
+- Select students → add to class / enroll in course
+- Add students (batch create)
 - Create class
 - Open student
 - Open class
-- Navigate to families / a course roster
+- Navigate to a course roster
 
 ## Links to
 
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — open student
 - [CLASS](./CLASS.md) — open class roster
-- [FAMILIES](./FAMILIES.md) — family directory
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — enrollments live on courses
-- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md) (staff lives here), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
+- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md) (staff lives here), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Roster management, student profiles (no login P0/P1), classes, families. Parent invite *send* is still a separate flow.
+[FEATURES.md](../FEATURES.md) — Roster management, student profiles (no login P0/P1), classes, families. Parent invite *send* is still a separate flow. Families directory UI is not currently exposed in the SPA.

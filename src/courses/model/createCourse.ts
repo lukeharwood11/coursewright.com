@@ -1,8 +1,12 @@
+import type { CourseIconValue } from "@/courses/model/courseIcon";
+import { parseCourseIconKey } from "@/courses/model/courseIcon";
+
 export type CreateCourseInput = {
   title: string;
   description: string;
   location: string;
   subject: string;
+  iconKey: CourseIconValue;
   startDate: string | null;
   endDate: string | null;
   gradeLevels: string[];
@@ -19,6 +23,7 @@ export function validateCreateCourse(raw: {
   description: string;
   location: string;
   subject: string;
+  iconKey: CourseIconValue;
   startDate: string;
   endDate: string;
   gradeLevels: string[];
@@ -45,6 +50,7 @@ export function validateCreateCourse(raw: {
       description: raw.description.trim(),
       location: raw.location.trim(),
       subject: raw.subject.trim(),
+      iconKey: parseCourseIconKey(raw.iconKey),
       startDate,
       endDate,
       gradeLevels: raw.gradeLevels,
@@ -59,6 +65,7 @@ export function validateCourseSettings(raw: {
   description: string;
   location: string;
   subject: string;
+  iconKey: CourseIconValue;
   startDate: string;
   endDate: string;
   gradeLevels: string[];

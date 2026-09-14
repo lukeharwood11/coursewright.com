@@ -423,7 +423,7 @@ Parent-specific fields: `student_profile_id` (required), plus the shared email /
 | status | text | active · completed · withdrawn |
 | enrolled_at | timestamptz | |
 
-**Open:** Whether enrollment is always per student, or a Course can attach a **Class** (and members derive enrollment). See FEATURES Classes workshop. Until locked, enrollment remains student ↔ course.
+**Decided:** Enrollment is always per student (`student_profile` ↔ course). A Class may be used as a **batch preset** when enrolling (one-shot copy of members into enrollments — not a live link). See FEATURES Classes.
 
 ### Class
 
@@ -459,6 +459,7 @@ Org-scoped **group of students**. Not a Course — no units/materials.
 | description | text | optional short blurb — not the P1 **Summary** |
 | location | text | optional where the offering meets (free text) |
 | subject | text | optional subject / area (free text, not a taxonomy) |
+| icon_key | text | **optional** — Heroicons outline key for course catalog cards; null = none |
 | template_id | bigint | FK → CourseTemplate, **nullable** — **P1** live link when created from a template; unused in P0 product flows |
 | copied_from_course_id | bigint | FK → Course, **nullable** — P0 origin when created from another course (informational, no sync) |
 | start_date | date | nullable — informational |

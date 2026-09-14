@@ -9,7 +9,7 @@ All org members. **Same URL**, different chrome/content by role (owner, admin, i
 
 ## Purpose
 
-Organization home / dashboard. For parents this **is** the P0 parent dashboard (this week + important now). For instructors/owners/admins, an operational landing into courses, roster, settings.
+Organization home / dashboard. For parents this **is** the P0 parent dashboard (this week + important now). For instructors/owners/admins, an operational summary: courses, needs attention, this week across the org, and people counts — not a link grid to other sections.
 
 ## Behavior
 
@@ -27,11 +27,15 @@ Same URL for all roles; chrome and body switch by membership role.
 
 ### Instructor / owner / admin
 
-- Operational landing: navigate to courses, roster, families, settings via a **collapsible org sidebar** (nested course/family names when they exist). (**P1:** templates.)
-- **Advanced search** entry in product chrome when shipped (always-available, cross-facet — overlay vs route TBD).
-- Optional widgets TBD (recent courses, needs attention).
+- Operational **dashboard** (sidebar still provides full nav). Home body summarizes the co-op; it does not only list destinations.
+- **Getting started** when there are no courses and/or no students: short checklist (create course → add students → enroll / publish). Create → print does **not** require a roster.
+- **Needs attention** (only when non-empty): active courses with zero enrollments; unpublished courses that already have enrollments; active courses with enrollments but no dated materials in the current week.
+- **Courses**: compact preview cards (title, icon, subject, published/status, enrollment count), up to six, plus link to [COURSE_LIST](./COURSE_LIST.md). Primary **Create course**.
+- **This week**: week label; org-wide **Important now**; per active course dated-material counts for the Sunday–Saturday week (staff sees active materials, including unpublished).
+- **People**: student + class counts → [ORG_ROSTER](./ORG_ROSTER.md).
 - Switch org returns to org picker.
-- Create → print does **not** require a roster (empty org/course still useful).
+- **Search** in product chrome (staff): pages, courses, and materials by title; facets / dedicated route still TBD.
+- **P1:** templates in chrome.
 
 ## Data shown
 
@@ -39,17 +43,19 @@ Same URL for all roles; chrome and body switch by membership role.
 
 - Org **name**
 - Week range label (Sun–Sat dates)
-- **Important now** items: material title, course/student context, link target
+- **Important now** items: material title, description (when set), course/student context, link target
 - Per **student profile**: name, grade badge TBD
 - Per student → **courses** → this week’s **materials** (title, due/date in amber when dated)
 - Print affordances (not data fields)
 
 ### Instructor / owner / admin
 
-- Org **name**
-- Nav destinations in the org sidebar (courses and families listed by name when present)
-- TBD widget data: e.g. recent course titles/status, attention counts
-- Search chrome (when shipped)
+- Org **name** + current week label
+- Setup flags: needs course / needs students
+- Attention rows: course title + reason
+- Course previews: title, icon, subject, status, visibility, active enrollment count
+- This week: important-now (material title, description when set, course title); dated material counts by course
+- People: student count, class count
 
 ## Contents
 
@@ -73,13 +79,16 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 ### Instructor / owner / admin view
 
-- Collapsible **org sidebar** for Home, Courses, Roster (nested class names when they exist), Families, Settings (course and family names nested when present)
-- Org overview useful for running the co-op
-- Obvious navigation: [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md) (**P1:** [TEMPLATE_LIST](./TEMPLATE_LIST.md))
-- **Advanced search** in chrome (P0 — overlay vs `/search` route TBD)
-- TBD widgets: recent courses, needs attention
+- Collapsible **org sidebar** for Home, Courses, Roster (nested class names when they exist), Settings (course names nested when present)
+- Header: org name, week label, **Create course**
+- Getting started (when needed)
+- Needs attention (when needed)
+- Courses preview + View all
+- This week (important now + dated counts)
+- People snapshot (roster)
 - Switch org → [ORG_PICKER](./ORG_PICKER.md)
 - Account menu (avatar) → User (Settings / Sign out) and Organization (Org settings / Switch → [ORG_PICKER](./ORG_PICKER.md)) — [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md), [ORG_SETTINGS](./ORG_SETTINGS.md)
+- **Search** in chrome (staff overlay: pages / courses / materials; dedicated route TBD)
 
 ## Primary actions
 
@@ -91,9 +100,10 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 ### Instructor / owner / admin
 
-- Open / create course
-- Open roster / families / settings
-- Search (when shipped)
+- Create / open course
+- Open attention targets (course or course roster)
+- Open roster / settings
+- Search org pages, courses, materials
 
 ## Links to
 
@@ -108,16 +118,17 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 ### Instructor / owner / admin
 
-- [COURSE_LIST](./COURSE_LIST.md) — courses
-- [ORG_ROSTER](./ORG_ROSTER.md) — org roster (includes class list)
-- [CLASS](./CLASS.md) — a class opened from roster
-- [FAMILIES](./FAMILIES.md) — family directory
-- [ORG_SETTINGS](./ORG_SETTINGS.md) — org settings
+- [COURSE](./COURSE.md) — open a course (preview or this-week row)
+- [COURSE_ROSTER](./COURSE_ROSTER.md) — from “no enrollments” attention
+- [COURSE_LIST](./COURSE_LIST.md) — view all / create course
+- [MATERIAL](./MATERIAL.md) — important-now item
+- [ORG_ROSTER](./ORG_ROSTER.md) — people / students
+- [ORG_SETTINGS](./ORG_SETTINGS.md) — via chrome / account menu
 - [ORG_PICKER](./ORG_PICKER.md) — switch org
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — account
-- Search — TBD overlay vs route
+- Search — staff chrome overlay (pages / courses / materials); dedicated route still TBD
 - **P1:** [TEMPLATE_LIST](./TEMPLATE_LIST.md) — templates
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Parent experience, units/dating, important now, print grain, RBAC, advanced search. Parent summary layer is **P1**, not P0. Homework in P0 = dated materials on this week (no separate assignment object).
+[FEATURES.md](../FEATURES.md) — Parent experience, units/dating, important now, print grain, RBAC, advanced search. Parent summary layer is **P1**, not P0. Homework in P0 = dated materials on this week (no separate assignment object). Staff home is an operational dashboard (attention + course previews + this week + people), not a nav tile grid.

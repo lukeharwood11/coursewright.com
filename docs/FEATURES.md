@@ -58,18 +58,18 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Marketing site** | Public home, about, pricing | shipped | Contact / privacy / terms / cookies still construction placeholders |
 | **Authentication** | Sign up, sign in | shipped | **Email (password or magic link) + Google** via **Supabase Auth**. Login has password + magic-link; signup stays Google / email OTP. Session gates live |
 | **Account settings** | Cross-org account page (`/my/settings`) | in progress | View + sign-out live; profile edit still stubbed |
-| **Organizations** | Anyone can create an org; creator is first **owner**; org picker (`/my`) | in progress | Create + list + `/my/:orgSlug` home + org settings identity live; **collapsible org sidebar** on org pages; staff invite/role UI still stubbed |
+| **Organizations** | Anyone can create an org; creator is first **owner**; org picker (`/my`) | in progress | Create + list + `/my/:orgSlug` home + org settings identity live; **collapsible org sidebar**; staff home is a summary dashboard (courses, attention, this week, people). Staff invite/role UI still stubbed |
 | **Org permalink** | Stable org URL (`slug`) created with the org | shipped | Create + settings change with break-links warning |
 | **Org grade scheme** | Org chooses how grades work (exact / range / custom; presets K–12, Custom) | shipped | Defaults on create; owners/admins edit in org settings |
 | **Admin invites** | Add other admins by email; those emails can be **claimed** by accounts | planned | Schema + RLS ready; no invite UI or claim route |
 | **Student profiles** | Org-level student records — no login required | shipped | Org roster create/edit + profile page. Created when first added to a course or class; linkable later (P2) |
-| **Classes** | Org-scoped **group of students** — separate from a Course | shipped | Create class, add/remove members. How Class relates to course enrollment — **workshop** (see [Classes](#classes-p0)) |
-| **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | shipped | Org / class / course roster live; parent invite *send* not started |
+| **Classes** | Org-scoped **group of students** — separate from a Course | shipped | Create class + batch add/remove members. Class is a **batch preset** into course enroll (not a live link) |
+| **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | shipped | List-first org / class / course roster with **batch select** enroll/add; parent invite *send* not started |
 | **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches parent vs staff home. **P0 roles:** owner, admin, instructor, parent. Owner vs admin = billing. |
 | **Admin account management** | Admins invite, **change roles**, and **remove** admins/instructors | planned | Last owner/admin DB guard ready; no change/remove staff UI |
 | **Homework (P0)** | Dated materials in a unit — appear on parent "this week" when dates fall in Sun–Sat | shipped | `scheduled_date` on add/edit material. Parent “this week” uses unit/material dates. **Not** a separate assignment type |
 | **Course builder** | Create and organize **courses** within an org (no templates in P0) | shipped | Create, course home, units, materials (page/link/file), print/share chrome |
-| **Courses (instances)** | Runnable offerings with dates and a roster — from scratch or **copied from another course** | shipped | Create from scratch + settings + roster. Copy via Function. Catalog: **description**, **location**, **subject / area**. **Templates are P1** |
+| **Courses (instances)** | Runnable offerings with dates and a roster — from scratch or **copied from another course** | shipped | Create from scratch + settings + roster. Copy via Function. Catalog: **description**, **location**, **subject / area**, optional **icon** on list cards. **Templates are P1** |
 | **Create course from course** | Duplicate an existing course’s units/materials into a new independent course | shipped | Edge Function `create-course-from-course` deployed on testing; copy content only — **no roster**, **no live sync**. Copies start unpublished |
 | **Course visibility** | **Published / unpublished** controls whether families can see the course | shipped | Unpublished: instructors/admins. Published: enrolled parents (students when that role exists). New courses start unpublished. Distinct from `status` (active / archived) |
 | **Co-teaching** | Multiple instructors per course | shipped | Course settings: owners/admins add co-teachers (RLS); instructors see the list |
@@ -80,8 +80,8 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **File sharing** | Upload and attach files; share with parents as part of course materials | shipped | File materials upload to Storage `org-files` with `files` / `file_versions` |
 | **Audio & video files** | Video as a **block** on a material page; uploaded audio TBD | shipped | Video **URL embed** in page blocks (upload vs URL still **TBD**); uploaded audio/video play on file materials |
 | **Course grade levels** | Courses carry **grade metadata** — multiple grades and/or ranges | shipped | Editor on create + course settings. Templates get the same model in **P1** |
-| **Advanced search** | Native, easy, **cross-facet** search — “where do I have this resource?” | planned | GIN `search_vector` indexes ready; search chrome toasts only |
-| **Families / parent directory** | Named group of **student profiles**; parents appear via `parent_student_links`; org **parent directory** | shipped | Class-mirror members. Link parent creates/reuses student links (`admin_invites` `role=parent` if no account). **Never enrollments.** `family_members.parent_user_id` unused in P0 app. Extra fields, merge/split, invite send/claim still open |
+| **Advanced search** | Native, easy, **cross-facet** search — “where do I have this resource?” | in progress | Staff chrome search: pages, courses, materials by title (card results). Facets / FTS ranking / files / people still open; GIN `search_vector` indexes ready |
+| **Families / parent directory** | Named group of **student profiles**; parents appear via `parent_student_links`; org **parent directory** | shipped | Class-mirror members. Link parent creates/reuses student links (`admin_invites` `role=parent` if no account). **Never enrollments.** `family_members.parent_user_id` unused in P0 app. Extra fields, merge/split, invite send/claim still open. **SPA directory UI currently not routed** (schema + databridge remain) |
 | **Print materials** | One-tap print of a material, a unit, or this week's work | shipped | [PRINT](./pages/PRINT.md): `@react-pdf/renderer` + in-app preview, Download / Print. Whole-course print out of P0 |
 | **Lesson materials & planning** | Unified storage for course content, files, and plans | shipped | Course builder authoring on courses |
 | **Content versioning** | Versions of course content; who changed what; revert dangerous actions | shipped | Restore a `material_versions` snapshot from material edit; file blob revert on file materials |
@@ -96,14 +96,16 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 
 ### Roster management (P0)
 
-Roster exists at **three** levels: **organization** (student profiles, staff), **class** (named group of students), and **course** (who participates in an offering — enrollment model **workshop**).
+Roster exists at **three** levels: **organization** (student profiles, staff), **class** (named group of students), and **course** (who participates in an offering).
+
+**UI vocabulary:** page/nav noun is **Roster**; course verbs are **Enroll** / **Unenroll**; class/org verbs are **Add** / **Remove**. Batch select is the default add path.
 
 | Capability | Who | Notes |
 |------------|-----|-------|
 | **Student profiles** | Admin, **instructor** | Org-level record for each student — **no user account required** |
 | **Classes** | Admin, instructor | Named groups of student profiles — **not** a course; no materials |
-| **Add student via course / class** | **Instructor** | Adding a student for the **first time** creates their `student_profile` in the org — exact create paths TBD with Class workshop |
-| **Course roster** | **Instructor** (their courses) | Who is in the offering — **open:** enroll individuals, attach a Class, or both |
+| **Add student via course / class** | **Instructor** | First-time add creates `student_profile` in the org; **batch create** (paste names / multi-row) supported |
+| **Course roster** | **Instructor** (their courses) | Enroll **individuals** (multi-select); optional **Class preset** checks that class’s members once |
 | **Parent linkage** | Admin, instructor | Associate parent email with each student profile |
 | **Parent invites** | Admin, instructor | Send email invites from roster or course context |
 | **Staff / instructor assignment** | Owner, admin | Assign instructors to courses |
@@ -118,20 +120,19 @@ A **Class** is an org-scoped **group of students**. It is **not** a Course.
 |---|-----------|------------|
 | **Purpose** | Group students (e.g. “Wednesday cohort”, “Room A”) | Plan and share materials for an offering |
 | **Materials / units** | None | Yes |
-| **Members** | Student profiles | Enrollment — **how this relates to Class is open** |
-| **Dates / grade metadata** | TBD | Optional start/end; optional grade levels |
+| **Members** | Student profiles | **Enrollment** → `student_profile` (individuals) |
+| **Dates / grade metadata** | Name + members only (P0) | Optional start/end; optional grade levels |
 
 **Decided:** Class and Course are separate concepts. Class list lives on the org roster; class roster is `/my/<org-slug>/classes/<class_id>`. Admins and instructors manage classes (same as the roster capability table).
 
-**Open (workshop — do not invent):**
+**Decided (enrollment):**
 
-1. Does a Course enroll a **Class** (whole group), **individuals**, or both?
-2. Can one student be in multiple Classes? Multiple Courses? (schema default: yes to multiple classes)
-3. Does parent “this week” / access still key off **course enrollment** only (current rule), with Class as roster convenience?
-4. Class fields beyond **name** + members — TBD
+1. A course enrolls **individuals** (`enrollment → student_profile`). A Class may be used as a **batch preset** when enrolling (one-shot copy of members into enrollments — **not** a live link).
+2. Students may be in **multiple classes** and **multiple courses**.
+3. Parent “this week” / access keys off **course enrollment** only; Class never grants materials, this-week, or print.
+4. Class fields in P0: **name** + members.
 
-Until enrollment is locked, keep **Course.enrollment → student_profile** as the access gate for parents (current rule). Class may feed who you pick when enrolling — TBD.
-
+Keep **Course.enrollment → student_profile** as the access gate for parents.
 ### Org creation & admins (P0)
 
 | Rule | Detail |
@@ -408,7 +409,7 @@ Content on **courses** may use **units** for grouping (templates are **P1**). Ma
 
 **Status:** content shape **decided**; editor canonical store and quiz placement still open.
 
-**Already decided (related):** Each **course** has its **own** participation model (enrollment workshop with **Class**). Create → print does **not** require a roster. **Templates are P1** — P0 authoring is on courses only.
+**Already decided (related):** Each **course** has its **own** roster (individuals via enrollment; Class is a batch preset). Create → print does **not** require a roster. **Templates are P1** — P0 authoring is on courses only.
 
 #### Structure (decided)
 
@@ -676,7 +677,9 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | Material = page of ordered blocks (rich text, video, external link) | **Superseded** | Link is a **material kind**; pages use blocks (rich text, video, …) |
 | Every material has **title** + **description** (all kinds) | **Decided** | page · link · file |
 | Material = page of ordered blocks when kind=page | **Decided** | First-class block rows in DB |
-| Class = org group of students, separate from Course | **Decided** | Enrollment relationship **workshop** |
+| Class = org group of students, separate from Course | **Decided** | Course enrolls individuals; Class is a batch preset into enroll (not live) |
+| Course roster UI: list-first + batch Enroll students | **Decided** | Multi-select + optional Class preset; batch create-and-enroll |
+| Roster = page noun; Enroll/Unenroll = course verbs | **Decided** | BRANDING; class/org use Add/Remove |
 | Quiz authoring + correct answers + print (blank + answer key) | **Decided** | **P0** product — block vs material shape **open** |
 | Quiz online take + autograde | **Decided** | **P1** — uses answers stored in P0 |
 | Page as composable entity (blocks) | **Decided** | Material is the page; no separate Page table required in P0 |

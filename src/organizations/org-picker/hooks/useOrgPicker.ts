@@ -9,7 +9,7 @@ import {
   orgQueryKeys,
 } from "@/organizations/databridge/memberships";
 import { validateCreateOrganization } from "@/organizations/model/createOrganization";
-import { slugify } from "@/organizations/model/slug";
+import { formatSlugInput } from "@/organizations/model/slug";
 
 export function useOrgPicker() {
   const user = useAuthedUser();
@@ -48,12 +48,12 @@ export function useOrgPicker() {
   function onNameChange(value: string) {
     setName(value);
     setFormError(null);
-    if (!slugTouched) setSlug(slugify(value));
+    if (!slugTouched) setSlug(formatSlugInput(value));
   }
 
   function onSlugChange(value: string) {
     setSlugTouched(true);
-    setSlug(slugify(value));
+    setSlug(formatSlugInput(value));
     setFormError(null);
   }
 

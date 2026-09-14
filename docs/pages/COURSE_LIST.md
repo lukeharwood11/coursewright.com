@@ -23,12 +23,13 @@ Browse and create **course instances** (runnable offerings with optional dates a
 
 Per course row (TBD density):
 
-- Course **title**
+- Course **title** and optional **icon** (set on create or in settings)
 - Optional **description**, **location**, **subject / area**
 - **Status** (e.g. active) and **unpublished** badge when hidden from families
 - Optional **start/end dates**
 - **Grade metadata** (grades/ranges per org scheme)
-- Instructors (names/avatars TBD)
+- **Instructors** (avatars + names on catalog cards)
+- **Active enrollment count** (students enrolled in the course)
 - Optional “created from …” origin indicator when copied from another course (TBD density)
 
 ## Contents
@@ -38,7 +39,7 @@ Per course row (TBD density):
 - Create course:
   - **From scratch** — blank course (starts unpublished)
   - **From another course** — pick a source course; copies units/materials; no roster; no live sync; copy starts unpublished
-  - Optional **description**, **subject / area**, **location** on the form
+  - Optional **description**, **subject / area**, **location**, **icon** on the form
 - Open → [COURSE](./COURSE.md)
 
 ## Primary actions
@@ -50,7 +51,7 @@ Per course row (TBD density):
 ## Links to
 
 - [COURSE](./COURSE.md) — open a course
-- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
+- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 - **P1:** [TEMPLATE_LIST](./TEMPLATE_LIST.md) — not in P0 create flow
 
 ## Notes

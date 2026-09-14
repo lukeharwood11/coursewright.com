@@ -1,7 +1,9 @@
 import type { FormEvent } from "react";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
+import { CourseIconPicker } from "@/courses/components/CourseIconPicker";
 import type { CourseSummary } from "@/courses/databridge/courses";
+import type { CourseIconValue } from "@/courses/model/courseIcon";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -13,6 +15,7 @@ export function CreateCourseForm({
   description,
   location,
   subject,
+  iconKey,
   startDate,
   endDate,
   status,
@@ -27,6 +30,7 @@ export function CreateCourseForm({
   onDescriptionChange,
   onLocationChange,
   onSubjectChange,
+  onIconKeyChange,
   onStartDateChange,
   onEndDateChange,
   onStatusChange,
@@ -40,6 +44,7 @@ export function CreateCourseForm({
   description: string;
   location: string;
   subject: string;
+  iconKey: CourseIconValue;
   startDate: string;
   endDate: string;
   status: string;
@@ -54,6 +59,7 @@ export function CreateCourseForm({
   onDescriptionChange: (value: string) => void;
   onLocationChange: (value: string) => void;
   onSubjectChange: (value: string) => void;
+  onIconKeyChange: (value: CourseIconValue) => void;
   onStartDateChange: (value: string) => void;
   onEndDateChange: (value: string) => void;
   onStatusChange: (value: string) => void;
@@ -135,6 +141,10 @@ export function CreateCourseForm({
           onChange={(event) => onDescriptionChange(event.target.value)}
         />
       </label>
+
+      <div className="mt-3">
+        <CourseIconPicker value={iconKey} onChange={onIconKeyChange} />
+      </div>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1">

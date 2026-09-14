@@ -31,6 +31,9 @@ export function OrgHomePage() {
     <StaffHome
       orgName={shell.organization.name}
       orgSlug={shell.organization.slug}
+      dashboard={home.staffDashboard}
+      loading={home.staffDashboardLoading}
+      error={home.staffDashboardError}
     />
   );
 }

@@ -1,6 +1,7 @@
 import { requireSupabase } from "./client";
 import type { CreateCourseInput } from "@/courses/model/createCourse";
 import { parseCourseStatus, type CourseStatus } from "@/courses/model/status";
+import { parseCourseIconKey, type CourseIconValue } from "@/courses/model/courseIcon";
 import {
   parseCourseVisibility,
   type CourseVisibility,
@@ -13,6 +14,7 @@ export type CourseSummary = {
   description: string;
   location: string;
   subject: string;
+  iconKey: CourseIconValue;
   status: CourseStatus;
   visibility: CourseVisibility;
   startDate: string | null;
@@ -27,11 +29,18 @@ export type CourseInstructor = {
   email: string;
 };
 
+export type CourseCatalogMeta = {
+  instructors: CourseInstructor[];
+  activeEnrollmentCount: number;
+};
+
 const COURSE_COLUMNS =
-  "id, organization_id, title, description, location, subject, status, visibility, start_date, end_date, grade_levels, copied_from_course_id";
+  "id, organization_id, title, description, location, subject, icon_key, status, visibility, start_date, end_date, grade_levels, copied_from_course_id";
 
 export const courseQueryKeys = {
   list: (orgId: number) => ["courses", "list", orgId] as const,
+  /** Course list page — includes roster meta; do not share cache with `list`. */
+  listWithCatalog: (orgId: number) => ["courses", "listWithCatalog", orgId] as const,
   detail: (id: number) => ["courses", "detail", id] as const,
   instructors: (id: number) => ["courses", "instructors", id] as const,
 };
@@ -43,6 +52,7 @@ type CourseRow = {
   description: string;
   location: string;
   subject: string;
+  icon_key: string | null;
   status: string;
   visibility: string;
   start_date: string | null;
@@ -59,6 +69,7 @@ function toCourseSummary(row: CourseRow): CourseSummary {
     description: row.description ?? "",
     location: row.location ?? "",
     subject: row.subject ?? "",
+    iconKey: parseCourseIconKey(row.icon_key),
     status: parseCourseStatus(row.status),
     visibility: parseCourseVisibility(row.visibility),
     startDate: row.start_date,
@@ -106,6 +117,7 @@ export async function createCourse(
       description: input.description,
       location: input.location,
       subject: input.subject,
+      icon_key: input.iconKey,
       start_date: input.startDate,
       end_date: input.endDate,
       grade_levels: input.gradeLevels,
@@ -134,6 +146,7 @@ export async function updateCourse(
       description: input.description,
       location: input.location,
       subject: input.subject,
+      icon_key: input.iconKey,
       start_date: input.startDate,
       end_date: input.endDate,
       grade_levels: input.gradeLevels,
@@ -157,6 +170,85 @@ export async function updateCourseVisibility(
   if (error) throw new Error(error.message);
 }
 
+function mapCourseInstructorRows(
+  rows: Array<{
+    course_id?: number;
+    user_id: string;
+    profile: { name: string; email: string } | { name: string; email: string }[] | null;
+  }>,
+): CourseInstructor[] {
+  return rows.flatMap((row) => {
+    const profile = Array.isArray(row.profile) ? row.profile[0] : row.profile;
+    if (!profile) return [];
+    return [
+      {
+        userId: row.user_id,
+        name: profile.name || profile.email,
+        email: profile.email,
+      },
+    ];
+  });
+}
+
+export async function listCoursesCatalogMeta(
+  courseIds: number[],
+): Promise<Record<number, CourseCatalogMeta>> {
+  const metaFor = (): CourseCatalogMeta => ({
+    instructors: [],
+    activeEnrollmentCount: 0,
+  });
+  const byCourseId: Record<number, CourseCatalogMeta> = {};
+  for (const courseId of courseIds) {
+    byCourseId[courseId] = metaFor();
+  }
+  if (courseIds.length === 0) return byCourseId;
+
+  const db = requireSupabase();
+  const [instructorResult, enrollmentResult] = await Promise.all([
+    db
+      .from("course_instructors")
+      .select("course_id, user_id, profile:profiles(name, email)")
+      .in("course_id", courseIds),
+    db
+      .from("enrollments")
+      .select("course_id")
+      .in("course_id", courseIds)
+      .eq("status", "active"),
+  ]);
+
+  if (instructorResult.error) throw new Error(instructorResult.error.message);
+  if (enrollmentResult.error) throw new Error(enrollmentResult.error.message);
+
+  const instructorsByCourse = new Map<number, CourseInstructor[]>();
+  for (const row of instructorResult.data ?? []) {
+    const courseId = row.course_id;
+    if (typeof courseId !== "number") continue;
+    const person = mapCourseInstructorRows([row])[0];
+    if (!person) continue;
+    const list = instructorsByCourse.get(courseId) ?? [];
+    list.push(person);
+    instructorsByCourse.set(courseId, list);
+  }
+
+  for (const [courseId, instructors] of instructorsByCourse) {
+    byCourseId[courseId] = {
+      ...byCourseId[courseId],
+      instructors,
+    };
+  }
+
+  for (const row of enrollmentResult.data ?? []) {
+    const courseId = row.course_id;
+    if (typeof courseId !== "number") continue;
+    byCourseId[courseId] = {
+      ...byCourseId[courseId],
+      activeEnrollmentCount: byCourseId[courseId].activeEnrollmentCount + 1,
+    };
+  }
+
+  return byCourseId;
+}
+
 export async function listCourseInstructors(
   courseId: number,
 ): Promise<CourseInstructor[]> {
@@ -168,17 +260,7 @@ export async function listCourseInstructors(
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []).flatMap((row) => {
-    const profile = Array.isArray(row.profile) ? row.profile[0] : row.profile;
-    if (!profile) return [];
-    return [
-      {
-        userId: row.user_id,
-        name: profile.name || profile.email,
-        email: profile.email,
-      },
-    ];
-  });
+  return mapCourseInstructorRows(data ?? []);
 }
 
 export async function addCourseInstructor(
@@ -244,6 +326,7 @@ export async function copyCourseFromCourse(args: {
   description: string;
   location: string;
   subject: string;
+  iconKey: CourseIconValue;
   startDate: string | null;
   endDate: string | null;
   gradeLevels: string[];

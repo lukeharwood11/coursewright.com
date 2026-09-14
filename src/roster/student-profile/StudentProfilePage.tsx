@@ -141,35 +141,6 @@ export function StudentProfilePage() {
         </section>
       </div>
 
-      <section className="mt-4 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-        <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Family</h2>
-        {profile.families.length === 0 ? (
-          <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink-soft)]">
-            Not in a family yet. Group siblings from the{" "}
-            <Link
-              to={`${base}/families`}
-              className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-            >
-              parent directory
-            </Link>
-            .
-          </p>
-        ) : (
-          <ul className="mt-3 divide-y divide-[var(--line-soft)]">
-            {profile.families.map((row) => (
-              <li key={row.id} className="py-2">
-                <Link
-                  to={`${base}/families/${row.id}`}
-                  className="text-[14.5px] font-extrabold text-[var(--ink)] hover:text-[var(--green-deep)]"
-                >
-                  {row.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
       <p className="mt-6 text-[13px]">
         <Link
           to={`${base}/roster`}

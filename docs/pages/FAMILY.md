@@ -1,7 +1,8 @@
 # FAMILY
 
 **URL:** `/my/<org-slug>/families/<family_id>`  
-**URL map:** [URLS.md](../URLS.md)
+**URL map:** [URLS.md](../URLS.md)  
+**SPA status:** Outline and feature remain; **not currently routed or linked** in the app.
 
 ## Audience
 
@@ -51,8 +52,8 @@ One **family**: a named group of student profiles in this org. Parents appear on
 - [FAMILIES](./FAMILIES.md) — back to directory
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — member students
 - [ORG_ROSTER](./ORG_ROSTER.md) — roster
-- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
+- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Families & parent directory. Not the P2 cross-org parent family manager. Invite **send** and **claim** are still planned. Merge/split households is TBD. `family_members.parent_user_id` exists in schema but is unused for P0 app writes.
+[FEATURES.md](../FEATURES.md) — Families & parent directory. Not the P2 cross-org parent family manager. Invite **send** and **claim** are still planned. Merge/split households is TBD. `family_members.parent_user_id` exists in schema but is unused for P0 app writes. Schema + `roster/databridge/families` remain; SPA page UI is currently removed.

@@ -4,6 +4,7 @@ import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { Avatar } from "@/ui/Avatar";
 import { coursePath } from "@/courses/model/paths";
+import { CourseIconPicker } from "@/courses/components/CourseIconPicker";
 import { useCourseSettings } from "./hooks/useCourseSettings";
 import { CourseVisibilityBanner } from "@/courses/course/components/CourseVisibilityBanner";
 
@@ -108,6 +109,9 @@ export function CourseSettingsPage() {
             onChange={(event) => settings.setDescription(event.target.value)}
           />
         </label>
+        <div className="mt-3">
+          <CourseIconPicker value={settings.iconKey} onChange={settings.setIconKey} />
+        </div>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1">
             <span className="text-[13px] font-bold text-[var(--ink-soft)]">

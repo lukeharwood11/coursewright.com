@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/ui/Button";
 import { coursePath, coursesPath } from "@/courses/model/paths";
-import { AddStudentForm } from "@/roster/student-profile/components/AddStudentForm";
-import { ExistingStudentPicker } from "@/roster/student-profile/components/ExistingStudentPicker";
+import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
 import { useCourseRoster } from "./hooks/useCourseRoster";
 
@@ -53,7 +52,10 @@ export function CourseRosterPage() {
 
   const students = roster.enrollments.map((enrollment) => enrollment.student);
   const enrollmentIdByStudent = new Map(
-    roster.enrollments.map((enrollment) => [enrollment.student.id, enrollment.id]),
+    roster.enrollments.map((enrollment) => [
+      enrollment.student.id,
+      enrollment.id,
+    ]),
   );
   const base = `/my/${roster.organization.slug}`;
 
@@ -63,11 +65,11 @@ export function CourseRosterPage() {
         className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        Course roster
+        Roster
       </h1>
       <p className="mt-1 text-[14px] text-[var(--ink-soft)]">{roster.course.title}</p>
       <p className="mt-3 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-        Students are optional. You can print materials without anyone on this
+        Students in this course. You can print materials without anyone on this
         list.
       </p>
       <p className="mt-2 text-[13px]">
@@ -86,52 +88,17 @@ export function CourseRosterPage() {
         </Link>
       </p>
 
-      <div className="mt-6 grid items-start gap-4 lg:grid-cols-2">
-        <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-          <ExistingStudentPicker
-            students={roster.availableStudents}
-            selectedId={roster.selectedId}
-            saving={roster.addingExisting}
-            error={roster.existingError}
-            onSelect={roster.setSelectedId}
-            onAdd={roster.onAddExisting}
-          />
-          {roster.availableStudents.length === 0 ? (
-            <p className="text-[14px] leading-relaxed text-[var(--ink-soft)]">
-              {roster.enrollments.length === 0
-                ? "No one in the org yet. Add a new student to create their profile and enroll them."
-                : "Everyone already in the org is enrolled here. Add a new student below."}
-            </p>
-          ) : null}
-        </section>
-
-        <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-          <h3 className="text-[13px] font-bold text-[var(--ink-soft)]">
-            Add a new student
-          </h3>
-          <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-            Creates their org profile and enrolls them in this course.
-          </p>
-          <div className="mt-4">
-            <AddStudentForm
-              name={roster.name}
-              parentEmail={roster.parentEmail}
-              gradeLevel={roster.gradeLevel}
-              gradeLabels={roster.gradeLabels}
-              error={roster.newError}
-              saving={roster.addingNew}
-              submitLabel="Add to course"
-              onNameChange={roster.setName}
-              onParentEmailChange={roster.setParentEmail}
-              onGradeLevelChange={roster.setGradeLevel}
-              onSubmit={roster.onAddNew}
-            />
-          </div>
-        </section>
-      </div>
-
       <section className="mt-8">
-        <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Enrolled</h2>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">
+            Enrolled
+          </h2>
+          {!roster.panelOpen ? (
+            <Button type="button" onClick={roster.openPanel}>
+              Enroll students
+            </Button>
+          ) : null}
+        </div>
         <StudentRosterList
           students={students}
           orgSlug={roster.organization.slug}
@@ -151,6 +118,49 @@ export function CourseRosterPage() {
           }}
         />
       </section>
+
+      <AddStudentsPanel
+        open={roster.panelOpen}
+        onClose={roster.closePanel}
+        title="Enroll students"
+        tab={roster.tab}
+        onTabChange={roster.setTab}
+        students={roster.availableStudents}
+        selectedIds={roster.selectedIds}
+        existingError={roster.existingError}
+        existingSaving={roster.addingExisting}
+        existingConfirmLabel={(count) =>
+          count === 1 ? "Enroll 1 student" : `Enroll ${count} students`
+        }
+        existingEmptyMessage={
+          roster.enrollments.length === 0
+            ? "No one in the org yet. Create new students to enroll them here."
+            : "Everyone already in the org is enrolled here. Create new students, or manage people on the org roster."
+        }
+        classPresets={roster.classes}
+        selectedClassId={roster.selectedClassId}
+        onSelectClass={roster.onSelectClass}
+        onToggle={roster.onToggle}
+        onSelectFiltered={roster.onSelectFiltered}
+        onClear={roster.onClearSelection}
+        onConfirmExisting={roster.onConfirmExisting}
+        drafts={roster.drafts}
+        pasteText={roster.pasteText}
+        gradeLabels={roster.gradeLabels}
+        newError={roster.newError}
+        newSaving={roster.addingNew}
+        newSubmitLabel={(count) =>
+          count === 1
+            ? "Create and enroll 1 student"
+            : `Create and enroll ${count} students`
+        }
+        onDraftChange={roster.setDraft}
+        onAddRow={roster.onAddRow}
+        onRemoveRow={roster.onRemoveRow}
+        onPasteTextChange={roster.setPasteText}
+        onApplyPaste={roster.onApplyPaste}
+        onSubmitNew={roster.onSubmitNew}
+      />
     </div>
   );
 }
