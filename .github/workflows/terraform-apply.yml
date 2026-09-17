@@ -109,6 +109,9 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      # Optional production overrides (HN-010). Empty vars are fine — build-spa.sh
+      # falls back to Terraform outputs and exports the resolved VITE_* so Vite
+      # does not bake blank process-env values over .env.production.
       - name: Build SPA
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
