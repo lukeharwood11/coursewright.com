@@ -9,8 +9,10 @@ dist/
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
 !.env.example
-!.env.development
+!.env.testing
 
 # Logs
 logs/
@@ -48,6 +50,8 @@ infra/terraform/override.tf
 infra/terraform/override.tf.json
 infra/terraform/*_override.tf
 infra/terraform/*_override.tf.json
+infra/terraform/tf.plan
+infra/terraform/*.tfplan
 # Keep the lockfile for reproducible provider versions in CI:
 # infra/terraform/.terraform.lock.hcl
 

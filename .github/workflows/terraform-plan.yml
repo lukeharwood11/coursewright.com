@@ -3,6 +3,7 @@
 # Dispatch only. Testing first; production uses GitHub Environment approval.
 # Requires: AWS OIDC (HN-003), SUPABASE_ACCESS_TOKEN secret, GitHub Environments (HN-010).
 # ACM (HN-005) is ISSUED. See docs/HUMAN_NEEDED.md.
+# SPA compile-check only — apply rebuilds dist/ from Terraform outputs.
 
 name: Terraform Plan
 
@@ -25,7 +26,7 @@ permissions:
 env:
   AWS_REGION: us-east-1
   AWS_ROLE_TO_ASSUME: arn:aws:iam::891612573605:role/github-oidc
-  TERRAFORM_VERSION: "1.9.8"
+  TERRAFORM_VERSION: "1.16.3"
   TF_IN_AUTOMATION: "true"
   TF_INPUT: "false"
   SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -56,22 +57,19 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # Testing: prefer committed .env.development until the testing branch
-      # exists; after first apply, re-point keys at the branch (HN / docs).
-      - name: Build (testing)
-        if: inputs.tier == 'testing'
-        run: |
-          cp .env.development .env.production
-          npm run build
-
-      - name: Build (production)
-        if: inputs.tier == 'production'
+      # Compile check only. Apply rebuilds via build-spa.sh from Terraform outputs
+      # so testing never publishes stale keys from a plan-time dist artifact.
+      - name: Build (compile check)
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
           VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
           VITE_POSTHOG_HOST: ${{ vars.VITE_POSTHOG_HOST }}
-        run: npm run build
+        run: |
+          if [ -z "${VITE_SUPABASE_URL}" ] || [ -z "${VITE_SUPABASE_ANON_KEY}" ]; then
+            cp .env.testing .env.production
+          fi
+          npm run build
 
       - uses: hashicorp/setup-terraform@v3
         with:
@@ -86,13 +84,5 @@ jobs:
         with:
           name: terraform-plan-${{ inputs.tier }}
           path: infra/terraform/tf.plan
-          retention-days: 1
-          if-no-files-found: error
-
-      - name: Upload Application Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: application-${{ inputs.tier }}
-          path: dist/
           retention-days: 1
           if-no-files-found: error

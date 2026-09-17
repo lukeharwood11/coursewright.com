@@ -7,17 +7,17 @@ Terraform for Course Wright: **AWS SPA** + **Supabase** (provider). **One root m
 - `modules/spa_site` — S3 + CloudFront OAC + Route53
 - `supabase.tf` — provider `supabase/supabase` (token: `SUPABASE_ACCESS_TOKEN`)
   - **testing:** persistent `supabase_branch` (`git_branch = "testing"`) + settings/apikeys on the branch
-  - **production:** import existing project `hlecttkgrfhtzvwnxtyb` + settings/apikeys on main
+  - **production:** settings/apikeys on existing project `hlecttkgrfhtzvwnxtyb` (by ref — no `supabase_project` resource, no import)
 - **`../tfvars/testing.tfvars`** → `beta.coursewright.com` (`coursewright-testing-spa`)
 - **`../tfvars/production.tfvars`** → `coursewright.com` (`coursewright-production-spa`)
 
-SPA sync/invalidation is **not** in this module — [`scripts/deploy-spa.sh`](../../scripts/deploy-spa.sh) / GHA (never a `null_resource`). SQL migrations stay CLI ([`scripts/deploy-supabase.sh`](../../scripts/deploy-supabase.sh)).
+SPA sync/invalidation is **not** in this module — [`scripts/deploy-spa.sh`](../../scripts/deploy-spa.sh) / GHA (never a `null_resource`). SQL migrations stay CLI ([`scripts/deploy-supabase.sh`](../../scripts/deploy-supabase.sh)). SPA Vite keys come from Terraform outputs via [`scripts/build-spa.sh`](../../scripts/build-spa.sh) after apply.
 
-**Gates:** ACM (HN-005) is ISSUED. Confirm HN-003 (AWS/OIDC) and HN-010 (Environments) before live apply. Supabase Branching must be available on the org/plan (HN-011).
+**Gates:** ACM (HN-005) is ISSUED. Confirm HN-003 (AWS/OIDC) and HN-010 (Environments) before live apply. Supabase Branching must be available on the org/plan (HN-011). Pin Terraform **1.16.3** locally and in Actions (`.terraform-version` + workflow `TERRAFORM_VERSION`; plan files are not portable across versions).
 
 ## Remote state
 
-Shared nosh/amia backend (`lukeharwood-dev-tfstate` / `lukeharwood-dev-tf-lock`, `us-east-2`). CourseWright keys only:
+Shared nosh/amia backend (`lukeharwood-dev-tfstate`, `us-east-2`, S3 `use_lockfile`). CourseWright keys only:
 
 | Tier | Key | Backend file |
 |------|-----|--------------|
@@ -37,17 +37,6 @@ terraform plan  -var-file=../tfvars/testing.tfvars
 
 Never mix a tier’s `-var-file` with the other tier’s backend key.
 
-### Production Supabase project import (one-time)
-
-```bash
-cd infra/terraform
-terraform init -reconfigure -backend-config=backend-production.hcl
-TF_VAR_supabase_db_password='…' terraform import -var-file=../tfvars/production.tfvars \
-  'supabase_project.main[0]' hlecttkgrfhtzvwnxtyb
-```
-
-Password is ignored after import (`lifecycle.ignore_changes`). Do **not** apply production before import — that would try to create a new project.
-
 ## Rules
 
 - Prefer **tfvars per tier** over duplicated env roots.
@@ -60,6 +49,7 @@ Password is ignored after import (`lifecycle.ignore_changes`). Do **not** apply 
 
 - Commit `SUPABASE_ACCESS_TOKEN` or DB passwords.
 - Manage SQL schema inside Terraform (migrations stay files + CLI).
+- Create a `supabase_project` resource for the existing production project (password validation + accidental create).
 - Sync SPA from a Terraform `null_resource`.
-- Point testing SPA at **main** after the branch exists — use branch URL/keys from outputs.
+- Point testing SPA at **main** — `build-spa.sh testing` refuses parent keys.
 - Run `nuke.sh` against production main.

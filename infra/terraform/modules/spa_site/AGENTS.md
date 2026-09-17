@@ -6,7 +6,7 @@ S3 + CloudFront hosting for the CourseWright SPA. Pattern follows [SayNosh.com t
 
 - Private S3 bucket (`coursewright-${environment}-spa`), SSE-AES256, public access block
 - CloudFront OAC + bucket policy (bucket is not public)
-- CloudFront distribution: SPA 403/404 → `/index.html`, `/assets/*` long-cache
+- CloudFront distribution: SPA 403/404 → `/index.html`, `/assets/*` long-cache, `price_class = PriceClass_100` (US/CA/EU)
 - ACM: **data source only** — looks up an **ISSUED** cert for `coursewright.com` (covers apex + `*.coursewright.com`, including `beta`) in `us-east-1` (HN-005)
 - Route53 A/AAAA aliases for `domain_name` in the parent zone
 

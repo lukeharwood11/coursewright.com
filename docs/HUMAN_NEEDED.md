@@ -33,10 +33,11 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 **Steps:**
 
 1. Ensure an AWS account exists for Course Wright.
-2. CI assumes existing OIDC role `arn:aws:iam::891612573605:role/github-oidc` (trust for this repo is assumed). Confirm that role can read/write S3 + CloudFront + ACM (data lookup) + Route53 + the shared Terraform state backend (`lukeharwood-dev-tfstate` / `lukeharwood-dev-tf-lock` in `us-east-2`).
-3. For local Terraform, provide credentials (`AWS_PROFILE`, or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`) — **not** committed to git. CI does not use long-lived access keys.
-4. Confirm region `us-east-1` for the SPA stack (required for CloudFront ACM).
-5. ACM (HN-005) is already **ISSUED** — OIDC/IAM confirmation is the remaining AWS gate before apply.
+2. CI assumes existing OIDC role `arn:aws:iam::891612573605:role/github-oidc`. Confirm that role can read/write S3 + CloudFront + ACM (data lookup) + Route53 + the shared Terraform state backend (`lukeharwood-dev-tfstate` in `us-east-2`, including Get/Put/Delete on state `.tflock` objects).
+3. **Trust policy:** a 2026-09-16 dispatch of Terraform Plan (testing) failed with `Not authorized to perform sts:AssumeRoleWithWebIdentity`. Add this repo (`lukeharwood11/coursewright.com`) to the role’s OIDC trust / federated subject (`repo:lukeharwood11/coursewright.com:*`).
+4. For local Terraform, provide credentials (`AWS_PROFILE`, or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`) — **not** committed to git. CI does not use long-lived access keys. Local `aws sts get-caller-identity` as IAM user `macbook` already works.
+5. Confirm region `us-east-1` for the SPA stack (required for CloudFront ACM).
+6. ACM (HN-005) is already **ISSUED** — OIDC trust for GitHub Actions is the remaining AWS gate before apply.
 
 **Done when:** `aws sts get-caller-identity` works for the OIDC role (and any local profile), and a human has explicitly approved apply for a tier.
 
@@ -52,38 +53,31 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 **Steps:**
 
-1. Create Environment **`testing`** (optional protection; no required reviewers). First dispatch may auto-create it.
+1. Environment **`testing`** exists (auto-created on first dispatch; no required reviewers). Leave it unprotected.
 2. Create Environment **`production`** and add **required reviewers** (Luke / Dave) so production plan and apply wait for approval.
-3. On **`production`**, set GitHub Environment **variables** (publishable only): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` (from HN-007 when a dedicated production Supabase project exists; until then use main project keys from Terraform outputs). Testing builds copy committed `.env.development` until the testing branch keys are written back.
+3. On **`production`**, set GitHub Environment **variables** (publishable only): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` (from HN-007 when a dedicated production Supabase project exists; until then `build-spa.sh` uses Terraform outputs for the existing main project). Testing deploys always rebuild from Terraform **branch** outputs. Local/dev keys live in committed `.env.testing`.
 4. Confirm repo secret **`SUPABASE_ACCESS_TOKEN`** is set (done). Still confirm HN-003 before live apply.
 
 **Done when:** Dispatching `terraform-plan.yml` / `terraform-apply.yml` with `tier=production` pauses for Environment approval; testing does not.
 
 ---
 
-### HN-011 — Supabase Branching for testing + production project import
+### HN-011 — Supabase Branching for testing
 
 | | |
 |--|--|
-| **Why** | Testing Terraform creates a **persistent** DB branch (`git_branch = "testing"`) off project `hlecttkgrfhtzvwnxtyb`. Branching must be enabled on the org/plan. Production must **import** the existing project before first apply so Terraform does not try to create a new one. After the testing branch exists, point `.env.development` / testing Vite builds at the branch URL + publishable key (Terraform outputs). |
+| **Why** | Testing Terraform creates a **persistent** DB branch (`git_branch = "testing"`) off project `hlecttkgrfhtzvwnxtyb`. Branching must be enabled on the org/plan. Production Terraform manages **settings + apikeys** on that existing project by ref (no project import). Committed `.env.testing` holds the branch URL + publishable key for `npm run dev`. Deploys still build from Terraform outputs (`scripts/build-spa.sh`). |
 | **Where** | Supabase Dashboard (Branching); local/GHA Terraform |
-| **Placeholder** | `infra/terraform/supabase.tf`; `.env.development` |
+| **Placeholder** | `infra/terraform/supabase.tf`; `.env.testing` |
 
 **Steps:**
 
 1. Confirm **Branching** is available for project `hlecttkgrfhtzvwnxtyb` (Pro/Team feature).
-2. Ensure `SUPABASE_ACCESS_TOKEN` works locally (`supabase projects list` or a dry `terraform plan` for testing).
-3. **Before first production apply**, import the project (set `TF_VAR_supabase_db_password` once):
-   ```bash
-   cd infra/terraform
-   terraform init -reconfigure -backend-config=backend-production.hcl
-   TF_VAR_supabase_db_password='…' terraform import -var-file=../tfvars/production.tfvars \
-     'supabase_project.main[0]' hlecttkgrfhtzvwnxtyb
-   ```
-4. After first **testing** apply, copy `supabase_url` + `supabase_anon_key` outputs into `.env.development` (and GitHub testing build if needed) so the SPA talks to the branch, not main.
-5. Update Google OAuth redirect URLs for `https://beta.coursewright.com` if not already covered.
+2. Ensure `SUPABASE_ACCESS_TOKEN` works locally (`supabase projects list` or `./scripts/tf-plan.sh testing`).
+3. Keep committed `.env.testing` in sync with Terraform `supabase_url` + `supabase_anon_key` if the testing branch is recreated.
+4. Update Google OAuth redirect URLs for `https://beta.coursewright.com` if not already covered.
 
-**Done when:** Testing plan/apply creates/uses the persistent branch; production state has the imported project; testing SPA env points at the branch.
+**Done when:** Testing plan/apply creates/uses the persistent branch; testing SPA deploys (`build-spa.sh`) use the branch URL/keys.
 
 ---
 
@@ -93,15 +87,15 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 |--|--|
 | **Why** | Separate production Auth/DB from the current project (until then production Terraform manages **main** on `hlecttkgrfhtzvwnxtyb`) |
 | **Where** | [Supabase Dashboard](https://supabase.com/dashboard) |
-| **Placeholder** | GitHub Environment `production` vars on `terraform-plan.yml` (HN-010) |
+| **Placeholder** | GitHub Environment `production` vars used by `build-spa.sh` on apply (HN-010) |
 
 **Steps:**
 
 1. Create a production project (name suggestion: `coursewright-production`).
-2. Copy **Project URL** + **anon** key into the GitHub Environment `production` variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) used by `terraform-plan.yml` (not git). See HN-010.
+2. Copy **Project URL** + **anon** key into the GitHub Environment `production` variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) used by `build-spa.sh` / apply (not git). See HN-010.
 3. Enable Google provider with the same OAuth client (add production callback URL).
 4. Add production Site URL + redirect URLs under Auth settings.
-5. Update `supabase_project_ref` / import target in Terraform when cutting over.
+5. Update `supabase_project_ref` in `infra/tfvars/production.tfvars` (and the parent ref in `testing.tfvars` if the testing branch should move) when cutting over.
 
 **Done when:** Production env has its own Supabase URL/anon key and Google provider enabled.
 
@@ -119,11 +113,11 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ### HN-004 — Terraform remote state backend
 
-**Completed:** 2026-09-11 — reuse existing nosh/amia backend (`lukeharwood-dev-tfstate` / `lukeharwood-dev-tf-lock`, `us-east-2`). CourseWright keys: `testing/coursewright.com/terraform.tfstate`, `prod/coursewright.com/terraform.tfstate`. Init with `backend-testing.hcl` / `backend-production.hcl`. No new bucket or lock table.
+**Completed:** 2026-09-11 — reuse existing nosh/amia backend (`lukeharwood-dev-tfstate`, `us-east-2`, S3 `use_lockfile`). CourseWright keys: `testing/coursewright.com/terraform.tfstate`, `prod/coursewright.com/terraform.tfstate`. Init with `backend-testing.hcl` / `backend-production.hcl`. No new bucket.
 
 ### HN-001 — Create Supabase projects (testing + production)
 
-**Completed:** 2026-09-05 — project linked as `hlecttkgrfhtzvwnxtyb` (`coursewright.com`); URL + anon key in committed `.env.development`; CLI `supabase link` done. Testing now uses a **persistent DB branch** (HN-011). Dedicated production project deferred → **HN-007**.
+**Completed:** 2026-09-05 — project linked as `hlecttkgrfhtzvwnxtyb` (`coursewright.com`); CLI `supabase link` done. Testing now uses a **persistent DB branch** and committed `.env.testing` (HN-011). Dedicated production project deferred → **HN-007**.
 
 ### HN-002 — Google Cloud OAuth for Sign in with Google
 
@@ -131,7 +125,7 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ### HN-006 — PostHog project(s) for product analytics
 
-**Completed:** 2026-09-05 — testing keys in committed `.env.development`; SPA wires `src/infrastructure/posthog/client.ts`. Separate production PostHog project can wait until first prod deploy.
+**Completed:** 2026-09-05 — testing keys in committed `.env.testing`; SPA wires `src/infrastructure/posthog/client.ts`. Separate production PostHog project can wait until first prod deploy.
 
 ### HN-008 — Deploy `create-course-from-course` Edge Function
 

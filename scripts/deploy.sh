@@ -45,36 +45,7 @@ bash "${SCRIPT_DIR}/deploy-supabase.sh" "$TIER"
 step "Build SPA (${TIER})"
 cd "$REPO_ROOT"
 npm ci --silent
-
-if [[ "$TIER" == "testing" ]]; then
-  # Prefer Terraform outputs from the testing branch; fall back to .env.development.
-  cd "$TF_DIR"
-  VITE_URL="$(terraform output -raw supabase_url 2>/dev/null || true)"
-  VITE_KEY="$(terraform output -raw supabase_anon_key 2>/dev/null || true)"
-  cd "$REPO_ROOT"
-  if [[ -n "$VITE_URL" && -n "$VITE_KEY" ]]; then
-    cat > .env.production <<EOF
-VITE_SUPABASE_URL=${VITE_URL}
-VITE_SUPABASE_ANON_KEY=${VITE_KEY}
-EOF
-    # Preserve PostHog from .env.development when present
-    if [[ -f .env.development ]]; then
-      grep -E '^VITE_POSTHOG_' .env.development >> .env.production || true
-    fi
-  else
-    cp .env.development .env.production
-  fi
-else
-  if [[ -z "${VITE_SUPABASE_URL:-}" || -z "${VITE_SUPABASE_ANON_KEY:-}" ]]; then
-    # Fall back to Terraform outputs for production main
-    cd "$TF_DIR"
-    export VITE_SUPABASE_URL="$(terraform output -raw supabase_url)"
-    export VITE_SUPABASE_ANON_KEY="$(terraform output -raw supabase_anon_key)"
-    cd "$REPO_ROOT"
-  fi
-fi
-
-npm run build
+bash "${SCRIPT_DIR}/build-spa.sh" "$TIER"
 
 step "Publish SPA (${TIER})"
 bash "${SCRIPT_DIR}/deploy-spa.sh" "$TIER"

@@ -1,5 +1,6 @@
 # Remote state uses the EXISTING shared nosh/amia S3 backend.
-# Do not create a CourseWright-only state bucket or DynamoDB lock table — only new keys.
+# Do not create a CourseWright-only state bucket — only new keys.
+# Locking is S3-native (`use_lockfile`); no DynamoDB lock table.
 #
 # Keys (partial backend configs):
 #   testing/coursewright.com/terraform.tfstate  → backend-testing.hcl
@@ -12,9 +13,9 @@
 
 terraform {
   backend "s3" {
-    bucket         = "lukeharwood-dev-tfstate"
-    region         = "us-east-2"
-    dynamodb_table = "lukeharwood-dev-tf-lock"
-    encrypt        = true
+    bucket       = "lukeharwood-dev-tfstate"
+    region       = "us-east-2"
+    use_lockfile = true
+    encrypt      = true
   }
 }

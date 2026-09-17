@@ -5,7 +5,7 @@ export const ORG_FILES_BUCKET = "org-files";
 function requireSupabase() {
   if (!supabase) {
     throw new Error(
-      "Accounts aren’t connected yet. Add Supabase URL and anon key to .env.development.",
+      "Accounts aren’t connected yet. Add Supabase URL and anon key to .env.testing.",
     );
   }
   return supabase;
@@ -35,11 +35,14 @@ export async function uploadOrgFileObject(
 export async function signedOrgFileUrl(
   objectPath: string,
   expiresInSeconds = 3600,
+  options?: { download?: string | boolean },
 ): Promise<string> {
   const db = requireSupabase();
   const { data, error } = await db.storage
     .from(ORG_FILES_BUCKET)
-    .createSignedUrl(objectPath, expiresInSeconds);
+    .createSignedUrl(objectPath, expiresInSeconds, {
+      download: options?.download,
+    });
   if (error) throw new Error(error.message);
   if (!data?.signedUrl) throw new Error("Couldn’t open that file.");
   return data.signedUrl;

@@ -49,7 +49,7 @@ coursewright.com/
 ├── vite.config.ts
 ├── tsconfig.json
 ├── index.html
-├── .env.development          # Shared public Vite client env (testing)
+├── .env.testing              # Shared public Vite client env (testing branch)
 ├── .env.example              # Documents required VITE_* keys
 ├── public/
 ├── dist/                     # gitignored — build → S3
@@ -168,10 +168,10 @@ infra/
 ├── README.md
 ├── tfvars/                   # tier values (sibling to terraform/)
 │   ├── testing.tfvars        # beta.coursewright.com + branch parent ref
-│   └── production.tfvars     # coursewright.com + project import refs
+│   └── production.tfvars     # coursewright.com + existing project ref
 └── terraform/                # one root module; tiers via ../tfvars
     ├── AGENTS.md
-    ├── supabase.tf           # supabase provider: branch (testing) / project+settings (prod)
+    ├── supabase.tf           # supabase provider: branch (testing) / settings (prod)
     ├── modules/
     │   └── spa_site/         # S3 + CloudFront + ACM/DNS
     └── …                     # main.tf, variables.tf, backend-*.hcl; state per tier
@@ -188,7 +188,7 @@ infra/
 ./scripts/deploy.sh production --yes
 ```
 
-**Terraform manages:** S3, CloudFront, ACM lookup, Route53 aliases; Supabase project (imported), persistent testing branch, settings, API key outputs.
+**Terraform manages:** S3, CloudFront, ACM lookup, Route53 aliases; persistent testing branch, production settings on the existing project (by ref), API key outputs.
 
 **Not Terraform:** SQL schema files / `db push`, Edge Function source — [`scripts/deploy-supabase.sh`](../scripts/deploy-supabase.sh).
 

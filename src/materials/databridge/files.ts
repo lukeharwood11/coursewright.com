@@ -203,8 +203,11 @@ export async function listFileVersions(fileId: number): Promise<FileVersionRecor
   }));
 }
 
-export async function fileSignedUrl(storageRef: string): Promise<string> {
-  return signedOrgFileUrl(storageRef);
+export async function fileSignedUrl(
+  storageRef: string,
+  options?: { download?: string | boolean },
+): Promise<string> {
+  return signedOrgFileUrl(storageRef, 3600, options);
 }
 
 export async function downloadFileBytes(storageRef: string): Promise<Uint8Array> {

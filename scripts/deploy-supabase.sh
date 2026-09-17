@@ -21,15 +21,10 @@ fi
 
 tf_init
 
-cd "$TF_DIR"
-PROJECT_REF="$(terraform output -raw supabase_project_ref 2>/dev/null || true)"
-PARENT_REF="$(terraform output -raw supabase_parent_project_ref 2>/dev/null || true)"
-if [[ -z "$PARENT_REF" ]]; then
-  # Fallback if older state lacks the output — still refuse testing→parent below.
-  PARENT_REF="hlecttkgrfhtzvwnxtyb"
-fi
+PROJECT_REF="$(tf_output_raw supabase_project_ref)"
+PARENT_REF="$(resolve_parent_project_ref)"
 
-if [[ -z "$PROJECT_REF" || "$PROJECT_REF" == "null" ]]; then
+if [[ -z "$PROJECT_REF" ]]; then
   red "supabase_project_ref output empty — apply Terraform for ${TIER} first."
   exit 1
 fi
@@ -41,8 +36,8 @@ if [[ "$TIER" == "testing" ]]; then
     red "Apply Terraform for testing first so the persistent branch exists, then re-run."
     exit 1
   fi
-  BRANCH_ID="$(terraform output -raw supabase_branch_id 2>/dev/null || true)"
-  if [[ -z "$BRANCH_ID" || "$BRANCH_ID" == "null" ]]; then
+  BRANCH_ID="$(tf_output_raw supabase_branch_id)"
+  if [[ -z "$BRANCH_ID" ]]; then
     red "Refusing testing migrations: supabase_branch_id is empty — branch not in state."
     exit 1
   fi

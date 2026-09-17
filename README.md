@@ -38,7 +38,7 @@ npm install
 npm run dev
 ```
 
-Shared testing keys are in committed `.env.development` (loaded automatically by Vite in dev). Override with a gitignored `.env.local` if needed. Production builds get `VITE_*` from CI/hosting.
+Shared testing keys are in committed `.env.testing` (`npm run dev` uses Vite `--mode testing`). Override with a gitignored `.env.local` if needed. Production builds get `VITE_*` from CI/hosting.
 
 | Script | What it does |
 |--------|----------------|
@@ -72,7 +72,7 @@ Everything product-related lives in **`docs/`**. Agent index: [AGENTS.md](./AGEN
 | `src/` | React SPA (domain folders scream the product) |
 | `supabase/` | Migrations + Edge Functions |
 | `infra/terraform/` | AWS SPA hosting + Supabase (branch/settings) |
-| `scripts/` | Deploy helpers (`tf-plan`, `tf-apply`, `deploy-spa`, `deploy-supabase`, `deploy`) |
+| `scripts/` | Deploy helpers (`tf-plan`, `tf-apply`, `build-spa`, `deploy-spa`, `deploy-supabase`, `deploy`) |
 
 ---
 
@@ -88,14 +88,14 @@ See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) and [docs/STRUCTURE.md](./doc
 
 ## Deploy notes
 
-1. Open items in [docs/HUMAN_NEEDED.md](./docs/HUMAN_NEEDED.md) (HN-003 AWS/OIDC, HN-010 Environments, HN-011 Supabase Branching/import).  
-2. Local one-shot (needs AWS creds + `SUPABASE_ACCESS_TOKEN`):
+1. Open items in [docs/HUMAN_NEEDED.md](./docs/HUMAN_NEEDED.md) (HN-003 AWS/OIDC, HN-010 Environments, HN-011 Supabase Branching).  
+2. Local one-shot (needs AWS creds + `SUPABASE_ACCESS_TOKEN`; Terraform **1.16.3**):
    ```bash
    ./scripts/deploy.sh testing
    ./scripts/deploy.sh production --yes
    ```
-3. Or step-by-step: `./scripts/tf-plan.sh testing` → `./scripts/tf-apply.sh testing` → `./scripts/deploy-supabase.sh testing` → build → `./scripts/deploy-spa.sh testing`.  
-4. CI: dispatch **Terraform Plan** then **Terraform Apply** (same scripts).
+3. Or step-by-step: `./scripts/tf-plan.sh testing` → `./scripts/tf-apply.sh testing` → `./scripts/deploy-supabase.sh testing` → `./scripts/build-spa.sh testing` → `./scripts/deploy-spa.sh testing`.  
+4. CI: dispatch **Terraform Plan** then **Terraform Apply** (apply rebuilds the SPA from Terraform outputs).
 
 Schema changes: `./scripts/deploy-supabase.sh <tier>` (or `supabase db push` after linking the tier’s project ref).
 

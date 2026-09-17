@@ -1,11 +1,8 @@
 # Supabase via official provider (SUPABASE_ACCESS_TOKEN env).
-# Production: import existing project into this tier's state; manage settings + apikeys.
+# Production: settings + apikeys on the existing project (by ref) — do not create
+# a supabase_project resource (that would require a DB password on every plan and
+# could create a second project if applied without import).
 # Testing: persistent DB branch off the parent project; settings + apikeys on the branch.
-#
-# One-time production import:
-#   terraform init -reconfigure -backend-config=backend-production.hcl
-#   TF_VAR_supabase_db_password='…' terraform import -var-file=../tfvars/production.tfvars \
-#     'supabase_project.main[0]' hlecttkgrfhtzvwnxtyb
 #
 # Migrations / Edge Functions stay CLI (scripts/deploy-supabase.sh) — not managed here.
 
@@ -33,22 +30,8 @@ locals {
 }
 
 # ---------------------------------------------------------------------------
-# Production — import existing project (do not recreate).
+# Production — existing project by ref (no create / no import).
 # ---------------------------------------------------------------------------
-
-resource "supabase_project" "main" {
-  count = local.is_production ? 1 : 0
-
-  organization_id   = var.supabase_organization_id
-  name              = var.supabase_project_name
-  database_password = var.supabase_db_password
-  region            = var.supabase_region
-
-  lifecycle {
-    prevent_destroy = true
-    ignore_changes  = [database_password]
-  }
-}
 
 resource "supabase_settings" "main" {
   count = local.is_production ? 1 : 0
@@ -88,12 +71,14 @@ resource "supabase_settings" "testing" {
   depends_on = [supabase_branch.testing]
 }
 
+# Read keys after settings so the provider has waited for the branch project to
+# be ACTIVE (supabase_settings Create waits; the branch resource does not).
 data "supabase_apikeys" "testing" {
   count = local.is_testing ? 1 : 0
 
   project_ref = supabase_branch.testing[0].database.id
 
-  depends_on = [supabase_branch.testing]
+  depends_on = [supabase_settings.testing]
 }
 
 # ---------------------------------------------------------------------------
@@ -109,7 +94,7 @@ output "supabase_project_ref" {
 
 output "supabase_parent_project_ref" {
   value       = var.supabase_project_ref
-  description = "Parent/main Supabase project ref (hlecttkgrfhtzvwnxtyb). Used by deploy-supabase.sh to refuse testing→main."
+  description = "Parent/main Supabase project ref (hlecttkgrfhtzvwnxtyb). Used by deploy-supabase.sh / nuke.sh to refuse testing→main."
 }
 
 output "supabase_url" {

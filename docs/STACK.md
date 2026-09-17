@@ -95,7 +95,7 @@ API traffic goes to **Supabase** (PostgREST, Auth, Storage, Functions) — not t
 
 Terraform owns **AWS** (SPA hosting/DNS) and **Supabase project/branch/settings** via the official provider (`infra/terraform/supabase.tf`). SQL migrations and Edge Function source deploys stay on the Supabase CLI ([`scripts/deploy-supabase.sh`](../scripts/deploy-supabase.sh)).
 
-**Tiers:** prefer `./scripts/tf-plan.sh testing|production` from repo root (pairs backend key + tfvars). Keep **separate state** per tier (`testing/coursewright.com/…`, `prod/coursewright.com/…`). Testing uses a **persistent Supabase DB branch**; production uses project **main** (import once — HN-011).
+**Tiers:** prefer `./scripts/tf-plan.sh testing|production` from repo root (pairs backend key + tfvars). Keep **separate state** per tier (`testing/coursewright.com/…`, `prod/coursewright.com/…`). Testing uses a **persistent Supabase DB branch**; production uses project **main** by ref (HN-011).
 
 ---
 
@@ -150,12 +150,12 @@ Product/planning content stays curated markdown; VitePress only publishes/naviga
 |-------|------|
 | **GitHub Actions** | Workflows under `.github/workflows/` |
 | **PR / main checks** | Install, typecheck, build (and tests when they exist) |
-| **Terraform plan** | `workflow_dispatch` only — [terraform-plan.yml](../.github/workflows/terraform-plan.yml). OIDC + `SUPABASE_ACCESS_TOKEN` → build → `./scripts/tf-plan.sh` → artifacts |
-| **Terraform apply** | `workflow_dispatch` only — [terraform-apply.yml](../.github/workflows/terraform-apply.yml). Download plan + `dist/` → `./scripts/tf-apply.sh` → optional `./scripts/deploy-supabase.sh` → `./scripts/deploy-spa.sh` (no Terraform `null_resource`) |
+| **Terraform plan** | `workflow_dispatch` only — [terraform-plan.yml](../.github/workflows/terraform-plan.yml). OIDC + `SUPABASE_ACCESS_TOKEN` → compile-check build → `./scripts/tf-plan.sh` → `tf.plan` artifact |
+| **Terraform apply** | `workflow_dispatch` only — [terraform-apply.yml](../.github/workflows/terraform-apply.yml). Checkout plan SHA → `./scripts/tf-apply.sh` → optional `./scripts/deploy-supabase.sh` → `./scripts/build-spa.sh` → `./scripts/deploy-spa.sh` (no Terraform `null_resource`) |
 
-Input `tier`: `testing` \| `production`. Production jobs use GitHub Environment `production` (required reviewers — HN-010). OIDC role `arn:aws:iam::891612573605:role/github-oidc`, Terraform **1.9.x**, region `us-east-1`.
+Input `tier`: `testing` \| `production`. Production jobs use GitHub Environment `production` (required reviewers — HN-010). OIDC role `arn:aws:iam::891612573605:role/github-oidc`, Terraform **1.16.3**, region `us-east-1`.
 
-Confirm HN-003 (AWS/OIDC) and HN-010 (Environments) before live apply. ACM (HN-005) is ISSUED. Supabase Branching + project import: HN-011.
+Confirm HN-003 (AWS/OIDC) and HN-010 (Environments) before live apply. ACM (HN-005) is ISSUED. Supabase Branching: HN-011.
 
 Deploy credentials stay in GitHub Actions OIDC / secrets / environments — not in the repo. Human setup: [HUMAN_NEEDED.md](./HUMAN_NEEDED.md).
 

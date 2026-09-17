@@ -7,7 +7,7 @@
 # Do not hardcode access_token here.
 
 terraform {
-  required_version = ">= 1.5.0"
+  required_version = "~> 1.16.3"
 
   required_providers {
     aws = {

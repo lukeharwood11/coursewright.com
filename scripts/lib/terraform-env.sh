@@ -57,3 +57,28 @@ tf_var_file_arg() {
   # Path relative to TF_DIR
   echo "-var-file=../tfvars/${TIER}.tfvars"
 }
+
+# Parent/main project — testing branches off this; nuke/migrate must not hit it
+# unless the tier is production.
+DEFAULT_SUPABASE_PARENT_PROJECT_REF="hlecttkgrfhtzvwnxtyb"
+
+# Prints a terraform output with trailing newline stripped; empty if missing.
+tf_output_raw() {
+  local name="$1"
+  local value
+  value="$(cd "$TF_DIR" && terraform output -raw "$name" 2>/dev/null || true)"
+  if [[ "$value" == "null" ]]; then
+    value=""
+  fi
+  printf '%s' "$value"
+}
+
+resolve_parent_project_ref() {
+  local from_state
+  from_state="$(tf_output_raw supabase_parent_project_ref)"
+  if [[ -n "$from_state" ]]; then
+    printf '%s' "$from_state"
+  else
+    printf '%s' "$DEFAULT_SUPABASE_PARENT_PROJECT_REF"
+  fi
+}
