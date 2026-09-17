@@ -102,18 +102,20 @@ data "supabase_apikeys" "testing" {
 
 output "supabase_project_ref" {
   value = local.is_testing ? (
-    length(supabase_branch.testing) > 0 ? supabase_branch.testing[0].database.id : var.supabase_project_ref
+    length(supabase_branch.testing) > 0 ? supabase_branch.testing[0].database.id : null
   ) : var.supabase_project_ref
-  description = "Supabase project ref for this tier (branch ref for testing, main for production)"
+  description = "Supabase project ref for this tier (branch ref for testing, main for production). Null on testing until the branch exists — never falls back to main."
+}
+
+output "supabase_parent_project_ref" {
+  value       = var.supabase_project_ref
+  description = "Parent/main Supabase project ref (hlecttkgrfhtzvwnxtyb). Used by deploy-supabase.sh to refuse testing→main."
 }
 
 output "supabase_url" {
-  value = format(
-    "https://%s.supabase.co",
-    local.is_testing ? (
-      length(supabase_branch.testing) > 0 ? supabase_branch.testing[0].database.id : var.supabase_project_ref
-    ) : var.supabase_project_ref
-  )
+  value = local.is_testing ? (
+    length(supabase_branch.testing) > 0 ? format("https://%s.supabase.co", supabase_branch.testing[0].database.id) : null
+  ) : format("https://%s.supabase.co", var.supabase_project_ref)
   description = "Supabase API URL for this tier"
 }
 

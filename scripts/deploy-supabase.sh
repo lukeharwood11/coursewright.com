@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Push migrations + deploy Edge Functions to the tier's Supabase target.
-# testing  → persistent branch (Terraform output supabase_project_ref)
-# production → main project (same output / linked ref)
+# testing  → persistent branch project ref ONLY (never parent/main)
+# production → main project
 #
 # Usage: ./scripts/deploy-supabase.sh <testing|production>
 # Requires: SUPABASE_ACCESS_TOKEN, supabase CLI, Terraform state for the tier.
@@ -23,9 +23,36 @@ tf_init
 
 cd "$TF_DIR"
 PROJECT_REF="$(terraform output -raw supabase_project_ref 2>/dev/null || true)"
-if [[ -z "$PROJECT_REF" ]]; then
+PARENT_REF="$(terraform output -raw supabase_parent_project_ref 2>/dev/null || true)"
+if [[ -z "$PARENT_REF" ]]; then
+  # Fallback if older state lacks the output — still refuse testing→parent below.
+  PARENT_REF="hlecttkgrfhtzvwnxtyb"
+fi
+
+if [[ -z "$PROJECT_REF" || "$PROJECT_REF" == "null" ]]; then
   red "supabase_project_ref output empty — apply Terraform for ${TIER} first."
   exit 1
+fi
+
+# Safety: testing migrations must never hit the parent/main project.
+if [[ "$TIER" == "testing" ]]; then
+  if [[ "$PROJECT_REF" == "$PARENT_REF" ]]; then
+    red "Refusing testing migrations: supabase_project_ref equals parent main (${PARENT_REF})."
+    red "Apply Terraform for testing first so the persistent branch exists, then re-run."
+    exit 1
+  fi
+  BRANCH_ID="$(terraform output -raw supabase_branch_id 2>/dev/null || true)"
+  if [[ -z "$BRANCH_ID" || "$BRANCH_ID" == "null" ]]; then
+    red "Refusing testing migrations: supabase_branch_id is empty — branch not in state."
+    exit 1
+  fi
+  step "Target confirmed: testing branch ref ${PROJECT_REF} (branch id ${BRANCH_ID}, parent ${PARENT_REF})"
+else
+  if [[ "$PROJECT_REF" != "$PARENT_REF" ]]; then
+    red "Refusing production migrations: expected parent main (${PARENT_REF}), got ${PROJECT_REF}."
+    exit 1
+  fi
+  step "Target confirmed: production main ${PROJECT_REF}"
 fi
 
 step "Supabase migrations (${TIER} → ${PROJECT_REF})"
