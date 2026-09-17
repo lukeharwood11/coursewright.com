@@ -93,4 +93,4 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | Env | URL | Terraform |
 |-----|-----|-----------|
 | Production | `coursewright.com` | `-var-file=../tfvars/production.tfvars` |
-| Testing | `justtesting.coursewright.com` | `-var-file=../tfvars/testing.tfvars` |
+| Testing | `beta.coursewright.com` | `-var-file=../tfvars/testing.tfvars` |

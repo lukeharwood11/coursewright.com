@@ -68,7 +68,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches parent vs staff home. **P0 roles:** owner, admin, instructor, parent. Owner vs admin = billing. |
 | **Admin account management** | Admins invite, **change roles**, and **remove** admins/instructors | planned | Last owner/admin DB guard ready; no change/remove staff UI |
 | **Homework (P0)** | Dated materials in a unit — appear on parent "this week" when dates fall in Sun–Sat | shipped | `scheduled_date` on add/edit material. Parent “this week” uses unit/material dates. **Not** a separate assignment type |
-| **Course builder** | Create and organize **courses** within an org (no templates in P0) | shipped | Create, course home, units, materials (page/link/file), print/share chrome |
+| **Course builder** | Create and organize **courses** within an org (no templates in P0) | shipped | Create, course home, units, materials (page/link/file), print/share chrome; collapsible course outline (units + materials tree) |
 | **Courses (instances)** | Runnable offerings with dates and a roster — from scratch or **copied from another course** | shipped | Create from scratch + settings + roster. Copy via Function. Catalog: **description**, **location**, **subject / area**, optional **icon** on list cards. **Templates are P1** |
 | **Create course from course** | Duplicate an existing course’s units/materials into a new independent course | shipped | Edge Function `create-course-from-course` deployed on testing; copy content only — **no roster**, **no live sync**. Copies start unpublished |
 | **Course visibility** | **Published / unpublished** controls whether families can see the course | shipped | Unpublished: instructors/admins. Published: enrolled parents (students when that role exists). New courses start unpublished. Distinct from `status` (active / archived) |
@@ -696,6 +696,6 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | File storage | **Decided** | Supabase Storage — STACK.md |
 | Frontend hosting | **Decided** | AWS S3 + CloudFront — STACK.md |
 | Infrastructure as code | **Decided** | Terraform + infra/tfvars — STACK.md |
-| Custom domain | **Decided** | coursewright.com (prod); justtesting.coursewright.com (testing) |
+| Custom domain | **Decided** | coursewright.com (prod); beta.coursewright.com (testing) |
 | Migrations | **Decided** | `supabase db migrate` — STACK.md |
 | Billing provider (P1) | **Hypothesis** | Stripe Billing — STACK.md; not P0 |

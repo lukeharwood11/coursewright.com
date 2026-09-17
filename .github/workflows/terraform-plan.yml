@@ -1,11 +1,8 @@
-# CourseWright Terraform plan (nosh-style, adapted).
+# CourseWright Terraform plan (shared scripts).
 #
 # Dispatch only. Testing first; production uses GitHub Environment approval.
-# Do not apply the saved plan until Luke’s ISSUED us-east-1 ACM (HN-005) and
-# HN-003 AWS/OIDC creds. See docs/HUMAN_NEEDED.md.
-#
-# Differs from SayNosh.com: Vite app is at repo root (not web/); Terraform root
-# is infra/terraform/; init uses backend-*.hcl; plan uses ../tfvars/*.tfvars.
+# Requires: AWS OIDC (HN-003), SUPABASE_ACCESS_TOKEN secret, GitHub Environments (HN-010).
+# ACM (HN-005) is ISSUED. See docs/HUMAN_NEEDED.md.
 
 name: Terraform Plan
 
@@ -31,6 +28,7 @@ env:
   TERRAFORM_VERSION: "1.9.8"
   TF_IN_AUTOMATION: "true"
   TF_INPUT: "false"
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
 jobs:
   plan:
@@ -58,9 +56,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # Testing keys are committed in .env.development. Vite production builds
-      # do not load that file, so copy it for the testing tier only. Production
-      # reads VITE_* from the GitHub Environment (HN-007 / HN-010).
+      # Testing: prefer committed .env.development until the testing branch
+      # exists; after first apply, re-point keys at the branch (HN / docs).
       - name: Build (testing)
         if: inputs.tier == 'testing'
         run: |
@@ -81,22 +78,8 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
 
-      - name: Terraform Init and Plan
-        working-directory: infra/terraform
-        run: |
-          terraform init -backend-config=backend-${{ inputs.tier }}.hcl
-          set +e
-          terraform plan -var-file=../tfvars/${{ inputs.tier }}.tfvars -out=tf.plan -detailed-exitcode
-          exitcode=$?
-          set -e
-          if [ "$exitcode" -eq 1 ]; then
-            exit 1
-          fi
-          exit 0
-
-      - name: Show Plan Output
-        working-directory: infra/terraform
-        run: terraform show tf.plan
+      - name: Terraform Plan
+        run: ./scripts/tf-plan.sh ${{ inputs.tier }}
 
       - name: Upload Plan Artifact
         uses: actions/upload-artifact@v4

@@ -16,7 +16,7 @@ Craftsperson / **playwright** energy: someone who *makes* courses. Also **course
 
 **Mark (for now):** type only — **Course Wright** in Lora; **CW** in Lora when space is tight. See [STYLE_GUIDE.md](./STYLE_GUIDE.md).
 
-Domain: **coursewright.com** (owned). Testing: **justtesting.coursewright.com**.
+Domain: **coursewright.com** (owned). Testing: **beta.coursewright.com**.
 
 ---
 

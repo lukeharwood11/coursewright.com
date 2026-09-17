@@ -161,35 +161,36 @@ supabase/
 
 ---
 
-## `infra/` — AWS via Terraform
+## `infra/` — AWS + Supabase via Terraform
 
 ```text
 infra/
 ├── README.md
 ├── tfvars/                   # tier values (sibling to terraform/)
-│   ├── testing.tfvars        # justtesting.coursewright.com
-│   └── production.tfvars     # coursewright.com
+│   ├── testing.tfvars        # beta.coursewright.com + branch parent ref
+│   └── production.tfvars     # coursewright.com + project import refs
 └── terraform/                # one root module; tiers via ../tfvars
     ├── AGENTS.md
+    ├── supabase.tf           # supabase provider: branch (testing) / project+settings (prod)
     ├── modules/
     │   └── spa_site/         # S3 + CloudFront + ACM/DNS
-    └── …                     # main.tf, variables.tf, backend; state per tier <!-- TBD -->
+    └── …                     # main.tf, variables.tf, backend-*.hcl; state per tier
 ```
 
-| Tier | Domain | Var file |
-|------|--------|----------|
-| Testing | `justtesting.coursewright.com` | `infra/tfvars/testing.tfvars` |
-| Production | `coursewright.com` | `infra/tfvars/production.tfvars` |
+| Tier | Domain | Var file | State key |
+|------|--------|----------|-----------|
+| Testing | `beta.coursewright.com` | `infra/tfvars/testing.tfvars` | `testing/coursewright.com/terraform.tfstate` |
+| Production | `coursewright.com` | `infra/tfvars/production.tfvars` | `prod/coursewright.com/terraform.tfstate` |
 
 ```bash
-cd infra/terraform
-terraform apply -var-file=../tfvars/testing.tfvars
-terraform apply -var-file=../tfvars/production.tfvars
+./scripts/tf-plan.sh testing
+./scripts/deploy.sh testing          # local one-shot
+./scripts/deploy.sh production --yes
 ```
 
-**Terraform manages:** S3 buckets, CloudFront distributions, TLS certs (ACM), DNS records as needed for those hosts.
+**Terraform manages:** S3, CloudFront, ACM lookup, Route53 aliases; Supabase project (imported), persistent testing branch, settings, API key outputs.
 
-**Not Terraform:** Supabase projects/schema (`supabase db migrate`), Edge Functions, or app secrets in Supabase — those stay on the Supabase CLI / dashboard workflow.
+**Not Terraform:** SQL schema files / `db push`, Edge Function source — [`scripts/deploy-supabase.sh`](../scripts/deploy-supabase.sh).
 
 Same stack definition for every tier — **do not** fork separate `envs/testing` vs `envs/production` roots; use tfvars + separate state per tier.
 

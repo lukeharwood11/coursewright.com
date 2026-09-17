@@ -1,8 +1,10 @@
 # HUMAN_NEEDED HN-003 — AWS credentials: local env / shared config, or GHA OIDC
 # role arn:aws:iam::891612573605:role/github-oidc (see terraform-plan.yml / terraform-apply.yml).
 # Do not commit access keys. The spa_site module is real: apply creates S3 + CloudFront.
-# Do not apply (local or GHA terraform-apply.yml) until an ISSUED ACM cert exists in
-# us-east-1 for coursewright.com + *.coursewright.com (HN-005). GitHub Environment gates: HN-010.
+# ACM (HN-005) is ISSUED; remaining gates: HN-003 AWS/OIDC confirm + HN-010 GitHub Environments.
+#
+# Supabase: provider reads SUPABASE_ACCESS_TOKEN from the environment (local or GHA secret).
+# Do not hardcode access_token here.
 
 terraform {
   required_version = ">= 1.5.0"
@@ -11,6 +13,10 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
+    }
+    supabase = {
+      source  = "supabase/supabase"
+      version = "~> 1.0"
     }
   }
 }
@@ -27,3 +33,6 @@ provider "aws" {
     }
   }
 }
+
+# Access token: SUPABASE_ACCESS_TOKEN env var (never commit).
+provider "supabase" {}

@@ -1,19 +1,19 @@
 # AGENTS — `.github/workflows/`
 
-CI/CD YAML. Product behavior is not defined here.
+CI/CD YAML. Product behavior is not defined here. Keep YAML thin — call [`scripts/`](../../scripts/).
 
 ## Workflows
 
 | File | Trigger | Role |
 |------|---------|------|
-| `terraform-plan.yml` | `workflow_dispatch` | OIDC → `npm ci` + `npm run build` → `dist/` → `terraform init` + `plan` → upload `tf.plan` + `dist/` |
-| `terraform-apply.yml` | `workflow_dispatch` | Download matching plan artifacts → `terraform apply tf.plan` → `aws s3 sync` + CloudFront invalidate |
+| `terraform-plan.yml` | `workflow_dispatch` | OIDC + `SUPABASE_ACCESS_TOKEN` → build `dist/` → `./scripts/tf-plan.sh` → upload `tf.plan` + `dist/` |
+| `terraform-apply.yml` | `workflow_dispatch` | Download plan artifacts → `./scripts/tf-apply.sh` → optional `./scripts/deploy-supabase.sh` → `./scripts/deploy-spa.sh` |
 
-Input `tier`: `testing` \| `production`. Job `environment:` matches the tier so **production** can require GitHub Environment reviewers.
+Input `tier`: `testing` \| `production`. Optional `plan_run_id`, `deploy_supabase`. Job `environment:` matches the tier.
 
 ## Don’t
 
 - Add `push`/`pull_request` triggers for plan/apply.
-- Point Node/`npm` at a `web/` subdirectory (that is nosh; CourseWright is repo-root).
+- Point Node/`npm` at a `web/` subdirectory (nosh layout; CourseWright is repo-root).
 - Sync or invalidate from Terraform (`null_resource` / `local-exec`).
-- Dispatch **apply** until HN-005 ACM is ISSUED in `us-east-1` and HN-003 is done.
+- Inline terraform/aws deploy logic that belongs in `scripts/`.

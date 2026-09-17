@@ -52,7 +52,7 @@ enabled = true
 site_url = "http://localhost:5173"
 additional_redirect_urls = [
   "http://localhost:5173",
-  "https://justtesting.coursewright.com",
+  "https://beta.coursewright.com",
   "https://coursewright.com",
 ]
 enable_signup = true

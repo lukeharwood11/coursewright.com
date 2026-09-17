@@ -1,11 +1,8 @@
-# CourseWright Terraform apply (nosh-style, adapted).
+# CourseWright Terraform apply (shared scripts).
 #
-# DO NOT DISPATCH until Luke’s ISSUED us-east-1 ACM certificate (HN-005) and
-# HN-003 AWS/OIDC credentials. This workflow is code-only until those land.
-# See docs/HUMAN_NEEDED.md.
-#
-# After apply, S3 sync + CloudFront invalidate run as Actions steps — not a
-# Terraform null_resource.
+# Dispatch only. Requires matching plan artifacts from terraform-plan.yml.
+# After apply: SPA sync + optional Supabase migrate/functions via scripts.
+# See docs/HUMAN_NEEDED.md (HN-003, HN-010).
 
 name: Terraform Apply
 
@@ -24,6 +21,11 @@ on:
         description: Run ID of the matching Terraform Plan (empty = latest successful plan for this tier)
         required: false
         type: string
+      deploy_supabase:
+        description: Also push migrations + Edge Functions after apply
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   id-token: write
@@ -40,6 +42,7 @@ env:
   TERRAFORM_VERSION: "1.9.8"
   TF_IN_AUTOMATION: "true"
   TF_INPUT: "false"
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
 jobs:
   apply:
@@ -61,6 +64,12 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
+
+      - name: Setup Supabase CLI
+        if: inputs.deploy_supabase
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
       - name: Download Plan Artifact (specific run)
         if: inputs.plan_run_id != ''
@@ -104,33 +113,12 @@ jobs:
           path: dist
           workflow_conclusion: success
 
-      - name: Terraform Init and Apply
-        working-directory: infra/terraform
-        run: |
-          terraform init -backend-config=backend-${{ inputs.tier }}.hcl
-          terraform apply tf.plan
+      - name: Terraform Apply
+        run: ./scripts/tf-apply.sh ${{ inputs.tier }}
 
-      # Deploy is Actions, not Terraform. Bucket name from output, with the
-      # known coursewright-${tier}-spa fallback if output is empty.
+      - name: Deploy Supabase
+        if: inputs.deploy_supabase
+        run: ./scripts/deploy-supabase.sh ${{ inputs.tier }}
+
       - name: Sync SPA to S3 and invalidate CloudFront
-        working-directory: infra/terraform
-        env:
-          TIER: ${{ inputs.tier }}
-        run: |
-          set -euo pipefail
-          if [ ! -d "${GITHUB_WORKSPACE}/dist" ]; then
-            echo "dist/ artifact missing" >&2
-            exit 1
-          fi
-          BUCKET="$(terraform output -raw spa_bucket_name)"
-          DIST_ID="$(terraform output -raw cloudfront_distribution_id)"
-          if [ -z "${BUCKET}" ]; then
-            BUCKET="coursewright-${TIER}-spa"
-            echo "spa_bucket_name output empty; falling back to ${BUCKET}"
-          fi
-          if [ -z "${DIST_ID}" ]; then
-            echo "cloudfront_distribution_id output is empty" >&2
-            exit 1
-          fi
-          aws s3 sync "${GITHUB_WORKSPACE}/dist/" "s3://${BUCKET}" --delete
-          aws cloudfront create-invalidation --distribution-id "${DIST_ID}" --paths "/*"
+        run: ./scripts/deploy-spa.sh ${{ inputs.tier }}

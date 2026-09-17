@@ -48,9 +48,8 @@ infra/terraform/override.tf
 infra/terraform/override.tf.json
 infra/terraform/*_override.tf
 infra/terraform/*_override.tf.json
-# Keep the lockfile if you want reproducible provider versions in CI:
+# Keep the lockfile for reproducible provider versions in CI:
 # infra/terraform/.terraform.lock.hcl
-infra/terraform/.terraform.lock.hcl
 
 # Misc
 *.pem

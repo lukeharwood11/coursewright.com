@@ -1,6 +1,7 @@
-# Root module — wires spa_site. Apply with -var-file=../tfvars/testing.tfvars|production.tfvars
-# Do not apply until HN-003 (AWS creds) + ISSUED ACM cert in us-east-1 + HN-005 (DNS).
+# Root module — wires spa_site + supabase (see supabase.tf).
+# Prefer ./scripts/tf-plan.sh|tf-apply.sh <tier> from repo root.
 # Init with the matching backend-*.hcl. Always creates Route53 A/AAAA aliases.
+# ACM (HN-005) issued; confirm HN-003 / HN-010 / HN-011 before live apply.
 
 module "spa_site" {
   source = "./modules/spa_site"

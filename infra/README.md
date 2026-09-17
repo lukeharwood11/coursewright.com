@@ -1,26 +1,26 @@
 # Infra
 
-Terraform under `terraform/`. Deploy the Vite `dist/` to the tier’s S3 bucket after apply.
+Terraform under `terraform/` (AWS SPA + Supabase provider). Prefer repo-root scripts:
 
-- Human blockers: [docs/HUMAN_NEEDED.md](../docs/HUMAN_NEEDED.md) (HN-003 AWS/OIDC, HN-005 ACM cert in us-east-1 + DNS, HN-010 GitHub Environments). **Do not apply** until HN-003 + ISSUED ACM (HN-005).
-- Remote state: shared nosh/amia backend; init with `backend-testing.hcl` / `backend-production.hcl`
-- Tier vars: [`tfvars/`](./tfvars/) (`testing.tfvars` / `production.tfvars`)
-- `spa_site` module: private S3 + CloudFront OAC + Route53 A/AAAA aliases; ACM lookup for `coursewright.com` / `*.coursewright.com`
-- See [AGENTS.md](./AGENTS.md) and [terraform/AGENTS.md](./terraform/AGENTS.md)
+| Script | Role |
+|--------|------|
+| [`../scripts/tf-plan.sh`](../scripts/tf-plan.sh) / [`tf-apply.sh`](../scripts/tf-apply.sh) | Tiered plan/apply |
+| [`../scripts/deploy-spa.sh`](../scripts/deploy-spa.sh) | Sync `dist/` + CloudFront invalidate |
+| [`../scripts/deploy-supabase.sh`](../scripts/deploy-supabase.sh) | Migrations + Edge Functions |
+| [`../scripts/deploy.sh`](../scripts/deploy.sh) | Local one-shot |
 
-## GitHub Actions (plan / apply)
+- Human blockers: [docs/HUMAN_NEEDED.md](../docs/HUMAN_NEEDED.md) — HN-003 (AWS/OIDC), HN-010 (Environments), HN-011 (Supabase Branching). ACM (HN-005) is done.
+- Remote state keys: `testing/coursewright.com/terraform.tfstate`, `prod/coursewright.com/terraform.tfstate`
+- Tier vars: [`tfvars/`](./tfvars/) — testing → `beta.coursewright.com`, production → `coursewright.com`
+- Supabase: existing project `hlecttkgrfhtzvwnxtyb`; testing uses a **persistent DB branch**; production uses **main** (import once)
+- Auth: `SUPABASE_ACCESS_TOKEN` (local env + GitHub Actions secret)
 
-Dispatch-only workflows (nosh-style): [`.github/workflows/terraform-plan.yml`](../.github/workflows/terraform-plan.yml) and [`.github/workflows/terraform-apply.yml`](../.github/workflows/terraform-apply.yml).
+## GitHub Actions
+
+Dispatch-only: [`.github/workflows/terraform-plan.yml`](../.github/workflows/terraform-plan.yml) / [`terraform-apply.yml`](../.github/workflows/terraform-apply.yml). Workflows call the shared scripts (OIDC + `SUPABASE_ACCESS_TOKEN`).
 
 | | Testing | Production |
 |--|---------|------------|
-| Dispatch input | `tier=testing` (default) | `tier=production` |
+| Domain | `beta.coursewright.com` | `coursewright.com` |
 | Backend | `backend-testing.hcl` | `backend-production.hcl` |
-| Vars | `testing.tfvars` | `production.tfvars` |
-| Gate | GitHub Environment `testing` (no required reviewers) | GitHub Environment `production` (required reviewers — HN-010) |
-
-Plan: checkout → OIDC (`arn:aws:iam::891612573605:role/github-oidc`) → `npm ci` + `npm run build` → repo-root `dist/` → `terraform init` + `plan -out=tf.plan` → upload `tf.plan` + `dist/`.
-
-Apply: download those artifacts from the matching plan run → `terraform init` + `apply tf.plan` → **Actions** `aws s3 sync` of `dist/` to `spa_bucket_name` (fallback `coursewright-${tier}-spa`) → CloudFront invalidate. No Terraform `null_resource`.
-
-**Do not dispatch apply** until Luke’s ACM certificate is **ISSUED** in `us-east-1` (HN-005) and HN-003 AWS/OIDC access is confirmed. The workflows are code-only until then.
+| Gate | Environment `testing` | Environment `production` (reviewers — HN-010) |

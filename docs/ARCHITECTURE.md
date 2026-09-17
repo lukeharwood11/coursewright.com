@@ -35,7 +35,7 @@ If a new folder is named after a library (`redux/`, `hooks/`, `contexts/`) at th
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│  Browser SPA (coursewright.com / justtesting.…)               │
+│  Browser SPA (coursewright.com / beta.…)               │
 │  Domain modules scream product · UI is delivery               │
 └───────────────┬─────────────────────────────┬───────────────┘
                 │ PostgREST (CRUD)            │ Functions (complex)
@@ -164,7 +164,7 @@ Functions are **use-case adapters**, not a general REST API. Prefer few, obvious
 
 ```text
 coursewright.com              → CloudFront → S3 (prod SPA)
-justtesting.coursewright.com  → CloudFront → S3 (test SPA)
+beta.coursewright.com  → CloudFront → S3 (test SPA)
          │
          └── browser talks to Supabase (Auth / PostgREST / Storage / Functions)
 ```

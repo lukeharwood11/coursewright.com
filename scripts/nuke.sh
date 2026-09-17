@@ -8,6 +8,9 @@
 #   ./scripts/nuke.sh --yes        # skip confirmation prompt
 #   ./scripts/nuke.sh --local --yes
 #
+# Prefer linking to the **testing branch** project ref (Terraform output
+# supabase_project_ref for tier=testing). Never nuke production main.
+#
 # To rewrite migrations from scratch: delete supabase/migrations/*.sql,
 # run this script, then add fresh migrations and push/reset again.
 

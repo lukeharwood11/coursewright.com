@@ -8,7 +8,7 @@ LMS for **homeschool co-ops and micro-schools** — plan courses, reuse template
 | | |
 |--|--|
 | Production | [coursewright.com](https://coursewright.com) |
-| Testing | [justtesting.coursewright.com](https://justtesting.coursewright.com) |
+| Testing | [beta.coursewright.com](https://beta.coursewright.com) |
 
 ---
 
@@ -71,7 +71,8 @@ Everything product-related lives in **`docs/`**. Agent index: [AGENTS.md](./AGEN
 |-----------|---------|
 | `src/` | React SPA (domain folders scream the product) |
 | `supabase/` | Migrations + Edge Functions |
-| `infra/terraform/` | AWS SPA hosting |
+| `infra/terraform/` | AWS SPA hosting + Supabase (branch/settings) |
+| `scripts/` | Deploy helpers (`tf-plan`, `tf-apply`, `deploy-spa`, `deploy-supabase`, `deploy`) |
 
 ---
 
@@ -87,17 +88,16 @@ See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) and [docs/STRUCTURE.md](./doc
 
 ## Deploy notes
 
-1. Complete open items in [docs/HUMAN_NEEDED.md](./docs/HUMAN_NEEDED.md) (AWS, Terraform state, DNS; production Supabase when needed).  
-2. Build: `npm run build` → upload `dist/` to the tier’s S3 bucket.  
-3. Terraform tiers:
+1. Open items in [docs/HUMAN_NEEDED.md](./docs/HUMAN_NEEDED.md) (HN-003 AWS/OIDC, HN-010 Environments, HN-011 Supabase Branching/import).  
+2. Local one-shot (needs AWS creds + `SUPABASE_ACCESS_TOKEN`):
    ```bash
-   cd infra/terraform
-   terraform plan  -var-file=../tfvars/testing.tfvars
-   terraform apply -var-file=../tfvars/production.tfvars
+   ./scripts/deploy.sh testing
+   ./scripts/deploy.sh production --yes
    ```
-   Keep **separate state** per tier.
+3. Or step-by-step: `./scripts/tf-plan.sh testing` → `./scripts/tf-apply.sh testing` → `./scripts/deploy-supabase.sh testing` → build → `./scripts/deploy-spa.sh testing`.  
+4. CI: dispatch **Terraform Plan** then **Terraform Apply** (same scripts).
 
-Schema changes: `supabase db migrate` (after linking a project).
+Schema changes: `./scripts/deploy-supabase.sh <tier>` (or `supabase db push` after linking the tier’s project ref).
 
 ---
 
