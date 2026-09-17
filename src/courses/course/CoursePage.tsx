@@ -8,6 +8,10 @@ import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
 import { CourseHeader, PrintHint } from "./components/CourseHeader";
 import { CourseVisibilityBanner } from "./components/CourseVisibilityBanner";
+import {
+  CourseOutline,
+  CourseOutlineToggle,
+} from "./components/CourseOutline";
 import { CourseSidebar } from "./components/CourseSidebar";
 import { UnitCard } from "./components/UnitCard";
 import { useCourse } from "./hooks/useCourse";
@@ -37,6 +41,10 @@ export function CoursePage() {
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
   const [addingUnit, setAddingUnit] = useState(false);
   const [unitTitle, setUnitTitle] = useState("");
+  const [outlineOpen, setOutlineOpen] = useState(() =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(min-width: 1024px)").matches,
+  );
 
   useEffect(() => {
     document.title = course
@@ -118,7 +126,26 @@ export function CoursePage() {
       />
       <PrintHint />
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_16rem]">
+      {!outlineOpen ? (
+        <div className="mt-6">
+          <CourseOutlineToggle onOpen={() => setOutlineOpen(true)} />
+        </div>
+      ) : null}
+
+      <div
+        className={`grid gap-6 ${
+          outlineOpen ? "mt-6 lg:grid-cols-[14rem_minmax(0,1fr)_16rem]" : "mt-4 lg:grid-cols-[minmax(0,1fr)_16rem]"
+        }`}
+      >
+        <CourseOutline
+          orgSlug={organization.slug}
+          courseId={course.id}
+          units={units}
+          topLevelMaterials={topLevelMaterials}
+          materialsByUnitId={materialsByUnitId}
+          open={outlineOpen}
+          onClose={() => setOutlineOpen(false)}
+        />
         <div className="min-w-0">
           <section>
             <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">

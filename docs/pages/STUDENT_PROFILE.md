@@ -16,6 +16,7 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 
 - View/edit one `student_profile` (no student login in P0/P1).
 - Edit name, optional parent email, optional grade (must match org grade scheme when set).
+- **Save** / **Cancel** in the page header; Save disabled when nothing changed; Cancel goes back (confirms if dirty).
 - Show course enrollments and class membership.
 - Creating profiles often happens on first course or class add; this page manages the canonical org record.
 - Send/resend parent invite is **not** on this page yet (email can be stored).

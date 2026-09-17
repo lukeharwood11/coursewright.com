@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { BillingPlaceholder } from "@/billing";
-import { Button } from "@/ui/Button";
+import { PageFormActions } from "@/ui/PageFormActions";
 import { toastNotImplemented } from "@/ui/toast";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
@@ -81,24 +81,13 @@ export function OrgSettingsPage() {
               : "Only owners and admins can change these settings."}
           </p>
         </div>
-        {settings.canEdit && settings.hasChanges ? (
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={settings.onCancel}
-              disabled={settings.saving}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              form={ORG_SETTINGS_FORM_ID}
-              disabled={settings.saving}
-            >
-              {settings.saving ? "Saving…" : "Save"}
-            </Button>
-          </div>
+        {settings.canEdit ? (
+          <PageFormActions
+            formId={ORG_SETTINGS_FORM_ID}
+            saving={settings.saving}
+            hasChanges={settings.hasChanges}
+            cancelTo={`/my/${settings.organization.slug}`}
+          />
         ) : null}
       </div>
 

@@ -25,6 +25,7 @@ View (and edit) a single material placement — the thing parents open from this
 - Print → [PRINT](./PRINT.md) (`…/print`) → generated PDF in-app preview → Download / Print; no export wizard.
 - Instance content promote to template is **P1** (opt-in); overridden copies do not receive template sync for that resource.
 - File replace keeps prior blobs (versioning); audio/video play in-app.
+- **file** materials always offer **Download** (signed URL with attachment disposition). PDF/image also show an inline preview with **Expand** for a larger view.
 
 ## Data shown
 
@@ -40,7 +41,7 @@ View (and edit) a single material placement — the thing parents open from this
 
 - **page:** ordered **blocks** (rich text, video, …)
 - **link:** URL (+ title)
-- **file:** attached File (name, type, version affordances, open/download)
+- **file:** attached File (name, type, inline preview when possible, **Download**, **Expand** for PDF/image)
 
 **Derived / chrome**
 
@@ -63,7 +64,7 @@ View (and edit) a single material placement — the thing parents open from this
 
 - **page** — ordered blocks: **rich text** (WYSIWYG and/or Markdown), **video**; printable block layout
 - **link** — external URL; print → title + URL/QR
-- **file** — org File; versioned blobs; print-ready / open
+- **file** — org File; versioned blobs; preview + **Download**; PDF/image **Expand**
 - Quiz author + print still required product-wise later — **not** in v1 Add material menu
 - Forms — **not P0**
 
@@ -75,6 +76,7 @@ View (and edit) a single material placement — the thing parents open from this
 ### Edit
 
 - **Edit URL:** `…/materials/<material_id>/edit` (locked — [URLS.md](../URLS.md))
+- Placement fields: **Save** / **Cancel** in the page header; Save disabled when unchanged; Cancel goes back (confirms if dirty)
 - **page:** add / reorder / edit / remove blocks
 - **link / file:** edit URL or replace file (file replace → new FileVersion)
 - Versioning / who changed what / revert dangerous actions
@@ -85,6 +87,8 @@ View (and edit) a single material placement — the thing parents open from this
 
 - Print
 - Share link
+- **Download** (file materials)
+- **Expand** preview (PDF/image)
 - Play audio/video
 - **Edit** → `…/edit` (editors)
 - Toggle important now

@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { forwardRef } from "react";
 import { Link } from "react-router-dom";
 
 type Variant = "primary" | "secondary" | "google" | "ghost";
@@ -28,28 +29,28 @@ function buttonClassName(variant: Variant, fullWidth: boolean | undefined, extra
     .join(" ");
 }
 
-export function Button({
-  variant = "primary",
-  fullWidth,
-  children,
-  className,
-  type = "button",
-  ...rest
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: Variant;
-  fullWidth?: boolean;
-  children: ReactNode;
-}) {
+export const Button = forwardRef<
+  HTMLButtonElement,
+  ButtonHTMLAttributes<HTMLButtonElement> & {
+    variant?: Variant;
+    fullWidth?: boolean;
+    children: ReactNode;
+  }
+>(function Button(
+  { variant = "primary", fullWidth, children, className, type = "button", ...rest },
+  ref,
+) {
   return (
     <button
       {...rest}
+      ref={ref}
       type={type}
       className={buttonClassName(variant, fullWidth, className)}
     >
       {children}
     </button>
   );
-}
+});
 
 export function ButtonLink({
   variant = "primary",

@@ -1,5 +1,5 @@
 import type { FormEvent } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
@@ -13,12 +13,17 @@ import {
   updateCourse,
   updateCourseVisibility,
 } from "@/courses/databridge/courses";
-import { validateCourseSettings } from "@/courses/model/createCourse";
+import {
+  courseSettingsHaveChanges,
+  validateCourseSettings,
+} from "@/courses/model/createCourse";
 import { allowedGradeLevels, toggleGradeLevel } from "@/courses/model/gradeLevels";
 import { getOrganization, orgQueryKeys } from "@/organizations/databridge/organizations";
 import { canManageOrgSettings, isStaffRole } from "@/organizations/model/role";
 import type { CourseIconValue } from "@/courses/model/courseIcon";
 import type { CourseVisibility } from "@/courses/model/visibility";
+
+export const COURSE_SETTINGS_FORM_ID = "course-settings-form";
 
 export function useCourseSettings() {
   const { courseId: courseIdParam } = useParams();
@@ -63,7 +68,7 @@ export function useCourseSettings() {
   const [formError, setFormError] = useState<string | null>(null);
   const [addUserId, setAddUserId] = useState("");
 
-  useEffect(() => {
+  const resetForm = useCallback(() => {
     if (!course) return;
     setTitle(course.title);
     setDescription(course.description);
@@ -74,7 +79,12 @@ export function useCourseSettings() {
     setEndDate(course.endDate ?? "");
     setStatus(course.status);
     setGradeLevels(course.gradeLevels);
+    setFormError(null);
   }, [course]);
+
+  useEffect(() => {
+    resetForm();
+  }, [resetForm]);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -96,6 +106,7 @@ export function useCourseSettings() {
       return updateCourse(courseId, parsed.value);
     },
     onSuccess: async () => {
+      setFormError(null);
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.detail(courseId),
       });
@@ -143,8 +154,26 @@ export function useCourseSettings() {
       }),
   });
 
+  const hasChanges = course
+    ? courseSettingsHaveChanges(
+        {
+          title,
+          description,
+          location,
+          subject,
+          iconKey,
+          startDate,
+          endDate,
+          gradeLevels,
+          status,
+        },
+        course,
+      )
+    : false;
+
   function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!hasChanges) return;
     setFormError(null);
     save.mutate();
   }
@@ -180,6 +209,7 @@ export function useCourseSettings() {
     gradeLabels: orgQuery.data?.gradeLabels ?? [],
     formError: formError ?? (save.error ? save.error.message : null),
     saving: save.isPending,
+    hasChanges,
     onSubmit,
     instructors: instructorsQuery.data ?? [],
     staff: (staffQuery.data ?? []).filter((row) => !instructorIds.has(row.userId)),

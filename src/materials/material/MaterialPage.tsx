@@ -11,10 +11,10 @@ import { materialKindLabel } from "@/materials/model/kind";
 import { materialEditPath, materialPrintPath } from "@/materials/model/paths";
 import { isPublished } from "@/materials/model/visibility";
 import { resourceShareMessage } from "@/sharing/model/copyLink";
-import { filePlaybackKind } from "@/materials/model/playback";
 import { createResourceShareLink } from "@/sharing/databridge/shareLinks";
 import { unitPath } from "@/units/model/paths";
 import { useMaterial } from "./hooks/useMaterial";
+import { FileMaterialBody } from "./components/FileMaterialBody";
 import { VisibilityBanner } from "./components/VisibilityBanner";
 
 export function MaterialPage() {
@@ -251,37 +251,12 @@ function MaterialBody({
     if (!page.file) {
       return <p className="text-[14px] text-[var(--ink-soft)]">No file attached.</p>;
     }
-    const kind = filePlaybackKind(page.file.mimeType);
-    if (kind === "audio" && page.fileUrl) {
-      return <audio className="w-full max-w-xl" controls src={page.fileUrl} />;
-    }
-    if (kind === "video" && page.fileUrl) {
-      return (
-        <video className="w-full max-w-2xl" controls src={page.fileUrl} />
-      );
-    }
-    if ((kind === "pdf" || kind === "image") && page.fileUrl) {
-      return (
-        <iframe
-          title={page.file.filename}
-          className="h-[70vh] w-full rounded-[10px] border border-[var(--line-soft)] bg-white"
-          src={page.fileUrl}
-        />
-      );
-    }
     return (
-      <p>
-        {page.fileUrl ? (
-          <a
-            href={page.fileUrl}
-            className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-          >
-            Open {page.file.filename}
-          </a>
-        ) : (
-          page.file.filename
-        )}
-      </p>
+      <FileMaterialBody
+        file={page.file}
+        fileUrl={page.fileUrl}
+        fileDownloadUrl={page.fileDownloadUrl}
+      />
     );
   }
 

@@ -16,6 +16,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 
 - Loads one course instance; instructor chrome for builders, simpler read chrome for parents.
 - Browse **top-level materials** (no unit) **above** ordered units; materials may also nest under units.
+- Optional **outline** panel (file-tree of top-level materials + units with nested materials); open by default on large screens (`lg`+), closed on smaller screens; **Show outline** / hide so it is not always open.
 - Add unit / add material (top-level or into a unit) when permitted.
 - Print and share controls stay visible (not in overflow-only menus).
 - Instructors can **publish / unpublish** the course (distinct from archive).
@@ -29,6 +30,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - **Top-level materials** (title, description, kind/badge, dates, print)
 - Ordered **units** (name, optional date range, material counts TBD)
 - Materials under units: **title**, **description**, kind/badge, dates, print affordance
+- **Outline** (when shown): same units/materials as a compact tree (titles + kind icons); links to unit/material pages
 - **Instructors** (sidebar)
 - Parent variant: same structure without edit controls; **unpublished courses 404**; **unpublished materials are omitted**
 
@@ -37,6 +39,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Course title; badges for status, unpublished, dates, subject / area, grade metadata ([STYLE_GUIDE.md](../STYLE_GUIDE.md) instructor course pattern)
 - Optional description and location under the title
 - Publish / unpublish banner (instructors)
+- Collapsible **outline** (left on large screens): tree of top-level materials and units → materials; links open [UNIT](./UNIT.md) / [MATERIAL](./MATERIAL.md)
 - Top-level materials list (above units) with **title**, **description**, kind, **Print**; add material here or into a unit
 - Units list (ordered) → [UNIT](./UNIT.md); add unit
 - Materials under units: **title**, **description**, kind/badge, dates, print affordance
