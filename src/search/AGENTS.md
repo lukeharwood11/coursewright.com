@@ -5,7 +5,7 @@ Cross-facet find (“where is this resource?”) — staff chrome search for now
 ## Scope (this slice)
 
 - Org top-bar search (**staff only**): pages, courses, materials
-- Postgres FTS via existing `search_vector` GIN indexes (PostgREST `textSearch`)
+- Postgres FTS via existing `search_vector` GIN indexes (PostgREST `fts(english)` / `to_tsquery`, so `frac:*` prefixes work)
 - Overlay cards only — no `/search` route until [URLS.md](../../docs/URLS.md) locks it
 - Hits are **findability only**. They never grant access. Enrollment / `parent_student_links` remain the access gate.
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { filterPageResults, staffSearchPages } from "./pages";
-import { toPrefixTsQuery } from "./query";
+import { prefixSearchVectorFilter, toPrefixTsQuery } from "./query";
 import {
   mergeSearchResults,
   rankSearchResults,
@@ -10,12 +10,25 @@ import {
 } from "./results";
 
 test("toPrefixTsQuery builds AND prefix terms and strips operators", () => {
+  assert.equal(toPrefixTsQuery("frac"), "frac:*");
   assert.equal(toPrefixTsQuery("Fractions Lab"), "fractions:* & lab:*");
   assert.equal(toPrefixTsQuery("  worksheet.pdf  "), "worksheet:* & pdf:*");
   assert.equal(toPrefixTsQuery("foo & bar!"), "foo:* & bar:*");
   assert.equal(toPrefixTsQuery("a"), "a:*");
   assert.equal(toPrefixTsQuery("!!!"), null);
   assert.equal(toPrefixTsQuery("   "), null);
+});
+
+test("prefix FTS uses to_tsquery (fts), not plainto_tsquery (plfts)", () => {
+  assert.deepEqual(prefixSearchVectorFilter("frac"), {
+    column: "search_vector",
+    operator: "fts(english)",
+    value: "frac:*",
+  });
+  assert.notEqual(
+    prefixSearchVectorFilter("frac")?.operator,
+    "plfts(english)",
+  );
 });
 
 test("searchResultTypeLabel covers this slice’s types", () => {

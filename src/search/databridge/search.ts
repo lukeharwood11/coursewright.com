@@ -1,6 +1,9 @@
 import { requireSupabase } from "./client";
 import { courseSearchHref, materialSearchHref } from "@/search/model/paths";
-import { searchResultLimit, toPrefixTsQuery } from "@/search/model/query";
+import {
+  prefixSearchVectorFilter,
+  searchResultLimit,
+} from "@/search/model/query";
 import type { SearchResult } from "@/search/model/results";
 
 export const searchQueryKeys = {
@@ -26,18 +29,16 @@ type MaterialHit = {
   unit_id: number | null;
 };
 
-const FTS = { config: "english" } as const;
-
 export async function searchCourses(args: FtsOptions): Promise<SearchResult[]> {
-  const tsQuery = toPrefixTsQuery(args.query);
-  if (!tsQuery) return [];
+  const fts = prefixSearchVectorFilter(args.query);
+  if (!fts) return [];
 
   const db = requireSupabase();
   const { data, error } = await db
     .from("courses")
     .select("id, title")
     .eq("organization_id", args.organizationId)
-    .textSearch("search_vector", tsQuery, FTS)
+    .filter(fts.column, fts.operator, fts.value)
     .order("title")
     .limit(searchResultLimit());
 
@@ -52,8 +53,8 @@ export async function searchCourses(args: FtsOptions): Promise<SearchResult[]> {
 }
 
 export async function searchMaterials(args: FtsOptions): Promise<SearchResult[]> {
-  const tsQuery = toPrefixTsQuery(args.query);
-  if (!tsQuery) return [];
+  const fts = prefixSearchVectorFilter(args.query);
+  if (!fts) return [];
 
   const db = requireSupabase();
   const { data, error } = await db
@@ -62,7 +63,7 @@ export async function searchMaterials(args: FtsOptions): Promise<SearchResult[]>
     .eq("organization_id", args.organizationId)
     .not("course_id", "is", null)
     .is("deleted_at", null)
-    .textSearch("search_vector", tsQuery, FTS)
+    .filter(fts.column, fts.operator, fts.value)
     .order("title")
     .limit(searchResultLimit());
 
