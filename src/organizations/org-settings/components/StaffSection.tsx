@@ -2,16 +2,15 @@ import type { FormEvent } from "react";
 import { Input } from "@/ui/Input";
 import { Button } from "@/ui/Button";
 import type { StaffInviteRole } from "@/organizations/model/role";
-import type {
-  OrgStaffMember,
-  PendingStaffInvite,
-} from "@/organizations/databridge/staffInvites";
+import type { PendingStaffInvite } from "@/organizations/databridge/staffInvites";
+import type { StaffMemberRow } from "../hooks/useOrgStaff";
 import { InviteStaffForm } from "./InviteStaffForm";
 import { PendingInviteList } from "./PendingInviteList";
 import { StaffMemberList } from "./StaffMemberList";
 
 export function StaffSection({
   canInvite,
+  canManage,
   loading,
   loadError,
   members,
@@ -23,6 +22,8 @@ export function StaffSection({
   inviting,
   copiedId,
   cancelingId,
+  changingId,
+  removingId,
   lastInviteUrl,
   lastInvite,
   onEmailChange,
@@ -30,11 +31,14 @@ export function StaffSection({
   onInvite,
   onCopy,
   onCancel,
+  onChangeRole,
+  onRemove,
 }: {
   canInvite: boolean;
+  canManage: boolean;
   loading: boolean;
   loadError: string | null;
-  members: OrgStaffMember[];
+  members: StaffMemberRow[];
   pending: PendingStaffInvite[];
   email: string;
   role: StaffInviteRole;
@@ -43,6 +47,8 @@ export function StaffSection({
   inviting: boolean;
   copiedId: number | null;
   cancelingId: number | null;
+  changingId: number | null;
+  removingId: number | null;
   lastInviteUrl: string | null;
   lastInvite: PendingStaffInvite | null;
   onEmailChange: (value: string) => void;
@@ -50,13 +56,15 @@ export function StaffSection({
   onInvite: (event: FormEvent) => void;
   onCopy: (invite: PendingStaffInvite) => void;
   onCancel: (invite: PendingStaffInvite) => void;
+  onChangeRole: (member: StaffMemberRow, nextRole: string) => void;
+  onRemove: (member: StaffMemberRow) => void;
 }) {
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
       <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Staff</h2>
       <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink-soft)]">
-        {canInvite
-          ? "Invite an owner, admin, or instructor. Copy the link and send it yourself — Course Wright doesn’t email invites yet."
+        {canManage
+          ? "Invite an owner, admin, or instructor. Change admin and instructor roles, or remove them from staff. Copy invite links and send them yourself — Course Wright doesn’t email invites yet."
           : "Owners, admins, and instructors in this organization."}
       </p>
 
@@ -70,7 +78,15 @@ export function StaffSection({
         </p>
       ) : null}
 
-      {!loading ? <StaffMemberList members={members} /> : null}
+      {!loading ? (
+        <StaffMemberList
+          members={members}
+          changingId={changingId}
+          removingId={removingId}
+          onChangeRole={onChangeRole}
+          onRemove={onRemove}
+        />
+      ) : null}
 
       {canInvite ? (
         <>

@@ -58,15 +58,15 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Marketing site** | Public home, about, pricing | shipped | Contact / privacy / terms / cookies still construction placeholders |
 | **Authentication** | Sign up, sign in | shipped | **Email (password or magic link) + Google** via **Supabase Auth**. Login has password + magic-link; signup stays Google / email OTP. Session gates live |
 | **Account settings** | Cross-org account page (`/my/settings`) | in progress | View + sign-out live; profile edit still stubbed |
-| **Organizations** | Anyone can create an org; creator is first **owner**; org picker (`/my`) | in progress | Create + list + `/my/:orgSlug` home + org settings identity live; **collapsible org sidebar**; staff home is a summary dashboard (courses, attention, this week, people); staff **invite + copy link** live; parent invites share that claim path; change/remove staff still TBD |
+| **Organizations** | Anyone can create an org; creator is first **owner**; org picker (`/my`) | in progress | Create + list + `/my/:orgSlug` home + org settings identity live; **collapsible org sidebar**; staff home is a summary dashboard (courses, attention, this week, people); staff **invite + copy link** live; parent invites share that claim path; **change/remove staff** in org settings |
 | **Org permalink** | Stable org URL (`slug`) created with the org | shipped | Create + settings change with break-links warning |
 | **Org grade scheme** | Org chooses how grades work (exact / range / custom; presets K–12, Custom) | shipped | Defaults on create; owners/admins edit in org settings |
 | **Admin invites** | Add other admins by email; those emails can be **claimed** by accounts | shipped | v0: invite owner/admin/instructor; **copy a claim link** (no email send); invitee sees pending requests after login |
 | **Student profiles** | Org-level student records — no dedicated student role required | shipped | Org roster create/edit + profile page; **multiple parent invites** + optional **student email** (same claim path). Parent invite copy-link on profile and course roster. Created when first added to a course or class; dedicated student role later (P2) |
 | **Classes** | Org-scoped **group of students** — separate from a Course | shipped | Create class + batch add/remove members. Class is a **batch preset** into course enroll (not a live link) |
 | **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | shipped | List-first org / class / course roster with **batch select** enroll/add; multiple parent invites + optional student email; parent invite is copyable claim link (no email send) |
-| **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches parent vs staff home. **P0 roles:** owner, admin, instructor, parent. Owner vs admin = billing. |
-| **Admin account management** | Admins invite, **change roles**, and **remove** admins/instructors | planned | Last owner/admin DB guard ready; no change/remove staff UI |
+| **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches parent vs staff home. **P0 roles:** owner, admin, instructor, parent. Owner vs admin = billing. Staff change/remove is **membership-only** — materials/roster stay enrollment-gated |
+| **Admin account management** | Admins invite, **change roles**, and **remove** admins/instructors | shipped | Org settings updates `memberships` only (admin ↔ instructor; remove admin/instructor). Last owner/admin blocked in DB + UI. Does **not** add a staff-role gate on materials/roster RLS. Invite/copy-link unchanged |
 | **Homework (P0)** | Dated materials in a unit — appear on parent "this week" when dates fall in Sun–Sat | shipped | `scheduled_date` on add/edit material. Parent “this week” uses unit/material dates. **Not** a separate assignment type |
 | **Course builder** | Create and organize **courses** within an org (no templates in P0) | shipped | Create, course home, units, materials (page/link/file), print/share chrome; collapsible course outline (units + materials tree) |
 | **Courses (instances)** | Runnable offerings with dates and a roster — from scratch or **copied from another course** | shipped | Create from scratch + settings + roster. Copy via Function. Catalog: **description**, **location**, **subject / area**, optional **icon** on list cards. **Templates are P1** |
@@ -142,8 +142,8 @@ Keep **Course.enrollment → student_profile** as the access gate for parents.
 | **Admins** | Same org management as owners (name, permalink, grade scheme, staff) except **billing** |
 | **More admins** | Owner/any admin adds **emails**; those people **claim** the seat with an account on that email. **v0:** copy a link (no email send); login also shows pending requests |
 | **Multiple admins** | Yes — no single-admin limit |
-| **Change staff roles** | Owners and admins can change **admin ↔ instructor** for existing staff |
-| **Remove staff** | Owners and admins can **remove** admins and instructors from the org |
+| **Change staff roles** | Owners and admins can change **admin ↔ instructor** for existing staff. Writes **`memberships.role` only**. Does **not** gate course materials or roster on staff role — families still see content via **enrollment** (and `parent_student_links` where applicable) |
+| **Remove staff** | Owners and admins can **remove** admins and instructors from the org (end that membership). Does **not** rewrite materials/roster RLS |
 | **Last owner/admin** | Cannot remove or demote the **last remaining owner or admin** (org lockout guard) |
 | **Org permalink** | On create, generate a unique **`slug`** used as the org’s permalink URL. Owners and admins may change it later; the UI **must warn** that changing the slug **breaks existing links** (no automatic redirect required in P0) |
 

@@ -10,7 +10,7 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 - Grade scheme (K–12 / Custom) and org type (co-op / micro-school)
 - Admin invites (email, copyable claim link; v0 does not send email)
 - Parent invites use the **same** `/invite/<token>` claim path (`role = parent`); create UI lives in `roster/`
-- **Staff management** — change admin ↔ instructor; remove admins/instructors (not the last owner or admin)
+- **Staff management** — change admin ↔ instructor; remove admins/instructors (not the last owner or admin). **Membership table only** — do not wire staff role into materials/roster RLS
 - Not: course builder, roster details (those are sibling domains)
 
 ## Rules
@@ -28,3 +28,4 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 - Put student roster UI here — use `roster/`.
 - Put billing UI here until P1 — use `billing/` (owner-only placeholder is OK on org settings).
 - Allow removing or demoting the last owner or admin.
+- Add a staff-role check to materials or roster RLS. Content access stays enrollment-gated (`parent_student_links` where applicable). Role change only affects who can manage the org.
