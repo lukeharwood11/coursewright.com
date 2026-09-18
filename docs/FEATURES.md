@@ -74,7 +74,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Course visibility** | **Published / unpublished** controls whether families can see the course | shipped | Unpublished: instructors/admins. Published: enrolled parents (students when that role exists). New courses start unpublished. Distinct from `status` (active / archived) |
 | **Co-teaching** | Multiple instructors per course | shipped | Course settings: owners/admins add co-teachers (RLS); instructors see the list |
 | **Units** | Materials organized in **units**; each unit may have optional dates | shipped | Course home + unit page; **courses only** in P0 |
-| **Rich materials** | **Add material** kinds: **page** / **link** / **file**; pages are ordered **blocks** | shipped | v1 kinds. Rich text `body.markdown` until canonical store is locked; video blocks are URL embeds |
+| **Rich materials** | **Add material** kinds: **page** / **link** / **file**; pages are ordered **blocks** | shipped | v1 kinds. Page editor is [Lexical](https://lexical.dev/); rich text stored as `body.lexical`. Video blocks are URL embeds |
 | **Material visibility** | **Published / unpublished** controls who can see a material | shipped | Unpublished: instructors/admins. Published: enrolled parents (students when that role exists). New materials start unpublished |
 | **Quizzes (author + print)** | Create quizzes, mark correct answers, print blank (+ instructor answer key) | planned | **Open:** quiz as block type vs separate material kind — see materials section |
 | **File sharing** | Upload and attach files; share with parents as part of course materials | shipped | File materials upload to Storage `org-files` with `files` / `file_versions` |
@@ -84,7 +84,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Families / parent directory** | Named group of **student profiles**; parents appear via `parent_student_links`; org **parent directory** | shipped | Class-mirror members. Link parent creates/reuses student links (`admin_invites` `role=parent` if no account). **Never enrollments.** `family_members.parent_user_id` unused in P0 app. Extra fields, merge/split, and invite **email send** still open. Copy-link claim lives on roster/profile. **SPA directory UI currently not routed** (schema + databridge remain) |
 | **Print materials** | One-tap print of a material, a unit, or this week's work | shipped | [PRINT](./pages/PRINT.md): `@react-pdf/renderer` + in-app preview, Download / Print. Whole-course print out of P0 |
 | **Lesson materials & planning** | Unified storage for course content, files, and plans | shipped | Course builder authoring on courses |
-| **Content versioning** | Versions of course content; who changed what; revert dangerous actions | shipped | Restore a `material_versions` snapshot from material edit; file blob revert on file materials |
+| **Content versioning** | Versions of course content; who changed what; revert dangerous actions | shipped | Restore a `material_versions` snapshot from material edit; file blob revert on file materials. Page/placement edits version only on Save when something changed |
 | **Soft deletes** | Content is never hard-deleted | shipped | Remove/restore on units and materials (`deleted_at`) |
 | **Parent invites (email)** | Invite parents by email to access shared content | shipped | v0: copy `/invite/<token>` (same path as staff); no email send. Membership + student link on claim. Unrouted family directory can also insert `admin_invites` `role=parent` when linking an email with no account |
 | **Parent access (link or account)** | Parent clicks invite link **or** signs up / logs in with the **same email** | shipped | Unified `/invite/<token>` claim; course access still requires enrollment |
@@ -407,7 +407,7 @@ Content on **courses** may use **units** for grouping (templates are **P1**). Ma
 
 ### Materials & content creation
 
-**Status:** content shape **decided**; editor canonical store and quiz placement still open.
+**Status:** content shape **decided**; rich-text store is **Lexical JSON**; quiz placement still open.
 
 **Already decided (related):** Each **course** has its **own** roster (individuals via enrollment; Class is a batch preset). Create → print does **not** require a roster. **Templates are P1** — P0 authoring is on courses only.
 
@@ -448,9 +448,9 @@ Course
 | **Quizzes — take online + autograde** | **P1** | |
 | **Forms** | **in design** | |
 
-#### Editor (still open)
+#### Editor
 
-One canonical store for rich-text blocks — Markdown, portable block JSON, or HTML from WYSIWYG? UI may offer WYSIWYG and/or Markdown either way.
+Page materials use a **Lexical** WYSIWYG editor ([lexical.dev](https://lexical.dev/)). Canonical store for rich-text blocks is the Lexical editor state in `blocks.body.lexical`. Existing `body.markdown` still loads. Video URLs stay `video` blocks (insert from the editor toolbar). Instructors save from the page header; a new `material_versions` row is written only when saved placement or page content actually changed.
 
 #### Closed workshop questions
 
@@ -460,11 +460,10 @@ One canonical store for rich-text blocks — Markdown, portable block JSON, or H
 
 #### Still open
 
-1. **Rich-text canonical store** (MD vs JSON vs HTML).
-2. **Quiz:** block on a page vs own material kind later (answers still stored for print / P1 autograde).
-3. **Video on a page:** URL embed vs uploaded file (or both).
-4. **Uploaded audio** as a later block/material kind?
-5. **Forms** — job to be done + who responds.
+1. **Quiz:** block on a page vs own material kind later (answers still stored for print / P1 autograde).
+2. **Video on a page:** URL embed vs uploaded file (or both).
+3. **Uploaded audio** as a later block/material kind?
+4. **Forms** — job to be done + who responds.
 
 ---
 
@@ -684,7 +683,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | Quiz online take + autograde | **Decided** | **P1** — uses answers stored in P0 |
 | Page as composable entity (blocks) | **Decided** | Material is the page; no separate Page table required in P0 |
 | Forms as a content kind | **In design** | Job-to-be-done + who responds TBD |
-| Rich-text block canonical store (MD / JSON / HTML) | **Open** | Editor UX may offer WYSIWYG and/or Markdown |
+| Rich-text block canonical store (MD / JSON / HTML) | **Decided** | Lexical editor state JSON in `blocks.body.lexical`; WYSIWYG on material edit |
 | Instance-only materials don't affect template | **Superseded** | **P1** — replaced by optional promote; N/A in P0 (no templates) |
 | Course summary auto-draft (instructor edits) | **Decided** | P1 only |
 | Billing in P1 | **Decided** | Course Wright → org (SaaS), not org → parent |

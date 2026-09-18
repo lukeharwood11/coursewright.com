@@ -6,8 +6,8 @@ import {
   View,
   StyleSheet,
 } from "@react-pdf/renderer";
-import { parseRichTextBody } from "@/materials/model/blocks";
 import { isPdfMime } from "@/print/model/fileKind";
+import { printSegmentsFromBlocks } from "@/materials/model/pageContent";
 import type { PrintMaterialView, PrintPacketView } from "@/print/model/previewAssets";
 
 const INK = "#1F2B24";
@@ -36,6 +36,12 @@ const styles = StyleSheet.create({
     fontFamily: "Times-Bold",
     fontSize: 18,
     marginBottom: 8,
+  },
+  heading: {
+    fontFamily: "Helvetica-Bold",
+    fontSize: 14,
+    marginBottom: 6,
+    marginTop: 4,
   },
   description: {
     color: FAINT,
@@ -142,34 +148,38 @@ function MaterialBody({ material }: { material: PrintMaterialView }) {
     return <Text style={styles.meta}>This page doesn’t have content yet.</Text>;
   }
 
+  const segments = printSegmentsFromBlocks(material.blocks);
+  if (segments.length === 0) {
+    return <Text style={styles.meta}>This page doesn’t have content yet.</Text>;
+  }
+
   let videoIndex = 0;
   return (
     <View>
-      {material.blocks.map((block, index) => {
-        if (block.kind === "rich_text") {
-          const markdown = parseRichTextBody(block.body);
+      {segments.map((segment, index) => {
+        if (segment.type === "video") {
+          const qr = material.videoQrs[videoIndex];
+          videoIndex += 1;
           return (
             <View key={index}>
-              {markdown.split(/\n+/).map((paragraph, paragraphIndex) => {
-                if (!paragraph.trim()) {
-                  return <View key={paragraphIndex} style={styles.spacer} />;
-                }
-                return (
-                  <Text key={paragraphIndex} style={styles.body}>
-                    {paragraph.replace(/^#+\s*/, "")}
-                  </Text>
-                );
-              })}
+              <Text style={styles.label}>Video</Text>
+              <UrlWithQr url={qr?.url || segment.url} qrDataUrl={qr?.dataUrl ?? null} />
             </View>
           );
         }
-        const qr = material.videoQrs[videoIndex];
-        videoIndex += 1;
+        if (segment.type === "heading") {
+          return (
+            <Text key={index} style={styles.heading}>
+              {segment.text}
+            </Text>
+          );
+        }
+        const prefix = segment.type === "listItem" ? "• " : "";
         return (
-          <View key={index}>
-            <Text style={styles.label}>Video</Text>
-            <UrlWithQr url={qr?.url || null} qrDataUrl={qr?.dataUrl ?? null} />
-          </View>
+          <Text key={index} style={styles.body}>
+            {prefix}
+            {segment.text}
+          </Text>
         );
       })}
     </View>

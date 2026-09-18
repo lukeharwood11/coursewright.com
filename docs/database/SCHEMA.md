@@ -564,7 +564,7 @@ Ordered content piece on a **page** material only (`materials.kind = page`).
 | material_id | bigint | FK → Material (`kind = page`) |
 | position | int | order within the page |
 | kind | text | **P0:** `rich_text` · `video` — extensible |
-| body | jsonb | Kind-specific payload (rich text canonical store TBD; video URL or `file_id`) |
+| body | jsonb | Kind-specific payload. Rich text: Lexical editor JSON in `lexical` (legacy `markdown` still accepted). Video: URL |
 | file_id | bigint | FK → File, nullable — when block references an uploaded file |
 | copied_from_id | bigint | FK → Block, nullable — lineage on course-from-course / template copy |
 | deleted_at | timestamptz | soft delete |
@@ -573,7 +573,7 @@ Ordered content piece on a **page** material only (`materials.kind = page`).
 
 | kind | Payload (sketch) |
 |------|------------------|
-| `rich_text` | Canonical document (Markdown / JSON / HTML — **open**) |
+| `rich_text` | Lexical editor state (`body.lexical`); legacy `body.markdown` still reads |
 | `video` | URL embed and/or uploaded `file_id` — **open** which modes |
 
 **Not v1 material kinds:** quiz (shape open), audio. External URLs at the unit level use material `kind = link`, not a link block (unless we later add link blocks inside pages — TBD).
@@ -665,7 +665,7 @@ Family cross-org management (extends P0 org Family)
 | Course ↔ Class enrollment model | Enrollment, Class, Course roster UX | **Workshop** — keep student↔course enrollment until decided |
 | `copied_from_course_id` on Course | Origin tracking for course-from-course | **Migrated** (informational; no sync) |
 | Add material kinds page · link · file | Material.kind | **Decided** (v1) |
-| Rich-text block canonical store | Block.body | **Open** |
+| Rich-text block canonical store | Block.body | **Lexical JSON** (`body.lexical`) |
 | Video block: URL vs uploaded file | Block, File, players | **Open** |
 | Quiz / Form shape | Block kind vs later material kind | Not in v1 Add menu; Form unused |
 | Autograde answer storage + attempt model | QuizAttempt (phase TBD) | P1 |

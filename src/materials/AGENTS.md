@@ -6,7 +6,7 @@ Lesson materials: **page** / **link** / **file**, plus ordered **blocks** on pag
 
 - Material placement (title, **description**, kind, optional `unit_id`, dates, **visibility**, important now, sync/override)
 - **v1 Add material:** `page` · `link` · `file` (into a unit or top-level)
-- **page** → ordered **blocks** (`rich_text`, `video`, …)
+- **page** → ordered **blocks** (`rich_text`, `video`, …); rich text is authored in [Lexical](https://lexical.dev/) and stored as editor JSON
 - **link** → `url`; **file** → `file_id` (org File + versions)
 - Soft delete, versions, revert UX
 - Dating: optional material `scheduled_date`; optional unit range only when `unit_id` is set
@@ -16,7 +16,7 @@ Lesson materials: **page** / **link** / **file**, plus ordered **blocks** on pag
 
 - `unit_id` is **nullable** — null = top-level on the course (shown above units).
 - Do **not** invent quiz/form schema beyond FEATURES — quiz is **not** in the v1 Add material menu.
-- Page content lives in `blocks` rows — do not dump the whole page into `materials.body`.
+- Page content lives in `blocks` rows — do not dump the whole page into `materials.body`. Rich-text `body.lexical` is the Lexical editor state; keep video URLs as `video` blocks.
 - Generous file types/sizes for `kind = file` — keep open.
 - Versioning + soft deletes are P0 — never hard-delete user content from the app.
 - Replacing a file must create a `FileVersion` + new Storage blob; revert restores a prior blob.

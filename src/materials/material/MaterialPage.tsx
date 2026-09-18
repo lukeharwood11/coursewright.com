@@ -6,16 +6,17 @@ import { Badge } from "@/ui/Badge";
 import { Button, ButtonLink } from "@/ui/Button";
 import { formatIsoDate } from "@/courses/model/dates";
 import { coursePath } from "@/courses/model/paths";
-import { parseRichTextBody, parseVideoBody, youtubeEmbedSrc } from "@/materials/model/blocks";
 import { materialKindLabel } from "@/materials/model/kind";
 import { materialEditPath, materialPrintPath } from "@/materials/model/paths";
 import { isPublished } from "@/materials/model/visibility";
+import { pageHasContent } from "@/materials/model/pageContent";
 import { resourceShareMessage } from "@/sharing/model/copyLink";
 import { createResourceShareLink } from "@/sharing/databridge/shareLinks";
 import { unitPath } from "@/units/model/paths";
 import { useMaterial } from "./hooks/useMaterial";
 import { FileMaterialBody } from "./components/FileMaterialBody";
 import { VisibilityBanner } from "./components/VisibilityBanner";
+import { PageContentView } from "./components/PageContentView";
 
 export function MaterialPage() {
   const page = useMaterial();
@@ -260,54 +261,19 @@ function MaterialBody({
     );
   }
 
-  if (page.blocks.length === 0) {
+  if (page.blocks.length === 0 || !pageHasContent(page.blocks)) {
     return (
       <p className="text-[14.5px] text-[var(--ink-soft)]">
-        This page doesn’t have any blocks yet.
+        This page doesn’t have any content yet.
         {page.canEdit ? " Open Edit to add text or a video." : ""}
       </p>
     );
   }
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
-      {page.blocks.map((block) => (
-        <BlockView key={block.id} kind={block.kind} body={block.body} />
-      ))}
-    </div>
-  );
-}
-
-function BlockView({ kind, body }: { kind: "rich_text" | "video"; body: unknown }) {
-  if (kind === "video") {
-    const url = parseVideoBody(body);
-    const embed = youtubeEmbedSrc(url);
-    if (embed) {
-      return (
-        <iframe
-          title="Video"
-          className="aspect-video w-full rounded-[10px] border border-[var(--line-soft)]"
-          src={embed}
-          allow="fullscreen"
-        />
-      );
-    }
-    return url ? (
-      <a
-        href={url}
-        className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-        target="_blank"
-        rel="noreferrer"
-      >
-        {url}
-      </a>
-    ) : null;
-  }
-
-  const markdown = parseRichTextBody(body);
-  return (
-    <div className="whitespace-pre-wrap text-[14.5px] leading-relaxed text-[var(--ink)]">
-      {markdown}
-    </div>
+    <PageContentView
+      blocks={page.blocks}
+      viewKey={`${material.id}-${page.blocks.map((block) => block.id).join("-")}`}
+    />
   );
 }

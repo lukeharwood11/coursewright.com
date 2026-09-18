@@ -1,5 +1,5 @@
 import QRCode from "qrcode";
-import { parseVideoBody } from "@/materials/model/blocks";
+import { videoUrlsFromBlocks } from "@/materials/model/pageContent";
 import { isImageMime } from "@/print/model/fileKind";
 import type { PrintMaterial, PrintPacket } from "@/print/model/packet";
 
@@ -46,9 +46,7 @@ export async function toPrintMaterialView(
       ? bytesToDataUrl(material.file.bytes, material.file.mimeType)
       : null;
   const videoQrs: PrintMaterialView["videoQrs"] = [];
-  for (const block of material.blocks) {
-    if (block.kind !== "video") continue;
-    const url = parseVideoBody(block.body);
+  for (const url of videoUrlsFromBlocks(material.blocks)) {
     videoQrs.push({
       url,
       dataUrl: url ? await qrDataUrl(url) : null,

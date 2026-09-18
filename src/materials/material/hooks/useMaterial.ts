@@ -166,6 +166,7 @@ export function useMaterial() {
     importantNow,
     versions: versionsQuery.data ?? [],
     loading: materialQuery.isLoading || courseQuery.isLoading,
+    blocksLoading: blocksQuery.isLoading,
     error: materialQuery.error?.message ?? courseQuery.error?.message ?? null,
     notFound: !materialQuery.isLoading && (!material || !belongsHere),
     toggleImportant,
