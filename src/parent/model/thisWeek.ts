@@ -5,6 +5,12 @@ function toIsoDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+export function localIsoDate(now = new Date()): string {
+  const date = new Date(now);
+  date.setHours(0, 0, 0, 0);
+  return toIsoDate(date);
+}
+
 function formatShort(date: Date): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }

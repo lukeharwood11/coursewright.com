@@ -83,9 +83,10 @@ export async function loadUnitPrintPacket(unitId: number): Promise<PrintPacket |
 export async function loadWeekPrintPacket(args: {
   organizationId: number;
   userId: string;
+  studentIds?: number[] | null;
 }): Promise<PrintPacket> {
   const dashboard = await loadParentDashboard(args.organizationId, args.userId);
-  const refs = thisWeekPrintRefs(dashboard);
+  const refs = thisWeekPrintRefs(dashboard, args.studentIds);
   const printed: PrintMaterial[] = [];
   for (const ref of refs) {
     const material = await getMaterial(ref.materialId);

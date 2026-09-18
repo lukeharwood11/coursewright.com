@@ -8,6 +8,7 @@ export type StudentSummary = {
   name: string;
   gradeLevel: string | null;
   parentEmail: string | null;
+  studentEmail: string | null;
 };
 
 export const studentQueryKeys = {
@@ -15,25 +16,28 @@ export const studentQueryKeys = {
   detail: (id: number) => ["students", "detail", id] as const,
 };
 
-type StudentRow = {
+export type StudentRow = {
   id: number;
   organization_id: number;
   name: string;
   grade_level: string | null;
   parent_email: string | null;
+  student_email: string | null;
 };
 
-function toStudentSummary(row: StudentRow): StudentSummary {
+export function toStudentSummary(row: StudentRow): StudentSummary {
   return {
     id: row.id,
     organizationId: row.organization_id,
     name: row.name,
     gradeLevel: row.grade_level,
     parentEmail: row.parent_email,
+    studentEmail: row.student_email,
   };
 }
 
-const STUDENT_COLUMNS = "id, organization_id, name, grade_level, parent_email";
+export const STUDENT_COLUMNS =
+  "id, organization_id, name, grade_level, parent_email, student_email";
 
 export async function listStudents(
   organizationId: number,
@@ -93,6 +97,7 @@ export async function createStudents(
         organization_id: organizationId,
         name: input.name,
         parent_email: input.parentEmail,
+        student_email: input.studentEmail,
         grade_level: input.gradeLevel,
         created_via_course_id: createdViaCourseId ?? null,
       })),
@@ -116,6 +121,7 @@ export async function updateStudent(
     .update({
       name: input.name,
       parent_email: input.parentEmail,
+      student_email: input.studentEmail,
       grade_level: input.gradeLevel,
     })
     .eq("id", id)

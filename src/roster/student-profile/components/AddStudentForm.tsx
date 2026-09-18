@@ -5,6 +5,7 @@ import { StudentProfileFields } from "@/roster/student-profile/components/Studen
 export function AddStudentForm({
   name,
   parentEmail,
+  studentEmail,
   gradeLevel,
   gradeLabels,
   error,
@@ -12,11 +13,13 @@ export function AddStudentForm({
   submitLabel,
   onNameChange,
   onParentEmailChange,
+  onStudentEmailChange,
   onGradeLevelChange,
   onSubmit,
 }: {
   name: string;
   parentEmail: string;
+  studentEmail: string;
   gradeLevel: string;
   gradeLabels: string[];
   error: string | null;
@@ -24,6 +27,7 @@ export function AddStudentForm({
   submitLabel: string;
   onNameChange: (value: string) => void;
   onParentEmailChange: (value: string) => void;
+  onStudentEmailChange: (value: string) => void;
   onGradeLevelChange: (value: string) => void;
   onSubmit: (event: FormEvent) => void;
 }) {
@@ -32,11 +36,13 @@ export function AddStudentForm({
       <StudentProfileFields
         name={name}
         parentEmail={parentEmail}
+        studentEmail={studentEmail}
         gradeLevel={gradeLevel}
         gradeLabels={gradeLabels}
         disabled={saving}
         onNameChange={onNameChange}
         onParentEmailChange={onParentEmailChange}
+        onStudentEmailChange={onStudentEmailChange}
         onGradeLevelChange={onGradeLevelChange}
       />
       {error ? (

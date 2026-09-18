@@ -90,7 +90,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Parent access (link or account)** | Parent clicks invite link **or** signs up / logs in with the **same email** | shipped | Unified `/invite/<token>` claim; course access still requires enrollment |
 | **Parent org membership** | Parent becomes a parent in the org when they claim an invite | shipped | Membership created on claim; materials still gated on enrollment + published course |
 | **Share resources with parents** | Share course content and files with enrolled families | shipped | Copy material URL (account required). Dedicated share-entry path still TBD |
-| **Parent dashboard** | This calendar week's **dated unit materials** and **Important now** | shipped | Open + print wired to course/material/print routes |
+| **Parent dashboard** | This calendar week's dated materials, **Up next**, **Important now**, student tags, **Print this week** for active students | in progress | Parent/student home; student login still uses parent claim path |
 | **Resource links** | Send a parent a link that opens a **specific resource** (after they log in) | shipped | Copy signed-in material URL; `share_links` row recorded. Public entry path still TBD |
 | **Instructor "important now"** | Flag items needing immediate parent attention | shipped | Toggle on material; parent home surfaces it |
 
@@ -106,7 +106,7 @@ Roster exists at **three** levels: **organization** (student profiles, staff), *
 | **Classes** | Admin, instructor | Named groups of student profiles — **not** a course; no materials |
 | **Add student via course / class** | **Instructor** | First-time add creates `student_profile` in the org; **batch create** (paste names / multi-row) supported |
 | **Course roster** | **Instructor** (their courses) | Enroll **individuals** (multi-select); optional **Class preset** checks that class’s members once |
-| **Parent linkage** | Admin, instructor | Associate parent email with each student profile |
+| **Parent linkage** | Admin, instructor | Associate **one or more** parent emails with each student profile |
 | **Parent invites** | Admin, instructor | Copy a claim link from roster or student profile (**v0: no email send**) |
 | **Staff / instructor assignment** | Owner, admin | Assign instructors to courses |
 | **Admins** | Owner, admin | Multiple admins; invite by email (claimable) |
@@ -153,19 +153,18 @@ Students are represented as **`student_profile`** records in the organization �
 
 | Rule | Detail |
 |------|--------|
-| **No login** | Student profiles do not require authentication in P0 (or P1) |
+| **No student role yet** | Student profiles do not have a dedicated membership role in P0/P1. Optional **student email** can be invited with the same parent claim path so that person sees this one student's work |
 | **Created on first enrollment** | When an instructor adds a student to a course and they don't exist in the org yet, a `student_profile` is created automatically |
-| **Future accounts (P2)** | Student user accounts can be linked to an existing `student_profile` — profile stays the canonical record |
+| **Future accounts (P2)** | A dedicated student role can be linked to an existing `student_profile` via `user_id` — profile stays the canonical record |
 
 **Fields:**
 
 | Field | Required | Notes |
 |-------|----------|-------|
 | **Name** | Yes | That's the only required field |
-| **Parent email** | Optional | Used for parent invites / linkage when provided |
+| **Parent emails** | Optional | One or more. First email may be stored on create; more parents are invited from the student profile |
+| **Student email** | Optional | Contact email for the student. Staff can copy an invite so that email can sign in and see this student's work (parent claim path) |
 | **Grade level** | Optional | Value depends on **org grade scheme** — exact grade or range |
-
-Nothing else on the profile in P0.
 
 ### Org grade scheme (P0)
 
@@ -306,7 +305,7 @@ The smallest complete loop in P0: **create materials → print them (or send a l
 | **Print** | Anyone looking at materials they can access | One **Print** action → [PRINT](./pages/PRINT.md) (`…/print`) → **generated PDF preview** → Download or Print | **The P0 bar.** Must feel instant |
 | **File sharing** | Instructors → enrolled parents | Files live on materials; parents open/download from the course / dashboard | Same access as other materials |
 | **Resource link** | Instructor sends; parent opens | Link opens **that** material after login | Account required in P0 |
-| **Parent dashboard** | Enrolled parent | This week + important now; **Print** on a material or on this week | Same print bar as creator |
+| **Parent dashboard** | Enrolled parent (or invited student email) | Up next + important now + this week; student tags; **Print** on a material or on this week for **active** students | Same print bar as creator |
 
 **Print grain (P0):**
 
@@ -314,7 +313,7 @@ The smallest complete loop in P0: **create materials → print them (or send a l
 |--------|--------|----------------|
 | **Print** (on a material) | That material — in-app text/lesson plan in a print layout; files open in a print-ready view (PDF prints natively) | Creator course, parent dashboard, resource page |
 | **Print unit** | The unit as one continuous packet (materials in order) | Creator course (unit), parent view of that unit |
-| **Print this week** | This Sunday–Saturday week's dated materials (and important now, if any) | Parent dashboard |
+| **Print this week** | This Sunday–Saturday week's dated materials (and important now, if any) for **active** students on the parent home | Parent dashboard |
 
 **Not P0:** Print whole course.
 
@@ -375,9 +374,13 @@ Do **not** ship a separate “Export” product name in P0. Print *is* the path 
 
 | Layer | Phase | Content |
 |-------|-------|---------|
+| **Up next** | P0 | Soonest dated material **on or after today** (material `scheduled_date`, else unit start) among active students |
+| **(C) Important now** | P0 | Instructor-flagged items needing attention (courses of active students) |
 | **(A) This week** | P0 | **Dated materials** in units for the **current calendar week (Sunday–Saturday)** — **Print this week** is a first-class action |
 | **(B) Summary** | P1 | System-drafted overview; instructor can edit |
-| **(C) Important now** | P0 | Instructor-flagged items needing attention |
+| **Student tags** | P0 | When a parent has **more than one** student, tags at the top toggle who is active. Deselecting a student hides their work. One student (or a student viewing themselves) skips the tags. |
+
+**Student view:** Same home as a parent, without multi-student tags/sections. Optional student email is invited with the parent claim path so that person only sees that one student. Dedicated student membership role remains **P2**.
 
 **Links parents can receive:**
 
@@ -591,7 +594,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 ## Explicitly out of scope (for now)
 
 - **Native mobile apps** (iOS / Android) — web only
-- **Student user accounts** — deferred to P2; P0/P1 use `student_profile` only (no login)
+- **Student user accounts** — dedicated student role deferred to P2; P0 can invite optional student email via the parent claim path so that person sees that one student
 - **Full parent family management across orgs** — deferred to P2 (org-scoped Family / parent directory is **P0**)
 - **Orgs collecting tuition from parents** — future; Course Wright bills orgs first
 - **Print whole course** — initial release is material / unit / this week only

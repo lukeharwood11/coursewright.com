@@ -1,5 +1,5 @@
 import { supabase } from "@/infrastructure/supabase/client";
-import { calendarWeekContaining } from "@/parent/model/thisWeek";
+import { calendarWeekContaining, localIsoDate } from "@/parent/model/thisWeek";
 import { buildParentDashboard } from "@/parent/model/dashboard";
 import type { ParentDashboard, ParentDashboardSource } from "@/parent/model/dashboard";
 
@@ -28,6 +28,7 @@ export async function loadParentDashboard(
 ): Promise<ParentDashboard> {
   const db = requireSupabase();
   const week = calendarWeekContaining();
+  const today = localIsoDate();
 
   const { data: links, error: linksError } = await db
     .from("parent_student_links")
@@ -40,6 +41,7 @@ export async function loadParentDashboard(
   if (studentIds.length === 0) {
     return buildParentDashboard({
       week,
+      today,
       students: [],
       enrollments: [],
       materials: [],
@@ -140,6 +142,7 @@ export async function loadParentDashboard(
 
   return buildParentDashboard({
     week,
+    today,
     students: (studentsResult.data ?? []).map((row) => ({
       id: row.id,
       name: row.name,

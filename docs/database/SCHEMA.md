@@ -359,20 +359,21 @@ Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor
 
 ### StudentProfile
 
-Org-level student record. **No login in P0/P1.**
+Org-level student record. **No dedicated student membership role in P0/P1.** Optional `student_email` may be invited with the parent claim path so that person sees this student's work.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
 | name | text | **Required** — only required field |
-| parent_email | text | **Optional** — for parent invite / linkage when provided |
+| parent_email | text | **Optional** — first parent email for create/search; more parents via invites + `ParentStudentLink` |
+| student_email | text | **Optional** — student contact email; invite uses parent claim path (student role is P2) |
 | grade_level | text | **Optional** — must be in org `grade_labels` when set |
 | user_id | uuid | FK → User, **nullable** — linked in P2 when student gets an account |
 | created_at | timestamptz | |
 | created_via_course_id | bigint | FK → Course, nullable — course that triggered first enrollment |
 
-No other student-profile fields in P0.
+No other student-profile fields in P0 besides optional parent/student emails and grade.
 
 ### Family
 

@@ -4,8 +4,8 @@ Parent dashboard: usability anchor. This week + important now.
 
 ## Scope
 
-- Parent home: week range (Sun–Sat), important now, per-student materials
-- **Print this week** + Print per material (compose `print/`)
+- Parent home: week range (Sun–Sat), **Up next**, important now, student tags, per-student materials
+- **Print this week** for **active** students + Print per material (compose `print/`)
 - Simpler than instructor UI — always
 - `model/` + `databridge/` for this-week data; org home (`organizations/org-home`) renders the parent view
 

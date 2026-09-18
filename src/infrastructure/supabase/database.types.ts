@@ -1135,6 +1135,7 @@ export type Database = {
           organization_id: number
           parent_email: string | null
           search_vector: unknown
+          student_email: string | null
           updated_at: string
           user_id: string | null
         }
@@ -1147,6 +1148,7 @@ export type Database = {
           organization_id: number
           parent_email?: string | null
           search_vector?: unknown
+          student_email?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -1159,6 +1161,7 @@ export type Database = {
           organization_id?: number
           parent_email?: string | null
           search_vector?: unknown
+          student_email?: string | null
           updated_at?: string
           user_id?: string | null
         }
