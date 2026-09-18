@@ -5,6 +5,9 @@ import {
   Text,
   View,
   StyleSheet,
+  Svg,
+  Rect,
+  Path,
 } from "@react-pdf/renderer";
 import { isPdfMime } from "@/print/model/fileKind";
 import { pageHasQuiz, printSegmentsFromBlocks } from "@/materials/model/pageContent";
@@ -82,6 +85,27 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#DEDACB",
   },
+  choiceRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+  },
+  checkbox: {
+    width: 13,
+    height: 13,
+    marginTop: 1.5,
+    marginRight: 8,
+  },
+  choiceBody: {
+    flexGrow: 1,
+    flexShrink: 1,
+    fontSize: 12,
+    lineHeight: 1.4,
+  },
+  correctLabel: {
+    color: FAINT,
+    fontSize: 11,
+  },
 });
 
 function Header({
@@ -126,6 +150,36 @@ function UrlWithQr({ url, qrDataUrl }: { url: string | null; qrDataUrl: string |
   );
 }
 
+/** Drawn square — avoids Helvetica-missing Unicode and janky `[ ]` / `[X]` text. */
+function PrintCheckbox({ checked }: { checked: boolean }) {
+  return (
+    <View style={styles.checkbox}>
+      <Svg width="13" height="13" viewBox="0 0 13 13">
+        <Rect
+          x="0.75"
+          y="0.75"
+          width="11.5"
+          height="11.5"
+          rx="1.25"
+          stroke={INK}
+          strokeWidth="1.25"
+          fill={checked ? INK : "#FFFFFF"}
+        />
+        {checked ? (
+          <Path
+            d="M3.2 6.6 L5.4 8.8 L9.8 4.2"
+            stroke="#FFFFFF"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+        ) : null}
+      </Svg>
+    </View>
+  );
+}
+
 function QuizPrint({
   quiz,
   includeAnswerKey,
@@ -135,20 +189,35 @@ function QuizPrint({
 }) {
   return (
     <View style={styles.quiz} wrap={false}>
-      {quizPrintLines(quiz, includeAnswerKey).map((line) => (
-        <Text
-          key={line.id}
-          style={
-            line.tone === "label"
-              ? styles.label
-              : line.tone === "meta"
-                ? styles.meta
-                : styles.body
-          }
-        >
-          {line.text}
-        </Text>
-      ))}
+      {quizPrintLines(quiz, includeAnswerKey).map((line) => {
+        if (line.kind === "choice") {
+          return (
+            <View key={line.id} style={styles.choiceRow} wrap={false}>
+              <PrintCheckbox checked={line.checked} />
+              <Text style={styles.choiceBody}>
+                {line.letter}. {line.text}
+                {line.showCorrectLabel ? (
+                  <Text style={styles.correctLabel}> (correct)</Text>
+                ) : null}
+              </Text>
+            </View>
+          );
+        }
+        return (
+          <Text
+            key={line.id}
+            style={
+              line.tone === "label"
+                ? styles.label
+                : line.tone === "meta"
+                  ? styles.meta
+                  : styles.body
+            }
+          >
+            {line.text}
+          </Text>
+        );
+      })}
     </View>
   );
 }

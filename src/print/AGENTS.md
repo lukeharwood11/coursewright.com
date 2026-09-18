@@ -16,7 +16,7 @@ One-tap print: material, unit, this week. **Client-generated PDF** with in-app p
 
 - **`@react-pdf/renderer`**: ink layout (page / link / cover / images / QR). **`pdf-lib`**: pass through or append original PDF files in a packet.
 - Preview is the generated (or attached) PDF in an iframe. **Download** saves that blob; **Print** prints that iframe.
-- Map blocks / link / file kinds in `model/`; document tree lives in `print/components/PacketDocument.tsx`; `print/hooks/renderPrintPdf.tsx` turns it into a blob. Page quizzes print on the whole page: staff packets include the answer key; parent packets are questions only.
+- Map blocks / link / file kinds in `model/`; document tree lives in `print/components/PacketDocument.tsx`; `print/hooks/renderPrintPdf.tsx` turns it into a blob. Page quizzes print on the whole page: staff packets include the answer key; parent packets are questions only. Multiple-choice choices use drawn SVG checkbox squares (Helvetica-safe), not Unicode bullets or `[ ]`/`[X]` text.
 - If `kind = file` and the blob is already PDF, preview that file. JPEG/PNG files are placed on a generated page.
 - No `PrintJob` table — generate on the fly.
 - Entry points: parent home, course, unit, material — labels **Print** / **Print unit** / **Print this week**.
