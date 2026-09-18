@@ -57,8 +57,8 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 |---------|-------------|--------|-------|
 | **Marketing site** | Public home, about, pricing | shipped | Contact / privacy / terms / cookies still construction placeholders |
 | **Authentication** | Sign up, sign in | shipped | **Email (password or magic link) + Google** via **Supabase Auth**. Login has password + magic-link; signup stays Google / email OTP. Session gates live |
-| **Account settings** | Cross-org account page (`/my/settings`) | in progress | View + sign-out live; profile edit still stubbed |
-| **Organizations** | Anyone can create an org; creator is first **owner**; org picker (`/my`) | in progress | Create + list + `/my/:orgSlug` home + org settings identity live; **collapsible org sidebar**; staff home is a summary dashboard (courses, attention, this week, people); staff **invite + copy link** live; parent invites share that claim path; **change/remove staff** in org settings |
+| **Account settings** | Cross-org account page (`/my/settings`) | shipped | View + **edit display name** (`profiles.name`) + sign-out. Email is read-only (auth-owned). Avatar, Google link management, and preferences still TBD |
+| **Organizations** | Anyone can create an org; creator is first **owner**; org picker (`/my`) | shipped | Create + list + `/my/:orgSlug` home + org settings (identity, permalink, grade scheme); **collapsible org sidebar**; staff home dashboard; staff **invite + copy link**; **change/remove staff** in org settings. Billing remains P1 |
 | **Org permalink** | Stable org URL (`slug`) created with the org | shipped | Create + settings change with break-links warning |
 | **Org grade scheme** | Org chooses how grades work (exact / range / custom; presets K–12, Custom) | shipped | Defaults on create; owners/admins edit in org settings |
 | **Admin invites** | Add other admins by email; those emails can be **claimed** by accounts | shipped | v0: invite owner/admin/instructor; **copy a claim link** (no email send); invitee sees pending requests after login |
