@@ -42,17 +42,32 @@ test("student print lines hide answers; staff print lines include the key", () =
       { id: "b", text: "4", correct: true },
     ],
   });
-  const student = quizPrintLines(quiz, false)
+  const student = quizPrintLines(quiz, false);
+  const staff = quizPrintLines(quiz, true);
+  const studentText = student
+    .filter((line) => line.kind === "text")
     .map((line) => line.text)
     .join("\n");
-  const staff = quizPrintLines(quiz, true)
+  const staffText = staff
+    .filter((line) => line.kind === "text")
     .map((line) => line.text)
     .join("\n");
-  assert.match(student, /What is 2\+2\?/);
-  assert.match(student, /\[ \] A\. 3/);
-  assert.match(student, /\[ \] B\. 4/);
-  assert.doesNotMatch(student, /correct|Answer key/i);
-  assert.match(staff, /Answer key/);
-  assert.match(staff, /\[X\] B\. 4 {2}\(correct\)/);
-  assert.match(staff, /Correct: B/);
+  const studentChoices = student.filter((line) => line.kind === "choice");
+  const staffChoices = staff.filter((line) => line.kind === "choice");
+
+  assert.match(studentText, /What is 2\+2\?/);
+  assert.equal(studentChoices.length, 2);
+  assert.equal(studentChoices[0]?.letter, "A");
+  assert.equal(studentChoices[0]?.text, "3");
+  assert.equal(studentChoices[0]?.checked, false);
+  assert.equal(studentChoices[1]?.letter, "B");
+  assert.equal(studentChoices[1]?.text, "4");
+  assert.equal(studentChoices[1]?.checked, false);
+  assert.doesNotMatch(studentText, /correct|Answer key/i);
+
+  assert.match(staffText, /Answer key/);
+  assert.equal(staffChoices[0]?.checked, false);
+  assert.equal(staffChoices[1]?.checked, true);
+  assert.equal(staffChoices[1]?.showCorrectLabel, true);
+  assert.match(staffText, /Correct: B/);
 });

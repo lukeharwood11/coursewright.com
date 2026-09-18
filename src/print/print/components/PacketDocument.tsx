@@ -5,6 +5,9 @@ import {
   Text,
   View,
   StyleSheet,
+  Svg,
+  Rect,
+  Path,
 } from "@react-pdf/renderer";
 import { isPdfMime } from "@/print/model/fileKind";
 import { pageHasQuiz, printSegmentsFromBlocks } from "@/materials/model/pageContent";
@@ -24,10 +27,39 @@ const styles = StyleSheet.create({
     lineHeight: 1.4,
     padding: 54,
   },
+  brandRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    marginBottom: 4,
+  },
   brand: {
     color: FAINT,
     fontSize: 9,
-    marginBottom: 8,
+  },
+  brandRight: {
+    color: FAINT,
+    fontSize: 9,
+    textAlign: "right",
+  },
+  metaRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    marginBottom: 4,
+    gap: 12,
+  },
+  metaLeft: {
+    color: FAINT,
+    fontSize: 11,
+    flexGrow: 1,
+    flexShrink: 1,
+  },
+  metaRight: {
+    color: FAINT,
+    fontSize: 11,
+    textAlign: "right",
+    flexShrink: 1,
   },
   meta: {
     color: FAINT,
@@ -37,7 +69,7 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: "Times-Bold",
     fontSize: 18,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   heading: {
     fontFamily: "Helvetica-Bold",
@@ -48,7 +80,7 @@ const styles = StyleSheet.create({
   description: {
     color: FAINT,
     fontSize: 11,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   body: {
     fontSize: 12,
@@ -82,6 +114,27 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#DEDACB",
   },
+  choiceRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+  },
+  checkbox: {
+    width: 13,
+    height: 13,
+    marginTop: 1.5,
+    marginRight: 8,
+  },
+  choiceBody: {
+    flexGrow: 1,
+    flexShrink: 1,
+    fontSize: 12,
+    lineHeight: 1.4,
+  },
+  correctLabel: {
+    color: FAINT,
+    fontSize: 11,
+  },
 });
 
 function Header({
@@ -91,22 +144,28 @@ function Header({
   packet: PrintPacketView;
   material: PrintMaterialView;
 }) {
+  const showAnswerKey =
+    Boolean(packet.includeAnswerKey) && pageHasQuiz(material.blocks);
+  const contextRight = (material.contextLines ?? []).filter(Boolean).join(" · ") || null;
+  const showPacketTitle = Boolean(packet.title && packet.title !== material.title);
   return (
     <View>
-      <Text style={styles.brand}>Course Wright</Text>
-      {packet.subtitle ? <Text style={styles.meta}>{packet.subtitle}</Text> : null}
-      {packet.title && packet.title !== material.title ? (
-        <Text style={styles.meta}>{packet.title}</Text>
+      <View style={styles.brandRow}>
+        <Text style={styles.brand}>Course Wright</Text>
+        {showAnswerKey ? <Text style={styles.brandRight}>Answer key</Text> : null}
+      </View>
+      {packet.subtitle || contextRight ? (
+        <View style={styles.metaRow}>
+          {packet.subtitle ? (
+            <Text style={styles.metaLeft}>{packet.subtitle}</Text>
+          ) : (
+            <View />
+          )}
+          {contextRight ? <Text style={styles.metaRight}>{contextRight}</Text> : null}
+        </View>
       ) : null}
-      {(material.contextLines ?? []).map((line) => (
-        <Text key={line} style={styles.meta}>
-          {line}
-        </Text>
-      ))}
+      {showPacketTitle ? <Text style={styles.meta}>{packet.title}</Text> : null}
       <Text style={styles.title}>{material.title}</Text>
-      {packet.includeAnswerKey && pageHasQuiz(material.blocks) ? (
-        <Text style={styles.meta}>Answer key</Text>
-      ) : null}
       {material.description ? (
         <Text style={styles.description}>{material.description}</Text>
       ) : null}
@@ -126,6 +185,36 @@ function UrlWithQr({ url, qrDataUrl }: { url: string | null; qrDataUrl: string |
   );
 }
 
+/** Drawn square — avoids Helvetica-missing Unicode and janky `[ ]` / `[X]` text. */
+function PrintCheckbox({ checked }: { checked: boolean }) {
+  return (
+    <View style={styles.checkbox}>
+      <Svg width="13" height="13" viewBox="0 0 13 13">
+        <Rect
+          x="0.75"
+          y="0.75"
+          width="11.5"
+          height="11.5"
+          rx="1.25"
+          stroke={INK}
+          strokeWidth="1.25"
+          fill={checked ? INK : "#FFFFFF"}
+        />
+        {checked ? (
+          <Path
+            d="M3.2 6.6 L5.4 8.8 L9.8 4.2"
+            stroke="#FFFFFF"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+        ) : null}
+      </Svg>
+    </View>
+  );
+}
+
 function QuizPrint({
   quiz,
   includeAnswerKey,
@@ -135,20 +224,35 @@ function QuizPrint({
 }) {
   return (
     <View style={styles.quiz} wrap={false}>
-      {quizPrintLines(quiz, includeAnswerKey).map((line) => (
-        <Text
-          key={line.id}
-          style={
-            line.tone === "label"
-              ? styles.label
-              : line.tone === "meta"
-                ? styles.meta
-                : styles.body
-          }
-        >
-          {line.text}
-        </Text>
-      ))}
+      {quizPrintLines(quiz, includeAnswerKey).map((line) => {
+        if (line.kind === "choice") {
+          return (
+            <View key={line.id} style={styles.choiceRow} wrap={false}>
+              <PrintCheckbox checked={line.checked} />
+              <Text style={styles.choiceBody}>
+                {line.letter}. {line.text}
+                {line.showCorrectLabel ? (
+                  <Text style={styles.correctLabel}> (correct)</Text>
+                ) : null}
+              </Text>
+            </View>
+          );
+        }
+        return (
+          <Text
+            key={line.id}
+            style={
+              line.tone === "label"
+                ? styles.label
+                : line.tone === "meta"
+                  ? styles.meta
+                  : styles.body
+            }
+          >
+            {line.text}
+          </Text>
+        );
+      })}
     </View>
   );
 }
