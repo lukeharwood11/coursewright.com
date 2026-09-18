@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProfile } from "@/auth/api/profiles";
+import { getProfile, profileQueryKeys } from "@/auth/api/profiles";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { courseQueryKeys, listCourses } from "@/courses/databridge/courses";
 import {
@@ -23,7 +23,7 @@ export function useOrgShellData(orgSlug: string | undefined) {
   });
 
   const profileQuery = useQuery({
-    queryKey: ["profiles", user.id],
+    queryKey: profileQueryKeys.detail(user.id),
     queryFn: () => getProfile(user.id),
   });
 
