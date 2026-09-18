@@ -44,17 +44,41 @@ export function formatMaterialDate(isoDate: string): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-export function isInCalendarWeek(
+function dateInWeek(week: CalendarWeek, isoDate: string): boolean {
+  return isoDate >= week.start && isoDate <= week.end;
+}
+
+/** Assignment date for This week: scheduled_date, else unit range overlap. */
+export function isAssignedInCalendarWeek(
   week: CalendarWeek,
   scheduledDate: string | null,
   unitStart: string | null,
   unitEnd: string | null,
 ): boolean {
-  if (scheduledDate) {
-    return scheduledDate >= week.start && scheduledDate <= week.end;
-  }
+  if (scheduledDate) return dateInWeek(week, scheduledDate);
   if (unitStart && unitEnd) {
     return unitStart <= week.end && unitEnd >= week.start;
   }
   return false;
+}
+
+export function isDueInCalendarWeek(
+  week: CalendarWeek,
+  dueDate: string | null,
+): boolean {
+  return Boolean(dueDate && dateInWeek(week, dueDate));
+}
+
+/** Material belongs on This week when assigned this week and/or due this week. */
+export function isInCalendarWeek(
+  week: CalendarWeek,
+  scheduledDate: string | null,
+  unitStart: string | null,
+  unitEnd: string | null,
+  dueDate: string | null = null,
+): boolean {
+  return (
+    isAssignedInCalendarWeek(week, scheduledDate, unitStart, unitEnd) ||
+    isDueInCalendarWeek(week, dueDate)
+  );
 }

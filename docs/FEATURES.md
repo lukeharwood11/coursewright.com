@@ -67,7 +67,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | shipped | List-first org / class / course roster with **batch select** enroll/add; multiple parent invites + optional student email; parent invite is copyable claim link (no email send) |
 | **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches parent vs staff home. **P0 roles:** owner, admin, instructor, parent. Owner vs admin = billing. Staff change/remove is **membership-only** — materials/roster stay enrollment-gated |
 | **Admin account management** | Admins invite, **change roles**, and **remove** admins/instructors | shipped | Org settings updates `memberships` only (admin ↔ instructor; remove admin/instructor). Last owner/admin blocked in DB + UI. Does **not** add a staff-role gate on materials/roster RLS. Invite/copy-link unchanged |
-| **Homework (P0)** | Dated materials in a unit — appear on parent "this week" when dates fall in Sun–Sat | shipped | Optional **assignment date** (`scheduled_date`) drives This week. Optional **due date** (`due_date`) is display-only (Add due date). **Not** a separate assignment type |
+| **Homework (P0)** | Dated materials in a unit — appear on parent "this week" when dates fall in Sun–Sat | shipped | Optional **assignment date** (`scheduled_date`) and optional **due date** (`due_date`). Parent home shows **Assigned next** / **Due next**; This week includes either date in range. **Not** a separate assignment type |
 | **Course builder** | Create and organize **courses** within an org (no templates in P0) | shipped | Create, course home, units, materials (page/link/file), print/share chrome; collapsible course outline (units + materials tree) |
 | **Courses (instances)** | Runnable offerings with dates and a roster — from scratch or **copied from another course** | shipped | Create from scratch + settings + roster. Copy via Function. Catalog: **description**, **location**, **subject / area**, optional **icon** on list cards. **Templates are P1** |
 | **Create course from course** | Duplicate an existing course’s units/materials into a new independent course | shipped | Edge Function `create-course-from-course` deployed on testing; copy content only — **no roster**, **no live sync**. Copies start unpublished |
@@ -378,9 +378,9 @@ Do **not** ship a separate “Export” product name in P0. Print *is* the path 
 
 | Layer | Phase | Content |
 |-------|-------|---------|
-| **Up next** | P0 | Soonest dated material **on or after today** (material `scheduled_date`, else unit start) among active students |
+| **Up next** | P0 | **Assigned next** (soonest assignment date on or after today) and **Due next** (soonest due date on or after today) among active students |
 | **(C) Important now** | P0 | Instructor-flagged items needing attention (courses of active students) |
-| **(A) This week** | P0 | **Dated materials** in units for the **current calendar week (Sunday–Saturday)** — **Print this week** is a first-class action |
+| **(A) This week** | P0 | Materials **assigned** this calendar week (Sun–Sat) **and/or due** this week — labels distinguish Assigned vs Due. **Print this week** is a first-class action |
 | **(B) Summary** | P1 | System-drafted overview; instructor can edit |
 | **Student tags** | P0 | When a parent has **more than one** student, tags at the top toggle who is active. Deselecting a student hides their work. One student (or a student viewing themselves) skips the tags. |
 
@@ -407,7 +407,7 @@ Content on **courses** may use **units** for grouping (templates are **P1**). Ma
 | **Top-level materials** | Materials with **no unit** sit at the **course top level**, shown **above** the units list |
 | **Unit dates** | Optional on a unit (`start_date` / `end_date` or a date range) |
 | **Material dates** | Optional **assignment date** (`scheduled_date`) and optional **due date** (`due_date`) per material — unit and material dating both supported when a unit is set |
-| **"This week" resolution** | If a material has `scheduled_date`, that wins. Else, if it has a unit with a date range, use that range. Top-level materials without `scheduled_date` do **not** appear in "this week." **`due_date` does not affect This week.** Parent week is still **Sunday–Saturday** |
+| **"This week" resolution** | A material appears on This week when its **assignment** date falls in the week (`scheduled_date`, else unit range) **and/or** its **`due_date`** falls in the week. Parent week is still **Sunday–Saturday**. Labels: **Assigned** vs **Due** |
 | **Copy from course** | Units and materials (including top-level) copy into the new course; independent — no live sync in P0 |
 
 **P0 homework:** dated materials (with `scheduled_date`, or in a dated unit). A material appears under parent "this week" when its effective date(s) fall in the current Sunday–Saturday week. There is **no separate assignment object in P0** — that's the next conversation.
@@ -653,7 +653,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | Course can be promoted to a template later | **Decided** | **P1** — From-scratch → reusable |
 | Content organized in units; unit dates optional | **Superseded** | Units optional; materials may be top-level |
 | App entity PKs use **bigserial** / **bigint** (auto-increment) | **Decided** | FKs to app entities are `bigint`; `profiles` / auth stay `uuid` |
-| Material dating: optional unit dates, optional material `scheduled_date` (assignment), optional `due_date` | **Decided** | Assignment date wins for This week when set; else unit range if material has a unit; top-level needs `scheduled_date` for "this week". Due date is optional display only |
+| Material dating: optional unit dates, optional material `scheduled_date` (assignment), optional `due_date` | **Decided** | Assignment date wins for assignment-week membership when set; else unit range if material has a unit; top-level needs `scheduled_date` for assignment-week. Materials also appear on This week when `due_date` falls in the week. UI labels Assigned vs Due |
 | Multiple instructors per course | **Decided** | CourseInstructor |
 | Calendar week = Sunday–Saturday | **Decided** | Parent dashboard |
 | Parent must have an account to view (P0) | **Decided** | Invite → signup/login; magic links later |

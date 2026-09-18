@@ -103,12 +103,12 @@ export function MaterialPage() {
               <Badge variant="amber">Unpublished</Badge>
             )}
             {page.material.scheduledDate ? (
-              <span className="text-[12px] font-bold text-[var(--amber-deep)]">
-                {formatIsoDate(page.material.scheduledDate)}
+              <span className="text-[12px] font-bold text-[var(--slate)]">
+                Assigned {formatIsoDate(page.material.scheduledDate)}
               </span>
             ) : null}
             {page.material.dueDate ? (
-              <span className="text-[12px] font-bold text-[var(--ink-soft)]">
+              <span className="text-[12px] font-bold text-[var(--amber-deep)]">
                 Due {formatIsoDate(page.material.dueDate)}
               </span>
             ) : null}

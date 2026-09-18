@@ -43,6 +43,7 @@ export type StaffDashboardMaterial = {
   id: number;
   title: string;
   scheduledDate: string | null;
+  dueDate: string | null;
   courseId: number;
   unitId: number | null;
   unitStart: string | null;
@@ -94,6 +95,7 @@ export function buildStaffDashboard(source: StaffDashboardSource): StaffDashboar
         material.scheduledDate,
         material.unitStart,
         material.unitEnd,
+        material.dueDate,
       )
     ) {
       continue;

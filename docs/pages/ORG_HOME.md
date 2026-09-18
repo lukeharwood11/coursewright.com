@@ -18,9 +18,9 @@ Same URL for all roles; chrome and body switch by membership role.
 ### Parent
 
 - Usability bar: understand child, course, and what’s needed immediately — no LMS jargon.
-- Show **Up next** (soonest dated material on or after today), **this calendar week** (Sunday–Saturday), and **Important now**.
-- When the parent has more than one student, **tags** at the top toggle who is active. Deselecting a student hides their work (this week, up next, important now). One student skips the tags.
-- “This week” materials: effective date in range — material `scheduled_date` if set, else unit date range.
+- Show **Coming up** (**Assigned next** + **Due next**), **this calendar week** (Sunday–Saturday), and **Important now**.
+- When the parent has more than one student, **tags** at the top toggle who is active. Deselecting a student hides their work (this week, coming up, important now). One student skips the tags.
+- “This week” materials: assignment date in range (`scheduled_date` if set, else unit date range) **and/or** `due_date` in range. Labels always say **Assigned** vs **Due**.
 - **Print this week** prints only **active** students’ week materials (and important now for their courses). Per-material **Print** stays first-class — both land on [PRINT](./PRINT.md).
 - Parent org access requires linked student enrolled in a course with `status = active` **and** `visibility = published` (dates informational only).
 - Progress tab is P1 (dim/inactive until then). Parent summary layer (B) is **P1**, not P0.
@@ -45,10 +45,10 @@ Same URL for all roles; chrome and body switch by membership role.
 - Org **name**
 - Week range label (Sun–Sat dates)
 - **Student tags** when more than one linked student (active / inactive)
-- **Up next**: next dated material on or after today for active students (title, date, course, student when more than one is active)
+- **Coming up**: **Assigned next** and **Due next** (title, labeled date, course, student when more than one is active)
 - **Important now** items: material title, description (when set), course/student context, link target (courses of active students)
 - Per **student profile** (when more than one is active): name, grade badge TBD
-- Per student → **courses** → this week’s **materials** (title, due/date in amber when dated). One active student: same course/material list without the extra student header.
+- Per student → **courses** → this week’s **materials** (title; **Assigned** date in slate; **Due** date in amber). One active student: same course/material list without the extra student header.
 - Print affordances (not data fields)
 
 ### Instructor / owner / admin
@@ -70,9 +70,9 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Desktop: simpler collapsible sidebar (This week, their courses, Progress)
 - Greeting + **current calendar week** (Sunday–Saturday) + **Print this week**
 - **Student tags** (multi-student parents only) — tap to include/exclude a student
-- **Up next** — soonest dated material from today
+- **Coming up** — Assigned next + Due next (clear labels; no card chrome)
 - **Important now** — instructor-flagged items (amber treatment)
-- **This week** — dated materials whose effective date falls in the week (`scheduled_date` wins; else unit date range)
+- **This week** — materials assigned and/or due in the week; **Assigned** vs **Due** labels
 - Per student → course → materials when more than one student is active; each material has **Print**
 - Bottom tabs concept: This week | Progress (Progress **P1** — dim/inactive until then)
 - Links into material / unit / course in the same URL tree (simpler chrome)
@@ -102,7 +102,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Print this week (active students)
 - Toggle which students are active (when more than one)
 - Open / print a material
-- Open up-next / important-now items
+- Open assigned-next / due-next / important-now items
 
 ### Instructor / owner / admin
 

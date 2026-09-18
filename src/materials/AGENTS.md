@@ -9,7 +9,7 @@ Lesson materials: **page** / **link** / **file**, plus ordered **blocks** on pag
 - **page** → ordered **blocks** (`rich_text`, `video`, …); rich text is authored in [Lexical](https://lexical.dev/) and stored as editor JSON (tables, quotes, links, in-page file nodes, **quiz** nodes)
 - **link** → `url`; **file** → `file_id` (org File + versions)
 - Soft delete, versions, revert UX
-- Dating: optional material `scheduled_date` (assignment / This week); optional `due_date` (display); optional unit range only when `unit_id` is set
+- Dating: optional material `scheduled_date` (assignment / This week); optional `due_date` (also surfaces on This week when in range); optional unit range only when `unit_id` is set
 - **Visibility:** `unpublished` (instructors/admins) vs `published` (enrolled parents). New materials start unpublished. RLS enforces this — do not rely on UI hiding alone. Published → title badge; Unpublish at bottom of material screens.
 
 ## Rules

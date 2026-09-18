@@ -57,12 +57,12 @@ export function MaterialRow({
             <Badge variant="amber">Unpublished</Badge>
           ) : null}
           {scheduledDate ? (
-            <span className="text-[12px] font-bold text-[var(--amber-deep)]">
-              {formatIsoDate(scheduledDate)}
+            <span className="text-[12px] font-bold text-[var(--slate)]">
+              Assigned {formatIsoDate(scheduledDate)}
             </span>
           ) : null}
           {dueDate ? (
-            <span className="text-[12px] font-bold text-[var(--ink-soft)]">
+            <span className="text-[12px] font-bold text-[var(--amber-deep)]">
               Due {formatIsoDate(dueDate)}
             </span>
           ) : null}

@@ -4,7 +4,8 @@ import { isInCalendarWeek, localIsoDate } from "./thisWeek";
 export type ParentDashboardMaterial = {
   id: number;
   title: string;
-  scheduledDate: string | null;
+  /** When the work is assigned / for This week (scheduled_date, else unit start). */
+  assignedDate: string | null;
   dueDate: string | null;
   unitId: number | null;
 };
@@ -33,21 +34,26 @@ export type ParentImportantNowItem = {
   unitId: number | null;
 };
 
-export type ParentDashboardUpNext = {
+export type ParentDashboardNextItem = {
   studentId: number;
   studentName: string;
   courseId: number;
   courseTitle: string;
   material: ParentDashboardMaterial;
-  effectiveDate: string;
+  /** The date that ranked this item (assignment date or due date). */
+  sortDate: string;
 };
 
 export type ParentDashboard = {
   week: CalendarWeek;
   importantNow: ParentImportantNowItem[];
   students: ParentDashboardStudent[];
-  upcoming: ParentDashboardUpNext[];
-  upNext: ParentDashboardUpNext | null;
+  /** Soonest assigned materials on or after today. */
+  nextAssigned: ParentDashboardNextItem[];
+  /** Soonest due materials on or after today. */
+  nextDue: ParentDashboardNextItem[];
+  nextAssignedItem: ParentDashboardNextItem | null;
+  nextDueItem: ParentDashboardNextItem | null;
   hasActiveEnrollment: boolean;
 };
 
@@ -92,6 +98,22 @@ export function materialEffectiveDate(
   return null;
 }
 
+function toDashboardMaterial(
+  material: ParentDashboardSource["materials"][number],
+): ParentDashboardMaterial {
+  return {
+    id: material.id,
+    title: material.title,
+    assignedDate: materialEffectiveDate(
+      material.scheduledDate,
+      material.unitStart,
+      material.unitEnd,
+    ),
+    dueDate: material.dueDate,
+    unitId: material.unitId,
+  };
+}
+
 export function buildParentDashboard(source: ParentDashboardSource): ParentDashboard {
   const activeCourseIds = new Set(
     source.enrollments
@@ -113,15 +135,11 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
               material.scheduledDate,
               material.unitStart,
               material.unitEnd,
+              material.dueDate,
             ),
         )
-        .map((material) => ({
-          id: material.id,
-          title: material.title,
-          scheduledDate: material.scheduledDate,
-          dueDate: material.dueDate,
-          unitId: material.unitId,
-        }));
+        .map(toDashboardMaterial)
+        .sort(compareWeekMaterials);
       return {
         id: enrollment.courseId,
         title: enrollment.courseTitle,
@@ -141,13 +159,17 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
     activeCourseIds.has(item.courseId),
   );
 
-  const upcoming = collectUpcoming(source);
+  const nextAssigned = collectNextByDate(source, "assigned");
+  const nextDue = collectNextByDate(source, "due");
+
   return {
     week: source.week,
     importantNow,
     students,
-    upcoming,
-    upNext: upcoming[0] ?? null,
+    nextAssigned,
+    nextDue,
+    nextAssignedItem: nextAssigned[0] ?? null,
+    nextDueItem: nextDue[0] ?? null,
     hasActiveEnrollment: students.some((student) => student.hasActiveEnrollment),
   };
 }
@@ -164,13 +186,18 @@ export function filterParentDashboard(
   const importantNow = dashboard.importantNow.filter((item) =>
     courseIds.has(item.courseId),
   );
-  const upcoming = dashboard.upcoming.filter((item) => allowed.has(item.studentId));
+  const nextAssigned = dashboard.nextAssigned.filter((item) =>
+    allowed.has(item.studentId),
+  );
+  const nextDue = dashboard.nextDue.filter((item) => allowed.has(item.studentId));
   return {
     ...dashboard,
     students,
     importantNow,
-    upcoming,
-    upNext: upcoming[0] ?? null,
+    nextAssigned,
+    nextDue,
+    nextAssignedItem: nextAssigned[0] ?? null,
+    nextDueItem: nextDue[0] ?? null,
     hasActiveEnrollment: students.some((student) => student.hasActiveEnrollment),
   };
 }
@@ -179,9 +206,22 @@ export function toggleStudentId(ids: number[], id: number): number[] {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
 }
 
-function collectUpcoming(source: ParentDashboardSource): ParentDashboardUpNext[] {
+function compareWeekMaterials(
+  a: ParentDashboardMaterial,
+  b: ParentDashboardMaterial,
+): number {
+  const aKey = a.assignedDate ?? a.dueDate ?? "";
+  const bKey = b.assignedDate ?? b.dueDate ?? "";
+  if (aKey !== bKey) return aKey.localeCompare(bKey);
+  return a.title.localeCompare(b.title);
+}
+
+function collectNextByDate(
+  source: ParentDashboardSource,
+  kind: "assigned" | "due",
+): ParentDashboardNextItem[] {
   const today = source.today || localIsoDate();
-  const items: ParentDashboardUpNext[] = [];
+  const items: ParentDashboardNextItem[] = [];
 
   for (const student of source.students) {
     const enrollments = source.enrollments.filter(
@@ -190,34 +230,29 @@ function collectUpcoming(source: ParentDashboardSource): ParentDashboardUpNext[]
     for (const enrollment of enrollments) {
       for (const material of source.materials) {
         if (material.courseId !== enrollment.courseId) continue;
-        const effectiveDate = materialEffectiveDate(
-          material.scheduledDate,
-          material.unitStart,
-          material.unitEnd,
-        );
-        if (!effectiveDate || effectiveDate < today) continue;
+        const sortDate =
+          kind === "assigned"
+            ? materialEffectiveDate(
+                material.scheduledDate,
+                material.unitStart,
+                material.unitEnd,
+              )
+            : material.dueDate;
+        if (!sortDate || sortDate < today) continue;
         items.push({
           studentId: student.id,
           studentName: student.name,
           courseId: enrollment.courseId,
           courseTitle: enrollment.courseTitle,
-          effectiveDate,
-          material: {
-            id: material.id,
-            title: material.title,
-            scheduledDate: material.scheduledDate,
-            dueDate: material.dueDate,
-            unitId: material.unitId,
-          },
+          sortDate,
+          material: toDashboardMaterial(material),
         });
       }
     }
   }
 
   items.sort((a, b) => {
-    if (a.effectiveDate !== b.effectiveDate) {
-      return a.effectiveDate.localeCompare(b.effectiveDate);
-    }
+    if (a.sortDate !== b.sortDate) return a.sortDate.localeCompare(b.sortDate);
     if (a.studentName !== b.studentName) {
       return a.studentName.localeCompare(b.studentName);
     }
