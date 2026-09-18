@@ -77,7 +77,7 @@ export function OrgSettingsPage() {
           </h1>
           <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
             {settings.canEdit
-              ? "Name, permalink, type, and how grades work."
+              ? "Name, web address, type, and how grades work."
               : "Only owners and admins can change these settings."}
           </p>
         </div>

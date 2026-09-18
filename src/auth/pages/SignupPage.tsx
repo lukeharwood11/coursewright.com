@@ -15,6 +15,7 @@ export function SignupPage() {
       subcopy="Plan courses, share materials, and print from one place."
       googleLabel="Sign up with Google"
       submitLabel="Create account"
+      passwordSignUp
       footer={
         <p>
           Already have an account?{" "}

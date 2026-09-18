@@ -49,7 +49,7 @@ export function CreateOrganizationForm({
       </label>
 
       <label className="mt-3 flex flex-col gap-1">
-        <span className="text-[13px] font-bold text-[var(--ink-soft)]">Permalink</span>
+        <span className="text-[13px] font-bold text-[var(--ink-soft)]">Web address</span>
         <Input
           value={slug}
           onChange={(event) => onSlugChange(event.target.value)}
@@ -58,7 +58,7 @@ export function CreateOrganizationForm({
           spellCheck={false}
         />
         <span className="text-[12px] text-[var(--ink-faint)]">
-          Used in your link: coursewright.com/my/{slug || "…"}
+          This is the link to your organization: coursewright.com/my/{slug || "…"}
         </span>
       </label>
 

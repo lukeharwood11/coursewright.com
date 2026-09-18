@@ -273,7 +273,7 @@ function PlacementForm({
       ) : null}
       <label className="mt-3 flex flex-col gap-1">
         <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-          Date for this week (optional)
+          Date (optional)
         </span>
         <Input
           className="w-full"
@@ -281,6 +281,9 @@ function PlacementForm({
           value={scheduledDate}
           onChange={(event) => onScheduledDate(event.target.value)}
         />
+        <span className="text-[12px] text-[var(--ink-faint)]">
+          If you set a date, this shows up on parents’ This week page that week.
+        </span>
       </label>
       {error ? (
         <p className="mt-3 text-[13px] text-[var(--amber-deep)]">{error}</p>
@@ -310,10 +313,10 @@ function PageBlocksEditor({
 
   return (
     <section className="mt-8 max-w-2xl">
-      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Blocks</h2>
+      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Page content</h2>
       <p className="mt-1 text-[13px] text-[var(--ink-faint)]">
-        Rich text is stored as Markdown in the block until a canonical format is
-        locked. Video blocks use a URL (YouTube or a link).
+        Add text and video to this page. Video uses a YouTube or other web
+        address.
       </p>
       <div className="mt-3 flex flex-col gap-4">
         {blocks.map((block) => (
@@ -368,7 +371,7 @@ function BlockEditor({
   return (
     <div className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
       <p className="text-[12px] font-bold text-[var(--ink-faint)]">
-        {kind === "video" ? "Video URL" : "Rich text"}
+        {kind === "video" ? "Video" : "Text"}
       </p>
       {kind === "video" ? (
         <Input

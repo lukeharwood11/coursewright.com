@@ -5,37 +5,38 @@
 
 ## Audience
 
-Org decision-makers (admins) comparing cost before signup.
+Org decision-makers (admins) checking cost before signup.
 
 ## Purpose
 
-Show how Course Wright charges **organizations** so they can serve parents. Parent-pay / tuition collection is out of scope for P0/P1 product framing.
+Say that Course Wright is an **invite-only pilot**. Do not present plan options or dollar amounts.
 
 
 ## Behavior
 
-- Public marketing page for how Course Wright bills **organizations**.
+- Public marketing page.
 - Does not process payment in P0 (in-app billing is P1).
-- CTA to signup; no live subscription data required for P0 marketing.
+- CTA to signup for people who already have an invite.
+- No live subscription data.
 
 ## Data shown
 
-- Pricing / packaging presentation (TBD — per teacher vs per course still hypothesis)
-- Statement that orgs are billed, not parents (P0/P1 framing)
+- **Invite-only pilot** — no plans, packaging options, or prices
 - CTA to signup
-- Do not invent dollar amounts until decided
+- Do not invent dollar amounts
 
 ## Contents
 
-- Clear statement: we bill the org, not parents (P0/P1)
-- Plan presentation (TBD packaging — per teacher vs per course is still a hypothesis in FEATURES)
+- Heading: invite-only pilot
+- Short explanation: working with a handful of co-ops and micro-schools; plans/prices come later
+- If you’ve been invited: create an account and start an organization
 - CTA → [SIGNUP](./SIGNUP.md)
 - Link to [ABOUT](./ABOUT.md), [HOME](./HOME.md)
-- Note that in-app billing UI is **P1**; this page can still market intent in P0
+- In-app billing UI is **P1**; this page does **not** show per-teacher / per-course options
 
 ## Primary actions
 
-- Sign up
+- Sign up (if invited)
 - Contact / questions — TBD if needed
 
 ## Links to
@@ -47,4 +48,4 @@ Show how Course Wright charges **organizations** so they can serve parents. Pare
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) (P1 billing), [BRANDING.md](../BRANDING.md). Do not invent specific dollar amounts here until decided.
+[FEATURES.md](../FEATURES.md) (P1 billing), [BRANDING.md](../BRANDING.md). Do not invent specific dollar amounts or plan cards.

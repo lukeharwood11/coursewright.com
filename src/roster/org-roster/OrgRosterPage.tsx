@@ -24,8 +24,8 @@ export function OrgRosterPage() {
         Roster
       </h1>
       <p className="mt-1 max-w-2xl text-[14px] text-[var(--ink-soft)]">
-        Student profiles for this organization. Select people to add to a class
-        or enroll in a course. Course enrollments also live on each course.
+        Students in this organization. Select people to add to a class or enroll
+        in a course.
       </p>
 
       {roster.loading ? (
@@ -64,9 +64,8 @@ export function OrgRosterPage() {
 
         {!roster.loading && roster.students.length === 0 && !roster.query ? (
           <p className="mt-4 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-            No student profiles yet. Add students here, or when you enroll
-            someone in a course or class. You can still print courses without a
-            roster.
+            No students yet. Add them here, or when you enroll someone in a
+            course or class. You can still print courses without a roster.
           </p>
         ) : (
           <StudentRosterList
@@ -104,8 +103,8 @@ export function OrgRosterPage() {
                 Add students
               </h2>
               <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-                Name is enough. Parent email and grade are optional. Paste several
-                names at once when onboarding a cohort.
+                Name is enough. Parent email and grade are optional. Paste
+                several names at once when you’re adding a group.
               </p>
             </div>
             <Button type="button" variant="secondary" onClick={roster.closePanel}>
@@ -140,8 +139,8 @@ export function OrgRosterPage() {
               Classes
             </h2>
             <p className="mt-1 max-w-xl text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-              Named groups of students — not a course, and no materials. Select
-              students above to add them here, or open a class to manage members.
+              A class is a named group of students you can add to a course later.
+              It doesn’t have lessons or materials.
             </p>
           </div>
           {!roster.creatingClassOpen ? (

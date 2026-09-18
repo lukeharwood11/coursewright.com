@@ -88,7 +88,7 @@ export function OrgSettingsForm({
         </div>
 
         <label className="mt-3 flex flex-col gap-1">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Permalink</span>
+          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Web address</span>
           <Input
             className="w-full"
             value={slug}
@@ -98,15 +98,15 @@ export function OrgSettingsForm({
             spellCheck={false}
           />
           <span className="text-[12px] text-[var(--ink-faint)]">
-            Used in your link: coursewright.com/my/{slug || "…"}
+            This is the link to your organization: coursewright.com/my/{slug || "…"}
           </span>
         </label>
 
         {slugChanged ? (
           <div className="mt-3 rounded-[10px] border border-[var(--amber)] bg-[var(--amber-tint)] p-3">
             <p className="text-[13.5px] leading-relaxed text-[var(--amber-deep)]">
-              Changing the permalink breaks existing links. Course Wright will
-              not redirect the old URL.
+              Changing this address breaks existing links. Course Wright will
+              not send people from the old address to the new one.
             </p>
             <label className="mt-2 flex items-start gap-2 text-[13.5px] text-[var(--ink)]">
               <input
@@ -123,13 +123,13 @@ export function OrgSettingsForm({
       </section>
 
       <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-        <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Grade scheme</h2>
+        <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Grades</h2>
         <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-          How student and course grade levels work in this organization.
+          How you name grades for students and courses.
         </p>
 
         <label className="mt-3 flex flex-col gap-1">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Preset</span>
+          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Grade list</span>
           <select
             className={controlClass}
             value={gradeScheme}

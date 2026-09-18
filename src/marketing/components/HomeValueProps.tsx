@@ -6,23 +6,23 @@ type OutlineIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 const props: { title: string; body: string; icon: OutlineIcon }[] = [
   {
-    title: "One hub for materials",
-    body: "Lesson plans, files, and this week’s work live in one place — not scattered across drives, chats, and email.",
+    title: "One place for materials",
+    body: "Lesson plans, files, and this week’s work live together — so families aren’t hunting through folders, chats, and inboxes.",
     icon: FolderIcon,
   },
   {
     title: "Share wright, including paper",
-    body: "Print a material, a unit, or this week in one tap. If someone just wants it on paper, that’s the point.",
+    body: "Print a material, a unit, or this week in one tap. If someone just wants it on paper, that’s easy.",
     icon: PrinterIcon,
   },
   {
     title: "Obvious the second you open it",
-    body: "Built for parents who dislike technology, and for volunteers who’d rather teach than manage software.",
+    body: "Built so parents can see what’s going on immediately, and so volunteers can spend their time teaching — not managing software.",
     icon: EyeIcon,
   },
   {
     title: "Built for co-ops, not districts",
-    body: "Lighter than Google Classroom. Clear roles for admins, instructors, and parents — without extra machinery.",
+    body: "Clear roles for admins, instructors, and parents — without the extra machinery of a big-school platform.",
     icon: UserGroupIcon,
   },
 ];

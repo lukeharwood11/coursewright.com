@@ -23,19 +23,19 @@ const audience: { title: string; body: string; icon: OutlineIcon }[] = [
   },
   {
     title: "Instructors",
-    body: "Plan courses, reuse templates, and share or print materials. Built so volunteers don’t need a training session.",
+    body: "Plan courses, copy what worked last term, and share or print materials. Built so volunteers don’t need a training session.",
     icon: BookOpenIcon,
   },
   {
     title: "Parents",
-    body: "See this week’s work and print what you need. If you dislike technology, the screen should still make sense immediately.",
+    body: "See this week’s work and print what you need. The screen should make sense immediately — even if you don’t like technology.",
     icon: UsersIcon,
   },
 ];
 
 const jobs: { text: string; icon: OutlineIcon }[] = [
   { text: "Plan courses and group work into units", icon: CalendarDaysIcon },
-  { text: "Reuse templates so you aren’t starting from a blank page each term", icon: Square2StackIcon },
+  { text: "Copy a course so you aren’t starting from a blank page each term", icon: Square2StackIcon },
   { text: "Share materials with parents — including print", icon: PrinterIcon },
   { text: "Run the org with clear admin, instructor, and parent roles", icon: UserGroupIcon },
 ];
@@ -51,9 +51,9 @@ export function AboutPage() {
         For homeschool co-ops and micro-schools
       </h1>
       <p className="mt-4 text-[15.5px] leading-relaxed text-[var(--ink-soft)]">
-        Course Wright gives you one place to plan courses, reuse templates, share
-        materials with parents, and run your program. It is meant to feel obvious —
-        especially for parents who hate technology.
+        Course Wright gives you one place to plan courses, share materials with
+        parents, and run your program. It is meant to feel obvious — especially
+        for families opening a link on a phone.
       </p>
 
       <ul className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -103,10 +103,10 @@ export function AboutPage() {
           Not another heavy classroom tool
         </h2>
         <p className="mt-3 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-          Many co-ops stitch together Microsoft folders for files, WhatsApp for
-          chatter, and Outlook for parent email — and then try something like Google
-          Classroom, which feels too heavy-handed. Course Wright is built around the
-          jobs you actually need done, and does them simply.
+          Course work often lives in a mix of shared folders, group chats, and
+          email — or in school software that feels like too much for a co-op.
+          Course Wright is built around the jobs you actually need done, and
+          does them simply.
         </p>
       </section>
 

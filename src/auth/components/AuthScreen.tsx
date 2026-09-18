@@ -9,6 +9,7 @@ import { GoogleMark } from "./GoogleMark";
 import { signInWithEmail } from "@/auth/api/signInWithEmail";
 import { signInWithPassword } from "@/auth/api/signInWithPassword";
 import { signInWithGoogle } from "@/auth/api/signInWithGoogle";
+import { signUpWithPassword } from "@/auth/api/signUpWithPassword";
 import { safeNextPath } from "@/auth/model/safeNext";
 import { isSupabaseConfigured } from "@/infrastructure/supabase/client";
 
@@ -19,6 +20,7 @@ export function AuthScreen({
   googleLabel,
   footer,
   passwordSignIn = false,
+  passwordSignUp = false,
   magicLinkLabel = "Email me a sign-in link",
 }: {
   heading: string;
@@ -28,6 +30,8 @@ export function AuthScreen({
   footer: ReactNode;
   /** Login only: email + password primary, magic link as a secondary action. */
   passwordSignIn?: boolean;
+  /** Signup: email + password creates an account and signs the person in. */
+  passwordSignUp?: boolean;
   magicLinkLabel?: string;
 }) {
   const location = useLocation();
@@ -36,6 +40,7 @@ export function AuthScreen({
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const showPassword = passwordSignIn || passwordSignUp;
 
   async function onGoogle() {
     setBusy(true);
@@ -60,6 +65,19 @@ export function AuthScreen({
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (passwordSignUp) {
+      if (!password) {
+        setMessage("Choose a password to create your account.");
+        return;
+      }
+      setBusy(true);
+      setMessage(null);
+      const result = await signUpWithPassword(email.trim(), password);
+      if (result.error) setMessage(result.error);
+      setBusy(false);
+      return;
+    }
+
     if (!passwordSignIn) {
       await sendMagicLink();
       return;
@@ -122,7 +140,7 @@ export function AuthScreen({
               autoComplete="email"
             />
           </label>
-          {passwordSignIn && (
+          {showPassword && (
             <label className="flex flex-col gap-1">
               <span className="text-[13px] font-bold text-[var(--ink-soft)]">Password</span>
               <Input
@@ -130,7 +148,8 @@ export function AuthScreen({
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
+                autoComplete={passwordSignUp ? "new-password" : "current-password"}
+                minLength={passwordSignUp ? 6 : undefined}
               />
             </label>
           )}

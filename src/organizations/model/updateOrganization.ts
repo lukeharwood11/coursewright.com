@@ -34,18 +34,18 @@ export function validateUpdateOrganization(
   if (!isValidSlug(slug)) {
     return {
       ok: false,
-      error: "Permalink must be 2–60 letters, numbers, or hyphens.",
+      error: "Web address must be 2–60 letters, numbers, or hyphens.",
     };
   }
   if (isReservedSlug(slug)) {
-    return { ok: false, error: "That permalink is reserved. Try another." };
+    return { ok: false, error: "That web address is reserved. Try another." };
   }
 
   const slugChanged = slug !== input.currentSlug;
   if (slugChanged && !input.confirmPermalinkChange) {
     return {
       ok: false,
-      error: "Confirm that you understand changing the permalink breaks existing links.",
+      error: "Confirm that you understand changing the web address breaks existing links.",
     };
   }
 
@@ -56,7 +56,7 @@ export function validateUpdateOrganization(
 
   const gradeScheme = parseGradeScheme(input.gradeScheme);
   if (!gradeScheme) {
-    return { ok: false, error: "Choose a grade scheme." };
+    return { ok: false, error: "Choose how grades are named." };
   }
 
   const gradeLabels =
@@ -112,7 +112,7 @@ export function organizationWriteErrorMessage(
   kind: "create" | "update",
 ): string {
   if (error.code === "23505") {
-    return "That permalink is taken. Try another.";
+    return "That web address is taken. Try another.";
   }
   if (
     error.code === "42501" ||
