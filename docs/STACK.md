@@ -74,7 +74,7 @@ Exact Function list is implementation detail; the rule is **simple = PostgREST, 
 
 | Method | How |
 |--------|-----|
-| **Email** | Supabase Auth email sign-up (OTP) / sign-in (password or magic link) |
+| **Email** | Supabase Auth email sign-up (password) / sign-in (password or magic link) |
 | **Google** | Google Cloud OAuth client → Supabase Auth Google provider |
 
 Product rule unchanged: parents use the **same email** as their invite (see [FEATURES.md](./FEATURES.md)).
