@@ -4,6 +4,7 @@ import {
   parseQuizBody,
   quizChoiceLetter,
   quizCorrectChoiceLetters,
+  quizPrintLines,
 } from "./quiz";
 
 test("parseQuizBody fills defaults and keeps correct flags", () => {
@@ -30,4 +31,28 @@ test("short-answer quizzes keep the stored answer for the key", () => {
   assert.equal(quiz.questionKind, "short_answer");
   assert.equal(quiz.answer, "Paris");
   assert.equal(quizCorrectChoiceLetters(quiz), "");
+});
+
+test("student print lines hide answers; staff print lines include the key", () => {
+  const quiz = parseQuizBody({
+    prompt: "What is 2+2?",
+    questionKind: "multiple_choice",
+    choices: [
+      { id: "a", text: "3", correct: false },
+      { id: "b", text: "4", correct: true },
+    ],
+  });
+  const student = quizPrintLines(quiz, false)
+    .map((line) => line.text)
+    .join("\n");
+  const staff = quizPrintLines(quiz, true)
+    .map((line) => line.text)
+    .join("\n");
+  assert.match(student, /What is 2\+2\?/);
+  assert.match(student, /○ A\. 3/);
+  assert.match(student, /○ B\. 4/);
+  assert.doesNotMatch(student, /correct|Answer key/i);
+  assert.match(staff, /Answer key/);
+  assert.match(staff, /● B\. 4 {2}\(correct\)/);
+  assert.match(staff, /Correct: B/);
 });

@@ -8,7 +8,7 @@ import {
 } from "@react-pdf/renderer";
 import { isPdfMime } from "@/print/model/fileKind";
 import { pageHasQuiz, printSegmentsFromBlocks } from "@/materials/model/pageContent";
-import { quizChoiceLetter, quizCorrectChoiceLetters } from "@/materials/model/quiz";
+import { quizPrintLines } from "@/materials/model/quiz";
 import type { QuizBody } from "@/materials/model/quiz";
 import type { PrintMaterialView, PrintPacketView } from "@/print/model/previewAssets";
 
@@ -133,42 +133,22 @@ function QuizPrint({
   quiz: QuizBody;
   includeAnswerKey: boolean;
 }) {
-  const letters = quizCorrectChoiceLetters(quiz);
   return (
     <View style={styles.quiz} wrap={false}>
-      <Text style={styles.label}>{includeAnswerKey ? "Quiz · Answer key" : "Quiz"}</Text>
-      {quiz.prompt.trim() ? (
-        <Text style={styles.body}>{quiz.prompt.trim()}</Text>
-      ) : (
-        <Text style={styles.meta}>Question</Text>
-      )}
-      {quiz.questionKind === "short_answer" ? (
-        includeAnswerKey ? (
-          <Text style={styles.body}>
-            Answer: {quiz.answer.trim() || "Not marked yet"}
-          </Text>
-        ) : (
-          <Text style={styles.body}>________________________________</Text>
-        )
-      ) : (
-        <View>
-          {quiz.choices.map((choice, index) => {
-            if (!choice.text.trim() && !includeAnswerKey) return null;
-            const mark = includeAnswerKey && choice.correct ? "●" : "○";
-            const correct =
-              includeAnswerKey && choice.correct ? "  (correct)" : "";
-            return (
-              <Text key={choice.id} style={styles.body}>
-                {mark} {quizChoiceLetter(index)}. {choice.text.trim() || "Empty choice"}
-                {correct}
-              </Text>
-            );
-          })}
-          {includeAnswerKey && letters ? (
-            <Text style={styles.meta}>Correct: {letters}</Text>
-          ) : null}
-        </View>
-      )}
+      {quizPrintLines(quiz, includeAnswerKey).map((line) => (
+        <Text
+          key={line.id}
+          style={
+            line.tone === "label"
+              ? styles.label
+              : line.tone === "meta"
+                ? styles.meta
+                : styles.body
+          }
+        >
+          {line.text}
+        </Text>
+      ))}
     </View>
   );
 }

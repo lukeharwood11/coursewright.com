@@ -91,3 +91,53 @@ export function quizCorrectChoiceLetters(quiz: QuizBody): string {
     .flatMap((choice, index) => (choice.correct ? [quizChoiceLetter(index)] : []))
     .join(", ");
 }
+
+export type QuizPrintLine = {
+  id: string;
+  tone: "label" | "body" | "meta";
+  text: string;
+};
+
+export function quizPrintLines(
+  quiz: QuizBody,
+  includeAnswerKey: boolean,
+): QuizPrintLine[] {
+  const lines: QuizPrintLine[] = [
+    {
+      id: "label",
+      tone: "label",
+      text: includeAnswerKey ? "Quiz · Answer key" : "Quiz",
+    },
+    {
+      id: "prompt",
+      tone: quiz.prompt.trim() ? "body" : "meta",
+      text: quiz.prompt.trim() || "Question",
+    },
+  ];
+  if (quiz.questionKind === "short_answer") {
+    lines.push({
+      id: "answer",
+      tone: "body",
+      text: includeAnswerKey
+        ? `Answer: ${quiz.answer.trim() || "Not marked yet"}`
+        : "________________________________",
+    });
+    return lines;
+  }
+  quiz.choices.forEach((choice, index) => {
+    if (!choice.text.trim() && !includeAnswerKey) return;
+    const mark = includeAnswerKey && choice.correct ? "●" : "○";
+    const correct = includeAnswerKey && choice.correct ? "  (correct)" : "";
+    lines.push({
+      id: choice.id,
+      tone: "body",
+      text: `${mark} ${quizChoiceLetter(index)}. ${choice.text.trim() || "Empty choice"}${correct}`,
+    });
+  });
+  const letters = quizCorrectChoiceLetters(quiz);
+  if (includeAnswerKey && letters) {
+    lines.push({ id: "correct", tone: "meta", text: `Correct: ${letters}` });
+  }
+  return lines;
+}
+
