@@ -24,7 +24,7 @@ Sign in with **email + password**, an **email magic link**, or **Google** (Supab
 - Wordmark and short sign-in copy
 - Auth controls (Google, email, password) — no course/roster data
 - Error/validation messages for failed auth (TBD exact copy)
-- Invite context banner when token/context present (TBD)
+- Invite-aware copy when `next` is `/invite/<token>` — sign in with the invited email
 
 ## Contents
 
@@ -34,7 +34,7 @@ Sign in with **email + password**, an **email magic link**, or **Google** (Supab
 - Email + password sign-in (primary)
 - Email magic-link sign-in (secondary)
 - Link to [SIGNUP](./SIGNUP.md)
-- Invite-aware messaging when arriving from an invite (TBD path) — same email as invite
+- Invite-aware messaging when arriving from [INVITE_CLAIM](./INVITE_CLAIM.md) — same email as invite
 - Phone-friendly centered card layout ([STYLE_GUIDE.md](../STYLE_GUIDE.md))
 
 ## Primary actions
@@ -52,9 +52,9 @@ Sign in with **email + password**, an **email magic link**, or **Google** (Supab
 ## Links to
 
 - [SIGNUP](./SIGNUP.md) — create account
-- [ORG_PICKER](./ORG_PICKER.md) — default after success (`/my`)
+- [ORG_PICKER](./ORG_PICKER.md) — default after success (`/my`); pending invite requests also show there
 - [ORG_HOME](./ORG_HOME.md) — after success when org/invite destination is known
-- Invite claim entry — TBD (no page file until path locked)
+- [INVITE_CLAIM](./INVITE_CLAIM.md) — when `next=/invite/<token>`
 
 ## Notes
 

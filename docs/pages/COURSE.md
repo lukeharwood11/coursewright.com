@@ -60,6 +60,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 
 - Same URL tree; fewer edit controls; print still obvious; no builder clutter
 - Unpublished courses are not visible (same URL 404s)
+- Parent/student home tags do not apply here — this page is one course
 
 ## Links to
 

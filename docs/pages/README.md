@@ -13,6 +13,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [PRIVACY](./PRIVACY.md) | `/privacy` (outline for real policy text — live screen is construction until then) |
 | [LOGIN](./LOGIN.md) | `/login` |
 | [SIGNUP](./SIGNUP.md) | `/signup` |
+| [INVITE_CLAIM](./INVITE_CLAIM.md) | `/invite/<token>` |
 | [ORG_PICKER](./ORG_PICKER.md) | `/my` |
 | [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) | `/my/settings` |
 | [ORG_HOME](./ORG_HOME.md) | `/my/<org-slug>` |
@@ -33,7 +34,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [FAMILIES](./FAMILIES.md) | `/my/<org-slug>/families` | **Not currently routed** |
 | [FAMILY](./FAMILY.md) | `/my/<org-slug>/families/<family_id>` | **Not currently routed** |
 
-**No page file yet** (paths TBD in [URLS.md](../URLS.md)): invite claim, resource share entry, search route. Share / search UX is still required on the locked pages above; print routes are locked — see [PRINT](./PRINT.md).
+**No page file yet** (paths TBD in [URLS.md](../URLS.md)): resource share entry, search route. Share / search UX is still required on the locked pages above; print routes are locked — see [PRINT](./PRINT.md).
 
 ---
 
@@ -45,7 +46,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 |------------|-----------------|
 | Organizations / create org / first owner | [ORG_PICKER](./ORG_PICKER.md) |
 | Org permalink slug | [ORG_PICKER](./ORG_PICKER.md), [ORG_SETTINGS](./ORG_SETTINGS.md) |
-| Admin invites / staff roles / last-admin guard | [ORG_SETTINGS](./ORG_SETTINGS.md) |
+| Admin invites / staff roles / last-admin guard | [ORG_SETTINGS](./ORG_SETTINGS.md), [INVITE_CLAIM](./INVITE_CLAIM.md), [ORG_PICKER](./ORG_PICKER.md) (pending requests) |
 | Org grade scheme | [ORG_SETTINGS](./ORG_SETTINGS.md) |
 | Authentication (email password / magic link + Google) | [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md) |
 | RBAC (owner / admin / instructor / parent) | Role splits on [ORG_HOME](./ORG_HOME.md) + gated pages |
@@ -58,7 +59,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Classes (student groups) | [ORG_ROSTER](./ORG_ROSTER.md) (list/create), [CLASS](./CLASS.md) |
 | File / content versioning, soft deletes | [MATERIAL](./MATERIAL.md), [COURSE](./COURSE.md) |
 | Homework = dated materials; Important now | [ORG_HOME](./ORG_HOME.md), [MATERIAL](./MATERIAL.md) |
-| Parent dashboard / access rules | [ORG_HOME](./ORG_HOME.md); claim via [LOGIN](./LOGIN.md) / [SIGNUP](./SIGNUP.md) |
+| Parent dashboard / access rules | [ORG_HOME](./ORG_HOME.md); claim via [INVITE_CLAIM](./INVITE_CLAIM.md) / [LOGIN](./LOGIN.md) / [SIGNUP](./SIGNUP.md) |
 | Print (material / unit / this week) | [PRINT](./PRINT.md); entry from [MATERIAL](./MATERIAL.md), [UNIT](./UNIT.md), [ORG_HOME](./ORG_HOME.md) |
 | Resource links / share with parents | [MATERIAL](./MATERIAL.md) (entry URL TBD) |
 | Advanced search | Product chrome — [ORG_HOME](./ORG_HOME.md) + org chrome; route TBD |
@@ -68,7 +69,6 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 
 | Concern | Status |
 |---------|--------|
-| Invite claim URL | Path TBD — no page file until locked |
 | Resource share entry URL | Path TBD — recipients land on [MATERIAL](./MATERIAL.md) after login |
 | Forms content kind | FEATURES in design — not P0 on [MATERIAL](./MATERIAL.md) |
 | Course templates + ACL / promote / sync | **P1** — [TEMPLATE_LIST](./TEMPLATE_LIST.md), [TEMPLATE](./TEMPLATE.md), [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) |

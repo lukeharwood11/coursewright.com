@@ -1,0 +1,148 @@
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import {
+  cancelInvite,
+  createParentInvite,
+  listOrgPendingParentInvites,
+  listParentLinksForStudents,
+  staffInviteQueryKeys,
+  type PendingOrgInvite,
+} from "@/organizations/databridge/staffInvites";
+import { canInviteParent } from "@/organizations/model/role";
+import {
+  inviteUrl,
+  validateCreateParentInvite,
+} from "@/organizations/model/staffInvite";
+import {
+  getStudent,
+  studentQueryKeys,
+  updateStudent,
+} from "@/roster/databridge/students";
+
+export function useParentInvite(studentId: number | null) {
+  const user = useAuthedUser();
+  const { organization, role } = useOrgShell();
+  const queryClient = useQueryClient();
+  const canInvite = canInviteParent(role);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [addEmail, setAddEmail] = useState("");
+
+  const pendingQuery = useQuery({
+    queryKey: staffInviteQueryKeys.parents(organization.id),
+    queryFn: () => listOrgPendingParentInvites(organization.id),
+    enabled: canInvite && studentId != null,
+  });
+
+  const linksQuery = useQuery({
+    queryKey: staffInviteQueryKeys.parentLinks(studentId != null ? [studentId] : []),
+    queryFn: () => listParentLinksForStudents(studentId != null ? [studentId] : []),
+    enabled: canInvite && studentId != null,
+  });
+
+  const pending = (pendingQuery.data ?? []).filter(
+    (invite) => invite.studentProfileId === studentId,
+  );
+  const linked = (linksQuery.data ?? []).filter(
+    (link) => link.studentProfileId === studentId,
+  );
+
+  const inviteMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const parsed = validateCreateParentInvite({ email });
+      if (!parsed.ok) throw new Error(parsed.error);
+      if (studentId == null) throw new Error("Student isn’t loaded yet.");
+      const invite = await createParentInvite({
+        organizationId: organization.id,
+        studentProfileId: studentId,
+        email: parsed.value.email,
+        invitedBy: user.id,
+      });
+      const student = await getStudent(studentId);
+      if (student && !student.parentEmail) {
+        await updateStudent(studentId, {
+          name: student.name,
+          parentEmail: parsed.value.email,
+          studentEmail: student.studentEmail,
+          gradeLevel: student.gradeLevel,
+        });
+      }
+      return invite;
+    },
+    onSuccess: async (invite) => {
+      setAddEmail("");
+      await copyInvite(invite);
+      await queryClient.invalidateQueries({
+        queryKey: staffInviteQueryKeys.parents(organization.id),
+      });
+      if (studentId != null) {
+        await queryClient.invalidateQueries({
+          queryKey: studentQueryKeys.detail(studentId),
+        });
+        await queryClient.invalidateQueries({
+          queryKey: studentQueryKeys.list(organization.id),
+        });
+      }
+    },
+    onError: (error: Error) => {
+      toast(error.message);
+    },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: (invite: PendingOrgInvite) => cancelInvite(invite.id),
+    onSuccess: async () => {
+      toast("Invite canceled.");
+      setCopiedId(null);
+      await queryClient.invalidateQueries({
+        queryKey: staffInviteQueryKeys.parents(organization.id),
+      });
+    },
+    onError: (error: Error) => {
+      toast(error.message);
+    },
+  });
+
+  async function copyInvite(invite: PendingOrgInvite) {
+    const url = inviteUrl(window.location.origin, invite.token);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(invite.id);
+      toast("Invite link copied — send it yourself.");
+    } catch {
+      setCopiedId(null);
+      toast("Copy the link from the field.");
+    }
+  }
+
+  return {
+    canInvite,
+    loading: pendingQuery.isLoading || linksQuery.isLoading,
+    loadError: pendingQuery.error
+      ? pendingQuery.error.message
+      : linksQuery.error
+        ? linksQuery.error.message
+        : null,
+    pending,
+    linked,
+    addEmail,
+    invitingEmail: inviteMutation.isPending
+      ? (inviteMutation.variables ?? "").trim().toLowerCase()
+      : null,
+    cancelingId: cancelMutation.isPending
+      ? (cancelMutation.variables?.id ?? null)
+      : null,
+    copiedId,
+    origin: typeof window === "undefined" ? "" : window.location.origin,
+    setAddEmail,
+    onInvite: (email: string) => inviteMutation.mutate(email),
+    onCopy: (invite: PendingOrgInvite) => {
+      void copyInvite(invite);
+    },
+    onCancel: (invite: PendingOrgInvite) => {
+      cancelMutation.mutate(invite);
+    },
+  };
+}

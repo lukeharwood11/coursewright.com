@@ -17,7 +17,12 @@ import {
   MarketingLayout,
   PricingPage,
 } from "@/marketing";
-import { OrgHomePage, OrgPickerPage, OrgSettingsPage } from "@/organizations";
+import {
+  ClaimInvitePage,
+  OrgHomePage,
+  OrgPickerPage,
+  OrgSettingsPage,
+} from "@/organizations";
 import { PrintPage } from "@/print";
 import {
   ClassRosterPage,
@@ -60,6 +65,7 @@ export function AppRoutes() {
         }
       />
       <Route element={<RequireAuth />}>
+        <Route path="/invite/:token" element={<ClaimInvitePage />} />
         <Route element={<AccountLayout />}>
           <Route path="/my" element={<OrgPickerPage />} />
           <Route path="/my/settings" element={<AccountSettingsPage />} />

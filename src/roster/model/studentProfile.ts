@@ -1,6 +1,7 @@
 export type StudentProfileInput = {
   name: string;
   parentEmail: string;
+  studentEmail: string;
   gradeLevel: string;
   gradeLabels: string[];
 };
@@ -8,6 +9,7 @@ export type StudentProfileInput = {
 export type ValidatedStudentProfile = {
   name: string;
   parentEmail: string | null;
+  studentEmail: string | null;
   gradeLevel: string | null;
 };
 
@@ -16,12 +18,14 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export type StudentProfileDraft = {
   name: string;
   parentEmail: string;
+  studentEmail: string;
   gradeLevel: string;
 };
 
 export type StudentProfileSaved = {
   name: string;
   parentEmail: string | null;
+  studentEmail: string | null;
   gradeLevel: string | null;
 };
 
@@ -34,8 +38,23 @@ export function studentProfileHaveChanges(
   if (draft.parentEmail.trim().toLowerCase() !== (saved.parentEmail ?? "")) {
     return true;
   }
+  if (draft.studentEmail.trim().toLowerCase() !== (saved.studentEmail ?? "")) {
+    return true;
+  }
   if (draft.gradeLevel.trim() !== (saved.gradeLevel ?? "")) return true;
   return false;
+}
+
+function parseOptionalEmail(
+  raw: string,
+  label: string,
+): { ok: true; value: string | null } | { ok: false; error: string } {
+  const email = raw.trim().toLowerCase();
+  if (!email) return { ok: true, value: null };
+  if (!EMAIL_PATTERN.test(email)) {
+    return { ok: false, error: `Enter a valid ${label}, or leave it blank.` };
+  }
+  return { ok: true, value: email };
 }
 
 export function validateStudentProfile(
@@ -46,14 +65,11 @@ export function validateStudentProfile(
     return { ok: false, error: "Name is required." };
   }
 
-  const parentEmailRaw = input.parentEmail.trim().toLowerCase();
-  let parentEmail: string | null = null;
-  if (parentEmailRaw) {
-    if (!EMAIL_PATTERN.test(parentEmailRaw)) {
-      return { ok: false, error: "Enter a valid parent email, or leave it blank." };
-    }
-    parentEmail = parentEmailRaw;
-  }
+  const parentEmail = parseOptionalEmail(input.parentEmail, "parent email");
+  if (!parentEmail.ok) return parentEmail;
+
+  const studentEmail = parseOptionalEmail(input.studentEmail, "student email");
+  if (!studentEmail.ok) return studentEmail;
 
   const gradeLevelRaw = input.gradeLevel.trim();
   let gradeLevel: string | null = null;
@@ -64,16 +80,34 @@ export function validateStudentProfile(
     gradeLevel = gradeLevelRaw;
   }
 
-  return { ok: true, value: { name, parentEmail, gradeLevel } };
+  return {
+    ok: true,
+    value: {
+      name,
+      parentEmail: parentEmail.value,
+      studentEmail: studentEmail.value,
+      gradeLevel,
+    },
+  };
 }
 
 export function studentMatchesQuery(
-  student: { name: string; parentEmail: string | null; gradeLevel: string | null },
+  student: {
+    name: string;
+    parentEmail: string | null;
+    studentEmail: string | null;
+    gradeLevel: string | null;
+  },
   query: string,
 ): boolean {
   const needle = query.trim().toLowerCase();
   if (!needle) return true;
-  const haystack = [student.name, student.parentEmail ?? "", student.gradeLevel ?? ""]
+  const haystack = [
+    student.name,
+    student.parentEmail ?? "",
+    student.studentEmail ?? "",
+    student.gradeLevel ?? "",
+  ]
     .join(" ")
     .toLowerCase();
   return haystack.includes(needle);
@@ -90,11 +124,12 @@ export function studentsNotIn<T extends { id: number }>(
 export type NewStudentDraft = {
   name: string;
   parentEmail: string;
+  studentEmail: string;
   gradeLevel: string;
 };
 
 export function emptyStudentDraft(gradeLevel = ""): NewStudentDraft {
-  return { name: "", parentEmail: "", gradeLevel };
+  return { name: "", parentEmail: "", studentEmail: "", gradeLevel };
 }
 
 /** One name per line; blank lines ignored. */
@@ -115,11 +150,15 @@ export function validateStudentBatch(
   for (let index = 0; index < drafts.length; index += 1) {
     const draft = drafts[index];
     const blank =
-      !draft.name.trim() && !draft.parentEmail.trim() && !draft.gradeLevel.trim();
+      !draft.name.trim() &&
+      !draft.parentEmail.trim() &&
+      !draft.studentEmail.trim() &&
+      !draft.gradeLevel.trim();
     if (blank) continue;
     const parsed = validateStudentProfile({
       name: draft.name,
       parentEmail: draft.parentEmail,
+      studentEmail: draft.studentEmail,
       gradeLevel: draft.gradeLevel,
       gradeLabels,
     });
@@ -162,3 +201,4 @@ export function rosterWriteErrorMessage(error: {
   }
   return error.message;
 }
+

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProfile } from "@/auth/api/profiles";
+import { getProfile, profileQueryKeys } from "@/auth/api/profiles";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import {
   listMyMemberships,
@@ -12,7 +12,7 @@ export function useAccountShellData(): AppShellValue {
   const user = useAuthedUser();
 
   const profileQuery = useQuery({
-    queryKey: ["profiles", user.id],
+    queryKey: profileQueryKeys.detail(user.id),
     queryFn: () => getProfile(user.id),
   });
 

@@ -20,15 +20,16 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 - Save org name/metadata; changing **permalink slug** shows a warning that existing links break (no auto-redirect in P0) and requires an explicit confirmation.
 - **Save** and **Cancel** stay in the page header (upper right). Save is disabled when nothing changed; Cancel goes back (confirms first if there are unsaved changes).
 - Set org **type** (co-op / micro-school) and **grade scheme** (K–12 / custom labels).
-- Staff section on this page: invite by email, change roles, remove staff — UI TBD; block remove/demote of last owner or admin.
+- Staff section on this page: invite owner / admin / instructor by email, **copy a claim link** (v0 does not send email), list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). Owners and admins **change admin ↔ instructor** and **remove** admins/instructors; the last remaining owner or admin cannot be removed or demoted. Those writes update **org membership** (who can run settings and invites). They do **not** change who can see course content — materials and roster stay **enrollment-gated** (and `parent_student_links` where applicable).
 - Billing section is P1 placeholder, **shown only to owners**.
 
 ## Data shown
 
 - Organization **name**, **slug**, **org type**
 - Current **grade scheme** and labels (K–12 preset or custom)
-- Staff list: person name/email, role (owner | admin | instructor), invite/claim status — TBD
-- Pending admin/instructor invites (email, status) — TBD
+- Staff list: person **name** / **email**, **role** (owner | admin | instructor); owners and admins see change-role and remove actions for admins/instructors
+- Last owner/admin rows explain why they can’t be removed or demoted
+- Pending staff invites: **email**, **role**, copyable `/invite/<token>` link, cancel
 - Billing status — P1, owner only
 
 ## Contents
@@ -48,9 +49,10 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 ### Staff / roles (section)
 
 - List owners, admins, and instructors
-- Invite admins / instructors by email (claimable)
-- Change **admin ↔ instructor** for existing staff
-- Remove admins/instructors
+- Invite owners / admins / instructors by email; copy the claim link (no email send in v0)
+- Pending invites: copy link again, or cancel
+- Change **admin ↔ instructor** for existing staff (owners and admins; owner seats stay invite-only). Membership role only — not a materials/roster access gate
+- Remove admins/instructors (membership only)
 - Guard: cannot remove or demote the **last remaining owner or admin**
 
 ### Billing (P1)
@@ -63,15 +65,18 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 - Save org settings / slug (with warning) — header Save disabled when unchanged; Cancel leaves (confirm if dirty)
 - Cancel — discard unsaved changes
 - Set grade scheme
-- Invite / change role / remove staff (TBD)
+- Invite staff and copy the claim link; cancel a pending invite
+- Change admin ↔ instructor for existing staff (membership role only)
+- Remove an admin or instructor from staff (blocked when they are the last owner/admin)
 
 ## Links to
 
 - [ORG_HOME](./ORG_HOME.md) — back to the organization
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — cross-org account settings (distinct from this page)
+- [INVITE_CLAIM](./INVITE_CLAIM.md) — copied staff invite link (recipient); parent invites use the same URL from roster
 - [LOGIN](./LOGIN.md) — after sign-out (if sign-out lives in chrome)
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Org creation & owners/admins, grade scheme, RBAC, admin account management. Account-level prefs → [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md).
+[FEATURES.md](../FEATURES.md) — Org creation & owners/admins, grade scheme, RBAC, admin account management. Staff change/remove is membership-only; course content stays enrollment-gated. Account-level prefs → [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md).

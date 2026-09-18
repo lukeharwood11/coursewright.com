@@ -18,6 +18,7 @@ export function OrgHomePage() {
   if (shell.role === "parent") {
     return (
       <ParentHome
+        key={shell.organization.slug}
         firstName={home.firstName}
         orgSlug={shell.organization.slug}
         dashboard={home.dashboard}

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  searchCoursesByTitle,
-  searchMaterialsByTitle,
+  searchCourses,
+  searchMaterials,
   searchQueryKeys,
 } from "@/search/databridge/search";
 import { filterPageResults, staffSearchPages } from "@/search/model/pages";
@@ -12,6 +12,7 @@ import {
 } from "@/search/model/query";
 import {
   mergeSearchResults,
+  rankSearchResults,
   type SearchResult,
 } from "@/search/model/results";
 
@@ -41,20 +42,17 @@ export function useOrgSearch(args: {
     queryKey: searchQueryKeys.org(args.organizationId, debouncedQuery),
     queryFn: async (): Promise<SearchResult[]> => {
       const query = debouncedQuery;
+      const ftsArgs = {
+        organizationId: args.organizationId,
+        orgSlug: args.orgSlug,
+        query,
+      };
       const [courses, materials] = await Promise.all([
-        searchCoursesByTitle({
-          organizationId: args.organizationId,
-          orgSlug: args.orgSlug,
-          query,
-        }),
-        searchMaterialsByTitle({
-          organizationId: args.organizationId,
-          orgSlug: args.orgSlug,
-          query,
-        }),
+        searchCourses(ftsArgs),
+        searchMaterials(ftsArgs),
       ]);
       const pages = filterPageResults(staffSearchPages(args.orgSlug), query);
-      return mergeSearchResults([pages, courses, materials]);
+      return rankSearchResults(mergeSearchResults([pages, courses, materials]), query);
     },
     enabled: searchable,
   });

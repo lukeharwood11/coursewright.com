@@ -96,7 +96,7 @@ export async function listClassMembers(classId: number): Promise<ClassMember[]> 
   const { data, error } = await db
     .from("class_members")
     .select(
-      "id, class_id, student:student_profiles(id, organization_id, name, grade_level, parent_email)",
+      "id, class_id, student:student_profiles(id, organization_id, name, grade_level, parent_email, student_email)",
     )
     .eq("class_id", classId)
     .order("created_at");
@@ -116,6 +116,7 @@ export async function listClassMembers(classId: number): Promise<ClassMember[]> 
           name: student.name,
           gradeLevel: student.grade_level,
           parentEmail: student.parent_email,
+          studentEmail: student.student_email,
         },
       },
     ];

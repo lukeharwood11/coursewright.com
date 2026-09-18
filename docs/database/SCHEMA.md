@@ -13,7 +13,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | User | `profiles` | PK = `auth.users.id`. Email + Google live in Supabase Auth; `profiles` is the PostgREST-facing row. |
 | Organization | `organizations` | |
 | Membership | `memberships` | |
-| AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `parent`. Membership is created on claim. |
+| AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `parent`. Claimed via copyable `/invite/<token>` or pending-request inbox after login. **v0: no email send.** Membership is created on claim. |
 | StudentProfile | `student_profiles` | |
 | Family | `families` | |
 | FamilyMember | `family_members` | |
@@ -79,17 +79,21 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 
 ### Parent access gate
 
-A user receives the **parent** role in an organization when **all** of the following are true:
+**Membership** (parent role) is created when the invited email **claims** a parent invite — same token path as staff. Claiming also writes `parent_student_links`.
 
-1. Their **email** matches a parent invite (or linked student profile record).
-2. They have at least one **student profile** associated with them.
-3. That student profile has an **enrollment** in a course with **`status = active`** within the organization.
+**Course access** still keys off enrollment, not the invite:
+
+1. Active **parent** membership in the organization.
+2. A `parent_student_links` row for that user.
+3. That student profile has an **enrollment** in a course with **`status = active`** and **`visibility = published`**.
+
+A claimed parent with no enrollment can open the org (empty “this week”) but cannot SELECT courses.
 
 **Active course** = `Course.status = active`. Optional `start_date` / `end_date` are informational, not access gates.
 
 **Published course** = `Course.visibility = published`. Parents SELECT a course (and its content via `parent_can_view_course`) only when the course is **active and published**. Unpublished courses are instructors/admins only. New courses default unpublished; existing rows stayed published when the column was added.
 
-**P0:** Invite email → parent **must sign up or log in** with that email before viewing. Magic links (no account) are later. **Print** is available on any material/unit/week they can view.
+**P0:** Invite email → parent **must sign up or log in** with that email before viewing. Magic links (no account) are later. **v0 does not send email** — staff copy `/invite/<token>`. **Print** is available on any material/unit/week they can view.
 
 **P0 if enrollments end:** parent User / Membership stays **active**. Visibility rules deferred.
 
@@ -321,7 +325,7 @@ Authenticated users only: admins, instructors, parents. **Not students** (P0/P1)
 
 ### Membership
 
-Org staff and parent memberships. Owners and admins may **change** `admin` ↔ `instructor` and **remove** admin/instructor memberships. **Cannot** remove or demote the last remaining `owner` or `admin`.
+Org staff and parent memberships. Owners and admins may **change** `admin` ↔ `instructor` and **remove** admin/instructor memberships. **Cannot** remove or demote the last remaining `owner` or `admin`. These writes touch **`memberships` only**. Course materials and roster stay **enrollment-gated** (and `ParentStudentLink` where applicable) — do **not** add a second staff-role gate on content RLS.
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -333,7 +337,7 @@ Org staff and parent memberships. Owners and admins may **change** `admin` ↔ `
 
 ### AdminInvite
 
-Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` (staff) or `parent`. Claimed by signing up / logging in with that email (send/claim UI still planned). **Membership is created on claim.** Parent course access still requires enrollment (see Parent access gate).
+Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` (staff) or `parent`. **v0:** copy a claim link; Course Wright does **not** send email. Claimed by opening `/invite/<token>` or by signing in with that email and accepting a pending request. **Membership is created on claim.** Parent course access still requires enrollment (see Parent access gate).
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -343,32 +347,33 @@ Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor
 | role | text | `owner` · `admin` · `instructor` · `parent` |
 | student_profile_id | bigint | FK → StudentProfile, **required when `role = parent`**, else null |
 | invited_by | uuid | FK → User |
-| token | text | Unique invite token (returned on insert) |
+| token | text | Unique invite token (returned on insert; used in `/invite/<token>`) |
 | accepted_at | timestamptz | nullable |
 | membership_id | bigint | FK → Membership, nullable |
 
 **Who can invite staff:** owners and admins. Admins may invite `admin` or `instructor`. Only owners may invite another `owner`. Instructors cannot invite org staff.
 
-**Who can invite parents:** owners, admins, and instructors. Parent invites are created from the Families directory / roster when linking an email with no account.
+**Who can invite parents:** owners, admins, and instructors. Parent invites are created from roster / student profile (copy `/invite/<token>`). The Families directory, when routed, may also insert a pending parent row when linking an email with no account.
 
 ---
 
 ### StudentProfile
 
-Org-level student record. **No login in P0/P1.**
+Org-level student record. **No dedicated student membership role in P0/P1.** Optional `student_email` may be invited with the parent claim path so that person sees this student's work.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
 | name | text | **Required** — only required field |
-| parent_email | text | **Optional** — for parent invite / linkage when provided |
+| parent_email | text | **Optional** — first parent email for create/search; more parents via invites + `ParentStudentLink` |
+| student_email | text | **Optional** — student contact email; invite uses parent claim path (student role is P2) |
 | grade_level | text | **Optional** — must be in org `grade_labels` when set |
 | user_id | uuid | FK → User, **nullable** — linked in P2 when student gets an account |
 | created_at | timestamptz | |
 | created_via_course_id | bigint | FK → Course, nullable — course that triggered first enrollment |
 
-No other student-profile fields in P0.
+No other student-profile fields in P0 besides optional parent/student emails and grade.
 
 ### Family
 
@@ -402,7 +407,7 @@ Stored on `admin_invites` with `role = parent` (same token / claim RPCs as staff
 
 Parent-specific fields: `student_profile_id` (required), plus the shared email / token / invited_by / accepted_at columns on AdminInvite.
 
-**P0 Families path:** staff save one pending row per chosen student. Send/claim UI is still planned. On claim: create parent membership (if needed) and `parent_student_links`. Do **not** grant course access from the invite alone.
+**v0:** staff copy `/invite/<token>`; no email send. On claim: create parent membership (if needed) and `parent_student_links`. Do **not** grant course access from the invite alone. Unrouted Families directory may also save a pending parent row per chosen student.
 
 ### ParentStudentLink
 
@@ -560,7 +565,7 @@ Ordered content piece on a **page** material only (`materials.kind = page`).
 | material_id | bigint | FK → Material (`kind = page`) |
 | position | int | order within the page |
 | kind | text | **P0:** `rich_text` · `video` — extensible |
-| body | jsonb | Kind-specific payload (rich text canonical store TBD; video URL or `file_id`) |
+| body | jsonb | Kind-specific payload. Rich text: Lexical editor JSON in `lexical` (legacy `markdown` still accepted). Video: URL |
 | file_id | bigint | FK → File, nullable — when block references an uploaded file |
 | copied_from_id | bigint | FK → Block, nullable — lineage on course-from-course / template copy |
 | deleted_at | timestamptz | soft delete |
@@ -569,7 +574,7 @@ Ordered content piece on a **page** material only (`materials.kind = page`).
 
 | kind | Payload (sketch) |
 |------|------------------|
-| `rich_text` | Canonical document (Markdown / JSON / HTML — **open**) |
+| `rich_text` | Lexical editor state (`body.lexical`); legacy `body.markdown` still reads |
 | `video` | URL embed and/or uploaded `file_id` — **open** which modes |
 
 **Not v1 material kinds:** quiz (shape open), audio. External URLs at the unit level use material `kind = link`, not a link block (unless we later add link blocks inside pages — TBD).
@@ -661,7 +666,7 @@ Family cross-org management (extends P0 org Family)
 | Course ↔ Class enrollment model | Enrollment, Class, Course roster UX | **Workshop** — keep student↔course enrollment until decided |
 | `copied_from_course_id` on Course | Origin tracking for course-from-course | **Migrated** (informational; no sync) |
 | Add material kinds page · link · file | Material.kind | **Decided** (v1) |
-| Rich-text block canonical store | Block.body | **Open** |
+| Rich-text block canonical store | Block.body | **Lexical JSON** (`body.lexical`) |
 | Video block: URL vs uploaded file | Block, File, players | **Open** |
 | Quiz / Form shape | Block kind vs later material kind | Not in v1 Add menu; Form unused |
 | Autograde answer storage + attempt model | QuizAttempt (phase TBD) | P1 |

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { printBackPath, type PrintGrainKind } from "@/print/model/paths";
+import { printBackPath, parsePrintStudentIds, type PrintGrainKind } from "@/print/model/paths";
 import {
   loadMaterialPrintPacket,
   loadUnitPrintPacket,
@@ -31,15 +31,17 @@ export function usePrint() {
   const unitId = params.unitId ? Number(params.unitId) : NaN;
   const materialId = params.materialId ? Number(params.materialId) : NaN;
   const grain = grainFromPath(location.pathname, materialId, unitId);
+  const studentIds = parsePrintStudentIds(location.search);
 
   const query = useQuery({
-    queryKey: ["print", organization.id, location.pathname],
+    queryKey: ["print", organization.id, location.pathname, location.search],
     queryFn: async () => {
       const packet =
         grain === "thisWeek"
           ? await loadWeekPrintPacket({
               organizationId: organization.id,
               userId: user.id,
+              studentIds,
             })
           : grain === "material"
             ? await loadMaterialPrintPacket(materialId)

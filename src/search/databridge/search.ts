@@ -1,14 +1,20 @@
 import { requireSupabase } from "./client";
 import { courseSearchHref, materialSearchHref } from "@/search/model/paths";
 import {
+  prefixSearchVectorFilter,
   searchResultLimit,
-  toIlikePattern,
 } from "@/search/model/query";
 import type { SearchResult } from "@/search/model/results";
 
 export const searchQueryKeys = {
   org: (organizationId: number, query: string) =>
     ["search", "org", organizationId, query] as const,
+};
+
+type FtsOptions = {
+  organizationId: number;
+  orgSlug: string;
+  query: string;
 };
 
 type CourseHit = {
@@ -23,17 +29,16 @@ type MaterialHit = {
   unit_id: number | null;
 };
 
-export async function searchCoursesByTitle(args: {
-  organizationId: number;
-  orgSlug: string;
-  query: string;
-}): Promise<SearchResult[]> {
+export async function searchCourses(args: FtsOptions): Promise<SearchResult[]> {
+  const fts = prefixSearchVectorFilter(args.query);
+  if (!fts) return [];
+
   const db = requireSupabase();
   const { data, error } = await db
     .from("courses")
     .select("id, title")
     .eq("organization_id", args.organizationId)
-    .ilike("title", toIlikePattern(args.query))
+    .filter(fts.column, fts.operator, fts.value)
     .order("title")
     .limit(searchResultLimit());
 
@@ -47,11 +52,10 @@ export async function searchCoursesByTitle(args: {
   }));
 }
 
-export async function searchMaterialsByTitle(args: {
-  organizationId: number;
-  orgSlug: string;
-  query: string;
-}): Promise<SearchResult[]> {
+export async function searchMaterials(args: FtsOptions): Promise<SearchResult[]> {
+  const fts = prefixSearchVectorFilter(args.query);
+  if (!fts) return [];
+
   const db = requireSupabase();
   const { data, error } = await db
     .from("materials")
@@ -59,7 +63,7 @@ export async function searchMaterialsByTitle(args: {
     .eq("organization_id", args.organizationId)
     .not("course_id", "is", null)
     .is("deleted_at", null)
-    .ilike("title", toIlikePattern(args.query))
+    .filter(fts.column, fts.operator, fts.value)
     .order("title")
     .limit(searchResultLimit());
 

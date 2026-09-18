@@ -88,12 +88,16 @@ export function BatchCreateStudentsForm({
             <StudentProfileFields
               name={draft.name}
               parentEmail={draft.parentEmail}
+              studentEmail={draft.studentEmail}
               gradeLevel={draft.gradeLevel}
               gradeLabels={gradeLabels}
               disabled={saving}
               onNameChange={(name) => onDraftChange(index, { ...draft, name })}
               onParentEmailChange={(parentEmail) =>
                 onDraftChange(index, { ...draft, parentEmail })
+              }
+              onStudentEmailChange={(studentEmail) =>
+                onDraftChange(index, { ...draft, studentEmail })
               }
               onGradeLevelChange={(gradeLevel) =>
                 onDraftChange(index, { ...draft, gradeLevel })

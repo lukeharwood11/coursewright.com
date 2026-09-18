@@ -4,6 +4,8 @@ import { Badge } from "@/ui/Badge";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { enrollmentStatusLabel } from "@/roster/model/enrollment";
 import { StudentProfileFields } from "./components/StudentProfileFields";
+import { ParentInvitePanel } from "./components/ParentInvitePanel";
+import { useParentInvite } from "./hooks/useParentInvite";
 import {
   STUDENT_PROFILE_FORM_ID,
   useStudentProfile,
@@ -11,6 +13,7 @@ import {
 
 export function StudentProfilePage() {
   const profile = useStudentProfile();
+  const parentInvite = useParentInvite(profile.student?.id ?? null);
 
   useEffect(() => {
     document.title = profile.student
@@ -66,7 +69,8 @@ export function StudentProfilePage() {
             {profile.student.name}
           </h1>
           <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
-            Org-level student profile — no login in Course Wright yet.
+            Org-level student profile. Parents (and an optional student email)
+            sign in with an invite to see this student’s work.
           </p>
         </div>
         <PageFormActions
@@ -84,12 +88,15 @@ export function StudentProfilePage() {
       >
         <StudentProfileFields
           name={profile.name}
-          parentEmail={profile.parentEmail}
+          parentEmail={profile.student.parentEmail ?? ""}
+          studentEmail={profile.studentEmail}
           gradeLevel={profile.gradeLevel}
           gradeLabels={profile.gradeLabels}
           disabled={profile.saving}
+          showParentEmail={false}
           onNameChange={profile.setName}
-          onParentEmailChange={profile.setParentEmail}
+          onParentEmailChange={() => undefined}
+          onStudentEmailChange={profile.setStudentEmail}
           onGradeLevelChange={profile.setGradeLevel}
         />
         {profile.formError ? (
@@ -98,6 +105,25 @@ export function StudentProfilePage() {
           </p>
         ) : null}
       </form>
+
+      <ParentInvitePanel
+        parentEmail={profile.student.parentEmail}
+        studentEmail={profile.student.studentEmail}
+        canInvite={parentInvite.canInvite}
+        loading={parentInvite.loading}
+        loadError={parentInvite.loadError}
+        pending={parentInvite.pending}
+        linked={parentInvite.linked}
+        addEmail={parentInvite.addEmail}
+        invitingEmail={parentInvite.invitingEmail}
+        cancelingId={parentInvite.cancelingId}
+        copiedId={parentInvite.copiedId}
+        origin={parentInvite.origin}
+        onAddEmailChange={parentInvite.setAddEmail}
+        onInvite={parentInvite.onInvite}
+        onCopy={parentInvite.onCopy}
+        onCancel={parentInvite.onCancel}
+      />
 
       <div className="mt-6 grid items-start gap-4 lg:grid-cols-2">
         <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">

@@ -5,7 +5,7 @@
 **URL (material, course, top-level):** `/my/<org-slug>/courses/<course_id>/materials/<material_id>/print`  
 **URL (material, course, in unit):** `/my/<org-slug>/courses/<course_id>/units/<unit_id>/materials/<material_id>/print`  
 **URL (unit, course):** `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print`  
-**URL (this week):** `/my/<org-slug>/print-this-week`  
+**URL (this week):** `/my/<org-slug>/print-this-week` (optional `?students=<id>,<id>` for active students on the parent home)  
 **URL (material / unit, template, P1):** same `/print` suffix on the template URL tree  
 **URL map:** [URLS.md](../URLS.md)
 
@@ -33,7 +33,7 @@ One composition: **generate a PDF** of the grain, **preview that PDF** in the pa
 |-------|-------------|
 | **Material** | One material by kind — **page:** blocks in order; **link:** title + URL/QR; **file:** if the attached file is already a PDF/image, prefer previewing **that file**; otherwise a cover sheet (title, description). Video blocks → title + URL/QR, not a player frame. |
 | **Unit** | Materials in `position` order as one packet; page breaks **between** materials. |
-| **This week** | Current Sunday–Saturday dated materials (+ important now, if any), grouped like [ORG_HOME](./ORG_HOME.md) (e.g. by student/course). Page breaks between materials. |
+| **This week** | Current Sunday–Saturday dated materials (+ important now, if any) for **active** students on parent home, grouped like [ORG_HOME](./ORG_HOME.md) (e.g. by student/course). Page breaks between materials. Optional `?students=` filters the packet. |
 
 **Not on this page:** print whole course (out of scope).
 

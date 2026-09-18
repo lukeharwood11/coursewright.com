@@ -9,20 +9,26 @@ const selectClass = [
 export function StudentProfileFields({
   name,
   parentEmail,
+  studentEmail,
   gradeLevel,
   gradeLabels,
   disabled,
+  showParentEmail = true,
   onNameChange,
   onParentEmailChange,
+  onStudentEmailChange,
   onGradeLevelChange,
 }: {
   name: string;
   parentEmail: string;
+  studentEmail: string;
   gradeLevel: string;
   gradeLabels: string[];
   disabled?: boolean;
+  showParentEmail?: boolean;
   onNameChange: (value: string) => void;
   onParentEmailChange: (value: string) => void;
+  onStudentEmailChange: (value: string) => void;
   onGradeLevelChange: (value: string) => void;
 }) {
   return (
@@ -37,15 +43,31 @@ export function StudentProfileFields({
           autoComplete="off"
         />
       </label>
+      {showParentEmail ? (
+        <label className="flex flex-col gap-1">
+          <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+            Parent email
+          </span>
+          <Input
+            className="w-full"
+            type="email"
+            value={parentEmail}
+            onChange={(event) => onParentEmailChange(event.target.value)}
+            disabled={disabled}
+            autoComplete="off"
+            placeholder="optional"
+          />
+        </label>
+      ) : null}
       <label className="flex flex-col gap-1">
         <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-          Parent email
+          Student email
         </span>
         <Input
           className="w-full"
           type="email"
-          value={parentEmail}
-          onChange={(event) => onParentEmailChange(event.target.value)}
+          value={studentEmail}
+          onChange={(event) => onStudentEmailChange(event.target.value)}
           disabled={disabled}
           autoComplete="off"
           placeholder="optional"

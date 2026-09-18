@@ -69,9 +69,11 @@ export function StudentRosterList({
                 <span className="block truncate text-[15.5px] font-extrabold text-[var(--ink)]">
                   {student.name}
                 </span>
-                {student.parentEmail ? (
+                {student.parentEmail || student.studentEmail ? (
                   <span className="mt-0.5 block truncate text-[12.5px] text-[var(--ink-faint)]">
-                    {student.parentEmail}
+                    {[student.parentEmail, student.studentEmail]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </span>
                 ) : null}
               </Link>

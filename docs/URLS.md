@@ -11,7 +11,7 @@
 | Marketing / public site | `coursewright.com/…` | No auth required |
 | Signed-in app | `coursewright.com/my/<org-slug>/…` | Org permalink scopes the session |
 | Account (cross-org) | `coursewright.com/my/settings` | Outside a specific org |
-| Auth | `/login`, `/signup`, invite claim URLs | Outside `/my` |
+| Auth | `/login`, `/signup`, `/invite/<token>` | Outside `/my` |
 | Share / deep links | Short entry URLs that resolve into `/my/…` after login | Account required in P0 — paths TBD |
 
 `<org-slug>` = organization permalink ([FEATURES.md](./FEATURES.md) — changing it warns that links break; no auto-redirect in P0).
@@ -41,7 +41,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 |------|-----|-------|
 | [LOGIN](./pages/LOGIN.md) | `/login` | Email + password, magic link, Google |
 | [SIGNUP](./pages/SIGNUP.md) | `/signup` | Email + password or Google; signs the person in on success |
-| Invite claim | <!-- TBD --> | No page file until path locked |
+| [INVITE_CLAIM](./pages/INVITE_CLAIM.md) | `/invite/<token>` | Parent or staff invite (`parent` / owner / admin / instructor). Sign in first, then accept. **v0: no email send** — copy the link |
 | Auth callback | <!-- TBD — may be Supabase-hosted --> | |
 
 ---
@@ -123,7 +123,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 | [PRINT](./pages/PRINT.md) (material, top-level) | `/my/<org-slug>/courses/<course_id>/materials/<material_id>/print` | Same on template tree (**P1**) |
 | [PRINT](./pages/PRINT.md) (material, in unit) | `…/units/<unit_id>/materials/<material_id>/print` | |
 | [PRINT](./pages/PRINT.md) (unit) | `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print` | Packet in material order |
-| [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Parent dashboard grain; Sun–Sat + important now |
+| [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Parent dashboard grain; Sun–Sat + important now. Optional `?students=` limits to active students |
 
 **Do not use** `?print=1` on the source page — print is its own chrome-free screen with a real PDF viewer.
 
@@ -151,7 +151,6 @@ Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / un
 
 | Concern | Status |
 |---------|--------|
-| Invite claim URLs | TBD |
 | Resource share entry URLs | TBD |
 | Search as a route vs overlay | TBD |
 
@@ -159,5 +158,5 @@ Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / un
 
 ## Open questions
 
-1. **Share / invite links** — `/invite/<token>`, `/s/<token>`, or other?
+1. **Share / resource links** — `/s/<token>` or other? Staff invites use `/invite/<token>`.
 2. **Search** — overlay only, or `/my/<org-slug>/search`?

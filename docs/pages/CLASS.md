@@ -25,9 +25,9 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 ## Data shown
 
 - Class **name** (title)
-- Members: **name**, optional **grade**, optional parent email
+- Members: **name**, optional **grade**, optional parent / student email
 - Batch picker of org students not already in the class
-- New-student draft rows: name (required), parent email, grade (org scheme)
+- New-student draft rows: name (required), parent email, student email, grade (org scheme)
 
 ## Contents
 

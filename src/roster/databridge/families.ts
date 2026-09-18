@@ -43,6 +43,7 @@ type StudentEmbed = {
   name: string;
   grade_level: string | null;
   parent_email: string | null;
+  student_email: string | null;
 };
 
 type FamilyMemberEmbed = {
@@ -74,7 +75,7 @@ const FAMILY_SELECT = `
     student_profile_id,
     display_name,
     student:student_profiles!family_members_student_profile_id_fkey(
-      id, organization_id, name, grade_level, parent_email
+      id, organization_id, name, grade_level, parent_email, student_email
     )
   )
 `;
@@ -91,6 +92,7 @@ function toStudentSummary(row: StudentEmbed): StudentSummary {
     name: row.name,
     gradeLevel: row.grade_level,
     parentEmail: row.parent_email,
+    studentEmail: row.student_email,
   };
 }
 
