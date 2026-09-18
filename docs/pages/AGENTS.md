@@ -55,7 +55,7 @@ Org pages share a **collapsible sidebar** (overlay drawer on small screens). Whe
 - [ORG_SETTINGS](./ORG_SETTINGS.md)
 - [ORG_PICKER](./ORG_PICKER.md) — switch org
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
-- Search — staff chrome overlay (pages / courses / units / materials / files; type facet); dedicated route still TBD
+- Search — staff chrome overlay (pages / courses / materials); dedicated route still TBD
 
 [TEMPLATE_LIST](./TEMPLATE_LIST.md) is **P1** — do not put templates in P0 org chrome.
 [FAMILIES](./FAMILIES.md) / [FAMILY](./FAMILY.md) remain product outlines but are **not currently in org chrome or routes**.

@@ -3,7 +3,6 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Input } from "@/ui/Input";
 import { useOrgSearch } from "@/search/hooks/useOrgSearch";
 import { SearchResultCard } from "./SearchResultCard";
-import { SearchTypeFilters } from "./SearchTypeFilters";
 
 type Props = {
   organizationId: number;
@@ -16,8 +15,6 @@ export function OrgSearchBar({ organizationId, orgSlug }: Props) {
   const {
     query,
     setQuery,
-    typeFilter,
-    setTypeFilter,
     open,
     setOpen,
     results,
@@ -67,7 +64,7 @@ export function OrgSearchBar({ organizationId, orgSlug }: Props) {
           aria-controls={listId}
           aria-autocomplete="list"
           autoComplete="off"
-          placeholder="Search courses, units, materials…"
+          placeholder="Search pages, courses, materials…"
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
@@ -78,38 +75,35 @@ export function OrgSearchBar({ organizationId, orgSlug }: Props) {
         />
       </div>
       {open ? (
-        <div className="absolute right-0 z-40 mt-2 w-[min(100vw-2rem,24rem)] rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-2 shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
-          <SearchTypeFilters value={typeFilter} onChange={setTypeFilter} />
-          <div
-            id={listId}
-            role="listbox"
-            className="max-h-[min(24rem,70vh)] overflow-y-auto"
-          >
-            {loading ? (
-              <p className="px-2 py-3 text-[13px] text-[var(--ink-soft)]">
-                Searching…
-              </p>
-            ) : null}
-            {!loading && error ? (
-              <p className="px-2 py-3 text-[13px] text-[var(--amber-deep)]">
-                {error}
-              </p>
-            ) : null}
-            {!loading && !error && results.length === 0 ? (
-              <p className="px-2 py-3 text-[13px] text-[var(--ink-soft)]">
-                No matches.
-              </p>
-            ) : null}
-            {!loading && !error && results.length > 0 ? (
-              <ul className="flex flex-col gap-1.5">
-                {results.map((result) => (
-                  <li key={result.id} role="option">
-                    <SearchResultCard result={result} onSelect={clear} />
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
+        <div
+          id={listId}
+          role="listbox"
+          className="absolute right-0 z-40 mt-2 w-[min(100vw-2rem,24rem)] rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-2 shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
+        >
+          {loading ? (
+            <p className="px-2 py-3 text-[13px] text-[var(--ink-soft)]">
+              Searching…
+            </p>
+          ) : null}
+          {!loading && error ? (
+            <p className="px-2 py-3 text-[13px] text-[var(--amber-deep)]">
+              {error}
+            </p>
+          ) : null}
+          {!loading && !error && results.length === 0 ? (
+            <p className="px-2 py-3 text-[13px] text-[var(--ink-soft)]">
+              No matches.
+            </p>
+          ) : null}
+          {!loading && !error && results.length > 0 ? (
+            <ul className="flex flex-col gap-1.5">
+              {results.map((result) => (
+                <li key={result.id} role="option">
+                  <SearchResultCard result={result} onSelect={clear} />
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       ) : null}
     </div>

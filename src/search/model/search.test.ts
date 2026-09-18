@@ -1,13 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { filterPageResults, staffSearchPages } from "./pages";
-import { searchResultLimit, toPrefixTsQuery } from "./query";
+import { toPrefixTsQuery } from "./query";
 import {
-  includesSearchType,
   mergeSearchResults,
   rankSearchResults,
   searchResultTypeLabel,
-  searchTypeFilterLabel,
   type SearchResult,
 } from "./results";
 
@@ -20,18 +18,10 @@ test("toPrefixTsQuery builds AND prefix terms and strips operators", () => {
   assert.equal(toPrefixTsQuery("   "), null);
 });
 
-test("searchResultLimit is smaller when searching every type", () => {
-  assert.equal(searchResultLimit(false), 5);
-  assert.equal(searchResultLimit(true), 8);
-});
-
-test("type filter labels stay sentence-case product words", () => {
-  assert.equal(searchTypeFilterLabel("all"), "All");
-  assert.equal(searchResultTypeLabel("unit"), "Unit");
-  assert.equal(searchResultTypeLabel("file"), "File");
-  assert.equal(includesSearchType("all", "course"), true);
-  assert.equal(includesSearchType("unit", "course"), false);
-  assert.equal(includesSearchType("file", "file"), true);
+test("searchResultTypeLabel covers this slice’s types", () => {
+  assert.equal(searchResultTypeLabel("page"), "Page");
+  assert.equal(searchResultTypeLabel("course"), "Course");
+  assert.equal(searchResultTypeLabel("material"), "Material");
 });
 
 test("filterPageResults matches staff destinations by title", () => {

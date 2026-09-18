@@ -19,15 +19,8 @@ export function SearchResultCard({ result, onSelect }: Props) {
     >
       <div className="flex items-start gap-2">
         <Badge variant="slate">{searchResultTypeLabel(result.type)}</Badge>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-[14px] font-semibold text-[var(--ink)]">
-            {result.title}
-          </span>
-          {result.detail ? (
-            <span className="mt-0.5 block truncate text-[12px] text-[var(--ink-soft)]">
-              {result.detail}
-            </span>
-          ) : null}
+        <span className="min-w-0 flex-1 truncate text-[14px] font-semibold text-[var(--ink)]">
+          {result.title}
         </span>
       </div>
     </Link>

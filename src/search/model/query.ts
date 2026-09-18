@@ -1,6 +1,5 @@
 const MIN_QUERY_LENGTH = 1;
-const RESULT_LIMIT_ALL = 5;
-const RESULT_LIMIT_TYPED = 8;
+const RESULT_LIMIT = 8;
 
 export function normalizeSearchQuery(raw: string): string {
   return raw.trim().replace(/\s+/g, " ");
@@ -23,6 +22,6 @@ export function toPrefixTsQuery(query: string): string | null {
   return terms.map((term) => `${term}:*`).join(" & ");
 }
 
-export function searchResultLimit(scopedToType: boolean): number {
-  return scopedToType ? RESULT_LIMIT_TYPED : RESULT_LIMIT_ALL;
+export function searchResultLimit(): number {
+  return RESULT_LIMIT;
 }
