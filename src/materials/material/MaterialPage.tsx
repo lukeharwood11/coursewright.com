@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PrinterIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
@@ -16,7 +16,11 @@ import { unitPath } from "@/units/model/paths";
 import { useMaterial } from "./hooks/useMaterial";
 import { FileMaterialBody } from "./components/FileMaterialBody";
 import { VisibilityBanner } from "./components/VisibilityBanner";
-import { PageContentView } from "./components/PageContentView";
+
+const PageContentView = lazy(async () => {
+  const module = await import("./components/PageContentView");
+  return { default: module.PageContentView };
+});
 
 export function MaterialPage() {
   const page = useMaterial();
@@ -271,9 +275,13 @@ function MaterialBody({
   }
 
   return (
-    <PageContentView
-      blocks={page.blocks}
-      viewKey={`${material.id}-${page.blocks.map((block) => block.id).join("-")}`}
-    />
+    <Suspense
+      fallback={<p className="text-[14px] text-[var(--ink-soft)]">Loading page…</p>}
+    >
+      <PageContentView
+        blocks={page.blocks}
+        viewKey={`${material.id}-${page.blocks.map((block) => block.id).join("-")}`}
+      />
+    </Suspense>
   );
 }

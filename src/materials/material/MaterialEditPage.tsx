@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
@@ -8,8 +8,12 @@ import { replaceFile, revertFileToVersion, listFileVersions } from "@/materials/
 import { materialPath } from "@/materials/model/paths";
 import { useMaterialEdit } from "./hooks/useMaterialEdit";
 import { VisibilityBanner } from "./components/VisibilityBanner";
-import { PageContentEditor } from "./components/PageContentEditor";
 import { fileQueryKeys } from "@/materials/databridge/files";
+
+const PageContentEditor = lazy(async () => {
+  const module = await import("./components/PageContentEditor");
+  return { default: module.PageContentEditor };
+});
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -162,12 +166,20 @@ export function MaterialEditPage() {
               version is stored only if this page changed.
             </p>
             <div className="mt-3">
-              <PageContentEditor
-                blocks={page.blocks}
-                editorKey={`${page.material.id}-${edit.editorEpoch}`}
-                editable
-                onDraftChange={edit.onDraftChange}
-              />
+              <Suspense
+                fallback={
+                  <p className="text-[14px] text-[var(--ink-soft)]">
+                    Loading editor…
+                  </p>
+                }
+              >
+                <PageContentEditor
+                  blocks={page.blocks}
+                  editorKey={`${page.material.id}-${edit.editorEpoch}`}
+                  editable
+                  onDraftChange={edit.onDraftChange}
+                />
+              </Suspense>
             </div>
           </section>
         ) : null}
