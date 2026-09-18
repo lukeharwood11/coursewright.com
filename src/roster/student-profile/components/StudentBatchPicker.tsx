@@ -82,7 +82,8 @@ export function StudentBatchPicker({
             ))}
           </select>
           <span className="text-[12.5px] text-[var(--ink-faint)]">
-            Checks that class’s members who aren’t already here. Not a live link.
+            Adds those students now. If the class changes later, this list
+            won’t update on its own.
           </span>
         </label>
       ) : null}

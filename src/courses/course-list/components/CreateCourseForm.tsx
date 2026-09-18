@@ -76,8 +76,8 @@ export function CreateCourseForm({
     >
       <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Create course</h2>
       <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-        You can print what you make without adding a roster. New courses start
-        unpublished so families don’t see them until you publish.
+        You can print what you make without adding students. Families won’t see
+        a new course until you publish it.
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -115,8 +115,8 @@ export function CreateCourseForm({
             ))}
           </select>
           <span className="text-[12px] text-[var(--ink-faint)]">
-            Copies units and materials only. No roster, and no live sync. The
-            new course starts unpublished.
+            Copies the units and materials. Students are not copied. Families
+            won’t see the new course until you publish it.
           </span>
         </label>
       ) : null}
@@ -149,7 +149,7 @@ export function CreateCourseForm({
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
           <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-            Subject / area (optional)
+            Subject (optional)
           </span>
           <Input
             className="w-full"
@@ -207,8 +207,8 @@ export function CreateCourseForm({
           <option value="archived">Archived</option>
         </select>
         <span className="text-[12px] text-[var(--ink-faint)]">
-          Active means this offering is running. Families still only see it
-          after you publish.
+          Active courses are in use this term. Families still only see a course
+          after you publish it.
         </span>
       </label>
 

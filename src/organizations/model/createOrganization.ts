@@ -23,11 +23,11 @@ export function validateCreateOrganization(
   if (!isValidSlug(slug)) {
     return {
       ok: false,
-      error: "Permalink must be 2–60 letters, numbers, or hyphens.",
+      error: "Web address must be 2–60 letters, numbers, or hyphens.",
     };
   }
   if (isReservedSlug(slug)) {
-    return { ok: false, error: "That permalink is reserved. Try another." };
+    return { ok: false, error: "That web address is reserved. Try another." };
   }
 
   return { ok: true, value: { name, slug } };

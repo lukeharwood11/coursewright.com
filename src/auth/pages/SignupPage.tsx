@@ -23,6 +23,7 @@ export function SignupPage() {
       }
       googleLabel="Sign up with Google"
       submitLabel="Create account"
+      passwordSignUp
       footer={
         <p>
           Already have an account?{" "}

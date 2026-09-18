@@ -75,7 +75,7 @@ export function validateStudentProfile(
   let gradeLevel: string | null = null;
   if (gradeLevelRaw) {
     if (!input.gradeLabels.includes(gradeLevelRaw)) {
-      return { ok: false, error: "Grade must match this organization’s grade scheme." };
+      return { ok: false, error: "Pick a grade from this organization’s list." };
     }
     gradeLevel = gradeLevelRaw;
   }

@@ -123,6 +123,8 @@ Other drafts kept for reference (not in use):
 7. **Reuse without rework** — P0: create a course from another course. **P1:** templates with linked copies and optional promote.
 8. **We bill the org** — Course Wright charges organizations so they can serve parents. Parent-pay is later.
 
+**Public site:** Keep this positioning, but do **not** paste the Microsoft / WhatsApp / Outlook (or SharePoint) example onto marketing pages — that’s one person’s inspiration, not customer-facing copy. Talk about scattered folders, chats, and email in general. Pricing is an invite-only pilot; do not show plan options.
+
 ---
 
 ## Product naming conventions

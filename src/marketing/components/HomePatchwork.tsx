@@ -4,9 +4,9 @@ import { ChatBubbleLeftRightIcon, EnvelopeIcon, FolderIcon } from "@heroicons/re
 type OutlineIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 const today: { name: string; use: string; icon: OutlineIcon }[] = [
-  { name: "Microsoft folders", use: "Files for lesson materials", icon: FolderIcon },
-  { name: "WhatsApp", use: "Day-to-day chatter", icon: ChatBubbleLeftRightIcon },
-  { name: "Outlook", use: "Parent email", icon: EnvelopeIcon },
+  { name: "Shared folders", use: "Lesson files", icon: FolderIcon },
+  { name: "Group chats", use: "Day-to-day questions", icon: ChatBubbleLeftRightIcon },
+  { name: "Email", use: "Updates for families", icon: EnvelopeIcon },
 ];
 
 export function HomePatchwork() {
@@ -19,11 +19,12 @@ export function HomePatchwork() {
             className="mt-1 text-[22px] font-semibold text-[var(--ink)]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Most co-ops stitch together a patchwork
+            Materials shouldn’t live in three places
           </h2>
           <p className="mt-3 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-            Google Classroom is often too heavy-handed for this size. Course Wright
-            replaces the scatter with one hub — and wins on usability first.
+            Most co-ops and micro-schools already have a way to share files, chat,
+            and email parents. Course Wright puts the course itself in one hub
+            that’s easy to open — especially on a phone.
           </p>
         </div>
         <ul className="flex flex-col gap-3">

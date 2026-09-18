@@ -13,7 +13,7 @@ export function OrgNotFound({ error }: { error: string | null }) {
         We couldn’t find that organization
       </h1>
       <p className="text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-        The permalink may have changed, or you may not be a member. Choose an
+        The web address may have changed, or you may not be a member. Choose an
         organization you belong to.
       </p>
       {error ? (

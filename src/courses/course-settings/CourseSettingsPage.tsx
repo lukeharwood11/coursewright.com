@@ -162,7 +162,8 @@ export function CourseSettingsPage() {
               </label>
             </div>
             <p className="mt-2 text-[12px] text-[var(--ink-faint)]">
-              Dates are informational only — they don’t control access.
+              These dates are for your records. They don’t change who can see
+              the course.
             </p>
             <label className="mt-3 flex flex-col gap-1">
               <span className="text-[13px] font-bold text-[var(--ink-soft)]">Status</span>
@@ -175,8 +176,8 @@ export function CourseSettingsPage() {
                 <option value="archived">Archived</option>
               </select>
               <span className="text-[12px] text-[var(--ink-faint)]">
-                Active means this offering is running. Families still only see it
-                after you publish.
+                Active courses are in use this term. Families still only see a
+                course after you publish it.
               </span>
             </label>
           </section>
@@ -188,9 +189,11 @@ export function CourseSettingsPage() {
 
         <div className="grid gap-4">
           <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-            <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Catalog</h2>
+            <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">
+              How it appears
+            </h2>
             <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-              How this course shows up in your list.
+              Optional details for the course list.
             </p>
             <div className="mt-4">
               <CourseIconPicker
@@ -201,7 +204,7 @@ export function CourseSettingsPage() {
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <label className="flex flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-                  Subject / area
+                  Subject
                 </span>
                 <Input
                   className="w-full"

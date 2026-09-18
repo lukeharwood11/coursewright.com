@@ -87,7 +87,7 @@ export function AddMaterialForm({
       ) : null}
       <label className="mt-3 flex flex-col gap-1">
         <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-          Date for this week (optional)
+          Date (optional)
         </span>
         <Input
           className="w-full"
@@ -95,6 +95,9 @@ export function AddMaterialForm({
           value={add.scheduledDate}
           onChange={(event) => add.setScheduledDate(event.target.value)}
         />
+        <span className="text-[12px] text-[var(--ink-faint)]">
+          If you set a date, this shows up on parents’ This week page that week.
+        </span>
       </label>
       {add.formError ? (
         <p className="mt-3 text-[13px] text-[var(--amber-deep)]" role="alert">

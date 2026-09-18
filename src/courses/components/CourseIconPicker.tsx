@@ -26,7 +26,7 @@ export function CourseIconPicker({
     <fieldset>
       <legend className="text-[13px] font-bold text-[var(--ink-soft)]">Icon</legend>
       <p className="mt-1 text-[12px] text-[var(--ink-faint)]">
-        Optional. Shows on the course card in your catalog.
+        Optional. Shows next to this course in your course list.
         {selectedLabel ? ` Selected: ${selectedLabel}.` : " None selected."}
       </p>
       <div className="mt-2 flex flex-wrap gap-2">

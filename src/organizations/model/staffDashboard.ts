@@ -123,7 +123,7 @@ export function buildStaffDashboard(source: StaffDashboardSource): StaffDashboar
         kind: "unpublished_with_roster",
         courseId: course.id,
         courseTitle: course.title,
-        message: `${course.title} is unpublished but has enrolled students`,
+        message: `${course.title} isn’t published yet, but students are enrolled`,
       });
     }
     if (enrolled > 0 && (datedCounts.get(course.id) ?? 0) === 0) {

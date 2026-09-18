@@ -29,10 +29,10 @@ P0 sales landing — brand-first entry that explains Course Wright and drives si
 
 - Brand / wordmark as hero-level signal (not nav-only)
 - Tagline: Plan wright. Share wright. Course Wright. / Courses, done wright.
-- Short value props aligned with vision: one hub for materials, share including **print**, lighter than Google Classroom, built for co-ops
+- Short value props aligned with vision: one place for materials, share including **print**, built for co-ops — **without naming specific third-party tools**
 - Primary CTA → [SIGNUP](./SIGNUP.md) (and/or product after auth)
 - Secondary links: [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [PRIVACY](./PRIVACY.md), [LOGIN](./LOGIN.md)
-- TBD: exact section copy, imagery, and layout (follow [STYLE_GUIDE.md](../STYLE_GUIDE.md) / branding when designed)
+- TBD: exact hero media (follow [STYLE_GUIDE.md](../STYLE_GUIDE.md) / branding when designed). Public copy stays general — do not paste the internal “WhatsApp / Outlook / SharePoint” inspiration onto the page.
 
 ## Primary actions
 

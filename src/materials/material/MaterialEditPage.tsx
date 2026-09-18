@@ -148,7 +148,7 @@ export function MaterialEditPage() {
           ) : null}
           <label className="mt-3 flex flex-col gap-1">
             <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-              Date for this week (optional)
+              Date (optional)
             </span>
             <Input
               className="w-full"
@@ -156,6 +156,9 @@ export function MaterialEditPage() {
               value={edit.scheduledDate}
               onChange={(event) => edit.setScheduledDate(event.target.value)}
             />
+            <span className="text-[12px] text-[var(--ink-faint)]">
+              If you set a date, this shows up on parents’ This week page that week.
+            </span>
           </label>
         </div>
 
