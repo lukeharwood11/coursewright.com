@@ -11,7 +11,7 @@ alter table public.student_profiles
   );
 
 comment on column public.student_profiles.student_email is
-  'Optional student contact email. Invite uses parent claim path; student role is P2.';
+  'Optional student contact email. Invite uses parent claim path; student role is P2. HN-013';
 
 comment on column public.student_profiles.parent_email is
   'Optional first parent email for search/create. Additional parents live on parent_student_links and admin_invites.';
