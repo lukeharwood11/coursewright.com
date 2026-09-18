@@ -4,6 +4,8 @@ import { Badge } from "@/ui/Badge";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { enrollmentStatusLabel } from "@/roster/model/enrollment";
 import { StudentProfileFields } from "./components/StudentProfileFields";
+import { ParentInvitePanel } from "./components/ParentInvitePanel";
+import { useParentInvite } from "./hooks/useParentInvite";
 import {
   STUDENT_PROFILE_FORM_ID,
   useStudentProfile,
@@ -11,6 +13,7 @@ import {
 
 export function StudentProfilePage() {
   const profile = useStudentProfile();
+  const parentInvite = useParentInvite(profile.student?.id ?? null);
 
   useEffect(() => {
     document.title = profile.student
@@ -98,6 +101,22 @@ export function StudentProfilePage() {
           </p>
         ) : null}
       </form>
+
+      <ParentInvitePanel
+        parentEmail={profile.student.parentEmail}
+        canInvite={parentInvite.canInvite}
+        loading={parentInvite.loading}
+        loadError={parentInvite.loadError}
+        pendingEmail={parentInvite.pending?.email ?? null}
+        linked={parentInvite.linked}
+        inviting={parentInvite.inviting}
+        canceling={parentInvite.canceling}
+        copied={parentInvite.copied}
+        inviteUrl={parentInvite.inviteUrl}
+        onInvite={parentInvite.onInvite}
+        onCopy={parentInvite.onCopy}
+        onCancel={parentInvite.onCancel}
+      />
 
       <div className="mt-6 grid items-start gap-4 lg:grid-cols-2">
         <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">

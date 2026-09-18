@@ -15,14 +15,14 @@ Create an account with **email magic link / OTP** or **Google**. Password sign-u
 ## Behavior
 
 - Unauthenticated account creation (email OTP / magic link or Google). No password field.
-- On success: invite claim when token present (path TBD), else `/my` to pick/create org.
+- On success: [INVITE_CLAIM](./INVITE_CLAIM.md) when `next=/invite/<token>`, else `/my` to pick/create org (pending staff requests also show there).
 - Anyone may create an org after signup (creator = first owner) via org picker.
 
 ## Data shown
 
 - Wordmark and create-account copy
 - Auth controls (Google, email) — no org list until after success
-- Invite-aware messaging when claiming a seat / parent invite (TBD)
+- Invite-aware messaging when claiming an invite (`next=/invite/<token>`) — use the invited email
 - Validation / error messages (TBD)
 
 ## Contents
@@ -42,14 +42,14 @@ Create an account with **email magic link / OTP** or **Google**. Password sign-u
 
 ## After success
 
-- Invite claim flow when token present (path TBD)
-- Else → `/my` to pick or create org
+- [INVITE_CLAIM](./INVITE_CLAIM.md) when token present
+- Else → `/my` to pick or create org (pending requests on [ORG_PICKER](./ORG_PICKER.md))
 
 ## Links to
 
 - [LOGIN](./LOGIN.md) — existing account
-- [ORG_PICKER](./ORG_PICKER.md) — after success (pick or create org)
-- Invite claim entry — TBD (no page file until path locked)
+- [ORG_PICKER](./ORG_PICKER.md) — after success (pick or create org; pending invite requests)
+- [INVITE_CLAIM](./INVITE_CLAIM.md) — when `next=/invite/<token>`
 
 ## Notes
 

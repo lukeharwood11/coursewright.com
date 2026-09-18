@@ -1,16 +1,20 @@
 import { useEffect } from "react";
 import { CreateOrganizationForm } from "./components/CreateOrganizationForm";
 import { OrgList } from "./components/OrgList";
+import { PendingInvites } from "./components/PendingInvites";
 import { useOrgPicker } from "./hooks/useOrgPicker";
+import { usePendingStaffInvites } from "./hooks/usePendingStaffInvites";
 
 export function OrgPickerPage() {
   const picker = useOrgPicker();
+  const pending = usePendingStaffInvites();
 
   useEffect(() => {
     document.title = "Organizations · Course Wright";
   }, []);
 
-  const isEmpty = !picker.loading && picker.memberships.length === 0;
+  const noMemberships = !picker.loading && picker.memberships.length === 0;
+  const isEmpty = noMemberships && !pending.loading && pending.invites.length === 0;
 
   return (
     <div className="max-w-lg px-5 py-8 md:px-8">
@@ -38,6 +42,19 @@ export function OrgPickerPage() {
         </p>
       ) : null}
 
+      {pending.loadError ? (
+        <p className="mt-6 text-[13.5px] text-[var(--amber-deep)]" role="alert">
+          {pending.loadError}
+        </p>
+      ) : null}
+
+      <PendingInvites
+        invites={pending.invites}
+        acceptingId={pending.acceptingId}
+        error={pending.acceptError}
+        onAccept={pending.onAccept}
+      />
+
       {!picker.loading && picker.memberships.length > 0 ? (
         <div className="mt-6">
           <OrgList memberships={picker.memberships} />
@@ -57,7 +74,7 @@ export function OrgPickerPage() {
           slug={picker.slug}
           error={picker.formError}
           submitting={picker.creating}
-          emptyState={isEmpty}
+          emptyState={noMemberships}
           onNameChange={picker.onNameChange}
           onSlugChange={picker.onSlugChange}
           onSubmit={picker.onCreate}

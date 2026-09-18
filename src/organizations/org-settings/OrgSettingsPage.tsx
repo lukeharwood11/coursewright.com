@@ -2,18 +2,20 @@ import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { BillingPlaceholder } from "@/billing";
 import { PageFormActions } from "@/ui/PageFormActions";
-import { toastNotImplemented } from "@/ui/toast";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
   ORG_SETTINGS_FORM_ID,
   OrgSettingsForm,
 } from "./components/OrgSettingsForm";
+import { StaffSection } from "./components/StaffSection";
 import { useOrgSettings } from "./hooks/useOrgSettings";
+import { useOrgStaff } from "./hooks/useOrgStaff";
 
 export function OrgSettingsPage() {
   const { orgSlug } = useParams();
   const shell = useOrgShell();
   const settings = useOrgSettings(orgSlug);
+  const staff = useOrgStaff(settings.organization?.id, settings.role);
 
   useEffect(() => {
     const name = shell.organization.name;
@@ -77,7 +79,7 @@ export function OrgSettingsPage() {
           </h1>
           <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
             {settings.canEdit
-              ? "Name, permalink, type, and how grades work."
+              ? "Name, permalink, type, grades, and who can help run this organization."
               : "Only owners and admins can change these settings."}
           </p>
         </div>
@@ -112,32 +114,35 @@ export function OrgSettingsPage() {
         />
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <section
-          className={`rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5 ${
-            settings.showBilling ? "" : "lg:col-span-2"
-          }`}
-        >
-          <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Staff</h2>
-          <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink-soft)]">
-            Invite owners, admins, and instructors, and change roles, from this
-            page next.
-          </p>
-          {settings.canEdit ? (
-            <div className="mt-4">
-              <button
-                type="button"
-                className="text-[13px] font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-                onClick={() => toastNotImplemented("Invite staff")}
-              >
-                Invite staff
-              </button>
-            </div>
-          ) : null}
-        </section>
-
-        {settings.showBilling ? <BillingPlaceholder /> : null}
+      <div className="mt-4">
+        <StaffSection
+          canInvite={staff.canInvite}
+          loading={staff.loading}
+          loadError={staff.loadError}
+          members={staff.members}
+          pending={staff.pending}
+          email={staff.email}
+          role={staff.role}
+          roles={staff.roles}
+          formError={staff.formError}
+          inviting={staff.inviting}
+          copiedId={staff.copiedId}
+          cancelingId={staff.cancelingId}
+          lastInviteUrl={staff.lastInviteUrl}
+          lastInvite={staff.lastInvite}
+          onEmailChange={staff.onEmailChange}
+          onRoleChange={staff.onRoleChange}
+          onInvite={staff.onInvite}
+          onCopy={staff.onCopy}
+          onCancel={staff.onCancel}
+        />
       </div>
+
+      {settings.showBilling ? (
+        <div className="mt-4 max-w-xl">
+          <BillingPlaceholder />
+        </div>
+      ) : null}
     </div>
   );
 }

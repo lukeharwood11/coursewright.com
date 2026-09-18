@@ -18,8 +18,8 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
 - **Enroll students** opens a panel with two paths:
   - **From roster** — multi-select eligible org students (filter, select all, clear). Optional **Class preset** checks that class’s members who aren’t already enrolled (one-shot; not a live link).
   - **New students** — batch create org profiles (multi-row or paste names) and enroll them in one confirm.
-- Unenroll (withdrawn) from the row; parent org access requires enrollment in a course with `status = active`.
-- Parent email can be stored on new profiles; sending the invite is a separate flow.
+- Unenroll (withdrawn) from the row; parent **course** access requires enrollment in an active published course (membership is created on invite claim).
+- **Invite parent** from an enrolled student who has a parent email — copy `/invite/<token>` (v0 does not send email).
 - Empty roster allowed — printing materials does not require students.
 
 ## Data shown
@@ -35,11 +35,13 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
 - Enrolled list → [STUDENT_PROFILE](./STUDENT_PROFILE.md)
 - **Enroll students** progressive panel (batch existing + batch new)
 - Unenroll on each row
+- Parent email / invite from course context — copy claim link (no email send)
 - Empty state: students optional — **create → print does not require a roster**
 
 ## Primary actions
 
 - Enroll / unenroll (batch enroll preferred)
+- Invite parent and copy the claim link
 - Open [STUDENT_PROFILE](./STUDENT_PROFILE.md)
 
 ## Links to
@@ -47,6 +49,7 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
 - [COURSE](./COURSE.md) — back to course
 - [COURSE_SETTINGS](./COURSE_SETTINGS.md) — instructors / related settings (TBD split)
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — open student
+- [INVITE_CLAIM](./INVITE_CLAIM.md) — copied parent invite link (recipient)
 - [ORG_ROSTER](./ORG_ROSTER.md) — org-wide roster
 - [CLASS](./CLASS.md) — class preset source (does not auto-enroll as a live link)
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
