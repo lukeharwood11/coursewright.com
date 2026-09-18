@@ -39,7 +39,7 @@ View (and edit) a single material placement — the thing parents open from this
 
 **Body (by kind)**
 
-- **page:** ordered **blocks** (rich text, video, …)
+- **page:** ordered **blocks** rendered from the Lexical document (rich text, tables, links, in-page files, video embeds)
 - **link:** URL (+ title)
 - **file:** attached File (name, type, inline preview when possible, **Download**, **Expand** for PDF/image)
 
@@ -62,7 +62,7 @@ View (and edit) a single material placement — the thing parents open from this
 
 ### Content (v1 kinds)
 
-- **page** — ordered blocks: **rich text** (WYSIWYG and/or Markdown), **video**; printable block layout
+- **page** — Lexical editor: headings, lists, quotes, tables, links, **video** URL embeds, in-page file attachments; printable block layout
 - **link** — external URL; print → title + URL/QR
 - **file** — org File; versioned blobs; preview + **Download**; PDF/image **Expand**
 - Quiz author + print still required product-wise later — **not** in v1 Add material menu
@@ -76,8 +76,8 @@ View (and edit) a single material placement — the thing parents open from this
 ### Edit
 
 - **Edit URL:** `…/materials/<material_id>/edit` (locked — [URLS.md](../URLS.md))
-- Placement fields: **Save** / **Cancel** in the page header; Save disabled when unchanged; Cancel goes back (confirms if dirty)
-- **page:** add / reorder / edit / remove blocks
+- Placement fields + page content: **Save** / **Cancel** in the page header; Save disabled when unchanged; Cancel goes back (confirms if dirty)
+- **page:** [Lexical](https://lexical.dev/) WYSIWYG (headings, lists, quotes, tables, links, video URL embeds, in-page files). A version is stored only when the instructor saves and something changed — not per keystroke.
 - **link / file:** edit URL or replace file (file replace → new FileVersion)
 - Versioning / who changed what / revert dangerous actions
 - Soft deletes only

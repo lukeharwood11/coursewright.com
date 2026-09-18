@@ -21,6 +21,7 @@
 | **Migrations** | **`supabase db migrate`** | Schema changes via Supabase CLI migrations |
 | **UI** | **React** + **Tailwind CSS** | Product UI |
 | **Icons** | **Heroicons** (`@heroicons/react`) | UI icons (MIT); notices in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) |
+| **Page editor** | **Lexical** (`lexical`, `@lexical/react`) | WYSIWYG for page materials ([lexical.dev](https://lexical.dev/)); MIT notice in THIRD_PARTY_NOTICES.md |
 | **Print PDF** | **`@react-pdf/renderer`** + **pdf-lib** + **qrcode** | React document tree → blob; pdf-lib merges original PDF files; iframe preview |
 | **Bundler** | **Vite** | SPA build → `dist/` → S3 |
 | **Server/async state** | **TanStack Query** | Data fetching / cache against PostgREST |

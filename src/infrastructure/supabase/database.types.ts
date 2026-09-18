@@ -1345,6 +1345,14 @@ export type Database = {
           student_profile_id: number | null
         }[]
       }
+      save_material_page: {
+        Args: {
+          p_material_id: number
+          p_placement?: Json | null
+          p_blocks?: Json | null
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

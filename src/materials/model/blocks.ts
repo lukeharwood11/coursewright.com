@@ -13,10 +13,28 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 export function parseRichTextBody(body: unknown): string {
   const record = asRecord(body);
   if (!record) return typeof body === "string" ? body : "";
+  if (record.lexical && typeof record.lexical === "object") {
+    const root = asRecord((record.lexical as { root?: unknown }).root);
+    if (root) return lexicalPlainText(root);
+  }
   if (typeof record.markdown === "string") return record.markdown;
   if (typeof record.text === "string") return record.text;
   if (typeof record.html === "string") return record.html;
   return "";
+}
+
+function lexicalPlainText(node: Record<string, unknown>): string {
+  if (typeof node.text === "string") return node.text;
+  if (typeof node.filename === "string") return node.filename;
+  if (typeof node.url === "string") return node.url;
+  const children = node.children;
+  if (!Array.isArray(children)) return "";
+  return children
+    .flatMap((child) => {
+      const record = asRecord(child);
+      return record ? [lexicalPlainText(record)] : [];
+    })
+    .join("");
 }
 
 export function richTextBody(markdown: string): RichTextBody {
@@ -34,7 +52,6 @@ export function videoBody(url: string): VideoBody {
   return { url };
 }
 
-/** Interim store: markdown in `body.markdown` until a canonical rich-text format is locked. */
 export function youtubeEmbedSrc(url: string): string | null {
   try {
     const parsed = new URL(url);

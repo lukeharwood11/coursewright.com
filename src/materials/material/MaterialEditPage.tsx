@@ -1,30 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { PageFormActions } from "@/ui/PageFormActions";
-import { useMutation } from "@tanstack/react-query";
-import type { Json } from "@/infrastructure/supabase/database.types";
-import {
-  createBlock,
-  softDeleteBlock,
-  updateBlock,
-} from "@/materials/databridge/blocks";
-import { replaceFile, revertFileToVersion, listFileVersions } from "@/materials/databridge/files";
-import { updateMaterial } from "@/materials/databridge/materials";
-import {
-  parseRichTextBody,
-  parseVideoBody,
-  richTextBody,
-  videoBody,
-} from "@/materials/model/blocks";
-import { materialPath } from "@/materials/model/paths";
 import { useQuery } from "@tanstack/react-query";
-import { useMaterial } from "./hooks/useMaterial";
+import { replaceFile, revertFileToVersion, listFileVersions } from "@/materials/databridge/files";
+import { materialPath } from "@/materials/model/paths";
+import { useMaterialEdit } from "./hooks/useMaterialEdit";
 import { VisibilityBanner } from "./components/VisibilityBanner";
+import { PageEditorMediaProvider } from "./components/PageEditorMediaContext";
 import { fileQueryKeys } from "@/materials/databridge/files";
 
-const MATERIAL_EDIT_FORM_ID = "material-edit-form";
+const PageContentEditor = lazy(async () => {
+  const module = await import("./components/PageContentEditor");
+  return { default: module.PageContentEditor };
+});
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -32,19 +22,8 @@ const controlClass = [
 ].join(" ");
 
 export function MaterialEditPage() {
-  const page = useMaterial();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [url, setUrl] = useState("");
-  const [scheduledDate, setScheduledDate] = useState("");
-  const [saving, setSaving] = useState(false);
-  useEffect(() => {
-    if (!page.material) return;
-    setTitle(page.material.title);
-    setDescription(page.material.description);
-    setUrl(page.material.url ?? "");
-    setScheduledDate(page.material.scheduledDate ?? "");
-  }, [page.material]);
+  const edit = useMaterialEdit();
+  const page = edit.page;
 
   useEffect(() => {
     document.title = page.material
@@ -66,7 +45,7 @@ export function MaterialEditPage() {
     );
   }
 
-  if (page.loading) {
+  if (page.loading || (page.material?.kind === "page" && page.blocksLoading)) {
     return (
       <div className="px-5 py-8 md:px-8">
         <p className="text-[14px] text-[var(--ink-soft)]">Loading editor…</p>
@@ -91,12 +70,6 @@ export function MaterialEditPage() {
     materialId: page.material.id,
   });
 
-  const hasChanges =
-    title !== page.material.title ||
-    description !== page.material.description ||
-    (page.material.kind === "link" && url !== (page.material.url ?? "")) ||
-    scheduledDate !== (page.material.scheduledDate ?? "");
-
   return (
     <div className="px-5 py-8 md:px-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -117,9 +90,9 @@ export function MaterialEditPage() {
           </p>
         </div>
         <PageFormActions
-          formId={MATERIAL_EDIT_FORM_ID}
-          saving={saving}
-          hasChanges={hasChanges}
+          formId={edit.formId}
+          saving={edit.saving}
+          hasChanges={edit.hasChanges}
           cancelTo={viewHref}
         />
       </div>
@@ -134,36 +107,96 @@ export function MaterialEditPage() {
         />
       ) : null}
 
-      <PlacementForm
-        formId={MATERIAL_EDIT_FORM_ID}
-        title={title}
-        description={description}
-        url={url}
-        scheduledDate={scheduledDate}
-        kind={page.material.kind}
-        hasChanges={hasChanges}
-        onSavingChange={setSaving}
-        onTitle={setTitle}
-        onDescription={setDescription}
-        onUrl={setUrl}
-        onScheduledDate={setScheduledDate}
-        onSave={() =>
-          updateMaterial(page.material!.id, {
-            title: title.trim() || page.material!.title,
-            description,
-            url: page.material!.kind === "link" ? url.trim() : page.material!.url,
-            scheduledDate: scheduledDate || null,
-          }).then(() => page.invalidate())
-        }
-      />
+      <form
+        id={edit.formId}
+        className="mt-6"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          await edit.save();
+        }}
+      >
+        <div className="max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
+          <label className="flex flex-col gap-1">
+            <span className="text-[13px] font-bold text-[var(--ink-soft)]">Title</span>
+            <Input
+              className="w-full"
+              value={edit.title}
+              onChange={(event) => edit.setTitle(event.target.value)}
+            />
+          </label>
+          <label className="mt-3 flex flex-col gap-1">
+            <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+              Description
+            </span>
+            <textarea
+              className={`${controlClass} min-h-[4.5rem] resize-y`}
+              value={edit.description}
+              onChange={(event) => edit.setDescription(event.target.value)}
+            />
+          </label>
+          {page.material.kind === "link" ? (
+            <label className="mt-3 flex flex-col gap-1">
+              <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+                Web address
+              </span>
+              <Input
+                className="w-full"
+                value={edit.url}
+                onChange={(event) => edit.setUrl(event.target.value)}
+              />
+            </label>
+          ) : null}
+          <label className="mt-3 flex flex-col gap-1">
+            <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+              Date for this week (optional)
+            </span>
+            <Input
+              className="w-full"
+              type="date"
+              value={edit.scheduledDate}
+              onChange={(event) => edit.setScheduledDate(event.target.value)}
+            />
+          </label>
+        </div>
 
-      {page.material.kind === "page" ? (
-        <PageBlocksEditor
-          materialId={page.material.id}
-          blocks={page.blocks}
-          onChange={page.invalidate}
-        />
-      ) : null}
+        {page.material.kind === "page" ? (
+          <section className="mt-8 max-w-3xl">
+            <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Content</h2>
+            <p className="mt-1 text-[13px] text-[var(--ink-faint)]">
+              Write the lesson here — headings, lists, tables, links, videos,
+              and files. Save at the top when you’re ready — a new version is
+              stored only if this page changed.
+            </p>
+            <div className="mt-3">
+              <Suspense
+                fallback={
+                  <p className="text-[14px] text-[var(--ink-soft)]">
+                    Loading editor…
+                  </p>
+                }
+              >
+                <PageEditorMediaProvider
+                  value={{
+                    organizationId: page.organization.id,
+                    userId: page.userId,
+                  }}
+                >
+                  <PageContentEditor
+                    blocks={page.blocks}
+                    editorKey={`${page.material.id}-${edit.editorEpoch}`}
+                    editable
+                    onDraftChange={edit.onDraftChange}
+                  />
+                </PageEditorMediaProvider>
+              </Suspense>
+            </div>
+          </section>
+        ) : null}
+
+        {edit.error ? (
+          <p className="mt-3 text-[13px] text-[var(--amber-deep)]">{edit.error}</p>
+        ) : null}
+      </form>
 
       {page.material.kind === "file" && page.file ? (
         <FileEditor
@@ -191,7 +224,9 @@ export function MaterialEditPage() {
                 className="px-2.5 py-1.5 text-[12px]"
                 onClick={() => {
                   if (!window.confirm("Restore this version?")) return;
-                  page.revert.mutate(version.snapshot);
+                  page.revert.mutate(version.snapshot, {
+                    onSuccess: edit.afterRestore,
+                  });
                 }}
               >
                 Restore
@@ -200,214 +235,6 @@ export function MaterialEditPage() {
           ))}
         </ul>
       </section>
-    </div>
-  );
-}
-
-function PlacementForm({
-  formId,
-  title,
-  description,
-  url,
-  scheduledDate,
-  kind,
-  hasChanges,
-  onSavingChange,
-  onTitle,
-  onDescription,
-  onUrl,
-  onScheduledDate,
-  onSave,
-}: {
-  formId: string;
-  title: string;
-  description: string;
-  url: string;
-  scheduledDate: string;
-  kind: string;
-  hasChanges: boolean;
-  onSavingChange: (saving: boolean) => void;
-  onTitle: (value: string) => void;
-  onDescription: (value: string) => void;
-  onUrl: (value: string) => void;
-  onScheduledDate: (value: string) => void;
-  onSave: () => Promise<void>;
-}) {
-  const [error, setError] = useState<string | null>(null);
-
-  return (
-    <form
-      id={formId}
-      className="mt-6 max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
-      onSubmit={async (event) => {
-        event.preventDefault();
-        if (!hasChanges) return;
-        onSavingChange(true);
-        setError(null);
-        try {
-          await onSave();
-        } catch (caught) {
-          setError(caught instanceof Error ? caught.message : "Couldn’t save.");
-        } finally {
-          onSavingChange(false);
-        }
-      }}
-    >
-      <label className="flex flex-col gap-1">
-        <span className="text-[13px] font-bold text-[var(--ink-soft)]">Title</span>
-        <Input className="w-full" value={title} onChange={(event) => onTitle(event.target.value)} />
-      </label>
-      <label className="mt-3 flex flex-col gap-1">
-        <span className="text-[13px] font-bold text-[var(--ink-soft)]">Description</span>
-        <textarea
-          className={`${controlClass} min-h-[4.5rem] resize-y`}
-          value={description}
-          onChange={(event) => onDescription(event.target.value)}
-        />
-      </label>
-      {kind === "link" ? (
-        <label className="mt-3 flex flex-col gap-1">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Web address</span>
-          <Input className="w-full" value={url} onChange={(event) => onUrl(event.target.value)} />
-        </label>
-      ) : null}
-      <label className="mt-3 flex flex-col gap-1">
-        <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-          Date for this week (optional)
-        </span>
-        <Input
-          className="w-full"
-          type="date"
-          value={scheduledDate}
-          onChange={(event) => onScheduledDate(event.target.value)}
-        />
-      </label>
-      {error ? (
-        <p className="mt-3 text-[13px] text-[var(--amber-deep)]">{error}</p>
-      ) : null}
-    </form>
-  );
-}
-
-function PageBlocksEditor({
-  materialId,
-  blocks,
-  onChange,
-}: {
-  materialId: number;
-  blocks: Array<{ id: number; kind: "rich_text" | "video"; body: unknown }>;
-  onChange: () => void;
-}) {
-  const add = useMutation({
-    mutationFn: (kind: "rich_text" | "video") =>
-      createBlock({
-        materialId,
-        kind,
-        body: kind === "rich_text" ? richTextBody("") : videoBody(""),
-      }),
-    onSuccess: onChange,
-  });
-
-  return (
-    <section className="mt-8 max-w-2xl">
-      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Blocks</h2>
-      <p className="mt-1 text-[13px] text-[var(--ink-faint)]">
-        Rich text is stored as Markdown in the block until a canonical format is
-        locked. Video blocks use a URL (YouTube or a link).
-      </p>
-      <div className="mt-3 flex flex-col gap-4">
-        {blocks.map((block) => (
-          <BlockEditor
-            key={block.id}
-            id={block.id}
-            kind={block.kind}
-            body={block.body}
-            onChange={onChange}
-          />
-        ))}
-      </div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Button
-          variant="secondary"
-          onClick={() => add.mutate("rich_text")}
-          disabled={add.isPending}
-        >
-          Add text
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => add.mutate("video")}
-          disabled={add.isPending}
-        >
-          Add video
-        </Button>
-      </div>
-    </section>
-  );
-}
-
-function BlockEditor({
-  id,
-  kind,
-  body,
-  onChange,
-}: {
-  id: number;
-  kind: "rich_text" | "video";
-  body: unknown;
-  onChange: () => void;
-}) {
-  const [value, setValue] = useState(
-    kind === "video" ? parseVideoBody(body) : parseRichTextBody(body),
-  );
-
-  useEffect(() => {
-    setValue(kind === "video" ? parseVideoBody(body) : parseRichTextBody(body));
-  }, [body, kind]);
-
-  return (
-    <div className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
-      <p className="text-[12px] font-bold text-[var(--ink-faint)]">
-        {kind === "video" ? "Video URL" : "Rich text"}
-      </p>
-      {kind === "video" ? (
-        <Input
-          className="mt-2 w-full"
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-          placeholder="https://youtu.be/…"
-        />
-      ) : (
-        <textarea
-          className={`${controlClass} mt-2 min-h-[8rem] resize-y`}
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-        />
-      )}
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Button
-          type="button"
-          onClick={async () => {
-            const next: Json =
-              kind === "video" ? videoBody(value.trim()) : richTextBody(value);
-            await updateBlock(id, { body: next });
-            onChange();
-          }}
-        >
-          Save block
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={async () => {
-            if (!window.confirm("Remove this block?")) return;
-            await softDeleteBlock(id);
-            onChange();
-          }}
-        >
-          Remove
-        </Button>
-      </div>
     </div>
   );
 }

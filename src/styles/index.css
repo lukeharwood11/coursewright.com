@@ -63,3 +63,138 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+.cw-editor-shell {
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.cw-editor-view {
+  max-width: 42rem;
+}
+
+.cw-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  border-bottom: 1px solid var(--line-soft);
+  padding: 0.65rem 0.75rem;
+  background: var(--paper);
+}
+
+.cw-editor-input {
+  min-height: 16rem;
+  padding: 0.9rem 1rem 1.25rem;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  outline: none;
+}
+
+.cw-editor-input-view {
+  min-height: 0;
+  padding: 0;
+}
+
+.cw-editor-placeholder {
+  position: absolute;
+  top: 0.9rem;
+  left: 1rem;
+  margin: 0;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+.cw-editor-p {
+  margin: 0 0 0.65rem;
+}
+
+.cw-editor-h {
+  margin: 0 0 0.7rem;
+  font-family: var(--font-ui);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.cw-editor-ul {
+  margin: 0 0 0.65rem;
+  padding-left: 1.35rem;
+  list-style: disc;
+}
+
+.cw-editor-ol {
+  margin: 0 0 0.65rem;
+  padding-left: 1.35rem;
+  list-style: decimal;
+}
+
+.cw-editor-li {
+  margin: 0.15rem 0;
+}
+
+.cw-editor-quote {
+  margin: 0 0 0.65rem;
+  padding-left: 0.85rem;
+  border-left: 3px solid var(--line);
+  color: var(--ink-soft);
+}
+
+.cw-editor-link {
+  font-weight: 700;
+  color: var(--green);
+  text-decoration: underline;
+}
+
+.cw-editor-bold {
+  font-weight: 700;
+}
+
+.cw-editor-italic {
+  font-style: italic;
+}
+
+.cw-editor-underline {
+  text-decoration: underline;
+}
+
+.cw-editor-strikethrough {
+  text-decoration: line-through;
+}
+
+.cw-editor-table-scroll {
+  margin: 0 0 0.85rem;
+  overflow-x: auto;
+}
+
+.cw-editor-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cw-editor-th,
+.cw-editor-td {
+  min-width: 5rem;
+  border: 1px solid var(--line);
+  padding: 0.4rem 0.55rem;
+  vertical-align: top;
+}
+
+.cw-editor-th {
+  background: var(--paper);
+  font-weight: 700;
+}
+
+.cw-editor-input hr {
+  margin: 0.85rem 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.cw-editor-video,
+.cw-editor-file {
+  margin: 0.5rem 0 0.85rem;
+}
+
