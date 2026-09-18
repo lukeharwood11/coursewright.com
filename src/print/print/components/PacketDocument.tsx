@@ -27,10 +27,39 @@ const styles = StyleSheet.create({
     lineHeight: 1.4,
     padding: 54,
   },
+  brandRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    marginBottom: 4,
+  },
   brand: {
     color: FAINT,
     fontSize: 9,
-    marginBottom: 8,
+  },
+  brandRight: {
+    color: FAINT,
+    fontSize: 9,
+    textAlign: "right",
+  },
+  metaRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    marginBottom: 4,
+    gap: 12,
+  },
+  metaLeft: {
+    color: FAINT,
+    fontSize: 11,
+    flexGrow: 1,
+    flexShrink: 1,
+  },
+  metaRight: {
+    color: FAINT,
+    fontSize: 11,
+    textAlign: "right",
+    flexShrink: 1,
   },
   meta: {
     color: FAINT,
@@ -40,7 +69,7 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: "Times-Bold",
     fontSize: 18,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   heading: {
     fontFamily: "Helvetica-Bold",
@@ -51,7 +80,7 @@ const styles = StyleSheet.create({
   description: {
     color: FAINT,
     fontSize: 11,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   body: {
     fontSize: 12,
@@ -115,22 +144,28 @@ function Header({
   packet: PrintPacketView;
   material: PrintMaterialView;
 }) {
+  const showAnswerKey =
+    Boolean(packet.includeAnswerKey) && pageHasQuiz(material.blocks);
+  const contextRight = (material.contextLines ?? []).filter(Boolean).join(" · ") || null;
+  const showPacketTitle = Boolean(packet.title && packet.title !== material.title);
   return (
     <View>
-      <Text style={styles.brand}>Course Wright</Text>
-      {packet.subtitle ? <Text style={styles.meta}>{packet.subtitle}</Text> : null}
-      {packet.title && packet.title !== material.title ? (
-        <Text style={styles.meta}>{packet.title}</Text>
+      <View style={styles.brandRow}>
+        <Text style={styles.brand}>Course Wright</Text>
+        {showAnswerKey ? <Text style={styles.brandRight}>Answer key</Text> : null}
+      </View>
+      {packet.subtitle || contextRight ? (
+        <View style={styles.metaRow}>
+          {packet.subtitle ? (
+            <Text style={styles.metaLeft}>{packet.subtitle}</Text>
+          ) : (
+            <View />
+          )}
+          {contextRight ? <Text style={styles.metaRight}>{contextRight}</Text> : null}
+        </View>
       ) : null}
-      {(material.contextLines ?? []).map((line) => (
-        <Text key={line} style={styles.meta}>
-          {line}
-        </Text>
-      ))}
+      {showPacketTitle ? <Text style={styles.meta}>{packet.title}</Text> : null}
       <Text style={styles.title}>{material.title}</Text>
-      {packet.includeAnswerKey && pageHasQuiz(material.blocks) ? (
-        <Text style={styles.meta}>Answer key</Text>
-      ) : null}
       {material.description ? (
         <Text style={styles.description}>{material.description}</Text>
       ) : null}
