@@ -35,7 +35,7 @@ Same URL for all roles; chrome and body switch by membership role.
 - **This week**: week label; org-wide **Important now**; per active course dated-material counts for the Sunday–Saturday week (staff sees active materials, including unpublished).
 - **People**: student + class counts → [ORG_ROSTER](./ORG_ROSTER.md).
 - Switch org returns to org picker.
-- **Search** in product chrome (staff): pages, courses, and materials by title; facets / dedicated route still TBD.
+- **Search** in product chrome (staff): Postgres FTS across pages, courses, units, materials, and files; type facet in the overlay; dedicated route still TBD.
 - **P1:** templates in chrome.
 
 ## Data shown
@@ -109,7 +109,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Create / open course
 - Open attention targets (course or course roster)
 - Open roster / settings
-- Search org pages, courses, materials
+- Search org pages, courses, units, materials, files
 
 ## Links to
 
@@ -132,7 +132,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - [ORG_SETTINGS](./ORG_SETTINGS.md) — via chrome / account menu
 - [ORG_PICKER](./ORG_PICKER.md) — switch org
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — account
-- Search — staff chrome overlay (pages / courses / materials); dedicated route still TBD
+- Search — staff chrome overlay (pages / courses / units / materials / files; type facet); dedicated route still TBD
 - **P1:** [TEMPLATE_LIST](./TEMPLATE_LIST.md) — templates
 
 ## Notes
