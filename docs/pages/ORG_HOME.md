@@ -35,7 +35,7 @@ Same URL for all roles; chrome and body switch by membership role.
 - **This week**: week label; org-wide **Important now**; per active course dated-material counts for the Sunday–Saturday week (staff sees active materials, including unpublished).
 - **People**: student + class counts → [ORG_ROSTER](./ORG_ROSTER.md).
 - Switch org returns to org picker.
-- **Search** in product chrome (staff): pages, courses, and materials by title; facets / dedicated route still TBD.
+- **Search** in product chrome (staff): Postgres FTS for courses and materials, plus staff pages by title; overlay only; dedicated route still TBD.
 - **P1:** templates in chrome.
 
 ## Data shown

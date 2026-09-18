@@ -80,7 +80,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **File sharing** | Upload and attach files; share with parents as part of course materials | shipped | File materials upload to Storage `org-files` with `files` / `file_versions` |
 | **Audio & video files** | Video as a **block** on a material page; uploaded audio TBD | shipped | Video **URL embed** in page blocks (upload vs URL still **TBD**). Uploaded audio/video also play when attached inside a page or as a file material |
 | **Course grade levels** | Courses carry **grade metadata** — multiple grades and/or ranges | shipped | Editor on create + course settings. Templates get the same model in **P1** |
-| **Advanced search** | Native, easy, **cross-facet** search — “where do I have this resource?” | in progress | Staff chrome search: pages, courses, materials by title (card results). Facets / FTS ranking / files / people still open; GIN `search_vector` indexes ready |
+| **Advanced search** | Native, easy, **cross-facet** search — “where do I have this resource?” | in progress | Staff chrome overlay (no `/search` route): Postgres FTS on `search_vector` for courses + materials; staff pages by title. Findability only (RLS). Deferred: facets, files, units, people, parent search, `ts_rank`, dedicated index |
 | **Families / parent directory** | Named group of **student profiles**; parents appear via `parent_student_links`; org **parent directory** | shipped | Class-mirror members. Link parent creates/reuses student links (`admin_invites` `role=parent` if no account). **Never enrollments.** `family_members.parent_user_id` unused in P0 app. Extra fields, merge/split, and invite **email send** still open. Copy-link claim lives on roster/profile. **SPA directory UI currently not routed** (schema + databridge remain) |
 | **Print materials** | One-tap print of a material, a unit, or this week's work | shipped | [PRINT](./pages/PRINT.md): `@react-pdf/renderer` + in-app preview, Download / Print. Whole-course print out of P0 |
 | **Lesson materials & planning** | Unified storage for course content, files, and plans | shipped | Course builder authoring on courses |
@@ -207,6 +207,10 @@ Teachers will ask **“where do I have this resource?”** Search is a **core P0
 | **RLS-respecting** | Results only include what the current user can already access |
 
 **Stack note:** Prefer Postgres full-text + facet filters via PostgREST; escalate to a dedicated index only if needed — [STACK.md](./STACK.md).
+
+**This slice (staff chrome):** Overlay search uses generated `search_vector` GIN indexes via PostgREST `fts(english)` (`to_tsquery`, not `plainto_tsquery`) for **courses** and **materials**, so prefixes like `frac` match Fractions. Staff **pages** (Home / Courses / Roster / Settings) match by title in the client. Staff only; no `/search` route; no Algolia/Elastic/side index. Hits are findability only — they do not grant access; enrollment / `parent_student_links` stay the gate.
+
+**Deferred:** facets, files, units, roster people / families, page/block body text, `ts_rank`, parent search, dedicated `/search` route.
 
 ### Families & parent directory (P0, org-scoped)
 
