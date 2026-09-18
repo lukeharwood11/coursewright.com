@@ -1,4 +1,4 @@
-import type { ParentDashboard } from "@/parent/model/dashboard";
+import { filterParentDashboard, type ParentDashboard } from "@/parent/model/dashboard";
 
 export type ThisWeekPrintRef = {
   materialId: number;
@@ -9,7 +9,12 @@ export type ThisWeekPrintRef = {
 /** Unique materials in parent-home order: important now, then per student → course. */
 export function thisWeekPrintRefs(
   dashboard: ParentDashboard,
+  studentIds?: number[] | null,
 ): ThisWeekPrintRef[] {
+  const scoped =
+    studentIds && studentIds.length > 0
+      ? filterParentDashboard(dashboard, studentIds)
+      : dashboard;
   const byId = new Map<number, ThisWeekPrintRef>();
 
   function add(
@@ -31,11 +36,11 @@ export function thisWeekPrintRefs(
     });
   }
 
-  for (const item of dashboard.importantNow) {
+  for (const item of scoped.importantNow) {
     add(item.materialId, item.courseId, `${item.courseTitle} · Important now`);
   }
 
-  for (const student of dashboard.students) {
+  for (const student of scoped.students) {
     for (const course of student.courses) {
       for (const material of course.materials) {
         add(material.id, course.id, `${student.name} · ${course.title}`);

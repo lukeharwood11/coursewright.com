@@ -94,7 +94,7 @@ export function StudentBatchPicker({
         <Input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Name, grade, or parent email"
+          placeholder="Name, grade, or email"
           disabled={saving}
         />
       </label>
@@ -141,9 +141,9 @@ export function StudentBatchPicker({
                       {student.name}
                     </span>
                     <span className="block text-[12.5px] text-[var(--ink-soft)]">
-                      {[student.gradeLevel, student.parentEmail]
+                      {[student.gradeLevel, student.parentEmail, student.studentEmail]
                         .filter(Boolean)
-                        .join(" · ") || "No grade or parent email"}
+                        .join(" · ") || "No grade or email"}
                     </span>
                   </span>
                 </label>

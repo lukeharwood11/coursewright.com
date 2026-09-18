@@ -123,7 +123,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 | [PRINT](./pages/PRINT.md) (material, top-level) | `/my/<org-slug>/courses/<course_id>/materials/<material_id>/print` | Same on template tree (**P1**) |
 | [PRINT](./pages/PRINT.md) (material, in unit) | `…/units/<unit_id>/materials/<material_id>/print` | |
 | [PRINT](./pages/PRINT.md) (unit) | `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print` | Packet in material order |
-| [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Parent dashboard grain; Sun–Sat + important now |
+| [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Parent dashboard grain; Sun–Sat + important now. Optional `?students=` limits to active students |
 
 **Do not use** `?print=1` on the source page — print is its own chrome-free screen with a real PDF viewer.
 

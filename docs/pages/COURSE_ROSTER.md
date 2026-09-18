@@ -19,16 +19,16 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
   - **From roster** — multi-select eligible org students (filter, select all, clear). Optional **Class preset** checks that class’s members who aren’t already enrolled (one-shot; not a live link).
   - **New students** — batch create org profiles (multi-row or paste names) and enroll them in one confirm.
 - Unenroll (withdrawn) from the row; parent **course** access requires enrollment in an active published course (membership is created on invite claim).
-- **Invite parent** from an enrolled student who has a parent email — copy `/invite/<token>` (v0 does not send email).
+- **Invite parent** from an enrolled student — copy `/invite/<token>` for a parent email (v0 does not send email). Multiple parents are managed on the student profile.
 - Empty roster allowed — printing materials does not require students.
 
 ## Data shown
 
 - Course context (title) for orientation
-- Enrolled students: **name**, optional **grade**, parent email / invite status
+- Enrolled students: **name**, optional **grade**, parent / student email / invite status
 - Batch picker of org students not already enrolled
 - Optional class list for preset
-- New-student draft rows: name (required), parent email, grade (org scheme)
+- New-student draft rows: name (required), parent email, student email, grade (org scheme)
 
 ## Contents
 

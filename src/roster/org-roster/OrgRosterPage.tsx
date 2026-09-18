@@ -51,7 +51,7 @@ export function OrgRosterPage() {
               <Input
                 value={roster.query}
                 onChange={(event) => roster.setQuery(event.target.value)}
-                placeholder="Name, grade, or parent email"
+                placeholder="Name, grade, or email"
               />
             </label>
             {!roster.panelOpen ? (

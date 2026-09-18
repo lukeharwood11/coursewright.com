@@ -41,6 +41,8 @@ export type StaffInvitePreview = InvitePreview & { role: StaffInviteRole };
 export type ParentLinkStatus = {
   studentProfileId: number;
   parentUserId: string;
+  name: string;
+  email: string;
 };
 
 type ProfileEmbed = { name: string; email: string } | { name: string; email: string }[] | null;
@@ -174,14 +176,21 @@ export async function listParentLinksForStudents(
   const db = requireSupabase();
   const { data, error } = await db
     .from("parent_student_links")
-    .select("parent_user_id, student_profile_id")
+    .select(
+      "parent_user_id, student_profile_id, parent:profiles!parent_student_links_parent_user_id_fkey(name, email)",
+    )
     .in("student_profile_id", studentIds);
 
   if (error) throw new Error(error.message);
-  return (data ?? []).map((row) => ({
-    studentProfileId: row.student_profile_id,
-    parentUserId: row.parent_user_id,
-  }));
+  return (data ?? []).map((row) => {
+    const parent = unwrapOne(row.parent);
+    return {
+      studentProfileId: row.student_profile_id,
+      parentUserId: row.parent_user_id,
+      name: parent?.name || parent?.email || "Parent",
+      email: parent?.email ?? "",
+    };
+  });
 }
 
 export async function createStaffInvite(input: {

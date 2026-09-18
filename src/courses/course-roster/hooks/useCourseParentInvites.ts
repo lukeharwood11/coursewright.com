@@ -37,15 +37,20 @@ export function useCourseParentInvites(students: StudentSummary[]) {
     enabled: canInvite && studentIds.length > 0,
   });
 
-  const pendingByStudent = new Map<number, PendingOrgInvite>();
+  const pendingByStudent = new Map<number, PendingOrgInvite[]>();
   for (const invite of pendingQuery.data ?? []) {
-    if (invite.studentProfileId != null) {
-      pendingByStudent.set(invite.studentProfileId, invite);
-    }
+    if (invite.studentProfileId == null) continue;
+    const current = pendingByStudent.get(invite.studentProfileId) ?? [];
+    current.push(invite);
+    pendingByStudent.set(invite.studentProfileId, current);
   }
-  const linkedStudentIds = new Set(
-    (linksQuery.data ?? []).map((link) => link.studentProfileId),
-  );
+
+  const linkedByStudent = new Map<number, string[]>();
+  for (const link of linksQuery.data ?? []) {
+    const current = linkedByStudent.get(link.studentProfileId) ?? [];
+    if (link.email) current.push(link.email);
+    linkedByStudent.set(link.studentProfileId, current);
+  }
 
   const inviteMutation = useMutation({
     mutationFn: async (student: StudentSummary) => {
@@ -82,17 +87,27 @@ export function useCourseParentInvites(students: StudentSummary[]) {
     }
   }
 
+  function canInviteSavedEmail(student: StudentSummary): boolean {
+    const email = student.parentEmail;
+    if (!email) return false;
+    const pending = pendingByStudent.get(student.id) ?? [];
+    if (pending.some((invite) => invite.email === email)) return false;
+    const linked = linkedByStudent.get(student.id) ?? [];
+    return !linked.includes(email);
+  }
+
   return {
     canInvite,
     pendingByStudent,
-    linkedStudentIds,
+    linkedByStudent,
     invitingStudentId: inviteMutation.isPending
       ? (inviteMutation.variables?.id ?? null)
       : null,
     copiedId,
+    canInviteSavedEmail,
     onInvite: (student: StudentSummary) => inviteMutation.mutate(student),
     onCopy: (studentId: number) => {
-      const invite = pendingByStudent.get(studentId);
+      const invite = pendingByStudent.get(studentId)?.[0];
       if (invite) void copyInvite(invite);
     },
   };

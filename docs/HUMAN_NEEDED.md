@@ -22,6 +22,22 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ## Open
 
+### HN-013 — Apply `student_email` migration on the testing database
+
+| | |
+|--|--|
+| **Why** | Parent/student roster on branch `cursor/parent-student-view-52f1` selects `student_profiles.student_email`. Until this migration is applied, roster and parent home queries against the testing project will error. |
+| **Where** | Supabase CLI / Dashboard; testing project used by `.env.testing` (`yplmaauelutcosqqvnya`) |
+| **Placeholder** | `supabase/migrations/20260918033100_student_email.sql` (`HN-013`) |
+
+**Steps:**
+
+1. From a machine with `SUPABASE_ACCESS_TOKEN` (HN-012) and the project linked, run `supabase db push` (or `scripts/nuke.sh` in experiment mode if a full reset is acceptable).
+2. Confirm `student_profiles.student_email` exists (`information_schema.columns`).
+3. Repeat for production when that project is in use (HN-007).
+
+**Done when:** `student_email` is on `student_profiles` in the database the SPA uses; creating a student with a student email succeeds.
+
 ### HN-003 — AWS account access for Terraform + deploy
 
 | | |

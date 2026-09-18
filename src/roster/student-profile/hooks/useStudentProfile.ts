@@ -59,14 +59,14 @@ export function useStudentProfile() {
   });
 
   const [name, setName] = useState("");
-  const [parentEmail, setParentEmail] = useState("");
+  const [studentEmail, setStudentEmail] = useState("");
   const [gradeLevel, setGradeLevel] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
   const resetForm = useCallback(() => {
     if (!student || !belongsHere) return;
     setName(student.name);
-    setParentEmail(student.parentEmail ?? "");
+    setStudentEmail(student.studentEmail ?? "");
     setGradeLevel(student.gradeLevel ?? "");
     setFormError(null);
   }, [student, belongsHere]);
@@ -80,7 +80,8 @@ export function useStudentProfile() {
       if (!student) throw new Error("Student isn’t loaded yet.");
       const parsed = validateStudentProfile({
         name,
-        parentEmail,
+        parentEmail: student.parentEmail ?? "",
+        studentEmail,
         gradeLevel,
         gradeLabels: organizationQuery.data?.gradeLabels ?? [],
       });
@@ -105,7 +106,12 @@ export function useStudentProfile() {
   const hasChanges =
     student && belongsHere
       ? studentProfileHaveChanges(
-          { name, parentEmail, gradeLevel },
+          {
+            name,
+            parentEmail: student.parentEmail ?? "",
+            studentEmail,
+            gradeLevel,
+          },
           student,
         )
       : false;
@@ -127,7 +133,7 @@ export function useStudentProfile() {
     error: query.error ? query.error.message : null,
     notFound: !query.isLoading && (!student || !belongsHere),
     name,
-    parentEmail,
+    studentEmail,
     gradeLevel,
     formError,
     saving: saveMutation.isPending,
@@ -136,8 +142,8 @@ export function useStudentProfile() {
       setName(value);
       setFormError(null);
     },
-    setParentEmail: (value: string) => {
-      setParentEmail(value);
+    setStudentEmail: (value: string) => {
+      setStudentEmail(value);
       setFormError(null);
     },
     setGradeLevel: (value: string) => {

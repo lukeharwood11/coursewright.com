@@ -16,13 +16,19 @@ import {
   inviteUrl,
   validateCreateParentInvite,
 } from "@/organizations/model/staffInvite";
+import {
+  getStudent,
+  studentQueryKeys,
+  updateStudent,
+} from "@/roster/databridge/students";
 
 export function useParentInvite(studentId: number | null) {
   const user = useAuthedUser();
   const { organization, role } = useOrgShell();
   const queryClient = useQueryClient();
   const canInvite = canInviteParent(role);
-  const [copied, setCopied] = useState(false);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [addEmail, setAddEmail] = useState("");
 
   const pendingQuery = useQuery({
     queryKey: staffInviteQueryKeys.parents(organization.id),
@@ -36,11 +42,11 @@ export function useParentInvite(studentId: number | null) {
     enabled: canInvite && studentId != null,
   });
 
-  const pending =
-    pendingQuery.data?.find((invite) => invite.studentProfileId === studentId) ??
-    null;
-  const linked = Boolean(
-    linksQuery.data?.some((link) => link.studentProfileId === studentId),
+  const pending = (pendingQuery.data ?? []).filter(
+    (invite) => invite.studentProfileId === studentId,
+  );
+  const linked = (linksQuery.data ?? []).filter(
+    (link) => link.studentProfileId === studentId,
   );
 
   const inviteMutation = useMutation({
@@ -48,18 +54,37 @@ export function useParentInvite(studentId: number | null) {
       const parsed = validateCreateParentInvite({ email });
       if (!parsed.ok) throw new Error(parsed.error);
       if (studentId == null) throw new Error("Student isn’t loaded yet.");
-      return createParentInvite({
+      const invite = await createParentInvite({
         organizationId: organization.id,
         studentProfileId: studentId,
         email: parsed.value.email,
         invitedBy: user.id,
       });
+      const student = await getStudent(studentId);
+      if (student && !student.parentEmail) {
+        await updateStudent(studentId, {
+          name: student.name,
+          parentEmail: parsed.value.email,
+          studentEmail: student.studentEmail,
+          gradeLevel: student.gradeLevel,
+        });
+      }
+      return invite;
     },
     onSuccess: async (invite) => {
+      setAddEmail("");
       await copyInvite(invite);
       await queryClient.invalidateQueries({
         queryKey: staffInviteQueryKeys.parents(organization.id),
       });
+      if (studentId != null) {
+        await queryClient.invalidateQueries({
+          queryKey: studentQueryKeys.detail(studentId),
+        });
+        await queryClient.invalidateQueries({
+          queryKey: studentQueryKeys.list(organization.id),
+        });
+      }
     },
     onError: (error: Error) => {
       toast(error.message);
@@ -70,7 +95,7 @@ export function useParentInvite(studentId: number | null) {
     mutationFn: (invite: PendingOrgInvite) => cancelInvite(invite.id),
     onSuccess: async () => {
       toast("Invite canceled.");
-      setCopied(false);
+      setCopiedId(null);
       await queryClient.invalidateQueries({
         queryKey: staffInviteQueryKeys.parents(organization.id),
       });
@@ -84,10 +109,10 @@ export function useParentInvite(studentId: number | null) {
     const url = inviteUrl(window.location.origin, invite.token);
     try {
       await navigator.clipboard.writeText(url);
-      setCopied(true);
+      setCopiedId(invite.id);
       toast("Invite link copied — send it yourself.");
     } catch {
-      setCopied(false);
+      setCopiedId(null);
       toast("Copy the link from the field.");
     }
   }
@@ -102,16 +127,22 @@ export function useParentInvite(studentId: number | null) {
         : null,
     pending,
     linked,
-    inviting: inviteMutation.isPending,
-    canceling: cancelMutation.isPending,
-    copied,
-    inviteUrl: pending ? inviteUrl(window.location.origin, pending.token) : null,
+    addEmail,
+    invitingEmail: inviteMutation.isPending
+      ? (inviteMutation.variables ?? "").trim().toLowerCase()
+      : null,
+    cancelingId: cancelMutation.isPending
+      ? (cancelMutation.variables?.id ?? null)
+      : null,
+    copiedId,
+    origin: typeof window === "undefined" ? "" : window.location.origin,
+    setAddEmail,
     onInvite: (email: string) => inviteMutation.mutate(email),
-    onCopy: () => {
-      if (pending) void copyInvite(pending);
+    onCopy: (invite: PendingOrgInvite) => {
+      void copyInvite(invite);
     },
-    onCancel: () => {
-      if (pending) cancelMutation.mutate(pending);
+    onCancel: (invite: PendingOrgInvite) => {
+      cancelMutation.mutate(invite);
     },
   };
 }

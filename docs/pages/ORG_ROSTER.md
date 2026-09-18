@@ -16,8 +16,8 @@ Org-level people directory for **student profiles** and **classes**. Course enro
 
 - Directory-first: searchable student list is the primary surface.
 - **Select students** on the list (checkboxes, select all matching) → **Add to class** or **Enroll in course** (pick destination; batch write).
-- **Add students** opens a batch create panel (multi-row and/or paste names one-per-line; name required; optional parent email and grade per org scheme).
-- Find students by name, grade, or parent email (list filter; P0 advanced search is a separate chrome job).
+- **Add students** opens a batch create panel (multi-row and/or paste names one-per-line; name required; optional parent email, student email, and grade per org scheme).
+- Find students by name, grade, parent email, or student email (list filter; P0 advanced search is a separate chrome job).
 - **Classes** listed below; **Create class** is compact (name only) — open the class to manage members, or assign from the student selection bar.
 - Open student profile; course enrollments can also be edited on course roster.
 - Staff invite/roles are **not** managed here ([ORG_SETTINGS](./ORG_SETTINGS.md)).
@@ -25,9 +25,9 @@ Org-level people directory for **student profiles** and **classes**. Course enro
 
 ## Data shown
 
-- Student list: **name**, optional **grade**, optional parent email
+- Student list: **name**, optional **grade**, optional parent / student email
 - Class list: class **name**
-- Batch add fields: name rows, optional parent email / grade, paste names
+- Batch add fields: name rows, optional parent email / student email / grade, paste names
 - Empty state when no profiles yet
 
 ## Contents

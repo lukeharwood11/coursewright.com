@@ -1,5 +1,17 @@
-export function printThisWeekPath(orgSlug: string): string {
-  return `/my/${orgSlug}/print-this-week`;
+export function printThisWeekPath(orgSlug: string, studentIds?: number[]): string {
+  const path = `/my/${orgSlug}/print-this-week`;
+  if (!studentIds || studentIds.length === 0) return path;
+  return `${path}?students=${studentIds.join(",")}`;
+}
+
+export function parsePrintStudentIds(search: string): number[] | null {
+  const raw = new URLSearchParams(search).get("students");
+  if (!raw) return null;
+  const ids = raw
+    .split(",")
+    .map((value) => Number(value.trim()))
+    .filter((value) => Number.isFinite(value) && value > 0);
+  return ids;
 }
 
 export type PrintGrainKind = "material" | "unit" | "thisWeek";

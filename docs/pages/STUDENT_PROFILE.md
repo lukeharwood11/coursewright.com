@@ -9,23 +9,25 @@ Admins and instructors.
 
 ## Purpose
 
-View/edit one org-level **student profile** (not a user account in P0/P1).
+View/edit one org-level **student profile** (not a dedicated student account in P0/P1).
 
 
 ## Behavior
 
-- View/edit one `student_profile` (no student login in P0/P1).
-- Edit name, optional parent email, optional grade (must match org grade scheme when set).
+- View/edit one `student_profile` (no dedicated student role in P0/P1).
+- Edit name, optional student email, optional grade (must match org grade scheme when set).
+- **Parents:** add **one or more** parent emails; each can get a copyable `/invite/<token>` (v0 does not send email). Linked parents and pending invites are listed.
+- **Student email:** optional. Invite uses the same claim path so that email can sign in and see this student's work.
 - **Save** / **Cancel** in the page header; Save disabled when nothing changed; Cancel goes back (confirms if dirty).
 - Show course enrollments and class membership.
 - Creating profiles often happens on first course or class add; this page manages the canonical org record.
-- **Invite parent:** if a parent email is saved, create a parent invite and **copy `/invite/<token>`** (v0 does not send email). Same claim path as staff.
 
 ## Data shown
 
 - **Name** (required, editable)
-- **Parent email** (optional, editable)
+- **Student email** (optional, editable)
 - **Grade level** (optional, editable; scheme-constrained)
+- Parents: linked accounts, pending invites, add another parent email
 - Enrollments: course title + status + link to that course roster
 - Class memberships: class name + link
 - Parent invite / claim status (pending link, copyable claim URL, or accepted)
@@ -35,8 +37,9 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 ### Fields (P0)
 
 - **Name** — required
-- **Parent email** — optional (invites / linkage)
+- **Student email** — optional (invite to view this student’s work)
 - **Grade level** — optional; must match org grade scheme when set
+- **Parents** — one or more emails; invite / copy / cancel per email
 
 ### Related
 
@@ -44,12 +47,12 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 - Classes in this org → [CLASS](./CLASS.md)
 - Parent invite / claim status on this page; copy `/invite/<token>` (no email send)
 - Family membership is not shown here while the families directory is unrouted
-- No student login controls (accounts = P2)
+- No dedicated student-role controls (accounts = P2; student email uses parent claim path)
 
 ## Primary actions
 
 - Edit profile fields
-- Create parent invite and copy the claim link; cancel a pending invite
+- Create parent (or student-email) invite and copy the claim link; cancel a pending invite; add another parent
 - Open class / course enrollments
 
 ## Links to

@@ -69,7 +69,8 @@ export function StudentProfilePage() {
             {profile.student.name}
           </h1>
           <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
-            Org-level student profile — no login in Course Wright yet.
+            Org-level student profile. Parents (and an optional student email)
+            sign in with an invite to see this student’s work.
           </p>
         </div>
         <PageFormActions
@@ -87,12 +88,15 @@ export function StudentProfilePage() {
       >
         <StudentProfileFields
           name={profile.name}
-          parentEmail={profile.parentEmail}
+          parentEmail={profile.student.parentEmail ?? ""}
+          studentEmail={profile.studentEmail}
           gradeLevel={profile.gradeLevel}
           gradeLabels={profile.gradeLabels}
           disabled={profile.saving}
+          showParentEmail={false}
           onNameChange={profile.setName}
-          onParentEmailChange={profile.setParentEmail}
+          onParentEmailChange={() => undefined}
+          onStudentEmailChange={profile.setStudentEmail}
           onGradeLevelChange={profile.setGradeLevel}
         />
         {profile.formError ? (
@@ -104,15 +108,18 @@ export function StudentProfilePage() {
 
       <ParentInvitePanel
         parentEmail={profile.student.parentEmail}
+        studentEmail={profile.student.studentEmail}
         canInvite={parentInvite.canInvite}
         loading={parentInvite.loading}
         loadError={parentInvite.loadError}
-        pendingEmail={parentInvite.pending?.email ?? null}
+        pending={parentInvite.pending}
         linked={parentInvite.linked}
-        inviting={parentInvite.inviting}
-        canceling={parentInvite.canceling}
-        copied={parentInvite.copied}
-        inviteUrl={parentInvite.inviteUrl}
+        addEmail={parentInvite.addEmail}
+        invitingEmail={parentInvite.invitingEmail}
+        cancelingId={parentInvite.cancelingId}
+        copiedId={parentInvite.copiedId}
+        origin={parentInvite.origin}
+        onAddEmailChange={parentInvite.setAddEmail}
         onInvite={parentInvite.onInvite}
         onCopy={parentInvite.onCopy}
         onCancel={parentInvite.onCancel}
