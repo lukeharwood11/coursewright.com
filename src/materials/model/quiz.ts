@@ -126,7 +126,7 @@ export function quizPrintLines(
   }
   quiz.choices.forEach((choice, index) => {
     if (!choice.text.trim() && !includeAnswerKey) return;
-    const mark = includeAnswerKey && choice.correct ? "●" : "○";
+    const mark = includeAnswerKey && choice.correct ? "[X]" : "[ ]";
     const correct = includeAnswerKey && choice.correct ? "  (correct)" : "";
     lines.push({
       id: choice.id,

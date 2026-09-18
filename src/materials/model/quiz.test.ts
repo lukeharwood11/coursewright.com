@@ -49,10 +49,10 @@ test("student print lines hide answers; staff print lines include the key", () =
     .map((line) => line.text)
     .join("\n");
   assert.match(student, /What is 2\+2\?/);
-  assert.match(student, /○ A\. 3/);
-  assert.match(student, /○ B\. 4/);
+  assert.match(student, /\[ \] A\. 3/);
+  assert.match(student, /\[ \] B\. 4/);
   assert.doesNotMatch(student, /correct|Answer key/i);
   assert.match(staff, /Answer key/);
-  assert.match(staff, /● B\. 4 {2}\(correct\)/);
+  assert.match(staff, /\[X\] B\. 4 {2}\(correct\)/);
   assert.match(staff, /Correct: B/);
 });
