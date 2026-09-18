@@ -7,7 +7,9 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { isPdfMime } from "@/print/model/fileKind";
-import { printSegmentsFromBlocks } from "@/materials/model/pageContent";
+import { pageHasQuiz, printSegmentsFromBlocks } from "@/materials/model/pageContent";
+import { quizPrintLines } from "@/materials/model/quiz";
+import type { QuizBody } from "@/materials/model/quiz";
 import type { PrintMaterialView, PrintPacketView } from "@/print/model/previewAssets";
 
 const INK = "#1F2B24";
@@ -70,6 +72,16 @@ const styles = StyleSheet.create({
   spacer: {
     height: 8,
   },
+  quiz: {
+    marginTop: 8,
+    marginBottom: 12,
+    paddingTop: 8,
+    paddingBottom: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#DEDACB",
+    borderBottomWidth: 1,
+    borderBottomColor: "#DEDACB",
+  },
 });
 
 function Header({
@@ -92,6 +104,9 @@ function Header({
         </Text>
       ))}
       <Text style={styles.title}>{material.title}</Text>
+      {packet.includeAnswerKey && pageHasQuiz(material.blocks) ? (
+        <Text style={styles.meta}>Answer key</Text>
+      ) : null}
       {material.description ? (
         <Text style={styles.description}>{material.description}</Text>
       ) : null}
@@ -111,7 +126,40 @@ function UrlWithQr({ url, qrDataUrl }: { url: string | null; qrDataUrl: string |
   );
 }
 
-function MaterialBody({ material }: { material: PrintMaterialView }) {
+function QuizPrint({
+  quiz,
+  includeAnswerKey,
+}: {
+  quiz: QuizBody;
+  includeAnswerKey: boolean;
+}) {
+  return (
+    <View style={styles.quiz} wrap={false}>
+      {quizPrintLines(quiz, includeAnswerKey).map((line) => (
+        <Text
+          key={line.id}
+          style={
+            line.tone === "label"
+              ? styles.label
+              : line.tone === "meta"
+                ? styles.meta
+                : styles.body
+          }
+        >
+          {line.text}
+        </Text>
+      ))}
+    </View>
+  );
+}
+
+function MaterialBody({
+  material,
+  includeAnswerKey,
+}: {
+  material: PrintMaterialView;
+  includeAnswerKey: boolean;
+}) {
   if (material.kind === "link") {
     return <UrlWithQr url={material.url} qrDataUrl={material.qrDataUrl} />;
   }
@@ -174,6 +222,15 @@ function MaterialBody({ material }: { material: PrintMaterialView }) {
             </Text>
           );
         }
+        if (segment.type === "quiz") {
+          return (
+            <QuizPrint
+              key={index}
+              quiz={segment.quiz}
+              includeAnswerKey={includeAnswerKey}
+            />
+          );
+        }
         const prefix = segment.type === "listItem" ? "• " : "";
         return (
           <Text key={index} style={styles.body}>
@@ -192,7 +249,10 @@ export function PacketDocument({ packet }: { packet: PrintPacketView }) {
       {packet.materials.map((material) => (
         <Page key={material.id} size="LETTER" wrap style={styles.page}>
           <Header packet={packet} material={material} />
-          <MaterialBody material={material} />
+          <MaterialBody
+            material={material}
+            includeAnswerKey={Boolean(packet.includeAnswerKey)}
+          />
         </Page>
       ))}
     </Document>

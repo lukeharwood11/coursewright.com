@@ -28,14 +28,14 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | CourseInstructor | `course_instructors` | |
 | Unit | `units` | |
 | Material | `materials` | page · link · file; `unit_id` nullable (top-level) |
-| Block | `blocks` | Ordered content on a page material (`rich_text` · `video`; payload in `body` jsonb) |
+| Block | `blocks` | Ordered content on a page material (`rich_text` · `video`; quiz lives as a Lexical node in rich-text `body.lexical`) |
 | MaterialVersion | `material_versions` | |
 | File | `files` | |
 | FileVersion | `file_versions` | |
 | ShareLink | `share_links` | |
 | ImportantNow | `important_now` | |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates (Sunday–Saturday). |
-| Page / Block / Quiz / Form | `blocks` (+ quiz shape TBD) | Material **kind** page\|link\|file; blocks on pages only |
+| Page / Block / Quiz / Form | `blocks` (quiz is a Lexical node on a page) | Material **kind** page\|link\|file; blocks on pages only; **no** quiz table |
 
 **Locked conventions:**
 
@@ -564,7 +564,7 @@ Ordered content piece on a **page** material only (`materials.kind = page`).
 | organization_id | bigint | FK → Organization |
 | material_id | bigint | FK → Material (`kind = page`) |
 | position | int | order within the page |
-| kind | text | **P0:** `rich_text` · `video` — extensible |
+| kind | text | **P0:** `rich_text` · `video` — **quiz** is a Lexical node inside rich-text `body.lexical` (same page; not a material kind) |
 | body | jsonb | Kind-specific payload. Rich text: Lexical editor JSON in `lexical` (legacy `markdown` still accepted). Video: URL |
 | file_id | bigint | FK → File, nullable — when block references an uploaded file |
 | copied_from_id | bigint | FK → Block, nullable — lineage on course-from-course / template copy |
@@ -574,14 +574,14 @@ Ordered content piece on a **page** material only (`materials.kind = page`).
 
 | kind | Payload (sketch) |
 |------|------------------|
-| `rich_text` | Lexical editor state (`body.lexical`); legacy `body.markdown` still reads |
+| `rich_text` | Lexical editor state (`body.lexical`); **quiz** and in-page **file** nodes live here. Quiz payload: prompt, multiple-choice and/or short-answer, correct answers (print key in P0; autograde in P1). Legacy `body.markdown` still reads |
 | `video` | URL embed and/or uploaded `file_id` — **open** which modes |
 
-**Not v1 material kinds:** quiz (shape open), audio. External URLs at the unit level use material `kind = link`, not a link block (unless we later add link blocks inside pages — TBD).
+**Not v1 material kinds:** quiz (it’s a **page block**), audio. External URLs at the unit level use material `kind = link`, not a link block (unless we later add link blocks inside pages — TBD).
 
-### Quiz / Form (not locked as tables)
+### Quiz / Form
 
-- **Quiz:** P0 author + print still required product-wise; shape = block kind vs later material kind — **open**. Not in v1 “Add material” menu.
+- **Quiz:** **P0** author + print. Shape = **block on a page** (Lexical `quiz` node; answers on the node). Not a material kind. Not in v1 “Add material” menu. No parallel quiz table; parent access stays enrollment / `parent_student_links`. Online take + autograde is **P1**.
 - **Form:** workshop.
 ### ShareLink
 
@@ -668,7 +668,7 @@ Family cross-org management (extends P0 org Family)
 | Add material kinds page · link · file | Material.kind | **Decided** (v1) |
 | Rich-text block canonical store | Block.body | **Lexical JSON** (`body.lexical`) |
 | Video block: URL vs uploaded file | Block, File, players | **Open** |
-| Quiz / Form shape | Block kind vs later material kind | Not in v1 Add menu; Form unused |
+| Quiz / Form shape | Block on a page vs later material kind | **Quiz = page block** (Lexical node). Form unused |
 | Autograde answer storage + attempt model | QuizAttempt (phase TBD) | P1 |
 | SaaS packaging (per teacher vs per course) | OrgSubscription | P1 |
 | Assignment object shape | Next conversation | Not P0 |

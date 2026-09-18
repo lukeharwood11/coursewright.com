@@ -1,7 +1,7 @@
 export const MATERIAL_KINDS = ["page", "link", "file"] as const;
 export type MaterialKind = (typeof MATERIAL_KINDS)[number];
 
-export const BLOCK_KINDS = ["rich_text", "video"] as const;
+export const BLOCK_KINDS = ["rich_text", "video", "quiz"] as const;
 export type BlockKind = (typeof BLOCK_KINDS)[number];
 
 export function parseMaterialKind(value: string): MaterialKind | null {

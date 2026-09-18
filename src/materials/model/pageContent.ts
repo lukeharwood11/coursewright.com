@@ -1,6 +1,7 @@
 import type { SerializedEditorState } from "lexical";
 import type { BlockKind } from "./blocks";
 import { parseRichTextBody, parseVideoBody } from "./blocks";
+import { parseQuizBody, type QuizBody } from "./quiz";
 
 export type LexicalJson = {
   type: string;
@@ -23,7 +24,8 @@ export type PagePrintSegment =
   | { type: "heading"; text: string }
   | { type: "paragraph"; text: string }
   | { type: "listItem"; text: string; ordered: boolean }
-  | { type: "video"; url: string };
+  | { type: "video"; url: string }
+  | { type: "quiz"; quiz: QuizBody };
 
 export type LexicalSplitPart =
   | { kind: "video"; url: string }
@@ -48,8 +50,13 @@ export function videoUrlFromLexicalNode(node: LexicalJson): string | null {
   return url || null;
 }
 
+export function quizFromLexicalNode(node: LexicalJson): QuizBody | null {
+  if (node.type !== "quiz") return null;
+  return parseQuizBody(node);
+}
+
 function isHoistableBlock(node: LexicalJson): boolean {
-  return node.type === "video" || node.type === "file";
+  return node.type === "video" || node.type === "file" || node.type === "quiz";
 }
 
 function containsHoistableBlock(node: LexicalJson): boolean {
@@ -126,6 +133,7 @@ export function plainTextFromLexical(state: SerializedEditorState): string {
   return collectPrintSegmentsFromLexical(state)
     .flatMap((segment) => {
       if (segment.type === "video") return [];
+      if (segment.type === "quiz") return [segment.quiz.prompt];
       return [segment.text];
     })
     .join("\n\n");
@@ -138,6 +146,7 @@ function isEmptyLexicalState(state: SerializedEditorState): boolean {
 }
 
 function walkHasContent(node: LexicalJson): boolean {
+  if (node.type === "quiz") return true;
   if (node.type === "video") {
     return typeof node.url === "string" && node.url.trim() !== "";
   }
@@ -171,6 +180,9 @@ function flattenNodes(nodes: LexicalJson[]): PagePrintSegment[] {
 }
 
 function flattenNonVideoNode(node: LexicalJson): PagePrintSegment[] {
+  if (node.type === "quiz") {
+    return [{ type: "quiz", quiz: parseQuizBody(node) }];
+  }
   if (node.type === "file") {
     const name =
       typeof node.filename === "string" && node.filename.trim()
@@ -276,6 +288,10 @@ export function printSegmentsFromBlocks(
 ): PagePrintSegment[] {
   const segments: PagePrintSegment[] = [];
   for (const block of blocks) {
+    if (block.kind === "quiz") {
+      segments.push({ type: "quiz", quiz: parseQuizBody(block.body) });
+      continue;
+    }
     if (block.kind === "video") {
       const url = parseVideoBody(block.body).trim();
       if (url) segments.push({ type: "video", url });
@@ -303,10 +319,17 @@ export function videoUrlsFromBlocks(
   );
 }
 
+export function pageHasQuiz(
+  blocks: Array<{ kind: BlockKind; body: unknown }>,
+): boolean {
+  return printSegmentsFromBlocks(blocks).some((segment) => segment.type === "quiz");
+}
+
 export function pageHasContent(
   blocks: Array<{ kind: BlockKind; body: unknown }>,
 ): boolean {
   for (const block of blocks) {
+    if (block.kind === "quiz") return true;
     if (block.kind === "video") {
       if (parseVideoBody(block.body).trim()) return true;
       continue;

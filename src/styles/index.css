@@ -194,7 +194,8 @@ body {
 }
 
 .cw-editor-video,
-.cw-editor-file {
+.cw-editor-file,
+.cw-editor-quiz {
   margin: 0.5rem 0 0.85rem;
 }
 

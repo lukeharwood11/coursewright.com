@@ -107,6 +107,118 @@ test("print segments keep nested video URLs", () => {
   assert.deepEqual(segments, [{ type: "video", url: YT }]);
 });
 
+function quizNode(quiz: {
+  prompt: string;
+  questionKind?: string;
+  choices?: Array<{ id: string; text: string; correct: boolean }>;
+  answer?: string;
+}) {
+  return {
+    type: "quiz",
+    version: 1,
+    prompt: quiz.prompt,
+    questionKind: quiz.questionKind ?? "multiple_choice",
+    choices: quiz.choices ?? [],
+    answer: quiz.answer ?? "",
+  };
+}
+
+test("root-level quiz nodes stay on the page as rich text, not a new material kind", () => {
+  const quiz = quizNode({
+    prompt: "What is 2+2?",
+    choices: [
+      { id: "a", text: "3", correct: false },
+      { id: "b", text: "4", correct: true },
+    ],
+  });
+  const blocks = editorStateToBlocks(
+    editorState([paragraph("Warm-up"), quiz, paragraph("Done")]),
+  );
+  assert.equal(blocks.length, 1);
+  assert.equal(blocks[0]?.kind, "rich_text");
+  const lexical = blocks[0]?.body as { lexical: SerializedEditorState };
+  const types = lexical.lexical.root.children.map(
+    (child) => (child as { type: string }).type,
+  );
+  assert.deepEqual(types, ["paragraph", "quiz", "paragraph"]);
+});
+
+test("quiz nested in a paragraph is hoisted to a top-level quiz node", () => {
+  const parts = splitLexicalNodes([
+    {
+      type: "paragraph",
+      children: [
+        quizNode({
+          prompt: "Capital of France?",
+          questionKind: "short_answer",
+          answer: "Paris",
+        }),
+      ],
+    },
+  ]);
+  assert.equal(parts.length, 1);
+  assert.equal(parts[0]?.kind, "node");
+  if (parts[0]?.kind === "node") {
+    assert.equal(parts[0].node.type, "quiz");
+    assert.equal(parts[0].node.prompt, "Capital of France?");
+  }
+});
+
+test("print segments include several quiz nodes on one page", () => {
+  const segments = printSegmentsFromBlocks([
+    {
+      kind: "rich_text",
+      body: {
+        lexical: editorState([
+          quizNode({
+            prompt: "Pick one",
+            choices: [
+              { id: "1", text: "Yes", correct: true },
+              { id: "2", text: "No", correct: false },
+            ],
+          }),
+          paragraph("Between"),
+          quizNode({
+            prompt: "Fill in",
+            questionKind: "short_answer",
+            answer: "42",
+          }),
+        ]),
+      },
+    },
+  ]);
+  assert.equal(segments.filter((segment) => segment.type === "quiz").length, 2);
+  assert.deepEqual(
+    segments.map((segment) => segment.type),
+    ["quiz", "paragraph", "quiz"],
+  );
+  const first = segments[0];
+  assert.equal(first?.type, "quiz");
+  if (first?.type === "quiz") {
+    assert.equal(first.quiz.prompt, "Pick one");
+    assert.equal(first.quiz.choices[0]?.correct, true);
+  }
+});
+
+test("dedicated quiz blocks still print when kind is quiz", () => {
+  const segments = printSegmentsFromBlocks([
+    {
+      kind: "quiz",
+      body: {
+        prompt: "Stored as a quiz block",
+        questionKind: "short_answer",
+        choices: [],
+        answer: "Yes",
+      },
+    },
+  ]);
+  assert.equal(segments.length, 1);
+  assert.equal(segments[0]?.type, "quiz");
+  if (segments[0]?.type === "quiz") {
+    assert.equal(segments[0].quiz.answer, "Yes");
+  }
+});
+
 test("splitLexicalNodes hoists file nodes out of paragraphs", () => {
   const parts = splitLexicalNodes([
     {

@@ -144,7 +144,7 @@ Other drafts kept for reference (not in use):
 | Top-level material | **Course material** (no unit) | shown above the units list |
 | Material (in a unit) | **Material** | kind: **page** · **link** · **file** (v1); every material has **title** + **description** |
 | Page material body | **Blocks** | only when kind = page; rich text, video, … |
-| Page building block | **Block** | rich text, video (**P0** on pages); extensible |
+| Page building block | **Block** | rich text, video, **quiz** (**P0** on pages); extensible |
 | Material date | **Scheduled date** | optional; wins over unit dates for "this week" |
 | Calendar week | **Sunday–Saturday** | parent "this week" |
 | Link to one material | **Resource link** | deep link; login required in P0 |
@@ -166,7 +166,7 @@ Other drafts kept for reference (not in use):
 | External URL | **Link** (material kind) | not a course deep link — that’s **Resource link** |
 | Uploaded media on a page | **Video** (block) | URL and/or file — **open**; audio TBD |
 | In-product find | **Search** | native, cross-facet — P0 |
-| Assessment | **Quiz** | printable; autograde when online — in design |
+| Assessment | **Quiz** | block on a page; printable blank + staff answer key in P0; autograde when online — **P1** |
 | Structured response | **Form** | not a quiz — in design |
 | Uploaded file | **File** | attachment, upload |
 | Prior file blob | **File version** | replace keeps old Storage objects for revert |
