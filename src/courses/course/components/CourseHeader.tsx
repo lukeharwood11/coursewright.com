@@ -1,5 +1,10 @@
 import { Link } from "react-router-dom";
-import { PrinterIcon, ShareIcon } from "@heroicons/react/24/outline";
+import {
+  Cog6ToothIcon,
+  DocumentDuplicateIcon,
+  PrinterIcon,
+  ShareIcon,
+} from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { Button, ButtonLink } from "@/ui/Button";
 import { formatDateRange } from "@/courses/model/dates";
@@ -115,12 +120,14 @@ export function CourseHeader({
         </Button>
         {canEdit ? (
           <ButtonLink variant="secondary" to={newCourseFromPath(orgSlug, courseId)}>
-            Create course from this course
+            <DocumentDuplicateIcon className="h-5 w-5" aria-hidden />
+            Duplicate
           </ButtonLink>
         ) : null}
         {canEdit ? (
           <ButtonLink variant="secondary" to={courseSettingsPath(orgSlug, courseId)}>
-            Course settings
+            <Cog6ToothIcon className="h-5 w-5" aria-hidden />
+            Settings
           </ButtonLink>
         ) : null}
       </div>

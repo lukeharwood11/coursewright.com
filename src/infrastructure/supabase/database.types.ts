@@ -339,6 +339,7 @@ export type Database = {
           description: string
           end_date: string | null
           grade_levels: string[]
+          icon_key: string | null
           id: number
           location: string
           organization_id: number
@@ -357,6 +358,7 @@ export type Database = {
           description?: string
           end_date?: string | null
           grade_levels?: string[]
+          icon_key?: string | null
           id?: number
           location?: string
           organization_id: number
@@ -375,6 +377,7 @@ export type Database = {
           description?: string
           end_date?: string | null
           grade_levels?: string[]
+          icon_key?: string | null
           id?: number
           location?: string
           organization_id?: number

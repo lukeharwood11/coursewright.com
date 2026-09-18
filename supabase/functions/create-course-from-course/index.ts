@@ -7,6 +7,7 @@ type Body = {
   description?: unknown;
   location?: unknown;
   subject?: unknown;
+  iconKey?: unknown;
   startDate?: unknown;
   endDate?: unknown;
   gradeLevels?: unknown;
@@ -34,6 +35,12 @@ Deno.serve(async (request) => {
     const description = typeof body.description === "string" ? body.description.trim() : "";
     const location = typeof body.location === "string" ? body.location.trim() : "";
     const subject = typeof body.subject === "string" ? body.subject.trim() : "";
+    const iconKey =
+      body.iconKey === null
+        ? null
+        : typeof body.iconKey === "string" && body.iconKey.trim()
+          ? body.iconKey.trim()
+          : undefined;
     const startDate = typeof body.startDate === "string" && body.startDate ? body.startDate : null;
     const endDate = typeof body.endDate === "string" && body.endDate ? body.endDate : null;
     const gradeLevels = Array.isArray(body.gradeLevels)
@@ -44,7 +51,7 @@ Deno.serve(async (request) => {
     const db = serviceClient();
     const { data: source, error: sourceError } = await db
       .from("courses")
-      .select("id, organization_id, title")
+      .select("id, organization_id, title, icon_key")
       .eq("id", sourceCourseId)
       .maybeSingle();
     if (sourceError) throw sourceError;
@@ -79,6 +86,7 @@ Deno.serve(async (request) => {
         status,
         visibility: "unpublished",
         copied_from_course_id: source.id,
+        icon_key: iconKey !== undefined ? iconKey : source.icon_key,
       })
       .select("id")
       .maybeSingle();

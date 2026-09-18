@@ -1,5 +1,5 @@
 import type { FormEvent } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -19,7 +19,12 @@ import {
   studentQueryKeys,
   updateStudent,
 } from "@/roster/databridge/students";
-import { validateStudentProfile } from "@/roster/model/studentProfile";
+import {
+  studentProfileHaveChanges,
+  validateStudentProfile,
+} from "@/roster/model/studentProfile";
+
+export const STUDENT_PROFILE_FORM_ID = "student-profile-form";
 
 export function useStudentProfile() {
   const { studentId: studentIdParam } = useParams();
@@ -58,13 +63,17 @@ export function useStudentProfile() {
   const [gradeLevel, setGradeLevel] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const resetForm = useCallback(() => {
     if (!student || !belongsHere) return;
     setName(student.name);
     setParentEmail(student.parentEmail ?? "");
     setGradeLevel(student.gradeLevel ?? "");
     setFormError(null);
   }, [student, belongsHere]);
+
+  useEffect(() => {
+    resetForm();
+  }, [resetForm]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -93,8 +102,17 @@ export function useStudentProfile() {
     },
   });
 
+  const hasChanges =
+    student && belongsHere
+      ? studentProfileHaveChanges(
+          { name, parentEmail, gradeLevel },
+          student,
+        )
+      : false;
+
   function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!hasChanges) return;
     setFormError(null);
     saveMutation.mutate();
   }
@@ -113,6 +131,7 @@ export function useStudentProfile() {
     gradeLevel,
     formError,
     saving: saveMutation.isPending,
+    hasChanges,
     setName: (value: string) => {
       setName(value);
       setFormError(null);

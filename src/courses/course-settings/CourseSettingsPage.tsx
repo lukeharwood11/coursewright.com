@@ -2,9 +2,14 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
+import { PageFormActions } from "@/ui/PageFormActions";
 import { Avatar } from "@/ui/Avatar";
 import { coursePath } from "@/courses/model/paths";
-import { useCourseSettings } from "./hooks/useCourseSettings";
+import { CourseIconPicker } from "@/courses/components/CourseIconPicker";
+import {
+  COURSE_SETTINGS_FORM_ID,
+  useCourseSettings,
+} from "./hooks/useCourseSettings";
 import { CourseVisibilityBanner } from "@/courses/course/components/CourseVisibilityBanner";
 
 const controlClass = [
@@ -57,203 +62,254 @@ export function CourseSettingsPage() {
 
   return (
     <div className="px-5 py-8 md:px-8">
-      <h1
-        className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        Course settings
-      </h1>
-      <p className="mt-2 text-[13px]">
-        <Link
-          to={coursePath(settings.organization.slug, settings.course.id)}
-          className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-        >
-          Back to {settings.course.title}
-        </Link>
-      </p>
-      {settings.copiedFromCourseId ? (
-        <p className="mt-2 text-[13px] text-[var(--ink-faint)]">
-          This course was copied from another course. Edits stay on this copy.
-        </p>
-      ) : null}
-
-      {settings.course ? (
-        <CourseVisibilityBanner
-          visibility={settings.course.visibility}
-          canEdit={settings.canEdit}
-          pending={settings.setVisibility.isPending}
-          onPublish={() => settings.setVisibility.mutate("published")}
-          onUnpublish={() => settings.setVisibility.mutate("unpublished")}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1
+            className="flex flex-wrap items-center gap-2 text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            <span className="rounded-[6px] bg-[var(--slate-tint)] px-2.5 py-0.5 text-[var(--slate)]">
+              {settings.course.title}
+            </span>
+            <span>Course settings</span>
+          </h1>
+          <p className="mt-2 text-[13px]">
+            <Link
+              to={coursePath(settings.organization.slug, settings.course.id)}
+              className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+            >
+              Back to {settings.course.title}
+            </Link>
+          </p>
+          {settings.copiedFromCourseId ? (
+            <p className="mt-2 text-[13px] text-[var(--ink-faint)]">
+              This course was copied from another course. Edits stay on this copy.
+            </p>
+          ) : null}
+        </div>
+        <PageFormActions
+          formId={COURSE_SETTINGS_FORM_ID}
+          saving={settings.saving}
+          hasChanges={settings.hasChanges}
+          cancelTo={coursePath(settings.organization.slug, settings.course.id)}
+          saveLabel="Save settings"
         />
-      ) : null}
+      </div>
+
+      <CourseVisibilityBanner
+        visibility={settings.course.visibility}
+        canEdit={settings.canEdit}
+        pending={settings.setVisibility.isPending}
+        onPublish={() => settings.setVisibility.mutate("published")}
+        onUnpublish={() => settings.setVisibility.mutate("unpublished")}
+      />
 
       <form
-        className="mt-6 max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5"
+        id={COURSE_SETTINGS_FORM_ID}
+        className="mt-6 grid items-start gap-4 lg:grid-cols-2"
         onSubmit={settings.onSubmit}
       >
-        <label className="flex flex-col gap-1">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Name</span>
-          <Input
-            className="w-full"
-            value={settings.title}
-            onChange={(event) => settings.setTitle(event.target.value)}
-            required
-          />
-        </label>
-        <label className="mt-3 flex flex-col gap-1">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Description</span>
-          <textarea
-            className={`${controlClass} min-h-[4.5rem] resize-y`}
-            value={settings.description}
-            onChange={(event) => settings.setDescription(event.target.value)}
-          />
-        </label>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1">
-            <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-              Subject / area
-            </span>
-            <Input
-              className="w-full"
-              value={settings.subject}
-              onChange={(event) => settings.setSubject(event.target.value)}
-              placeholder="Math, nature study…"
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-[13px] font-bold text-[var(--ink-soft)]">Location</span>
-            <Input
-              className="w-full"
-              value={settings.location}
-              onChange={(event) => settings.setLocation(event.target.value)}
-              placeholder="Room A, the park…"
-            />
-          </label>
-        </div>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1">
-            <span className="text-[13px] font-bold text-[var(--ink-soft)]">Start date</span>
-            <Input
-              className="w-full"
-              type="date"
-              value={settings.startDate}
-              onChange={(event) => settings.setStartDate(event.target.value)}
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-[13px] font-bold text-[var(--ink-soft)]">End date</span>
-            <Input
-              className="w-full"
-              type="date"
-              value={settings.endDate}
-              onChange={(event) => settings.setEndDate(event.target.value)}
-            />
-          </label>
-        </div>
-        <label className="mt-3 flex flex-col gap-1">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Status</span>
-          <select
-            className={controlClass}
-            value={settings.status}
-            onChange={(event) => settings.setStatus(event.target.value)}
-          >
-            <option value="active">Active</option>
-            <option value="archived">Archived</option>
-          </select>
-          <span className="text-[12px] text-[var(--ink-faint)]">
-            Active means this offering is running. Families still only see it
-            after you publish.
-          </span>
-        </label>
-        {settings.gradeLabels.length > 0 ? (
-          <fieldset className="mt-3">
-            <legend className="text-[13px] font-bold text-[var(--ink-soft)]">
-              Grade levels
-            </legend>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {settings.gradeLabels.map((label) => (
-                <label
-                  key={label}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-[var(--line-soft)] px-2.5 py-1 text-[12.5px] font-bold text-[var(--ink-soft)]"
-                >
-                  <input
-                    type="checkbox"
-                    checked={settings.gradeLevels.includes(label)}
-                    onChange={() => settings.toggleGrade(label)}
-                  />
-                  {label}
-                </label>
-              ))}
+        <div className="grid gap-4">
+          <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
+            <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Course</h2>
+            <label className="mt-4 flex flex-col gap-1">
+              <span className="text-[13px] font-bold text-[var(--ink-soft)]">Name</span>
+              <Input
+                className="w-full"
+                value={settings.title}
+                onChange={(event) => settings.setTitle(event.target.value)}
+                required
+              />
+            </label>
+            <label className="mt-3 flex flex-col gap-1">
+              <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+                Description
+              </span>
+              <textarea
+                className={`${controlClass} min-h-[4.5rem] resize-y`}
+                value={settings.description}
+                onChange={(event) => settings.setDescription(event.target.value)}
+              />
+            </label>
+          </section>
+
+          <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
+            <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">
+              Schedule & status
+            </h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+                  Start date
+                </span>
+                <Input
+                  className="w-full"
+                  type="date"
+                  value={settings.startDate}
+                  onChange={(event) => settings.setStartDate(event.target.value)}
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+                  End date
+                </span>
+                <Input
+                  className="w-full"
+                  type="date"
+                  value={settings.endDate}
+                  onChange={(event) => settings.setEndDate(event.target.value)}
+                />
+              </label>
             </div>
-          </fieldset>
-        ) : null}
-        {settings.formError ? (
-          <p className="mt-3 text-[13px] text-[var(--amber-deep)]">{settings.formError}</p>
-        ) : null}
-        <div className="mt-4">
-          <Button type="submit" disabled={settings.saving}>
-            {settings.saving ? "Saving…" : "Save settings"}
-          </Button>
+            <p className="mt-2 text-[12px] text-[var(--ink-faint)]">
+              Dates are informational only — they don’t control access.
+            </p>
+            <label className="mt-3 flex flex-col gap-1">
+              <span className="text-[13px] font-bold text-[var(--ink-soft)]">Status</span>
+              <select
+                className={controlClass}
+                value={settings.status}
+                onChange={(event) => settings.setStatus(event.target.value)}
+              >
+                <option value="active">Active</option>
+                <option value="archived">Archived</option>
+              </select>
+              <span className="text-[12px] text-[var(--ink-faint)]">
+                Active means this offering is running. Families still only see it
+                after you publish.
+              </span>
+            </label>
+          </section>
+
+          {settings.formError ? (
+            <p className="text-[13px] text-[var(--amber-deep)]">{settings.formError}</p>
+          ) : null}
+        </div>
+
+        <div className="grid gap-4">
+          <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
+            <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Catalog</h2>
+            <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
+              How this course shows up in your list.
+            </p>
+            <div className="mt-4">
+              <CourseIconPicker
+                value={settings.iconKey}
+                onChange={settings.setIconKey}
+              />
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+                  Subject / area
+                </span>
+                <Input
+                  className="w-full"
+                  value={settings.subject}
+                  onChange={(event) => settings.setSubject(event.target.value)}
+                  placeholder="Math, nature study…"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+                  Location
+                </span>
+                <Input
+                  className="w-full"
+                  value={settings.location}
+                  onChange={(event) => settings.setLocation(event.target.value)}
+                  placeholder="Room A, the park…"
+                />
+              </label>
+            </div>
+            {settings.gradeLabels.length > 0 ? (
+              <fieldset className="mt-3">
+                <legend className="text-[13px] font-bold text-[var(--ink-soft)]">
+                  Grade levels
+                </legend>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {settings.gradeLabels.map((label) => (
+                    <label
+                      key={label}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-[var(--line-soft)] px-2.5 py-1 text-[12.5px] font-bold text-[var(--ink-soft)]"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={settings.gradeLevels.includes(label)}
+                        onChange={() => settings.toggleGrade(label)}
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ) : null}
+          </section>
+
+          <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
+            <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">
+              Instructors
+            </h2>
+            <ul className="mt-3 flex flex-col gap-2">
+              {settings.instructors.map((person) => (
+                <li
+                  key={person.userId}
+                  className="flex items-center justify-between gap-2"
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    <Avatar name={person.name} size={28} />
+                    <span className="truncate text-[13.5px] font-semibold">
+                      {person.name}
+                    </span>
+                  </span>
+                  {settings.canManageInstructors ? (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="px-2.5 py-1.5 text-[12px]"
+                      onClick={() => settings.removeInstructor.mutate(person.userId)}
+                    >
+                      Remove
+                    </Button>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+            {settings.canManageInstructors ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                <select
+                  className={`${controlClass} min-w-0 flex-1`}
+                  value={settings.addUserId}
+                  onChange={(event) => settings.setAddUserId(event.target.value)}
+                >
+                  <option value="">Add a co-teacher</option>
+                  {settings.staff.map((person) => (
+                    <option key={person.userId} value={person.userId}>
+                      {person.name}
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  type="button"
+                  disabled={!settings.addUserId}
+                  onClick={() => settings.addInstructor.mutate()}
+                >
+                  Add
+                </Button>
+              </div>
+            ) : (
+              <p className="mt-3 text-[13px] text-[var(--ink-faint)]">
+                Owners and admins can add co-teachers.
+              </p>
+            )}
+            {settings.addInstructor.error ? (
+              <p className="mt-2 text-[13px] text-[var(--amber-deep)]">
+                {settings.addInstructor.error.message}
+              </p>
+            ) : null}
+          </section>
         </div>
       </form>
-
-      <section className="mt-6 max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-        <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Instructors</h2>
-        <ul className="mt-3 flex flex-col gap-2">
-          {settings.instructors.map((person) => (
-            <li key={person.userId} className="flex items-center justify-between gap-2">
-              <span className="flex min-w-0 items-center gap-2">
-                <Avatar name={person.name} size={28} />
-                <span className="truncate text-[13.5px] font-semibold">{person.name}</span>
-              </span>
-              {settings.canManageInstructors ? (
-                <Button
-                  variant="secondary"
-                  className="px-2.5 py-1.5 text-[12px]"
-                  onClick={() => settings.removeInstructor.mutate(person.userId)}
-                >
-                  Remove
-                </Button>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-        {settings.canManageInstructors ? (
-          <form
-            className="mt-4 flex flex-wrap gap-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (!settings.addUserId) return;
-              settings.addInstructor.mutate();
-            }}
-          >
-            <select
-              className={controlClass}
-              value={settings.addUserId}
-              onChange={(event) => settings.setAddUserId(event.target.value)}
-            >
-              <option value="">Add a co-teacher</option>
-              {settings.staff.map((person) => (
-                <option key={person.userId} value={person.userId}>
-                  {person.name}
-                </option>
-              ))}
-            </select>
-            <Button type="submit" disabled={!settings.addUserId}>
-              Add
-            </Button>
-          </form>
-        ) : (
-          <p className="mt-3 text-[13px] text-[var(--ink-faint)]">
-            Owners and admins can add co-teachers.
-          </p>
-        )}
-        {settings.addInstructor.error ? (
-          <p className="mt-2 text-[13px] text-[var(--amber-deep)]">
-            {settings.addInstructor.error.message}
-          </p>
-        ) : null}
-      </section>
     </div>
   );
 }

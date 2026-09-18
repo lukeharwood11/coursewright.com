@@ -26,8 +26,6 @@ import {
 import { PrintPage } from "@/print";
 import {
   ClassRosterPage,
-  FamiliesPage,
-  FamilyPage,
   OrgRosterPage,
   StudentProfilePage,
 } from "@/roster";
@@ -142,22 +140,6 @@ export function AppRoutes() {
               element={
                 <RequireStaff>
                   <ClassRosterPage />
-                </RequireStaff>
-              }
-            />
-            <Route
-              path="families"
-              element={
-                <RequireStaff>
-                  <FamiliesPage />
-                </RequireStaff>
-              }
-            />
-            <Route
-              path="families/:familyId"
-              element={
-                <RequireStaff>
-                  <FamilyPage />
                 </RequireStaff>
               }
             />

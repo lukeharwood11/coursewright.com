@@ -1,7 +1,9 @@
 export { Avatar } from "./Avatar";
 export { Badge } from "./Badge";
 export { Button, ButtonLink } from "./Button";
+export { ConfirmDialog } from "./ConfirmDialog";
 export { Input } from "./Input";
+export { PageFormActions } from "./PageFormActions";
 export { toastNotImplemented } from "./toast";
 export { Mark, Wordmark } from "./Wordmark";
 export {

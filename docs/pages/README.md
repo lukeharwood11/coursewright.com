@@ -31,8 +31,8 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [ORG_ROSTER](./ORG_ROSTER.md) | `/my/<org-slug>/roster` |
 | [STUDENT_PROFILE](./STUDENT_PROFILE.md) | `/my/<org-slug>/roster/<student_id>` |
 | [CLASS](./CLASS.md) | `/my/<org-slug>/classes/<class_id>` |
-| [FAMILIES](./FAMILIES.md) | `/my/<org-slug>/families` |
-| [FAMILY](./FAMILY.md) | `/my/<org-slug>/families/<family_id>` |
+| [FAMILIES](./FAMILIES.md) | `/my/<org-slug>/families` | **Not currently routed** |
+| [FAMILY](./FAMILY.md) | `/my/<org-slug>/families/<family_id>` | **Not currently routed** |
 
 **No page file yet** (paths TBD in [URLS.md](../URLS.md)): resource share entry, search route. Share / search UX is still required on the locked pages above; print routes are locked — see [PRINT](./PRINT.md).
 
@@ -52,7 +52,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | RBAC (owner / admin / instructor / parent) | Role splits on [ORG_HOME](./ORG_HOME.md) + gated pages |
 | Student profiles | [ORG_ROSTER](./ORG_ROSTER.md), [STUDENT_PROFILE](./STUDENT_PROFILE.md), [COURSE_ROSTER](./COURSE_ROSTER.md), [CLASS](./CLASS.md) |
 | Roster / enrollments / parent linkage & invites | [ORG_ROSTER](./ORG_ROSTER.md), [COURSE_ROSTER](./COURSE_ROSTER.md), [STUDENT_PROFILE](./STUDENT_PROFILE.md), [CLASS](./CLASS.md) |
-| Families / parent directory | [FAMILIES](./FAMILIES.md), [FAMILY](./FAMILY.md) |
+| Families / parent directory | [FAMILIES](./FAMILIES.md), [FAMILY](./FAMILY.md) — feature kept; SPA UI not currently routed |
 | Course builder — courses only; create from scratch or from another course | [COURSE_LIST](./COURSE_LIST.md), [COURSE](./COURSE.md), [COURSE_SETTINGS](./COURSE_SETTINGS.md) |
 | Units + dating (optional); top-level materials allowed | [COURSE](./COURSE.md), [UNIT](./UNIT.md) |
 | Rich materials — Add: page / link / file; pages use blocks | [MATERIAL](./MATERIAL.md) |

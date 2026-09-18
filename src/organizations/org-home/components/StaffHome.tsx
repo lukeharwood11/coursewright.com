@@ -1,49 +1,28 @@
-import {
-  BookOpenIcon,
-  Cog6ToothIcon,
-  PlusIcon,
-  UserGroupIcon,
-  UsersIcon,
-} from "@heroicons/react/24/outline";
-import { ButtonLink } from "@/ui/Button";
-import { Link } from "react-router-dom";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import type { StaffDashboard } from "@/organizations/model/staffDashboard";
 import { newCoursePath } from "@/courses/model/paths";
+import { ButtonLink } from "@/ui/Button";
+import {
+  StaffAttentionList,
+  StaffCoursesPreview,
+  StaffGettingStarted,
+  StaffPeopleSnapshot,
+  StaffWeekSummary,
+} from "./StaffDashboardSections";
 
 export function StaffHome({
   orgName,
   orgSlug,
+  dashboard,
+  loading,
+  error,
 }: {
   orgName: string;
   orgSlug: string;
+  dashboard: StaffDashboard | null;
+  loading: boolean;
+  error: string | null;
 }) {
-  const base = `/my/${orgSlug}`;
-  const destinations = [
-    {
-      title: "Courses",
-      description: "Offerings families participate in.",
-      to: `${base}/courses`,
-      icon: BookOpenIcon,
-    },
-    {
-      title: "Roster",
-      description: "Students and classes for this organization.",
-      to: `${base}/roster`,
-      icon: UsersIcon,
-    },
-    {
-      title: "Families",
-      description: "Parent directory for this organization.",
-      to: `${base}/families`,
-      icon: UserGroupIcon,
-    },
-    {
-      title: "Organization settings",
-      description: "Permalink, grade scheme, and staff.",
-      to: `${base}/settings`,
-      icon: Cog6ToothIcon,
-    },
-  ] as const;
-
   return (
     <div className="px-5 py-8 md:px-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -55,8 +34,7 @@ export function StaffHome({
             {orgName}
           </h1>
           <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
-            Plan courses, share materials, and print from one place. Use the
-            sidebar to jump to a course or family.
+            {dashboard?.week.label ?? "Organization overview"}
           </p>
         </div>
         <ButtonLink to={newCoursePath(orgSlug)}>
@@ -65,30 +43,33 @@ export function StaffHome({
         </ButtonLink>
       </div>
 
-      <ul className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {destinations.map((item) => (
-          <li key={item.title}>
-            <Link
-              to={item.to}
-              className="flex h-full w-full items-start gap-3 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] px-4 py-4 text-left hover:border-[var(--green)] hover:bg-[var(--green-tint)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
-            >
-              <item.icon className="mt-0.5 h-6 w-6 shrink-0 text-[var(--green)]" aria-hidden />
-              <span>
-                <span className="block text-[15.5px] font-extrabold text-[var(--ink)]">
-                  {item.title}
-                </span>
-                <span className="mt-1 block text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-                  {item.description}
-                </span>
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {loading ? (
+        <p className="mt-6 text-[14px] text-[var(--ink-soft)]">Loading overview…</p>
+      ) : null}
 
-      <p className="mt-6 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-        You can create a course and print materials without a roster.
-      </p>
+      {error ? (
+        <p className="mt-6 text-[13.5px] text-[var(--amber-deep)]" role="alert">
+          {error}
+        </p>
+      ) : null}
+
+      {dashboard && !loading ? (
+        <div className="mt-6 flex flex-col gap-8">
+          {dashboard.setup.needsCourse || dashboard.setup.needsStudents ? (
+            <StaffGettingStarted
+              orgSlug={orgSlug}
+              needsCourse={dashboard.setup.needsCourse}
+              needsStudents={dashboard.setup.needsStudents}
+            />
+          ) : null}
+          <StaffAttentionList orgSlug={orgSlug} items={dashboard.attention} />
+          <StaffCoursesPreview orgSlug={orgSlug} dashboard={dashboard} />
+          {!dashboard.setup.needsCourse ? (
+            <StaffWeekSummary orgSlug={orgSlug} dashboard={dashboard} />
+          ) : null}
+          <StaffPeopleSnapshot orgSlug={orgSlug} people={dashboard.people} />
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -35,7 +35,7 @@ If a new folder is named after a library (`redux/`, `hooks/`, `contexts/`) at th
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│  Browser SPA (coursewright.com / justtesting.…)               │
+│  Browser SPA (coursewright.com / beta.…)               │
 │  Domain modules scream product · UI is delivery               │
 └───────────────┬─────────────────────────────┬───────────────┘
                 │ PostgREST (CRUD)            │ Functions (complex)
@@ -164,14 +164,14 @@ Functions are **use-case adapters**, not a general REST API. Prefer few, obvious
 
 ```text
 coursewright.com              → CloudFront → S3 (prod SPA)
-justtesting.coursewright.com  → CloudFront → S3 (test SPA)
+beta.coursewright.com  → CloudFront → S3 (test SPA)
          │
          └── browser talks to Supabase (Auth / PostgREST / Storage / Functions)
 ```
 
 SPA only on CloudFront. API is Supabase, not an origin on the CDN (except the static app).
 
-**IaC:** **Terraform** under `infra/terraform/` — one stack, **`testing.tfvars` / `production.tfvars`** for tiers (separate state per tier). Supabase schema and Functions stay outside Terraform — see [STACK.md](./STACK.md) / [STRUCTURE.md](./STRUCTURE.md).
+**IaC:** **Terraform** under `infra/terraform/` — one stack, **`infra/tfvars/testing.tfvars` / `production.tfvars`** for tiers (separate state per tier). Supabase schema and Functions stay outside Terraform — see [STACK.md](./STACK.md) / [STRUCTURE.md](./STRUCTURE.md).
 
 ---
 

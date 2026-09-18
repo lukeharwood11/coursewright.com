@@ -26,6 +26,7 @@ export type ParentImportantNowItem = {
   id: number;
   materialId: number;
   materialTitle: string;
+  materialDescription: string;
   courseId: number;
   courseTitle: string;
   unitId: number | null;
@@ -60,6 +61,7 @@ export type ParentDashboardSource = {
     id: number;
     materialId: number;
     materialTitle: string;
+    materialDescription: string;
     courseId: number;
     courseTitle: string;
     unitId: number | null;

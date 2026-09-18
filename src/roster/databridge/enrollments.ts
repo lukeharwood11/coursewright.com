@@ -112,48 +112,89 @@ export async function enrollStudent(
   courseId: number,
   studentProfileId: number,
 ): Promise<EnrollmentRecord> {
-  const db = requireSupabase();
-  const { data: existing, error: existingError } = await db
-    .from("enrollments")
-    .select("id, course_id, student_profile_id, status")
-    .eq("course_id", courseId)
-    .eq("student_profile_id", studentProfileId)
-    .maybeSingle();
-
-  if (existingError) throw new Error(rosterWriteErrorMessage(existingError));
-
-  if (existing) {
-    const { data, error } = await db
-      .from("enrollments")
-      .update({ status: "active" })
-      .eq("id", existing.id)
-      .select("id, course_id, student_profile_id, status")
-      .maybeSingle();
-
-    if (error) throw new Error(rosterWriteErrorMessage(error));
-    const enrollment = data ? toEnrollment(data) : null;
-    if (!enrollment) {
-      throw new Error("You don’t have permission to update this enrollment.");
-    }
-    return enrollment;
-  }
-
-  const { data, error } = await db
-    .from("enrollments")
-    .insert({
-      course_id: courseId,
-      student_profile_id: studentProfileId,
-      status: "active",
-    })
-    .select("id, course_id, student_profile_id, status")
-    .maybeSingle();
-
-  if (error) throw new Error(rosterWriteErrorMessage(error));
-  const enrollment = data ? toEnrollment(data) : null;
+  const results = await enrollStudents(courseId, [studentProfileId]);
+  const enrollment = results[0];
   if (!enrollment) {
     throw new Error("You don’t have permission to enroll this student.");
   }
   return enrollment;
+}
+
+export async function enrollStudents(
+  courseId: number,
+  studentProfileIds: number[],
+): Promise<EnrollmentRecord[]> {
+  const uniqueIds = [
+    ...new Set(studentProfileIds.filter((id) => Number.isFinite(id) && id > 0)),
+  ];
+  if (uniqueIds.length === 0) return [];
+
+  const db = requireSupabase();
+  const { data: existingRows, error: existingError } = await db
+    .from("enrollments")
+    .select("id, course_id, student_profile_id, status")
+    .eq("course_id", courseId)
+    .in("student_profile_id", uniqueIds);
+
+  if (existingError) throw new Error(rosterWriteErrorMessage(existingError));
+
+  const existingByStudent = new Map(
+    (existingRows ?? []).map((row) => [row.student_profile_id, row]),
+  );
+  const toReactivate = (existingRows ?? [])
+    .filter((row) => row.status !== "active")
+    .map((row) => row.id);
+  const toInsert = uniqueIds.filter((id) => !existingByStudent.has(id));
+
+  const results: EnrollmentRecord[] = [];
+
+  for (const row of existingRows ?? []) {
+    if (row.status === "active") {
+      const enrollment = toEnrollment(row);
+      if (enrollment) results.push(enrollment);
+    }
+  }
+
+  if (toReactivate.length > 0) {
+    const { data, error } = await db
+      .from("enrollments")
+      .update({ status: "active" })
+      .in("id", toReactivate)
+      .select("id, course_id, student_profile_id, status");
+
+    if (error) throw new Error(rosterWriteErrorMessage(error));
+    for (const row of data ?? []) {
+      const enrollment = toEnrollment(row);
+      if (enrollment) results.push(enrollment);
+    }
+    if ((data ?? []).length === 0) {
+      throw new Error("You don’t have permission to update this enrollment.");
+    }
+  }
+
+  if (toInsert.length > 0) {
+    const { data, error } = await db
+      .from("enrollments")
+      .insert(
+        toInsert.map((studentProfileId) => ({
+          course_id: courseId,
+          student_profile_id: studentProfileId,
+          status: "active",
+        })),
+      )
+      .select("id, course_id, student_profile_id, status");
+
+    if (error) throw new Error(rosterWriteErrorMessage(error));
+    for (const row of data ?? []) {
+      const enrollment = toEnrollment(row);
+      if (enrollment) results.push(enrollment);
+    }
+    if ((data ?? []).length === 0) {
+      throw new Error("You don’t have permission to enroll this student.");
+    }
+  }
+
+  return results;
 }
 
 export async function addStudentToCourse(args: {

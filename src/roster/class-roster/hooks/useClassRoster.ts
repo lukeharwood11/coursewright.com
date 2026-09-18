@@ -7,14 +7,26 @@ import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import { getOrganization } from "@/organizations/databridge/organizations";
 import {
-  addClassMember,
+  addClassMembers,
   classQueryKeys,
   getClass,
   listClassMembers,
   removeClassMember,
 } from "@/roster/databridge/classes";
-import { createStudent, listStudents, studentQueryKeys } from "@/roster/databridge/students";
-import { studentsNotIn, validateStudentProfile } from "@/roster/model/studentProfile";
+import {
+  createStudents,
+  listStudents,
+  studentQueryKeys,
+} from "@/roster/databridge/students";
+import {
+  emptyStudentDraft,
+  mergeSelectedIds,
+  parseStudentNamesPaste,
+  studentsNotIn,
+  toggleIdInSet,
+  validateStudentBatch,
+  type NewStudentDraft,
+} from "@/roster/model/studentProfile";
 
 export function useClassRoster() {
   const { classId: classIdParam } = useParams();
@@ -54,26 +66,29 @@ export function useClassRoster() {
     members.map((member) => member.student.id),
   );
 
-  const [selectedId, setSelectedId] = useState("");
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [tab, setTab] = useState<"existing" | "new">("existing");
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [existingError, setExistingError] = useState<string | null>(null);
-  const [name, setName] = useState("");
-  const [parentEmail, setParentEmail] = useState("");
-  const [gradeLevel, setGradeLevel] = useState("");
+  const [drafts, setDrafts] = useState<NewStudentDraft[]>([emptyStudentDraft()]);
+  const [pasteText, setPasteText] = useState("");
   const [newError, setNewError] = useState<string | null>(null);
 
   const addExistingMutation = useMutation({
     mutationFn: async () => {
-      const studentId = Number(selectedId);
-      if (!classReady || !Number.isFinite(studentId) || studentId <= 0) {
-        throw new Error("Choose a student to add.");
+      if (!classReady) throw new Error("Class isn’t loaded yet.");
+      if (selectedIds.length === 0) {
+        throw new Error("Choose at least one student to add.");
       }
-      await addClassMember(classId, studentId);
+      await addClassMembers(classId, selectedIds);
+      return selectedIds.length;
     },
-    onSuccess: async () => {
-      setSelectedId("");
+    onSuccess: async (count) => {
+      setSelectedIds([]);
       setExistingError(null);
+      setPanelOpen(false);
       await invalidateClass(queryClient, organization.id, classId);
-      toast("Student added to class.");
+      toast(count === 1 ? "Student added to class." : `${count} students added to class.`);
     },
     onError: (error: Error) => {
       setExistingError(error.message);
@@ -83,24 +98,25 @@ export function useClassRoster() {
   const addNewMutation = useMutation({
     mutationFn: async () => {
       if (!classReady) throw new Error("Class isn’t loaded yet.");
-      const parsed = validateStudentProfile({
-        name,
-        parentEmail,
-        gradeLevel,
-        gradeLabels: organizationQuery.data?.gradeLabels ?? [],
-      });
+      const parsed = validateStudentBatch(
+        drafts,
+        organizationQuery.data?.gradeLabels ?? [],
+      );
       if (!parsed.ok) throw new Error(parsed.error);
-      const student = await createStudent(organization.id, parsed.value);
-      await addClassMember(classId, student.id);
-      return student;
+      const created = await createStudents(organization.id, parsed.values);
+      await addClassMembers(
+        classId,
+        created.map((student) => student.id),
+      );
+      return created.length;
     },
-    onSuccess: async () => {
-      setName("");
-      setParentEmail("");
-      setGradeLevel("");
+    onSuccess: async (count) => {
+      setDrafts([emptyStudentDraft()]);
+      setPasteText("");
       setNewError(null);
+      setPanelOpen(false);
       await invalidateClass(queryClient, organization.id, classId);
-      toast("Student added to class.");
+      toast(count === 1 ? "Student added to class." : `${count} students added to class.`);
     },
     onError: (error: Error) => {
       setNewError(error.message);
@@ -118,15 +134,31 @@ export function useClassRoster() {
     },
   });
 
-  function onAddExisting() {
-    setExistingError(null);
-    addExistingMutation.mutate();
-  }
-
-  function onAddNew(event: FormEvent) {
+  function onSubmitNew(event: FormEvent) {
     event.preventDefault();
     setNewError(null);
     addNewMutation.mutate();
+  }
+
+  function onApplyPaste() {
+    const names = parseStudentNamesPaste(pasteText);
+    if (names.length === 0) return;
+    setDrafts((current) => {
+      const next = [...current];
+      const firstBlank = next.findIndex((draft) => !draft.name.trim());
+      let writeAt = firstBlank >= 0 ? firstBlank : next.length;
+      for (const name of names) {
+        if (writeAt < next.length) {
+          next[writeAt] = { ...next[writeAt], name };
+        } else {
+          next.push({ ...emptyStudentDraft(), name });
+        }
+        writeAt += 1;
+      }
+      return next.length > 0 ? next : [emptyStudentDraft()];
+    });
+    setPasteText("");
+    setNewError(null);
   }
 
   return {
@@ -142,30 +174,66 @@ export function useClassRoster() {
         ? membersQuery.error.message
         : null,
     notFound: !classQuery.isLoading && (!classGroup || !belongsHere),
-    selectedId,
+    panelOpen,
+    tab,
+    selectedIds,
     existingError,
-    name,
-    parentEmail,
-    gradeLevel,
+    drafts,
+    pasteText,
     newError,
     addingExisting: addExistingMutation.isPending,
     addingNew: addNewMutation.isPending,
     removingId: removeMutation.isPending ? (removeMutation.variables ?? null) : null,
-    setSelectedId,
-    setName: (value: string) => {
-      setName(value);
+    openPanel: () => {
+      setPanelOpen(true);
+      setTab(availableStudents.length === 0 ? "new" : "existing");
+    },
+    closePanel: () => {
+      setPanelOpen(false);
+      setExistingError(null);
       setNewError(null);
     },
-    setParentEmail: (value: string) => {
-      setParentEmail(value);
+    setTab,
+    onToggle: (id: number) => {
+      setSelectedIds((current) => toggleIdInSet(current, id));
+      setExistingError(null);
+    },
+    onSelectFiltered: (ids: number[]) => {
+      setSelectedIds((current) => mergeSelectedIds(current, ids));
+      setExistingError(null);
+    },
+    onClearSelection: () => {
+      setSelectedIds([]);
+      setExistingError(null);
+    },
+    onConfirmExisting: () => {
+      setExistingError(null);
+      addExistingMutation.mutate();
+    },
+    setDraft: (index: number, draft: NewStudentDraft) => {
+      setDrafts((current) =>
+        current.map((row, rowIndex) => (rowIndex === index ? draft : row)),
+      );
       setNewError(null);
     },
-    setGradeLevel: (value: string) => {
-      setGradeLevel(value);
+    onAddRow: () => {
+      setDrafts((current) => [...current, emptyStudentDraft()]);
       setNewError(null);
     },
-    onAddExisting,
-    onAddNew,
+    onRemoveRow: (index: number) => {
+      setDrafts((current) =>
+        current.length <= 1
+          ? [emptyStudentDraft()]
+          : current.filter((_, rowIndex) => rowIndex !== index),
+      );
+      setNewError(null);
+    },
+    setPasteText: (value: string) => {
+      setPasteText(value);
+      setNewError(null);
+    },
+    onApplyPaste,
+    onSubmitNew,
     onRemove: (memberId: number) => removeMutation.mutate(memberId),
   };
 }

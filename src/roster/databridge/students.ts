@@ -67,24 +67,43 @@ export async function createStudent(
   input: ValidatedStudentProfile,
   createdViaCourseId?: number,
 ): Promise<StudentSummary> {
+  const created = await createStudents(
+    organizationId,
+    [input],
+    createdViaCourseId,
+  );
+  const student = created[0];
+  if (!student) {
+    throw new Error("You don’t have permission to add a student.");
+  }
+  return student;
+}
+
+export async function createStudents(
+  organizationId: number,
+  inputs: ValidatedStudentProfile[],
+  createdViaCourseId?: number,
+): Promise<StudentSummary[]> {
+  if (inputs.length === 0) return [];
   const db = requireSupabase();
   const { data, error } = await db
     .from("student_profiles")
-    .insert({
-      organization_id: organizationId,
-      name: input.name,
-      parent_email: input.parentEmail,
-      grade_level: input.gradeLevel,
-      created_via_course_id: createdViaCourseId ?? null,
-    })
-    .select(STUDENT_COLUMNS)
-    .maybeSingle();
+    .insert(
+      inputs.map((input) => ({
+        organization_id: organizationId,
+        name: input.name,
+        parent_email: input.parentEmail,
+        grade_level: input.gradeLevel,
+        created_via_course_id: createdViaCourseId ?? null,
+      })),
+    )
+    .select(STUDENT_COLUMNS);
 
   if (error) throw new Error(rosterWriteErrorMessage(error));
-  if (!data) {
+  if (!data || data.length === 0) {
     throw new Error("You don’t have permission to add a student.");
   }
-  return toStudentSummary(data);
+  return data.map((row) => toStudentSummary(row));
 }
 
 export async function updateStudent(

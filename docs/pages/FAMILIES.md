@@ -1,48 +1,52 @@
 # FAMILIES
 
 **URL:** `/my/<org-slug>/families`  
-**URL map:** [URLS.md](../URLS.md)
+**URL map:** [URLS.md](../URLS.md)  
+**SPA status:** Outline and feature remain; **not currently routed or linked** in the app.
 
 ## Audience
 
-Admins and instructors (exact visibility TBD — FEATURES leaves admin-only vs instructor-visible open).
+Admins and instructors (same staff visibility as Classes). Parents do not use this directory in P0.
 
 ## Purpose
 
-Org-scoped **parent / family directory** — find households without hunting course rosters.
+Org-scoped **parent / family directory** — find named student groups (households) without hunting course rosters.
 
 
 ## Behavior
 
-- Browse org-scoped family directory (admin and/or instructor — exact visibility TBD).
-- Open a family; create/group households from roster associations (UX TBD).
-- Org-scoped only (cross-org family management is P2).
+- Browse org-scoped family directory (owners, admins, and instructors).
+- Create a **named** family (required name, like a class). Empty family is allowed; add students on the family page.
+- Empty state explains grouping students and that parents appear from parent–student links, not family membership.
+- Org-scoped only (cross-org family management is P2). Sidebar lists families by name when this screen is restored.
 
 ## Data shown
 
-- Family list: household label/names (display name TBD), member summary (students/parents counts or names)
+- Family list: required display name (fallback to student names if missing); member summary (student count and parent count derived from links)
 - Empty state explaining linking households
+- Create field: family name (required)
 
 ## Contents
 
-- List families (households) in the org
-- Built from roster + parent links; group siblings into one family
+- Create family (name required)
+- List families in the org
 - Open → [FAMILY](./FAMILY.md)
-- Empty state: explain linking parents/students into a household
+- Empty state: create a named group, add students, link a parent to those students
+- Jump to related [ORG_ROSTER](./ORG_ROSTER.md) students
 - Cross-org family management is **P2** — this page is org-scoped only
 
 ## Primary actions
 
+- Create family
 - Open family
-- Create / group family (TBD UX)
 - Jump to related [ORG_ROSTER](./ORG_ROSTER.md) students
 
 ## Links to
 
 - [FAMILY](./FAMILY.md) — open family
 - [ORG_ROSTER](./ORG_ROSTER.md) — related students
-- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
+- Via org chrome (when restored): [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Families & parent directory (P0). Profile fields beyond names still open.
+[FEATURES.md](../FEATURES.md) — Families & parent directory (P0). **Access lock:** family is a named group of students (Class-mirror). Parents are derived from `parent_student_links`. Materials / this-week / print stay enrollment + that student link. Extra profile fields, merge/split, parent-facing profile, and invite send/claim remain TBD. Schema + `roster/databridge/families` remain; SPA page UI is currently removed.

@@ -19,7 +19,6 @@ export type NavSection = {
 export type NavLists = {
   courses: Array<{ id: string; title: string }>;
   classes: Array<{ id: string; title: string }>;
-  families: Array<{ id: string; label: string }>;
 };
 
 const CHILD_LIMIT = 12;
@@ -62,13 +61,6 @@ export function buildStaffNav(orgSlug: string, lists: NavLists): NavSection[] {
         })),
         (id) => `${base}/classes/${id}`,
       ),
-    },
-    {
-      id: "families",
-      label: "Families",
-      href: `${base}/families`,
-      match: "prefix",
-      children: childLinks(lists.families, (id) => `${base}/families/${id}`),
     },
     {
       id: "settings",

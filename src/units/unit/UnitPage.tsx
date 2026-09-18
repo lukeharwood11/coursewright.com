@@ -3,12 +3,15 @@ import { Link } from "react-router-dom";
 import { ArrowDownIcon, ArrowUpIcon, PrinterIcon } from "@heroicons/react/24/outline";
 import { Button, ButtonLink } from "@/ui/Button";
 import { Input } from "@/ui/Input";
+import { PageFormActions } from "@/ui/PageFormActions";
 import { formatDateRange } from "@/courses/model/dates";
 import { coursePath } from "@/courses/model/paths";
 import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
 import { unitPrintPath } from "@/units/model/paths";
 import { useUnit } from "./hooks/useUnit";
+
+const UNIT_SETTINGS_FORM_ID = "unit-settings-form";
 
 export function UnitPage() {
   const page = useUnit();
@@ -70,6 +73,12 @@ export function UnitPage() {
     course.id,
     unit.id,
   );
+  const hasChanges =
+    page.canEdit &&
+    !unit.deletedAt &&
+    (title !== unit.title ||
+      startDate !== (unit.startDate ?? "") ||
+      endDate !== (unit.endDate ?? ""));
 
   return (
     <div className="px-5 py-8 md:px-8">
@@ -94,10 +103,21 @@ export function UnitPage() {
             </Link>
           </p>
         </div>
-        <ButtonLink variant="secondary" to={printHref}>
-          <PrinterIcon className="h-5 w-5" aria-hidden />
-          Print unit
-        </ButtonLink>
+        <div className="flex flex-wrap items-center gap-2">
+          {page.canEdit && !unit.deletedAt ? (
+            <PageFormActions
+              formId={UNIT_SETTINGS_FORM_ID}
+              saving={page.saveUnit.isPending}
+              hasChanges={hasChanges}
+              cancelTo={coursePath(page.organization.slug, course.id)}
+              saveLabel="Save unit"
+            />
+          ) : null}
+          <ButtonLink variant="secondary" to={printHref}>
+            <PrinterIcon className="h-5 w-5" aria-hidden />
+            Print unit
+          </ButtonLink>
+        </div>
       </div>
 
       {unit.deletedAt ? (
@@ -115,9 +135,11 @@ export function UnitPage() {
 
       {page.canEdit && !unit.deletedAt ? (
         <form
+          id={UNIT_SETTINGS_FORM_ID}
           className="mt-6 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
           onSubmit={(event) => {
             event.preventDefault();
+            if (!hasChanges) return;
             page.saveUnit.mutate({
               title: title.trim() || page.unit!.title,
               startDate: startDate || null,
@@ -153,10 +175,7 @@ export function UnitPage() {
               />
             </label>
           </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button type="submit" disabled={page.saveUnit.isPending}>
-              {page.saveUnit.isPending ? "Saving…" : "Save unit"}
-            </Button>
+          <div className="mt-3">
             <Button
               type="button"
               variant="secondary"

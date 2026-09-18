@@ -16,6 +16,7 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 
 - View/edit one `student_profile` (no student login in P0/P1).
 - Edit name, optional parent email, optional grade (must match org grade scheme when set).
+- **Save** / **Cancel** in the page header; Save disabled when nothing changed; Cancel goes back (confirms if dirty).
 - Show course enrollments and class membership.
 - Creating profiles often happens on first course or class add; this page manages the canonical org record.
 - **Invite parent:** if a parent email is saved, create a parent invite and **copy `/invite/<token>`** (v0 does not send email). Same claim path as staff.
@@ -42,7 +43,7 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 - Enrollments in courses in this org → links to those [COURSE_ROSTER](./COURSE_ROSTER.md) contexts
 - Classes in this org → [CLASS](./CLASS.md)
 - Parent invite / claim status on this page; copy `/invite/<token>` (no email send)
-- Family membership → [FAMILY](./FAMILY.md) when grouped (display TBD)
+- Family membership is not shown here while the families directory is unrouted
 - No student login controls (accounts = P2)
 
 ## Primary actions
@@ -57,10 +58,8 @@ View/edit one org-level **student profile** (not a user account in P0/P1).
 - [INVITE_CLAIM](./INVITE_CLAIM.md) — copied parent invite link (recipient)
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — course enrollment contexts
 - [CLASS](./CLASS.md) — class membership
-- [FAMILY](./FAMILY.md) — household when grouped
-- [FAMILIES](./FAMILIES.md) — directory
-- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [FAMILIES](./FAMILIES.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
+- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Student profiles; parent access rules (active enrollment).
+[FEATURES.md](../FEATURES.md) — Student profiles; parent access rules (active enrollment). Family membership UI is not currently shown on this page (families directory not routed).

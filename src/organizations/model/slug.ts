@@ -1,12 +1,17 @@
 const RESERVED_SLUGS = new Set(["settings", "login", "signup", "my"]);
 
-/** Match `private.slugify` in supabase/migrations. */
-export function slugify(input: string): string {
+/** Normalize permalink text while the user is typing (keeps trailing hyphens). */
+export function formatSlugInput(input: string): string {
   return input
     .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-");
+}
+
+/** Match `private.slugify` in supabase/migrations — use on save, not each keystroke. */
+export function slugify(input: string): string {
+  return formatSlugInput(input.trim()).replace(/^-+|-+$/g, "");
 }
 
 export function isReservedSlug(slug: string): boolean {

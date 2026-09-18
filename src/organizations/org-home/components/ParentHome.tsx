@@ -136,7 +136,12 @@ function ParentDashboardBody({
                   <span className="block text-[14px] font-bold text-[var(--ink)]">
                     {item.materialTitle}
                   </span>
-                  <span className="text-[12.5px] text-[var(--ink-soft)]">
+                  {item.materialDescription ? (
+                    <span className="mt-0.5 block text-[12.5px] text-[var(--ink-soft)]">
+                      {item.materialDescription}
+                    </span>
+                  ) : null}
+                  <span className="mt-0.5 block text-[12.5px] text-[var(--ink-soft)]">
                     {item.courseTitle}
                   </span>
                 </Link>

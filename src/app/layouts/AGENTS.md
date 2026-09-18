@@ -4,20 +4,21 @@ App chrome: collapsible sidebar + top bar for signed-in `/my` pages.
 
 ## Scope
 
-- **Account shell** (`/my`, `/my/settings`) — Organizations (nested org names) and Account. No course/roster/family nav.
+- **Account shell** (`/my`, `/my/settings`) — Organizations (nested org names) and Account. No course/roster nav.
 - **Org shell** (`/my/<org-slug>/…`) — staff vs parent nav (role decides chrome, not a second app)
 - Collapse on desktop; overlay drawer on small screens
-- Nested course / family links from domain databridge lists (org shell only)
+- Nested course / class links from domain databridge lists (org shell only)
 
 ## Rules
 
 - Keep this layer thin — no course/roster business rules. Lists come from domain `databridge/`.
 - Parent chrome stays simpler than staff (This week, their courses, Progress). Do not dump instructor destinations onto parent screens.
-- Account-level chrome must not show org destinations (courses, roster, families, org settings).
+- Account-level chrome must not show org destinations (courses, roster, org settings).
 - Hide chrome on print routes (`PrintLayout` — no org sidebar). HTML `@media print` also hides `.cw-org-chrome`.
 - Pass through auth `Outlet` context so `useAuthedUser` keeps working.
+- Families are **not** in staff nav while the directory SPA UI is unrouted.
 
 ## Don’t
 
 - Put marketing or login in this shell.
-- Invent extra widgets or search behavior — search still toasts until that feature ships, and only on org pages.
+- Invent extra search facets here — chrome mounts `search/`’s org search bar (staff only).

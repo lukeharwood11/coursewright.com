@@ -17,4 +17,4 @@ Browser Supabase client (anon key) and Storage helpers.
 ## Don’t
 
 - Embed multi-step course copy (or **P1** template copy) here — that’s a Function.
-- Commit secrets beyond public anon URL/key patterns (those belong in `.env.development`).
+- Commit secrets beyond public anon URL/key patterns (those belong in `.env.testing`).

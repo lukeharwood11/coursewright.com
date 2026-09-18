@@ -1,5 +1,5 @@
 import type { FormEvent } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
@@ -13,11 +13,17 @@ import {
   updateCourse,
   updateCourseVisibility,
 } from "@/courses/databridge/courses";
-import { validateCourseSettings } from "@/courses/model/createCourse";
+import {
+  courseSettingsHaveChanges,
+  validateCourseSettings,
+} from "@/courses/model/createCourse";
 import { allowedGradeLevels, toggleGradeLevel } from "@/courses/model/gradeLevels";
 import { getOrganization, orgQueryKeys } from "@/organizations/databridge/organizations";
 import { canManageOrgSettings, isStaffRole } from "@/organizations/model/role";
+import type { CourseIconValue } from "@/courses/model/courseIcon";
 import type { CourseVisibility } from "@/courses/model/visibility";
+
+export const COURSE_SETTINGS_FORM_ID = "course-settings-form";
 
 export function useCourseSettings() {
   const { courseId: courseIdParam } = useParams();
@@ -54,6 +60,7 @@ export function useCourseSettings() {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [subject, setSubject] = useState("");
+  const [iconKey, setIconKey] = useState<CourseIconValue>(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [status, setStatus] = useState("active");
@@ -61,17 +68,23 @@ export function useCourseSettings() {
   const [formError, setFormError] = useState<string | null>(null);
   const [addUserId, setAddUserId] = useState("");
 
-  useEffect(() => {
+  const resetForm = useCallback(() => {
     if (!course) return;
     setTitle(course.title);
     setDescription(course.description);
     setLocation(course.location);
     setSubject(course.subject);
+    setIconKey(course.iconKey);
     setStartDate(course.startDate ?? "");
     setEndDate(course.endDate ?? "");
     setStatus(course.status);
     setGradeLevels(course.gradeLevels);
+    setFormError(null);
   }, [course]);
+
+  useEffect(() => {
+    resetForm();
+  }, [resetForm]);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -80,6 +93,7 @@ export function useCourseSettings() {
         description,
         location,
         subject,
+        iconKey,
         startDate,
         endDate,
         gradeLevels: allowedGradeLevels(
@@ -92,11 +106,15 @@ export function useCourseSettings() {
       return updateCourse(courseId, parsed.value);
     },
     onSuccess: async () => {
+      setFormError(null);
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.detail(courseId),
       });
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.list(organization.id),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: courseQueryKeys.listWithCatalog(organization.id),
       });
     },
     onError: (error: Error) => setFormError(error.message),
@@ -111,6 +129,9 @@ export function useCourseSettings() {
       });
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.list(organization.id),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: courseQueryKeys.listWithCatalog(organization.id),
       });
     },
   });
@@ -133,8 +154,26 @@ export function useCourseSettings() {
       }),
   });
 
+  const hasChanges = course
+    ? courseSettingsHaveChanges(
+        {
+          title,
+          description,
+          location,
+          subject,
+          iconKey,
+          startDate,
+          endDate,
+          gradeLevels,
+          status,
+        },
+        course,
+      )
+    : false;
+
   function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!hasChanges) return;
     setFormError(null);
     save.mutate();
   }
@@ -156,6 +195,8 @@ export function useCourseSettings() {
     setLocation,
     subject,
     setSubject,
+    iconKey,
+    setIconKey,
     startDate,
     setStartDate,
     endDate,
@@ -168,6 +209,7 @@ export function useCourseSettings() {
     gradeLabels: orgQuery.data?.gradeLabels ?? [],
     formError: formError ?? (save.error ? save.error.message : null),
     saving: save.isPending,
+    hasChanges,
     onSubmit,
     instructors: instructorsQuery.data ?? [],
     staff: (staffQuery.data ?? []).filter((row) => !instructorIds.has(row.userId)),

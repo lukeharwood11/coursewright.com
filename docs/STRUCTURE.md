@@ -49,7 +49,7 @@ coursewright.com/
 ├── vite.config.ts
 ├── tsconfig.json
 ├── index.html
-├── .env.development          # Shared public Vite client env (testing)
+├── .env.testing              # Shared public Vite client env (testing branch)
 ├── .env.example              # Documents required VITE_* keys
 ├── public/
 ├── dist/                     # gitignored — build → S3
@@ -59,6 +59,7 @@ coursewright.com/
 ├── infra/                    # Terraform (AWS) + deploy notes
 │   └── terraform/
 └── .github/                  # GitHub Actions (CI/CD)
+    └── workflows/            # terraform-plan.yml + terraform-apply.yml (dispatch only)
 ```
 
 ---
@@ -160,33 +161,36 @@ supabase/
 
 ---
 
-## `infra/` — AWS via Terraform
+## `infra/` — AWS + Supabase via Terraform
 
 ```text
 infra/
 ├── README.md
-└── terraform/                # one root module; tiers via tfvars
+├── tfvars/                   # tier values (sibling to terraform/)
+│   ├── testing.tfvars        # beta.coursewright.com + branch parent ref
+│   └── production.tfvars     # coursewright.com + existing project ref
+└── terraform/                # one root module; tiers via ../tfvars
     ├── AGENTS.md
-    ├── testing.tfvars        # justtesting.coursewright.com
-    ├── production.tfvars     # coursewright.com
+    ├── supabase.tf           # supabase provider: branch (testing) / settings (prod)
     ├── modules/
     │   └── spa_site/         # S3 + CloudFront + ACM/DNS
-    └── …                     # main.tf, variables.tf, backend; state per tier <!-- TBD -->
+    └── …                     # main.tf, variables.tf, backend-*.hcl; state per tier
 ```
 
-| Tier | Domain | Var file |
-|------|--------|----------|
-| Testing | `justtesting.coursewright.com` | `testing.tfvars` |
-| Production | `coursewright.com` | `production.tfvars` |
+| Tier | Domain | Var file | State key |
+|------|--------|----------|-----------|
+| Testing | `beta.coursewright.com` | `infra/tfvars/testing.tfvars` | `testing/coursewright.com/terraform.tfstate` |
+| Production | `coursewright.com` | `infra/tfvars/production.tfvars` | `prod/coursewright.com/terraform.tfstate` |
 
 ```bash
-terraform apply -var-file=testing.tfvars
-terraform apply -var-file=production.tfvars
+./scripts/tf-plan.sh testing
+./scripts/deploy.sh testing          # local one-shot
+./scripts/deploy.sh production --yes
 ```
 
-**Terraform manages:** S3 buckets, CloudFront distributions, TLS certs (ACM), DNS records as needed for those hosts.
+**Terraform manages:** S3, CloudFront, ACM lookup, Route53 aliases; persistent testing branch, production settings on the existing project (by ref), API key outputs.
 
-**Not Terraform:** Supabase projects/schema (`supabase db migrate`), Edge Functions, or app secrets in Supabase — those stay on the Supabase CLI / dashboard workflow.
+**Not Terraform:** SQL schema files / `db push`, Edge Function source — [`scripts/deploy-supabase.sh`](../scripts/deploy-supabase.sh).
 
 Same stack definition for every tier — **do not** fork separate `envs/testing` vs `envs/production` roots; use tfvars + separate state per tier.
 
@@ -207,7 +211,7 @@ Same stack definition for every tier — **do not** fork separate `envs/testing`
 | Modal / selection state | Domain `stores/` or small `app` store — Zustand |
 | Server list/cache | TanStack Query in domain `api/` |
 | Supabase client setup | `src/infrastructure/supabase/` |
-| Deploy SPA | Build `dist/` → upload to S3; AWS resources via **Terraform** |
+| Deploy SPA | GHA `terraform-apply.yml`: `aws s3 sync dist/` + CloudFront invalidate; AWS resources via **Terraform** |
 
 ---
 

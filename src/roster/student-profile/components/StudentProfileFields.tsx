@@ -31,7 +31,6 @@ export function StudentProfileFields({
         <span className="text-[13px] font-bold text-[var(--ink-soft)]">Name</span>
         <Input
           className="w-full"
-          required
           value={name}
           onChange={(event) => onNameChange(event.target.value)}
           disabled={disabled}

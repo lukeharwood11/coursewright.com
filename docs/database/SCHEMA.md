@@ -353,7 +353,7 @@ Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor
 
 **Who can invite staff:** owners and admins. Admins may invite `admin` or `instructor`. Only owners may invite another `owner`. Instructors cannot invite org staff.
 
-**Who can invite parents:** owners, admins, and instructors. Parent invites are created from roster / student profile, not org settings.
+**Who can invite parents:** owners, admins, and instructors. Parent invites are created from roster / student profile (copy `/invite/<token>`). The Families directory, when routed, may also insert a pending parent row when linking an email with no account.
 
 ---
 
@@ -376,13 +376,13 @@ No other student-profile fields in P0.
 
 ### Family
 
-Org-scoped household for the **parent directory**. Builds on roster / parent links.
+Org-scoped **named group of student profiles** for the parent directory (Class-mirror). Empty family is OK. **Not an access gate** — materials, this-week, and print stay enrollment + `ParentStudentLink`.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
-| display_name | text | **optional** — members have `display_name` at minimum |
+| display_name | text | **required in P0 directory UI** (column remains nullable in SQL) |
 | created_at | timestamptz | |
 | deleted_at | timestamptz | soft delete |
 
@@ -393,20 +393,20 @@ Org-scoped household for the **parent directory**. Builds on roster / parent lin
 | id | bigint | PK |
 | family_id | bigint | FK → Family |
 | student_profile_id | bigint | FK, nullable — student in household |
-| parent_user_id | uuid | FK → User, nullable — parent who belongs to the family |
+| parent_user_id | uuid | FK → User, nullable — **unused for P0 app writes**; parents are derived from `ParentStudentLink`. Not an access gate |
 | display_name | text | **names** on the family profile (may mirror linked profile/user) |
 
 **Uniqueness (locked):** at least one of `student_profile_id` / `parent_user_id`; a student profile belongs to at most one family; unique `(family_id, parent_user_id)` when parent is set.
 
-**Rule:** A parent linked to a student in the family (via `ParentStudentLink`) **can be** a member of that family. Exact auto-create vs manual group UX TBD.
+**P0 app rule:** `family_members` rows are **students** (Class-mirror). Parents appear on a family only via `ParentStudentLink` to those students — a parent may appear on two families that way. Linking a parent creates or reuses those links (or a pending `ParentInvite` if they have no account). Never write enrollments from the directory. Merge/split UX TBD.
 
 ### ParentInvite
 
 Stored on `admin_invites` with `role = parent` (same token / claim RPCs as staff). The separate `parent_invites` table is retired.
 
-Parent-specific fields: `student_profile_id` (required), plus the shared email / token / accepted_at columns on AdminInvite.
+Parent-specific fields: `student_profile_id` (required), plus the shared email / token / invited_by / accepted_at columns on AdminInvite.
 
-**v0:** staff copy `/invite/<token>`; no email send. On claim: create parent membership (if needed) and `parent_student_links`. Do **not** grant course access from the invite alone.
+**v0:** staff copy `/invite/<token>`; no email send. On claim: create parent membership (if needed) and `parent_student_links`. Do **not** grant course access from the invite alone. Unrouted Families directory may also save a pending parent row per chosen student.
 
 ### ParentStudentLink
 
@@ -427,7 +427,7 @@ Parent-specific fields: `student_profile_id` (required), plus the shared email /
 | status | text | active · completed · withdrawn |
 | enrolled_at | timestamptz | |
 
-**Open:** Whether enrollment is always per student, or a Course can attach a **Class** (and members derive enrollment). See FEATURES Classes workshop. Until locked, enrollment remains student ↔ course.
+**Decided:** Enrollment is always per student (`student_profile` ↔ course). A Class may be used as a **batch preset** when enrolling (one-shot copy of members into enrollments — not a live link). See FEATURES Classes.
 
 ### Class
 
@@ -463,6 +463,7 @@ Org-scoped **group of students**. Not a Course — no units/materials.
 | description | text | optional short blurb — not the P1 **Summary** |
 | location | text | optional where the offering meets (free text) |
 | subject | text | optional subject / area (free text, not a taxonomy) |
+| icon_key | text | **optional** — Heroicons outline key for course catalog cards; null = none |
 | template_id | bigint | FK → CourseTemplate, **nullable** — **P1** live link when created from a template; unused in P0 product flows |
 | copied_from_course_id | bigint | FK → Course, **nullable** — P0 origin when created from another course (informational, no sync) |
 | start_date | date | nullable — informational |
@@ -674,7 +675,7 @@ Family cross-org management (extends P0 org Family)
 | Material visibility published / unpublished | Parents (and future students) see published only | **Decided** — unpublished = instructors/admins |
 | Course visibility published / unpublished | Parents see a course only when active **and** published | **Decided** — unpublished = instructors/admins; new courses unpublished |
 | Course description, location, subject | Catalog fields on Course | **Decided** — optional free text; description ≠ P1 Summary |
-| Family profile fields beyond names | Family, FamilyMember | Names (+ optional family `display_name`) only |
+| Family profile fields beyond names | Family, FamilyMember | P0 UI: family display name + student names; parents derived from links. Extra fields TBD |
 | Course `grade_levels` storage (array vs join table vs range columns) | Course, CourseTemplate, search facets | **`text[]`** |
 | Search: FTS columns vs materialized search document | Indexes, PostgREST views | **Generated `tsvector` + GIN** on searchable tables |
 | Template product surface | CourseTemplate, TemplateAccess, sync Functions | **P1** — tables may exist; no P0 UI |
@@ -691,6 +692,6 @@ Family cross-org management (extends P0 org Family)
 - **Files:** Supabase Storage bucket `org-files`; `File.storage_ref` is `{organization_id}/{file_id}/{version_id}/{filename}`. Audio/video playback in the SPA for those mime types.
 - **Search:** generated `search_vector` columns + GIN indexes; facets are ordinary columns (`course_id`, `kind`, `mime_type`, `grade_levels`, …) filtered under the same RLS.
 - **Analytics:** PostHog (client) — not a schema entity.
-- Access control via **RLS** (and Storage policies) aligned with Membership roles and parent access rules above. Parent SELECT of a course requires an active `parent` membership, a `ParentStudentLink`, an active `Enrollment`, `Course.status = active`, and `Course.visibility = published`. Parents (and future students) SELECT materials only when `visibility = published` **and** they can view the course. Instructors/admins see unpublished courses and materials.
+- Access control via **RLS** (and Storage policies) aligned with Membership roles and parent access rules above. Parent SELECT of a course requires an active `parent` membership, a `ParentStudentLink`, an active `Enrollment`, `Course.status = active`, and `Course.visibility = published`. **Family membership is not part of that gate.** Parents (and future students) SELECT materials only when `visibility = published` **and** they can view the course. Instructors/admins see unpublished courses and materials.
 - **Migrations:** `supabase db migrate` — see [STACK.md](../STACK.md).
 - **ID format:** App entities use **`bigserial` / `bigint`**. Auth-linked ids (`profiles`, FKs to `auth.users`) stay **`uuid`**. Baseline migrations match this convention.

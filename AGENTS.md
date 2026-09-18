@@ -61,6 +61,7 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | [src/units/AGENTS.md](./src/units/AGENTS.md) | Units |
 | [src/materials/AGENTS.md](./src/materials/AGENTS.md) | Materials, files, versions, important now |
 | [src/sharing/AGENTS.md](./src/sharing/AGENTS.md) | Resource links / share with parents |
+| [src/search/AGENTS.md](./src/search/AGENTS.md) | Cross-facet / chrome search |
 | [src/print/AGENTS.md](./src/print/AGENTS.md) | Print material / unit / this week |
 | [src/parent/AGENTS.md](./src/parent/AGENTS.md) | Parent dashboard |
 | [src/auth/AGENTS.md](./src/auth/AGENTS.md) | Login, signup, invites, session |
@@ -83,11 +84,13 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | [supabase/functions/AGENTS.md](./supabase/functions/AGENTS.md) | Edge Functions (use cases) |
 | [infra/AGENTS.md](./infra/AGENTS.md) | AWS hosting overview |
 | [infra/terraform/AGENTS.md](./infra/terraform/AGENTS.md) | Terraform for S3/CloudFront |
+| [infra/tfvars/AGENTS.md](./infra/tfvars/AGENTS.md) | Tier var files (testing / production) |
+| [.github/AGENTS.md](./.github/AGENTS.md) | GitHub Actions (dispatch-only Terraform plan/apply) |
 | [scripts/AGENTS.md](./scripts/AGENTS.md) | Root utility scripts (e.g. experiment-mode `nuke.sh`) |
 
 ## Environments
 
 | Env | URL | Terraform |
 |-----|-----|-----------|
-| Production | `coursewright.com` | `-var-file=production.tfvars` |
-| Testing | `justtesting.coursewright.com` | `-var-file=testing.tfvars` |
+| Production | `coursewright.com` | `-var-file=../tfvars/production.tfvars` |
+| Testing | `beta.coursewright.com` | `-var-file=../tfvars/testing.tfvars` |

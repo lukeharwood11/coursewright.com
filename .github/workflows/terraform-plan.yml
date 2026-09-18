@@ -1,0 +1,88 @@
+# CourseWright Terraform plan (shared scripts).
+#
+# Dispatch only. Testing first; production uses GitHub Environment approval.
+# Requires: AWS OIDC (HN-003), SUPABASE_ACCESS_TOKEN secret, GitHub Environments (HN-010).
+# ACM (HN-005) is ISSUED. See docs/HUMAN_NEEDED.md.
+# SPA compile-check only — apply rebuilds dist/ from Terraform outputs.
+
+name: Terraform Plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: Environment to plan (testing first; production is gated)
+        required: true
+        type: choice
+        default: testing
+        options:
+          - testing
+          - production
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ROLE_TO_ASSUME: arn:aws:iam::891612573605:role/github-oidc
+  TERRAFORM_VERSION: "1.16.3"
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+jobs:
+  plan:
+    name: Plan (${{ inputs.tier }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.tier }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          audience: sts.amazonaws.com
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      # Compile check only. Apply rebuilds via build-spa.sh from Terraform outputs
+      # so testing never publishes stale keys from a plan-time dist artifact.
+      - name: Build (compile check)
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
+          VITE_POSTHOG_HOST: ${{ vars.VITE_POSTHOG_HOST }}
+        run: |
+          if [ -z "${VITE_SUPABASE_URL}" ] || [ -z "${VITE_SUPABASE_ANON_KEY}" ]; then
+            cp .env.testing .env.production
+          fi
+          npm run build
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform Plan
+        run: ./scripts/tf-plan.sh ${{ inputs.tier }}
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-${{ inputs.tier }}
+          path: infra/terraform/tf.plan
+          retention-days: 1
+          if-no-files-found: error

@@ -10,7 +10,7 @@ Sign-up / sign-in: email (password or magic link) + Google via Supabase Auth.
 - Invite link entry → sign up / log in with **same email**
 - Session helpers used by `app/` gates
 
-Auth APIs call the browser Supabase client (`infrastructure/supabase/client.ts`). Without Supabase env (`VITE_SUPABASE_*` from `.env.development` or CI), the UI still loads and shows a setup notice.
+Auth APIs call the browser Supabase client (`infrastructure/supabase/client.ts`). Without Supabase env (`VITE_SUPABASE_*` from `.env.testing` or CI), the UI still loads and shows a setup notice.
 
 ## Rules
 

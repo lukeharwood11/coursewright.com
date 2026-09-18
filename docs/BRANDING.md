@@ -16,7 +16,7 @@ Craftsperson / **playwright** energy: someone who *makes* courses. Also **course
 
 **Mark (for now):** type only — **Course Wright** in Lora; **CW** in Lora when space is tight. See [STYLE_GUIDE.md](./STYLE_GUIDE.md).
 
-Domain: **coursewright.com** (owned). Testing: **justtesting.coursewright.com**.
+Domain: **coursewright.com** (owned). Testing: **beta.coursewright.com**.
 
 ---
 
@@ -135,7 +135,7 @@ Other drafts kept for reference (not in use):
 | Org URL path | **Permalink** / **slug** | changing it breaks existing links — warn the user |
 | Reusable course blueprint | **Template** | **P1** — blueprint, course template |
 | Runnable offering | **Course** | content + offering; not a student group |
-| Group of students | **Class** | **P0** — cohort / room; **not** a Course; enrollment link **workshop** |
+| Group of students | **Class** | **P0** — cohort / room; **not** a Course; batch preset into course enroll |
 | Copy course content into a new course | **Create from course** | **P0** — independent copy; no live sync |
 | Template permission | **Owner** / **Edit** / **View** | **P1** — who can access a template (sometimes called ACL) |
 | Content grouping | **Unit** | optional; groups materials when set |
@@ -157,7 +157,7 @@ Other drafts kept for reference (not in use):
 | Course topic | **Subject / area** | optional free text catalog label — not a taxonomy |
 | Course family access | **Published** / **Unpublished** | unpublished = instructors/admins; published = enrolled parents. Distinct from **Active** / **Archived** |
 | Course grades | **Grade levels** | catalog metadata — multiple grades and/or ranges; not P1 progress grades (**P1 templates** use the same) |
-| Course enrollment | **Roster** / **Enrollment** | who is in a course — may use Class as input (**workshop**) |
+| Course enrollment | **Roster** (page/nav) · **Enroll** / **Unenroll** (verbs) | Schema: `enrollments`. Class may **batch-preset** who to enroll (not a live link) |
 | Stored content | **Materials** | page / link / file in a unit |
 | Authored lesson page | **Page** (material kind) | composed of **blocks** |
 | Uploaded handout | **File** (material kind) | org File + versions |

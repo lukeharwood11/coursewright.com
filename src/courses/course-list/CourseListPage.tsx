@@ -1,17 +1,12 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { Badge } from "@/ui/Badge";
 import { Button } from "@/ui/Button";
-import { formatDateRange } from "@/courses/model/dates";
-import { coursePath } from "@/courses/model/paths";
-import { courseStatusLabel } from "@/courses/model/status";
-import { isCoursePublished } from "@/courses/model/visibility";
+import { CourseCard } from "./components/CourseCard";
 import { CreateCourseForm } from "./components/CreateCourseForm";
 import { useCourseList, useCreateCourse } from "./hooks/useCourseList";
 
 export function CourseListPage() {
-  const { organization, courses, loading, error } = useCourseList();
+  const { organization, courses, catalogByCourseId, loading, error } = useCourseList();
   const create = useCreateCourse();
 
   useEffect(() => {
@@ -47,6 +42,7 @@ export function CourseListPage() {
           description={create.description}
           location={create.location}
           subject={create.subject}
+          iconKey={create.iconKey}
           startDate={create.startDate}
           endDate={create.endDate}
           status={create.status}
@@ -61,6 +57,7 @@ export function CourseListPage() {
           onDescriptionChange={create.setDescription}
           onLocationChange={create.setLocation}
           onSubjectChange={create.setSubject}
+          onIconKeyChange={create.setIconKey}
           onStartDateChange={create.setStartDate}
           onEndDateChange={create.setEndDate}
           onStatusChange={create.setStatus}
@@ -90,46 +87,16 @@ export function CourseListPage() {
       ) : null}
 
       {courses.length > 0 ? (
-        <ul className="mt-6 divide-y divide-[var(--line-soft)] rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]">
-          {courses.map((course) => {
-            const dates = formatDateRange(course.startDate, course.endDate);
-            return (
-              <li key={course.id}>
-                <Link
-                  to={coursePath(organization.slug, course.id)}
-                  className="flex flex-wrap items-center gap-3 px-4 py-3 hover:bg-[var(--green-tint)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
-                >
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15.5px] font-extrabold text-[var(--ink)]">
-                      {course.title}
-                    </span>
-                    {course.description ? (
-                      <span className="mt-0.5 line-clamp-2 text-[13px] leading-relaxed text-[var(--ink-soft)]">
-                        {course.description}
-                      </span>
-                    ) : null}
-                    {dates || course.location ? (
-                      <span className="mt-1 block text-[12.5px] text-[var(--ink-faint)]">
-                        {[dates, course.location].filter(Boolean).join(" · ")}
-                      </span>
-                    ) : null}
-                  </span>
-                  {course.subject ? (
-                    <Badge variant="slate">{course.subject}</Badge>
-                  ) : null}
-                  {course.gradeLevels.length > 0 ? (
-                    <Badge variant="neutral">{course.gradeLevels.join(", ")}</Badge>
-                  ) : null}
-                  {!isCoursePublished(course.visibility) ? (
-                    <Badge variant="amber">Unpublished</Badge>
-                  ) : null}
-                  <Badge variant={course.status === "active" ? "green" : "neutral"}>
-                    {courseStatusLabel(course.status)}
-                  </Badge>
-                </Link>
-              </li>
-            );
-          })}
+        <ul className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {courses.map((course) => (
+            <li key={course.id} className="min-h-0">
+              <CourseCard
+                course={course}
+                orgSlug={organization.slug}
+                catalogMeta={catalogByCourseId[course.id]}
+              />
+            </li>
+          ))}
         </ul>
       ) : null}
     </div>

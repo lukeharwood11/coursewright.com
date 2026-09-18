@@ -4,7 +4,7 @@ Design-system primitives from [STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md).
 
 ## Scope
 
-- Button, ButtonLink, Input, Wordmark, Badge, Avatar
+- Button, ButtonLink, Input, Wordmark, Badge, Avatar, PageFormActions, ConfirmDialog
 - `toastNotImplemented` (sonner) for screens that are not built yet
 - No product flows
 

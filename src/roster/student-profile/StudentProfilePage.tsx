@@ -1,12 +1,15 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/ui/Badge";
-import { Button } from "@/ui/Button";
+import { PageFormActions } from "@/ui/PageFormActions";
 import { enrollmentStatusLabel } from "@/roster/model/enrollment";
 import { StudentProfileFields } from "./components/StudentProfileFields";
 import { ParentInvitePanel } from "./components/ParentInvitePanel";
-import { useStudentProfile } from "./hooks/useStudentProfile";
 import { useParentInvite } from "./hooks/useParentInvite";
+import {
+  STUDENT_PROFILE_FORM_ID,
+  useStudentProfile,
+} from "./hooks/useStudentProfile";
 
 export function StudentProfilePage() {
   const profile = useStudentProfile();
@@ -57,17 +60,28 @@ export function StudentProfilePage() {
 
   return (
     <div className="px-5 py-8 md:px-8">
-      <h1
-        className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        {profile.student.name}
-      </h1>
-      <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
-        Org-level student profile — no login in Course Wright yet.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1
+            className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {profile.student.name}
+          </h1>
+          <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
+            Org-level student profile — no login in Course Wright yet.
+          </p>
+        </div>
+        <PageFormActions
+          formId={STUDENT_PROFILE_FORM_ID}
+          saving={profile.saving}
+          hasChanges={profile.hasChanges}
+          cancelTo={`/my/${profile.organization.slug}/roster`}
+        />
+      </div>
 
       <form
+        id={STUDENT_PROFILE_FORM_ID}
         className="mt-6 max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5"
         onSubmit={profile.onSubmit}
       >
@@ -86,11 +100,6 @@ export function StudentProfilePage() {
             {profile.formError}
           </p>
         ) : null}
-        <div className="mt-4">
-          <Button type="submit" disabled={profile.saving}>
-            {profile.saving ? "Saving…" : "Save"}
-          </Button>
-        </div>
       </form>
 
       <ParentInvitePanel
