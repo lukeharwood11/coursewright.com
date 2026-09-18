@@ -766,6 +766,7 @@ export type Database = {
           deprecated_at: string | null
           deprecated_by: string | null
           description: string
+          due_date: string | null
           file_id: number | null
           id: number
           is_overridden: boolean
@@ -793,6 +794,7 @@ export type Database = {
           deprecated_at?: string | null
           deprecated_by?: string | null
           description?: string
+          due_date?: string | null
           file_id?: number | null
           id?: number
           is_overridden?: boolean
@@ -820,6 +822,7 @@ export type Database = {
           deprecated_at?: string | null
           deprecated_by?: string | null
           description?: string
+          due_date?: string | null
           file_id?: number | null
           id?: number
           is_overridden?: boolean

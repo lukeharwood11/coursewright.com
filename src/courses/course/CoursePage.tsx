@@ -122,7 +122,6 @@ export function CoursePage() {
         canEdit={canEdit}
         pending={setVisibility.isPending}
         onPublish={() => setVisibility.mutate("published")}
-        onUnpublish={() => setVisibility.mutate("unpublished")}
       />
       <PrintHint />
 
@@ -164,6 +163,7 @@ export function CoursePage() {
                     description={material.description}
                     kind={material.kind}
                     scheduledDate={material.scheduledDate}
+                    dueDate={material.dueDate}
                     importantNow={importantIds.has(material.id)}
                     visibility={material.visibility}
                   />

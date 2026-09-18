@@ -24,6 +24,7 @@ export function useAddMaterial(args: {
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
   const [scheduledDate, setScheduledDate] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -35,6 +36,7 @@ export function useAddMaterial(args: {
         kind,
         url,
         scheduledDate,
+        dueDate,
       });
       if (!parsed.ok) throw new Error(parsed.error);
       if (kind === "file" && !file) {
@@ -89,6 +91,7 @@ export function useAddMaterial(args: {
     setDescription("");
     setUrl("");
     setScheduledDate("");
+    setDueDate("");
     setFile(null);
     setFormError(null);
   }
@@ -112,6 +115,8 @@ export function useAddMaterial(args: {
     setUrl,
     scheduledDate,
     setScheduledDate,
+    dueDate,
+    setDueDate,
     setFile,
     formError,
     submitting: mutation.isPending,

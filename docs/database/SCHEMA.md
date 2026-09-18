@@ -515,7 +515,7 @@ Optional content grouping on a **course** (P0) or a **template** (P1). Materials
 | deleted_at | timestamptz | soft delete |
 | deprecated_at | timestamptz | nullable |
 
-**Dating:** unit dates and per-material `scheduled_date` are **both optional**. For parent "this week": material `scheduled_date` wins when set; otherwise the unit range applies **if the material has a unit**. Top-level materials need `scheduled_date` to appear in "this week."
+**Dating:** unit dates, per-material `scheduled_date` (assignment), and per-material `due_date` are **all optional**. For parent "this week": material `scheduled_date` wins when set; otherwise the unit range applies **if the material has a unit**. Top-level materials need `scheduled_date` to appear in "this week." `due_date` is display-only.
 
 ### Material
 
@@ -533,7 +533,8 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 | kind | text | **v1:** `page` · `link` · `file` |
 | url | text | nullable — required when `kind = link` |
 | file_id | bigint | FK → **File**, nullable — required when `kind = file` |
-| scheduled_date | date | **optional** — when set, used for calendar-week dashboard (wins over unit dates) |
+| scheduled_date | date | **optional** — assignment date; when set, used for calendar-week dashboard (wins over unit dates) |
+| due_date | date | **optional** — due date for display; does **not** drive “this week” |
 | visibility | text | **`unpublished`** (instructors/admins) · **`published`** (enrolled parents; students when that role exists). New materials default unpublished |
 | position | int | order within the unit, or among top-level materials when `unit_id` is null |
 | copied_from_id | bigint | FK → Material, nullable — source Material when copied (course-from-course **P0**, or template→course **P1**) |

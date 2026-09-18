@@ -10,7 +10,13 @@ import {
   COURSE_SETTINGS_FORM_ID,
   useCourseSettings,
 } from "./hooks/useCourseSettings";
-import { CourseVisibilityBanner } from "@/courses/course/components/CourseVisibilityBanner";
+import {
+  CourseUnpublishControl,
+  CourseVisibilityBanner,
+} from "@/courses/course/components/CourseVisibilityBanner";
+import { PublishedBadge } from "@/ui/PublishedBadge";
+import { Badge } from "@/ui/Badge";
+import { isCoursePublished } from "@/courses/model/visibility";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -101,7 +107,6 @@ export function CourseSettingsPage() {
         canEdit={settings.canEdit}
         pending={settings.setVisibility.isPending}
         onPublish={() => settings.setVisibility.mutate("published")}
-        onUnpublish={() => settings.setVisibility.mutate("unpublished")}
       />
 
       <form
@@ -111,7 +116,14 @@ export function CourseSettingsPage() {
       >
         <div className="grid gap-4">
           <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-            <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Course</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Course</h2>
+              {isCoursePublished(settings.course.visibility) ? (
+                <PublishedBadge />
+              ) : (
+                <Badge variant="amber">Unpublished</Badge>
+              )}
+            </div>
             <label className="mt-4 flex flex-col gap-1">
               <span className="text-[13px] font-bold text-[var(--ink-soft)]">Name</span>
               <Input
@@ -180,6 +192,12 @@ export function CourseSettingsPage() {
                 course after you publish it.
               </span>
             </label>
+            <CourseUnpublishControl
+              visibility={settings.course.visibility}
+              canEdit={settings.canEdit}
+              pending={settings.setVisibility.isPending}
+              onUnpublish={() => settings.setVisibility.mutate("unpublished")}
+            />
           </section>
 
           {settings.formError ? (

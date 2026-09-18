@@ -418,6 +418,15 @@ function StudentWeek({
                         {formatMaterialDate(material.scheduledDate)}
                       </span>
                     ) : null}
+                    {material.dueDate ? (
+                      <span
+                        className={`block text-[12px] font-bold text-[var(--ink-soft)] ${
+                          material.scheduledDate ? "mt-0.5" : ""
+                        }`}
+                      >
+                        Due {formatMaterialDate(material.dueDate)}
+                      </span>
+                    ) : null}
                   </Link>
                   <ButtonLink
                     variant="secondary"

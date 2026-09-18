@@ -14,6 +14,7 @@ export type MaterialPagePlacement = {
   description: string;
   url: string | null;
   scheduledDate: string | null;
+  dueDate: string | null;
 };
 
 type RpcError = { code?: string; message: string; details?: string };
@@ -61,6 +62,7 @@ export async function saveMaterialPage(args: {
                 description: args.placement.description,
                 url: args.placement.url,
                 scheduled_date: args.placement.scheduledDate,
+                due_date: args.placement.dueDate,
               }
             : null,
           p_blocks:
@@ -151,6 +153,7 @@ async function saveMaterialPageFallback(args: {
       description: args.placement.description,
       url: args.placement.url,
       scheduledDate: args.placement.scheduledDate,
+      dueDate: args.placement.dueDate,
     });
   }
   if (args.blocks === undefined) return;

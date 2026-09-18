@@ -38,9 +38,9 @@ Configure the course instance (not content authoring — that’s [COURSE](./COU
 
 - Header: course name (slate tint chip) + “Course settings”; **Cancel** / **Save** (Save disabled when unchanged)
 - Two-column layout on large screens (stacks on smaller viewports)
-- Left: course name / description; schedule & status (dates, active / archived)
+- Left: course name / description; schedule & status (dates, active / archived); **Unpublish** when published
 - Right: catalog (icon, subject / area, location, grade levels); instructors / co-teaching
-- **Publish / unpublish** banner above the grid — families see the course only when it is active **and** published
+- **Unpublished:** amber warning + Publish above the grid. **Published:** green Published badge; Unpublish under schedule & status
 - Soft-delete / archive controls — TBD UX; content is soft-deleted only
 - **P1:** Template link / promote to template
 

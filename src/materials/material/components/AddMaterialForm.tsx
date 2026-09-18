@@ -2,6 +2,7 @@ import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { MATERIAL_KINDS, materialKindLabel, type MaterialKind } from "@/materials/model/kind";
 import { useAddMaterial } from "../hooks/useAddMaterial";
+import { OptionalDueDateField } from "./OptionalDueDateField";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -87,7 +88,7 @@ export function AddMaterialForm({
       ) : null}
       <label className="mt-3 flex flex-col gap-1">
         <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-          Date (optional)
+          Assignment date (optional)
         </span>
         <Input
           className="w-full"
@@ -99,6 +100,7 @@ export function AddMaterialForm({
           If you set a date, this shows up on parents’ This week page that week.
         </span>
       </label>
+      <OptionalDueDateField value={add.dueDate} onChange={add.setDueDate} />
       {add.formError ? (
         <p className="mt-3 text-[13px] text-[var(--amber-deep)]" role="alert">
           {add.formError}

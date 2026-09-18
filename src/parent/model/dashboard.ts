@@ -5,6 +5,7 @@ export type ParentDashboardMaterial = {
   id: number;
   title: string;
   scheduledDate: string | null;
+  dueDate: string | null;
   unitId: number | null;
 };
 
@@ -64,6 +65,7 @@ export type ParentDashboardSource = {
     id: number;
     title: string;
     scheduledDate: string | null;
+    dueDate: string | null;
     courseId: number;
     unitId: number | null;
     unitStart: string | null;
@@ -117,6 +119,7 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
           id: material.id,
           title: material.title,
           scheduledDate: material.scheduledDate,
+          dueDate: material.dueDate,
           unitId: material.unitId,
         }));
       return {
@@ -203,6 +206,7 @@ function collectUpcoming(source: ParentDashboardSource): ParentDashboardUpNext[]
             id: material.id,
             title: material.title,
             scheduledDate: material.scheduledDate,
+            dueDate: material.dueDate,
             unitId: material.unitId,
           },
         });
