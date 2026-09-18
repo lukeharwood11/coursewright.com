@@ -13,6 +13,31 @@ export type ValidatedStudentProfile = {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+export type StudentProfileDraft = {
+  name: string;
+  parentEmail: string;
+  gradeLevel: string;
+};
+
+export type StudentProfileSaved = {
+  name: string;
+  parentEmail: string | null;
+  gradeLevel: string | null;
+};
+
+/** True when the draft differs from the saved student profile. */
+export function studentProfileHaveChanges(
+  draft: StudentProfileDraft,
+  saved: StudentProfileSaved,
+): boolean {
+  if (draft.name.trim() !== saved.name) return true;
+  if (draft.parentEmail.trim().toLowerCase() !== (saved.parentEmail ?? "")) {
+    return true;
+  }
+  if (draft.gradeLevel.trim() !== (saved.gradeLevel ?? "")) return true;
+  return false;
+}
+
 export function validateStudentProfile(
   input: StudentProfileInput,
 ): { ok: true; value: ValidatedStudentProfile } | { ok: false; error: string } {

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
+import { PageFormActions } from "@/ui/PageFormActions";
 import { useMutation } from "@tanstack/react-query";
 import type { Json } from "@/infrastructure/supabase/database.types";
 import {
@@ -23,6 +24,8 @@ import { useMaterial } from "./hooks/useMaterial";
 import { VisibilityBanner } from "./components/VisibilityBanner";
 import { fileQueryKeys } from "@/materials/databridge/files";
 
+const MATERIAL_EDIT_FORM_ID = "material-edit-form";
+
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
   "focus:border-[var(--green)] focus:shadow-[0_0_0_3px_var(--green-tint)]",
@@ -34,7 +37,7 @@ export function MaterialEditPage() {
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
   const [scheduledDate, setScheduledDate] = useState("");
-
+  const [saving, setSaving] = useState(false);
   useEffect(() => {
     if (!page.material) return;
     setTitle(page.material.title);
@@ -88,22 +91,38 @@ export function MaterialEditPage() {
     materialId: page.material.id,
   });
 
+  const hasChanges =
+    title !== page.material.title ||
+    description !== page.material.description ||
+    (page.material.kind === "link" && url !== (page.material.url ?? "")) ||
+    scheduledDate !== (page.material.scheduledDate ?? "");
+
   return (
     <div className="px-5 py-8 md:px-8">
-      <h1
-        className="text-[24px] font-semibold text-[var(--ink)]"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        Edit {page.material.title}
-      </h1>
-      <p className="mt-2 text-[13px]">
-        <Link
-          to={viewHref}
-          className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-        >
-          Back to material
-        </Link>
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1
+            className="text-[24px] font-semibold text-[var(--ink)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Edit {page.material.title}
+          </h1>
+          <p className="mt-2 text-[13px]">
+            <Link
+              to={viewHref}
+              className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+            >
+              Back to material
+            </Link>
+          </p>
+        </div>
+        <PageFormActions
+          formId={MATERIAL_EDIT_FORM_ID}
+          saving={saving}
+          hasChanges={hasChanges}
+          cancelTo={viewHref}
+        />
+      </div>
 
       {!page.material.deletedAt ? (
         <VisibilityBanner
@@ -116,12 +135,14 @@ export function MaterialEditPage() {
       ) : null}
 
       <PlacementForm
+        formId={MATERIAL_EDIT_FORM_ID}
         title={title}
         description={description}
         url={url}
         scheduledDate={scheduledDate}
         kind={page.material.kind}
-        saving={false}
+        hasChanges={hasChanges}
+        onSavingChange={setSaving}
         onTitle={setTitle}
         onDescription={setDescription}
         onUrl={setUrl}
@@ -184,45 +205,51 @@ export function MaterialEditPage() {
 }
 
 function PlacementForm({
+  formId,
   title,
   description,
   url,
   scheduledDate,
   kind,
+  hasChanges,
+  onSavingChange,
   onTitle,
   onDescription,
   onUrl,
   onScheduledDate,
   onSave,
 }: {
+  formId: string;
   title: string;
   description: string;
   url: string;
   scheduledDate: string;
   kind: string;
-  saving: boolean;
+  hasChanges: boolean;
+  onSavingChange: (saving: boolean) => void;
   onTitle: (value: string) => void;
   onDescription: (value: string) => void;
   onUrl: (value: string) => void;
   onScheduledDate: (value: string) => void;
   onSave: () => Promise<void>;
 }) {
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   return (
     <form
+      id={formId}
       className="mt-6 max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
       onSubmit={async (event) => {
         event.preventDefault();
-        setSaving(true);
+        if (!hasChanges) return;
+        onSavingChange(true);
         setError(null);
         try {
           await onSave();
         } catch (caught) {
           setError(caught instanceof Error ? caught.message : "Couldn’t save.");
         } finally {
-          setSaving(false);
+          onSavingChange(false);
         }
       }}
     >
@@ -258,11 +285,6 @@ function PlacementForm({
       {error ? (
         <p className="mt-3 text-[13px] text-[var(--amber-deep)]">{error}</p>
       ) : null}
-      <div className="mt-4">
-        <Button type="submit" disabled={saving}>
-          {saving ? "Saving…" : "Save"}
-        </Button>
-      </div>
     </form>
   );
 }

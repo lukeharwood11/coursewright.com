@@ -2,7 +2,7 @@
 
 > **Status:** Draft — locked paths below. Behavior: [FEATURES.md](./FEATURES.md). Screen outlines: [pages/](./pages/). **These two docs must stay in sync** — see [AGENTS.md](./AGENTS.md#urlsmd-and-pages-must-match).
 
-**Hosts:** `coursewright.com` (prod) · `justtesting.coursewright.com` (testing)
+**Hosts:** `coursewright.com` (prod) · `beta.coursewright.com` (testing)
 
 **Working convention:**
 

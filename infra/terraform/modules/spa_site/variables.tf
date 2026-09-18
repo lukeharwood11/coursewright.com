@@ -10,7 +10,7 @@ variable "domain_name" {
 
 variable "route53_zone_name" {
   type        = string
-  description = "Parent Route53 hosted zone (coursewright.com for both apex and justtesting subdomain)."
+  description = "Parent Route53 hosted zone (coursewright.com for both apex and beta subdomain)."
   default     = "coursewright.com"
 }
 

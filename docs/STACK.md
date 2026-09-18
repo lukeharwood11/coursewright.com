@@ -17,7 +17,7 @@
 | **Frontend hosting** | **AWS S3** + **CloudFront** | Static React app CDN |
 | **IaC** | **Terraform** | AWS SPA hosting; **`infra/tfvars/testing.tfvars` / `production.tfvars`** for tiers |
 | **Custom domain** | **coursewright.com** | Production app (owned) |
-| **Testing domain** | **justtesting.coursewright.com** | Non-production / testing site |
+| **Testing domain** | **beta.coursewright.com** | Non-production / testing site |
 | **Migrations** | **`supabase db migrate`** | Schema changes via Supabase CLI migrations |
 | **UI** | **React** + **Tailwind CSS** | Product UI |
 | **Icons** | **Heroicons** (`@heroicons/react`) | UI icons (MIT); notices in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) |
@@ -41,13 +41,13 @@
 4. **Auth** — Supabase Auth owns identity. Login screen: **email + password**, **email magic link**, and **Sign in with Google** (Google Cloud OAuth → Supabase). Signup is Google or email OTP (no password sign-up). Invite claim uses the same email identity rules as product docs.
 5. **Files** — Uploads go to **Supabase Storage**; `File` rows in Postgres hold metadata / `storage_ref`. Prefer Storage + RLS (or signed URLs via Function when needed) over a separate file host. Playback / versioning / escalation design: [FILE_STORAGE.md](./FILE_STORAGE.md).
 6. **TanStack owns server state** — Queries/mutations against PostgREST (and Function calls). **Zustand** owns ephemeral UI state (modals, draft editors, selection) — not a second source of truth for remote data.
-7. **Frontend deploy** — Build the React app → **S3**; serve via **CloudFront**. **Production:** `coursewright.com`. **Testing:** `justtesting.coursewright.com`. No separate app server for the UI. **AWS resources are managed with Terraform** (`infra/terraform/`).
+7. **Frontend deploy** — Build the React app → **S3**; serve via **CloudFront**. **Production:** `coursewright.com`. **Testing:** `beta.coursewright.com`. No separate app server for the UI. **AWS resources are managed with Terraform** (`infra/terraform/`).
 8. **Schema changes** — Apply with **`supabase db migrate`** (Supabase CLI). Keep migration history in repo; don't hand-edit production schema.
 9. **One frontend** — React + Tailwind for admin, instructor, and parent surfaces. Responsive web; no native app.
 10. **Billing (P1 only)** — **Stripe Billing** is the planned path when org SaaS ships; webhooks → Functions → `OrgSubscription`. Not in P0.
 11. **Markdown → docs site** — Hand-written markdown (`docs/`, root + folder `AGENTS.md`, README) is the source; **VitePress** builds a searchable site so developers can explore the project without hunting through the tree.
 12. **UI docs** — **Storybook** for design-system / component exploration (`src/ui`). Not a replacement for product docs in VitePress.
-13. **CI/CD** — **GitHub Actions** owns check and deploy pipelines (`.github/workflows/`). Terraform plan/apply are **dispatch-only**; SPA publish is Actions `aws s3 sync` + CloudFront invalidate after apply. **Do not dispatch apply** until HN-003 + ISSUED ACM (HN-005). See [HUMAN_NEEDED.md](./HUMAN_NEEDED.md).
+13. **CI/CD** — **GitHub Actions** owns check and deploy pipelines (`.github/workflows/`). Terraform plan/apply are **dispatch-only** and call shared `scripts/`. SPA publish is `deploy-spa.sh` (S3 sync + CloudFront invalidate). Confirm HN-003 / HN-010 / HN-011 before live apply (ACM HN-005 is done). See [HUMAN_NEEDED.md](./HUMAN_NEEDED.md).
 14. **Analytics** — **PostHog** for product analytics (page views, key actions, funnels) and **error tracking** (exception autocapture + catch-all boundary reports). Wire the browser SDK from the SPA; do not invent a second analytics stack. Project keys come from human setup ([HUMAN_NEEDED.md](./HUMAN_NEEDED.md)). Respect auth/privacy: identify only after login when needed; no PII beyond what product docs allow.
 15. **Search is a first-class data concern** — Schema, indexes, and material metadata must support **cross-facet search** (P0 in [FEATURES.md](./FEATURES.md)). Prefer Postgres full-text / structured filters via PostgREST when they meet the bar; introduce a dedicated search service only if FTS + facets cannot. Do not treat search as a late UI filter over unindexed lists.
 
@@ -88,14 +88,14 @@ Product rule unchanged: parents use the **same email** as their invite (see [FEA
 | **S3** | Static assets (built React SPA) |
 | **CloudFront** | CDN / HTTPS in front of the bucket |
 | **Production** | **coursewright.com** (owned) |
-| **Testing** | **justtesting.coursewright.com** |
+| **Testing** | **beta.coursewright.com** |
 | **IaC** | **Terraform** — define/apply AWS hosting (and related DNS/ACM) |
 
-API traffic goes to **Supabase** (PostgREST, Auth, Storage, Functions) — not through an app origin on CloudFront except for the SPA itself. <!-- TBD: cache headers, SPA routing (CloudFront error → index.html), www vs apex, separate Supabase project/env for testing -->
+API traffic goes to **Supabase** (PostgREST, Auth, Storage, Functions) — not through an app origin on CloudFront except for the SPA itself.
 
-Terraform does **not** replace Supabase CLI for schema (`supabase db migrate`) or Edge Function deploys. It owns **AWS** (and optional DNS) for the SPA.
+Terraform owns **AWS** (SPA hosting/DNS) and **Supabase project/branch/settings** via the official provider (`infra/terraform/supabase.tf`). SQL migrations and Edge Function source deploys stay on the Supabase CLI ([`scripts/deploy-supabase.sh`](../scripts/deploy-supabase.sh)).
 
-**Tiers:** same Terraform root; select tier with `-var-file=../tfvars/testing.tfvars` or `-var-file=../tfvars/production.tfvars` (from `infra/terraform/`). Keep **separate state** per tier.
+**Tiers:** prefer `./scripts/tf-plan.sh testing|production` from repo root (pairs backend key + tfvars). Keep **separate state** per tier (`testing/coursewright.com/…`, `prod/coursewright.com/…`). Testing uses a **persistent Supabase DB branch**; production uses project **main** by ref (HN-011).
 
 ---
 
@@ -150,16 +150,16 @@ Product/planning content stays curated markdown; VitePress only publishes/naviga
 |-------|------|
 | **GitHub Actions** | Workflows under `.github/workflows/` |
 | **PR / main checks** | Install, typecheck, build (and tests when they exist) |
-| **Terraform plan** | `workflow_dispatch` only — [terraform-plan.yml](../.github/workflows/terraform-plan.yml). OIDC → `npm ci` + `npm run build` → repo-root `dist/` → `terraform init` (`backend-*.hcl`) + `plan` (`*.tfvars`) → artifacts |
-| **Terraform apply** | `workflow_dispatch` only — [terraform-apply.yml](../.github/workflows/terraform-apply.yml). Download matching plan + `dist/` → `apply tf.plan` → **Actions** `aws s3 sync` + CloudFront invalidate (no Terraform `null_resource`) |
+| **Terraform plan** | `workflow_dispatch` only — [terraform-plan.yml](../.github/workflows/terraform-plan.yml). OIDC + `SUPABASE_ACCESS_TOKEN` → compile-check build → `./scripts/tf-plan.sh` → `tf.plan` artifact |
+| **Terraform apply** | `workflow_dispatch` only — [terraform-apply.yml](../.github/workflows/terraform-apply.yml). Checkout plan SHA → `./scripts/tf-apply.sh` → optional `./scripts/deploy-supabase.sh` → `./scripts/build-spa.sh` → `./scripts/deploy-spa.sh` (no Terraform `null_resource`) |
 
-Input `tier`: `testing` \| `production`. Production jobs use GitHub Environment `production` (required reviewers — HN-010). OIDC role `arn:aws:iam::891612573605:role/github-oidc`, Terraform **1.9.x**, region `us-east-1`.
+Input `tier`: `testing` \| `production`. Production jobs use GitHub Environment `production` (required reviewers — HN-010). OIDC role `arn:aws:iam::891612573605:role/github-oidc`, Terraform **1.16.3**, region `us-east-1`.
 
-**Do not dispatch apply** until Luke’s ACM cert is **ISSUED** in `us-east-1` (HN-005) and HN-003 AWS/OIDC access is confirmed.
+Confirm HN-003 (AWS/OIDC) and HN-010 (Environments) before live apply. ACM (HN-005) is ISSUED. Supabase Branching: HN-011.
 
-Deploy credentials stay in GitHub Actions OIDC / environments — not in the repo. Human setup: [HUMAN_NEEDED.md](./HUMAN_NEEDED.md).
+Deploy credentials stay in GitHub Actions OIDC / secrets / environments — not in the repo. Human setup: [HUMAN_NEEDED.md](./HUMAN_NEEDED.md).
 
-<!-- TBD: PR/main check workflow, required status checks, Supabase migrate/Functions deploy from CI vs manual -->
+<!-- TBD: PR/main check workflow, required status checks -->
 
 ---
 

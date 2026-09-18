@@ -40,6 +40,8 @@ resource "aws_cloudfront_distribution" "spa_distribution" {
   default_root_object = "index.html"
   aliases             = [var.domain_name]
   comment             = "CourseWright ${var.environment} SPA"
+  # US-first: US, Canada, Europe. Default PriceClass_All bills SA/AU/India edges ~25–35% more.
+  price_class         = "PriceClass_100"
 
   origin {
     domain_name              = aws_s3_bucket.spa_bucket.bucket_regional_domain_name

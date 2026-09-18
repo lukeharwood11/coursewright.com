@@ -78,7 +78,7 @@ export function AccountMenu({
     <div ref={rootRef} className="relative">
       <button
         type="button"
-        className="rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+        className="cursor-pointer rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
         aria-label="Account menu"
         aria-haspopup="menu"
         aria-expanded={open}

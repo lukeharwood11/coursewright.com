@@ -1,11 +1,8 @@
-# CourseWright Terraform apply (nosh-style, adapted).
+# CourseWright Terraform apply (shared scripts).
 #
-# DO NOT DISPATCH until Luke’s ISSUED us-east-1 ACM certificate (HN-005) and
-# HN-003 AWS/OIDC credentials. This workflow is code-only until those land.
-# See docs/HUMAN_NEEDED.md.
-#
-# After apply, S3 sync + CloudFront invalidate run as Actions steps — not a
-# Terraform null_resource.
+# Dispatch only. Checks out the matching plan run's git SHA, applies that plan,
+# then rebuilds the SPA from Terraform outputs (never the plan-time dist/).
+# See docs/HUMAN_NEEDED.md (HN-003, HN-010).
 
 name: Terraform Apply
 
@@ -24,6 +21,11 @@ on:
         description: Run ID of the matching Terraform Plan (empty = latest successful plan for this tier)
         required: false
         type: string
+      deploy_supabase:
+        description: Also push migrations + Edge Functions after apply
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   id-token: write
@@ -37,9 +39,10 @@ concurrency:
 env:
   AWS_REGION: us-east-1
   AWS_ROLE_TO_ASSUME: arn:aws:iam::891612573605:role/github-oidc
-  TERRAFORM_VERSION: "1.9.8"
+  TERRAFORM_VERSION: "1.16.3"
   TF_IN_AUTOMATION: "true"
   TF_INPUT: "false"
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
 jobs:
   apply:
@@ -48,6 +51,17 @@ jobs:
     environment: ${{ inputs.tier }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Resolve matching plan run
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/gha-resolve-plan-run.sh "${{ inputs.tier }}" "${{ inputs.plan_run_id }}"
+
+      - name: Check out plan commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.plan.outputs.sha }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -62,75 +76,49 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
 
-      - name: Download Plan Artifact (specific run)
-        if: inputs.plan_run_id != ''
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Setup Supabase CLI
+        if: inputs.deploy_supabase
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Download Plan Artifact
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: terraform-plan.yml
           name: terraform-plan-${{ inputs.tier }}
           path: infra/terraform
-          run_id: ${{ inputs.plan_run_id }}
+          run_id: ${{ steps.plan.outputs.run_id }}
           workflow_conclusion: success
 
-      - name: Download Plan Artifact (latest)
-        if: inputs.plan_run_id == ''
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: terraform-plan.yml
-          name: terraform-plan-${{ inputs.tier }}
-          path: infra/terraform
-          workflow_conclusion: success
+      - name: Terraform Apply
+        run: ./scripts/tf-apply.sh ${{ inputs.tier }}
 
-      - name: Download Application Artifact (specific run)
-        if: inputs.plan_run_id != ''
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: terraform-plan.yml
-          name: application-${{ inputs.tier }}
-          path: dist
-          run_id: ${{ inputs.plan_run_id }}
-          workflow_conclusion: success
+      - name: Deploy Supabase
+        if: inputs.deploy_supabase
+        run: ./scripts/deploy-supabase.sh ${{ inputs.tier }}
 
-      - name: Download Application Artifact (latest)
-        if: inputs.plan_run_id == ''
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: terraform-plan.yml
-          name: application-${{ inputs.tier }}
-          path: dist
-          workflow_conclusion: success
+      - name: Install Dependencies
+        run: npm ci
 
-      - name: Terraform Init and Apply
-        working-directory: infra/terraform
-        run: |
-          terraform init -backend-config=backend-${{ inputs.tier }}.hcl
-          terraform apply tf.plan
-
-      # Deploy is Actions, not Terraform. Bucket name from output, with the
-      # known coursewright-${tier}-spa fallback if output is empty.
-      - name: Sync SPA to S3 and invalidate CloudFront
-        working-directory: infra/terraform
+      # Optional production overrides (HN-010). Empty vars are fine — build-spa.sh
+      # falls back to Terraform outputs and exports the resolved VITE_* so Vite
+      # does not bake blank process-env values over .env.production.
+      - name: Build SPA
         env:
-          TIER: ${{ inputs.tier }}
-        run: |
-          set -euo pipefail
-          if [ ! -d "${GITHUB_WORKSPACE}/dist" ]; then
-            echo "dist/ artifact missing" >&2
-            exit 1
-          fi
-          BUCKET="$(terraform output -raw spa_bucket_name)"
-          DIST_ID="$(terraform output -raw cloudfront_distribution_id)"
-          if [ -z "${BUCKET}" ]; then
-            BUCKET="coursewright-${TIER}-spa"
-            echo "spa_bucket_name output empty; falling back to ${BUCKET}"
-          fi
-          if [ -z "${DIST_ID}" ]; then
-            echo "cloudfront_distribution_id output is empty" >&2
-            exit 1
-          fi
-          aws s3 sync "${GITHUB_WORKSPACE}/dist/" "s3://${BUCKET}" --delete
-          aws cloudfront create-invalidation --distribution-id "${DIST_ID}" --paths "/*"
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
+          VITE_POSTHOG_HOST: ${{ vars.VITE_POSTHOG_HOST }}
+        run: ./scripts/build-spa.sh ${{ inputs.tier }}
+
+      - name: Sync SPA to S3 and invalidate CloudFront
+        run: ./scripts/deploy-spa.sh ${{ inputs.tier }}

@@ -63,6 +63,19 @@ export function useMaterial() {
     queryFn: () => fileSignedUrl(fileQuery.data!.storageRef),
     enabled: Boolean(fileQuery.data?.storageRef),
   });
+  const downloadQuery = useQuery({
+    queryKey: [
+      "files",
+      "download",
+      fileQuery.data?.storageRef ?? "",
+      fileQuery.data?.filename ?? "",
+    ],
+    queryFn: () =>
+      fileSignedUrl(fileQuery.data!.storageRef, {
+        download: fileQuery.data!.filename,
+      }),
+    enabled: Boolean(fileQuery.data?.storageRef),
+  });
   const importantQuery = useQuery({
     queryKey: importantNowQueryKeys.course(courseId),
     queryFn: () => listImportantNowForCourse(courseId),
@@ -149,6 +162,7 @@ export function useMaterial() {
     blocks: blocksQuery.data ?? [],
     file: fileQuery.data ?? null,
     fileUrl: signedQuery.data ?? null,
+    fileDownloadUrl: downloadQuery.data ?? null,
     importantNow,
     versions: versionsQuery.data ?? [],
     loading: materialQuery.isLoading || courseQuery.isLoading,
