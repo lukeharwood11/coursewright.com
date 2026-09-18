@@ -25,6 +25,10 @@ export type PagePrintSegment =
   | { type: "listItem"; text: string; ordered: boolean }
   | { type: "video"; url: string };
 
+export type LexicalSplitPart =
+  | { kind: "video"; url: string }
+  | { kind: "node"; node: LexicalJson };
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (value && typeof value === "object" && !Array.isArray(value)) {
     return value as Record<string, unknown>;
@@ -36,6 +40,67 @@ function asLexicalJson(value: unknown): LexicalJson | null {
   const record = asRecord(value);
   if (!record || typeof record.type !== "string") return null;
   return record as LexicalJson;
+}
+
+export function videoUrlFromLexicalNode(node: LexicalJson): string | null {
+  if (node.type !== "video") return null;
+  const url = typeof node.url === "string" ? node.url.trim() : "";
+  return url || null;
+}
+
+function isHoistableBlock(node: LexicalJson): boolean {
+  return node.type === "video" || node.type === "file";
+}
+
+function containsHoistableBlock(node: LexicalJson): boolean {
+  if (isHoistableBlock(node)) return true;
+  return (node.children ?? []).some(containsHoistableBlock);
+}
+
+export function splitLexicalNodes(nodes: LexicalJson[]): LexicalSplitPart[] {
+  const parts: LexicalSplitPart[] = [];
+  for (const node of nodes) {
+    const url = videoUrlFromLexicalNode(node);
+    if (url) {
+      parts.push({ kind: "video", url });
+      continue;
+    }
+    const children = node.children;
+    if (!children?.length || !children.some(containsHoistableBlock)) {
+      parts.push({ kind: "node", node });
+      continue;
+    }
+    let buffer: LexicalJson[] = [];
+    function flushBuffer() {
+      if (buffer.length === 0) return;
+      parts.push({ kind: "node", node: { ...node, children: buffer } });
+      buffer = [];
+    }
+    for (const childPart of splitLexicalNodes(children)) {
+      if (childPart.kind === "video") {
+        flushBuffer();
+        parts.push(childPart);
+        continue;
+      }
+      if (isHoistableBlock(childPart.node)) {
+        flushBuffer();
+        parts.push(childPart);
+        continue;
+      }
+      buffer.push(childPart.node);
+    }
+    flushBuffer();
+  }
+  return parts;
+}
+
+export function splitLexicalChildren(value: unknown): LexicalSplitPart[] {
+  if (!Array.isArray(value)) return [];
+  const nodes = value.flatMap((item) => {
+    const node = asLexicalJson(item);
+    return node ? [node] : [];
+  });
+  return splitLexicalNodes(nodes);
 }
 
 export function parseLexicalState(body: unknown): SerializedEditorState | null {
@@ -95,76 +160,78 @@ function collectPrintSegmentsFromLexical(
 
 function flattenNodes(nodes: LexicalJson[]): PagePrintSegment[] {
   const segments: PagePrintSegment[] = [];
-  for (const node of nodes) {
-    if (node.type === "video") {
-      const url = typeof node.url === "string" ? node.url.trim() : "";
-      if (url) segments.push({ type: "video", url });
+  for (const part of splitLexicalNodes(nodes)) {
+    if (part.kind === "video") {
+      segments.push({ type: "video", url: part.url });
       continue;
     }
-    if (node.type === "file") {
-      const name =
-        typeof node.filename === "string" && node.filename.trim()
-          ? node.filename.trim()
-          : "File";
-      segments.push({ type: "paragraph", text: name });
-      continue;
-    }
-    if (node.type === "table") {
-      const rows = node.children ?? [];
-      let anyRow = false;
-      for (const row of rows) {
-        const cells = (row.children ?? []).map((cell) => textOf(cell).trim());
-        const text = cells.filter(Boolean).join(" · ");
-        if (text) {
-          segments.push({ type: "paragraph", text });
-          anyRow = true;
-        }
-      }
-      if (!anyRow) segments.push({ type: "paragraph", text: "Table" });
-      continue;
-    }
-    if (node.type === "horizontalrule") {
-      continue;
-    }
-    if (node.type === "heading") {
-      const text = textOf(node).trim();
-      if (text) segments.push({ type: "heading", text });
-      continue;
-    }
-    if (node.type === "quote") {
-      const text = textOf(node).trim();
-      if (text) segments.push({ type: "paragraph", text });
-      continue;
-    }
-    if (node.type === "list") {
-      const ordered = node.listType === "number" || node.tag === "ol";
-      for (const child of node.children ?? []) {
-        if (child.type === "listitem") {
-          const nested = (child.children ?? []).filter((item) => item.type === "list");
-          const text = textOf({
-            ...child,
-            children: (child.children ?? []).filter((item) => item.type !== "list"),
-          }).trim();
-          if (text) segments.push({ type: "listItem", text, ordered });
-          segments.push(...flattenNodes(nested));
-        } else {
-          segments.push(...flattenNodes([child]));
-        }
-      }
-      continue;
-    }
-    if (node.children?.length && node.type !== "text") {
-      const text = textOf(node).trim();
-      if (text) segments.push({ type: "paragraph", text });
-    }
+    segments.push(...flattenNonVideoNode(part.node));
   }
   return segments;
+}
+
+function flattenNonVideoNode(node: LexicalJson): PagePrintSegment[] {
+  if (node.type === "file") {
+    const name =
+      typeof node.filename === "string" && node.filename.trim()
+        ? node.filename.trim()
+        : "File";
+    return [{ type: "paragraph", text: name }];
+  }
+  if (node.type === "table") {
+    const segments: PagePrintSegment[] = [];
+    const rows = node.children ?? [];
+    let anyRow = false;
+    for (const row of rows) {
+      const cells = (row.children ?? []).map((cell) => textOf(cell).trim());
+      const text = cells.filter(Boolean).join(" · ");
+      if (text) {
+        segments.push({ type: "paragraph", text });
+        anyRow = true;
+      }
+    }
+    if (!anyRow) segments.push({ type: "paragraph", text: "Table" });
+    return segments;
+  }
+  if (node.type === "horizontalrule") {
+    return [];
+  }
+  if (node.type === "heading") {
+    const text = textOf(node).trim();
+    return text ? [{ type: "heading", text }] : [];
+  }
+  if (node.type === "quote") {
+    const text = textOf(node).trim();
+    return text ? [{ type: "paragraph", text }] : [];
+  }
+  if (node.type === "list") {
+    const segments: PagePrintSegment[] = [];
+    const ordered = node.listType === "number" || node.tag === "ol";
+    for (const child of node.children ?? []) {
+      if (child.type === "listitem") {
+        const nested = (child.children ?? []).filter((item) => item.type === "list");
+        const text = textOf({
+          ...child,
+          children: (child.children ?? []).filter((item) => item.type !== "list"),
+        }).trim();
+        if (text) segments.push({ type: "listItem", text, ordered });
+        segments.push(...flattenNodes(nested));
+      } else {
+        segments.push(...flattenNodes([child]));
+      }
+    }
+    return segments;
+  }
+  if (node.children?.length && node.type !== "text") {
+    const text = textOf(node).trim();
+    return text ? [{ type: "paragraph", text }] : [];
+  }
+  return [];
 }
 
 export function editorStateToBlocks(state: SerializedEditorState): PageBlockDraft[] {
   const root = asLexicalJson(state.root);
   if (!root) return [];
-  const rootChildren = root.children ?? [];
   const drafts: PageBlockDraft[] = [];
   let buffer: LexicalJson[] = [];
 
@@ -187,21 +254,18 @@ export function editorStateToBlocks(state: SerializedEditorState): PageBlockDraf
     buffer = [];
   }
 
-  for (const child of rootChildren) {
-    if (child.type === "video") {
+  for (const part of splitLexicalNodes(root.children ?? [])) {
+    if (part.kind === "video") {
       flush();
-      const url = typeof child.url === "string" ? child.url.trim() : "";
-      if (url) {
-        drafts.push({
-          kind: "video",
-          body: { url },
-          position: drafts.length,
-          fileId: null,
-        });
-      }
+      drafts.push({
+        kind: "video",
+        body: { url: part.url },
+        position: drafts.length,
+        fileId: null,
+      });
       continue;
     }
-    buffer.push(child);
+    buffer.push(part.node);
   }
   flush();
   return drafts;

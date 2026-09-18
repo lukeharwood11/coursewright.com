@@ -9,10 +9,17 @@ import type {
   LexicalEditor,
   LexicalNode,
   NodeKey,
-  SerializedLexicalNode,
   Spread,
 } from "lexical";
-import { $getNodeByKey, DecoratorNode } from "lexical";
+import {
+  $getDocument,
+  $getNodeByKey,
+  nodeSchema,
+  numberValue,
+  stringValue,
+} from "lexical";
+import { DecoratorBlockNode } from "@lexical/react/LexicalDecoratorBlockNode";
+import type { SerializedDecoratorBlockNode } from "@lexical/react/LexicalDecoratorBlockNode";
 import { Button } from "@/ui/Button";
 import { fileQueryKeys, fileSignedUrl, getFile } from "@/materials/databridge/files";
 import { filePlaybackKind } from "@/materials/model/playback";
@@ -23,8 +30,14 @@ export type SerializedFileNode = Spread<
     filename: string;
     mimeType: string;
   },
-  SerializedLexicalNode
+  SerializedDecoratorBlockNode
 >;
+
+const fileNodeSchema = nodeSchema<FileNode>()({
+  fileId: numberValue(),
+  filename: stringValue(),
+  mimeType: stringValue(),
+});
 
 function convertFileElement(element: HTMLElement): DOMConversionOutput | null {
   const fileId = Number(element.getAttribute("data-lexical-file-id"));
@@ -34,42 +47,36 @@ function convertFileElement(element: HTMLElement): DOMConversionOutput | null {
   return { node: $createFileNode({ fileId, filename, mimeType }) };
 }
 
-export class FileNode extends DecoratorNode<JSX.Element> {
-  __fileId: number;
-  __filename: string;
-  __mimeType: string;
+export class FileNode extends DecoratorBlockNode {
+  declare __fileId: number;
+  declare __filename: string;
+  declare __mimeType: string;
 
-  static getType(): string {
-    return "file";
+  $config() {
+    return this.config("file", {
+      extends: DecoratorBlockNode,
+      json: fileNodeSchema,
+    });
   }
 
   static clone(node: FileNode): FileNode {
     return new FileNode(node.__fileId, node.__filename, node.__mimeType, node.__key);
   }
 
-  constructor(fileId: number, filename: string, mimeType: string, key?: NodeKey) {
-    super(key);
+  constructor(
+    fileId: number = 0,
+    filename: string = "File",
+    mimeType: string = "",
+    key?: NodeKey,
+  ) {
+    super(undefined, key);
     this.__fileId = fileId;
     this.__filename = filename;
     this.__mimeType = mimeType;
   }
 
   static importJSON(serializedNode: SerializedFileNode): FileNode {
-    return $createFileNode({
-      fileId: serializedNode.fileId,
-      filename: serializedNode.filename,
-      mimeType: serializedNode.mimeType,
-    });
-  }
-
-  exportJSON(): SerializedFileNode {
-    return {
-      ...super.exportJSON(),
-      type: "file",
-      fileId: this.__fileId,
-      filename: this.__filename,
-      mimeType: this.__mimeType,
-    };
+    return $createFileNode().updateFromJSON(serializedNode);
   }
 
   static importDOM(): DOMConversionMap | null {
@@ -82,46 +89,68 @@ export class FileNode extends DecoratorNode<JSX.Element> {
   }
 
   exportDOM(): DOMExportOutput {
-    const element = document.createElement("div");
-    element.setAttribute("data-lexical-file-id", String(this.__fileId));
-    element.setAttribute("data-lexical-file-name", this.__filename);
-    element.setAttribute("data-lexical-file-type", this.__mimeType);
-    element.textContent = this.__filename;
+    const element = $getDocument().createElement("div");
+    element.setAttribute("data-lexical-file-id", String(this.getFileId()));
+    element.setAttribute("data-lexical-file-name", this.getFilename());
+    element.setAttribute("data-lexical-file-type", this.getMimeType());
+    element.textContent = this.getFilename();
     return { element };
   }
 
-  createDOM(): HTMLElement {
-    const div = document.createElement("div");
-    div.className = "cw-editor-file";
-    return div;
+  getFileId(): number {
+    return this.getLatest().__fileId;
   }
 
-  updateDOM(): false {
-    return false;
+  setFileId(fileId: number): this {
+    const self = this.getWritable();
+    self.__fileId = fileId;
+    return self;
+  }
+
+  getFilename(): string {
+    return this.getLatest().__filename;
+  }
+
+  setFilename(filename: string): this {
+    const self = this.getWritable();
+    self.__filename = filename;
+    return self;
+  }
+
+  getMimeType(): string {
+    return this.getLatest().__mimeType;
+  }
+
+  setMimeType(mimeType: string): this {
+    const self = this.getWritable();
+    self.__mimeType = mimeType;
+    return self;
+  }
+
+  createDOM(): HTMLElement {
+    const div = $getDocument().createElement("div");
+    div.className = "cw-editor-file";
+    return div;
   }
 
   decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element {
     return (
       <FileEmbed
-        fileId={this.__fileId}
-        filename={this.__filename}
-        mimeType={this.__mimeType}
+        fileId={this.getFileId()}
+        filename={this.getFilename()}
+        mimeType={this.getMimeType()}
         nodeKey={this.getKey()}
       />
     );
   }
-
-  isInline(): false {
-    return false;
-  }
 }
 
-export function $createFileNode(args: {
+export function $createFileNode(args?: {
   fileId: number;
   filename: string;
   mimeType: string;
 }): FileNode {
-  return new FileNode(args.fileId, args.filename, args.mimeType);
+  return new FileNode(args?.fileId ?? 0, args?.filename ?? "File", args?.mimeType ?? "");
 }
 
 export function $isFileNode(

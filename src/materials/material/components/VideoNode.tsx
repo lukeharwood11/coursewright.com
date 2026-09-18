@@ -1,5 +1,7 @@
 import type { JSX } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { DecoratorBlockNode } from "@lexical/react/LexicalDecoratorBlockNode";
+import type { SerializedDecoratorBlockNode } from "@lexical/react/LexicalDecoratorBlockNode";
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -8,14 +10,22 @@ import type {
   LexicalEditor,
   LexicalNode,
   NodeKey,
-  SerializedLexicalNode,
   Spread,
 } from "lexical";
-import { $getNodeByKey, DecoratorNode } from "lexical";
+import {
+  $getDocument,
+  $getNodeByKey,
+  nodeSchema,
+  stringValue,
+} from "lexical";
 import { Button } from "@/ui/Button";
 import { youtubeEmbedSrc } from "@/materials/model/blocks";
 
-export type SerializedVideoNode = Spread<{ url: string }, SerializedLexicalNode>;
+export type SerializedVideoNode = Spread<{ url: string }, SerializedDecoratorBlockNode>;
+
+const videoNodeSchema = nodeSchema<VideoNode>()({
+  url: stringValue(),
+});
 
 function convertVideoElement(element: HTMLElement): DOMConversionOutput | null {
   const url = element.getAttribute("data-lexical-video");
@@ -23,32 +33,27 @@ function convertVideoElement(element: HTMLElement): DOMConversionOutput | null {
   return { node: $createVideoNode(url) };
 }
 
-export class VideoNode extends DecoratorNode<JSX.Element> {
-  __url: string;
+export class VideoNode extends DecoratorBlockNode {
+  declare __url: string;
 
-  static getType(): string {
-    return "video";
+  $config() {
+    return this.config("video", {
+      extends: DecoratorBlockNode,
+      json: videoNodeSchema,
+    });
   }
 
   static clone(node: VideoNode): VideoNode {
     return new VideoNode(node.__url, node.__key);
   }
 
-  constructor(url: string, key?: NodeKey) {
-    super(key);
+  constructor(url: string = "", key?: NodeKey) {
+    super(undefined, key);
     this.__url = url;
   }
 
   static importJSON(serializedNode: SerializedVideoNode): VideoNode {
-    return $createVideoNode(serializedNode.url);
-  }
-
-  exportJSON(): SerializedVideoNode {
-    return {
-      ...super.exportJSON(),
-      type: "video",
-      url: this.__url,
-    };
+    return $createVideoNode().updateFromJSON(serializedNode);
   }
 
   static importDOM(): DOMConversionMap | null {
@@ -61,36 +66,34 @@ export class VideoNode extends DecoratorNode<JSX.Element> {
   }
 
   exportDOM(): DOMExportOutput {
-    const element = document.createElement("div");
-    element.setAttribute("data-lexical-video", this.__url);
-    element.textContent = this.__url;
+    const element = $getDocument().createElement("div");
+    element.setAttribute("data-lexical-video", this.getUrl());
+    element.textContent = this.getUrl();
     return { element };
   }
 
   getUrl(): string {
-    return this.__url;
+    return this.getLatest().__url;
   }
 
-  createDOM(_config: EditorConfig): HTMLElement {
-    const div = document.createElement("div");
+  setUrl(url: string): this {
+    const self = this.getWritable();
+    self.__url = url;
+    return self;
+  }
+
+  createDOM(): HTMLElement {
+    const div = $getDocument().createElement("div");
     div.className = "cw-editor-video";
     return div;
   }
 
-  updateDOM(): false {
-    return false;
-  }
-
   decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element {
-    return <VideoEmbed url={this.__url} nodeKey={this.getKey()} />;
-  }
-
-  isInline(): false {
-    return false;
+    return <VideoEmbed url={this.getUrl()} nodeKey={this.getKey()} />;
   }
 }
 
-export function $createVideoNode(url: string): VideoNode {
+export function $createVideoNode(url: string = ""): VideoNode {
   return new VideoNode(url);
 }
 

@@ -26,7 +26,7 @@ import {
 } from "lexical";
 import type { BlockRecord } from "@/materials/databridge/blocks";
 import { parseRichTextBody, parseVideoBody } from "@/materials/model/blocks";
-import { parseLexicalState } from "@/materials/model/pageContent";
+import { parseLexicalState, splitLexicalChildren } from "@/materials/model/pageContent";
 import { FileNode } from "./FileNode";
 import { $createVideoNode, VideoNode } from "./VideoNode";
 
@@ -108,8 +108,12 @@ export function loadBlocksIntoEditor(
         }
         const lexical = parseLexicalState(block.body);
         if (lexical?.root.children?.length) {
-          for (const child of lexical.root.children) {
-            root.append($parseSerializedNode(child));
+          for (const part of splitLexicalChildren(lexical.root.children)) {
+            if (part.kind === "video") {
+              root.append($createVideoNode(part.url));
+              continue;
+            }
+            root.append($parseSerializedNode(part.node));
           }
           continue;
         }

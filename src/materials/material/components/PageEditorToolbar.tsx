@@ -7,6 +7,7 @@ import {
   COMMAND_PRIORITY_CRITICAL,
   FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
+  type LexicalNode,
   type TextFormatType,
 } from "lexical";
 import { $setBlocksType } from "@lexical/selection";
@@ -44,6 +45,13 @@ import { usePageEditorMedia } from "./PageEditorMediaContext";
 import { $createVideoNode } from "./VideoNode";
 
 type PromptKind = "link" | "video" | null;
+
+function insertDecoratorBlock(node: LexicalNode) {
+  const inserted = $insertNodeToNearestRoot(node);
+  const paragraph = $createParagraphNode();
+  inserted.insertAfter(paragraph);
+  paragraph.selectEnd();
+}
 
 export function PageEditorToolbar() {
   const [editor] = useLexicalComposerContext();
@@ -179,11 +187,7 @@ export function PageEditorToolbar() {
     }
     if (promptKind === "video" && looksLikeHttpUrl(value)) {
       editor.update(() => {
-        const video = $createVideoNode(value);
-        $insertNodeToNearestRoot(video);
-        const paragraph = $createParagraphNode();
-        video.insertAfter(paragraph);
-        paragraph.selectEnd();
+        insertDecoratorBlock($createVideoNode(value));
       });
     }
     setPromptKind(null);
@@ -201,15 +205,13 @@ export function PageEditorToolbar() {
         file,
       });
       editor.update(() => {
-        const node = $createFileNode({
-          fileId: uploaded.id,
-          filename: uploaded.filename,
-          mimeType: uploaded.mimeType,
-        });
-        $insertNodeToNearestRoot(node);
-        const paragraph = $createParagraphNode();
-        node.insertAfter(paragraph);
-        paragraph.selectEnd();
+        insertDecoratorBlock(
+          $createFileNode({
+            fileId: uploaded.id,
+            filename: uploaded.filename,
+            mimeType: uploaded.mimeType,
+          }),
+        );
       });
     } catch (caught) {
       setUploadError(
