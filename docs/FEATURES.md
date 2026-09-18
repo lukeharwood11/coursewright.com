@@ -74,9 +74,9 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Course visibility** | **Published / unpublished** controls whether families can see the course | shipped | Unpublished: instructors/admins. Published: enrolled parents (students when that role exists). New courses start unpublished. Distinct from `status` (active / archived) |
 | **Co-teaching** | Multiple instructors per course | shipped | Course settings: owners/admins add co-teachers (RLS); instructors see the list |
 | **Units** | Materials organized in **units**; each unit may have optional dates | shipped | Course home + unit page; **courses only** in P0 |
-| **Rich materials** | **Add material** kinds: **page** / **link** / **file**; pages are ordered **blocks** | shipped | v1 kinds. Page editor is [Lexical](https://lexical.dev/); rich text stored as `body.lexical`. Toolbar: headings, lists, tables, quotes, links, video URLs, in-page file attachments |
+| **Rich materials** | **Add material** kinds: **page** / **link** / **file**; pages are ordered **blocks** | shipped | v1 kinds. Page editor is [Lexical](https://lexical.dev/); rich text stored as `body.lexical`. Toolbar: headings, lists, tables, quotes, links, video URLs, in-page file attachments, **quizzes** |
 | **Material visibility** | **Published / unpublished** controls who can see a material | shipped | Unpublished: instructors/admins. Published: enrolled parents (students when that role exists). New materials start unpublished |
-| **Quizzes (author + print)** | Create quizzes, mark correct answers, print blank (+ instructor answer key) | planned | **Open:** quiz as block type vs separate material kind — see materials section |
+| **Quizzes (author + print)** | Create quizzes, mark correct answers, print blank (+ instructor answer key) | shipped | **Quiz = block on a page** (Lexical `quiz` node in `body.lexical`; not a material kind). Many per page. Answers stored on the node. Whole-page print: parent/student = questions only; staff = answer key. No roster required. Online take is **P1** |
 | **File sharing** | Upload and attach files; share with parents as part of course materials | shipped | File materials upload to Storage `org-files` with `files` / `file_versions` |
 | **Audio & video files** | Video as a **block** on a material page; uploaded audio TBD | shipped | Video **URL embed** in page blocks (upload vs URL still **TBD**). Uploaded audio/video also play when attached inside a page or as a file material |
 | **Course grade levels** | Courses carry **grade metadata** — multiple grades and/or ranges | shipped | Editor on create + course settings. Templates get the same model in **P1** |
@@ -414,7 +414,7 @@ Content on **courses** may use **units** for grouping (templates are **P1**). Ma
 
 ### Materials & content creation
 
-**Status:** content shape **decided**; rich-text store is **Lexical JSON**; quiz placement still open.
+**Status:** content shape **decided**; rich-text store is **Lexical JSON**; **quiz is a block on a page**.
 
 **Already decided (related):** Each **course** has its **own** roster (individuals via enrollment; Class is a batch preset). Create → print does **not** require a roster. **Templates are P1** — P0 authoring is on courses only.
 
@@ -434,15 +434,15 @@ Course
 | **Top-level placement** | No-unit materials appear **above** the units list on the course |
 | **Add material (v1)** | Three kinds: **page**, **link**, **file** (into a unit or top-level) |
 | **Title + description** | **Every** material has a **title** and **description**, regardless of kind |
-| **page** | A page of ordered **blocks** (rich text, video, …) |
+| **page** | A page of ordered **blocks** (rich text, video, quiz, …) |
 | **link** | External URL (title + description + URL) |
 | **file** | References an org-scoped **File** (title + description + upload / attach) |
 | **Blocks** | Only on **page** materials |
 | **Visibility** | **unpublished** (instructors/admins only) or **published** (enrolled parents; students when that role exists). New materials start unpublished |
-| **P0 block kinds (on pages)** | **Rich text** (WYSIWYG / Markdown), **video** — extensible later |
+| **P0 block kinds (on pages)** | **Rich text**, **video**, **quiz** — extensible later |
 | **Database** | `materials.unit_id` **nullable**. `materials.kind` ∈ `page` · `link` · `file`. `materials.visibility` ∈ `published` · `unpublished`. Pages use `blocks` rows; link uses `url`; file uses `file_id` |
 
-**Print:** Print by kind — page → blocks layout; link → title + URL/QR; file → title + print-ready/open. Print unit = materials in order.
+**Print:** Print by kind — page → blocks layout (quizzes print on the whole page: questions only for parents; staff see the answer key); link → title + URL/QR; file → title + print-ready/open. Print unit = materials in order. No quiz-block-only print in P0.
 
 #### Phases for related kinds
 
@@ -451,26 +451,26 @@ Course
 | **page / link / file materials** | **P0 / v1** | “Add material” menu |
 | **Rich text / video blocks on pages** | **P0** | Page composition |
 | **Uploaded audio** | TBD | Not a v1 add-material kind |
-| **Quizzes — author + print** | **P0** (product) | **Open** shape — **not** in v1 add-material menu |
+| **Quizzes — author + print** | **P0** (product) | Block on a page — **not** in v1 add-material menu |
 | **Quizzes — take online + autograde** | **P1** | |
 | **Forms** | **in design** | |
 
 #### Editor
 
-Page materials use a **Lexical** WYSIWYG editor ([lexical.dev](https://lexical.dev/)). Canonical store for rich-text blocks is the Lexical editor state in `blocks.body.lexical`. Existing `body.markdown` still loads. Video URLs stay `video` blocks (insert from the editor toolbar). Uploaded files, images, and audio/video can sit inside the Lexical document (no extra block kind). Instructors save from the page header; a new `material_versions` row is written only when saved placement or page content actually changed.
+Page materials use a **Lexical** WYSIWYG editor ([lexical.dev](https://lexical.dev/)). Canonical store for rich-text blocks is the Lexical editor state in `blocks.body.lexical`. Existing `body.markdown` still loads. Video URLs stay `video` blocks (insert from the editor toolbar). **Quizzes** are Lexical `quiz` nodes on the page (many allowed); correct answers live on the node for print (P0) and autograde (P1). Uploaded files, images, and audio/video can sit inside the Lexical document (no extra block kind). Instructors save from the page header; a new `material_versions` row is written only when saved placement or page content actually changed.
 
 #### Closed workshop questions
 
 1. ~~Page entity~~ → **page** materials are pages of blocks. No separate Page table required unless reuse demands it later.
 2. ~~Reuse of the same page in multiple units~~ → **P0:** content is copied with course-from-course; no shared Page instance across units.
 3. ~~Add material kinds (v1)~~ → **page · link · file**.
+4. ~~Quiz~~ → **block on a page** (Lexical `quiz` node). Not a material kind. Many per page. Answers stored on the node.
 
 #### Still open
 
-1. **Quiz:** block on a page vs own material kind later (answers still stored for print / P1 autograde).
-2. **Video on a page:** URL embed vs uploaded file (or both).
-3. **Uploaded audio** as a later block/material kind?
-4. **Forms** — job to be done + who responds.
+1. **Video on a page:** URL embed vs uploaded file (or both).
+2. **Uploaded audio** as a later block/material kind?
+3. **Forms** — job to be done + who responds.
 
 ---
 
@@ -686,7 +686,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | Class = org group of students, separate from Course | **Decided** | Course enrolls individuals; Class is a batch preset into enroll (not live) |
 | Course roster UI: list-first + batch Enroll students | **Decided** | Multi-select + optional Class preset; batch create-and-enroll |
 | Roster = page noun; Enroll/Unenroll = course verbs | **Decided** | BRANDING; class/org use Add/Remove |
-| Quiz authoring + correct answers + print (blank + answer key) | **Decided** | **P0** product — block vs material shape **open** |
+| Quiz authoring + correct answers + print (blank + answer key) | **Decided** | **P0** — quiz is a **block on a page** (Lexical `quiz` node). Not a material kind. Many per page. Whole-page print; parent/student = questions only; staff = answer key. No roster required. No `/quiz` routes |
 | Quiz online take + autograde | **Decided** | **P1** — uses answers stored in P0 |
 | Page as composable entity (blocks) | **Decided** | Material is the page; no separate Page table required in P0 |
 | Forms as a content kind | **In design** | Job-to-be-done + who responds TBD |

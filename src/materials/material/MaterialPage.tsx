@@ -269,7 +269,7 @@ function MaterialBody({
     return (
       <p className="text-[14.5px] text-[var(--ink-soft)]">
         This page doesn’t have any content yet.
-        {page.canEdit ? " Open Edit to add text or a video." : ""}
+        {page.canEdit ? " Open Edit to add text, a video, or a quiz." : ""}
       </p>
     );
   }
@@ -281,6 +281,7 @@ function MaterialBody({
       <PageContentView
         blocks={page.blocks}
         viewKey={`${material.id}-${page.blocks.map((block) => block.id).join("-")}`}
+        showAnswers={page.canEdit}
       />
     </Suspense>
   );

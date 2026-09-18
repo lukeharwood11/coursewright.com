@@ -1,5 +1,6 @@
-export type BlockKind = "rich_text" | "video";
+import type { BlockKind } from "./kind";
 
+export type { BlockKind };
 export type RichTextBody = { markdown: string };
 export type VideoBody = { url: string };
 

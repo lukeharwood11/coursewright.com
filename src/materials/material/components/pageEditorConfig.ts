@@ -28,7 +28,9 @@ import type { BlockRecord } from "@/materials/databridge/blocks";
 import { parseRichTextBody, parseVideoBody } from "@/materials/model/blocks";
 import { parseLexicalState, splitLexicalChildren } from "@/materials/model/pageContent";
 import { FileNode } from "./FileNode";
+import { $createQuizNode, QuizNode } from "./QuizNode";
 import { $createVideoNode, VideoNode } from "./VideoNode";
+import { parseQuizBody } from "@/materials/model/quiz";
 
 export const PAGE_EDITOR_NODES = [
   HeadingNode,
@@ -43,6 +45,7 @@ export const PAGE_EDITOR_NODES = [
   HorizontalRuleNode,
   VideoNode,
   FileNode,
+  QuizNode,
 ];
 
 export const PAGE_MARKDOWN_TRANSFORMERS: Transformer[] = [
@@ -106,11 +109,19 @@ export function loadBlocksIntoEditor(
           if (url) root.append($createVideoNode(url));
           continue;
         }
+        if (block.kind === "quiz") {
+          root.append($createQuizNode(parseQuizBody(block.body)));
+          continue;
+        }
         const lexical = parseLexicalState(block.body);
         if (lexical?.root.children?.length) {
           for (const part of splitLexicalChildren(lexical.root.children)) {
             if (part.kind === "video") {
               root.append($createVideoNode(part.url));
+              continue;
+            }
+            if (part.node.type === "quiz") {
+              root.append($createQuizNode(parseQuizBody(part.node)));
               continue;
             }
             root.append($parseSerializedNode(part.node));

@@ -39,7 +39,7 @@ View (and edit) a single material placement — the thing parents open from this
 
 **Body (by kind)**
 
-- **page:** ordered **blocks** rendered from the Lexical document (rich text, tables, links, in-page files, video embeds)
+- **page:** ordered **blocks** rendered from the Lexical document (rich text, tables, links, in-page files, video embeds, **quizzes**)
 - **link:** URL (+ title)
 - **file:** attached File (name, type, inline preview when possible, **Download**, **Expand** for PDF/image)
 
@@ -62,10 +62,10 @@ View (and edit) a single material placement — the thing parents open from this
 
 ### Content (v1 kinds)
 
-- **page** — Lexical editor: headings, lists, quotes, tables, links, **video** URL embeds, in-page file attachments; printable block layout
+- **page** — Lexical editor: headings, lists, quotes, tables, links, **video** URL embeds, in-page file attachments, **quizzes** (correct answers on the block; staff see the key, parents see questions only); printable block layout
 - **link** — external URL; print → title + URL/QR
 - **file** — org File; versioned blobs; preview + **Download**; PDF/image **Expand**
-- Quiz author + print still required product-wise later — **not** in v1 Add material menu
+- Quiz author + print is a **page block** (not a separate material kind)
 - Forms — **not P0**
 
 ### Share & print
@@ -77,7 +77,7 @@ View (and edit) a single material placement — the thing parents open from this
 
 - **Edit URL:** `…/materials/<material_id>/edit` (locked — [URLS.md](../URLS.md))
 - Placement fields + page content: **Save** / **Cancel** in the page header; Save disabled when unchanged; Cancel goes back (confirms if dirty)
-- **page:** [Lexical](https://lexical.dev/) WYSIWYG (headings, lists, quotes, tables, links, video URL embeds, in-page files). A version is stored only when the instructor saves and something changed — not per keystroke.
+- **page:** [Lexical](https://lexical.dev/) WYSIWYG (headings, lists, quotes, tables, links, video URL embeds, in-page files, **quizzes** with marked correct answers). A version is stored only when the instructor saves and something changed — not per keystroke.
 - **link / file:** edit URL or replace file (file replace → new FileVersion)
 - Versioning / who changed what / revert dangerous actions
 - Soft deletes only
@@ -113,4 +113,4 @@ View (and edit) a single material placement — the thing parents open from this
 
 [FEATURES.md](../FEATURES.md) — Add material: **page / link / file**; pages = blocks. [FILE_STORAGE.md](../FILE_STORAGE.md) for files. Templates = **P1**.
 
-**Out of scope on this page (P0):** online quiz take + autograde (P1); Forms; quiz in v1 Add menu; **print whole course**; template promote/sync.
+**Out of scope on this page (P0):** online quiz take + autograde (P1); Forms; quiz in v1 Add **material** menu (quiz is a block on a page); **print whole course**; template promote/sync.

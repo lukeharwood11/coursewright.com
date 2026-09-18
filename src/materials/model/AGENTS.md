@@ -1,3 +1,3 @@
 # AGENTS — `src/materials/model/`
 
-Pure material rules: kinds, visibility, block body shapes, playback, paths, validation. Rich text is Lexical JSON in `body.lexical` (legacy `markdown` still reads). Video blocks are URL embeds. In-page files stay inside the Lexical JSON (`file` nodes), not a new block kind.
+Pure material rules: kinds, visibility, block body shapes, playback, paths, validation, **quiz** payload. Rich text is Lexical JSON in `body.lexical` (legacy `markdown` still reads). Video blocks are URL embeds. **Quizzes** are Lexical `quiz` nodes inside that JSON (correct answers on the node), not a new material kind. In-page files stay inside the Lexical JSON (`file` nodes), not a new block kind.

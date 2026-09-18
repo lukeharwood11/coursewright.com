@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { isStaffRole } from "@/organizations/model/role";
 import { printBackPath, parsePrintStudentIds, type PrintGrainKind } from "@/print/model/paths";
 import {
   loadMaterialPrintPacket,
@@ -25,8 +26,9 @@ function grainFromPath(
 export function usePrint() {
   const params = useParams();
   const location = useLocation();
-  const { organization } = useOrgShell();
+  const { organization, role } = useOrgShell();
   const user = useAuthedUser();
+  const includeAnswerKey = isStaffRole(role);
   const courseId = params.courseId ? Number(params.courseId) : NaN;
   const unitId = params.unitId ? Number(params.unitId) : NaN;
   const materialId = params.materialId ? Number(params.materialId) : NaN;
@@ -34,9 +36,15 @@ export function usePrint() {
   const studentIds = parsePrintStudentIds(location.search);
 
   const query = useQuery({
-    queryKey: ["print", organization.id, location.pathname, location.search],
+    queryKey: [
+      "print",
+      organization.id,
+      location.pathname,
+      location.search,
+      includeAnswerKey,
+    ],
     queryFn: async () => {
-      const packet =
+      const loaded =
         grain === "thisWeek"
           ? await loadWeekPrintPacket({
               organizationId: organization.id,
@@ -46,7 +54,8 @@ export function usePrint() {
           : grain === "material"
             ? await loadMaterialPrintPacket(materialId)
             : await loadUnitPrintPacket(unitId);
-      if (!packet) throw new Error("We couldn’t find that to print.");
+      if (!loaded) throw new Error("We couldn’t find that to print.");
+      const packet = { ...loaded, includeAnswerKey };
       if (packet.materials.length === 0) {
         return { packet, blob: null as Blob | null, filename: "print.pdf" };
       }

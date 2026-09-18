@@ -7,7 +7,9 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { isPdfMime } from "@/print/model/fileKind";
-import { printSegmentsFromBlocks } from "@/materials/model/pageContent";
+import { pageHasQuiz, printSegmentsFromBlocks } from "@/materials/model/pageContent";
+import { quizChoiceLetter, quizCorrectChoiceLetters } from "@/materials/model/quiz";
+import type { QuizBody } from "@/materials/model/quiz";
 import type { PrintMaterialView, PrintPacketView } from "@/print/model/previewAssets";
 
 const INK = "#1F2B24";
@@ -70,6 +72,16 @@ const styles = StyleSheet.create({
   spacer: {
     height: 8,
   },
+  quiz: {
+    marginTop: 8,
+    marginBottom: 12,
+    paddingTop: 8,
+    paddingBottom: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#DEDACB",
+    borderBottomWidth: 1,
+    borderBottomColor: "#DEDACB",
+  },
 });
 
 function Header({
@@ -92,6 +104,9 @@ function Header({
         </Text>
       ))}
       <Text style={styles.title}>{material.title}</Text>
+      {packet.includeAnswerKey && pageHasQuiz(material.blocks) ? (
+        <Text style={styles.meta}>Answer key</Text>
+      ) : null}
       {material.description ? (
         <Text style={styles.description}>{material.description}</Text>
       ) : null}
@@ -111,7 +126,60 @@ function UrlWithQr({ url, qrDataUrl }: { url: string | null; qrDataUrl: string |
   );
 }
 
-function MaterialBody({ material }: { material: PrintMaterialView }) {
+function QuizPrint({
+  quiz,
+  includeAnswerKey,
+}: {
+  quiz: QuizBody;
+  includeAnswerKey: boolean;
+}) {
+  const letters = quizCorrectChoiceLetters(quiz);
+  return (
+    <View style={styles.quiz} wrap={false}>
+      <Text style={styles.label}>{includeAnswerKey ? "Quiz · Answer key" : "Quiz"}</Text>
+      {quiz.prompt.trim() ? (
+        <Text style={styles.body}>{quiz.prompt.trim()}</Text>
+      ) : (
+        <Text style={styles.meta}>Question</Text>
+      )}
+      {quiz.questionKind === "short_answer" ? (
+        includeAnswerKey ? (
+          <Text style={styles.body}>
+            Answer: {quiz.answer.trim() || "Not marked yet"}
+          </Text>
+        ) : (
+          <Text style={styles.body}>________________________________</Text>
+        )
+      ) : (
+        <View>
+          {quiz.choices.map((choice, index) => {
+            if (!choice.text.trim() && !includeAnswerKey) return null;
+            const mark = includeAnswerKey && choice.correct ? "●" : "○";
+            const correct =
+              includeAnswerKey && choice.correct ? "  (correct)" : "";
+            return (
+              <Text key={choice.id} style={styles.body}>
+                {mark} {quizChoiceLetter(index)}. {choice.text.trim() || "Empty choice"}
+                {correct}
+              </Text>
+            );
+          })}
+          {includeAnswerKey && letters ? (
+            <Text style={styles.meta}>Correct: {letters}</Text>
+          ) : null}
+        </View>
+      )}
+    </View>
+  );
+}
+
+function MaterialBody({
+  material,
+  includeAnswerKey,
+}: {
+  material: PrintMaterialView;
+  includeAnswerKey: boolean;
+}) {
   if (material.kind === "link") {
     return <UrlWithQr url={material.url} qrDataUrl={material.qrDataUrl} />;
   }
@@ -174,6 +242,15 @@ function MaterialBody({ material }: { material: PrintMaterialView }) {
             </Text>
           );
         }
+        if (segment.type === "quiz") {
+          return (
+            <QuizPrint
+              key={index}
+              quiz={segment.quiz}
+              includeAnswerKey={includeAnswerKey}
+            />
+          );
+        }
         const prefix = segment.type === "listItem" ? "• " : "";
         return (
           <Text key={index} style={styles.body}>
@@ -192,7 +269,10 @@ export function PacketDocument({ packet }: { packet: PrintPacketView }) {
       {packet.materials.map((material) => (
         <Page key={material.id} size="LETTER" wrap style={styles.page}>
           <Header packet={packet} material={material} />
-          <MaterialBody material={material} />
+          <MaterialBody
+            material={material}
+            includeAnswerKey={Boolean(packet.includeAnswerKey)}
+          />
         </Page>
       ))}
     </Document>

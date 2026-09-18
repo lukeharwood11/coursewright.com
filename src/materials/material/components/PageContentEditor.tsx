@@ -15,6 +15,7 @@ import type { EditorState, LexicalEditor } from "lexical";
 import type { BlockRecord } from "@/materials/databridge/blocks";
 import { looksLikeHttpUrl } from "@/materials/model/blocks";
 import { PageEditorToolbar } from "./PageEditorToolbar";
+import { PageQuizViewProvider } from "./PageQuizViewContext";
 import {
   PAGE_AUTOLINK_MATCHERS,
   PAGE_EDITOR_NODES,
@@ -27,15 +28,18 @@ export function PageContentEditor({
   blocks,
   editorKey,
   editable,
+  showAnswers = editable,
   onDraftChange,
 }: {
   blocks: BlockRecord[];
   editorKey: string;
   editable: boolean;
+  showAnswers?: boolean;
   onDraftChange?: (json: string) => void;
 }) {
   return (
-    <LexicalComposer
+    <PageQuizViewProvider value={showAnswers}>
+      <LexicalComposer
       key={editorKey}
       initialConfig={{
         namespace: "coursewright-page",
@@ -96,6 +100,7 @@ export function PageContentEditor({
           />
         ) : null}
       </div>
-    </LexicalComposer>
+      </LexicalComposer>
+    </PageQuizViewProvider>
   );
 }

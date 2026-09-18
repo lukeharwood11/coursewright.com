@@ -62,5 +62,10 @@ export async function toPrintPacketView(
   for (const material of packet.materials) {
     materials.push(await toPrintMaterialView(material));
   }
-  return { title: packet.title, subtitle: packet.subtitle, materials };
+  return {
+    title: packet.title,
+    subtitle: packet.subtitle,
+    includeAnswerKey: packet.includeAnswerKey,
+    materials,
+  };
 }

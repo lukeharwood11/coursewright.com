@@ -27,5 +27,6 @@ export type PrintMaterial = {
 export type PrintPacket = {
   title: string;
   subtitle: string | null;
+  includeAnswerKey?: boolean;
   materials: PrintMaterial[];
 };

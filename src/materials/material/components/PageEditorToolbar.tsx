@@ -42,6 +42,7 @@ import { uploadNewFile } from "@/materials/databridge/files";
 import { looksLikeHttpUrl } from "@/materials/model/blocks";
 import { $createFileNode } from "./FileNode";
 import { usePageEditorMedia } from "./PageEditorMediaContext";
+import { $createQuizNode } from "./QuizNode";
 import { $createVideoNode } from "./VideoNode";
 
 type PromptKind = "link" | "video" | null;
@@ -284,6 +285,16 @@ export function PageEditorToolbar() {
         }}
       >
         Video
+      </ToolbarButton>
+      <ToolbarButton
+        pressed={false}
+        onClick={() => {
+          editor.update(() => {
+            insertDecoratorBlock($createQuizNode());
+          });
+        }}
+      >
+        Quiz
       </ToolbarButton>
       {media ? (
         <>

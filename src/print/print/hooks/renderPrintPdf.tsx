@@ -15,6 +15,7 @@ async function renderPacket(materials: PrintMaterialView[], packet: PrintPacket)
       packet={{
         title: packet.title,
         subtitle: packet.subtitle,
+        includeAnswerKey: packet.includeAnswerKey,
         materials,
       }}
     />,

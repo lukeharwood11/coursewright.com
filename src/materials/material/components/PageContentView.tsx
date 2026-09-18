@@ -5,9 +5,11 @@ import { PageContentEditor } from "./PageContentEditor";
 export function PageContentView({
   blocks,
   viewKey,
+  showAnswers = false,
 }: {
   blocks: BlockRecord[];
   viewKey: string;
+  showAnswers?: boolean;
 }) {
   if (!pageHasContent(blocks)) {
     return (
@@ -22,6 +24,7 @@ export function PageContentView({
       blocks={blocks}
       editorKey={viewKey}
       editable={false}
+      showAnswers={showAnswers}
     />
   );
 }

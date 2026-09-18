@@ -1,7 +1,7 @@
 import type { Json } from "@/infrastructure/supabase/database.types";
 import { requireSupabase } from "./client";
 import { nextPosition } from "@/units/model/order";
-import type { BlockKind } from "@/materials/model/blocks";
+import { parseBlockKind, type BlockKind } from "@/materials/model/kind";
 
 export type BlockRecord = {
   id: number;
@@ -16,11 +16,6 @@ export const blockQueryKeys = {
   list: (materialId: number) => ["blocks", "list", materialId] as const,
 };
 
-function parseKind(value: string): BlockKind | null {
-  if (value === "rich_text" || value === "video") return value;
-  return null;
-}
-
 export async function listBlocks(materialId: number): Promise<BlockRecord[]> {
   const db = requireSupabase();
   const { data, error } = await db
@@ -33,7 +28,7 @@ export async function listBlocks(materialId: number): Promise<BlockRecord[]> {
 
   if (error) throw new Error(error.message);
   return (data ?? []).flatMap((row) => {
-    const kind = parseKind(row.kind);
+    const kind = parseBlockKind(row.kind);
     if (!kind) return [];
     return [
       {
@@ -68,7 +63,7 @@ export async function createBlock(args: {
 
   if (error) throw new Error(error.message);
   if (!data) throw new Error("The block was added but couldn’t be opened yet.");
-  const kind = parseKind(data.kind);
+  const kind = parseBlockKind(data.kind);
   if (!kind) throw new Error("Unexpected block kind.");
   return {
     id: data.id,
