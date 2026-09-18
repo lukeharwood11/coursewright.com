@@ -12,8 +12,8 @@ function friendlySignUpError(message: string): string {
   if (lower.includes("invalid") && lower.includes("email")) {
     return "Enter a valid email address.";
   }
-  if (lower.includes("not confirmed")) {
-    return "Check your email to confirm your account, then open Course Wright again.";
+  if (lower.includes("rate limit")) {
+    return "Too many attempts just now. Wait a minute and try again.";
   }
   return message;
 }
