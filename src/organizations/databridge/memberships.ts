@@ -155,8 +155,9 @@ export async function updateStaffMembershipRole(input: {
 
 export async function removeStaffMembership(membershipId: number): Promise<void> {
   const db = requireSupabase();
-  // Hard-delete admin/instructor rows. Memberships have no deleted_at, and
-  // status=suspended would block a later invite (unique org + user).
+  // Memberships have no deleted_at. status=suspended would block a later invite
+  // (unique org + user). Do not cascade into enrollments, parent links, or
+  // materials RLS — those stay enrollment-gated.
   const { data, error } = await db
     .from("memberships")
     .delete()

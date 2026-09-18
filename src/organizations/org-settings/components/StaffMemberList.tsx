@@ -103,11 +103,11 @@ export function StaffMemberList({
 
       <ConfirmDialog
         open={Boolean(pendingRemove)}
-        title="Remove from this organization?"
+        title="Remove from staff?"
         body={
           pendingRemove?.isYou
-            ? "You’ll lose access until someone invites you again."
-            : `${pendingName} will lose access until you invite them again.`
+            ? "You’ll no longer be staff in this organization until someone invites you again."
+            : `${pendingName} will no longer be staff in this organization until you invite them again.`
         }
         confirmLabel="Remove"
         cancelLabel="Keep them"

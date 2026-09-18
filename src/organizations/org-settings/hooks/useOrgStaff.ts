@@ -177,13 +177,13 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     onSuccess: async (member) => {
       const removedSelf = member.userId === user.id;
       if (removedSelf) {
-        toast("You were removed from this organization.");
+        toast("You were removed from staff in this organization.");
         await invalidateStaff();
         navigate("/my");
         return;
       }
       const name = member.name || member.email;
-      toast(`Removed ${name} from this organization.`);
+      toast(`Removed ${name} from staff.`);
       await invalidateStaff();
     },
     onError: (error: Error) => {

@@ -22,22 +22,6 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ## Open
 
-### HN-014 — Grant sequence usage on the testing database
-
-| | |
-|--|--|
-| **Why** | A signed-in user creating an org against the testing project fails with Postgres `42501` / `permission denied for sequence organizations_id_seq`. US-19 staff change/remove QA for a brand-new owner is blocked until INSERT works. Existing orgs can still be used to QA role change/remove. |
-| **Where** | Supabase CLI / Dashboard; testing project used by `.env.testing` (`yplmaauelutcosqqvnya`) |
-| **Placeholder** | `supabase/migrations/20260918135600_grant_sequences.sql` (`HN-014`) |
-
-**Steps:**
-
-1. From a machine with `SUPABASE_ACCESS_TOKEN` (HN-012) and the project linked, run `supabase db push` (or `scripts/nuke.sh` in experiment mode if a full reset is acceptable). This applies HN-013 (`student_email`) if it is still pending, then the sequence grants.
-2. Confirm as an authenticated role: `insert into organizations (name, org_type, grade_scheme) values ('Seq Grant Check', 'coop', 'k12')` succeeds (then delete the row), or create an org from `/my` in the SPA.
-3. Repeat for production when that project is in use (HN-007).
-
-**Done when:** a newly signed-in user can create an organization on the database the SPA uses; `organizations_id_seq` no longer returns 42501.
-
 ### HN-013 — Apply `student_email` migration on the testing database
 
 | | |

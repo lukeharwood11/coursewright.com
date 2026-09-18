@@ -64,7 +64,7 @@ export function StaffSection({
       <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Staff</h2>
       <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink-soft)]">
         {canManage
-          ? "Invite an owner, admin, or instructor. Change admin and instructor roles, or remove those people. Copy invite links and send them yourself — Course Wright doesn’t email invites yet."
+          ? "Invite an owner, admin, or instructor. Change admin and instructor roles, or remove them from staff. Copy invite links and send them yourself — Course Wright doesn’t email invites yet."
           : "Owners, admins, and instructors in this organization."}
       </p>
 

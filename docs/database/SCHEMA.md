@@ -325,7 +325,7 @@ Authenticated users only: admins, instructors, parents. **Not students** (P0/P1)
 
 ### Membership
 
-Org staff and parent memberships. Owners and admins may **change** `admin` ↔ `instructor` and **remove** admin/instructor memberships. **Cannot** remove or demote the last remaining `owner` or `admin`.
+Org staff and parent memberships. Owners and admins may **change** `admin` ↔ `instructor` and **remove** admin/instructor memberships. **Cannot** remove or demote the last remaining `owner` or `admin`. These writes touch **`memberships` only**. Course materials and roster stay **enrollment-gated** (and `ParentStudentLink` where applicable) — do **not** add a second staff-role gate on content RLS.
 
 | Field | Type | Notes |
 |-------|------|-------|
