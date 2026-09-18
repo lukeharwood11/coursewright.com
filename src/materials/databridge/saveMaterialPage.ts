@@ -6,7 +6,7 @@ import {
   softDeleteBlock,
   updateBlock,
 } from "./blocks";
-import { getMaterial, updateMaterial } from "./materials";
+import { updateMaterial } from "./materials";
 import type { PageBlockDraft } from "@/materials/model/pageContent";
 
 export type MaterialPagePlacement = {
@@ -18,7 +18,23 @@ export type MaterialPagePlacement = {
 
 type RpcError = { code?: string; message: string; details?: string };
 
-let savePageViaRest = false;
+const REST_FLAG = "cw.savePageViaRest";
+
+function restFallbackEnabled(): boolean {
+  try {
+    return sessionStorage.getItem(REST_FLAG) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function rememberRestFallback(): void {
+  try {
+    sessionStorage.setItem(REST_FLAG, "1");
+  } catch {
+    /* private mode */
+  }
+}
 
 export async function saveMaterialPage(args: {
   materialId: number;
@@ -28,33 +44,36 @@ export async function saveMaterialPage(args: {
   if (!args.placement && args.blocks === undefined) {
     throw new Error("Nothing to save.");
   }
-  if (savePageViaRest) {
-    return saveMaterialPageFallback(args);
+  if (restFallbackEnabled()) {
+    await saveMaterialPageFallback(args);
+    return 0;
   }
 
   const db = requireSupabase();
   try {
     const { data, error } = await withTimeout(
-      db.rpc("save_material_page", {
-        p_material_id: args.materialId,
-        p_placement: args.placement
-          ? {
-              title: args.placement.title,
-              description: args.placement.description,
-              url: args.placement.url,
-              scheduled_date: args.placement.scheduledDate,
-            }
-          : null,
-        p_blocks:
-          args.blocks === undefined
-            ? null
-            : (args.blocks.map((block) => ({
-                kind: block.kind,
-                body: block.body as Json,
-                position: block.position,
-                file_id: block.fileId,
-              })) as Json),
-      }),
+      db
+        .rpc("save_material_page", {
+          p_material_id: args.materialId,
+          p_placement: args.placement
+            ? {
+                title: args.placement.title,
+                description: args.placement.description,
+                url: args.placement.url,
+                scheduled_date: args.placement.scheduledDate,
+              }
+            : null,
+          p_blocks:
+            args.blocks === undefined
+              ? null
+              : (args.blocks.map((block) => ({
+                  kind: block.kind,
+                  body: block.body as Json,
+                  position: block.position,
+                  file_id: block.fileId,
+                })) as Json),
+        })
+        .abortSignal(AbortSignal.timeout(1200)),
       1500,
     );
     if (!error) {
@@ -69,8 +88,9 @@ export async function saveMaterialPage(args: {
     }
   }
 
-  savePageViaRest = true;
-  return saveMaterialPageFallback(args);
+  rememberRestFallback();
+  await saveMaterialPageFallback(args);
+  return 0;
 }
 
 function asRpcError(caught: unknown): RpcError {
@@ -124,7 +144,7 @@ async function saveMaterialPageFallback(args: {
   materialId: number;
   placement?: MaterialPagePlacement;
   blocks?: PageBlockDraft[];
-}): Promise<number> {
+}): Promise<void> {
   if (args.placement) {
     await updateMaterial(args.materialId, {
       title: args.placement.title,
@@ -133,40 +153,38 @@ async function saveMaterialPageFallback(args: {
       scheduledDate: args.placement.scheduledDate,
     });
   }
-  if (args.blocks !== undefined) {
-    const existing = await listBlocks(args.materialId);
-    const keep = Math.min(existing.length, args.blocks.length);
-    for (let index = 0; index < keep; index += 1) {
-      const draft = args.blocks[index];
-      const current = existing[index];
-      if (current.kind === draft.kind) {
-        await updateBlock(current.id, {
-          body: draft.body as Json,
-          position: draft.position,
-        });
-        continue;
-      }
-      await softDeleteBlock(current.id);
-      const created = await createBlock({
-        materialId: args.materialId,
-        kind: draft.kind,
+  if (args.blocks === undefined) return;
+
+  const existing = await listBlocks(args.materialId);
+  const keep = Math.min(existing.length, args.blocks.length);
+  for (let index = 0; index < keep; index += 1) {
+    const draft = args.blocks[index];
+    const current = existing[index];
+    if (current.kind === draft.kind) {
+      await updateBlock(current.id, {
         body: draft.body as Json,
+        position: draft.position,
       });
-      await updateBlock(created.id, { position: draft.position });
+      continue;
     }
-    for (let index = keep; index < args.blocks.length; index += 1) {
-      const draft = args.blocks[index];
-      const created = await createBlock({
-        materialId: args.materialId,
-        kind: draft.kind,
-        body: draft.body as Json,
-      });
-      await updateBlock(created.id, { position: draft.position });
-    }
-    for (let index = keep; index < existing.length; index += 1) {
-      await softDeleteBlock(existing[index].id);
-    }
+    await softDeleteBlock(current.id);
+    const created = await createBlock({
+      materialId: args.materialId,
+      kind: draft.kind,
+      body: draft.body as Json,
+    });
+    await updateBlock(created.id, { position: draft.position });
   }
-  const material = await getMaterial(args.materialId);
-  return material?.currentVersion ?? 0;
+  for (let index = keep; index < args.blocks.length; index += 1) {
+    const draft = args.blocks[index];
+    const created = await createBlock({
+      materialId: args.materialId,
+      kind: draft.kind,
+      body: draft.body as Json,
+    });
+    await updateBlock(created.id, { position: draft.position });
+  }
+  for (let index = keep; index < existing.length; index += 1) {
+    await softDeleteBlock(existing[index].id);
+  }
 }
