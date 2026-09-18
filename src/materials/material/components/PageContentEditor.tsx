@@ -7,12 +7,16 @@ import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { ClickableLinkPlugin } from "@lexical/react/LexicalClickableLinkPlugin";
+import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
+import { HorizontalRulePlugin } from "@lexical/react/LexicalHorizontalRulePlugin";
+import { AutoLinkPlugin } from "@lexical/react/LexicalAutoLinkPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import type { EditorState, LexicalEditor } from "lexical";
 import type { BlockRecord } from "@/materials/databridge/blocks";
 import { looksLikeHttpUrl } from "@/materials/model/blocks";
 import { PageEditorToolbar } from "./PageEditorToolbar";
 import {
+  PAGE_AUTOLINK_MATCHERS,
   PAGE_EDITOR_NODES,
   PAGE_EDITOR_THEME,
   PAGE_MARKDOWN_TRANSFORMERS,
@@ -72,10 +76,13 @@ export function PageContentEditor({
         </div>
         <HistoryPlugin />
         <ListPlugin />
+        <TablePlugin hasCellMerge={false} hasHorizontalScroll />
+        <HorizontalRulePlugin />
         <LinkPlugin
           validateUrl={looksLikeHttpUrl}
           attributes={{ target: "_blank", rel: "noreferrer" }}
         />
+        <AutoLinkPlugin matchers={PAGE_AUTOLINK_MATCHERS} />
         <ClickableLinkPlugin disabled={editable} />
         {editable ? (
           <MarkdownShortcutPlugin transformers={PAGE_MARKDOWN_TRANSFORMERS} />

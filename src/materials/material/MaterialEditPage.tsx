@@ -8,6 +8,7 @@ import { replaceFile, revertFileToVersion, listFileVersions } from "@/materials/
 import { materialPath } from "@/materials/model/paths";
 import { useMaterialEdit } from "./hooks/useMaterialEdit";
 import { VisibilityBanner } from "./components/VisibilityBanner";
+import { PageEditorMediaProvider } from "./components/PageEditorMediaContext";
 import { fileQueryKeys } from "@/materials/databridge/files";
 
 const PageContentEditor = lazy(async () => {
@@ -162,8 +163,9 @@ export function MaterialEditPage() {
           <section className="mt-8 max-w-3xl">
             <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Content</h2>
             <p className="mt-1 text-[13px] text-[var(--ink-faint)]">
-              Write the lesson here. Save at the top when you’re ready — a new
-              version is stored only if this page changed.
+              Write the lesson here — headings, lists, tables, links, videos,
+              and files. Save at the top when you’re ready — a new version is
+              stored only if this page changed.
             </p>
             <div className="mt-3">
               <Suspense
@@ -173,12 +175,19 @@ export function MaterialEditPage() {
                   </p>
                 }
               >
-                <PageContentEditor
-                  blocks={page.blocks}
-                  editorKey={`${page.material.id}-${edit.editorEpoch}`}
-                  editable
-                  onDraftChange={edit.onDraftChange}
-                />
+                <PageEditorMediaProvider
+                  value={{
+                    organizationId: page.organization.id,
+                    userId: page.userId,
+                  }}
+                >
+                  <PageContentEditor
+                    blocks={page.blocks}
+                    editorKey={`${page.material.id}-${edit.editorEpoch}`}
+                    editable
+                    onDraftChange={edit.onDraftChange}
+                  />
+                </PageEditorMediaProvider>
               </Suspense>
             </div>
           </section>

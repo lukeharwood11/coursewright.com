@@ -1,4 +1,5 @@
 import type { JSX } from "react";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -10,7 +11,8 @@ import type {
   SerializedLexicalNode,
   Spread,
 } from "lexical";
-import { DecoratorNode } from "lexical";
+import { $getNodeByKey, DecoratorNode } from "lexical";
+import { Button } from "@/ui/Button";
 import { youtubeEmbedSrc } from "@/materials/model/blocks";
 
 export type SerializedVideoNode = Spread<{ url: string }, SerializedLexicalNode>;
@@ -80,7 +82,7 @@ export class VideoNode extends DecoratorNode<JSX.Element> {
   }
 
   decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element {
-    return <VideoEmbed url={this.__url} />;
+    return <VideoEmbed url={this.__url} nodeKey={this.getKey()} />;
   }
 
   isInline(): false {
@@ -98,26 +100,44 @@ export function $isVideoNode(
   return node instanceof VideoNode;
 }
 
-export function VideoEmbed({ url }: { url: string }) {
+export function VideoEmbed({ url, nodeKey }: { url: string; nodeKey?: string }) {
+  const [editor] = useLexicalComposerContext();
   const embed = youtubeEmbedSrc(url);
-  if (embed) {
-    return (
-      <iframe
-        title="Video"
-        className="aspect-video w-full rounded-[10px] border border-[var(--line-soft)]"
-        src={embed}
-        allow="fullscreen"
-      />
-    );
-  }
   return (
-    <a
-      href={url}
-      className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-      target="_blank"
-      rel="noreferrer"
-    >
-      {url}
-    </a>
+    <div>
+      {embed ? (
+        <iframe
+          title="Video"
+          className="aspect-video w-full rounded-[10px] border border-[var(--line-soft)]"
+          src={embed}
+          allow="fullscreen"
+        />
+      ) : (
+        <a
+          href={url}
+          className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {url}
+        </a>
+      )}
+      {nodeKey && editor.isEditable() ? (
+        <div className="mt-2">
+          <Button
+            type="button"
+            variant="secondary"
+            className="px-2.5 py-1.5 text-[12px]"
+            onClick={() => {
+              editor.update(() => {
+                $getNodeByKey(nodeKey)?.remove();
+              });
+            }}
+          >
+            Remove
+          </Button>
+        </div>
+      ) : null}
+    </div>
   );
 }

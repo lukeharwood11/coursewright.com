@@ -160,7 +160,41 @@ body {
   text-decoration: underline;
 }
 
-.cw-editor-video {
+.cw-editor-strikethrough {
+  text-decoration: line-through;
+}
+
+.cw-editor-table-scroll {
+  margin: 0 0 0.85rem;
+  overflow-x: auto;
+}
+
+.cw-editor-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cw-editor-th,
+.cw-editor-td {
+  min-width: 5rem;
+  border: 1px solid var(--line);
+  padding: 0.4rem 0.55rem;
+  vertical-align: top;
+}
+
+.cw-editor-th {
+  background: var(--paper);
+  font-weight: 700;
+}
+
+.cw-editor-input hr {
+  margin: 0.85rem 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.cw-editor-video,
+.cw-editor-file {
   margin: 0.5rem 0 0.85rem;
 }
 

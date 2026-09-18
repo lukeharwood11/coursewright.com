@@ -7,6 +7,8 @@ export type LexicalJson = {
   children?: LexicalJson[];
   text?: string;
   url?: string;
+  filename?: string;
+  fileId?: number;
   [key: string]: unknown;
 };
 
@@ -48,6 +50,7 @@ export function parseLexicalState(body: unknown): SerializedEditorState | null {
 
 function textOf(node: LexicalJson): string {
   if (typeof node.text === "string") return node.text;
+  if (typeof node.filename === "string") return node.filename;
   if (!node.children?.length) return "";
   return node.children.map(textOf).join("");
 }
@@ -73,7 +76,12 @@ function walkHasContent(node: LexicalJson): boolean {
   if (node.type === "video") {
     return typeof node.url === "string" && node.url.trim() !== "";
   }
+  if (node.type === "file") {
+    return typeof node.fileId === "number" && node.fileId > 0;
+  }
+  if (node.type === "table" || node.type === "horizontalrule") return true;
   if (typeof node.text === "string" && node.text.trim() !== "") return true;
+  if (typeof node.filename === "string" && node.filename.trim() !== "") return true;
   return (node.children ?? []).some(walkHasContent);
 }
 
@@ -93,9 +101,39 @@ function flattenNodes(nodes: LexicalJson[]): PagePrintSegment[] {
       if (url) segments.push({ type: "video", url });
       continue;
     }
+    if (node.type === "file") {
+      const name =
+        typeof node.filename === "string" && node.filename.trim()
+          ? node.filename.trim()
+          : "File";
+      segments.push({ type: "paragraph", text: name });
+      continue;
+    }
+    if (node.type === "table") {
+      const rows = node.children ?? [];
+      let anyRow = false;
+      for (const row of rows) {
+        const cells = (row.children ?? []).map((cell) => textOf(cell).trim());
+        const text = cells.filter(Boolean).join(" · ");
+        if (text) {
+          segments.push({ type: "paragraph", text });
+          anyRow = true;
+        }
+      }
+      if (!anyRow) segments.push({ type: "paragraph", text: "Table" });
+      continue;
+    }
+    if (node.type === "horizontalrule") {
+      continue;
+    }
     if (node.type === "heading") {
       const text = textOf(node).trim();
       if (text) segments.push({ type: "heading", text });
+      continue;
+    }
+    if (node.type === "quote") {
+      const text = textOf(node).trim();
+      if (text) segments.push({ type: "paragraph", text });
       continue;
     }
     if (node.type === "list") {
@@ -204,5 +242,14 @@ export function videoUrlsFromBlocks(
 export function pageHasContent(
   blocks: Array<{ kind: BlockKind; body: unknown }>,
 ): boolean {
-  return printSegmentsFromBlocks(blocks).length > 0;
+  for (const block of blocks) {
+    if (block.kind === "video") {
+      if (parseVideoBody(block.body).trim()) return true;
+      continue;
+    }
+    const lexical = parseLexicalState(block.body);
+    if (lexical && !isEmptyLexicalState(lexical)) return true;
+    if (!lexical && parseRichTextBody(block.body).trim()) return true;
+  }
+  return false;
 }

@@ -25,6 +25,8 @@ export function parseRichTextBody(body: unknown): string {
 
 function lexicalPlainText(node: Record<string, unknown>): string {
   if (typeof node.text === "string") return node.text;
+  if (typeof node.filename === "string") return node.filename;
+  if (typeof node.url === "string") return node.url;
   const children = node.children;
   if (!Array.isArray(children)) return "";
   return children

@@ -1,7 +1,9 @@
 import type { InitialConfigType } from "@lexical/react/LexicalComposer";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ListItemNode, ListNode } from "@lexical/list";
-import { LinkNode } from "@lexical/link";
+import { AutoLinkNode, LinkNode, autoLinkUrlMatcher } from "@lexical/link";
+import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
+import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import {
   BOLD_STAR,
   BOLD_UNDERSCORE,
@@ -10,6 +12,8 @@ import {
   ITALIC_UNDERSCORE,
   LINK,
   ORDERED_LIST,
+  QUOTE,
+  STRIKETHROUGH,
   UNORDERED_LIST,
   type Transformer,
   $generateNodesFromMarkdownString,
@@ -23,6 +27,7 @@ import {
 import type { BlockRecord } from "@/materials/databridge/blocks";
 import { parseRichTextBody, parseVideoBody } from "@/materials/model/blocks";
 import { parseLexicalState } from "@/materials/model/pageContent";
+import { FileNode } from "./FileNode";
 import { $createVideoNode, VideoNode } from "./VideoNode";
 
 export const PAGE_EDITOR_NODES = [
@@ -31,19 +36,29 @@ export const PAGE_EDITOR_NODES = [
   ListNode,
   ListItemNode,
   LinkNode,
+  AutoLinkNode,
+  TableNode,
+  TableCellNode,
+  TableRowNode,
+  HorizontalRuleNode,
   VideoNode,
+  FileNode,
 ];
 
 export const PAGE_MARKDOWN_TRANSFORMERS: Transformer[] = [
   HEADING,
+  QUOTE,
   UNORDERED_LIST,
   ORDERED_LIST,
   BOLD_STAR,
   BOLD_UNDERSCORE,
   ITALIC_STAR,
   ITALIC_UNDERSCORE,
+  STRIKETHROUGH,
   LINK,
 ];
+
+export const PAGE_AUTOLINK_MATCHERS = [autoLinkUrlMatcher];
 
 export const PAGE_EDITOR_THEME: InitialConfigType["theme"] = {
   paragraph: "cw-editor-p",
@@ -65,10 +80,15 @@ export const PAGE_EDITOR_THEME: InitialConfigType["theme"] = {
   },
   quote: "cw-editor-quote",
   link: "cw-editor-link",
+  table: "cw-editor-table",
+  tableCell: "cw-editor-td",
+  tableCellHeader: "cw-editor-th",
+  tableScrollableWrapper: "cw-editor-table-scroll",
   text: {
     bold: "cw-editor-bold",
     italic: "cw-editor-italic",
     underline: "cw-editor-underline",
+    strikethrough: "cw-editor-strikethrough",
   },
 };
 

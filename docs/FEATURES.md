@@ -74,11 +74,11 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Course visibility** | **Published / unpublished** controls whether families can see the course | shipped | Unpublished: instructors/admins. Published: enrolled parents (students when that role exists). New courses start unpublished. Distinct from `status` (active / archived) |
 | **Co-teaching** | Multiple instructors per course | shipped | Course settings: owners/admins add co-teachers (RLS); instructors see the list |
 | **Units** | Materials organized in **units**; each unit may have optional dates | shipped | Course home + unit page; **courses only** in P0 |
-| **Rich materials** | **Add material** kinds: **page** / **link** / **file**; pages are ordered **blocks** | shipped | v1 kinds. Page editor is [Lexical](https://lexical.dev/); rich text stored as `body.lexical`. Video blocks are URL embeds |
+| **Rich materials** | **Add material** kinds: **page** / **link** / **file**; pages are ordered **blocks** | shipped | v1 kinds. Page editor is [Lexical](https://lexical.dev/); rich text stored as `body.lexical`. Toolbar: headings, lists, tables, quotes, links, video URLs, in-page file attachments |
 | **Material visibility** | **Published / unpublished** controls who can see a material | shipped | Unpublished: instructors/admins. Published: enrolled parents (students when that role exists). New materials start unpublished |
 | **Quizzes (author + print)** | Create quizzes, mark correct answers, print blank (+ instructor answer key) | planned | **Open:** quiz as block type vs separate material kind — see materials section |
 | **File sharing** | Upload and attach files; share with parents as part of course materials | shipped | File materials upload to Storage `org-files` with `files` / `file_versions` |
-| **Audio & video files** | Video as a **block** on a material page; uploaded audio TBD | shipped | Video **URL embed** in page blocks (upload vs URL still **TBD**); uploaded audio/video play on file materials |
+| **Audio & video files** | Video as a **block** on a material page; uploaded audio TBD | shipped | Video **URL embed** in page blocks (upload vs URL still **TBD**). Uploaded audio/video also play when attached inside a page or as a file material |
 | **Course grade levels** | Courses carry **grade metadata** — multiple grades and/or ranges | shipped | Editor on create + course settings. Templates get the same model in **P1** |
 | **Advanced search** | Native, easy, **cross-facet** search — “where do I have this resource?” | in progress | Staff chrome search: pages, courses, materials by title (card results). Facets / FTS ranking / files / people still open; GIN `search_vector` indexes ready |
 | **Families / parent directory** | Named group of **student profiles**; parents appear via `parent_student_links`; org **parent directory** | shipped | Class-mirror members. Link parent creates/reuses student links (`admin_invites` `role=parent` if no account). **Never enrollments.** `family_members.parent_user_id` unused in P0 app. Extra fields, merge/split, and invite **email send** still open. Copy-link claim lives on roster/profile. **SPA directory UI currently not routed** (schema + databridge remain) |
@@ -450,7 +450,7 @@ Course
 
 #### Editor
 
-Page materials use a **Lexical** WYSIWYG editor ([lexical.dev](https://lexical.dev/)). Canonical store for rich-text blocks is the Lexical editor state in `blocks.body.lexical`. Existing `body.markdown` still loads. Video URLs stay `video` blocks (insert from the editor toolbar). Instructors save from the page header; a new `material_versions` row is written only when saved placement or page content actually changed.
+Page materials use a **Lexical** WYSIWYG editor ([lexical.dev](https://lexical.dev/)). Canonical store for rich-text blocks is the Lexical editor state in `blocks.body.lexical`. Existing `body.markdown` still loads. Video URLs stay `video` blocks (insert from the editor toolbar). Uploaded files, images, and audio/video can sit inside the Lexical document (no extra block kind). Instructors save from the page header; a new `material_versions` row is written only when saved placement or page content actually changed.
 
 #### Closed workshop questions
 

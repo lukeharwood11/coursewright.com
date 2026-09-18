@@ -6,7 +6,7 @@ Lesson materials: **page** / **link** / **file**, plus ordered **blocks** on pag
 
 - Material placement (title, **description**, kind, optional `unit_id`, dates, **visibility**, important now, sync/override)
 - **v1 Add material:** `page` · `link` · `file` (into a unit or top-level)
-- **page** → ordered **blocks** (`rich_text`, `video`, …); rich text is authored in [Lexical](https://lexical.dev/) and stored as editor JSON
+- **page** → ordered **blocks** (`rich_text`, `video`, …); rich text is authored in [Lexical](https://lexical.dev/) and stored as editor JSON (tables, quotes, links, in-page file nodes)
 - **link** → `url`; **file** → `file_id` (org File + versions)
 - Soft delete, versions, revert UX
 - Dating: optional material `scheduled_date`; optional unit range only when `unit_id` is set
