@@ -55,7 +55,7 @@ export async function saveMaterialPage(args: {
                 file_id: block.fileId,
               })) as Json),
       }),
-      4000,
+      1500,
     );
     if (!error) {
       return typeof data === "number" ? data : 0;
