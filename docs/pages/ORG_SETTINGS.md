@@ -20,14 +20,15 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 - Save org name/metadata; changing **permalink slug** shows a warning that existing links break (no auto-redirect in P0) and requires an explicit confirmation.
 - **Save** and **Cancel** stay in the page header (upper right). Save is disabled when nothing changed; Cancel goes back (confirms first if there are unsaved changes).
 - Set org **type** (co-op / micro-school) and **grade scheme** (K–12 / custom labels).
-- Staff section on this page: invite owner / admin / instructor by email, **copy a claim link** (v0 does not send email), list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). Change roles / remove staff still TBD; block remove/demote of last owner or admin.
+- Staff section on this page: invite owner / admin / instructor by email, **copy a claim link** (v0 does not send email), list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). Owners and admins **change admin ↔ instructor** and **remove** admins/instructors; the last remaining owner or admin cannot be removed or demoted.
 - Billing section is P1 placeholder, **shown only to owners**.
 
 ## Data shown
 
 - Organization **name**, **slug**, **org type**
 - Current **grade scheme** and labels (K–12 preset or custom)
-- Staff list: person **name** / **email**, **role** (owner | admin | instructor)
+- Staff list: person **name** / **email**, **role** (owner | admin | instructor); owners and admins see change-role and remove actions for admins/instructors
+- Last owner/admin rows explain why they can’t be removed or demoted
 - Pending staff invites: **email**, **role**, copyable `/invite/<token>` link, cancel
 - Billing status — P1, owner only
 
@@ -50,8 +51,8 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 - List owners, admins, and instructors
 - Invite owners / admins / instructors by email; copy the claim link (no email send in v0)
 - Pending invites: copy link again, or cancel
-- Change **admin ↔ instructor** for existing staff — TBD
-- Remove admins/instructors — TBD
+- Change **admin ↔ instructor** for existing staff (owners and admins; owner seats stay invite-only)
+- Remove admins/instructors
 - Guard: cannot remove or demote the **last remaining owner or admin**
 
 ### Billing (P1)
@@ -65,7 +66,8 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 - Cancel — discard unsaved changes
 - Set grade scheme
 - Invite staff and copy the claim link; cancel a pending invite
-- Change role / remove staff (TBD)
+- Change admin ↔ instructor for existing staff
+- Remove an admin or instructor (blocked when they are the last owner/admin)
 
 ## Links to
 

@@ -6,6 +6,7 @@ import type { OrganizationSummary } from "./memberships";
 
 export type OrgStaffMember = {
   membershipId: number;
+  userId: string;
   role: StaffInviteRole;
   name: string;
   email: string;
@@ -49,6 +50,7 @@ type ProfileEmbed = { name: string; email: string } | { name: string; email: str
 
 type StaffMembershipRow = {
   id: number;
+  user_id: string | null;
   role: string;
   profile: ProfileEmbed;
 };
@@ -85,7 +87,7 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
   const db = requireSupabase();
   const { data, error } = await db
     .from("memberships")
-    .select("id, role, profile:profiles!memberships_user_id_fkey(name, email)")
+    .select("id, user_id, role, profile:profiles!memberships_user_id_fkey(name, email)")
     .eq("organization_id", organizationId)
     .eq("status", "active")
     .in("role", ["owner", "admin", "instructor"]);
@@ -97,9 +99,10 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
       const typed = row as StaffMembershipRow;
       const role = parseStaffInviteRole(typed.role);
       const profile = unwrapOne(typed.profile);
-      if (!role || !profile) return null;
+      if (!role || !profile || !typed.user_id) return null;
       return {
         membershipId: typed.id,
+        userId: typed.user_id,
         role,
         name: profile.name,
         email: profile.email,

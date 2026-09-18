@@ -117,6 +117,7 @@ export function OrgSettingsPage() {
       <div className="mt-4">
         <StaffSection
           canInvite={staff.canInvite}
+          canManage={staff.canManage}
           loading={staff.loading}
           loadError={staff.loadError}
           members={staff.members}
@@ -128,6 +129,8 @@ export function OrgSettingsPage() {
           inviting={staff.inviting}
           copiedId={staff.copiedId}
           cancelingId={staff.cancelingId}
+          changingId={staff.changingId}
+          removingId={staff.removingId}
           lastInviteUrl={staff.lastInviteUrl}
           lastInvite={staff.lastInvite}
           onEmailChange={staff.onEmailChange}
@@ -135,6 +138,8 @@ export function OrgSettingsPage() {
           onInvite={staff.onInvite}
           onCopy={staff.onCopy}
           onCancel={staff.onCancel}
+          onChangeRole={staff.onChangeRole}
+          onRemove={staff.onRemove}
         />
       </div>
 
