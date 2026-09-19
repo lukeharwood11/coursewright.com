@@ -206,6 +206,35 @@ export function toggleStudentId(ids: number[], id: number): number[] {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
 }
 
+export function datedMaterialCount(students: ParentDashboardStudent[]): number {
+  return students.reduce(
+    (count, student) =>
+      count +
+      student.courses.reduce((inner, course) => inner + course.materials.length, 0),
+    0,
+  );
+}
+
+export function coursesWithDatedMaterials(
+  courses: ParentDashboardCourse[],
+): ParentDashboardCourse[] {
+  return courses.filter((course) => course.materials.length > 0);
+}
+
+/** This-week list: drop empty course shells; keep unenrolled students for a plain-language note. */
+export function thisWeekStudents(
+  students: ParentDashboardStudent[],
+): ParentDashboardStudent[] {
+  return students
+    .map((student) => ({
+      ...student,
+      courses: coursesWithDatedMaterials(student.courses),
+    }))
+    .filter(
+      (student) => student.courses.length > 0 || !student.hasActiveEnrollment,
+    );
+}
+
 function compareWeekMaterials(
   a: ParentDashboardMaterial,
   b: ParentDashboardMaterial,

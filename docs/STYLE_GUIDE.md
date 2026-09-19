@@ -198,11 +198,11 @@ Paper canvas. Centered card, max-width ~320px. Wordmark → Lora heading → one
 
 ### Parent dashboard (phone — usability anchor)
 
-1. Top bar: **CW** or tiny wordmark + **org name** (700) + avatar. On desktop, a simpler collapsible sidebar (This week, their courses, Progress) sits beside the page.  
+1. Top bar: **CW** or tiny wordmark + **org name** (700) + avatar. On desktop, a simpler collapsible sidebar (This week, their courses, Progress) sits beside the page. Content uses the remaining width — do not center a narrow column on large screens.
 2. Greeting (Lora) + week range (“Week of Sep 1 – Sep 7”, Sunday–Saturday) + **Print this week**
 3. **Student tags** when more than one child — tap to include or hide that student’s work
-4. **Coming up** — **Assigned next** (soonest assignment date from today) and **Due next** (soonest due date from today); then **Important now** (if any)
-5. **This week** — materials assigned and/or due in the week. **Assigned** dates in slate; **Due** dates in amber-deep. Per student (when more than one is active): avatar, name, grade badge → course → material rows with **Print**. One student: same list without the extra header.
+4. **Important now** (if any), then **Coming up** — **Assigned next** (soonest assignment date from today) and **Due next** (soonest due date from today). On desktop, those two sit side by side when both exist.
+5. **This week** — materials assigned and/or due in the week. **Assigned** dates in slate; **Due** dates in amber-deep. Course cards only for courses with dated work this week (empty shells omitted); two columns on larger screens. Per student (when more than one is active): avatar, name, grade badge → course cards → material rows with **Print**. One student: same cards without the extra header.
 6. Bottom tabs on phone: **This week** | **Progress** (Progress may be P1 — dim/inactive until then). On desktop, those destinations live in the sidebar instead.
 
 Keep parent chrome minimal. One job on the home tab.
