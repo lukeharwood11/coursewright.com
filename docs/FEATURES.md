@@ -93,7 +93,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Parent dashboard** | This calendar week's dated materials, **Up next**, **Important now**, student tags, **Print this week** for active students | in progress | Parent/student home; student login still uses parent claim path. Staff can open this home via **Parent view** |
 | **Resource links** | Send a parent a link that opens a **specific resource** (after they log in) | shipped | Copy signed-in material URL; `share_links` row recorded. Public entry path still TBD |
 | **Instructor "important now"** | Flag items needing immediate parent attention | shipped | Toggle on material; parent home surfaces it |
-| **Staff parent view** | Owners, admins, and instructors switch most org pages to parent presentation | in progress | Header **Teacher** / **Parent view**. Real this-week if they have linked students; otherwise a preview. Hidden for parent-only users |
+| **Staff parent view** | Owners, admins, and instructors switch most org pages to parent presentation | in progress | Header **Teacher** / **Parent view**. Real this-week if they have linked students; otherwise a preview. Hidden for parent-only users. SPA + unit tests in; browser E2E against testing Auth blocked by email send rate limit |
 
 ### Roster management (P0)
 

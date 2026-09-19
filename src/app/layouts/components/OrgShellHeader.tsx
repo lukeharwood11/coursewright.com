@@ -23,7 +23,7 @@ export function OrgShellHeader() {
   const setMobileOpen = useSidebarStore((state) => state.setMobileOpen);
 
   return (
-    <header className="cw-org-chrome flex items-center gap-3 border-b border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 md:px-6">
+    <header className="cw-org-chrome flex flex-wrap items-center gap-3 border-b border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 md:px-6">
       <button
         type="button"
         className="shrink-0 rounded-[6px] p-1.5 text-[var(--ink-soft)] hover:bg-[var(--green-tint)] hover:text-[var(--green)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)] md:hidden"
