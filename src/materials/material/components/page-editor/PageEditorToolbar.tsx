@@ -244,6 +244,7 @@ export function PageEditorToolbar() {
           <DropdownItem
             icon={<PaperClipIcon className="h-4 w-4" />}
             label={actions.uploading ? "Uploading…" : "File"}
+            hint="MP3/M4A"
             onClick={actions.attachFile}
           />
         ) : null}

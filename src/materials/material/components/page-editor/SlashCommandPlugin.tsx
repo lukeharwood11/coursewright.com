@@ -202,7 +202,7 @@ function toSlashOption(
     return new SlashOption({
       id,
       title: "File",
-      keywords: ["file"],
+      keywords: ["file", "audio", "mp3", "m4a", "pdf", "attach"],
       glyph: <PaperClipIcon className="h-4 w-4" />,
       onSelect: actions.attachFile,
     });

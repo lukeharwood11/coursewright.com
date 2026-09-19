@@ -170,6 +170,11 @@ export function useMaterial() {
     file: fileQuery.data ?? null,
     fileUrl: signedQuery.data ?? null,
     fileDownloadUrl: downloadQuery.data ?? null,
+    retryFileUrl: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["files", "signed", fileQuery.data?.storageRef ?? ""],
+      });
+    },
     importantNow,
     versions: versionsQuery.data ?? [],
     loading: materialQuery.isLoading || courseQuery.isLoading,

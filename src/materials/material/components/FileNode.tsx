@@ -23,6 +23,7 @@ import type { SerializedDecoratorBlockNode } from "@lexical/react/LexicalDecorat
 import { Button } from "@/ui/Button";
 import { fileQueryKeys, fileSignedUrl, getFile } from "@/materials/databridge/files";
 import { filePlaybackKind } from "@/materials/model/playback";
+import { AudioPlayer } from "./AudioPlayer";
 
 export type SerializedFileNode = Spread<
   {
@@ -187,7 +188,8 @@ function FileEmbed({
       fileSignedUrl(file!.storageRef, { download: file!.filename }),
     enabled: Boolean(file?.storageRef),
   });
-  const kind = filePlaybackKind(file?.mimeType ?? mimeType);
+  const displayName = file?.filename ?? filename;
+  const kind = filePlaybackKind(file?.mimeType ?? mimeType, displayName);
   const src = signedQuery.data ?? null;
   const downloadUrl = downloadQuery.data ?? null;
 
@@ -195,7 +197,7 @@ function FileEmbed({
     <div className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--paper)] p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="min-w-0 text-[13.5px] font-bold text-[var(--ink)]">
-          {file?.filename ?? filename}
+          {displayName}
         </p>
         <div className="flex flex-wrap gap-2">
           {downloadUrl ? (
@@ -225,7 +227,7 @@ function FileEmbed({
       {kind === "image" && src ? (
         <img
           src={src}
-          alt={file?.filename ?? filename}
+          alt={displayName}
           className="mt-3 max-h-80 max-w-full rounded-[6px] object-contain"
         />
       ) : null}
@@ -233,7 +235,13 @@ function FileEmbed({
         <video className="mt-3 w-full rounded-[6px]" controls playsInline src={src} />
       ) : null}
       {kind === "audio" && src ? (
-        <audio className="mt-3 w-full" controls src={src} />
+        <AudioPlayer
+          className="mt-3"
+          src={src}
+          onRetry={() => {
+            void signedQuery.refetch();
+          }}
+        />
       ) : null}
       {kind === "pdf" && src ? (
         <iframe

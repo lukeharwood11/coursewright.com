@@ -7,15 +7,22 @@ import {
 import { Button } from "@/ui/Button";
 import { filePlaybackKind } from "@/materials/model/playback";
 import type { FileRecord } from "@/materials/databridge/files";
+import { AudioPlayer } from "./AudioPlayer";
 
 type Props = {
   file: FileRecord;
   fileUrl: string | null;
   fileDownloadUrl: string | null;
+  onRetryFileUrl?: () => void;
 };
 
-export function FileMaterialBody({ file, fileUrl, fileDownloadUrl }: Props) {
-  const kind = filePlaybackKind(file.mimeType);
+export function FileMaterialBody({
+  file,
+  fileUrl,
+  fileDownloadUrl,
+  onRetryFileUrl,
+}: Props) {
+  const kind = filePlaybackKind(file.mimeType, file.filename);
   const [expanded, setExpanded] = useState(false);
   const titleId = useId();
   const canPreview = Boolean(fileUrl) && (kind === "pdf" || kind === "image");
@@ -72,7 +79,11 @@ export function FileMaterialBody({ file, fileUrl, fileDownloadUrl }: Props) {
       </div>
 
       {kind === "audio" && fileUrl ? (
-        <audio className="w-full max-w-xl" controls src={fileUrl} />
+        <AudioPlayer
+          className="max-w-xl"
+          src={fileUrl}
+          onRetry={onRetryFileUrl}
+        />
       ) : null}
 
       {kind === "video" && fileUrl ? (

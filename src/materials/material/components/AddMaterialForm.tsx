@@ -84,6 +84,9 @@ export function AddMaterialForm({
             className="text-[13.5px] text-[var(--ink-soft)]"
             onChange={(event) => add.setFile(event.target.files?.[0] ?? null)}
           />
+          <span className="text-[12px] text-[var(--ink-faint)]">
+            Audio: MP3 or M4A works best on phones.
+          </span>
         </label>
       ) : null}
       <label className="mt-3 flex flex-col gap-1">
