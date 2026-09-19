@@ -1,29 +1,34 @@
 import type { ComponentType, SVGProps } from "react";
-import { EyeIcon, FolderIcon, PrinterIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import {
+  BuildingOffice2Icon,
+  FolderIcon,
+  PrinterIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/outline";
 import { IconWell } from "./IconWell";
 
 type OutlineIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 const props: { title: string; body: string; icon: OutlineIcon }[] = [
   {
+    title: "Ease of use",
+    body: "If something isn’t intuitive, tell us — we’ll fix it.",
+    icon: SparklesIcon,
+  },
+  {
+    title: "Built for small organizations",
+    body: "Made for co-ops and micro-schools — and shaped with the people who run them.",
+    icon: BuildingOffice2Icon,
+  },
+  {
     title: "One place for materials",
-    body: "Lesson plans, files, and this week’s work live together — so families aren’t hunting through folders, chats, and inboxes.",
+    body: "Materials, files, quizzes, and communication — all in one application.",
     icon: FolderIcon,
   },
   {
-    title: "Share wright, including paper",
-    body: "Print a material, a unit, or this week in one tap. If someone just wants it on paper, that’s easy.",
+    title: "Paper when you need it",
+    body: "Print a material, a unit, or this week in one tap. Sharing isn’t an afterthought.",
     icon: PrinterIcon,
-  },
-  {
-    title: "Obvious the second you open it",
-    body: "Built so parents can see what’s going on immediately, and so volunteers can spend their time teaching — not managing software.",
-    icon: EyeIcon,
-  },
-  {
-    title: "Built for co-ops, not districts",
-    body: "Clear roles for admins, instructors, and parents — without the extra machinery of a big-school platform.",
-    icon: UserGroupIcon,
   },
 ];
 
@@ -34,7 +39,7 @@ export function HomeValueProps() {
         className="text-[22px] font-semibold text-[var(--ink)]"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        What Course Wright is for
+        Why Course Wright?
       </h2>
       <ul className="mt-6 grid gap-4 sm:grid-cols-2">
         {props.map((item) => {

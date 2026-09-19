@@ -74,6 +74,13 @@ export function PrivacyPage() {
       <p className="mt-12 text-[14px] leading-relaxed text-[var(--ink-soft)]">
         See also our{" "}
         <Link
+          to="/terms"
+          className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+        >
+          terms of use
+        </Link>{" "}
+        and{" "}
+        <Link
           to="/cookies"
           className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
         >

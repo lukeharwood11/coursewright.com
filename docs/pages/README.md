@@ -11,9 +11,10 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [PRICING](./PRICING.md) | `/pricing` |
 | [CONTACT](./CONTACT.md) | `/contact` |
 | [PRIVACY](./PRIVACY.md) | `/privacy` |
+| [TERMS](./TERMS.md) | `/terms` |
 | [COOKIES](./COOKIES.md) | `/cookies` |
 | [DOCS](./DOCS.md) | `/docs` (topics under `/docs/<slug>`) |
-| [CONSTRUCTION](./CONSTRUCTION.md) | `/terms` |
+| [CONSTRUCTION](./CONSTRUCTION.md) | Shared placeholder for `ready: false` footer links (none currently) |
 | [LOGIN](./LOGIN.md) | `/login` |
 | [SIGNUP](./SIGNUP.md) | `/signup` |
 | [INVITE_CLAIM](./INVITE_CLAIM.md) | `/invite/<token>` |
@@ -67,7 +68,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Print (material / unit / this week) | [PRINT](./PRINT.md); entry from [MATERIAL](./MATERIAL.md), [UNIT](./UNIT.md), [ORG_HOME](./ORG_HOME.md) |
 | Resource links / share with parents | [MATERIAL](./MATERIAL.md) (entry URL TBD) |
 | Advanced search | Product chrome — [ORG_HOME](./ORG_HOME.md) + org chrome; route TBD |
-| Marketing / trust | [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [COOKIES](./COOKIES.md), [DOCS](./DOCS.md), [CONSTRUCTION](./CONSTRUCTION.md) (terms until copy exists) |
+| Marketing / trust | [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [TERMS](./TERMS.md), [COOKIES](./COOKIES.md), [DOCS](./DOCS.md) |
 
 **Intentionally not on locked pages yet (FEATURES / URLS):**
 

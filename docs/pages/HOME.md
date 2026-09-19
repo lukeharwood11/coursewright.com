@@ -28,9 +28,10 @@ P0 sales landing — brand-first entry that explains Course Wright and drives si
 ## Contents
 
 - Brand / wordmark as hero-level signal (not nav-only)
-- Tagline: Plan wright. Share wright. Course Wright. / Courses, done wright.
-- Short value props aligned with vision: one place for materials, share including **print**, built for co-ops — **without naming specific third-party tools**
-- Primary CTA → [SIGNUP](./SIGNUP.md) (and/or product after auth)
+- Tagline: Courses, done wright.
+- “Why Course Wright?” value props: ease of use, built for small organizations, one place for materials, plus a fourth TBD
+- Today / With Course Wright contrast: scattered tools vs one hub — **without naming specific third-party tools**
+- Primary CTA → [SIGNUP](./SIGNUP.md) (and/or product after auth); closing line: Ready to get started?
 - Secondary links: [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [PRIVACY](./PRIVACY.md), [LOGIN](./LOGIN.md)
 - TBD: exact hero media (follow [STYLE_GUIDE.md](../STYLE_GUIDE.md) / branding when designed). Public copy stays general — do not paste the internal “WhatsApp / Outlook / SharePoint” inspiration onto the page.
 
@@ -46,7 +47,7 @@ P0 sales landing — brand-first entry that explains Course Wright and drives si
 - [LOGIN](./LOGIN.md) — sign in
 - [ABOUT](./ABOUT.md) — about
 - [PRICING](./PRICING.md) — pricing
-- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [DOCS](./DOCS.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [COOKIES](./COOKIES.md), [CONSTRUCTION](./CONSTRUCTION.md) (`/terms`)
+- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [DOCS](./DOCS.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [TERMS](./TERMS.md), [COOKIES](./COOKIES.md)
 
 ## Notes
 

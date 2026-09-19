@@ -12,12 +12,12 @@ export function PricingPage() {
         className="mt-1 text-[28px] font-semibold leading-snug text-[var(--ink)]"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        Invite-only pilot
+        Free (for now)
       </h1>
       <p className="mt-4 text-[15.5px] leading-relaxed text-[var(--ink-soft)]">
-        Course Wright is in a small invite-only pilot. We aren’t publishing plans
-        or prices yet — we’re working with a handful of co-ops and micro-schools
-        to get the product wright.
+        Course Wright might change its pricing in the future, but right now we’re
+        working with a handful of small organizations to polish the product.
+        There are no plans or dollar amounts to publish yet.
       </p>
 
       <section className="mt-10 flex items-start gap-3 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
@@ -26,16 +26,17 @@ export function PricingPage() {
         </IconWell>
         <div>
           <h2 className="text-[15px] font-extrabold text-[var(--ink)]">
-            If you’ve been invited
+            Interested in partnering?
           </h2>
           <p className="mt-2 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-            Create an account and start an organization. Billing comes later.
+            If you’d like to work with us while we polish Course Wright, reach out
+            — we’d love to hear from you.
           </p>
         </div>
       </section>
 
       <p className="mt-8 text-[14px] leading-relaxed text-[var(--ink-soft)]">
-        Interested in partnering for the pilot? Email{" "}
+        Email{" "}
         <a
           href={mailto(contactEmails.hi)}
           className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
@@ -46,7 +47,11 @@ export function PricingPage() {
         <Link to="/about" className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]">
           about
         </Link>
-        , or create an account if you already have an invite.
+        , or{" "}
+        <Link to="/signup" className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]">
+          create an account
+        </Link>
+        .
       </p>
 
       <div className="mt-8 flex flex-wrap gap-3">

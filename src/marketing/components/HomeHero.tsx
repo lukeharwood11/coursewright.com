@@ -9,12 +9,11 @@ export function HomeHero() {
       <div>
         <Wordmark size="hero" />
         <h1
-          className="mt-3 text-[26px] font-semibold leading-snug text-[var(--ink)] sm:text-[30px]"
+          className="mt-3 text-[26px] font-semibold leading-snug text-[var(--green)] sm:text-[30px]"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          Plan wright. Share wright. Course Wright.
+          Courses, done wright.
         </h1>
-        <p className="mt-2 text-[15px] font-extrabold text-[var(--green)]">Courses, done wright.</p>
         <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[var(--ink-soft)]">
           One place for homeschool co-ops and micro-schools to plan courses, share
           materials with parents, and print what you need — without the clunky

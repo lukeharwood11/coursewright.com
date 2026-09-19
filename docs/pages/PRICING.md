@@ -9,36 +9,38 @@ Org decision-makers (admins) checking cost before signup.
 
 ## Purpose
 
-Say that Course Wright is an **invite-only pilot**. Do not present plan options or dollar amounts.
+Say that Course Wright is **Free (for now)**. Pricing may change later; today we’re polishing with a handful of small organizations. No plan cards or dollar amounts.
 
 
 ## Behavior
 
 - Public marketing page.
 - Does not process payment in P0 (in-app billing is P1).
-- CTA to signup for people who already have an invite.
+- CTA to signup; partnership interest → email.
 - No live subscription data.
 
 ## Data shown
 
-- **Invite-only pilot** — no plans, packaging options, or prices
-- CTA to signup
+- **Free (for now)** — no plans, packaging options, or prices
+- Note that pricing may change in the future
+- Working with a handful of small organizations to polish the product
+- CTA to signup / reach out to partner
 - Do not invent dollar amounts
 
 ## Contents
 
-- Heading: invite-only pilot
-- Short explanation: working with a handful of co-ops and micro-schools; plans/prices come later
-- If you’ve been invited: create an account and start an organization
+- Heading: Free (for now)
+- Short explanation: pricing may change; currently polishing with a handful of small orgs
+- Interested in partnering? Reach out
 - CTA → [SIGNUP](./SIGNUP.md)
 - Link to [ABOUT](./ABOUT.md), [HOME](./HOME.md)
-- Pilot partnership interest → email `hi@coursewright.com` (see [CONTACT](./CONTACT.md))
+- Partnership interest → email `hi@coursewright.com` (see [CONTACT](./CONTACT.md))
 - In-app billing UI is **P1**; this page does **not** show per-teacher / per-course options
 
 ## Primary actions
 
-- Sign up (if invited)
-- Email `hi@coursewright.com` for pilot / partnership interest
+- Sign up
+- Email `hi@coursewright.com` for partnership interest
 
 ## Links to
 
@@ -46,7 +48,7 @@ Say that Course Wright is an **invite-only pilot**. Do not present plan options 
 - [ABOUT](./ABOUT.md) — about
 - [HOME](./HOME.md) — home
 - [CONTACT](./CONTACT.md) — email directory (mailto `hi@`)
-- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [DOCS](./DOCS.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [COOKIES](./COOKIES.md), [CONSTRUCTION](./CONSTRUCTION.md) (`/terms`)
+- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [DOCS](./DOCS.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [TERMS](./TERMS.md), [COOKIES](./COOKIES.md)
 
 ## Notes
 

@@ -38,8 +38,8 @@ Explain how Course Wright uses cookies and similar technologies (including PostH
 
 - [HOME](./HOME.md)
 - [PRIVACY](./PRIVACY.md)
+- [TERMS](./TERMS.md)
 - [CONTACT](./CONTACT.md) — general/support; cookie questions use `legal@` on this page
-- [CONSTRUCTION](./CONSTRUCTION.md) — Terms only (still placeholder)
 
 ## Notes
 

@@ -33,7 +33,7 @@ export const footerColumns: FooterColumn[] = [
     links: [
       { to: "/contact", label: "Contact us", ready: true },
       { to: "/privacy", label: "Privacy", ready: true },
-      { to: "/terms", label: "Terms of use", ready: false },
+      { to: "/terms", label: "Terms of use", ready: true },
       { to: "/cookies", label: "Cookie policy", ready: true },
     ],
   },

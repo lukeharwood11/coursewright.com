@@ -8,7 +8,7 @@ export function HomeCta() {
         className="text-[24px] font-semibold text-[var(--ink)]"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        Ready to get the course wright?
+        Ready to get started?
       </h2>
       <p className="mx-auto mt-3 max-w-md text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
         Create an account, start an organization, and plan from one place. Families

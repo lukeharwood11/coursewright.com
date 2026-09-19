@@ -48,7 +48,7 @@ Roster covers students, classes, enrollments, and parent invites. Staff & roles 
 ## Links to
 
 - [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [SIGNUP](./SIGNUP.md), [LOGIN](./LOGIN.md) — marketing chrome
-- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [DOCS](./DOCS.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [COOKIES](./COOKIES.md), [CONSTRUCTION](./CONSTRUCTION.md) (`/terms`)
+- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [DOCS](./DOCS.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [TERMS](./TERMS.md), [COOKIES](./COOKIES.md)
 - Product destinations named in copy (not navigated as in-app deep links from help): [ORG_PICKER](./ORG_PICKER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_ROSTER](./ORG_ROSTER.md), [COURSE_LIST](./COURSE_LIST.md), [INVITE_CLAIM](./INVITE_CLAIM.md)
 
 ## Notes

@@ -84,7 +84,7 @@ src/
 ├── parent/                   # this week + important now + bulletins dashboard
 ├── bulletins/                # dated course notices + attached materials
 ├── auth/                     # login, signup, invite entry, session helpers
-├── marketing/                # public home, about, pricing, privacy, help `/docs`
+├── marketing/                # public home, about, pricing, privacy, terms, help `/docs`
 ├── billing/                  # P1 stub — Stripe later
 │
 ├── app/                      # delivery: router, providers, shells, gates

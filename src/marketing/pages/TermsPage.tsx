@@ -2,14 +2,14 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { ButtonLink } from "@/ui/Button";
 import {
-  cookieIntro,
-  cookieLastUpdated,
-  cookieSections,
-} from "../model/cookiePolicy";
+  termsIntro,
+  termsLastUpdated,
+  termsSections,
+} from "../model/termsOfUse";
 
-export function CookiesPage() {
-  const intro = cookieIntro();
-  const sections = cookieSections();
+export function TermsPage() {
+  const intro = termsIntro();
+  const sections = termsSections();
 
   return (
     <main className="mx-auto w-full max-w-3xl px-5 py-12 sm:py-16">
@@ -18,10 +18,10 @@ export function CookiesPage() {
         className="mt-1 text-[28px] font-semibold leading-snug text-[var(--ink)]"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        Cookie policy
+        Terms of use
       </h1>
       <p className="mt-2 text-[13.5px] text-[var(--ink-faint)]">
-        Last updated {cookieLastUpdated}
+        Last updated {termsLastUpdated}
       </p>
       <p className="mt-4 text-[15.5px] leading-relaxed text-[var(--ink-soft)]">
         {intro}
@@ -81,10 +81,10 @@ export function CookiesPage() {
         </Link>{" "}
         and{" "}
         <Link
-          to="/terms"
+          to="/cookies"
           className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
         >
-          terms of use
+          cookie policy
         </Link>
         .
       </p>

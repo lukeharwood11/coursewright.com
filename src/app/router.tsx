@@ -12,7 +12,6 @@ import { BulletinEditPage, BulletinPage } from "@/bulletins";
 import { MaterialEditPage, MaterialPage } from "@/materials";
 import {
   AboutPage,
-  ConstructionPage,
   ContactPage,
   CookiesPage,
   DocsHomePage,
@@ -23,6 +22,7 @@ import {
   MarketingLayout,
   PricingPage,
   PrivacyPage,
+  TermsPage,
 } from "@/marketing";
 import {
   ClaimInvitePage,
@@ -52,7 +52,7 @@ export function AppRoutes() {
         <Route path="/logos" element={<LogosPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/terms" element={<ConstructionPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route path="/cookies" element={<CookiesPage />} />
         <Route path="/docs" element={<DocsLayout />}>
           <Route index element={<DocsHomePage />} />

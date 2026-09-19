@@ -41,8 +41,8 @@ Publish the privacy policy for Course Wright.
 - [HOME](./HOME.md) — back to landing / footer
 - [ABOUT](./ABOUT.md) — about
 - [CONTACT](./CONTACT.md) — email directory; privacy uses `legal@coursewright.com`
+- [TERMS](./TERMS.md) — terms of use
 - [COOKIES](./COOKIES.md) — cookie policy (linked from privacy cookies section)
-- [CONSTRUCTION](./CONSTRUCTION.md) — Terms (still placeholder)
 
 ## Notes
 
