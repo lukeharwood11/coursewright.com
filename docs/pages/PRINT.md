@@ -33,7 +33,7 @@ One composition: **generate a PDF** of the grain, **preview that PDF** in the pa
 |-------|-------------|
 | **Material** | One material by kind — **page:** blocks in order (quizzes print on the whole page: **parents** and staff **Parent view** see questions only; **staff Teacher view** see the answer key from block data; multiple-choice choices use drawn checkbox squares, not bracket text); **link:** title + URL/QR; **file:** if the attached file is already a PDF/image, prefer previewing **that file**; otherwise a cover sheet (title, description). Video blocks → title + URL/QR, not a player frame. No quiz-block-only print in P0. |
 | **Unit** | Materials in `position` order as one packet; page breaks **between** materials. |
-| **This week** | Current Sunday–Saturday dated materials (+ important now, if any) for **active** students on parent home, grouped like [ORG_HOME](./ORG_HOME.md) (e.g. by student/course). Page breaks between materials. Optional `?students=` filters the packet. |
+| **This week** | Current Sunday–Saturday dated materials (+ important now, if any) for **active** students on parent home, grouped like [ORG_HOME](./ORG_HOME.md) **by student**. One student at a time; **page break before the next student**. Pack that student’s materials onto a page when they fit, separated by a rule; if there isn’t enough room to start the next assignment cleanly, it starts on the next page. Optional `?students=` filters the packet. |
 
 **Not on this page:** print whole course (out of scope).
 

@@ -21,7 +21,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 - Show **Coming up** (**Assigned next** + **Due next**), **this calendar week** (Sunday–Saturday), and **Important now**.
 - When the parent has more than one student, **tags** at the top toggle who is active. Deselecting a student hides their work (this week, coming up, important now). One student skips the tags.
 - “This week” materials: assignment date in range (`scheduled_date` if set, else unit date range) **and/or** `due_date` in range. Labels always say **Assigned** vs **Due**.
-- **Print this week** prints only **active** students’ week materials (and important now for their courses). Per-material **Print** stays first-class — both land on [PRINT](./PRINT.md).
+- **Print this week** prints only **active** students’ week materials (and important now for their courses), **one student at a time** with a page break before the next student. Per-material **Print** stays first-class — both land on [PRINT](./PRINT.md).
 - Parent org access requires linked student enrolled in a course with `status = active` **and** `visibility = published` (dates informational only).
 - Progress tab is P1 (dim/inactive until then). Parent summary layer (B) is **P1**, not P0.
 - Empty: no dated work, or not yet on an active enrollment — plain-language next step.

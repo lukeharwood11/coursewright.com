@@ -10,7 +10,7 @@
     "dev": "vite --mode testing",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "tsx --test src/materials/model/pageContent.test.ts src/materials/model/quiz.test.ts src/materials/model/pageEditor.test.ts src/materials/material/components/VideoNode.test.ts src/materials/material/components/QuizNode.test.ts src/auth/model/profile.test.ts src/search/model/search.test.ts src/parent/model/dashboard.test.ts src/app/layouts/model/viewMode.test.ts"
+    "test": "tsx --test src/materials/model/pageContent.test.ts src/materials/model/quiz.test.ts src/materials/model/pageEditor.test.ts src/materials/material/components/VideoNode.test.ts src/materials/material/components/QuizNode.test.ts src/auth/model/profile.test.ts src/search/model/search.test.ts src/parent/model/dashboard.test.ts src/app/layouts/model/viewMode.test.ts src/print/model/thisWeekPacket.test.ts src/print/print/components/PacketDocument.test.tsx"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
