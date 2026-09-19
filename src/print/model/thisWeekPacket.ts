@@ -1,11 +1,16 @@
 import { filterParentDashboard, type ParentDashboard } from "@/parent/model/dashboard";
+import { richTextBody } from "@/materials/model/blocks";
+import type { PrintMaterial } from "./packet";
 
 export type ThisWeekPrintRef = {
-  materialId: number;
+  source: "bulletin" | "material";
+  id: number;
   courseId: number;
   sectionKey: string;
   sectionTitle: string;
   contextLines: string[];
+  title?: string;
+  body?: string;
 };
 
 function courseTitleForStudent(
@@ -16,7 +21,26 @@ function courseTitleForStudent(
   return student.courses.find((course) => course.id === courseId)?.title ?? fallback;
 }
 
-/** One student's materials at a time: important now, then this-week by course. */
+function bulletinRefsForStudent(
+  dashboard: ParentDashboard,
+  student: ParentDashboard["students"][number],
+  sectionKey: string,
+): ThisWeekPrintRef[] {
+  return dashboard.bulletins
+    .filter((item) => item.students.some((row) => row.id === student.id))
+    .map((item) => ({
+      source: "bulletin" as const,
+      id: item.id,
+      courseId: item.courseId,
+      sectionKey,
+      sectionTitle: student.name,
+      contextLines: [item.courseTitle, "Bulletin"],
+      title: item.title,
+      body: item.body,
+    }));
+}
+
+/** One student at a time: that child's bulletins, then important now, then this-week materials. */
 export function thisWeekPrintRefs(
   dashboard: ParentDashboard,
   studentIds?: number[] | null,
@@ -31,6 +55,8 @@ export function thisWeekPrintRefs(
     const seen = new Set<number>();
     const courseIds = new Set(student.courses.map((course) => course.id));
     const sectionKey = `student-${student.id}`;
+    const bulletins = bulletinRefsForStudent(scoped, student, sectionKey);
+    refs.push(...bulletins);
 
     for (const item of scoped.importantNow) {
       if (!courseIds.has(item.courseId) || seen.has(item.materialId)) continue;
@@ -41,7 +67,8 @@ export function thisWeekPrintRefs(
         item.courseTitle,
       );
       refs.push({
-        materialId: item.materialId,
+        source: "material",
+        id: item.materialId,
         courseId: item.courseId,
         sectionKey,
         sectionTitle: student.name,
@@ -54,7 +81,8 @@ export function thisWeekPrintRefs(
         if (seen.has(material.id)) continue;
         seen.add(material.id);
         refs.push({
-          materialId: material.id,
+          source: "material",
+          id: material.id,
           courseId: course.id,
           sectionKey,
           sectionTitle: student.name,
@@ -65,4 +93,22 @@ export function thisWeekPrintRefs(
   }
 
   return refs;
+}
+
+export function printMaterialFromBulletin(ref: ThisWeekPrintRef): PrintMaterial {
+  const body = ref.body?.trim() ?? "";
+  return {
+    id: ref.id,
+    title: ref.title ?? "Bulletin",
+    description: "",
+    kind: "page",
+    url: null,
+    scheduledDate: null,
+    itemRole: "bulletin",
+    sectionKey: ref.sectionKey,
+    sectionTitle: ref.sectionTitle,
+    contextLines: ref.contextLines,
+    blocks: body ? [{ kind: "rich_text", body: richTextBody(body) }] : [],
+    file: null,
+  };
 }

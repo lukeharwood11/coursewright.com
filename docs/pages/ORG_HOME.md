@@ -19,9 +19,9 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 
 - Usability bar: understand child, course, and what’s needed immediately — no LMS jargon.
 - Show **Coming up** (**Assigned next** + **Due next**), **this calendar week** (Sunday–Saturday), **Important now**, and **available bulletins** (**From your teachers**).
-- When the parent has more than one student, **tags** at the top toggle who is active. Deselecting a student hides their work (this week, coming up, important now, bulletins). One student skips the tags.
-- “This week” materials: assignment date in range (`scheduled_date` if set, else unit date range) **and/or** `due_date` in range. Labels always say **Assigned** vs **Due**.
-- **Print this week** prints only **active** students’ week materials (and important now for their courses), **one student at a time** with a page break before the next student. Per-material **Print** stays first-class — both land on [PRINT](./PRINT.md).
+- When the parent has more than one student, **tags** at the top toggle who is active. Deselecting a student hides their work (this week, coming up, important now, bulletins). One student skips the tags. With more than one student showing, home is **grouped by student name**: that child’s bulletins, then their this-week work.
+- “This week” materials: assignment date in range (`scheduled_date` if set, else unit date range) **and/or** `due_date` in range. Labels always say **Assigned** vs **Due**. Home **shows due work by default**; assigned-not-due is under **More assigned this week**.
+- **Print this week** prints only **active** students’ **full** week (bulletin notices first, then due and assigned materials, plus important now for their courses), **one student at a time** with a page break before the next student. Per-material **Print** stays first-class — both land on [PRINT](./PRINT.md).
 - Parent org access requires linked student enrolled in a course with `status = active` **and** `visibility = published` (dates informational only).
 - Progress tab is P1 (dim/inactive until then). Parent summary layer (B) is **P1**, not P0.
 - Empty: no dated work, or not yet on an active enrollment — plain-language next step.
@@ -46,11 +46,11 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 - Org **name**
 - Week range label (Sun–Sat dates)
 - **Student tags** when more than one linked student (active / inactive)
-- **From your teachers:** available **bulletins** (title, optional note excerpt, course, date range) — today is in the bulletin’s start–end window; courses of active students
+- **From your teachers:** available **bulletins** (title, optional note excerpt, **course** title prominent, date range, material count) — today is in the bulletin’s start–end window; courses of active students. One student: section at the top. More than one student showing: the same cards sit **under that child’s name**, before their this-week materials.
 - **Important now** items: material title, description (when set), course/student context, link target (courses of active students)
 - **Coming up**: **Assigned next** and **Due next** (title, labeled date, course, student when more than one is active)
 - Per **student profile** (when more than one is active): name, grade badge TBD
-- Per student → **courses that have this week’s materials** (empty course shells omitted) → **materials** (title; **Assigned** date in slate; **Due** date in amber). One active student: same course/material list without the extra student header.
+- Per student → **courses that have this week’s materials** (empty course shells omitted) → **materials** (title; **Assigned** date in slate; **Due** date in amber). Home default is **due this week** only; **More assigned this week** reveals assigned-not-due. One active student: same course/material list without the extra student header.
 - Print affordances (not data fields)
 
 ### Instructor / owner / admin
@@ -72,16 +72,17 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Desktop: simpler collapsible sidebar (This week, their courses, Progress). Body uses remaining width — not a centered narrow column.
 - Greeting + **current calendar week** (Sunday–Saturday) + **Print this week**
 - **Student tags** (multi-student parents only) — tap to include/exclude a student
-- **From your teachers** — available bulletins first (when any). Opening a bulletin goes to [BULLETIN](./BULLETIN.md).
+- **From your teachers** — available bulletins first (when any). Course name is strong (green-deep, own line). One student: section at the top. More than one student showing: group by **student name**, with that child’s bulletins then their this-week work. Opening a bulletin goes to [BULLETIN](./BULLETIN.md).
 - **Important now** — instructor-flagged items (amber treatment), then **Coming up** — Assigned next + Due next (clear labels). On desktop, those two sit side by side when both exist.
-- **This week** — materials assigned and/or due in the week; **Assigned** vs **Due** labels. Only courses with dated work this week; two-column course cards on larger screens.
-- Per student → course → materials when more than one student is active; each material has **Print**
+- **This week** — **due** materials in the week by default; **Assigned** vs **Due** labels. **More assigned this week** expands assigned-not-due work. Only courses with visible dated work; two-column course cards on larger screens.
+- Per student → course → materials when more than one student is active (bulletins for that child first); each material has **Print**
 - Bottom tabs concept: This week | Progress (Progress **P1** — dim/inactive until then)
 - Links into material / unit / course in the same URL tree (simpler chrome)
 
 **Empty states**
 
 - No dated work this week — plain language, no LMS jargon
+- Nothing due, but assigned work exists — “Nothing due this week” plus **More assigned this week**
 - Not yet linked to an active enrollment — explain next step (invite / wait for roster)
 
 ### Instructor / owner / admin view
@@ -106,6 +107,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Toggle which students are active (when more than one)
 - Open / print a material
 - Open a bulletin from **From your teachers**
+- Expand **More assigned this week** (when assigned-not-due work exists)
 - Open assigned-next / due-next / important-now items
 
 ### Instructor / owner / admin

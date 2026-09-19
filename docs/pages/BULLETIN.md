@@ -27,7 +27,7 @@ A dated course **notice**. Teachers set when it is available and which materials
 - Title required. Optional note. **Start date** and **end date** required; end must be on or after start. New form defaults the range to this Sunday–Saturday week.
 - Pick zero or more **materials from this course** (checkboxes, top-level first then by unit). Order follows the picker’s list (course material order).
 - Saving creates or updates the bulletin and replaces the attached materials.
-- Date window **is** availability — no extra publish control. Families see it on home only while today is in range.
+- Date window **is** availability — no extra publish control. Families see it on home only while today is in range. Parent home cards emphasize the **course** title. Multi-student homes group by student (bulletins with that child’s work). **Print this week** prints each student’s bulletin content first, then their materials.
 - Cancel returns to the course (new) or the bulletin (edit).
 - Staff **Parent view** and parent-only users cannot open `/new` or `/edit` (redirect to org home).
 

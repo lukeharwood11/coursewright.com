@@ -17,7 +17,7 @@ One-tap print: material, unit, this week. **Client-generated PDF** with in-app p
 - **`@react-pdf/renderer`**: ink layout (page / link / cover / images / QR). **`pdf-lib`**: pass through or append original PDF files in a packet.
 - Preview is the generated (or attached) PDF in an iframe. **Download** saves that blob; **Print** prints that iframe.
 - Page quizzes print on the whole page: staff Teacher-view packets include the answer key; parent packets (and staff **Parent view**) are questions only. Multiple-choice choices use drawn SVG checkbox squares (Helvetica-safe), not Unicode bullets or `[ ]`/`[X]` text.
-- This-week packets print **one student at a time** (page break before the next student) and pack that student’s assignments onto a page when they fit, with a rule between them.
+This-week packets print **one student at a time** (page break before the next student). For each student, **available bulletin notices** (title + body) print first, then that student’s important-now and dated this-week materials, packed onto a page when they fit, with a rule between them.
 - If `kind = file` and the blob is already PDF, preview that file. JPEG/PNG files are placed on a generated page.
 - No `PrintJob` table — generate on the fly.
 - Entry points: parent home, course, unit, material — labels **Print** / **Print unit** / **Print this week**.

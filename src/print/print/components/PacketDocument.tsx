@@ -281,6 +281,9 @@ function MaterialBody({
   material: PrintMaterialView;
   includeAnswerKey: boolean;
 }) {
+  if (material.itemRole === "bulletin" && material.blocks.length === 0) {
+    return null;
+  }
   if (material.kind === "link") {
     return <UrlWithQr url={material.url} qrDataUrl={material.qrDataUrl} />;
   }

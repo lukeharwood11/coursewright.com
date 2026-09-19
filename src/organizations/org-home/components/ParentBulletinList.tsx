@@ -1,14 +1,19 @@
 import { Link } from "react-router-dom";
-import type { ParentBulletinItem } from "@/parent/model/dashboard";
+import {
+  bulletinForStudentsLabel,
+  type ParentBulletinItem,
+} from "@/parent/model/dashboard";
 import { bulletinPath } from "@/bulletins/model/paths";
 import { formatDateRange } from "@/courses/model/dates";
 
 export function ParentBulletinList({
   orgSlug,
   items,
+  showStudent,
 }: {
   orgSlug: string;
   items: ParentBulletinItem[];
+  showStudent: boolean;
 }) {
   if (items.length === 0) return null;
 
@@ -24,6 +29,9 @@ export function ParentBulletinList({
             item.materialCount === 1
               ? "1 material"
               : `${item.materialCount} materials`;
+          const forLabel = showStudent
+            ? bulletinForStudentsLabel(item.students)
+            : null;
           return (
             <li key={item.id}>
               <Link
@@ -38,10 +46,17 @@ export function ParentBulletinList({
                     {item.body}
                   </span>
                 ) : null}
-                <span className="mt-1.5 block text-[12.5px] text-[var(--ink-soft)]">
+                <span className="mt-1.5 block text-[14px] font-extrabold text-[var(--green-deep)]">
                   {item.courseTitle}
-                  {dates ? ` · ${dates}` : ""}
-                  {` · ${countLabel}`}
+                </span>
+                {forLabel ? (
+                  <span className="mt-0.5 block text-[13px] font-bold text-[var(--ink)]">
+                    {forLabel}
+                  </span>
+                ) : null}
+                <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
+                  {dates ? `${dates} · ` : ""}
+                  {countLabel}
                 </span>
               </Link>
             </li>
