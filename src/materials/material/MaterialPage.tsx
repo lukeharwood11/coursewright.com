@@ -280,6 +280,7 @@ function MaterialBody({
         file={page.file}
         fileUrl={page.fileUrl}
         fileDownloadUrl={page.fileDownloadUrl}
+        onRetryFileUrl={page.retryFileUrl}
       />
     );
   }

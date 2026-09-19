@@ -168,9 +168,10 @@ Signed URL TTL: **short** (e.g. 60–300s) for start-of-play; player may need re
 
 ### Audio
 
-- UI: compact player on the material / block (play, scrub, time, optional 1x/1.5x).
-- Source: signed URL → `<audio controls>` or small custom controls over the same element.
-- Offline / download: optional secondary action; **play in place is the P0 bar**.
+- UI: shared custom player on the material / in-page file (play/pause, scrub, time, **1× / 1.5×**).
+- Source: signed URL → hidden HTML5 `<audio>` driven by custom controls (not bare browser chrome).
+- Offline / download: secondary **Download** action outside the player; **play in place is the P0 bar**.
+- Same component for **file** materials and Lexical in-page file nodes so parents can listen while reading a page.
 
 ### Video
 
@@ -325,7 +326,7 @@ Beyond SCHEMA’s current fields, useful for players and search:
 1. **`File` is org-scoped**; materials/blocks **reference** it. Course→course and template→course copies share the **reference**.
 2. **Private** Supabase Storage bucket; paths `org/file/version/filename`.
 3. **Postgres** owns truth; **signed URLs** (Function) for play/download — still leaning this way.
-4. **HTML5** audio/video; prefer **MP4 H.264 + AAC** and **MP3/M4A**.
+4. **HTML5** audio/video engine; **custom** audio controls (1×/1.5×); prefer **MP4 H.264 + AAC** and **MP3/M4A**.
 5. **No transcoder** in P0; **progressive** playback counts as streaming.
 6. **Fork-on-replace** still open — biggest product footgun left in this model.
 7. Revisit HLS/media SaaS only after real size/compatibility pain.

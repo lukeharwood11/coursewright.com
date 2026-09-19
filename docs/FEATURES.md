@@ -78,7 +78,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Material visibility** | **Published / unpublished** controls who can see a material | shipped | Unpublished: amber warning + Publish. Published: green check badge by title; Unpublish at bottom of material view/edit. New materials start unpublished |
 | **Quizzes (author + print)** | Create quizzes, mark correct answers, print blank (+ instructor answer key) | shipped | **Quiz = block on a page** (Lexical `quiz` node in `body.lexical`; not a material kind). Many per page. Answers stored on the node. Whole-page print: parent/student = questions only; staff = answer key. Multiple-choice choices use drawn SVG checkbox squares (blank for students; filled check on the answer key) — not `[ ]`/`[X]` text or Unicode bullets. No roster required. Online take is **P1** |
 | **File sharing** | Upload and attach files; share with parents as part of course materials | shipped | File materials upload to Storage `org-files` with `files` / `file_versions` |
-| **Audio & video files** | Video as a **block** on a material page; uploaded audio TBD | shipped | Video **URL embed** in page blocks (upload vs URL still **TBD**). Uploaded audio/video also play when attached inside a page or as a file material |
+| **Audio & video files** | Video as a **block** on a material page; uploaded audio via **file** materials / in-page file attachments | shipped | Video **URL embed** in page blocks (upload vs URL still **TBD**). Uploaded audio uses a shared custom in-app player (play/pause, scrub, time, 1×/1.5×) on file materials and in-page files; uploaded video still uses native `<video>` |
 | **Course grade levels** | Courses carry **grade metadata** — multiple grades and/or ranges | shipped | Editor on create + course settings. Templates get the same model in **P1** |
 | **Advanced search** | Native, easy, **cross-facet** search — “where do I have this resource?” | in progress | Staff chrome overlay (no `/search` route): Postgres FTS on `search_vector` for courses + materials; staff pages by title. Findability only (RLS). Deferred: facets, files, units, people, parent search, `ts_rank`, dedicated index |
 | **Families / parent directory** | Named group of **student profiles**; parents appear via `parent_student_links`; org **parent directory** | shipped | Class-mirror members. Link parent creates/reuses student links (`admin_invites` `role=parent` if no account) and emails the Resend `organization-invite` event (HN-015). **Never enrollments.** `family_members.parent_user_id` unused in P0 app. Extra fields and merge/split still open. Copy-link claim lives on roster/profile. **SPA directory UI currently not routed** (schema + databridge remain) |
@@ -292,7 +292,7 @@ Minimum viable file sharing to replace **Microsoft / shared folders** for lesson
 | **Template copy** | When templates ship (**P1**): course materials keep the **same `file_id`** — reference only, no blob clone | See [FILE_STORAGE.md](./FILE_STORAGE.md). **P0 course-from-course copy** also shares `file_id` (no blob clone) |
 | **File versioning** | Each file replace stores a **new Storage blob** (prior blobs kept); revert restores a previous blob | Shared across all referrers unless forked |
 
-**Media vs embeds:** YouTube (and similar) **URL embeds** remain P0 rich-document blocks. **Uploaded** audio/video use Storage + native players on the material/file view.
+**Media vs embeds:** YouTube (and similar) **URL embeds** remain P0 rich-document blocks. **Uploaded** audio uses Storage + a custom in-app player on the material/file view; uploaded video uses Storage + native `<video>`.
 
 **Not in P0 minimum** (defer unless needed):
 
@@ -457,7 +457,7 @@ Course
 |------|-------|--------|
 | **page / link / file materials** | **P0 / v1** | “Add material” menu |
 | **Rich text / video blocks on pages** | **P0** | Page composition |
-| **Uploaded audio** | TBD | Not a v1 add-material kind |
+| **Uploaded audio** | **P0** | Not a v1 add-material kind — upload as **file** material or in-page file attachment; custom in-app player |
 | **Quizzes — author + print** | **P0** (product) | Block on a page — **not** in v1 add-material menu |
 | **Quizzes — take online + autograde** | **P1** | |
 | **Forms** | **in design** | |
@@ -476,7 +476,7 @@ Page materials use a **Lexical** WYSIWYG editor ([lexical.dev](https://lexical.d
 #### Still open
 
 1. **Video on a page:** URL embed vs uploaded file (or both).
-2. **Uploaded audio** as a later block/material kind?
+2. ~~**Uploaded audio** as a later block/material kind?~~ → **No** — file material or in-page file attachment only; custom in-app player.
 3. **Forms** — job to be done + who responds.
 
 ---

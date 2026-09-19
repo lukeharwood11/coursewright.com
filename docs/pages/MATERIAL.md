@@ -26,8 +26,8 @@ View (and edit) a single material placement — the thing parents open from this
 - View URL is the material path without `/edit`; edit appends `/edit`.
 - Print → [PRINT](./PRINT.md) (`…/print`) → generated PDF in-app preview → Download / Print; no export wizard.
 - Instance content promote to template is **P1** (opt-in); overridden copies do not receive template sync for that resource.
-- File replace keeps prior blobs (versioning); audio/video play in-app.
-- **file** materials always offer **Download** (signed URL with attachment disposition). PDF/image also show an inline preview with **Expand** for a larger view.
+- File replace keeps prior blobs (versioning); audio uses a shared custom in-app player (play/pause, scrub, time, 1×/1.5×); video uses native `<video>`.
+- **file** materials always offer **Download** (signed URL with attachment disposition). PDF/image also show an inline preview with **Expand** for a larger view. Audio plays inline; parents can keep reading a **page** material while an in-page audio attachment plays.
 
 ## Data shown
 
@@ -44,7 +44,7 @@ View (and edit) a single material placement — the thing parents open from this
 
 - **page:** ordered **blocks** rendered from the Lexical document (rich text, tables, links, in-page files, video embeds, **quizzes**)
 - **link:** URL (+ title)
-- **file:** attached File (name, type, inline preview when possible, **Download**, **Expand** for PDF/image)
+- **file:** attached File (name, type, inline preview when possible, **Download**, **Expand** for PDF/image, custom **audio player** when the file is audio)
 
 **Derived / chrome**
 
@@ -68,7 +68,7 @@ View (and edit) a single material placement — the thing parents open from this
 
 - **page** — Lexical editor: playground-style icon toolbar, `/` slash commands, insert popups for table size / link / video; headings, lists, quotes, tables, links, **video** URL embeds, in-page file attachments, **quizzes** (correct answers on the block; staff see the key, parents see questions only); printable block layout
 - **link** — external URL; print → title + URL/QR
-- **file** — org File; versioned blobs; preview + **Download**; PDF/image **Expand**
+- **file** — org File; versioned blobs; preview + **Download**; PDF/image **Expand**; audio → shared custom player (same as in-page file attachments)
 - Quiz author + print is a **page block** (not a separate material kind)
 - Forms — **not P0**
 
@@ -93,7 +93,7 @@ View (and edit) a single material placement — the thing parents open from this
 - Share link
 - **Download** (file materials)
 - **Expand** preview (PDF/image)
-- Play audio/video
+- Play audio (custom player) / video (native)
 - **Edit** → `…/edit` (editors)
 - Toggle important now
 - **Publish / unpublish**
