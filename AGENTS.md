@@ -66,7 +66,7 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | [src/parent/AGENTS.md](./src/parent/AGENTS.md) | Parent dashboard |
 | [src/bulletins/AGENTS.md](./src/bulletins/AGENTS.md) | Dated course notices + attached materials |
 | [src/auth/AGENTS.md](./src/auth/AGENTS.md) | Login, signup, invites, session |
-| [src/marketing/AGENTS.md](./src/marketing/AGENTS.md) | Public home, about, pricing, privacy |
+| [src/marketing/AGENTS.md](./src/marketing/AGENTS.md) | Public home, about, pricing, contact, privacy, cookies |
 | [src/billing/AGENTS.md](./src/billing/AGENTS.md) | P1 Stripe stub only |
 | [src/app/AGENTS.md](./src/app/AGENTS.md) | Router, layouts, gates |
 | [src/app/layouts/AGENTS.md](./src/app/layouts/AGENTS.md) | Collapsible org sidebar chrome |

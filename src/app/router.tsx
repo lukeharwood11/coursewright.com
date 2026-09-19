@@ -13,10 +13,13 @@ import { MaterialEditPage, MaterialPage } from "@/materials";
 import {
   AboutPage,
   ConstructionPage,
+  ContactPage,
+  CookiesPage,
   HomePage,
   LogosPage,
   MarketingLayout,
   PricingPage,
+  PrivacyPage,
 } from "@/marketing";
 import {
   ClaimInvitePage,
@@ -44,10 +47,10 @@ export function AppRoutes() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/logos" element={<LogosPage />} />
-        <Route path="/contact" element={<ConstructionPage />} />
-        <Route path="/privacy" element={<ConstructionPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<ConstructionPage />} />
-        <Route path="/cookies" element={<ConstructionPage />} />
+        <Route path="/cookies" element={<CookiesPage />} />
       </Route>
       <Route
         path="/login"

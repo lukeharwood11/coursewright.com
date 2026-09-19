@@ -46,7 +46,7 @@ P0 sales landing — brand-first entry that explains Course Wright and drives si
 - [LOGIN](./LOGIN.md) — sign in
 - [ABOUT](./ABOUT.md) — about
 - [PRICING](./PRICING.md) — pricing
-- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONSTRUCTION](./CONSTRUCTION.md) (`/contact`, `/privacy`, `/terms`, `/cookies`)
+- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [COOKIES](./COOKIES.md), [CONSTRUCTION](./CONSTRUCTION.md) (`/terms`)
 
 ## Notes
 
