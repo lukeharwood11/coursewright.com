@@ -1,6 +1,4 @@
 import type { FormEvent } from "react";
-import { Input } from "@/ui/Input";
-import { Button } from "@/ui/Button";
 import type { StaffInviteRole } from "@/organizations/model/role";
 import type { PendingStaffInvite } from "@/organizations/databridge/staffInvites";
 import type { StaffMemberRow } from "../hooks/useOrgStaff";
@@ -25,8 +23,7 @@ export function StaffSection({
   cancelingId,
   changingId,
   removingId,
-  lastInviteUrl,
-  lastInvite,
+  lastInviteSent,
   onEmailChange,
   onRoleChange,
   onInvite,
@@ -52,8 +49,7 @@ export function StaffSection({
   cancelingId: number | null;
   changingId: number | null;
   removingId: number | null;
-  lastInviteUrl: string | null;
-  lastInvite: PendingStaffInvite | null;
+  lastInviteSent: boolean;
   onEmailChange: (value: string) => void;
   onRoleChange: (value: StaffInviteRole) => void;
   onInvite: (event: FormEvent) => void;
@@ -68,7 +64,7 @@ export function StaffSection({
       <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Staff</h2>
       <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink-soft)]">
         {canManage
-          ? "Invite an owner, admin, or instructor. We’ll email them a link to join — you can also copy it. Change admin and instructor roles, or remove them from staff."
+          ? "Invite an owner, admin, or instructor. We’ll email them a link to join. Change admin and instructor roles, or remove them from staff."
           : "Owners, admins, and instructors in this organization."}
       </p>
 
@@ -105,27 +101,11 @@ export function StaffSection({
             onSubmit={onInvite}
           />
 
-          {lastInviteUrl ? (
+          {lastInviteSent ? (
             <div className="mt-4 rounded-[10px] border border-[var(--green)] bg-[var(--green-tint)] p-3">
               <p className="text-[13.5px] font-bold text-[var(--green-deep)]">
-                Invite created. We’ll email them — keep this link in case they need it.
+                Email invite sent!
               </p>
-              <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                <Input
-                  className="min-w-0 flex-1"
-                  readOnly
-                  value={lastInviteUrl}
-                  onFocus={(event) => event.currentTarget.select()}
-                />
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    if (lastInvite) onCopy(lastInvite);
-                  }}
-                >
-                  Copy link
-                </Button>
-              </div>
             </div>
           ) : null}
 

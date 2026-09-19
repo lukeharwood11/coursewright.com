@@ -2,14 +2,14 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { inviteCreatedMessage, inviteEmailResultMessage } from "./staffInvite";
 
-test("inviteCreatedMessage prefers emailed + copied when both succeed", () => {
+test("inviteCreatedMessage celebrates a sent email without a copied link", () => {
   assert.equal(
     inviteCreatedMessage({
       recipientEmail: "alex@example.com",
       emailSent: true,
       linkCopied: true,
     }),
-    "Invite emailed to alex@example.com. Link copied if they need it.",
+    "Email invite sent!",
   );
 });
 
@@ -39,6 +39,6 @@ test("inviteEmailResultMessage uses the function error when resend fails", () =>
       emailSent: true,
       emailError: null,
     }),
-    "Invite emailed to alex@example.com.",
+    "Email invite sent!",
   );
 });

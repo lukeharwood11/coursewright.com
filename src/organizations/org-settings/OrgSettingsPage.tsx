@@ -112,8 +112,7 @@ export function OrgSettingsPage() {
           cancelingId={staff.cancelingId}
           changingId={staff.changingId}
           removingId={staff.removingId}
-          lastInviteUrl={staff.lastInviteUrl}
-          lastInvite={staff.lastInvite}
+          lastInviteSent={staff.lastInviteSent}
           onEmailChange={staff.onEmailChange}
           onRoleChange={staff.onRoleChange}
           onInvite={staff.onInvite}
