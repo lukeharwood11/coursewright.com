@@ -66,7 +66,7 @@ View (and edit) a single material placement — the thing parents open from this
 
 ### Content (v1 kinds)
 
-- **page** — Lexical editor: headings, lists, quotes, tables, links, **video** URL embeds, in-page file attachments, **quizzes** (correct answers on the block; staff see the key, parents see questions only); printable block layout
+- **page** — Lexical editor: playground-style icon toolbar, `/` slash commands, insert popups for table size / link / video; headings, lists, quotes, tables, links, **video** URL embeds, in-page file attachments, **quizzes** (correct answers on the block; staff see the key, parents see questions only); printable block layout
 - **link** — external URL; print → title + URL/QR
 - **file** — org File; versioned blobs; preview + **Download**; PDF/image **Expand**
 - Quiz author + print is a **page block** (not a separate material kind)
@@ -81,7 +81,7 @@ View (and edit) a single material placement — the thing parents open from this
 
 - **Edit URL:** `…/materials/<material_id>/edit` (locked — [URLS.md](../URLS.md))
 - Placement fields + page content: **Save** / **Cancel** in the page header; Save disabled when unchanged; Cancel goes back (confirms if dirty)
-- **page:** [Lexical](https://lexical.dev/) WYSIWYG (headings, lists, quotes, tables, links, video URL embeds, in-page files, **quizzes** with marked correct answers). A version is stored only when the instructor saves and something changed — not per keystroke.
+- **page:** [Lexical](https://lexical.dev/) WYSIWYG with a playground-style **icon** toolbar (not word buttons). Headings, lists, quotes, tables, links, video URL embeds, in-page files, **quizzes** with marked correct answers. Type `/` to insert a block. Table insert asks for rows and columns. A version is stored only when the instructor saves and something changed — not per keystroke.
 - **link / file:** edit URL or replace file (file replace → new FileVersion)
 - Versioning / who changed what / revert dangerous actions
 - Soft deletes only

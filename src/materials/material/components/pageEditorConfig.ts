@@ -3,7 +3,11 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ListItemNode, ListNode } from "@lexical/list";
 import { AutoLinkNode, LinkNode, autoLinkUrlMatcher } from "@lexical/link";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
-import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
+import {
+  $createHorizontalRuleNode,
+  $isHorizontalRuleNode,
+  HorizontalRuleNode,
+} from "@lexical/react/LexicalHorizontalRuleNode";
 import {
   BOLD_STAR,
   BOLD_UNDERSCORE,
@@ -15,6 +19,7 @@ import {
   QUOTE,
   STRIKETHROUGH,
   UNORDERED_LIST,
+  type ElementTransformer,
   type Transformer,
   $generateNodesFromMarkdownString,
 } from "@lexical/markdown";
@@ -48,11 +53,29 @@ export const PAGE_EDITOR_NODES = [
   QuizNode,
 ];
 
+const HORIZONTAL_RULE: ElementTransformer = {
+  dependencies: [HorizontalRuleNode],
+  export: (node) => ($isHorizontalRuleNode(node) ? "***" : null),
+  regExp: /^(---|\*\*\*|___)\s?$/,
+  replace: (parentNode) => {
+    const line = $createHorizontalRuleNode();
+    if (parentNode.getNextSibling() != null) {
+      parentNode.replace(line);
+    } else {
+      parentNode.insertBefore(line);
+    }
+    line.selectNext();
+  },
+  type: "element",
+  triggerOnEnter: true,
+};
+
 export const PAGE_MARKDOWN_TRANSFORMERS: Transformer[] = [
   HEADING,
   QUOTE,
   UNORDERED_LIST,
   ORDERED_LIST,
+  HORIZONTAL_RULE,
   BOLD_STAR,
   BOLD_UNDERSCORE,
   ITALIC_STAR,
@@ -66,9 +89,9 @@ export const PAGE_AUTOLINK_MATCHERS = [autoLinkUrlMatcher];
 export const PAGE_EDITOR_THEME: InitialConfigType["theme"] = {
   paragraph: "cw-editor-p",
   heading: {
-    h1: "cw-editor-h",
-    h2: "cw-editor-h",
-    h3: "cw-editor-h",
+    h1: "cw-editor-h cw-editor-h1",
+    h2: "cw-editor-h cw-editor-h2",
+    h3: "cw-editor-h cw-editor-h3",
     h4: "cw-editor-h",
     h5: "cw-editor-h",
     h6: "cw-editor-h",
@@ -86,7 +109,9 @@ export const PAGE_EDITOR_THEME: InitialConfigType["theme"] = {
   table: "cw-editor-table",
   tableCell: "cw-editor-td",
   tableCellHeader: "cw-editor-th",
+  tableCellSelected: "cw-editor-td-selected",
   tableScrollableWrapper: "cw-editor-table-scroll",
+  indent: "cw-editor-indent",
   text: {
     bold: "cw-editor-bold",
     italic: "cw-editor-italic",
