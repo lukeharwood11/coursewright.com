@@ -31,3 +31,8 @@ output "acm_certificate_arn" {
   value       = module.spa_site.acm_certificate_arn
   description = "ISSUED ACM certificate ARN looked up in us-east-1 (HN-005)"
 }
+
+output "site_domain" {
+  value       = var.domain_name
+  description = "Public site hostname (coursewright.com or beta.coursewright.com)"
+}

@@ -9,8 +9,10 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [HOME](./HOME.md) | `/` |
 | [ABOUT](./ABOUT.md) | `/about` |
 | [PRICING](./PRICING.md) | `/pricing` |
-| [CONSTRUCTION](./CONSTRUCTION.md) | `/contact`, `/privacy`, `/terms`, `/cookies` |
-| [PRIVACY](./PRIVACY.md) | `/privacy` (outline for real policy text — live screen is construction until then) |
+| [CONTACT](./CONTACT.md) | `/contact` |
+| [PRIVACY](./PRIVACY.md) | `/privacy` |
+| [COOKIES](./COOKIES.md) | `/cookies` |
+| [CONSTRUCTION](./CONSTRUCTION.md) | `/terms` |
 | [LOGIN](./LOGIN.md) | `/login` |
 | [SIGNUP](./SIGNUP.md) | `/signup` |
 | [INVITE_CLAIM](./INVITE_CLAIM.md) | `/invite/<token>` |
@@ -64,7 +66,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Print (material / unit / this week) | [PRINT](./PRINT.md); entry from [MATERIAL](./MATERIAL.md), [UNIT](./UNIT.md), [ORG_HOME](./ORG_HOME.md) |
 | Resource links / share with parents | [MATERIAL](./MATERIAL.md) (entry URL TBD) |
 | Advanced search | Product chrome — [ORG_HOME](./ORG_HOME.md) + org chrome; route TBD |
-| Marketing / trust | [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [CONSTRUCTION](./CONSTRUCTION.md) (footer legal/contact until copy exists; [PRIVACY](./PRIVACY.md) outline) |
+| Marketing / trust | [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [COOKIES](./COOKIES.md), [CONSTRUCTION](./CONSTRUCTION.md) (terms until copy exists) |
 
 **Intentionally not on locked pages yet (FEATURES / URLS):**
 

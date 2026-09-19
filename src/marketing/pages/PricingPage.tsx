@@ -2,6 +2,7 @@ import { ArrowLeftIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { ButtonLink } from "@/ui/Button";
 import { IconWell } from "../components/IconWell";
+import { contactEmails, mailto } from "../model/contactEmails";
 
 export function PricingPage() {
   return (
@@ -28,14 +29,20 @@ export function PricingPage() {
             If you’ve been invited
           </h2>
           <p className="mt-2 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-            Create an account and start an organization. Billing comes later;
-            the pilot is about planning, sharing, and print.
+            Create an account and start an organization. Billing comes later.
           </p>
         </div>
       </section>
 
       <p className="mt-8 text-[14px] leading-relaxed text-[var(--ink-soft)]">
-        Curious whether it’s a fit? Start with{" "}
+        Interested in partnering for the pilot? Email{" "}
+        <a
+          href={mailto(contactEmails.hi)}
+          className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+        >
+          {contactEmails.hi}
+        </a>
+        . Curious whether it’s a fit? Start with{" "}
         <Link to="/about" className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]">
           about
         </Link>

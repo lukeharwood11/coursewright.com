@@ -1,7 +1,8 @@
-import { WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
-import { Link, useLocation } from "react-router-dom";
+import { ArrowLeftIcon, WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
+import { useLocation } from "react-router-dom";
+import { ButtonLink } from "@/ui/Button";
 import { IconWell } from "../components/IconWell";
-import { footerColumns, footerLinkForPath } from "../model/footerNav";
+import { footerLinkForPath } from "../model/footerNav";
 
 export function ConstructionPage() {
   const { pathname } = useLocation();
@@ -22,44 +23,14 @@ export function ConstructionPage() {
       </h1>
       <p className="mt-4 text-[15.5px] leading-relaxed text-[var(--ink-soft)]">
         We’re still writing this page. We won’t put placeholder legal or contact copy
-        here. Check back, or use one of the pages that already exists.
+        here. Check back later, or head home for pages that already exist.
       </p>
 
-      <h2
-        className="mt-10 text-[22px] font-semibold text-[var(--ink)]"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        Site pages
-      </h2>
-      <p className="mt-2 text-[14px] text-[var(--ink-soft)]">
-        These are the links in the site footer.
-      </p>
-
-      <div className="mt-6 grid gap-6 sm:grid-cols-3">
-        {footerColumns.map((column) => (
-          <nav key={column.heading} aria-label={column.heading}>
-            <p className="text-[12.5px] font-bold text-[var(--ink-faint)]">{column.heading}</p>
-            <ul className="mt-2 flex flex-col gap-1.5">
-              {column.links.map((item) => {
-                const isCurrent = item.to === pathname;
-                return (
-                  <li key={item.to}>
-                    {isCurrent ? (
-                      <span className="text-[13px] font-bold text-[var(--green)]">{item.label}</span>
-                    ) : (
-                      <Link
-                        to={item.to}
-                        className="text-[13px] font-bold text-[var(--ink-soft)] hover:text-[var(--green)]"
-                      >
-                        {item.label}
-                      </Link>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-        ))}
+      <div className="mt-10 flex flex-wrap gap-3">
+        <ButtonLink to="/" variant="secondary">
+          <ArrowLeftIcon className="h-5 w-5" aria-hidden />
+          Back to home
+        </ButtonLink>
       </div>
     </main>
   );
