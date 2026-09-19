@@ -13,11 +13,13 @@ export function publicHost(): string {
   return fromEnv || "coursewright.com";
 }
 
-/** Static privacy policy body for `/privacy`. Keep in sync with STACK.md practices. */
-export const privacyLastUpdated = "September 18, 2026";
+/** Static privacy policy body for `/privacy`. Keep in sync with STACK.md practices.
+ * Google OAuth branding verification requires a dedicated “Google user data” disclosure
+ * (access, use, share, protect, retain/delete) — see section `google-user-data`. */
+export const privacyLastUpdated = "September 19, 2026";
 
 export function privacyIntro(host = publicHost()): string {
-  return `This Privacy Policy explains how Course Wright (“we”, “us”) collects, uses, and shares information when you visit ${host} or use the Course Wright product. It is written for co-ops, micro-schools, instructors, and parents who trust us with school and family information.`;
+  return `This Privacy Policy explains how Course Wright (“we”, “us”) collects, uses, stores, and shares information when you visit ${host} or use the Course Wright product — including Google user data when you choose Sign in with Google. It is written for co-ops, micro-schools, instructors, and parents who trust us with school and family information.`;
 }
 
 export function privacySections(host = publicHost()): PrivacySection[] {
@@ -56,6 +58,21 @@ export function privacySections(host = publicHost()): PrivacySection[] {
       ],
     },
     {
+      id: "google-user-data",
+      title: "Google user data",
+      paragraphs: [
+        "Course Wright offers Sign in with Google so you can create or access an account without a separate password. When you choose that option, we access Google user data through Google’s OAuth consent flow (via our authentication provider, Supabase Auth). This section explains how we access, use, store, and share that Google user data.",
+      ],
+      bullets: [
+        "What Google user data we access — With your consent, we receive basic account profile information from Google that is needed to sign you in: typically your Google account email address, your name, and (when Google provides it) a profile photo URL. We do not request access to your Gmail, Google Drive, Google Calendar, Contacts, or other Google product content.",
+        "How we use Google user data — We use this Google user data only to create and authenticate your Course Wright account, display your name in the product, associate you with organization memberships and invites that match your email, and keep you signed in securely. We do not use Google user data for advertising, remarketing, credit decisions, or sale to data brokers.",
+        "How we store and protect Google user data — Google user data used for sign-in is stored with our authentication and database provider (Supabase) and delivered over encrypted connections (HTTPS). Access is limited by account authentication and organization role controls. We apply industry-standard safeguards appropriate to a hosted web application.",
+        "How we share Google user data — We do not sell Google user data. We share it only with service providers that process it on our behalf to operate Course Wright (notably Supabase for authentication and account storage, and Amazon Web Services for hosting the application), within your organization according to roles your admins set, or when required by law or to protect security. We do not transfer Google user data to independent third parties for their own marketing or advertising purposes.",
+        "Retention and deletion of Google user data — We keep Google-linked account information for as long as your Course Wright account remains active and as needed to provide the service. If you delete your account, or ask us to delete personal information associated with it, we will delete or de-identify that Google user data from our systems except where we must retain limited records for security, dispute resolution, or legal obligations. You may also revoke Course Wright’s access to your Google account in your Google Account permissions; after revocation you will need another sign-in method or to reconnect Google to use Sign in with Google again.",
+        "Limited use — Our use of Google user data complies with the Google API Services User Data Policy, including the Limited Use requirements: we use this data only to provide or improve user-facing Course Wright features that are visible in the product (sign-in and account identity), and not for serving ads.",
+      ],
+    },
+    {
       id: "analytics",
       title: "Product analytics (PostHog)",
       paragraphs: [
@@ -71,9 +88,9 @@ export function privacySections(host = publicHost()): PrivacySection[] {
         "We use trusted vendors to host and operate Course Wright. They process information only to provide services to us, under agreements that limit how they may use it.",
       ],
       bullets: [
-        "Supabase — authentication, database, file storage, and related backend services.",
+        "Supabase — authentication, database, file storage, and related backend services (including storage of Google sign-in account data described above).",
         "Amazon Web Services (AWS) — hosting and delivery of the web application.",
-        "Google — when you choose Sign in with Google (identity verification through Google’s OAuth flow).",
+        "Google — Sign in with Google / OAuth identity verification; see “Google user data” above for how we access, use, store, and share Google user data.",
         "PostHog — product analytics and client error reporting when enabled, as described above.",
       ],
     },
@@ -102,14 +119,14 @@ export function privacySections(host = publicHost()): PrivacySection[] {
       id: "retention",
       title: "Retention",
       paragraphs: [
-        "We keep account and organization data for as long as your organization uses Course Wright and as needed to provide the service. We may retain limited records longer when required for security, dispute resolution, or legal obligations. Analytics events are retained according to our PostHog project settings and operational needs.",
+        "We keep account and organization data for as long as your organization uses Course Wright and as needed to provide the service. We may retain limited records longer when required for security, dispute resolution, or legal obligations. Analytics events are retained according to our PostHog project settings and operational needs. Retention and deletion of Google user data is also described in the “Google user data” section above.",
       ],
     },
     {
       id: "security",
       title: "Security",
       paragraphs: [
-        "We use industry-standard measures appropriate to a hosted web application, including access controls and encrypted connections (HTTPS). No method of transmission or storage is completely secure; we work to protect your information and to improve our practices over time.",
+        "We use industry-standard measures appropriate to a hosted web application, including access controls and encrypted connections (HTTPS), to protect personal information and Google user data. No method of transmission or storage is completely secure; we work to protect your information and to improve our practices over time.",
       ],
     },
     {
@@ -125,7 +142,7 @@ export function privacySections(host = publicHost()): PrivacySection[] {
       title: "Your choices",
       paragraphs: [
         "Depending on where you live, you may have rights to access, correct, delete, or export personal information, or to object to certain processing. Organization admins control much of the content stored for their co-op or school.",
-        `To update account details, use account settings while signed in. For organization-held roster or course data, start with your organization’s administrator. For other privacy requests, email ${contactEmails.legal}.`,
+        `To update account details, use account settings while signed in. For organization-held roster or course data, start with your organization’s administrator. To revoke Google access, use your Google Account permissions or contact us. For other privacy requests, email ${contactEmails.legal}.`,
       ],
     },
     {
@@ -139,14 +156,14 @@ export function privacySections(host = publicHost()): PrivacySection[] {
       id: "changes",
       title: "Changes to this policy",
       paragraphs: [
-        "We may update this Privacy Policy from time to time. When we do, we will change the “Last updated” date at the top of this page. Continued use of Course Wright after an update means you accept the revised policy.",
+        "We may update this Privacy Policy from time to time. When we do, we will change the “Last updated” date at the top of this page. Continued use of Course Wright after an update means you accept the revised policy. We keep this policy up to date regarding how Course Wright uses Google user data.",
       ],
     },
     {
       id: "contact",
       title: "Contact",
       paragraphs: [
-        `Questions about this Privacy Policy or our privacy practices: ${contactEmails.legal}. If your question is about data your organization stores in Course Wright, your organization administrator is usually the fastest place to start.`,
+        `Questions about this Privacy Policy, our privacy practices, or Google user data: ${contactEmails.legal}. If your question is about data your organization stores in Course Wright, your organization administrator is usually the fastest place to start.`,
       ],
     },
   ];
