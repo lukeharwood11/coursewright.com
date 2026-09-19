@@ -4,7 +4,7 @@ Accept a staff or parent invite from `/invite/<token>`.
 
 ## Scope
 
-- Claim page UI + hook
+- Claim page UI + hook. Unsigned visitors see the invited email and **Create account** / **Sign in**
 - Same email as the invite; sending mail is `send-organization-invite`, not this screen
 - Role is payload (`parent` vs owner/admin/instructor)
 

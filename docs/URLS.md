@@ -41,7 +41,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 |------|-----|-------|
 | [LOGIN](./pages/LOGIN.md) | `/login` | Email + password, magic link, Google |
 | [SIGNUP](./pages/SIGNUP.md) | `/signup` | Email + password or Google; signs the person in on success |
-| [INVITE_CLAIM](./pages/INVITE_CLAIM.md) | `/invite/<token>` | Parent or staff invite (`parent` / owner / admin / instructor). Sign in first, then accept. Email sent via Resend; copy-link remains |
+| [INVITE_CLAIM](./pages/INVITE_CLAIM.md) | `/invite/<token>` | Parent or staff invite (`parent` / owner / admin / instructor). Loads unsigned; create account or sign in with the invited email, then accept. Email sent via Resend; copy-link remains |
 | Auth callback | <!-- TBD — may be Supabase-hosted --> | |
 
 ---

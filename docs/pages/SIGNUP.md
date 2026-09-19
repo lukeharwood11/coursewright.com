@@ -19,12 +19,13 @@ Create an account with **email + password** or **Google**. On success, the perso
 - If that email already has an account, tell them to sign in — do not send them to login automatically after a successful create.
 - On success: [INVITE_CLAIM](./INVITE_CLAIM.md) when `next=/invite/<token>`, else `/my` to pick/create org (`RedirectIfAuthed`; pending staff requests also show there).
 - Anyone may create an org after signup (creator = first owner) via org picker.
+- When arriving from an invite (`next` + `email=`), name and **prefill** the invited address. Google copy warns to pick that same account.
 
 ## Data shown
 
 - Wordmark and create-account copy
 - Auth controls (Google, email, password) — no org list until after success
-- Invite-aware messaging when claiming an invite (`next=/invite/<token>`) — use the invited email
+- Invite-aware messaging when claiming an invite (`next=/invite/<token>`) — invited address named and prefilled
 - Validation / error messages (TBD)
 
 ## Contents
@@ -33,7 +34,7 @@ Create an account with **email + password** or **Google**. On success, the perso
 - Google sign-up
 - Email + password sign-up
 - Link to [LOGIN](./LOGIN.md)
-- Invite-aware copy when arriving from invite (claim seat / parent access with same email)
+- Invite-aware copy when arriving from invite (claim seat / parent access with the invited email prefilled)
 - Anyone can create an org after signup (creator = first owner) via [ORG_PICKER](./ORG_PICKER.md)
 
 ## Primary actions

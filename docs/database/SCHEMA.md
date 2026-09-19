@@ -339,7 +339,7 @@ Org staff and parent memberships. Owners and admins may **change** `admin` ↔ `
 
 ### AdminInvite
 
-Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` (staff) or `parent`. **v0:** copy a claim link; Course Wright does **not** send email. Claimed by opening `/invite/<token>` or by signing in with that email and accepting a pending request. **Membership is created on claim.** Parent course access still requires enrollment (see Parent access gate).
+Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` (staff) or `parent`. Claimed by opening `/invite/<token>` or by signing in with that email and accepting a pending request. **Anyone with the token can preview** org name, role, and invited email via `get_invite` (unsigned `email_matches` is false). **Claim still requires** a signed-in account on that email. **Membership is created on claim.** Parent course access still requires enrollment (see Parent access gate).
 
 | Field | Type | Notes |
 |-------|------|-------|

@@ -55,6 +55,22 @@ Optional companion secret **`SITE_URL`** (used when the browser `Origin` header 
 
 **Done when:** inviting a person to an organization (staff or parent) delivers the Resend email with a working `/invite/<token>` link, without putting the API key in the frontend env.
 
+### HN-016 — Apply `anon_get_invite` migration on the testing database
+
+| | |
+|--|--|
+| **Why** | Invite links must load `/invite/<token>` while signed out so parents see the invited address and signup/login can prefill it. That needs `get_invite` granted to `anon`. Until this migration is applied, unsigned visitors get “not authenticated” and the claim page cannot name the address. |
+| **Where** | Supabase CLI / Dashboard; testing project used by `.env.testing` (`yplmaauelutcosqqvnya`) |
+| **Placeholder** | `supabase/migrations/20260919200000_anon_get_invite.sql` (`HN-016`) |
+
+**Steps:**
+
+1. From a machine with `SUPABASE_ACCESS_TOKEN` (HN-012) and the project linked, run `supabase db push` (or `scripts/nuke.sh` in experiment mode if a full reset is acceptable).
+2. Confirm `anon` can execute `get_invite` (`information_schema.routine_privileges`) and that `claim_invite` is still authenticated-only.
+3. Repeat for production when that project is in use (HN-007).
+
+**Done when:** opening `/invite/<token>` while signed out shows the invited email (and Create account / Sign in), without requiring a session first.
+
 ### HN-014 — Apply `bulletins` migration on the testing database
 
 | | |

@@ -65,8 +65,8 @@ export function AppRoutes() {
           </RedirectIfAuthed>
         }
       />
+      <Route path="/invite/:token" element={<ClaimInvitePage />} />
       <Route element={<RequireAuth />}>
-        <Route path="/invite/:token" element={<ClaimInvitePage />} />
         <Route element={<AccountLayout />}>
           <Route path="/my" element={<OrgPickerPage />} />
           <Route path="/my/settings" element={<AccountSettingsPage />} />
