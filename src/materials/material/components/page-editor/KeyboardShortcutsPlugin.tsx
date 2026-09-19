@@ -23,12 +23,10 @@ export function KeyboardShortcutsPlugin() {
         const key = event.key.toLowerCase();
         if (key === "k") {
           event.preventDefault();
+          let initialUrl = "";
           editor.getEditorState().read(() => {
             const selection = $getSelection();
-            if (!$isRangeSelection(selection)) {
-              actions.openLinkDialog();
-              return;
-            }
+            if (!$isRangeSelection(selection)) return;
             const anchor = selection.anchor.getNode();
             const parent = anchor.getParent();
             const linkNode = $isLinkNode(anchor)
@@ -36,13 +34,16 @@ export function KeyboardShortcutsPlugin() {
               : $isLinkNode(parent)
                 ? parent
                 : null;
-            actions.openLinkDialog(linkNode?.getURL() ?? "");
+            initialUrl = linkNode?.getURL() ?? "";
           });
+          actions.openLinkDialog(initialUrl);
           return true;
         }
         if (event.shiftKey && key === "s") {
           event.preventDefault();
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
+          queueMicrotask(() => {
+            editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
+          });
           return true;
         }
         return false;

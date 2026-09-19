@@ -113,7 +113,9 @@ export function SlashCommandPlugin() {
         nodeToRemove?.remove();
       });
       closeMenu();
-      option.onSelect();
+      queueMicrotask(() => {
+        option.onSelect();
+      });
     },
     [editor],
   );
