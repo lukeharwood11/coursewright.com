@@ -17,6 +17,7 @@ export function MaterialRow({
   description,
   kind,
   scheduledDate,
+  dueDate,
   importantNow,
   visibility,
 }: {
@@ -28,6 +29,7 @@ export function MaterialRow({
   description: string;
   kind: MaterialKind;
   scheduledDate: string | null;
+  dueDate?: string | null;
   importantNow: boolean;
   visibility: MaterialVisibility;
 }) {
@@ -55,8 +57,13 @@ export function MaterialRow({
             <Badge variant="amber">Unpublished</Badge>
           ) : null}
           {scheduledDate ? (
+            <span className="text-[12px] font-bold text-[var(--slate)]">
+              Assigned {formatIsoDate(scheduledDate)}
+            </span>
+          ) : null}
+          {dueDate ? (
             <span className="text-[12px] font-bold text-[var(--amber-deep)]">
-              {formatIsoDate(scheduledDate)}
+              Due {formatIsoDate(dueDate)}
             </span>
           ) : null}
         </span>

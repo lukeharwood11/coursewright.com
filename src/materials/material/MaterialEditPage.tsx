@@ -7,7 +7,11 @@ import { useQuery } from "@tanstack/react-query";
 import { replaceFile, revertFileToVersion, listFileVersions } from "@/materials/databridge/files";
 import { materialPath } from "@/materials/model/paths";
 import { useMaterialEdit } from "./hooks/useMaterialEdit";
-import { VisibilityBanner } from "./components/VisibilityBanner";
+import {
+  UnpublishControl,
+  VisibilityBanner,
+} from "./components/VisibilityBanner";
+import { OptionalDueDateField } from "./components/OptionalDueDateField";
 import { PageEditorMediaProvider } from "./components/PageEditorMediaContext";
 import { fileQueryKeys } from "@/materials/databridge/files";
 
@@ -103,7 +107,6 @@ export function MaterialEditPage() {
           canEdit={page.canEdit}
           pending={page.setVisibility.isPending}
           onPublish={() => page.setVisibility.mutate("published")}
-          onUnpublish={() => page.setVisibility.mutate("unpublished")}
         />
       ) : null}
 
@@ -148,7 +151,7 @@ export function MaterialEditPage() {
           ) : null}
           <label className="mt-3 flex flex-col gap-1">
             <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-              Date (optional)
+              Assignment date (optional)
             </span>
             <Input
               className="w-full"
@@ -160,6 +163,10 @@ export function MaterialEditPage() {
               If you set a date, this shows up on parents’ This week page that week.
             </span>
           </label>
+          <OptionalDueDateField
+            value={edit.dueDate}
+            onChange={edit.setDueDate}
+          />
         </div>
 
         {page.material.kind === "page" ? (
@@ -238,6 +245,15 @@ export function MaterialEditPage() {
           ))}
         </ul>
       </section>
+
+      {!page.material.deletedAt ? (
+        <UnpublishControl
+          visibility={page.material.visibility}
+          canEdit={page.canEdit}
+          pending={page.setVisibility.isPending}
+          onUnpublish={() => page.setVisibility.mutate("unpublished")}
+        />
+      ) : null}
     </div>
   );
 }

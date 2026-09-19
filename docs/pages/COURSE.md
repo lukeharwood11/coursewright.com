@@ -19,7 +19,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Optional **outline** panel (file-tree of top-level materials + units with nested materials); open by default on large screens (`lg`+), closed on smaller screens; **Show outline** / hide so it is not always open.
 - Add unit / add material (top-level or into a unit) when permitted.
 - Print and share controls stay visible (not in overflow-only menus).
-- Instructors can **publish / unpublish** the course (distinct from archive).
+- Instructors can **publish / unpublish** the course (distinct from archive). Unpublished courses show an amber warning + Publish on this page. Published courses show a green **Published** badge by the title; **Unpublish** lives in [COURSE_SETTINGS](./COURSE_SETTINGS.md).
 - Soft-delete / versioning entry points for dangerous actions (UX TBD).
 - **P0:** no template linkage UI. Optional “created from course …” origin is informational only (no sync).
 - **P1:** template-linked courses show linkage; promote / sync / override cues.
@@ -36,9 +36,9 @@ Course builder home — structure units/materials for this offering; jump to ros
 
 ## Contents
 
-- Course title; badges for status, unpublished, dates, subject / area, grade metadata ([STYLE_GUIDE.md](../STYLE_GUIDE.md) instructor course pattern)
+- Course title; badges for status, published (green check) / unpublished, dates, subject / area, grade metadata ([STYLE_GUIDE.md](../STYLE_GUIDE.md) instructor course pattern)
 - Optional description and location under the title
-- Publish / unpublish banner (instructors)
+- Unpublished warning + Publish (instructors); published courses have no visibility banner here
 - Collapsible **outline** (left on large screens): tree of top-level materials and units → materials; links open [UNIT](./UNIT.md) / [MATERIAL](./MATERIAL.md)
 - Top-level materials list (above units) with **title**, **description**, kind, **Print**; add material here or into a unit
 - Units list (ordered) → [UNIT](./UNIT.md); add unit

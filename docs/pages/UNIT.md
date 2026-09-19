@@ -27,7 +27,7 @@ One **unit** — optional ordered group of materials; optional dates. Materials 
 
 - Unit **title**, **order**
 - Optional unit **start/end dates** (or range)
-- Materials: **title**, **description**, kind/badge, optional **scheduled_date**, unpublished badge (instructors), important-now badge, print affordance
+- Materials: **title**, **description**, kind/badge, optional assignment/due dates, unpublished badge (instructors), important-now badge, print affordance
 - Parent course name for orientation (**P1:** or template name)
 
 ## Contents

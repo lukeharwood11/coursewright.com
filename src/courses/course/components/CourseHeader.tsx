@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { Button, ButtonLink } from "@/ui/Button";
+import { PublishedBadge } from "@/ui/PublishedBadge";
 import { formatDateRange } from "@/courses/model/dates";
 import { courseRosterPath, courseSettingsPath, coursesPath, newCourseFromPath } from "@/courses/model/paths";
 import { courseStatusLabel, type CourseStatus } from "@/courses/model/status";
@@ -60,9 +61,11 @@ export function CourseHeader({
           <Badge variant={status === "active" ? "green" : "neutral"}>
             {courseStatusLabel(status)}
           </Badge>
-          {!isCoursePublished(visibility) ? (
+          {isCoursePublished(visibility) ? (
+            canEdit ? <PublishedBadge /> : null
+          ) : (
             <Badge variant="amber">Unpublished</Badge>
-          ) : null}
+          )}
           {dates ? <Badge variant="neutral">{dates}</Badge> : null}
           {subject ? <Badge variant="slate">{subject}</Badge> : null}
           {gradeLevels.map((level) => (

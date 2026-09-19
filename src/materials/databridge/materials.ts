@@ -19,6 +19,7 @@ export type MaterialRecord = {
   url: string | null;
   fileId: number | null;
   scheduledDate: string | null;
+  dueDate: string | null;
   position: number;
   currentVersion: number;
   visibility: MaterialVisibility;
@@ -34,7 +35,7 @@ export const materialQueryKeys = {
 };
 
 const MATERIAL_COLUMNS =
-  "id, organization_id, course_id, unit_id, title, description, kind, url, file_id, scheduled_date, position, current_version, visibility, deleted_at";
+  "id, organization_id, course_id, unit_id, title, description, kind, url, file_id, scheduled_date, due_date, position, current_version, visibility, deleted_at";
 
 type MaterialRow = {
   id: number;
@@ -47,6 +48,7 @@ type MaterialRow = {
   url: string | null;
   file_id: number | null;
   scheduled_date: string | null;
+  due_date: string | null;
   position: number;
   current_version: number;
   visibility: string;
@@ -67,6 +69,7 @@ function toMaterial(row: MaterialRow): MaterialRecord | null {
     url: row.url,
     fileId: row.file_id,
     scheduledDate: row.scheduled_date,
+    dueDate: row.due_date,
     position: row.position,
     currentVersion: row.current_version,
     visibility: parseMaterialVisibility(row.visibility),
@@ -147,6 +150,7 @@ export async function createMaterial(args: {
       url: args.input.url,
       file_id: args.fileId ?? null,
       scheduled_date: args.input.scheduledDate,
+      due_date: args.input.dueDate,
       position: nextPosition(siblings.map((row) => row.position)),
     })
     .select(MATERIAL_COLUMNS)
@@ -166,6 +170,7 @@ export async function updateMaterial(
     url?: string | null;
     fileId?: number | null;
     scheduledDate?: string | null;
+    dueDate?: string | null;
     position?: number;
     visibility?: MaterialVisibility;
     deletedAt?: string | null;
@@ -181,6 +186,7 @@ export async function updateMaterial(
       url: patch.url,
       file_id: patch.fileId,
       scheduled_date: patch.scheduledDate,
+      due_date: patch.dueDate,
       position: patch.position,
       visibility: patch.visibility,
       deleted_at: patch.deletedAt,
@@ -278,6 +284,7 @@ export async function revertMaterialToVersion(
       file_id: typeof material.file_id === "number" ? material.file_id : null,
       scheduled_date:
         typeof material.scheduled_date === "string" ? material.scheduled_date : null,
+      due_date: typeof material.due_date === "string" ? material.due_date : null,
       deleted_at: null,
       deleted_by: null,
     })

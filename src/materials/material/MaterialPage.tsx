@@ -4,6 +4,7 @@ import { PrinterIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import { Badge } from "@/ui/Badge";
 import { Button, ButtonLink } from "@/ui/Button";
+import { PublishedBadge } from "@/ui/PublishedBadge";
 import { formatIsoDate } from "@/courses/model/dates";
 import { coursePath } from "@/courses/model/paths";
 import { materialKindLabel } from "@/materials/model/kind";
@@ -15,7 +16,10 @@ import { createResourceShareLink } from "@/sharing/databridge/shareLinks";
 import { unitPath } from "@/units/model/paths";
 import { useMaterial } from "./hooks/useMaterial";
 import { FileMaterialBody } from "./components/FileMaterialBody";
-import { VisibilityBanner } from "./components/VisibilityBanner";
+import {
+  UnpublishControl,
+  VisibilityBanner,
+} from "./components/VisibilityBanner";
 
 const PageContentView = lazy(async () => {
   const module = await import("./components/PageContentView");
@@ -93,12 +97,19 @@ export function MaterialPage() {
             {page.importantNow ? (
               <Badge variant="amberSolid">Important now</Badge>
             ) : null}
-            {!isPublished(page.material.visibility) ? (
+            {isPublished(page.material.visibility) ? (
+              page.canEdit ? <PublishedBadge /> : null
+            ) : (
               <Badge variant="amber">Unpublished</Badge>
-            ) : null}
+            )}
             {page.material.scheduledDate ? (
+              <span className="text-[12px] font-bold text-[var(--slate)]">
+                Assigned {formatIsoDate(page.material.scheduledDate)}
+              </span>
+            ) : null}
+            {page.material.dueDate ? (
               <span className="text-[12px] font-bold text-[var(--amber-deep)]">
-                {formatIsoDate(page.material.scheduledDate)}
+                Due {formatIsoDate(page.material.dueDate)}
               </span>
             ) : null}
           </div>
@@ -166,7 +177,6 @@ export function MaterialPage() {
           canEdit={page.canEdit}
           pending={page.setVisibility.isPending}
           onPublish={() => page.setVisibility.mutate("published")}
-          onUnpublish={() => page.setVisibility.mutate("unpublished")}
         />
       ) : null}
 
@@ -220,6 +230,15 @@ export function MaterialPage() {
             </Button>
           ) : null}
         </div>
+      ) : null}
+
+      {!page.material.deletedAt ? (
+        <UnpublishControl
+          visibility={page.material.visibility}
+          canEdit={page.canEdit}
+          pending={page.setVisibility.isPending}
+          onUnpublish={() => page.setVisibility.mutate("unpublished")}
+        />
       ) : null}
 
       {page.error ? (

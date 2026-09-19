@@ -131,7 +131,7 @@ Deno.serve(async (request) => {
     const { data: materials, error: materialsError } = await db
       .from("materials")
       .select(
-        "id, unit_id, title, description, kind, url, file_id, scheduled_date, position, visibility",
+        "id, unit_id, title, description, kind, url, file_id, scheduled_date, due_date, position, visibility",
       )
       .eq("course_id", source.id)
       .is("deleted_at", null)
@@ -155,6 +155,7 @@ Deno.serve(async (request) => {
           url: material.url,
           file_id: material.file_id,
           scheduled_date: material.scheduled_date,
+          due_date: material.due_date,
           position: material.position,
           visibility: material.visibility,
           copied_from_id: material.id,

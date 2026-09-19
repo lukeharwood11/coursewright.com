@@ -12,6 +12,7 @@ export function useMaterialEdit() {
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
   const [scheduledDate, setScheduledDate] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [contentBaseline, setContentBaseline] = useState<string | null>(null);
@@ -31,6 +32,7 @@ export function useMaterialEdit() {
     setDescription(page.material.description);
     setUrl(page.material.url ?? "");
     setScheduledDate(page.material.scheduledDate ?? "");
+    setDueDate(page.material.dueDate ?? "");
   }, [page.material]);
 
   const placementChanged = Boolean(
@@ -38,7 +40,8 @@ export function useMaterialEdit() {
       (title !== page.material.title ||
         description !== page.material.description ||
         (page.material.kind === "link" && url !== (page.material.url ?? "")) ||
-        scheduledDate !== (page.material.scheduledDate ?? "")),
+        scheduledDate !== (page.material.scheduledDate ?? "") ||
+        dueDate !== (page.material.dueDate ?? "")),
   );
 
   const contentChanged =
@@ -77,6 +80,7 @@ export function useMaterialEdit() {
               description,
               url: page.material.kind === "link" ? url.trim() : page.material.url,
               scheduledDate: scheduledDate || null,
+              dueDate: dueDate || null,
             }
           : undefined,
         blocks,
@@ -104,10 +108,12 @@ export function useMaterialEdit() {
     description,
     url,
     scheduledDate,
+    dueDate,
     setTitle,
     setDescription,
     setUrl,
     setScheduledDate,
+    setDueDate,
     saving,
     error,
     hasChanges: placementChanged || contentChanged,

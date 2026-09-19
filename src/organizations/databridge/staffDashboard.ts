@@ -59,7 +59,7 @@ async function loadWeekMaterials(
   const { data, error } = await db
     .from("materials")
     .select(
-      "id, title, scheduled_date, course_id, status, deleted_at, unit:units(id, start_date, end_date)",
+      "id, title, scheduled_date, due_date, course_id, status, deleted_at, unit:units(id, start_date, end_date)",
     )
     .in("course_id", courseIds)
     .is("deleted_at", null)
@@ -75,6 +75,7 @@ async function loadWeekMaterials(
         id: row.id,
         title: row.title,
         scheduledDate: row.scheduled_date,
+        dueDate: row.due_date,
         courseId: row.course_id,
         unitId: unit?.id ?? null,
         unitStart: unit?.start_date ?? null,

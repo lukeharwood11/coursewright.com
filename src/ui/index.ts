@@ -1,5 +1,6 @@
 export { Avatar } from "./Avatar";
 export { Badge } from "./Badge";
+export { PublishedBadge } from "./PublishedBadge";
 export { Button, ButtonLink } from "./Button";
 export { ConfirmDialog } from "./ConfirmDialog";
 export { Input } from "./Input";

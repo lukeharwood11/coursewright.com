@@ -515,7 +515,7 @@ Optional content grouping on a **course** (P0) or a **template** (P1). Materials
 | deleted_at | timestamptz | soft delete |
 | deprecated_at | timestamptz | nullable |
 
-**Dating:** unit dates and per-material `scheduled_date` are **both optional**. For parent "this week": material `scheduled_date` wins when set; otherwise the unit range applies **if the material has a unit**. Top-level materials need `scheduled_date` to appear in "this week."
+**Dating:** unit dates, per-material `scheduled_date` (assignment), and per-material `due_date` are **all optional**. For parent "this week": material appears when **assignment** falls in the week (`scheduled_date` when set; otherwise the unit range if the material has a unit) **and/or** when `due_date` falls in the week. Top-level materials need `scheduled_date` to count as assigned for the week. UI always labels **Assigned** vs **Due**.
 
 ### Material
 
@@ -533,7 +533,8 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 | kind | text | **v1:** `page` · `link` · `file` |
 | url | text | nullable — required when `kind = link` |
 | file_id | bigint | FK → **File**, nullable — required when `kind = file` |
-| scheduled_date | date | **optional** — when set, used for calendar-week dashboard (wins over unit dates) |
+| scheduled_date | date | **optional** — assignment date; when set, used for calendar-week dashboard (wins over unit dates) |
+| due_date | date | **optional** — due date; materials also appear on parent This week when this date falls in the week |
 | visibility | text | **`unpublished`** (instructors/admins) · **`published`** (enrolled parents; students when that role exists). New materials default unpublished |
 | position | int | order within the unit, or among top-level materials when `unit_id` is null |
 | copied_from_id | bigint | FK → Material, nullable — source Material when copied (course-from-course **P0**, or template→course **P1**) |
@@ -605,8 +606,9 @@ Parent-facing URL. **P0: must be logged in** before the destination is shown.
 
 - **ImportantNow** table `important_now`: `id`, `organization_id`, `course_id`, `material_id`, `created_by`, `created_at`. Unique `(course_id, material_id)`. Instructor flags on the parent dashboard.
 - **WeeklyContent:** not stored — materials whose **effective** dates fall in the current week, **Sunday–Saturday**.
-  - Effective date = `Material.scheduled_date` when set; otherwise the parent unit’s `start_date`/`end_date` range when the material has a unit and that range is set.
-  - Top-level materials (`unit_id` null) without `scheduled_date`, and undated materials in undated units, do not appear in "this week."
+  - Effective assignment date = `Material.scheduled_date` when set; otherwise the parent unit’s `start_date`/`end_date` range when the material has a unit and that range is set.
+  - A material appears on This week when its assignment date falls in the week **and/or** its `due_date` falls in the week.
+  - Top-level materials (`unit_id` null) without `scheduled_date` are not “assigned” for the week unless they have a `due_date` in range.
 
 ---
 

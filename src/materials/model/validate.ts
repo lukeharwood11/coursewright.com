@@ -4,6 +4,7 @@ export type CreateMaterialInput = {
   kind: "page" | "link" | "file";
   url: string | null;
   scheduledDate: string | null;
+  dueDate: string | null;
 };
 
 export type CreateMaterialParse =
@@ -16,6 +17,7 @@ export function validateMaterialFields(raw: {
   kind: "page" | "link" | "file";
   url: string;
   scheduledDate: string;
+  dueDate: string;
 }): CreateMaterialParse {
   const title = raw.title.trim();
   if (!title) return { ok: false, error: "Give this material a title." };
@@ -41,6 +43,7 @@ export function validateMaterialFields(raw: {
       kind: raw.kind,
       url: raw.kind === "link" ? url : null,
       scheduledDate: raw.scheduledDate.trim() || null,
+      dueDate: raw.dueDate.trim() || null,
     },
   };
 }

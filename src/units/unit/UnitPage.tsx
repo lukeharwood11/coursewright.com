@@ -237,6 +237,7 @@ export function UnitPage() {
                     description={material.description}
                     kind={material.kind}
                     scheduledDate={material.scheduledDate}
+                    dueDate={material.dueDate}
                     importantNow={page.importantIds.has(material.id)}
                     visibility={material.visibility}
                   />

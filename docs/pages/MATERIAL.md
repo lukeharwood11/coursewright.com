@@ -20,6 +20,8 @@ View (and edit) a single material placement — the thing parents open from this
 
 - Load one material placement; RLS/role determines edit vs read.
 - Instructors: edit via `…/edit`, set important now, **publish / unpublish**, share resource link, print, version/revert, soft-delete.
+- **Published:** green **Published** badge (check) next to the title for staff; no “families can see this” banner. **Unpublish** sits at the bottom of the material view/edit.
+- **Unpublished:** amber warning banner + Publish; unpublished badge next to title.
 - Parents: read + print + play media for **published** materials; unpublished is not listed and not openable (RLS); no builder chrome; account required (P0).
 - View URL is the material path without `/edit`; edit appends `/edit`.
 - Print → [PRINT](./PRINT.md) (`…/print`) → generated PDF in-app preview → Download / Print; no export wizard.
@@ -33,7 +35,8 @@ View (and edit) a single material placement — the thing parents open from this
 
 - **Title** (all kinds)
 - **Description** (all kinds)
-- Optional **scheduled_date**
+- Optional **scheduled_date** (assignment date)
+- Optional **due_date**
 - **Important now** flag
 - Course + unit context (names) for orientation (**P1:** or template)
 
@@ -56,8 +59,9 @@ View (and edit) a single material placement — the thing parents open from this
 - **Description** — every material (field always present; may be empty)
 - Course context; optional **unit** name when nested (omit when top-level)
 - Kind badge: page / link / file
-- **Visibility** — unpublished badge for instructors; parents never see unpublished
-- Optional `scheduled_date` (wins over unit dates for “this week”; required for top-level materials to appear in “this week”)
+- **Visibility** — unpublished: amber badge + warning banner; published: green Published badge (staff). Unpublish at bottom of page/edit
+- Optional `scheduled_date` (assignment date; wins over unit dates for “this week”; required for top-level materials to appear in “this week”)
+- Optional `due_date` (Add due date on add/edit; display only — does not drive This week)
 - Important now flag (instructor)
 
 ### Content (v1 kinds)
