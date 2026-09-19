@@ -48,7 +48,7 @@ export function PendingInviteList({
               disabled={sendingId === invite.id}
               onClick={() => onSendEmail(invite)}
             >
-              {sendingId === invite.id ? "Sending…" : "Send email"}
+              {sendingId === invite.id ? "Sending…" : "Resend email"}
             </Button>
             <Button
               variant="secondary"

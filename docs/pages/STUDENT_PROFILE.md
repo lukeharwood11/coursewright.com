@@ -52,7 +52,7 @@ View/edit one org-level **student profile** (not a dedicated student account in 
 ## Primary actions
 
 - Edit profile fields
-- Create parent (or student-email) invite (email + copy the claim link); cancel a pending invite; add another parent
+- Create parent (or student-email) invite (email + copy the claim link); **Resend email** or cancel a pending invite; add another parent
 - Open class / course enrollments
 
 ## Links to

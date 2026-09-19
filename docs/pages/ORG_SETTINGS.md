@@ -29,7 +29,7 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 - Current **grade scheme** and labels (K–12 preset or custom)
 - Staff list: person **name** / **email**, **role** (owner | admin | instructor); owners and admins see change-role and remove actions for admins/instructors
 - Last owner/admin rows explain why they can’t be removed or demoted
-- Pending staff invites: **email**, **role**, copyable `/invite/<token>` link, send email, cancel
+- Pending staff invites: **email**, **role**, copyable `/invite/<token>` link, **Resend email**, cancel
 - Billing status — P1, owner only
 
 ## Contents
@@ -50,7 +50,7 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 
 - List owners, admins, and instructors
 - Invite owners / admins / instructors by email; Course Wright emails the claim link and you can copy it again
-- Pending invites: copy link again, resend email, or cancel
+- Pending invites: copy link again, **Resend email**, or cancel
 - Change **admin ↔ instructor** for existing staff (owners and admins; owner seats stay invite-only). Membership role only — not a materials/roster access gate
 - Remove admins/instructors (membership only)
 - Guard: cannot remove or demote the **last remaining owner or admin**
