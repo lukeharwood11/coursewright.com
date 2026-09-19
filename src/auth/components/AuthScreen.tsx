@@ -22,6 +22,10 @@ export function AuthScreen({
   passwordSignIn = false,
   passwordSignUp = false,
   magicLinkLabel = "Email me a sign-in link",
+  initialEmail = "",
+  invitedEmail = null,
+  inviteCalloutAction = null,
+  googleHint = null,
 }: {
   heading: string;
   subcopy: string;
@@ -33,10 +37,14 @@ export function AuthScreen({
   /** Signup: email + password creates an account and signs the person in. */
   passwordSignUp?: boolean;
   magicLinkLabel?: string;
+  initialEmail?: string;
+  invitedEmail?: string | null;
+  inviteCalloutAction?: string | null;
+  googleHint?: string | null;
 }) {
   const location = useLocation();
   const nextPath = safeNextPath(new URLSearchParams(location.search).get("next"));
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -107,6 +115,14 @@ export function AuthScreen({
         </h1>
         <p className="mb-5 text-center text-[13.5px] text-[var(--ink-soft)]">{subcopy}</p>
 
+        {invitedEmail ? (
+          <p className="mb-4 rounded-[6px] bg-[var(--green-tint)] px-3 py-2 text-center text-[13px] leading-relaxed text-[var(--green-deep)]">
+            This invite is for{" "}
+            <span className="font-bold">{invitedEmail}</span>.{" "}
+            {inviteCalloutAction}
+          </p>
+        ) : null}
+
         {!isSupabaseConfigured && (
           <p className="mb-4 flex gap-2 rounded-[6px] bg-[var(--amber-tint)] px-3 py-2 text-[12.5px] text-[var(--amber-deep)]">
             <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
@@ -121,6 +137,11 @@ export function AuthScreen({
           <GoogleMark />
           {googleLabel}
         </Button>
+        {googleHint ? (
+          <p className="mt-2 text-center text-[12.5px] leading-relaxed text-[var(--ink-soft)]">
+            {googleHint}
+          </p>
+        ) : null}
 
         <div className="my-4 flex items-center gap-3 text-[12px] text-[var(--ink-faint)]">
           <span className="h-px flex-1 bg-[var(--line)]" />
@@ -139,6 +160,11 @@ export function AuthScreen({
               placeholder="you@example.com"
               autoComplete="email"
             />
+            {invitedEmail ? (
+              <span className="text-[12.5px] leading-relaxed text-[var(--ink-soft)]">
+                Use {invitedEmail} — the address on the invite.
+              </span>
+            ) : null}
           </label>
           {showPassword && (
             <label className="flex flex-col gap-1">

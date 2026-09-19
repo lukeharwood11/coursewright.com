@@ -16,7 +16,7 @@ Sign in with **email + password**, an **email magic link**, or **Google** (Supab
 
 - Unauthenticated. Offers Google, email + password, and email magic-link sign-in via Supabase Auth.
 - On success: redirect to `/my` ([ORG_PICKER](./ORG_PICKER.md)), last org, or invite destination when present.
-- Link to signup for new users; invite-aware messaging when arriving from an invite (same email).
+- Link to signup for new users; when arriving from an invite, name and **prefill** the invited email (from `email=` on the query). Google copy warns to pick that same account.
 - Account required to view shared content in P0 (no magic-link view yet).
 
 ## Data shown
@@ -24,7 +24,7 @@ Sign in with **email + password**, an **email magic link**, or **Google** (Supab
 - Wordmark and short sign-in copy
 - Auth controls (Google, email, password) — no course/roster data
 - Error/validation messages for failed auth (TBD exact copy)
-- Invite-aware copy when `next` is `/invite/<token>` — sign in with the invited email
+- Invite-aware copy when `next` is `/invite/<token>` — the invited address is named, prefilled, and required to accept
 
 ## Contents
 
@@ -34,7 +34,7 @@ Sign in with **email + password**, an **email magic link**, or **Google** (Supab
 - Email + password sign-in (primary)
 - Email magic-link sign-in (secondary)
 - Link to [SIGNUP](./SIGNUP.md)
-- Invite-aware messaging when arriving from [INVITE_CLAIM](./INVITE_CLAIM.md) — same email as invite
+- Invite-aware messaging when arriving from [INVITE_CLAIM](./INVITE_CLAIM.md) — same email as invite, prefilled
 - Phone-friendly centered card layout ([STYLE_GUIDE.md](../STYLE_GUIDE.md))
 
 ## Primary actions

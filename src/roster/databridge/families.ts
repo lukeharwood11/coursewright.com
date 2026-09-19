@@ -1,3 +1,4 @@
+import { sendOrganizationInviteEmail } from "@/organizations/databridge/staffInvites";
 import { familyWriteErrorMessage } from "@/roster/model/family";
 import { rosterWriteErrorMessage } from "@/roster/model/studentProfile";
 import type { ValidatedFamily } from "@/roster/model/family";
@@ -358,20 +359,29 @@ export async function createParentInvites(input: {
   const db = requireSupabase();
   const results = await Promise.all(
     input.studentIds.map(async (studentProfileId) => {
-      const { error } = await db.from("admin_invites").insert({
-        organization_id: input.organizationId,
-        email: input.email,
-        role: "parent",
-        invited_by: input.invitedBy,
-        student_profile_id: studentProfileId,
-      });
-      return error;
+      const { data, error } = await db
+        .from("admin_invites")
+        .insert({
+          organization_id: input.organizationId,
+          email: input.email,
+          role: "parent",
+          invited_by: input.invitedBy,
+          student_profile_id: studentProfileId,
+        })
+        .select("id")
+        .maybeSingle();
+      return { data, error };
     }),
   );
 
-  for (const error of results) {
-    if (!error) continue;
-    if (error.code === "23505") continue;
-    throw new Error(familyWriteErrorMessage(error));
+  const inviteIds: number[] = [];
+  for (const result of results) {
+    if (result.error) {
+      if (result.error.code === "23505") continue;
+      throw new Error(familyWriteErrorMessage(result.error));
+    }
+    if (result.data?.id) inviteIds.push(result.data.id);
   }
+
+  await Promise.all(inviteIds.map((id) => sendOrganizationInviteEmail(id)));
 }

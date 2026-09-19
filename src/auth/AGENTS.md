@@ -7,7 +7,7 @@ Sign-up / sign-in: email (password or magic link) + Google via Supabase Auth. Si
 - Login (`/login`) and signup (`/signup`) screens (STYLE_GUIDE)
 - Account settings (`/my/settings`) — cross-org; display name on `profiles`; sign out. Email is auth-owned (read-only). No avatar upload / Google link UI in P0
 - Account menu chrome (`AccountMenu`) — User (Settings, Sign out) + Organization (Org settings, Switch)
-- Invite link entry → sign up / log in with **same email**
+- Invite link entry → `/invite/<token>` loads unsigned, then sign up / log in with **that invited email** (prefilled + named in copy)
 - Session helpers used by `app/` gates
 
 Auth APIs call the browser Supabase client (`infrastructure/supabase/client.ts`). Without Supabase env (`VITE_SUPABASE_*` from `.env.testing` or CI), the UI still loads and shows a setup notice.

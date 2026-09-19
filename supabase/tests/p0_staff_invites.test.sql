@@ -1,6 +1,6 @@
 -- Unified email-claim invites: staff + parent on admin_invites (docs/database/SCHEMA.md).
 begin;
-select plan(23);
+select plan(26);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -174,6 +174,31 @@ select throws_ok(
 reset role;
 insert into invite_tokens (email, role, token)
   select email, role, token from admin_invites where role = 'parent';
+
+select set_config('request.jwt.claim.sub', '', true);
+select set_config('request.jwt.claims', '', true);
+set local role anon;
+
+select results_eq(
+  $$select email from get_invite((select token from invite_tokens where role = 'parent'))$$,
+  array['parent@example.com'::text],
+  'unsigned visitor with the token can see the invited email'
+);
+
+select results_eq(
+  $$select email_matches from get_invite((select token from invite_tokens where role = 'parent'))$$,
+  array[false],
+  'unsigned visitor does not match the invited email'
+);
+
+select throws_ok(
+  $$select claim_invite((select token from invite_tokens where role = 'parent'))$$,
+  '42501',
+  'not authenticated',
+  'unsigned visitor cannot claim'
+);
+
+reset role;
 
 select is_empty(
   $$select 1 from memberships

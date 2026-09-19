@@ -196,12 +196,39 @@ export async function listParentLinksForStudents(
   });
 }
 
+export type InviteEmailStatus = {
+  sent: boolean;
+  error: string | null;
+};
+
+export type CreatedOrgInvite<T> = {
+  invite: T;
+  email: InviteEmailStatus;
+};
+
+export async function sendOrganizationInviteEmail(
+  inviteId: number,
+): Promise<InviteEmailStatus> {
+  const db = requireSupabase();
+  const { data, error } = await db.functions.invoke("send-organization-invite", {
+    body: { inviteId },
+  });
+  const fromBody = await readFunctionErrorBody(data, error);
+  if (error || fromBody) {
+    return {
+      sent: false,
+      error: fromBody ?? functionErrorMessage(error, "Couldn’t send the invite email."),
+    };
+  }
+  return { sent: true, error: null };
+}
+
 export async function createStaffInvite(input: {
   organizationId: number;
   email: string;
   role: StaffInviteRole;
   invitedBy: string;
-}): Promise<PendingStaffInvite> {
+}): Promise<CreatedOrgInvite<PendingStaffInvite>> {
   const invite = await insertInvite({
     organizationId: input.organizationId,
     email: input.email,
@@ -213,7 +240,8 @@ export async function createStaffInvite(input: {
   if (!staff) {
     throw new Error("The invite was created but couldn’t be loaded. Refresh and try again.");
   }
-  return staff;
+  const email = await sendOrganizationInviteEmail(staff.id);
+  return { invite: staff, email };
 }
 
 export async function createParentInvite(input: {
@@ -221,14 +249,16 @@ export async function createParentInvite(input: {
   studentProfileId: number;
   email: string;
   invitedBy: string;
-}): Promise<PendingOrgInvite> {
-  return insertInvite({
+}): Promise<CreatedOrgInvite<PendingOrgInvite>> {
+  const invite = await insertInvite({
     organizationId: input.organizationId,
     email: input.email,
     role: "parent",
     invitedBy: input.invitedBy,
     studentProfileId: input.studentProfileId,
   });
+  const email = await sendOrganizationInviteEmail(invite.id);
+  return { invite, email };
 }
 
 export async function cancelInvite(id: number): Promise<void> {
@@ -335,4 +365,46 @@ function toPendingStaffInviteFromInvite(
   const role = parseStaffInviteRole(invite.role);
   if (!role) return null;
   return { ...invite, role };
+}
+
+async function readFunctionErrorBody(
+  data: unknown,
+  error: { message: string; context?: unknown } | null,
+): Promise<string | null> {
+  const fromData = errorString(data);
+  if (fromData) return fromData;
+
+  const context = error?.context;
+  if (context instanceof Response) {
+    try {
+      const body: unknown = await context.clone().json();
+      return errorString(body);
+    } catch {
+      return null;
+    }
+  }
+  return errorString(context);
+}
+
+function errorString(value: unknown): string | null {
+  if (
+    value &&
+    typeof value === "object" &&
+    "error" in value &&
+    typeof (value as { error: unknown }).error === "string"
+  ) {
+    return (value as { error: string }).error;
+  }
+  return null;
+}
+
+function functionErrorMessage(
+  error: { message: string } | null,
+  fallback: string,
+): string {
+  const message = error?.message.trim() ?? "";
+  if (!message || message.toLowerCase() === "edge function returned a non-2xx status code") {
+    return fallback;
+  }
+  return message;
 }

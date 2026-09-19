@@ -1,13 +1,16 @@
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthScreen } from "@/auth/components/AuthScreen";
-import { safeNextPath } from "@/auth/model/safeNext";
+import {
+  inviteAuthCalloutAction,
+  inviteAuthFromSearch,
+  inviteAuthGoogleHint,
+  inviteAuthSubcopy,
+} from "@/auth/model/inviteAuth";
 
 export function LoginPage() {
   const location = useLocation();
-  const fromInvite = safeNextPath(
-    new URLSearchParams(location.search).get("next"),
-  ).startsWith("/invite/");
+  const invite = inviteAuthFromSearch(location.search);
 
   useEffect(() => {
     document.title = "Sign in · Course Wright";
@@ -16,27 +19,31 @@ export function LoginPage() {
   return (
     <AuthScreen
       heading="Welcome back"
-      subcopy={
-        fromInvite
-          ? "Sign in with the email you were invited with to accept."
-          : "Sign in to see your courses and materials."
-      }
+      subcopy={inviteAuthSubcopy("login", invite)}
+      invitedEmail={invite.invitedEmail}
+      inviteCalloutAction={inviteAuthCalloutAction("login")}
+      googleHint={inviteAuthGoogleHint(invite)}
+      initialEmail={invite.invitedEmail ?? ""}
       googleLabel="Sign in with Google"
       submitLabel="Sign in"
       passwordSignIn
       footer={
         <>
           <p>
-            New to Course Wright?{" "}
+            {invite.fromInvite
+              ? "Need an account for this invite? "
+              : "New to Course Wright? "}
             <Link
               to={{ pathname: "/signup", search: location.search }}
               className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
             >
-              Create an account
+              {invite.fromInvite ? "Create one with that address" : "Create an account"}
             </Link>
             .
           </p>
-          <p className="mt-2">Joining a co-op? Ask your admin for an invite.</p>
+          {invite.fromInvite ? null : (
+            <p className="mt-2">Joining a co-op? Ask your admin for an invite.</p>
+          )}
         </>
       }
     />

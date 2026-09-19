@@ -18,11 +18,20 @@ export function ClaimInvitePage() {
       notFound={claim.notFound}
       invite={claim.invite}
       alreadyAccepted={claim.alreadyAccepted}
+      signedIn={claim.signedIn}
+      signedInEmail={claim.signedInEmail}
+      needsAccount={claim.needsAccount}
+      wrongAccount={claim.wrongAccount}
+      signupHref={claim.signupHref}
+      loginHref={claim.loginHref}
       canAccept={claim.canAccept}
       claiming={claim.claiming}
       claimError={claim.claimError}
+      signingOut={claim.signingOut}
+      signOutError={claim.signOutError}
       onAccept={claim.onAccept}
       onOpenOrg={claim.onOpenOrg}
+      onSignOut={() => void claim.onSignOut()}
     />
   );
 }

@@ -69,3 +69,6 @@ skip_nonce_check = false
 
 [functions.create-course-from-course]
 verify_jwt = true
+
+[functions.send-organization-invite]
+verify_jwt = true

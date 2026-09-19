@@ -16,7 +16,7 @@ Choose an organization or create a new one. Cross-org entry before `<org-slug>` 
 
 - Requires signed-in user.
 - Lists orgs the user belongs to; selecting one navigates to that org’s home.
-- **Pending invites** for this account’s email (staff or parent) show as requests to accept — same claim as [INVITE_CLAIM](./INVITE_CLAIM.md). **v0: no email send.**
+- **Pending invites** for this account’s email (staff or parent) show as requests to accept — same claim as [INVITE_CLAIM](./INVITE_CLAIM.md). Invites are emailed; this inbox still works if they open the app first.
 - Create organization: capture name, generate unique permalink slug, set creator as first **owner**, then open new org home.
 - Empty state pushes “create your first org” (roster not required to get value later). Pending invites still appear when the user has requests but no memberships yet.
 

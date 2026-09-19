@@ -6,21 +6,24 @@ import type { PendingStaffInvite } from "@/organizations/databridge/staffInvites
 export function PendingInviteList({
   invites,
   copiedId,
+  sendingId,
   cancelingId,
   onCopy,
+  onSendEmail,
   onCancel,
 }: {
   invites: PendingStaffInvite[];
   copiedId: number | null;
+  sendingId: number | null;
   cancelingId: number | null;
   onCopy: (invite: PendingStaffInvite) => void;
+  onSendEmail: (invite: PendingStaffInvite) => void;
   onCancel: (invite: PendingStaffInvite) => void;
 }) {
   if (invites.length === 0) {
     return (
       <p className="mt-3 text-[14px] text-[var(--ink-soft)]">
-        No pending invites. Course Wright doesn’t email the link — copy it and send it
-        yourself.
+        No pending invites.
       </p>
     );
   }
@@ -39,6 +42,13 @@ export function PendingInviteList({
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => onCopy(invite)}>
               {copiedId === invite.id ? "Copied" : "Copy link"}
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={sendingId === invite.id}
+              onClick={() => onSendEmail(invite)}
+            >
+              {sendingId === invite.id ? "Sending…" : "Resend email"}
             </Button>
             <Button
               variant="secondary"

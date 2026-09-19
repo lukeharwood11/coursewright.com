@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { Badge } from "@/ui/Badge";
-import { Button } from "@/ui/Button";
+import { Button, ButtonLink } from "@/ui/Button";
 import { Wordmark } from "@/ui/Wordmark";
 import { roleBadgeVariant, roleLabel } from "@/organizations/model/role";
 import type { InvitePreview } from "@/organizations/databridge/staffInvites";
+import { mismatchedInvitePrompt } from "@/organizations/model/inviteClaim";
 
 export function ClaimInviteCard({
   loading,
@@ -11,22 +12,40 @@ export function ClaimInviteCard({
   notFound,
   invite,
   alreadyAccepted,
+  signedIn,
+  signedInEmail,
+  needsAccount,
+  wrongAccount,
+  signupHref,
+  loginHref,
   canAccept,
   claiming,
   claimError,
+  signingOut,
+  signOutError,
   onAccept,
   onOpenOrg,
+  onSignOut,
 }: {
   loading: boolean;
   loadError: string | null;
   notFound: boolean;
   invite: InvitePreview | null;
   alreadyAccepted: boolean;
+  signedIn: boolean;
+  signedInEmail: string | null;
+  needsAccount: boolean;
+  wrongAccount: boolean;
+  signupHref: string;
+  loginHref: string;
   canAccept: boolean;
   claiming: boolean;
   claimError: string | null;
+  signingOut: boolean;
+  signOutError: string | null;
   onAccept: () => void;
   onOpenOrg: () => void;
+  onSignOut: () => void;
 }) {
   const isParent = invite?.role === "parent";
 
@@ -37,7 +56,7 @@ export function ClaimInviteCard({
         style={{ boxShadow: "var(--shadow)" }}
       >
         <div className="mb-4 text-center">
-          <Wordmark to="/my" size="login" />
+          <Wordmark to={signedIn ? "/my" : "/"} size="login" />
         </div>
         <h1
           className="mb-1 text-center text-2xl font-semibold text-[var(--ink)]"
@@ -83,10 +102,30 @@ export function ClaimInviteCard({
           </div>
         ) : null}
 
-        {invite && !invite.emailMatches ? (
+        {needsAccount && invite ? (
           <p className="mt-4 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-            This invite is for <span className="font-bold text-[var(--ink)]">{invite.email}</span>.
-            Sign in with that email to accept.
+            This invite is for{" "}
+            <span className="font-bold text-[var(--ink)]">{invite.email}</span>. Create an
+            account with that address — or sign in if you already have one.
+          </p>
+        ) : null}
+
+        {wrongAccount && invite ? (
+          <p className="mt-4 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
+            {signedInEmail ? (
+              <>
+                You’re signed in as{" "}
+                <span className="font-bold text-[var(--ink)]">{signedInEmail}</span>. This
+                invite is for{" "}
+                <span className="font-bold text-[var(--ink)]">{invite.email}</span>. Sign
+                out, then use that address.
+              </>
+            ) : (
+              mismatchedInvitePrompt({
+                invitedEmail: invite.email,
+                signedInEmail,
+              })
+            )}
           </p>
         ) : null}
 
@@ -102,7 +141,28 @@ export function ClaimInviteCard({
           </p>
         ) : null}
 
+        {signOutError ? (
+          <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
+            {signOutError}
+          </p>
+        ) : null}
+
         <div className="mt-5 flex flex-col gap-2">
+          {needsAccount ? (
+            <>
+              <ButtonLink to={signupHref} fullWidth>
+                Create account
+              </ButtonLink>
+              <ButtonLink to={loginHref} variant="secondary" fullWidth>
+                Sign in
+              </ButtonLink>
+            </>
+          ) : null}
+          {wrongAccount ? (
+            <Button onClick={onSignOut} disabled={signingOut} fullWidth>
+              {signingOut ? "Signing out…" : "Sign out"}
+            </Button>
+          ) : null}
           {canAccept ? (
             <Button onClick={onAccept} disabled={claiming} fullWidth>
               {claiming ? "Accepting…" : "Accept invite"}
@@ -113,14 +173,16 @@ export function ClaimInviteCard({
               Open {invite.organizationName}
             </Button>
           ) : null}
-          <p className="text-center text-[13px]">
-            <Link
-              to="/my"
-              className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-            >
-              Back to organizations
-            </Link>
-          </p>
+          {signedIn ? (
+            <p className="text-center text-[13px]">
+              <Link
+                to="/my"
+                className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+              >
+                Back to organizations
+              </Link>
+            </p>
+          ) : null}
         </div>
       </div>
     </main>

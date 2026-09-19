@@ -13,7 +13,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | User | `profiles` | PK = `auth.users.id`. Email + Google live in Supabase Auth; `profiles` is the PostgREST-facing row. |
 | Organization | `organizations` | |
 | Membership | `memberships` | |
-| AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `parent`. Claimed via copyable `/invite/<token>` or pending-request inbox after login. **v0: no email send.** Membership is created on claim. |
+| AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `parent`. Claimed via emailed `/invite/<token>` (Resend `organization-invite`) or pending-request inbox after login. Copy-link remains. Membership is created on claim. |
 | StudentProfile | `student_profiles` | |
 | Family | `families` | |
 | FamilyMember | `family_members` | |
@@ -339,7 +339,7 @@ Org staff and parent memberships. Owners and admins may **change** `admin` ↔ `
 
 ### AdminInvite
 
-Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` (staff) or `parent`. **v0:** copy a claim link; Course Wright does **not** send email. Claimed by opening `/invite/<token>` or by signing in with that email and accepting a pending request. **Membership is created on claim.** Parent course access still requires enrollment (see Parent access gate).
+Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` (staff) or `parent`. Claimed by opening `/invite/<token>` or by signing in with that email and accepting a pending request. **Anyone with the token can preview** org name, role, and invited email via `get_invite` (unsigned `email_matches` is false). **Claim still requires** a signed-in account on that email. **Membership is created on claim.** Parent course access still requires enrollment (see Parent access gate).
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -409,7 +409,7 @@ Stored on `admin_invites` with `role = parent` (same token / claim RPCs as staff
 
 Parent-specific fields: `student_profile_id` (required), plus the shared email / token / invited_by / accepted_at columns on AdminInvite.
 
-**v0:** staff copy `/invite/<token>`; no email send. On claim: create parent membership (if needed) and `parent_student_links`. Do **not** grant course access from the invite alone. Unrouted Families directory may also save a pending parent row per chosen student.
+Emails Resend `organization-invite` and keeps copy `/invite/<token>`. On claim: create parent membership (if needed) and `parent_student_links`. Do **not** grant course access from the invite alone. Unrouted Families directory may also save a pending parent row per chosen student.
 
 ### ParentStudentLink
 

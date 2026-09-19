@@ -22,6 +22,55 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ## Open
 
+### HN-015 — Set Resend API key for organization invite emails
+
+| | |
+|--|--|
+| **Why** | Staff and parent invites call Edge Function `send-organization-invite`, which posts Resend event `organization-invite`. Without `RESEND_API_KEY` on the Supabase project the Function runs on, the invite row is still created and the copy-link works, but nobody gets an email. |
+| **Where** | Resend dashboard (API key) + **Supabase Edge Function secrets** (testing branch and production). **Not** `.env.testing` and **not** a `VITE_*` variable — those are browser-exposed. |
+| **Placeholder** | `supabase/functions/send-organization-invite/index.ts` (`HN-015`) |
+
+**Where to put the key**
+
+| Environment | Put `RESEND_API_KEY` here |
+|-------------|---------------------------|
+| **Testing (beta)** | Supabase project **`yplmaauelutcosqqvnya`** (persistent testing branch) → **Project Settings → Edge Functions → Secrets**, name `RESEND_API_KEY`. CLI: `supabase secrets set RESEND_API_KEY=re_… --project-ref yplmaauelutcosqqvnya` |
+| **Production** | Same secret name on the production Supabase project (today: parent/main `hlecttkgrfhtzvwnxtyb`, or HN-007’s dedicated prod project when that exists). CLI: `supabase secrets set RESEND_API_KEY=re_… --project-ref <prod-ref>` |
+| **Local `supabase functions serve`** | `supabase secrets set --local RESEND_API_KEY=re_…` (or `supabase/functions/.env`, gitignored) |
+| **Do not** | Git, `.env.testing`, GitHub Actions `VITE_*`, or the SPA |
+
+Optional companion secret **`SITE_URL`** (used when the browser `Origin` header is missing):
+
+- Testing: `https://beta.coursewright.com`
+- Production: `https://coursewright.com`
+- Local: `http://localhost:5173`
+
+**Steps:**
+
+1. In [Resend](https://resend.com), create an API key that can send the **`organization-invite`** event you already configured.
+2. Set `RESEND_API_KEY` (and optionally `SITE_URL`) as Edge Function secrets on the **testing** project ref above.
+3. Repeat for production when that project should send mail. Use a separate Resend key if you want testing and production isolated.
+4. Deploy the Function: `./scripts/deploy-supabase.sh testing` (or Terraform Apply for `testing` with `deploy_supabase` on). Repeat for production when applying that tier.
+5. From org settings on the matching site, invite your own email and confirm the Resend `organization-invite` event arrives.
+
+**Done when:** inviting a person to an organization (staff or parent) delivers the Resend email with a working `/invite/<token>` link, without putting the API key in the frontend env.
+
+### HN-016 — Apply `anon_get_invite` migration on the testing database
+
+| | |
+|--|--|
+| **Why** | Invite links must load `/invite/<token>` while signed out so parents see the invited address and signup/login can prefill it. That needs `get_invite` granted to `anon`. Until this migration is applied, unsigned visitors get “not authenticated” and the claim page cannot name the address. |
+| **Where** | Supabase CLI / Dashboard; testing project used by `.env.testing` (`yplmaauelutcosqqvnya`) |
+| **Placeholder** | `supabase/migrations/20260919200000_anon_get_invite.sql` (`HN-016`) |
+
+**Steps:**
+
+1. From a machine with `SUPABASE_ACCESS_TOKEN` (HN-012) and the project linked, run `supabase db push` (or `scripts/nuke.sh` in experiment mode if a full reset is acceptable).
+2. Confirm `anon` can execute `get_invite` (`information_schema.routine_privileges`) and that `claim_invite` is still authenticated-only.
+3. Repeat for production when that project is in use (HN-007).
+
+**Done when:** opening `/invite/<token>` while signed out shows the invited email (and Create account / Sign in), without requiring a session first.
+
 ### HN-014 — Apply `bulletins` migration on the testing database
 
 | | |

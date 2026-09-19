@@ -11,6 +11,7 @@ import {
 import {
   cancelStaffInvite,
   createStaffInvite,
+  sendOrganizationInviteEmail,
   listOrgPendingInvites,
   listOrgStaff,
   staffInviteQueryKeys,
@@ -34,7 +35,13 @@ import {
   validateChangeStaffRole,
   validateRemoveStaffMember,
 } from "@/organizations/model/staffAccount";
-import { compareStaffRole, staffInviteUrl, validateCreateStaffInvite } from "@/organizations/model/staffInvite";
+import {
+  compareStaffRole,
+  inviteCreatedMessage,
+  inviteEmailResultMessage,
+  staffInviteUrl,
+  validateCreateStaffInvite,
+} from "@/organizations/model/staffInvite";
 
 export type StaffMemberRow = OrgStaffMember & {
   isYou: boolean;
@@ -58,6 +65,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
   const [formError, setFormError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [lastInviteId, setLastInviteId] = useState<number | null>(null);
+  const [lastInviteSent, setLastInviteSent] = useState(false);
 
   const selectedRole = roles.includes(inviteRole) ? inviteRole : (roles[0] ?? "instructor");
 
@@ -104,14 +112,18 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
         invitedBy: user.id,
       });
     },
-    onSuccess: async (invite) => {
+    onSuccess: async ({ invite, email: emailStatus }) => {
       setEmail("");
       setFormError(null);
-      const url = staffInviteUrl(window.location.origin, invite.token);
       setLastInviteId(invite.id);
-      setCopiedId(invite.id);
-      await navigator.clipboard.writeText(url).catch(() => undefined);
-      toast("Invite created. Link copied — send it yourself.");
+      setLastInviteSent(emailStatus.sent);
+      toast(
+        inviteCreatedMessage({
+          recipientEmail: invite.email,
+          emailSent: emailStatus.sent,
+          linkCopied: false,
+        }),
+      );
       await queryClient.invalidateQueries({
         queryKey: staffInviteQueryKeys.org(organizationId ?? 0),
       });
@@ -121,11 +133,28 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     },
   });
 
+  const sendEmailMutation = useMutation({
+    mutationFn: (invite: PendingStaffInvite) => sendOrganizationInviteEmail(invite.id),
+    onSuccess: (status, invite) => {
+      toast(
+        inviteEmailResultMessage({
+          recipientEmail: invite.email,
+          emailSent: status.sent,
+          emailError: status.error,
+        }),
+      );
+    },
+    onError: (error: Error) => {
+      toast(error.message);
+    },
+  });
+
   const cancelMutation = useMutation({
     mutationFn: (invite: PendingStaffInvite) => cancelStaffInvite(invite.id),
     onSuccess: async () => {
       toast("Invite canceled.");
       setLastInviteId(null);
+      setLastInviteSent(false);
       await queryClient.invalidateQueries({
         queryKey: staffInviteQueryKeys.org(organizationId ?? 0),
       });
@@ -216,11 +245,9 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     try {
       await navigator.clipboard.writeText(url);
       setCopiedId(invite.id);
-      setLastInviteId(invite.id);
       toast("Invite link copied.");
     } catch {
-      setLastInviteId(invite.id);
-      toast("Copy the link from the field.");
+      toast("Copy the link from the pending invite.");
     }
   }
 
@@ -247,6 +274,9 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     formError,
     inviting: inviteMutation.isPending,
     copiedId,
+    sendingId: sendEmailMutation.isPending
+      ? (sendEmailMutation.variables?.id ?? null)
+      : null,
     cancelingId: cancelMutation.isPending
       ? (cancelMutation.variables?.id ?? null)
       : null,
@@ -256,10 +286,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     removingId: removeMutation.isPending
       ? (removeMutation.variables?.membershipId ?? null)
       : null,
-    lastInviteUrl: lastInvite
-      ? staffInviteUrl(window.location.origin, lastInvite.token)
-      : null,
-    lastInvite,
+    lastInviteSent: Boolean(lastInvite && lastInviteSent),
     onEmailChange: (value: string) => {
       setEmail(value);
       setFormError(null);
@@ -270,6 +297,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     },
     onInvite,
     onCopy,
+    onSendEmail: (invite: PendingStaffInvite) => sendEmailMutation.mutate(invite),
     onCancel: (invite: PendingStaffInvite) => cancelMutation.mutate(invite),
     onChangeRole,
     onRemove: (member: OrgStaffMember) => removeMutation.mutate(member),
