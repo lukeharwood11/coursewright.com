@@ -54,7 +54,7 @@ export function ParentDashboardBody({
   }
 
   return (
-    <div className="mt-6 flex flex-col gap-5">
+    <div className="mt-6 flex flex-col gap-3">
       {showTags ? (
         <ParentStudentTags
           students={full.students}
@@ -64,7 +64,13 @@ export function ParentDashboardBody({
       ) : null}
 
       {hasImportantNow || hasComingUp ? (
-        <div className={attentionGrid ? "grid gap-5 md:grid-cols-2" : undefined}>
+        <div
+          className={
+            attentionGrid
+              ? "grid items-start content-start auto-rows-min gap-x-5 gap-y-3 md:grid-cols-2"
+              : undefined
+          }
+        >
           {hasImportantNow ? (
             <ParentImportantNowList
               orgSlug={orgSlug}
