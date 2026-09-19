@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { PrinterIcon } from "@heroicons/react/24/outline";
 import { Avatar } from "@/ui/Avatar";
@@ -15,13 +16,15 @@ export function ParentStudentWeek({
   orgSlug,
   student,
   showHeader,
+  lead = null,
 }: {
   orgSlug: string;
   student: ParentDashboardStudent;
   showHeader: boolean;
+  lead?: ReactNode;
 }) {
   return (
-    <div>
+    <div className="flex flex-col gap-3">
       {showHeader ? (
         <div className="mb-2 flex items-center gap-2">
           <Avatar name={student.name} size={28} />
@@ -37,6 +40,8 @@ export function ParentStudentWeek({
           Not in an active course yet.
         </p>
       ) : null}
+
+      {lead}
 
       {student.courses.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2">

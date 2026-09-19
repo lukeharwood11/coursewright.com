@@ -13,7 +13,7 @@ Course **instances**: offerings with optional dates, roster, instructors, catalo
 
 ## Rules
 
-- Builder chrome: Print / Share / Add material visible ([STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md)).
+- Builder chrome: Print / Share / Add material / **Add bulletin** visible ([STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md)).
 - Units & materials are sibling domains — compose them; don’t duplicate.
 - **P0:** no template UI. Course-from-course is an independent copy — **no live sync**. Copies start unpublished.
 - Course visibility helpers live in `courses/model/` (not materials).

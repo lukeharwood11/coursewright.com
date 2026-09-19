@@ -22,6 +22,22 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ## Open
 
+### HN-014 — Apply `bulletins` migration on the testing database
+
+| | |
+|--|--|
+| **Why** | Instructors can compose dated course bulletins in the SPA, and parent/student home loads `bulletins` / `bulletin_materials`. Until this migration is applied, those queries against the testing project will error. |
+| **Where** | Supabase CLI / Dashboard; testing project used by `.env.testing` (`yplmaauelutcosqqvnya`) |
+| **Placeholder** | `supabase/migrations/20260919180000_bulletins.sql` (`HN-014`) |
+
+**Steps:**
+
+1. From a machine with `SUPABASE_ACCESS_TOKEN` (HN-012) and the project linked, run `supabase db push` (or `scripts/nuke.sh` in experiment mode if a full reset is acceptable).
+2. Confirm tables `bulletins` and `bulletin_materials` exist (`information_schema.tables`).
+3. Repeat for production when that project is in use (HN-007).
+
+**Done when:** creating a bulletin on a course succeeds in the SPA against the database the app uses, and it appears on parent home during the date window.
+
 ### HN-013 — Apply `student_email` migration on the testing database
 
 | | |

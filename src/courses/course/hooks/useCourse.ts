@@ -17,6 +17,12 @@ import {
   listImportantNowForCourse,
 } from "@/materials/databridge/importantNow";
 import {
+  bulletinQueryKeys,
+  listBulletinsForCourse,
+} from "@/bulletins/databridge/bulletins";
+import { isBulletinAvailable } from "@/bulletins/model/availability";
+import { localIsoDate } from "@/parent/model/thisWeek";
+import {
   enrollmentQueryKeys,
   listCourseEnrollments,
 } from "@/roster/databridge/enrollments";
@@ -66,6 +72,11 @@ export function useCourse() {
     queryFn: () => listImportantNowForCourse(courseId),
     enabled: Number.isFinite(courseId),
   });
+  const bulletinsQuery = useQuery({
+    queryKey: bulletinQueryKeys.course(courseId),
+    queryFn: () => listBulletinsForCourse(courseId),
+    enabled: Number.isFinite(courseId),
+  });
   const originQuery = useQuery({
     queryKey: ["courses", "detail", courseQuery.data?.copiedFromCourseId ?? 0],
     queryFn: () => getCourse(courseQuery.data!.copiedFromCourseId!),
@@ -85,6 +96,12 @@ export function useCourse() {
   const importantIds = new Set(
     (importantQuery.data ?? []).map((row) => row.materialId),
   );
+  const today = localIsoDate();
+  const bulletins = parentPresentation
+    ? (bulletinsQuery.data ?? []).filter((row) =>
+        isBulletinAvailable(today, row.startDate, row.endDate),
+      )
+    : (bulletinsQuery.data ?? []);
 
   function invalidate() {
     void queryClient.invalidateQueries({ queryKey: courseQueryKeys.detail(courseId) });
@@ -149,6 +166,7 @@ export function useCourse() {
       (row) => row.status === "active",
     ),
     importantIds,
+    bulletins,
     loading:
       courseQuery.isLoading ||
       unitsQuery.isLoading ||

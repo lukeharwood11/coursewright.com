@@ -34,6 +34,8 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | FileVersion | `file_versions` | |
 | ShareLink | `share_links` | |
 | ImportantNow | `important_now` | |
+| Bulletin | `bulletins` | Dated course notice; start/end availability |
+| BulletinMaterial | `bulletin_materials` | Materials attached under a bulletin |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates (Sunday–Saturday). |
 | Page / Block / Quiz / Form | `blocks` (quiz is a Lexical node on a page) | Material **kind** page\|link\|file; blocks on pages only; **no** quiz table |
 
@@ -58,7 +60,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 
 | Phase | Entities in focus |
 |-------|-------------------|
-| **P0** | Organization, User, Membership, **AdminInvite**, **StudentProfile**, **Class**, **ClassMember**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
+| **P0** | Organization, User, Membership, **AdminInvite**, **StudentProfile**, **Class**, **ClassMember**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **Bulletin**, **BulletinMaterial**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
 | **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs) |
 | **P2** | Cross-org Family management, StudentProfile.user_id, Quiz online, Submission, **ParentPayments** (orgs collect from parents) |
 
@@ -119,7 +121,7 @@ A claimed parent with no enrollment can open the org (empty “this week”) but
 ## Creating a course from another course (P0)
 
 1. Copies **units and materials** (and file **references** — same `file_id`, no blob clone) into a **new course**.
-2. Does **not** copy roster, enrollments, important-now, or share links.
+2. Does **not** copy roster, enrollments, important-now, share links, or **bulletins**.
 3. New course is **independent** — edits do not sync back to the source (template-style sync is **P1**).
 4. Grade metadata **may** copy and remain editable on the new course.
 5. Description, location, and subject **may** copy from the create form (prefilled from the source). The copy starts **unpublished**.
@@ -610,6 +612,43 @@ Parent-facing URL. **P0: must be logged in** before the destination is shown.
   - A material appears on This week when its assignment date falls in the week **and/or** its `due_date` falls in the week.
   - Top-level materials (`unit_id` null) without `scheduled_date` are not “assigned” for the week unless they have a `due_date` in range.
 
+### Bulletin
+
+A course-scoped **notice** instructors make available for a date window. Families see it on the parent/student home while today is in range; opening it lists attached materials. **Not** an assignment object and **not** email.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| course_id | bigint | FK → Course |
+| title | text | required |
+| body | text | optional note (empty string when unset) |
+| start_date | date | first day the bulletin is available (inclusive) |
+| end_date | date | last day the bulletin is available (inclusive); must be ≥ `start_date` |
+| created_by | uuid | FK → User (`profiles`) |
+| created_at | timestamptz | |
+| updated_at | timestamptz | |
+| deleted_at | timestamptz | soft delete |
+| deleted_by | uuid | FK → User, nullable |
+
+**Availability:** app uses the viewer’s **local calendar date**. Staff who can manage the course always see non-deleted bulletins (including upcoming and past). Families see a bulletin on home only when the course is parent-viewable (active + published + enrollment) and today is in `[start_date, end_date]`. Date window **is** availability — no separate publish column.
+
+Course-from-course copy does **not** copy bulletins.
+
+### BulletinMaterial
+
+Join: materials attached under a bulletin, ordered.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| bulletin_id | bigint | FK → Bulletin |
+| material_id | bigint | FK → Material — must belong to the **same course** as the bulletin |
+| position | int | order on the bulletin page |
+| created_at | timestamptz | |
+
+Unique `(bulletin_id, material_id)`. Families only follow links to **published** materials (same material RLS). Soft-deleting a bulletin leaves join rows; the app path does not hard-delete bulletins.
+
 ---
 
 ## Core entities — P1
@@ -646,6 +685,7 @@ Course ──> CourseTemplate (optional; **P1**)
 Course / CourseTemplate.grade_levels (catalog metadata)
 Course ──< CourseInstructor >── User (instructor)  ← many
 Course ──< ImportantNow
+Course ──< Bulletin ──< BulletinMaterial >── Material
 Course ──< ShareLink
 ```
 

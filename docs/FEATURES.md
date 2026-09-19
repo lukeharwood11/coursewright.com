@@ -90,9 +90,10 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Parent access (link or account)** | Parent clicks invite link **or** signs up / logs in with the **same email** | shipped | Unified `/invite/<token>` claim; course access still requires enrollment |
 | **Parent org membership** | Parent becomes a parent in the org when they claim an invite | shipped | Membership created on claim; materials still gated on enrollment + published course |
 | **Share resources with parents** | Share course content and files with enrolled families | shipped | Copy material URL (account required). Dedicated share-entry path still TBD |
-| **Parent dashboard** | This calendar week's dated materials, **Up next**, **Important now**, student tags, **Print this week** for active students | in progress | Parent/student home; student login still uses parent claim path. Staff can open this home via **Parent view** |
+| **Parent dashboard** | This calendar week's dated materials, **Up next**, **Important now**, **bulletins**, student tags, **Print this week** for active students | in progress | Parent/student home; student login still uses parent claim path. Staff can open this home via **Parent view**. Available **bulletins** show under **From your teachers** (course title prominent). Multi-student homes **group by student** (bulletins, then that child’s work). This week **defaults to due work**; assigned-not-due is under **More assigned this week**. **Print this week** prints the full dated week **plus bulletin notices**, one student at a time, **bulletins first** |
 | **Resource links** | Send a parent a link that opens a **specific resource** (after they log in) | shipped | Copy signed-in material URL; `share_links` row recorded. Public entry path still TBD |
 | **Instructor "important now"** | Flag items needing immediate parent attention | shipped | Toggle on material; parent home surfaces it |
+| **Bulletins** | Dated course notice teachers make available for a start–end window, with optional materials underneath | in progress | Course-scoped. Families see it on parent/student home while today is in range; opening it lists links to those materials. **Not** email (P1 Notifications) and **not** a separate assignment object. SPA + migration in repo; apply on testing (**HN-014**) |
 | **Staff parent view** | Owners, admins, and instructors switch most org pages to parent presentation | in progress | Header **Teacher** / **Parent view**. Real this-week if they have linked students; otherwise a preview. Hidden for parent-only users. SPA + unit tests in; browser E2E against testing Auth blocked by email send rate limit |
 
 ### Roster management (P0)
@@ -249,7 +250,7 @@ Parents appear on a family **only** via existing `parent_student_links` to those
 **Creating a course (P0):**
 
 1. **From scratch** — blank course; add units and materials manually.
-2. **From another course** — copy that course’s **units and materials** into a **new independent course**. Does **not** copy roster, enrollments, important-now flags, or share links. **No live sync** between source and copy (template-style sync is **P1**).
+2. **From another course** — copy that course’s **units and materials** into a **new independent course**. Does **not** copy roster, enrollments, important-now flags, share links, or **bulletins**. **No live sync** between source and copy (template-style sync is **P1**).
 
 **P1 (templates) — deferred:**
 
@@ -318,7 +319,7 @@ The smallest complete loop in P0: **create materials → print them (or send a l
 |--------|--------|----------------|
 | **Print** (on a material) | That material — in-app text/lesson plan in a print layout; files open in a print-ready view (PDF prints natively) | Creator course, parent dashboard, resource page |
 | **Print unit** | The unit as one continuous packet (materials in order) | Creator course (unit), parent view of that unit |
-| **Print this week** | This Sunday–Saturday week's dated materials (and important now, if any) for **active** students on the parent home — one student at a time, then a page break | Parent dashboard |
+| **Print this week** | This Sunday–Saturday week's dated materials (and important now, if any) **plus available bulletin notices** for **active** students on the parent home — one student at a time, **that child’s bulletins first**, then a page break. Includes assigned-not-due work even when home hides it under **More assigned this week** | Parent dashboard |
 
 **Not P0:** Print whole course.
 
@@ -381,7 +382,8 @@ Do **not** ship a separate “Export” product name in P0. Print *is* the path 
 |-------|-------|---------|
 | **Up next** | P0 | **Assigned next** (soonest assignment date on or after today) and **Due next** (soonest due date on or after today) among active students |
 | **(C) Important now** | P0 | Instructor-flagged items needing attention (courses of active students) |
-| **(A) This week** | P0 | Materials **assigned** this calendar week (Sun–Sat) **and/or due** this week — labels distinguish Assigned vs Due. **Print this week** is a first-class action |
+| **Bulletins** | P0 | Teacher-composed notices that are **available** between a start date and end date. Shown on home as **From your teachers**. Course title is prominent; multi-student homes group by student (bulletins, then that child’s work). **Print this week** includes each student’s bulletin content first. Opening one lists the materials the teacher attached |
+| **(A) This week** | P0 | Materials **assigned** this calendar week (Sun–Sat) **and/or due** this week — labels distinguish Assigned vs Due. Home **shows due work by default**; other assigned work is under **More assigned this week**. **Print this week** still includes the full dated week |
 | **(B) Summary** | P1 | System-drafted overview; instructor can edit |
 | **Student tags** | P0 | When a parent has **more than one** student, tags at the top toggle who is active. Deselecting a student hides their work. One student (or a student viewing themselves) skips the tags. |
 
@@ -393,7 +395,7 @@ Do **not** ship a separate “Export” product name in P0. Print *is* the path 
 
 | Link | What happens (P0) |
 |------|-------------------|
-| **Invite / dashboard** | Sign up or log in → parent home (this week + important now). Empty if not yet enrolled. |
+| **Invite / dashboard** | Sign up or log in → parent home (this week + important now + available bulletins). Empty if not yet enrolled. |
 | **Resource link** | Sign up or log in → **that specific material/file** — **Print** is obvious on that page |
 
 Deep links still require an account in P0. Magic links (no account) may come later.
@@ -410,10 +412,12 @@ Content on **courses** may use **units** for grouping (templates are **P1**). Ma
 | **Top-level materials** | Materials with **no unit** sit at the **course top level**, shown **above** the units list |
 | **Unit dates** | Optional on a unit (`start_date` / `end_date` or a date range) |
 | **Material dates** | Optional **assignment date** (`scheduled_date`) and optional **due date** (`due_date`) per material — unit and material dating both supported when a unit is set |
-| **"This week" resolution** | A material appears on This week when its **assignment** date falls in the week (`scheduled_date`, else unit range) **and/or** its **`due_date`** falls in the week. Parent week is still **Sunday–Saturday**. Labels: **Assigned** vs **Due** |
+| **"This week" resolution** | A material belongs to This week when its **assignment** date falls in the week (`scheduled_date`, else unit range) **and/or** its **`due_date`** falls in the week. Parent week is still **Sunday–Saturday**. Labels: **Assigned** vs **Due**. Parent home **lists due items first**; assigned-not-due is collapsed under **More assigned this week**. Print this week is the full dated list **plus available bulletin notices** (per student, bulletins first) |
 | **Copy from course** | Units and materials (including top-level) copy into the new course; independent — no live sync in P0 |
 
-**P0 homework:** dated materials (with `scheduled_date`, or in a dated unit). A material appears under parent "this week" when its effective date(s) fall in the current Sunday–Saturday week. There is **no separate assignment object in P0** — that's the next conversation.
+**P0 homework:** dated materials (with `scheduled_date`, or in a dated unit). A material belongs to parent "this week" when its effective date(s) fall in the current Sunday–Saturday week. The home list **defaults to work due this week** (plus available bulletins); other assigned materials stay under **More assigned this week**. **Print this week** includes the full dated week **and each student’s available bulletin notices first**. There is **no separate assignment object in P0** — that's the next conversation.
+
+**P0 bulletins:** a course **Bulletin** is a notice with a **start date** and **end date**. Instructors (and org admins who can manage the course) write a title, optional note, pick those dates, and **select materials** from that course to sit underneath it. While **today** (the family’s local calendar date) is in the start–end window (inclusive), the bulletin appears on the parent/student home. Clicking it opens a page of **links to those materials**. On a multi-student home, the page is **grouped by student** (that child’s bulletins, then their work) and the **course** title is prominent. **Print this week** prints each student’s bulletin content first, then their materials. Date window **is** availability — no extra publish toggle. Soft-delete to take it down. Unpublished materials attached to a bulletin are omitted for families (same as elsewhere). Course-from-course copy does **not** copy bulletins (instance communication, like important now). This is **in-app**, not email.
 
 ### Materials & content creation
 
@@ -532,7 +536,10 @@ Page materials use a **Lexical** WYSIWYG editor ([lexical.dev](https://lexical.d
 - As an **admin or instructor**, I want to **group students into a Class** so that **I can manage cohorts separately from course content**.
 - As an **instructor**, I want to **set a date on a material or on its unit** so that **parents see the right work under this week**.
 - As an **instructor**, I want to **send a parent a link to a specific resource** so that **they don't have to hunt for it on the dashboard**.
-- As a **parent**, I want to **open my dashboard and see this week's dated materials first** so that **I know exactly what my child needs without digging**.
+- As an **instructor**, I want to **post a bulletin with a start and end date and attach materials** so that **families see one notice for this week’s work instead of hunting through the course**.
+- As a **parent or student**, I want to **open a bulletin from home and see links to the materials underneath it** so that **I know what to open without searching the course**.
+- As a **parent**, I want to **open my dashboard and see this week's due work (and bulletins) first** so that **I know exactly what my child needs without digging through every assigned material**.
+- As a **parent with more than one student**, I want **home and print grouped by child, with that child’s bulletins first** so that **I don’t mix up their courses**.
 - As a **parent creating materials**, I want to **print a worksheet or unit in one tap** so that **I can use it at the table without more software**.
 - As a **parent receiving materials**, I want **Print on this week and on each material** so that **paper is as easy as reading the screen**.
 - As an **instructor**, I want to **print a unit as a packet** so that **I can hand out this week's work without assembling files myself**.
@@ -567,7 +574,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | **Quizzes (take online + autograde)** | Take quizzes in-app; score from P0-stored correct answers | planned | Authoring + print already P0 |
 | **Forms** | Structured response collection | in design | Purpose + respondents TBD — see materials workshop |
 | **Course Wright billing (orgs)** | We charge organizations so they can serve parents | planned | `billing/` SPA stub + owner-only placeholder on org settings. Packaging: per teacher or per course — **hypothesis**. Provider: **Stripe** *(hypothesis)* |
-| **Notifications** | <!-- TBD --> | planned | Email likely |
+| **Notifications** | <!-- TBD --> | planned | Email likely. In-app **bulletins** are P0 and are not this row |
 | **Reporting** | <!-- TBD --> | planned | |
 | **Designed PDF packets** | Richer branded PDF layouts beyond the P0 ink packet | planned | P0 already generates + previews a PDF; P1 = stronger brand / layout polish |
 
@@ -658,7 +665,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | App entity PKs use **bigserial** / **bigint** (auto-increment) | **Decided** | FKs to app entities are `bigint`; `profiles` / auth stay `uuid` |
 | Material dating: optional unit dates, optional material `scheduled_date` (assignment), optional `due_date` | **Decided** | Assignment date wins for assignment-week membership when set; else unit range if material has a unit; top-level needs `scheduled_date` for assignment-week. Materials also appear on This week when `due_date` falls in the week. UI labels Assigned vs Due |
 | Multiple instructors per course | **Decided** | CourseInstructor |
-| Calendar week = Sunday–Saturday | **Decided** | Parent dashboard |
+| Calendar week = Sunday–Saturday | **Decided** | Parent dashboard. Home lists **due** this week by default; extra assigned under **More assigned this week**; print is the full dated week **plus each student’s bulletins first** |
 | Parent must have an account to view (P0) | **Decided** | Invite → signup/login; magic links later |
 | Parent profile stays active if enrollment ends (P0) | **Decided** | Defer visibility rules |
 | File types/sizes generous | **Decided** | Keep open |
@@ -670,6 +677,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | Multiple admins via email invite (claimable) | **Decided** | AdminInvite |
 | Auth: email + Google | **Decided** | Supabase Auth + Google Cloud OAuth — STACK.md |
 | P0 homework = dated materials in a unit | **Decided** | Parent "this week"; assignments next |
+| P0 bulletin = dated course notice with attached materials | **Decided** | Parent/student home; start–end availability; multi-student home/print grouped by student with bulletins first; course title emphasized; not email; not an assignment object |
 | Course Wright bills orgs (not parents) | **Decided** | SaaS; parent-pay is future |
 | SaaS packaging per teacher or per course | **Hypothesis** | Not decided |
 | Parents can receive a link to a specific resource | **Decided** | ShareLink to Material; auth required in P0 |

@@ -13,6 +13,7 @@ import {
   CourseOutlineToggle,
 } from "./components/CourseOutline";
 import { CourseSidebar } from "./components/CourseSidebar";
+import { CourseBulletinsSection } from "./components/CourseBulletinsSection";
 import { UnitCard } from "./components/UnitCard";
 import { useCourse } from "./hooks/useCourse";
 import { coursesPath } from "@/courses/model/paths";
@@ -30,6 +31,7 @@ export function CoursePage() {
     instructors,
     students,
     importantIds,
+    bulletins,
     loading,
     error,
     notFound,
@@ -145,7 +147,15 @@ export function CoursePage() {
           onClose={() => setOutlineOpen(false)}
         />
         <div className="min-w-0">
-          <section>
+          <CourseBulletinsSection
+            orgSlug={organization.slug}
+            courseId={course.id}
+            bulletins={bulletins}
+            canEdit={canEdit}
+            isParent={isParent}
+          />
+
+          <section className="mt-8">
             <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">
               Materials
             </h2>

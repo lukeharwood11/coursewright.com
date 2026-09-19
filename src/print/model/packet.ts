@@ -24,6 +24,8 @@ export type PrintMaterial = {
   /** Shown once at the start of a packed section (e.g. student name). */
   sectionTitle?: string;
   contextLines?: string[];
+  /** Bulletin notice in a this-week packet — empty body is OK. */
+  itemRole?: "bulletin";
   blocks: PrintBlock[];
   file: PrintFile | null;
 };

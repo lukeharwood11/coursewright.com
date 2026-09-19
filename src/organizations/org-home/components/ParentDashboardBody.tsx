@@ -1,8 +1,16 @@
+import { useState } from "react";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import {
   datedMaterialCount,
+  dueThisWeekStudents,
+  extraAssignedThisWeekCount,
+  extraAssignedThisWeekLabel,
+  parentHomeStudentSections,
   thisWeekStudents,
   type ParentDashboard,
 } from "@/parent/model/dashboard";
+import { Button } from "@/ui/Button";
+import { ParentBulletinList } from "./ParentBulletinList";
 import { ParentComingUpSection } from "./ParentComingUpSection";
 import { ParentImportantNowList } from "./ParentImportantNowList";
 import { ParentStudentTags } from "./ParentStudentTags";
@@ -23,6 +31,8 @@ export function ParentDashboardBody({
   preview?: boolean;
   onToggleStudent: (id: number) => void;
 }) {
+  const [showExtraAssigned, setShowExtraAssigned] = useState(false);
+
   if (!full.hasActiveEnrollment) {
     if (preview) {
       return (
@@ -42,10 +52,25 @@ export function ParentDashboardBody({
 
   const showTags = full.students.length > 1;
   const showStudentHeaders = visible.students.length > 1;
+  const extraCount = extraAssignedThisWeekCount(visible.students, visible.week);
+  const showExtra = showExtraAssigned && extraCount > 0;
   const datedCount = datedMaterialCount(visible.students);
-  const weekStudents = thisWeekStudents(visible.students);
+  const dueStudents = dueThisWeekStudents(visible.students, visible.week);
+  const dueCount = datedMaterialCount(dueStudents);
+  const weekStudents = showExtra
+    ? thisWeekStudents(visible.students)
+    : dueStudents;
+  const groupByStudent = showStudentHeaders;
+  const studentSections = groupByStudent
+    ? parentHomeStudentSections(
+        visible.students,
+        weekStudents,
+        visible.bulletins,
+      )
+    : [];
   const hasComingUp = Boolean(visible.nextAssignedItem || visible.nextDueItem);
   const hasImportantNow = visible.importantNow.length > 0;
+  const hasBulletins = visible.bulletins.length > 0;
   const attentionGrid = hasComingUp && hasImportantNow;
 
   if (showTags && selectedIds.length === 0) {
@@ -70,6 +95,14 @@ export function ParentDashboardBody({
           students={full.students}
           selectedIds={selectedIds}
           onToggle={onToggleStudent}
+        />
+      ) : null}
+
+      {hasBulletins && !groupByStudent ? (
+        <ParentBulletinList
+          orgSlug={orgSlug}
+          items={visible.bulletins}
+          showStudent={false}
         />
       ) : null}
 
@@ -102,25 +135,70 @@ export function ParentDashboardBody({
         <div className="mb-2">
           <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">This week</h2>
           <p className="mt-0.5 text-[13px] text-[var(--ink-faint)]">
-            Work assigned for this week, and anything due this week.
+            {extraCount > 0
+              ? "Work due this week. Other assigned work is under More assigned this week."
+              : "Work assigned for this week, and anything due this week."}
           </p>
         </div>
 
-        {datedCount === 0 ? (
+        {datedCount === 0 && !(groupByStudent && hasBulletins) ? (
           <p className="text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
             Nothing assigned or due this week. Check back soon, or open a course
             when something’s ready.
           </p>
         ) : (
           <div className="flex flex-col gap-5">
-            {weekStudents.map((student) => (
-              <ParentStudentWeek
-                key={student.id}
-                orgSlug={orgSlug}
-                student={student}
-                showHeader={showStudentHeaders}
-              />
-            ))}
+            {dueCount === 0 && extraCount > 0 && !showExtra ? (
+              <p className="text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
+                Nothing due this week.
+              </p>
+            ) : null}
+            {groupByStudent
+              ? studentSections.map((section) => (
+                  <ParentStudentWeek
+                    key={section.student.id}
+                    orgSlug={orgSlug}
+                    student={section.weekStudent ?? {
+                      ...section.student,
+                      courses: [],
+                    }}
+                    showHeader
+                    lead={
+                      section.bulletins.length > 0 ? (
+                        <ParentBulletinList
+                          orgSlug={orgSlug}
+                          items={section.bulletins}
+                          showStudent={false}
+                        />
+                      ) : null
+                    }
+                  />
+                ))
+              : weekStudents.map((student) => (
+                  <ParentStudentWeek
+                    key={student.id}
+                    orgSlug={orgSlug}
+                    student={student}
+                    showHeader={false}
+                  />
+                ))}
+            {extraCount > 0 ? (
+              <Button
+                variant="secondary"
+                className="self-start px-3 py-2 text-[13px]"
+                aria-expanded={showExtra}
+                onClick={() => setShowExtraAssigned((open) => !open)}
+              >
+                {showExtra ? (
+                  <ChevronUpIcon className="h-4 w-4" aria-hidden />
+                ) : (
+                  <ChevronDownIcon className="h-4 w-4" aria-hidden />
+                )}
+                {showExtra
+                  ? "Hide extra assigned work"
+                  : extraAssignedThisWeekLabel(extraCount)}
+              </Button>
+            ) : null}
           </div>
         )}
       </section>

@@ -46,10 +46,12 @@ export async function loadParentDashboard(
       enrollments: [],
       materials: [],
       importantNow: [],
+      bulletins: [],
     });
   }
 
-  const [studentsResult, enrollmentsResult, importantResult] = await Promise.all([
+  const [studentsResult, enrollmentsResult, importantResult, bulletinsResult] =
+    await Promise.all([
     db
       .from("student_profiles")
       .select("id, name, grade_level")
@@ -69,11 +71,19 @@ export async function loadParentDashboard(
         "id, material_id, course_id, material:materials(title, description, unit_id), course:courses(title)",
       )
       .eq("organization_id", organizationId),
+    db
+      .from("bulletins")
+      .select(
+        "id, title, body, start_date, end_date, course_id, course:courses(title), bulletin_materials(id)",
+      )
+      .eq("organization_id", organizationId)
+      .is("deleted_at", null),
   ]);
 
   if (studentsResult.error) throw new Error(studentsResult.error.message);
   if (enrollmentsResult.error) throw new Error(enrollmentsResult.error.message);
   if (importantResult.error) throw new Error(importantResult.error.message);
+  if (bulletinsResult.error) throw new Error(bulletinsResult.error.message);
 
   const enrollments = (enrollmentsResult.data ?? []).flatMap((row) => {
     const course = one(row.course);
@@ -141,6 +151,26 @@ export async function loadParentDashboard(
     ];
   });
 
+  const bulletins = (bulletinsResult.data ?? []).flatMap((row) => {
+    const course = one(row.course);
+    if (!course) return [];
+    const links = Array.isArray(row.bulletin_materials)
+      ? row.bulletin_materials
+      : [];
+    return [
+      {
+        id: row.id,
+        title: row.title,
+        body: row.body,
+        startDate: row.start_date,
+        endDate: row.end_date,
+        courseId: row.course_id,
+        courseTitle: course.title,
+        materialCount: links.length,
+      },
+    ];
+  });
+
   return buildParentDashboard({
     week,
     today,
@@ -152,5 +182,6 @@ export async function loadParentDashboard(
     enrollments,
     materials,
     importantNow,
+    bulletins,
   });
 }

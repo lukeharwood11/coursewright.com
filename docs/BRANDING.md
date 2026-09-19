@@ -183,6 +183,7 @@ Other drafts kept for reference (not in use):
 | Dated unit material (P0 homework) | **Material** (with dates) | not an assignment object yet |
 | Extra org admin | **Admin invite** | email, claimable |
 | Instructor priority flag | **Important now** | pinned, highlight, urgent |
+| Dated course notice with materials | **Bulletin** | available between start and end dates; not an assignment object; not email |
 | Course context blurb | **Summary** | **P1** — auto-drafted “what’s going on this week”; not the course **Description** |
 | Parent view (with account) | **Progress** | grades, notes, checklists, homework |
 | Person being taught | **Student** (profile) | student_profile, learner |
