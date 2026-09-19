@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { isStaffRole } from "@/organizations/model/role";
+import { familyVisibleMaterials, staffCanEdit } from "@/app/layouts/model/viewMode";
 import {
   courseQueryKeys,
   getCourse,
@@ -32,9 +32,9 @@ import type { CourseVisibility } from "@/courses/model/visibility";
 export function useCourse() {
   const { courseId: courseIdParam } = useParams();
   const courseId = courseIdParam ? Number(courseIdParam) : NaN;
-  const { organization, role } = useOrgShell();
+  const { organization, role, parentPresentation } = useOrgShell();
   const queryClient = useQueryClient();
-  const canEdit = isStaffRole(role);
+  const canEdit = staffCanEdit(role, parentPresentation);
 
   const courseQuery = useQuery({
     queryKey: courseQueryKeys.detail(courseId),
@@ -74,7 +74,13 @@ export function useCourse() {
 
   const course = courseQuery.data ?? null;
   const belongsHere = course?.organizationId === organization.id;
-  const materials = materialsQuery.data ?? [];
+  const familyCourseHidden =
+    parentPresentation &&
+    course != null &&
+    (course.visibility !== "published" || course.status !== "active");
+  const materials = parentPresentation
+    ? familyVisibleMaterials(materialsQuery.data ?? [])
+    : (materialsQuery.data ?? []);
   const units = unitsQuery.data ?? [];
   const importantIds = new Set(
     (importantQuery.data ?? []).map((row) => row.materialId),
@@ -125,8 +131,8 @@ export function useCourse() {
 
   return {
     organization,
-    role,
     canEdit,
+    isParent: parentPresentation,
     course: belongsHere ? course : null,
     copiedFromTitle: originQuery.data?.title ?? null,
     units,
@@ -157,7 +163,9 @@ export function useCourse() {
             reorderUnit.error?.message ??
             setVisibility.error?.message ??
             null,
-    notFound: !courseQuery.isLoading && (!course || !belongsHere),
+    notFound:
+      !courseQuery.isLoading &&
+      (!course || !belongsHere || familyCourseHidden),
     addUnit,
     reorderUnit,
     setVisibility,

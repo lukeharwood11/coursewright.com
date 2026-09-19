@@ -73,7 +73,14 @@ export function AppRoutes() {
         <Route path="/my/:orgSlug" element={<OrgLayout />}>
           <Route element={<OrgChrome />}>
             <Route index element={<OrgHomePage />} />
-            <Route path="settings" element={<OrgSettingsPage />} />
+            <Route
+              path="settings"
+              element={
+                <RequireStaff>
+                  <OrgSettingsPage />
+                </RequireStaff>
+              }
+            />
             <Route
               path="courses"
               element={

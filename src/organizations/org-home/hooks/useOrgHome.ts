@@ -2,66 +2,53 @@ import { useQuery } from "@tanstack/react-query";
 import { getProfile, profileQueryKeys } from "@/auth/api/profiles";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { firstNameFrom } from "@/auth/model/displayName";
-import {
-  getMembershipByOrgSlug,
-  orgQueryKeys,
-} from "@/organizations/databridge/memberships";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { isStaffRole } from "@/organizations/model/role";
 import {
   loadStaffDashboard,
   staffDashboardQueryKey,
 } from "@/organizations/databridge/staffDashboard";
 import { loadParentDashboard, parentQueryKeys } from "@/parent/databridge/dashboard";
-import { isStaffRole } from "@/organizations/model/role";
 
-export function useOrgHome(orgSlug: string | undefined) {
+export function useOrgHome() {
   const user = useAuthedUser();
-
-  const membershipQuery = useQuery({
-    queryKey: orgQueryKeys.bySlug(orgSlug ?? "", user.id),
-    queryFn: () => getMembershipByOrgSlug(user.id, orgSlug ?? ""),
-    enabled: Boolean(orgSlug),
-  });
+  const { organization, role, parentPresentation } = useOrgShell();
+  const staffView = isStaffRole(role);
 
   const profileQuery = useQuery({
     queryKey: profileQueryKeys.detail(user.id),
     queryFn: () => getProfile(user.id),
   });
 
-  const organization = membershipQuery.data?.organization ?? null;
-  const role = membershipQuery.data?.role ?? null;
-  const parentView = role === "parent";
-  const staffView = role ? isStaffRole(role) : false;
-
   const dashboardQuery = useQuery({
-    queryKey: parentQueryKeys.dashboard(organization?.id ?? 0, user.id),
-    queryFn: () => loadParentDashboard(organization!.id, user.id),
-    enabled: parentView && Boolean(organization),
+    queryKey: parentQueryKeys.dashboard(organization.id, user.id),
+    queryFn: () => loadParentDashboard(organization.id, user.id),
+    enabled: parentPresentation,
   });
 
   const staffDashboardQuery = useQuery({
-    queryKey: staffDashboardQueryKey(organization?.id ?? 0),
-    queryFn: () => loadStaffDashboard(organization!.id),
-    enabled: staffView && Boolean(organization),
+    queryKey: staffDashboardQueryKey(organization.id),
+    queryFn: () => loadStaffDashboard(organization.id),
+    enabled: staffView && !parentPresentation,
   });
 
   const profileName = profileQuery.data?.name ?? "";
   const profileEmail = profileQuery.data?.email ?? user.email ?? "";
+  const dashboard = dashboardQuery.data ?? null;
+  const parentViewIsPreview =
+    parentPresentation && staffView && dashboard != null && dashboard.students.length === 0;
 
   return {
-    loading: membershipQuery.isLoading,
-    error: membershipQuery.error ? membershipQuery.error.message : null,
-    notFound: !membershipQuery.isLoading && !membershipQuery.data,
     organization,
     role,
-    isStaff: staffView,
+    parentPresentation,
+    parentViewIsPreview,
     firstName: firstNameFrom(profileName, profileEmail),
-    profileName,
-    profileEmail,
-    dashboard: dashboardQuery.data ?? null,
-    dashboardLoading: parentView && dashboardQuery.isLoading,
+    dashboard,
+    dashboardLoading: parentPresentation && dashboardQuery.isLoading,
     dashboardError: dashboardQuery.error ? dashboardQuery.error.message : null,
     staffDashboard: staffDashboardQuery.data ?? null,
-    staffDashboardLoading: staffView && staffDashboardQuery.isLoading,
+    staffDashboardLoading: staffView && !parentPresentation && staffDashboardQuery.isLoading,
     staffDashboardError: staffDashboardQuery.error
       ? staffDashboardQuery.error.message
       : null,

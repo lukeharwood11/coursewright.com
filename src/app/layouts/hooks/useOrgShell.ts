@@ -12,9 +12,17 @@ import {
   listClasses,
 } from "@/roster/databridge/classes";
 import { buildParentNav, buildStaffNav } from "../model/nav";
+import {
+  canUseStaffViewToggle,
+  familyVisibleCourses,
+  staffShowsParentPresentation,
+} from "../model/viewMode";
+import type { AppShellValue } from "../OrgShellContext";
+import { useStaffViewMode } from "../stores/viewMode";
 
 export function useOrgShellData(orgSlug: string | undefined) {
   const user = useAuthedUser();
+  const { staffViewMode, setStaffViewMode } = useStaffViewMode(orgSlug);
 
   const membershipQuery = useQuery({
     queryKey: orgQueryKeys.bySlug(orgSlug ?? "", user.id),
@@ -31,6 +39,8 @@ export function useOrgShellData(orgSlug: string | undefined) {
   const role = membershipQuery.data?.role ?? null;
   const isStaff = role ? isStaffRole(role) : false;
   const organizationId = organization?.id;
+  const parentPresentation = staffShowsParentPresentation(role, staffViewMode);
+  const showStaffViewToggle = canUseStaffViewToggle(role);
 
   const coursesQuery = useQuery({
     queryKey: courseQueryKeys.list(organizationId ?? 0),
@@ -41,13 +51,16 @@ export function useOrgShellData(orgSlug: string | undefined) {
   const classesQuery = useQuery({
     queryKey: classQueryKeys.list(organizationId ?? 0),
     queryFn: () => listClasses(organizationId!),
-    enabled: isStaff && Boolean(organizationId),
+    enabled: isStaff && Boolean(organizationId) && !parentPresentation,
   });
 
   const courseRows = Array.isArray(coursesQuery.data) ? coursesQuery.data : [];
+  const navCourses = parentPresentation
+    ? familyVisibleCourses(courseRows)
+    : courseRows;
 
   const lists = {
-    courses: courseRows.map((course) => ({
+    courses: navCourses.map((course) => ({
       id: String(course.id),
       title: course.title,
     })),
@@ -59,18 +72,15 @@ export function useOrgShellData(orgSlug: string | undefined) {
 
   const navSections =
     organization && role
-      ? isStaff
-        ? buildStaffNav(organization.slug, lists)
-        : buildParentNav(organization.slug, lists)
+      ? parentPresentation
+        ? buildParentNav(organization.slug, lists)
+        : buildStaffNav(organization.slug, lists)
       : [];
 
   const profileName = profileQuery.data?.name ?? "";
   const profileEmail = profileQuery.data?.email ?? user.email ?? "";
 
-  return {
-    loading: membershipQuery.isLoading,
-    error: membershipQuery.error ? membershipQuery.error.message : null,
-    notFound: !membershipQuery.isLoading && !membershipQuery.data,
+  const value: AppShellValue = {
     brandLabel: organization?.name ?? "Course Wright",
     brandHref: organization ? `/my/${organization.slug}` : "/my",
     navLabel: "Organization",
@@ -79,6 +89,17 @@ export function useOrgShellData(orgSlug: string | undefined) {
     profileName,
     profileEmail,
     navSections,
-    showSearch: isStaff,
+    showSearch: isStaff && !parentPresentation,
+    parentPresentation,
+    showStaffViewToggle,
+    staffViewMode,
+    setStaffViewMode,
+  };
+
+  return {
+    loading: membershipQuery.isLoading,
+    error: membershipQuery.error ? membershipQuery.error.message : null,
+    notFound: !membershipQuery.isLoading && !membershipQuery.data,
+    value,
   };
 }

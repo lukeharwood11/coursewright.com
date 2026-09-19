@@ -16,7 +16,7 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 
 - Requires org **owner or admin** to save identity / grade scheme / type.
 - Instructors see the same fields, disabled.
-- Parents are told they cannot change settings.
+- Parents (and staff **Parent view**) are sent back to [ORG_HOME](./ORG_HOME.md).
 - Save org name/metadata; changing **permalink slug** shows a warning that existing links break (no auto-redirect in P0) and requires an explicit confirmation.
 - **Save** and **Cancel** stay in the page header (upper right). Save is disabled when nothing changed; Cancel goes back (confirms first if there are unsaved changes).
 - Set org **type** (co-op / micro-school) and **grade scheme** (K–12 / custom labels).

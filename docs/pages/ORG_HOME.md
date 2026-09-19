@@ -13,7 +13,7 @@ Organization home / dashboard. For parents this **is** the P0 parent dashboard (
 
 ## Behavior
 
-Same URL for all roles; chrome and body switch by membership role.
+Same URL for all roles; chrome and body switch by membership role. Owners, admins, and instructors also get a **Teacher / Parent view** toggle in org chrome. **Parent view** shows this parent dashboard (real this-week if they have linked students; otherwise a preview). Parent-only users do not see the toggle.
 
 ### Parent
 
@@ -35,7 +35,8 @@ Same URL for all roles; chrome and body switch by membership role.
 - **This week**: week label; org-wide **Important now**; per active course dated-material counts for the Sunday–Saturday week (staff sees active materials, including unpublished).
 - **People**: student + class counts → [ORG_ROSTER](./ORG_ROSTER.md).
 - Switch org returns to org picker.
-- **Search** in product chrome (staff): Postgres FTS for courses and materials, plus staff pages by title; overlay only; dedicated route still TBD.
+- **Teacher / Parent view** in the header: Parent view swaps this dashboard for the parent home (and parent chrome). Staff-only pages (roster, course list, settings) return here while Parent view is on.
+- **Search** in product chrome (staff, Teacher view): Postgres FTS for courses and materials, plus staff pages by title; overlay only; dedicated route still TBD.
 - **P1:** templates in chrome.
 
 ## Data shown
@@ -85,6 +86,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 - Collapsible **org sidebar** for Home, Courses, Roster (nested class names when they exist), Settings (course names nested when present)
 - Header: org name, week label, **Create course**
+- **Teacher / Parent view** (staff only) in org chrome
 - Getting started (when needed)
 - Needs attention (when needed)
 - Courses preview + View all
@@ -109,6 +111,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Open attention targets (course or course roster)
 - Open roster / settings
 - Search org pages, courses, materials
+- Switch **Teacher / Parent view** (header)
 
 ## Links to
 

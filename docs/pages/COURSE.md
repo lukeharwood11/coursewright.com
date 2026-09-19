@@ -14,7 +14,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 
 ## Behavior
 
-- Loads one course instance; instructor chrome for builders, simpler read chrome for parents.
+- Loads one course instance; instructor chrome for builders, simpler read chrome for parents (including staff **Parent view**).
 - Browse **top-level materials** (no unit) **above** ordered units; materials may also nest under units.
 - Optional **outline** panel (file-tree of top-level materials + units with nested materials); open by default on large screens (`lg`+), closed on smaller screens; **Show outline** / hide so it is not always open.
 - Add unit / add material (top-level or into a unit) when permitted.
@@ -60,6 +60,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 
 - Same URL tree; fewer edit controls; print still obvious; no builder clutter
 - Unpublished courses are not visible (same URL 404s)
+- Staff **Parent view** uses this variant (unpublished materials omitted; no edit)
 - Parent/student home tags do not apply here — this page is one course
 
 ## Links to
