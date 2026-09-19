@@ -45,10 +45,10 @@ Same URL for all roles; chrome and body switch by membership role.
 - Org **name**
 - Week range label (Sun–Sat dates)
 - **Student tags** when more than one linked student (active / inactive)
-- **Coming up**: **Assigned next** and **Due next** (title, labeled date, course, student when more than one is active)
 - **Important now** items: material title, description (when set), course/student context, link target (courses of active students)
+- **Coming up**: **Assigned next** and **Due next** (title, labeled date, course, student when more than one is active)
 - Per **student profile** (when more than one is active): name, grade badge TBD
-- Per student → **courses** → this week’s **materials** (title; **Assigned** date in slate; **Due** date in amber). One active student: same course/material list without the extra student header.
+- Per student → **courses that have this week’s materials** (empty course shells omitted) → **materials** (title; **Assigned** date in slate; **Due** date in amber). One active student: same course/material list without the extra student header.
 - Print affordances (not data fields)
 
 ### Instructor / owner / admin
@@ -67,12 +67,11 @@ Same URL for all roles; chrome and body switch by membership role.
 Tech-averse parents must understand what’s going on immediately — which child, what materials, what’s due.
 
 - Top: org context + account affordance ([STYLE_GUIDE.md](../STYLE_GUIDE.md) parent pattern) → [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
-- Desktop: simpler collapsible sidebar (This week, their courses, Progress)
+- Desktop: simpler collapsible sidebar (This week, their courses, Progress). Body uses remaining width — not a centered narrow column.
 - Greeting + **current calendar week** (Sunday–Saturday) + **Print this week**
 - **Student tags** (multi-student parents only) — tap to include/exclude a student
-- **Coming up** — Assigned next + Due next (clear labels; no card chrome)
-- **Important now** — instructor-flagged items (amber treatment)
-- **This week** — materials assigned and/or due in the week; **Assigned** vs **Due** labels
+- **Important now** — instructor-flagged items (amber treatment), then **Coming up** — Assigned next + Due next (clear labels). On desktop, those two sit side by side when both exist.
+- **This week** — materials assigned and/or due in the week; **Assigned** vs **Due** labels. Only courses with dated work this week; two-column course cards on larger screens.
 - Per student → course → materials when more than one student is active; each material has **Print**
 - Bottom tabs concept: This week | Progress (Progress **P1** — dim/inactive until then)
 - Links into material / unit / course in the same URL tree (simpler chrome)

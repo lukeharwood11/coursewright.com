@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   buildParentDashboard,
+  datedMaterialCount,
   filterParentDashboard,
+  thisWeekStudents,
   type ParentDashboardSource,
 } from "./dashboard.ts";
 import { calendarWeekContaining, isInCalendarWeek } from "./thisWeek.ts";
@@ -170,6 +172,84 @@ test("filterParentDashboard scopes coming up by selected student", () => {
   assert.equal(filtered.nextAssignedItem?.material.title, "Art project");
   assert.equal(filtered.nextDueItem?.material.title, "Art project");
   assert.equal(filtered.students.length, 1);
+});
+
+test("thisWeekStudents omits courses with no dated materials", () => {
+  const dashboard = buildParentDashboard(
+    source({
+      enrollments: [
+        {
+          studentId: 1,
+          courseId: 10,
+          courseTitle: "Science",
+          courseStatus: "active",
+        },
+        {
+          studentId: 1,
+          courseId: 12,
+          courseTitle: "Music",
+          courseStatus: "active",
+        },
+      ],
+      materials: [
+        {
+          id: 1,
+          title: "Lab write-up",
+          scheduledDate: "2026-09-16",
+          dueDate: null,
+          courseId: 10,
+          unitId: null,
+          unitStart: null,
+          unitEnd: null,
+        },
+      ],
+    }),
+  );
+
+  assert.equal(dashboard.students[0].courses.length, 2);
+  assert.equal(datedMaterialCount(dashboard.students), 1);
+
+  const week = thisWeekStudents(dashboard.students);
+  assert.equal(week.length, 1);
+  assert.equal(week[0].courses.length, 1);
+  assert.equal(week[0].courses[0].title, "Science");
+});
+
+test("thisWeekStudents keeps a student with no active course", () => {
+  const dashboard = buildParentDashboard(
+    source({
+      students: [
+        { id: 1, name: "Maya", gradeLevel: "4" },
+        { id: 2, name: "Eli", gradeLevel: "2" },
+      ],
+      enrollments: [
+        {
+          studentId: 1,
+          courseId: 10,
+          courseTitle: "Science",
+          courseStatus: "active",
+        },
+      ],
+      materials: [
+        {
+          id: 1,
+          title: "Lab write-up",
+          scheduledDate: "2026-09-16",
+          dueDate: null,
+          courseId: 10,
+          unitId: null,
+          unitStart: null,
+          unitEnd: null,
+        },
+      ],
+    }),
+  );
+
+  const week = thisWeekStudents(dashboard.students);
+  assert.equal(week.length, 2);
+  assert.equal(week[1].name, "Eli");
+  assert.equal(week[1].hasActiveEnrollment, false);
+  assert.equal(week[1].courses.length, 0);
 });
 
 test("calendarWeekContaining builds a Sunday–Saturday week", () => {
