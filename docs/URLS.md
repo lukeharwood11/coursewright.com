@@ -31,7 +31,10 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | [HOME](./pages/HOME.md) | `/` | Sales landing — P0 |
 | [ABOUT](./pages/ABOUT.md) | `/about` | P0 |
 | [PRICING](./pages/PRICING.md) | `/pricing` | P0 |
-| [CONSTRUCTION](./pages/CONSTRUCTION.md) | `/contact`, `/privacy`, `/terms`, `/cookies` | Shared footer placeholder until copy exists. Intended privacy outline: [PRIVACY](./pages/PRIVACY.md) |
+| [CONTACT](./pages/CONTACT.md) | `/contact` | Public emails (`hi@` / `support@`; `legal@` only on privacy) |
+| [PRIVACY](./pages/PRIVACY.md) | `/privacy` | Privacy policy (incl. PostHog disclosure) |
+| [COOKIES](./pages/COOKIES.md) | `/cookies` | Cookie policy (essential + PostHog when enabled) |
+| [CONSTRUCTION](./pages/CONSTRUCTION.md) | `/terms` | Shared footer placeholder until copy exists |
 
 ---
 

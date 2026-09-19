@@ -5,7 +5,8 @@
 # Usage: ./scripts/build-spa.sh <testing|production>
 #
 # testing: Terraform branch outputs only — never parent/main.
-# PostHog: VITE_POSTHOG_* env if set, else .env.testing.
+# PostHog: production tier only (VITE_POSTHOG_* from CI / env). Local +
+# testing builds omit the key so the SPA no-ops capture.
 # Exports VITE_* so empty CI env vars cannot override .env.production (Vite
 # gives process env higher priority than dotenv files).
 #
@@ -52,11 +53,21 @@ VITE_SUPABASE_URL=${URL}
 VITE_SUPABASE_ANON_KEY=${KEY}
 EOF
 
-POSTHOG_KEY="${VITE_POSTHOG_KEY:-}"
-POSTHOG_HOST="${VITE_POSTHOG_HOST:-}"
-if [[ -z "$POSTHOG_KEY" && -f "${REPO_ROOT}/.env.testing" ]]; then
-  POSTHOG_KEY="$(grep -E '^VITE_POSTHOG_KEY=' "${REPO_ROOT}/.env.testing" | head -1 | cut -d= -f2- || true)"
-  POSTHOG_HOST="$(grep -E '^VITE_POSTHOG_HOST=' "${REPO_ROOT}/.env.testing" | head -1 | cut -d= -f2- || true)"
+SITE_DOMAIN="$(tf_output_raw site_domain)"
+if [[ -z "$SITE_DOMAIN" ]]; then
+  if [[ "$TIER" == "production" ]]; then
+    SITE_DOMAIN="coursewright.com"
+  else
+    SITE_DOMAIN="beta.coursewright.com"
+  fi
+fi
+printf 'VITE_PUBLIC_HOST=%s\n' "$SITE_DOMAIN" >> "$ENV_FILE"
+
+POSTHOG_KEY=""
+POSTHOG_HOST=""
+if [[ "$TIER" == "production" ]]; then
+  POSTHOG_KEY="${VITE_POSTHOG_KEY:-}"
+  POSTHOG_HOST="${VITE_POSTHOG_HOST:-}"
 fi
 if [[ -n "$POSTHOG_KEY" ]]; then
   printf 'VITE_POSTHOG_KEY=%s\n' "$POSTHOG_KEY" >> "$ENV_FILE"
@@ -69,16 +80,18 @@ fi
 # vars.VITE_* which would otherwise wipe the values written above.
 export VITE_SUPABASE_URL="$URL"
 export VITE_SUPABASE_ANON_KEY="$KEY"
+export VITE_PUBLIC_HOST="$SITE_DOMAIN"
 if [[ -n "$POSTHOG_KEY" ]]; then
   export VITE_POSTHOG_KEY="$POSTHOG_KEY"
   if [[ -n "$POSTHOG_HOST" ]]; then
     export VITE_POSTHOG_HOST="$POSTHOG_HOST"
   fi
 else
+  # Ensure testing / missing-key builds never inherit CI or shell PostHog vars.
   unset VITE_POSTHOG_KEY VITE_POSTHOG_HOST || true
 fi
 
-step "Build SPA (${TIER} → ${URL})"
+step "Build SPA (${TIER} → ${URL}; host ${SITE_DOMAIN})"
 cd "$REPO_ROOT"
 npm run build
 green "Built dist/ for ${TIER}."

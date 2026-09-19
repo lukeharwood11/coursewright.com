@@ -32,19 +32,21 @@ Say that Course Wright is an **invite-only pilot**. Do not present plan options 
 - If you’ve been invited: create an account and start an organization
 - CTA → [SIGNUP](./SIGNUP.md)
 - Link to [ABOUT](./ABOUT.md), [HOME](./HOME.md)
+- Pilot partnership interest → email `hi@coursewright.com` (see [CONTACT](./CONTACT.md))
 - In-app billing UI is **P1**; this page does **not** show per-teacher / per-course options
 
 ## Primary actions
 
 - Sign up (if invited)
-- Contact / questions — TBD if needed
+- Email `hi@coursewright.com` for pilot / partnership interest
 
 ## Links to
 
 - [SIGNUP](./SIGNUP.md) — CTA
 - [ABOUT](./ABOUT.md) — about
 - [HOME](./HOME.md) — home
-- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONSTRUCTION](./CONSTRUCTION.md) (`/contact`, `/privacy`, `/terms`, `/cookies`)
+- [CONTACT](./CONTACT.md) — email directory (mailto `hi@`)
+- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [COOKIES](./COOKIES.md), [CONSTRUCTION](./CONSTRUCTION.md) (`/terms`)
 
 ## Notes
 

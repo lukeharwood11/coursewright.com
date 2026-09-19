@@ -10,7 +10,7 @@ export type FooterColumn = {
   links: FooterLink[];
 };
 
-/** Site-footer destinations. Construction pages reuse this so the lists stay in sync. */
+/** Site-footer destinations. `ready: false` routes render ConstructionPage. */
 export const footerColumns: FooterColumn[] = [
   {
     heading: "Product",
@@ -30,10 +30,10 @@ export const footerColumns: FooterColumn[] = [
   {
     heading: "Legal",
     links: [
-      { to: "/contact", label: "Contact us", ready: false },
-      { to: "/privacy", label: "Privacy", ready: false },
+      { to: "/contact", label: "Contact us", ready: true },
+      { to: "/privacy", label: "Privacy", ready: true },
       { to: "/terms", label: "Terms of use", ready: false },
-      { to: "/cookies", label: "Cookie policy", ready: false },
+      { to: "/cookies", label: "Cookie policy", ready: true },
     ],
   },
 ];
