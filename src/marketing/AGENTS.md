@@ -21,7 +21,7 @@ Public marketing site: home, about, pricing, contact, privacy, terms, cookies, h
 - Do not invent remaining legal copy — unfinished footer pages share [CONSTRUCTION](../../docs/pages/CONSTRUCTION.md).
 - Keep footer links in `model/footerNav.ts` so the footer and construction routes stay in sync (`ready: false` → ConstructionPage). Header and footer both link to `/docs` as **Help**.
 - When adding a public page that should be crawled, add it to `model/publicSeo.ts` (sitemap + meta). Do not invent crawlable URLs for `/my`, `/invite`, or `/logos`.
-- Privacy / terms / cookies are **also** prerendered to static HTML at build time (`scripts/prerender-legal-html.ts`) so non-JS verifiers see the policy body. Keep React pages and model copy as the source of truth — do not hand-edit `dist/privacy` etc.
+- Privacy / terms / cookies are **also** prerendered to static HTML at build time (`scripts/prerender-legal-html.ts`) so non-JS verifiers see the policy body. The homepage (`index.html`) is prerendered with app description + privacy/terms links for Google OAuth branding. Keep React pages and model copy as the source of truth — do not hand-edit `dist/privacy` etc.
 - Primary CTA → `/signup`. Sign in → `/login`. When signed in, marketing header shows **My Account** → `/my` instead of Sign in / Sign up.
 - Public copy stays general. Do **not** name specific third-party tools (WhatsApp, Outlook, SharePoint, Google Classroom, etc.) — that patchwork is internal inspiration, not site copy. Naming infrastructure providers on legal pages (Supabase, AWS, PostHog, Google sign-in) is intentional.
 

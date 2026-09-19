@@ -16,7 +16,8 @@ Publish the privacy policy for Course Wright.
 - Public legal page; renders the privacy policy body.
 - Static copy only — no product CRUD.
 - Highlights product analytics via **PostHog** when enabled (page views / leaves, client error reporting), plus standard account, org content, and hosting practices (Supabase, AWS, Google sign-in).
-- Includes a dedicated **Google user data** section (access / use / store / share / retain-delete / Limited Use) required for Google OAuth branding verification.
+- Opens with **App data collection and usage**, then dedicated Google headings (access / use / store / share / retain-delete / Limited Use) for OAuth branding verification.
+- Homepage is also prerendered with app description + privacy/terms links (Google requires the privacy policy to be linked from the homepage for non-JS crawlers).
 - Site hostname in the policy body comes from `VITE_PUBLIC_HOST` (`coursewright.com` or `beta.coursewright.com`).
 
 ## Data shown
