@@ -5,8 +5,8 @@ import { useOrgShell } from "@/app/layouts/OrgShellContext";
 
 /** UX gate — RLS is the real access control. */
 export function RequireStaff({ children }: { children: ReactNode }) {
-  const { organization, role } = useOrgShell();
-  if (!isStaffRole(role)) {
+  const { organization, role, parentPresentation } = useOrgShell();
+  if (!isStaffRole(role) || parentPresentation) {
     return <Navigate to={`/my/${organization.slug}`} replace />;
   }
   return children;

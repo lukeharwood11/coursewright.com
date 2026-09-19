@@ -2,6 +2,7 @@ import { createContext, useContext } from "react";
 import type { OrganizationSummary } from "@/organizations/databridge/memberships";
 import type { OrgRole } from "@/organizations/model/role";
 import type { NavSection } from "./model/nav";
+import type { StaffViewMode } from "./model/viewMode";
 
 export type AppShellValue = {
   brandLabel: string;
@@ -13,6 +14,10 @@ export type AppShellValue = {
   profileEmail: string;
   navSections: NavSection[];
   showSearch: boolean;
+  parentPresentation: boolean;
+  showStaffViewToggle: boolean;
+  staffViewMode: StaffViewMode;
+  setStaffViewMode: (mode: StaffViewMode) => void;
 };
 
 export const OrgShellContext = createContext<AppShellValue | null>(null);

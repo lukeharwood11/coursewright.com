@@ -22,7 +22,7 @@ View (and edit) a single material placement — the thing parents open from this
 - Instructors: edit via `…/edit`, set important now, **publish / unpublish**, share resource link, print, version/revert, soft-delete.
 - **Published:** green **Published** badge (check) next to the title for staff; no “families can see this” banner. **Unpublish** sits at the bottom of the material view/edit.
 - **Unpublished:** amber warning banner + Publish; unpublished badge next to title.
-- Parents: read + print + play media for **published** materials; unpublished is not listed and not openable (RLS); no builder chrome; account required (P0).
+- Parents: read + print + play media for **published** materials; unpublished is not listed and not openable (RLS); no builder chrome; account required (P0). Staff **Parent view** matches that presentation (quizzes show questions only).
 - View URL is the material path without `/edit`; edit appends `/edit`.
 - Print → [PRINT](./PRINT.md) (`…/print`) → generated PDF in-app preview → Download / Print; no export wizard.
 - Instance content promote to template is **P1** (opt-in); overridden copies do not receive template sync for that resource.

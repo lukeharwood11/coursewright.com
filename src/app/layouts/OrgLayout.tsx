@@ -17,24 +17,12 @@ export function OrgLayout() {
     );
   }
 
-  if (shell.notFound || !shell.organization || !shell.role) {
+  if (shell.notFound || !shell.value.organization || !shell.value.role) {
     return <OrgNotFound error={shell.error} />;
   }
 
   return (
-    <OrgShellContext.Provider
-      value={{
-        brandLabel: shell.brandLabel,
-        brandHref: shell.brandHref,
-        navLabel: shell.navLabel,
-        organization: shell.organization,
-        role: shell.role,
-        profileName: shell.profileName,
-        profileEmail: shell.profileEmail,
-        navSections: shell.navSections,
-        showSearch: shell.showSearch,
-      }}
-    >
+    <OrgShellContext.Provider value={shell.value}>
       <Outlet context={auth} />
     </OrgShellContext.Provider>
   );

@@ -65,7 +65,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Student profiles** | Org-level student records — no dedicated student role required | shipped | Org roster create/edit + profile page; **multiple parent invites** + optional **student email** (same claim path). Parent invite copy-link on profile and course roster. Created when first added to a course or class; dedicated student role later (P2) |
 | **Classes** | Org-scoped **group of students** — separate from a Course | shipped | Create class + batch add/remove members. Class is a **batch preset** into course enroll (not a live link) |
 | **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | shipped | List-first org / class / course roster with **batch select** enroll/add; multiple parent invites + optional student email; parent invite is copyable claim link (no email send) |
-| **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches parent vs staff home. **P0 roles:** owner, admin, instructor, parent. Owner vs admin = billing. Staff change/remove is **membership-only** — materials/roster stay enrollment-gated |
+| **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches parent vs staff home. **P0 roles:** owner, admin, instructor, parent. Owner vs admin = billing. Staff change/remove is **membership-only** — materials/roster stay enrollment-gated. **Staff parent view** in progress (header toggle) |
 | **Admin account management** | Admins invite, **change roles**, and **remove** admins/instructors | shipped | Org settings updates `memberships` only (admin ↔ instructor; remove admin/instructor). Last owner/admin blocked in DB + UI. Does **not** add a staff-role gate on materials/roster RLS. Invite/copy-link unchanged |
 | **Homework (P0)** | Dated materials in a unit — appear on parent "this week" when dates fall in Sun–Sat | shipped | Optional **assignment date** (`scheduled_date`) and optional **due date** (`due_date`). Parent home shows **Assigned next** / **Due next**; This week includes either date in range. **Not** a separate assignment type |
 | **Course builder** | Create and organize **courses** within an org (no templates in P0) | shipped | Create, course home, units, materials (page/link/file), print/share chrome; collapsible course outline (units + materials tree) |
@@ -90,9 +90,10 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Parent access (link or account)** | Parent clicks invite link **or** signs up / logs in with the **same email** | shipped | Unified `/invite/<token>` claim; course access still requires enrollment |
 | **Parent org membership** | Parent becomes a parent in the org when they claim an invite | shipped | Membership created on claim; materials still gated on enrollment + published course |
 | **Share resources with parents** | Share course content and files with enrolled families | shipped | Copy material URL (account required). Dedicated share-entry path still TBD |
-| **Parent dashboard** | This calendar week's dated materials, **Up next**, **Important now**, student tags, **Print this week** for active students | in progress | Parent/student home; student login still uses parent claim path |
+| **Parent dashboard** | This calendar week's dated materials, **Up next**, **Important now**, student tags, **Print this week** for active students | in progress | Parent/student home; student login still uses parent claim path. Staff can open this home via **Parent view** |
 | **Resource links** | Send a parent a link that opens a **specific resource** (after they log in) | shipped | Copy signed-in material URL; `share_links` row recorded. Public entry path still TBD |
 | **Instructor "important now"** | Flag items needing immediate parent attention | shipped | Toggle on material; parent home surfaces it |
+| **Staff parent view** | Owners, admins, and instructors switch most org pages to parent presentation | in progress | Header **Teacher** / **Parent view**. Real this-week if they have linked students; otherwise a preview. Hidden for parent-only users. SPA + unit tests in; browser E2E against testing Auth blocked by email send rate limit |
 
 ### Roster management (P0)
 
@@ -385,6 +386,8 @@ Do **not** ship a separate “Export” product name in P0. Print *is* the path 
 | **Student tags** | P0 | When a parent has **more than one** student, tags at the top toggle who is active. Deselecting a student hides their work. One student (or a student viewing themselves) skips the tags. |
 
 **Student view:** Same home as a parent, without multi-student tags/sections. Optional student email is invited with the parent claim path so that person only sees that one student. Dedicated student membership role remains **P2**.
+
+**Staff parent view (P0):** Owners, admins, and instructors get a **Teacher** / **Parent view** control in org chrome (not parent-only users). **Parent view** uses the same parent chrome and read-only course / unit / material / print presentation. If that staff member has `parent_student_links` in the org, home is their real parent dashboard. If not, home is a preview (empty this-week, with a short explanation). Staff-only destinations (roster, course list, settings, material edit) return to org home while Parent view is on. Default is Teacher. Print packets omit the answer key in Parent view.
 
 **Links parents can receive:**
 
@@ -687,6 +690,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | Course roster UI: list-first + batch Enroll students | **Decided** | Multi-select + optional Class preset; batch create-and-enroll |
 | Roster = page noun; Enroll/Unenroll = course verbs | **Decided** | BRANDING; class/org use Add/Remove |
 | Quiz authoring + correct answers + print (blank + answer key) | **Decided** | **P0** — quiz is a **block on a page** (Lexical `quiz` node). Not a material kind. Many per page. Whole-page print; parent/student = questions only; staff = answer key. No roster required. No `/quiz` routes |
+| Staff parent view (header toggle) | **Decided** | All staff (owner/admin/instructor). Real parent home if linked students; otherwise a preview. Hidden for parent-only users. Default Teacher. Parent view print omits answer key |
 | Quiz online take + autograde | **Decided** | **P1** — uses answers stored in P0 |
 | Page as composable entity (blocks) | **Decided** | Material is the page; no separate Page table required in P0 |
 | Forms as a content kind | **In design** | Job-to-be-done + who responds TBD |

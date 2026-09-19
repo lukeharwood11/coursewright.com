@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { BillingPlaceholder } from "@/billing";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
@@ -30,28 +30,8 @@ export function OrgSettingsPage() {
     );
   }
 
-  if (shell.role === "parent") {
-    return (
-      <div className="max-w-lg px-5 py-8 md:px-8">
-        <h1
-          className="text-[24px] font-semibold text-[var(--ink)]"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Organization settings
-        </h1>
-        <p className="mt-2 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-          Only owners and admins can change organization settings.
-        </p>
-        <p className="mt-4 text-[13px]">
-          <Link
-            to={`/my/${shell.organization.slug}`}
-            className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-          >
-            Back to {shell.organization.name}
-          </Link>
-        </p>
-      </div>
-    );
+  if (shell.parentPresentation) {
+    return <Navigate to={`/my/${shell.organization.slug}`} replace />;
   }
 
   if (!settings.organization || !settings.role) {

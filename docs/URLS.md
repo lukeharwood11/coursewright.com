@@ -143,7 +143,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 
 ## Parent experience
 
-Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / unit / material tree. No separate `/home` path in P0.
+Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / unit / material tree. No separate `/home` path in P0. Staff can switch to that presentation with **Parent view** in org chrome.
 
 ---
 

@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { getCourse } from "@/courses/databridge/courses";
-import { isStaffRole } from "@/organizations/model/role";
+import { staffCanEdit } from "@/app/layouts/model/viewMode";
 import { listBlocks } from "@/materials/databridge/blocks";
 import { fileSignedUrl, getFile } from "@/materials/databridge/files";
 import {
@@ -28,10 +28,10 @@ export function useMaterial() {
   const courseId = params.courseId ? Number(params.courseId) : NaN;
   const unitId = params.unitId ? Number(params.unitId) : null;
   const materialId = params.materialId ? Number(params.materialId) : NaN;
-  const { organization, role } = useOrgShell();
+  const { organization, role, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
   const queryClient = useQueryClient();
-  const canEdit = isStaffRole(role);
+  const canEdit = staffCanEdit(role, parentPresentation);
 
   const materialQuery = useQuery({
     queryKey: materialQueryKeys.detail(materialId),
@@ -93,6 +93,13 @@ export function useMaterial() {
     material?.courseId === courseId &&
     course?.organizationId === organization.id &&
     (unitId == null || material.unitId === unitId);
+  const familyHidden =
+    parentPresentation &&
+    material != null &&
+    course != null &&
+    (course.visibility !== "published" ||
+      course.status !== "active" ||
+      material.visibility !== "published");
 
   function invalidate() {
     void queryClient.invalidateQueries({
@@ -152,7 +159,7 @@ export function useMaterial() {
   return {
     organization,
     canEdit,
-    isParent: role === "parent",
+    isParent: parentPresentation,
     courseId,
     unitId: unitId && Number.isFinite(unitId) ? unitId : material?.unitId ?? null,
     materialId,
@@ -168,7 +175,10 @@ export function useMaterial() {
     loading: materialQuery.isLoading || courseQuery.isLoading,
     blocksLoading: blocksQuery.isLoading,
     error: materialQuery.error?.message ?? courseQuery.error?.message ?? null,
-    notFound: !materialQuery.isLoading && (!material || !belongsHere),
+    notFound:
+      !materialQuery.isLoading &&
+      !courseQuery.isLoading &&
+      (!material || !belongsHere || familyHidden),
     toggleImportant,
     remove,
     restore,

@@ -21,7 +21,7 @@ export function CoursePage() {
   const {
     organization,
     canEdit,
-    role,
+    isParent,
     course,
     copiedFromTitle,
     units,
@@ -37,7 +37,6 @@ export function CoursePage() {
     reorderUnit,
     setVisibility,
   } = useCourse();
-  const isParent = role === "parent";
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
   const [addingUnit, setAddingUnit] = useState(false);
   const [unitTitle, setUnitTitle] = useState("");

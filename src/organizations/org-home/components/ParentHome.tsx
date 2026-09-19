@@ -16,12 +16,14 @@ export function ParentHome({
   dashboard,
   loading,
   error,
+  preview = false,
 }: {
   firstName: string;
   orgSlug: string;
   dashboard: ParentDashboard | null;
   loading: boolean;
   error: string | null;
+  preview?: boolean;
 }) {
   const [activeIds, setActiveIds] = useState<number[] | null>(null);
   const weekLabel = dashboard?.week.label ?? "This week";
@@ -63,6 +65,14 @@ export function ParentHome({
         )}
       </header>
 
+      {preview ? (
+        <p className="mt-4 rounded-[10px] border border-[var(--slate)] bg-[var(--slate-tint)] px-3.5 py-3 text-[13.5px] leading-relaxed text-[var(--ink)]">
+          This is a preview of the parent home. Families with enrolled students
+          see this week’s work here. You don’t have a linked student in this
+          organization yet, so the list is empty.
+        </p>
+      ) : null}
+
       {loading ? (
         <p className="mt-6 text-[14px] text-[var(--ink-soft)]">Loading this week…</p>
       ) : null}
@@ -79,6 +89,7 @@ export function ParentHome({
           full={dashboard}
           visible={visible}
           selectedIds={selectedIds}
+          preview={preview}
           onToggleStudent={(id) =>
             setActiveIds(toggleStudentId(selectedIds, id))
           }

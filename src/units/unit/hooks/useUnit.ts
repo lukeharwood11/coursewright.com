@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { getCourse } from "@/courses/databridge/courses";
-import { isStaffRole } from "@/organizations/model/role";
+import { familyVisibleMaterials, staffCanEdit } from "@/app/layouts/model/viewMode";
 import {
   importantNowQueryKeys,
   listImportantNowForCourse,
@@ -25,9 +25,9 @@ export function useUnit() {
   const { courseId: courseIdParam, unitId: unitIdParam } = useParams();
   const courseId = courseIdParam ? Number(courseIdParam) : NaN;
   const unitId = unitIdParam ? Number(unitIdParam) : NaN;
-  const { organization, role } = useOrgShell();
+  const { organization, role, parentPresentation } = useOrgShell();
   const queryClient = useQueryClient();
-  const canEdit = isStaffRole(role);
+  const canEdit = staffCanEdit(role, parentPresentation);
 
   const unitQuery = useQuery({
     queryKey: unitQueryKeys.detail(unitId),
@@ -54,6 +54,13 @@ export function useUnit() {
   const course = courseQuery.data ?? null;
   const belongsHere =
     unit?.courseId === courseId && course?.organizationId === organization.id;
+  const familyCourseHidden =
+    parentPresentation &&
+    course != null &&
+    (course.visibility !== "published" || course.status !== "active");
+  const materials = parentPresentation
+    ? familyVisibleMaterials(materialsQuery.data ?? [])
+    : (materialsQuery.data ?? []);
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: unitQueryKeys.detail(unitId) });
@@ -96,12 +103,12 @@ export function useUnit() {
   return {
     organization,
     canEdit,
-    isParent: role === "parent",
+    isParent: parentPresentation,
     courseId,
     unitId,
     unit: belongsHere ? unit : null,
     course: belongsHere ? course : null,
-    materials: materialsQuery.data ?? [],
+    materials,
     importantIds: new Set((importantQuery.data ?? []).map((row) => row.materialId)),
     loading: unitQuery.isLoading || courseQuery.isLoading,
     error: unitQuery.error
@@ -114,7 +121,8 @@ export function useUnit() {
             removeUnit.error?.message ??
             restore.error?.message ??
             null,
-    notFound: !unitQuery.isLoading && (!unit || !belongsHere),
+    notFound:
+      !unitQuery.isLoading && (!unit || !belongsHere || familyCourseHidden),
     saveUnit,
     removeUnit,
     restore,

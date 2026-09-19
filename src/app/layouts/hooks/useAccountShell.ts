@@ -35,5 +35,9 @@ export function useAccountShellData(): AppShellValue {
     profileEmail: profileQuery.data?.email ?? user.email ?? "",
     navSections: buildAccountNav(organizations),
     showSearch: false,
+    parentPresentation: false,
+    showStaffViewToggle: false,
+    staffViewMode: "teacher",
+    setStaffViewMode: () => {},
   };
 }

@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { isStaffRole } from "@/organizations/model/role";
 import { printBackPath, parsePrintStudentIds, type PrintGrainKind } from "@/print/model/paths";
 import {
   loadMaterialPrintPacket,
@@ -26,9 +25,9 @@ function grainFromPath(
 export function usePrint() {
   const params = useParams();
   const location = useLocation();
-  const { organization, role } = useOrgShell();
+  const { organization, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
-  const includeAnswerKey = isStaffRole(role);
+  const includeAnswerKey = !parentPresentation;
   const courseId = params.courseId ? Number(params.courseId) : NaN;
   const unitId = params.unitId ? Number(params.unitId) : NaN;
   const materialId = params.materialId ? Number(params.materialId) : NaN;

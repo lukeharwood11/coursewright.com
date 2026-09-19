@@ -13,15 +13,25 @@ export function ParentDashboardBody({
   full,
   visible,
   selectedIds,
+  preview = false,
   onToggleStudent,
 }: {
   orgSlug: string;
   full: ParentDashboard;
   visible: ParentDashboard;
   selectedIds: number[];
+  preview?: boolean;
   onToggleStudent: (id: number) => void;
 }) {
   if (!full.hasActiveEnrollment) {
+    if (preview) {
+      return (
+        <p className="mt-4 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
+          Open a published course in the sidebar to see it the way a family
+          would — without editing tools.
+        </p>
+      );
+    }
     return (
       <p className="mt-6 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
         You’re not on a course yet. When your co-op adds you, this week’s
