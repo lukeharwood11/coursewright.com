@@ -3,10 +3,20 @@ import { filterParentDashboard, type ParentDashboard } from "@/parent/model/dash
 export type ThisWeekPrintRef = {
   materialId: number;
   courseId: number;
+  sectionKey: string;
+  sectionTitle: string;
   contextLines: string[];
 };
 
-/** Unique materials in parent-home order: important now, then per student → course. */
+function courseTitleForStudent(
+  student: ParentDashboard["students"][number],
+  courseId: number,
+  fallback: string,
+): string {
+  return student.courses.find((course) => course.id === courseId)?.title ?? fallback;
+}
+
+/** One student's materials at a time: important now, then this-week by course. */
 export function thisWeekPrintRefs(
   dashboard: ParentDashboard,
   studentIds?: number[] | null,
@@ -15,38 +25,44 @@ export function thisWeekPrintRefs(
     studentIds && studentIds.length > 0
       ? filterParentDashboard(dashboard, studentIds)
       : dashboard;
-  const byId = new Map<number, ThisWeekPrintRef>();
-
-  function add(
-    materialId: number,
-    courseId: number,
-    contextLine: string | null,
-  ) {
-    const existing = byId.get(materialId);
-    if (existing) {
-      if (contextLine && !existing.contextLines.includes(contextLine)) {
-        existing.contextLines.push(contextLine);
-      }
-      return;
-    }
-    byId.set(materialId, {
-      materialId,
-      courseId,
-      contextLines: contextLine ? [contextLine] : [],
-    });
-  }
-
-  for (const item of scoped.importantNow) {
-    add(item.materialId, item.courseId, `${item.courseTitle} · Important now`);
-  }
+  const refs: ThisWeekPrintRef[] = [];
 
   for (const student of scoped.students) {
+    const seen = new Set<number>();
+    const courseIds = new Set(student.courses.map((course) => course.id));
+    const sectionKey = `student-${student.id}`;
+
+    for (const item of scoped.importantNow) {
+      if (!courseIds.has(item.courseId) || seen.has(item.materialId)) continue;
+      seen.add(item.materialId);
+      const courseTitle = courseTitleForStudent(
+        student,
+        item.courseId,
+        item.courseTitle,
+      );
+      refs.push({
+        materialId: item.materialId,
+        courseId: item.courseId,
+        sectionKey,
+        sectionTitle: student.name,
+        contextLines: [`${courseTitle} · Important now`],
+      });
+    }
+
     for (const course of student.courses) {
       for (const material of course.materials) {
-        add(material.id, course.id, `${student.name} · ${course.title}`);
+        if (seen.has(material.id)) continue;
+        seen.add(material.id);
+        refs.push({
+          materialId: material.id,
+          courseId: course.id,
+          sectionKey,
+          sectionTitle: student.name,
+          contextLines: [course.title],
+        });
       }
     }
   }
 
-  return [...byId.values()];
+  return refs;
 }
