@@ -13,6 +13,7 @@ import { isPdfMime } from "@/print/model/fileKind";
 import { pageHasQuiz, printSegmentsFromBlocks } from "@/materials/model/pageContent";
 import { quizPrintLines } from "@/materials/model/quiz";
 import type { QuizBody } from "@/materials/model/quiz";
+import { groupPacketSections } from "@/print/model/packet";
 import type { PrintMaterialView, PrintPacketView } from "@/print/model/previewAssets";
 
 const INK = "#1F2B24";
@@ -42,34 +43,29 @@ const styles = StyleSheet.create({
     fontSize: 9,
     textAlign: "right",
   },
-  metaRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "baseline",
-    marginBottom: 4,
-    gap: 12,
-  },
-  metaLeft: {
-    color: FAINT,
-    fontSize: 11,
-    flexGrow: 1,
-    flexShrink: 1,
-  },
-  metaRight: {
-    color: FAINT,
-    fontSize: 11,
-    textAlign: "right",
-    flexShrink: 1,
-  },
   meta: {
     color: FAINT,
     fontSize: 11,
     marginBottom: 4,
   },
+  sectionTitle: {
+    fontFamily: "Helvetica-Bold",
+    fontSize: 12,
+    marginBottom: 12,
+  },
   title: {
     fontFamily: "Times-Bold",
     fontSize: 18,
     marginBottom: 6,
+  },
+  assignment: {
+    marginBottom: 4,
+  },
+  assignmentRule: {
+    marginTop: 12,
+    marginBottom: 14,
+    height: 1,
+    backgroundColor: INK,
   },
   heading: {
     fontFamily: "Helvetica-Bold",
@@ -137,34 +133,55 @@ const styles = StyleSheet.create({
   },
 });
 
-function Header({
+function contextLine(material: PrintMaterialView): string | null {
+  const line = (material.contextLines ?? []).filter(Boolean).join(" · ");
+  return line || null;
+}
+
+function PacketChrome({
   packet,
-  material,
+  sectionTitle,
+  showAnswerKey,
+  isolatedMaterial,
 }: {
   packet: PrintPacketView;
-  material: PrintMaterialView;
+  sectionTitle: string | null;
+  showAnswerKey: boolean;
+  isolatedMaterial: PrintMaterialView | null;
 }) {
-  const showAnswerKey =
-    Boolean(packet.includeAnswerKey) && pageHasQuiz(material.blocks);
-  const contextRight = (material.contextLines ?? []).filter(Boolean).join(" · ") || null;
-  const showPacketTitle = Boolean(packet.title && packet.title !== material.title);
+  const isolatedContext = isolatedMaterial ? contextLine(isolatedMaterial) : null;
+  const showPacketTitle = Boolean(
+    isolatedMaterial && packet.title && packet.title !== isolatedMaterial.title,
+  );
   return (
-    <View>
+    <View wrap={false}>
       <View style={styles.brandRow}>
         <Text style={styles.brand}>Course Wright</Text>
         {showAnswerKey ? <Text style={styles.brandRight}>Answer key</Text> : null}
       </View>
-      {packet.subtitle || contextRight ? (
-        <View style={styles.metaRow}>
-          {packet.subtitle ? (
-            <Text style={styles.metaLeft}>{packet.subtitle}</Text>
-          ) : (
-            <View />
-          )}
-          {contextRight ? <Text style={styles.metaRight}>{contextRight}</Text> : null}
-        </View>
+      {packet.subtitle ? <Text style={styles.meta}>{packet.subtitle}</Text> : null}
+      {sectionTitle ? <Text style={styles.sectionTitle}>{sectionTitle}</Text> : null}
+      {isolatedMaterial && isolatedContext ? (
+        <Text style={styles.meta}>{isolatedContext}</Text>
       ) : null}
       {showPacketTitle ? <Text style={styles.meta}>{packet.title}</Text> : null}
+      {isolatedMaterial ? (
+        <>
+          <Text style={styles.title}>{isolatedMaterial.title}</Text>
+          {isolatedMaterial.description ? (
+            <Text style={styles.description}>{isolatedMaterial.description}</Text>
+          ) : null}
+        </>
+      ) : null}
+    </View>
+  );
+}
+
+function AssignmentHeading({ material }: { material: PrintMaterialView }) {
+  const context = contextLine(material);
+  return (
+    <View wrap={false}>
+      {context ? <Text style={styles.meta}>{context}</Text> : null}
       <Text style={styles.title}>{material.title}</Text>
       {material.description ? (
         <Text style={styles.description}>{material.description}</Text>
@@ -348,17 +365,48 @@ function MaterialBody({
 }
 
 export function PacketDocument({ packet }: { packet: PrintPacketView }) {
+  const sections = groupPacketSections(packet.materials);
+  const includeAnswerKey = Boolean(packet.includeAnswerKey);
   return (
     <Document title={packet.title} author="Course Wright" producer="Course Wright">
-      {packet.materials.map((material) => (
-        <Page key={material.id} size="LETTER" wrap style={styles.page}>
-          <Header packet={packet} material={material} />
-          <MaterialBody
-            material={material}
-            includeAnswerKey={Boolean(packet.includeAnswerKey)}
-          />
-        </Page>
-      ))}
+      {sections.map((section, sectionIndex) => {
+        const sectionTitle = section[0]?.sectionTitle ?? null;
+        const packed = Boolean(sectionTitle);
+        const showAnswerKey =
+          includeAnswerKey &&
+          section.some((material) => pageHasQuiz(material.blocks));
+        return (
+          <Page
+            key={section[0]?.sectionKey ?? `section-${sectionIndex}`}
+            size="LETTER"
+            wrap
+            style={styles.page}
+          >
+            <PacketChrome
+              packet={packet}
+              sectionTitle={sectionTitle}
+              showAnswerKey={showAnswerKey}
+              isolatedMaterial={packed ? null : (section[0] ?? null)}
+            />
+            {section.map((material, index) => (
+              <View
+                key={`${material.sectionKey ?? "item"}-${material.id}-${index}`}
+                style={styles.assignment}
+                minPresenceAhead={packed && index > 0 ? 96 : 0}
+              >
+                {packed && index > 0 ? (
+                  <View style={styles.assignmentRule} wrap={false} />
+                ) : null}
+                {packed ? <AssignmentHeading material={material} /> : null}
+                <MaterialBody
+                  material={material}
+                  includeAnswerKey={includeAnswerKey}
+                />
+              </View>
+            ))}
+          </Page>
+        );
+      })}
     </Document>
   );
 }

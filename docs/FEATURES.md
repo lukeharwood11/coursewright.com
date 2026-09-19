@@ -82,7 +82,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Course grade levels** | Courses carry **grade metadata** — multiple grades and/or ranges | shipped | Editor on create + course settings. Templates get the same model in **P1** |
 | **Advanced search** | Native, easy, **cross-facet** search — “where do I have this resource?” | in progress | Staff chrome overlay (no `/search` route): Postgres FTS on `search_vector` for courses + materials; staff pages by title. Findability only (RLS). Deferred: facets, files, units, people, parent search, `ts_rank`, dedicated index |
 | **Families / parent directory** | Named group of **student profiles**; parents appear via `parent_student_links`; org **parent directory** | shipped | Class-mirror members. Link parent creates/reuses student links (`admin_invites` `role=parent` if no account). **Never enrollments.** `family_members.parent_user_id` unused in P0 app. Extra fields, merge/split, and invite **email send** still open. Copy-link claim lives on roster/profile. **SPA directory UI currently not routed** (schema + databridge remain) |
-| **Print materials** | One-tap print of a material, a unit, or this week's work | shipped | [PRINT](./pages/PRINT.md): `@react-pdf/renderer` + in-app preview, Download / Print. Whole-course print out of P0 |
+| **Print materials** | One-tap print of a material, a unit, or this week's work | shipped | [PRINT](./pages/PRINT.md): `@react-pdf/renderer` + in-app preview, Download / Print. This-week packet prints one student at a time (page break between students) and packs assignments onto a page when they fit. Whole-course print out of P0 |
 | **Lesson materials & planning** | Unified storage for course content, files, and plans | shipped | Course builder authoring on courses |
 | **Content versioning** | Versions of course content; who changed what; revert dangerous actions | shipped | Restore a `material_versions` snapshot from material edit; file blob revert on file materials. Page/placement edits version only on Save when something changed |
 | **Soft deletes** | Content is never hard-deleted | shipped | Remove/restore on units and materials (`deleted_at`) |
@@ -318,7 +318,7 @@ The smallest complete loop in P0: **create materials → print them (or send a l
 |--------|--------|----------------|
 | **Print** (on a material) | That material — in-app text/lesson plan in a print layout; files open in a print-ready view (PDF prints natively) | Creator course, parent dashboard, resource page |
 | **Print unit** | The unit as one continuous packet (materials in order) | Creator course (unit), parent view of that unit |
-| **Print this week** | This Sunday–Saturday week's dated materials (and important now, if any) for **active** students on the parent home | Parent dashboard |
+| **Print this week** | This Sunday–Saturday week's dated materials (and important now, if any) for **active** students on the parent home — one student at a time, then a page break | Parent dashboard |
 
 **Not P0:** Print whole course.
 

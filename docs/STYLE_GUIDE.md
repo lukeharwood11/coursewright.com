@@ -229,7 +229,7 @@ Print builds a **real PDF** and previews that file on dedicated `/print` (and `p
 | Body | Manrope, ~12–13pt equivalent, ink, generous line-height |
 | Files | If the material is already a PDF/image, preview that file; otherwise generate a cover / packet PDF |
 | Header (small) | Course Wright wordmark + course title — once, faint, not a branded poster |
-| Page breaks | Controlled in the PDF layout; prefer break between materials in unit / this-week packets |
+| Page breaks | Controlled in the PDF layout. **Unit:** break between materials. **This week:** break between students; pack a student’s materials onto a page when they fit (rule between assignments); start the next assignment on a new page if it can’t begin cleanly |
 
 **Print** is a secondary button in the product; on parent “this week” it can sit beside the week range. Label is always **Print**, **Print unit**, or **Print this week** — never Export. On the print screen itself, **Download** is allowed for the `.pdf`.
 

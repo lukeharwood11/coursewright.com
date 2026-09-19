@@ -91,7 +91,14 @@ export async function loadWeekPrintPacket(args: {
   for (const ref of refs) {
     const material = await getMaterial(ref.materialId);
     const item = await toPrintMaterial(material);
-    if (item) printed.push({ ...item, contextLines: ref.contextLines });
+    if (item) {
+      printed.push({
+        ...item,
+        contextLines: ref.contextLines,
+        sectionKey: ref.sectionKey,
+        sectionTitle: ref.sectionTitle,
+      });
+    }
   }
   return {
     title: "This week",

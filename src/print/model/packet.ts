@@ -19,6 +19,10 @@ export type PrintMaterial = {
   kind: MaterialKind;
   url: string | null;
   scheduledDate: string | null;
+  /** Consecutive materials with the same key share a wrapping page. */
+  sectionKey?: string;
+  /** Shown once at the start of a packed section (e.g. student name). */
+  sectionTitle?: string;
   contextLines?: string[];
   blocks: PrintBlock[];
   file: PrintFile | null;
@@ -30,3 +34,20 @@ export type PrintPacket = {
   includeAnswerKey?: boolean;
   materials: PrintMaterial[];
 };
+
+/** Pack same-section materials together; missing keys stay one material per page. */
+export function groupPacketSections<T extends { sectionKey?: string }>(
+  materials: T[],
+): T[][] {
+  const sections: T[][] = [];
+  for (const material of materials) {
+    const last = sections[sections.length - 1];
+    const key = material.sectionKey;
+    if (key && last?.[0]?.sectionKey === key) {
+      last.push(material);
+    } else {
+      sections.push([material]);
+    }
+  }
+  return sections;
+}
