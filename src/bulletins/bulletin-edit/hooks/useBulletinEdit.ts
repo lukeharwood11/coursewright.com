@@ -11,7 +11,11 @@ import {
   updateBulletin,
 } from "@/bulletins/databridge/bulletins";
 import { bulletinPath } from "@/bulletins/model/paths";
-import { toggleMaterialId, validateBulletinDraft } from "@/bulletins/model/validate";
+import {
+  defaultBulletinTitle,
+  toggleMaterialId,
+  validateBulletinDraft,
+} from "@/bulletins/model/validate";
 import { getCourse } from "@/courses/databridge/courses";
 import { coursePath } from "@/courses/model/paths";
 import {
@@ -59,12 +63,14 @@ export function useBulletinEdit() {
 
   const course = courseQuery.data ?? null;
   const loaded = isNew ? null : (bulletinQuery.data ?? null);
+  const newTitleDefault = course ? defaultBulletinTitle(course.title) : "";
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [startDate, setStartDate] = useState(week.start);
   const [endDate, setEndDate] = useState(week.end);
   const [materialIds, setMaterialIds] = useState<number[]>([]);
   const [hydratedId, setHydratedId] = useState<number | null>(null);
+  const [newTitleApplied, setNewTitleApplied] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,6 +83,12 @@ export function useBulletinEdit() {
     setHydratedId(loaded.id);
   }, [loaded, hydratedId]);
 
+  useEffect(() => {
+    if (!isNew || !newTitleDefault || newTitleApplied) return;
+    setTitle(newTitleDefault);
+    setNewTitleApplied(true);
+  }, [isNew, newTitleDefault, newTitleApplied]);
+
   const draft = { title, body, startDate, endDate, materialIds };
   const initial = loaded
     ? {
@@ -87,7 +99,7 @@ export function useBulletinEdit() {
         materialIds: loaded.materials.map((material) => material.id),
       }
     : {
-        title: "",
+        title: newTitleDefault,
         body: "",
         startDate: week.start,
         endDate: week.end,

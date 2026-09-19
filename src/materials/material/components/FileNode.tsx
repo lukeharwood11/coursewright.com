@@ -1,4 +1,5 @@
 import type { JSX } from "react";
+import { useState } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useQuery } from "@tanstack/react-query";
 import type {
@@ -20,10 +21,12 @@ import {
 } from "lexical";
 import { DecoratorBlockNode } from "@lexical/react/LexicalDecoratorBlockNode";
 import type { SerializedDecoratorBlockNode } from "@lexical/react/LexicalDecoratorBlockNode";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { fileQueryKeys, fileSignedUrl, getFile } from "@/materials/databridge/files";
 import { filePlaybackKind } from "@/materials/model/playback";
 import { AudioPlayer } from "./AudioPlayer";
+import { FilePreviewOverlay } from "./FilePreviewOverlay";
 
 export type SerializedFileNode = Spread<
   {
@@ -172,84 +175,162 @@ function FileEmbed({
   nodeKey: string;
 }) {
   const [editor] = useLexicalComposerContext();
+  const editable = editor.isEditable();
+  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const fileQuery = useQuery({
     queryKey: fileQueryKeys.detail(fileId),
     queryFn: () => getFile(fileId),
   });
   const file = fileQuery.data;
+  const displayName = file?.filename ?? filename;
+  const kind = filePlaybackKind(file?.mimeType ?? mimeType, displayName);
+  const needsInlineSrc = kind === "image" || kind === "video" || kind === "audio";
   const signedQuery = useQuery({
     queryKey: ["files", "signed", file?.storageRef ?? ""],
     queryFn: () => fileSignedUrl(file!.storageRef),
-    enabled: Boolean(file?.storageRef),
+    enabled: Boolean(file?.storageRef) && (needsInlineSrc || pdfPreviewOpen),
   });
   const downloadQuery = useQuery({
     queryKey: ["files", "download", file?.storageRef ?? "", file?.filename ?? ""],
     queryFn: () =>
       fileSignedUrl(file!.storageRef, { download: file!.filename }),
-    enabled: Boolean(file?.storageRef),
+    enabled: Boolean(file?.storageRef) && kind !== "image",
   });
-  const displayName = file?.filename ?? filename;
-  const kind = filePlaybackKind(file?.mimeType ?? mimeType, displayName);
   const src = signedQuery.data ?? null;
   const downloadUrl = downloadQuery.data ?? null;
 
-  return (
-    <div className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--paper)] p-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="min-w-0 text-[13.5px] font-bold text-[var(--ink)]">
-          {displayName}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {downloadUrl ? (
-            <a
-              href={downloadUrl}
-              className="text-[13px] font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-            >
-              Download
-            </a>
-          ) : null}
-          {editor.isEditable() ? (
-            <Button
-              type="button"
-              variant="secondary"
-              className="px-2.5 py-1.5 text-[12px]"
-              onClick={() => {
-                editor.update(() => {
-                  $getNodeByKey(nodeKey)?.remove();
-                });
-              }}
-            >
-              Remove
-            </Button>
-          ) : null}
-        </div>
+  function removeNode() {
+    editor.update(() => {
+      $getNodeByKey(nodeKey)?.remove();
+    });
+  }
+
+  if (kind === "image") {
+    return (
+      <div className="group relative inline-block max-w-full">
+        {src ? (
+          <img
+            src={src}
+            alt=""
+            className="max-h-80 max-w-full rounded-[6px] object-contain"
+          />
+        ) : (
+          <div
+            className="flex h-32 w-48 items-center justify-center rounded-[6px] bg-[var(--paper)] text-[12.5px] text-[var(--ink-faint)]"
+            aria-busy="true"
+          >
+            Loading image…
+          </div>
+        )}
+        {editable ? (
+          <Button
+            type="button"
+            variant="secondary"
+            className="absolute right-2 top-2 px-2.5 py-1.5 text-[12px] leading-none opacity-0 shadow-[var(--shadow)] transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"
+            onClick={removeNode}
+          >
+            Remove
+          </Button>
+        ) : null}
       </div>
-      {kind === "image" && src ? (
-        <img
-          src={src}
-          alt={displayName}
-          className="mt-3 max-h-80 max-w-full rounded-[6px] object-contain"
-        />
+    );
+  }
+
+  return (
+    <>
+      <div className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--paper)] p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            {kind === "pdf" ? (
+              <DocumentTextIcon
+                className="h-5 w-5 shrink-0 text-[var(--ink-soft)]"
+                aria-hidden
+              />
+            ) : null}
+            <p className="min-w-0 truncate text-[13.5px] font-bold leading-none text-[var(--ink)]">
+              {displayName}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {kind === "pdf" ? (
+              <Button
+                type="button"
+                variant="secondary"
+                className="px-2.5 py-1.5 text-[12px] leading-none"
+                disabled={!file?.storageRef}
+                onClick={() => setPdfPreviewOpen(true)}
+              >
+                Preview
+              </Button>
+            ) : null}
+            {downloadUrl ? (
+              <a
+                href={downloadUrl}
+                className="inline-flex items-center px-2.5 py-1.5 text-[12px] font-bold leading-none text-[var(--green)] hover:text-[var(--green-deep)]"
+              >
+                Download
+              </a>
+            ) : null}
+            {editable ? (
+              <Button
+                type="button"
+                variant="secondary"
+                className="px-2.5 py-1.5 text-[12px] leading-none"
+                onClick={removeNode}
+              >
+                Remove
+              </Button>
+            ) : null}
+          </div>
+        </div>
+        {kind === "video" && src ? (
+          <video className="mt-3 w-full rounded-[6px]" controls playsInline src={src} />
+        ) : null}
+        {kind === "audio" && src ? (
+          <AudioPlayer
+            className="mt-3"
+            src={src}
+            onRetry={() => {
+              void signedQuery.refetch();
+            }}
+          />
+        ) : null}
+      </div>
+      {kind === "pdf" ? (
+        <FilePreviewOverlay
+          open={pdfPreviewOpen}
+          title={displayName}
+          onClose={() => setPdfPreviewOpen(false)}
+          actions={
+            downloadUrl ? (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  const link = document.createElement("a");
+                  link.href = downloadUrl;
+                  link.rel = "noopener";
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                }}
+              >
+                Download
+              </Button>
+            ) : null
+          }
+        >
+          {src ? (
+            <iframe
+              title={displayName}
+              className="h-full w-full border-0 bg-white"
+              src={src}
+            />
+          ) : (
+            <p className="p-4 text-[14px] text-[var(--ink-soft)]">Loading PDF…</p>
+          )}
+        </FilePreviewOverlay>
       ) : null}
-      {kind === "video" && src ? (
-        <video className="mt-3 w-full rounded-[6px]" controls playsInline src={src} />
-      ) : null}
-      {kind === "audio" && src ? (
-        <AudioPlayer
-          className="mt-3"
-          src={src}
-          onRetry={() => {
-            void signedQuery.refetch();
-          }}
-        />
-      ) : null}
-      {kind === "pdf" && src ? (
-        <iframe
-          title={file?.filename ?? filename}
-          className="mt-3 h-64 w-full rounded-[6px] border-0 bg-white"
-          src={src}
-        />
-      ) : null}
-    </div>
+    </>
   );
 }

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   filterSlashOptions,
+  imageFilesFromClipboard,
   normalizeHttpUrl,
   parseSlashTableQuery,
   parseTableDimensions,
@@ -56,4 +57,32 @@ test("normalizeHttpUrl adds https when the address has no protocol", () => {
   assert.equal(normalizeHttpUrl("example.com/watch"), "https://example.com/watch");
   assert.equal(normalizeHttpUrl("not a url"), null);
   assert.equal(normalizeHttpUrl("   "), null);
+});
+
+test("imageFilesFromClipboard prefers image items over files", () => {
+  const png = new File([new Uint8Array([1])], "shot.png", { type: "image/png" });
+  const textItem = {
+    kind: "string",
+    type: "text/plain",
+    getAsFile: () => null,
+  };
+  const imageItem = {
+    kind: "file",
+    type: "image/png",
+    getAsFile: () => png,
+  };
+  const pdf = new File([new Uint8Array([1])], "doc.pdf", { type: "application/pdf" });
+
+  assert.deepEqual(
+    imageFilesFromClipboard({ items: [textItem, imageItem], files: [pdf] }),
+    [png],
+  );
+  assert.deepEqual(
+    imageFilesFromClipboard({
+      items: [textItem],
+      files: [png, pdf],
+    }),
+    [png],
+  );
+  assert.deepEqual(imageFilesFromClipboard({ items: [textItem], files: [pdf] }), []);
 });

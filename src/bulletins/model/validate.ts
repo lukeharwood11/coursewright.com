@@ -6,6 +6,12 @@ export type BulletinDraft = {
   materialIds: number[];
 };
 
+/** Prefill for a new bulletin — course title is the class name families know. */
+export function defaultBulletinTitle(courseTitle: string): string {
+  const name = courseTitle.trim();
+  return name ? `This week in ${name}` : "This week";
+}
+
 export function validateBulletinDraft(draft: BulletinDraft): string | null {
   if (!draft.title.trim()) return "Add a title so families know what this is.";
   if (!draft.startDate) return "Choose a start date.";

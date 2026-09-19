@@ -1,4 +1,5 @@
 import { looksLikeHttpUrl } from "./blocks";
+import { isImageMime } from "./playback";
 
 export const TABLE_MAX_ROWS = 20;
 export const TABLE_MAX_COLUMNS = 10;
@@ -99,4 +100,34 @@ export function normalizeHttpUrl(value: string): string | null {
   if (looksLikeHttpUrl(trimmed)) return trimmed;
   const withProtocol = `https://${trimmed}`;
   return looksLikeHttpUrl(withProtocol) ? withProtocol : null;
+}
+
+/** Image files from a paste/drop DataTransfer (items preferred, then files). */
+export function imageFilesFromClipboard(data: {
+  items?: ArrayLike<{
+    kind: string;
+    type: string;
+    getAsFile: () => File | null;
+  }> | null;
+  files?: ArrayLike<File> | null;
+}): File[] {
+  const fromItems: File[] = [];
+  if (data.items) {
+    for (let i = 0; i < data.items.length; i++) {
+      const item = data.items[i];
+      if (item.kind !== "file" || !isImageMime(item.type)) continue;
+      const file = item.getAsFile();
+      if (file) fromItems.push(file);
+    }
+  }
+  if (fromItems.length > 0) return fromItems;
+
+  const fromFiles: File[] = [];
+  if (data.files) {
+    for (let i = 0; i < data.files.length; i++) {
+      const file = data.files[i];
+      if (isImageMime(file.type)) fromFiles.push(file);
+    }
+  }
+  return fromFiles;
 }

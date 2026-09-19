@@ -314,11 +314,6 @@ export function PageEditorToolbar() {
           />
         </ToolbarDropdown>
       ) : null}
-      {actions.uploadError ? (
-        <p className="w-full px-1 text-[13px] text-[var(--amber-deep)]">
-          {actions.uploadError}
-        </p>
-      ) : null}
     </div>
   );
 }

@@ -48,12 +48,14 @@ type DialogKind = "table" | "link" | "video" | null;
 type PageEditorActions = {
   canAttachFile: boolean;
   uploading: boolean;
+  uploadingFilename: string | null;
   uploadError: string | null;
   setBlock: (type: PageBlockType) => void;
   insertQuiz: () => void;
   insertDivider: () => void;
   insertTable: (rows: number, columns: number) => void;
   attachFile: () => void;
+  uploadAndInsertFile: (file: File) => Promise<void>;
   openTableDialog: () => void;
   openLinkDialog: (initialUrl?: string) => void;
   openVideoDialog: () => void;
@@ -73,12 +75,14 @@ export function PageEditorActionsProvider({ children }: { children: ReactNode })
   const [editor] = useLexicalComposerContext();
   const media = usePageEditorMedia();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadingRef = useRef(false);
   const [dialog, setDialog] = useState<DialogKind>(null);
   const [tableRows, setTableRows] = useState(String(TABLE_DEFAULT_ROWS));
   const [tableColumns, setTableColumns] = useState(String(TABLE_DEFAULT_COLUMNS));
   const [urlValue, setUrlValue] = useState("");
   const [linkCanRemove, setLinkCanRemove] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingFilename, setUploadingFilename] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const closeDialog = useCallback(() => {
@@ -112,8 +116,45 @@ export function PageEditorActionsProvider({ children }: { children: ReactNode })
   }, [editor]);
 
   const attachFile = useCallback(() => {
+    if (uploadingRef.current) return;
     fileInputRef.current?.click();
   }, []);
+
+  const uploadAndInsertFile = useCallback(
+    async (file: File) => {
+      if (!media || uploadingRef.current) return;
+      uploadingRef.current = true;
+      setUploading(true);
+      setUploadingFilename(file.name);
+      setUploadError(null);
+      try {
+        const uploaded = await uploadNewFile({
+          organizationId: media.organizationId,
+          uploadedBy: media.userId,
+          file,
+        });
+        editor.update(() => {
+          insertDecoratorBlock(
+            $createFileNode({
+              fileId: uploaded.id,
+              filename: uploaded.filename,
+              mimeType: uploaded.mimeType,
+            }),
+          );
+        });
+      } catch (caught) {
+        setUploadError(
+          caught instanceof Error ? caught.message : "Couldn’t attach that file.",
+        );
+      } finally {
+        uploadingRef.current = false;
+        setUploading(false);
+        setUploadingFilename(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    },
+    [editor, media],
+  );
 
   const openTableDialog = useCallback(() => {
     setTableRows(String(TABLE_DEFAULT_ROWS));
@@ -132,35 +173,6 @@ export function PageEditorActionsProvider({ children }: { children: ReactNode })
     setDialog("video");
   }, []);
 
-  async function onPickFile(file: File) {
-    if (!media) return;
-    setUploading(true);
-    setUploadError(null);
-    try {
-      const uploaded = await uploadNewFile({
-        organizationId: media.organizationId,
-        uploadedBy: media.userId,
-        file,
-      });
-      editor.update(() => {
-        insertDecoratorBlock(
-          $createFileNode({
-            fileId: uploaded.id,
-            filename: uploaded.filename,
-            mimeType: uploaded.mimeType,
-          }),
-        );
-      });
-    } catch (caught) {
-      setUploadError(
-        caught instanceof Error ? caught.message : "Couldn’t attach that file.",
-      );
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  }
-
   const tableSize = parseTableDimensions(tableRows, tableColumns);
   const normalizedUrl = normalizeHttpUrl(urlValue);
 
@@ -168,12 +180,14 @@ export function PageEditorActionsProvider({ children }: { children: ReactNode })
     () => ({
       canAttachFile: media != null,
       uploading,
+      uploadingFilename,
       uploadError,
       setBlock,
       insertQuiz,
       insertDivider,
       insertTable,
       attachFile,
+      uploadAndInsertFile,
       openTableDialog,
       openLinkDialog,
       openVideoDialog,
@@ -188,8 +202,10 @@ export function PageEditorActionsProvider({ children }: { children: ReactNode })
       openTableDialog,
       openVideoDialog,
       setBlock,
+      uploadAndInsertFile,
       uploadError,
       uploading,
+      uploadingFilename,
     ],
   );
 
@@ -203,7 +219,7 @@ export function PageEditorActionsProvider({ children }: { children: ReactNode })
           className="hidden"
           onChange={(event) => {
             const next = event.target.files?.[0];
-            if (next) void onPickFile(next);
+            if (next) void uploadAndInsertFile(next);
           }}
         />
       ) : null}
