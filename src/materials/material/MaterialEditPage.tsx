@@ -291,6 +291,9 @@ function FileEditor({
           }}
         />
       </label>
+      <p className="mt-1 text-[12px] text-[var(--ink-faint)]">
+        Audio: MP3 or M4A works best on phones.
+      </p>
       <ul className="mt-4 divide-y divide-[var(--line-soft)] rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]">
         {(versionsQuery.data ?? []).map((version) => (
           <li
