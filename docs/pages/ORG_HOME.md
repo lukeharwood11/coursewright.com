@@ -18,7 +18,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 ### Parent
 
 - Usability bar: understand child, course, and what’s needed immediately — no LMS jargon.
-- Main body is the **current Sunday–Saturday week calendar** (same week component as [CALENDAR](./CALENDAR.md) week view): lesson-plan text in each day, materials after a divider, assigned = outline / due = filled, course colors.
+- Main body is the **current Sunday–Saturday week** (same chips, colors, and week notes as [CALENDAR](./CALENDAR.md)): days with work are **cards** that wrap (about two or three across). Empty days are omitted. Lesson-plan text in each day, materials after a divider, assigned = outline / due = filled, course colors.
 - **Focus** column on the right (stacks below on small screens): **Important now** and **Coming up** (**Assigned next** + **Due next**).
 - When the parent has more than one student, **tags** at the top toggle who is active. Deselecting a student hides their work (calendar, Focus). One student skips the tags.
 - Week notes for published lesson plans sit as a colored bar per course above the grid.
@@ -47,7 +47,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 - Org **name**
 - Week range label (Sun–Sat dates)
 - **Student tags** when more than one linked student (active / inactive)
-- Week calendar: per day, per visible course — day plan text; divider; lesson-plan materials and assigned/due materials (title; **Assigned** outline / **Due** filled; course color)
+- Week calendar: **cards** for days that have a plan or assigned/due work (empty days omitted; cards wrap instead of a squeezed seven-column row). Per visible course — day plan text; divider; lesson-plan materials and assigned/due materials (title; **Assigned** outline / **Due** filled; course color)
 - Published lesson-plan **week notes** as course-colored bars above the grid
 - **Focus:** Important now (material title, description when set, course/student context); Coming up Assigned next / Due next
 - Print affordances (not data fields)
@@ -71,7 +71,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Desktop: simpler collapsible sidebar (This week, Calendar, their courses, Progress). Body uses remaining width — not a centered narrow column.
 - Greeting + **current calendar week** (Sunday–Saturday) + **Print this week**
 - **Student tags** (multi-student parents only) — tap to include/exclude a student
-- Two columns on large screens: **week calendar** | **Focus** (Important now + Coming up). Stacks on small screens (calendar first).
+- Two columns on large screens: **week cards** | **Focus** (Important now + Coming up). Stacks on small screens (calendar first). Day cards wrap so two or three fit across instead of seven skinny columns.
 - Course legend on the week calendar (same as [CALENDAR](./CALENDAR.md)) so families can hide a class
 - Bottom tabs concept: This week | Progress (Progress **P1** — dim/inactive until then)
 - Links into material / lesson plan / course in the same URL tree (simpler chrome)

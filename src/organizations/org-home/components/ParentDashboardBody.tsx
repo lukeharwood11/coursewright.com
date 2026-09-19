@@ -105,6 +105,7 @@ export function ParentDashboardBody({
                 lessonDays={calendar.lessonDays}
                 chips={calendar.chips}
                 hiddenCourseIds={hiddenCourseIds}
+                layout="cards"
               />
             </div>
           )}

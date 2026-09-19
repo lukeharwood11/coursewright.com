@@ -2,10 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   chipsForMaterials,
+  dayHasCalendarContent,
   filterCourses,
   leftoverChips,
   mergeDayMaterials,
   toggleHiddenCourse,
+  weekDatesToShow,
 } from "./events.ts";
 import { addIsoDays, monthContaining } from "./dates.ts";
 
@@ -93,4 +95,60 @@ test("toggleHiddenCourse and month grid", () => {
     ).map((row) => row.courseId),
     [4],
   );
+});
+
+test("This week omits empty days and keeps days with notes or chips", () => {
+  const week = [
+    "2026-09-13",
+    "2026-09-14",
+    "2026-09-15",
+    "2026-09-16",
+    "2026-09-17",
+    "2026-09-18",
+    "2026-09-19",
+  ];
+  const lessonDays = [
+    {
+      planId: 1,
+      courseId: 10,
+      courseTitle: "Science",
+      colorKey: "moss" as const,
+      date: "2026-09-14",
+      body: "Lab day",
+      unpublished: false,
+      materials: [],
+    },
+    {
+      planId: 1,
+      courseId: 10,
+      courseTitle: "Science",
+      colorKey: "moss" as const,
+      date: "2026-09-16",
+      body: "   ",
+      unpublished: false,
+      materials: [],
+    },
+  ];
+  const chips = chipsForMaterials([
+    {
+      id: 1,
+      title: "Reading",
+      courseId: 10,
+      courseTitle: "Science",
+      colorKey: "moss",
+      scheduledDate: "2026-09-17",
+      dueDate: null,
+      unitId: null,
+      unitStart: null,
+      unitEnd: null,
+      unpublished: false,
+    },
+  ]);
+  assert.equal(dayHasCalendarContent("2026-09-13", lessonDays, chips), false);
+  assert.equal(dayHasCalendarContent("2026-09-16", lessonDays, chips), false);
+  assert.deepEqual(weekDatesToShow(week, lessonDays, chips, true), [
+    "2026-09-14",
+    "2026-09-17",
+  ]);
+  assert.equal(weekDatesToShow(week, lessonDays, chips, false).length, 7);
 });

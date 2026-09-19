@@ -60,6 +60,14 @@ export function weekdayShort(isoDate: string): string {
   return parseIso(isoDate).toLocaleDateString("en-US", { weekday: "short" });
 }
 
+export function weekdayDateHeading(isoDate: string): string {
+  return parseIso(isoDate).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export function dayNumber(isoDate: string): string {
   return String(parseIso(isoDate).getDate());
 }

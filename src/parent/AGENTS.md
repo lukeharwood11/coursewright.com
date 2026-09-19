@@ -4,8 +4,8 @@ Parent dashboard: usability anchor. This week’s **calendar** plus a **Focus** 
 
 ## Scope
 
-- Parent home: greeting, week range (Sun–Sat), student tags, **week calendar** (same `calendar/` week component), **Focus** (Important now + Coming up: Assigned next / Due next), **Print this week**
-- Week notes from published lesson plans sit as course-colored bars above the grid. Day cells show plan text, then materials after a divider (assigned = outline, due = filled).
+- Parent home: greeting, week range (Sun–Sat), student tags, **week cards** (`calendar/` `WeekCalendar` with `layout="cards"` — empty days omitted, cards wrap), **Focus** (Important now + Coming up: Assigned next / Due next), **Print this week**
+- Week notes from published lesson plans sit as course-colored bars above the days. Day cards show plan text, then materials after a divider (assigned = outline, due = filled).
 - Student tags filter the calendar and Focus. One student skips the tags.
 - **Print this week** for **active** students (one student at a time in the PDF): published lesson plans first (week note + day notes), then important now + dated materials.
 - `model/` + `databridge/` for this-week data; org home (`organizations/org-home`) renders the parent view (including staff **Parent view**)

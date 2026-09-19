@@ -188,3 +188,27 @@ export function leftoverChips(
     return !covered.has(`${chip.courseId}:${chip.materialId}`);
   });
 }
+
+/** A day belongs on This week when it has plan text, attached materials, or assigned/due chips. */
+export function dayHasCalendarContent(
+  date: string,
+  lessonDays: CalendarLessonPlanDay[],
+  chips: CalendarMaterialChip[],
+): boolean {
+  for (const day of lessonDays) {
+    if (day.date !== date) continue;
+    if (day.body.trim()) return true;
+    if (day.materials.length > 0) return true;
+  }
+  return chips.some((chip) => chip.date === date);
+}
+
+export function weekDatesToShow(
+  dates: string[],
+  lessonDays: CalendarLessonPlanDay[],
+  chips: CalendarMaterialChip[],
+  omitEmpty: boolean,
+): string[] {
+  if (!omitEmpty) return dates;
+  return dates.filter((date) => dayHasCalendarContent(date, lessonDays, chips));
+}
