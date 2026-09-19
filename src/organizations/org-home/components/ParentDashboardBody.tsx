@@ -3,6 +3,7 @@ import {
   thisWeekStudents,
   type ParentDashboard,
 } from "@/parent/model/dashboard";
+import { ParentBulletinList } from "./ParentBulletinList";
 import { ParentComingUpSection } from "./ParentComingUpSection";
 import { ParentImportantNowList } from "./ParentImportantNowList";
 import { ParentStudentTags } from "./ParentStudentTags";
@@ -46,6 +47,7 @@ export function ParentDashboardBody({
   const weekStudents = thisWeekStudents(visible.students);
   const hasComingUp = Boolean(visible.nextAssignedItem || visible.nextDueItem);
   const hasImportantNow = visible.importantNow.length > 0;
+  const hasBulletins = visible.bulletins.length > 0;
   const attentionGrid = hasComingUp && hasImportantNow;
 
   if (showTags && selectedIds.length === 0) {
@@ -71,6 +73,10 @@ export function ParentDashboardBody({
           selectedIds={selectedIds}
           onToggle={onToggleStudent}
         />
+      ) : null}
+
+      {hasBulletins ? (
+        <ParentBulletinList orgSlug={orgSlug} items={visible.bulletins} />
       ) : null}
 
       {hasImportantNow || hasComingUp ? (

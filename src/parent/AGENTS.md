@@ -1,13 +1,14 @@
 # AGENTS — `src/parent/`
 
-Parent dashboard: usability anchor. This week + important now.
+Parent dashboard: usability anchor. This week + important now + available **bulletins**.
 
 ## Scope
 
-- Parent home: week range (Sun–Sat), **Important now**, **Coming up** (Assigned next + Due next), student tags, per-student this-week course cards (empty courses omitted)
+- Parent home: week range (Sun–Sat), **From your teachers** (available bulletins), **Important now**, **Coming up** (Assigned next + Due next), student tags, per-student this-week course cards (empty courses omitted)
 - **Print this week** for **active** students (one student at a time in the PDF) + Print per material (compose `print/`)
 - Simpler than instructor UI — always
 - `model/` + `databridge/` for this-week data; org home (`organizations/org-home`) renders the parent view (including staff **Parent view**)
+- Bulletin rows come from `bulletins/` databridge; availability lives in `bulletins/model/`
 
 ## Rules
 

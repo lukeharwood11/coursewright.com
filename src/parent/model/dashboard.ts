@@ -1,5 +1,6 @@
 import type { CalendarWeek } from "./thisWeek";
 import { isInCalendarWeek, localIsoDate } from "./thisWeek";
+import { isBulletinAvailable } from "@/bulletins/model/availability";
 
 export type ParentDashboardMaterial = {
   id: number;
@@ -34,6 +35,17 @@ export type ParentImportantNowItem = {
   unitId: number | null;
 };
 
+export type ParentBulletinItem = {
+  id: number;
+  title: string;
+  body: string;
+  startDate: string;
+  endDate: string;
+  courseId: number;
+  courseTitle: string;
+  materialCount: number;
+};
+
 export type ParentDashboardNextItem = {
   studentId: number;
   studentName: string;
@@ -47,6 +59,7 @@ export type ParentDashboardNextItem = {
 export type ParentDashboard = {
   week: CalendarWeek;
   importantNow: ParentImportantNowItem[];
+  bulletins: ParentBulletinItem[];
   students: ParentDashboardStudent[];
   /** Soonest assigned materials on or after today. */
   nextAssigned: ParentDashboardNextItem[];
@@ -85,6 +98,16 @@ export type ParentDashboardSource = {
     courseId: number;
     courseTitle: string;
     unitId: number | null;
+  }>;
+  bulletins?: Array<{
+    id: number;
+    title: string;
+    body: string;
+    startDate: string;
+    endDate: string;
+    courseId: number;
+    courseTitle: string;
+    materialCount: number;
   }>;
 };
 
@@ -159,12 +182,29 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
     activeCourseIds.has(item.courseId),
   );
 
+  const seenBulletins = new Set<number>();
+  const bulletins = (source.bulletins ?? [])
+    .filter((item) => {
+      if (!activeCourseIds.has(item.courseId)) return false;
+      if (!isBulletinAvailable(source.today, item.startDate, item.endDate)) {
+        return false;
+      }
+      if (seenBulletins.has(item.id)) return false;
+      seenBulletins.add(item.id);
+      return true;
+    })
+    .sort((a, b) => {
+      if (a.startDate !== b.startDate) return a.startDate.localeCompare(b.startDate);
+      return a.title.localeCompare(b.title);
+    });
+
   const nextAssigned = collectNextByDate(source, "assigned");
   const nextDue = collectNextByDate(source, "due");
 
   return {
     week: source.week,
     importantNow,
+    bulletins,
     students,
     nextAssigned,
     nextDue,
@@ -186,6 +226,9 @@ export function filterParentDashboard(
   const importantNow = dashboard.importantNow.filter((item) =>
     courseIds.has(item.courseId),
   );
+  const bulletins = dashboard.bulletins.filter((item) =>
+    courseIds.has(item.courseId),
+  );
   const nextAssigned = dashboard.nextAssigned.filter((item) =>
     allowed.has(item.studentId),
   );
@@ -194,6 +237,7 @@ export function filterParentDashboard(
     ...dashboard,
     students,
     importantNow,
+    bulletins,
     nextAssigned,
     nextDue,
     nextAssignedItem: nextAssigned[0] ?? null,

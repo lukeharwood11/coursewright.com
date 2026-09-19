@@ -32,6 +32,7 @@ function source(
     ],
     materials: [],
     importantNow: [],
+    bulletins: [],
     ...overrides,
   };
 }
@@ -257,3 +258,109 @@ test("calendarWeekContaining builds a Sunday–Saturday week", () => {
   assert.equal(result.start, "2026-09-13");
   assert.equal(result.end, "2026-09-19");
 });
+
+test("dashboard includes available bulletins for enrolled courses only", () => {
+  const dashboard = buildParentDashboard(
+    source({
+      enrollments: [
+        {
+          studentId: 1,
+          courseId: 10,
+          courseTitle: "Science",
+          courseStatus: "active",
+        },
+      ],
+      bulletins: [
+        {
+          id: 1,
+          title: "Week 3 packet",
+          body: "Start with the lab.",
+          startDate: "2026-09-13",
+          endDate: "2026-09-19",
+          courseId: 10,
+          courseTitle: "Science",
+          materialCount: 2,
+        },
+        {
+          id: 2,
+          title: "Next week",
+          body: "",
+          startDate: "2026-09-20",
+          endDate: "2026-09-26",
+          courseId: 10,
+          courseTitle: "Science",
+          materialCount: 1,
+        },
+        {
+          id: 3,
+          title: "Art note",
+          body: "",
+          startDate: "2026-09-13",
+          endDate: "2026-09-19",
+          courseId: 11,
+          courseTitle: "Art",
+          materialCount: 0,
+        },
+      ],
+    }),
+  );
+
+  assert.deepEqual(
+    dashboard.bulletins.map((row) => row.title),
+    ["Week 3 packet"],
+  );
+});
+
+test("filterParentDashboard scopes bulletins by selected student", () => {
+  const dashboard = buildParentDashboard(
+    source({
+      students: [
+        { id: 1, name: "Maya", gradeLevel: "4" },
+        { id: 2, name: "Eli", gradeLevel: "2" },
+      ],
+      enrollments: [
+        {
+          studentId: 1,
+          courseId: 10,
+          courseTitle: "Science",
+          courseStatus: "active",
+        },
+        {
+          studentId: 2,
+          courseId: 11,
+          courseTitle: "Art",
+          courseStatus: "active",
+        },
+      ],
+      bulletins: [
+        {
+          id: 1,
+          title: "Science note",
+          body: "",
+          startDate: "2026-09-13",
+          endDate: "2026-09-19",
+          courseId: 10,
+          courseTitle: "Science",
+          materialCount: 1,
+        },
+        {
+          id: 2,
+          title: "Art note",
+          body: "",
+          startDate: "2026-09-13",
+          endDate: "2026-09-19",
+          courseId: 11,
+          courseTitle: "Art",
+          materialCount: 0,
+        },
+      ],
+    }),
+  );
+
+  const filtered = filterParentDashboard(dashboard, [2]);
+  assert.deepEqual(
+    filtered.bulletins.map((row) => row.title),
+    ["Art note"],
+  );
+});
+

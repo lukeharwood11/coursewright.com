@@ -8,6 +8,7 @@ import { OrgLayout } from "@/app/layouts/OrgLayout";
 import { PrintLayout } from "@/app/layouts/PrintLayout";
 import { StubPage } from "@/app/StubPage";
 import { CourseListPage, CoursePage, CourseRosterPage, CourseSettingsPage } from "@/courses";
+import { BulletinEditPage, BulletinPage } from "@/bulletins";
 import { MaterialEditPage, MaterialPage } from "@/materials";
 import {
   AboutPage,
@@ -103,6 +104,26 @@ export function AppRoutes() {
               element={
                 <RequireStaff>
                   <CourseRosterPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="courses/:courseId/bulletins/new"
+              element={
+                <RequireStaff>
+                  <BulletinEditPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="courses/:courseId/bulletins/:bulletinId"
+              element={<BulletinPage />}
+            />
+            <Route
+              path="courses/:courseId/bulletins/:bulletinId/edit"
+              element={
+                <RequireStaff>
+                  <BulletinEditPage />
                 </RequireStaff>
               }
             />

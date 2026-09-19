@@ -168,6 +168,119 @@ export type Database = {
           },
         ]
       }
+      bulletin_materials: {
+        Row: {
+          bulletin_id: number
+          created_at: string
+          id: number
+          material_id: number
+          position: number
+        }
+        Insert: {
+          bulletin_id: number
+          created_at?: string
+          id?: number
+          material_id: number
+          position?: number
+        }
+        Update: {
+          bulletin_id?: number
+          created_at?: string
+          id?: number
+          material_id?: number
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bulletin_materials_bulletin_id_fkey"
+            columns: ["bulletin_id"]
+            isOneToOne: false
+            referencedRelation: "bulletins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bulletin_materials_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bulletins: {
+        Row: {
+          body: string
+          course_id: number
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          deleted_by: string | null
+          end_date: string
+          id: number
+          organization_id: number
+          start_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          course_id: number
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          end_date: string
+          id?: number
+          organization_id: number
+          start_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          course_id?: number
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          end_date?: string
+          id?: number
+          organization_id?: number
+          start_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bulletins_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bulletins_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bulletins_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bulletins_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_members: {
         Row: {
           class_id: number

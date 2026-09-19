@@ -18,8 +18,8 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 ### Parent
 
 - Usability bar: understand child, course, and what’s needed immediately — no LMS jargon.
-- Show **Coming up** (**Assigned next** + **Due next**), **this calendar week** (Sunday–Saturday), and **Important now**.
-- When the parent has more than one student, **tags** at the top toggle who is active. Deselecting a student hides their work (this week, coming up, important now). One student skips the tags.
+- Show **Coming up** (**Assigned next** + **Due next**), **this calendar week** (Sunday–Saturday), **Important now**, and **available bulletins** (**From your teachers**).
+- When the parent has more than one student, **tags** at the top toggle who is active. Deselecting a student hides their work (this week, coming up, important now, bulletins). One student skips the tags.
 - “This week” materials: assignment date in range (`scheduled_date` if set, else unit date range) **and/or** `due_date` in range. Labels always say **Assigned** vs **Due**.
 - **Print this week** prints only **active** students’ week materials (and important now for their courses), **one student at a time** with a page break before the next student. Per-material **Print** stays first-class — both land on [PRINT](./PRINT.md).
 - Parent org access requires linked student enrolled in a course with `status = active` **and** `visibility = published` (dates informational only).
@@ -46,6 +46,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 - Org **name**
 - Week range label (Sun–Sat dates)
 - **Student tags** when more than one linked student (active / inactive)
+- **From your teachers:** available **bulletins** (title, optional note excerpt, course, date range) — today is in the bulletin’s start–end window; courses of active students
 - **Important now** items: material title, description (when set), course/student context, link target (courses of active students)
 - **Coming up**: **Assigned next** and **Due next** (title, labeled date, course, student when more than one is active)
 - Per **student profile** (when more than one is active): name, grade badge TBD
@@ -71,6 +72,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Desktop: simpler collapsible sidebar (This week, their courses, Progress). Body uses remaining width — not a centered narrow column.
 - Greeting + **current calendar week** (Sunday–Saturday) + **Print this week**
 - **Student tags** (multi-student parents only) — tap to include/exclude a student
+- **From your teachers** — available bulletins first (when any). Opening a bulletin goes to [BULLETIN](./BULLETIN.md).
 - **Important now** — instructor-flagged items (amber treatment), then **Coming up** — Assigned next + Due next (clear labels). On desktop, those two sit side by side when both exist.
 - **This week** — materials assigned and/or due in the week; **Assigned** vs **Due** labels. Only courses with dated work this week; two-column course cards on larger screens.
 - Per student → course → materials when more than one student is active; each material has **Print**
@@ -103,6 +105,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Print this week (active students)
 - Toggle which students are active (when more than one)
 - Open / print a material
+- Open a bulletin from **From your teachers**
 - Open assigned-next / due-next / important-now items
 
 ### Instructor / owner / admin
@@ -118,6 +121,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 ### Parent
 
 - [MATERIAL](./MATERIAL.md) — open a this-week / important-now item
+- [BULLETIN](./BULLETIN.md) — open an available bulletin
 - [UNIT](./UNIT.md) — open a unit when linked from materials
 - [COURSE](./COURSE.md) — open course context (read-focused)
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — account affordance
@@ -139,4 +143,4 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Parent experience, units/dating, important now, print grain, RBAC, advanced search. Parent summary layer is **P1**, not P0. Homework in P0 = dated materials on this week (no separate assignment object). Staff home is an operational dashboard (attention + course previews + this week + people), not a nav tile grid.
+[FEATURES.md](../FEATURES.md) — Parent experience, units/dating, important now, **bulletins**, print grain, RBAC, advanced search. Parent summary layer is **P1**, not P0. Homework in P0 = dated materials on this week (no separate assignment object). Staff home is an operational dashboard (attention + course previews + this week + people), not a nav tile grid.
