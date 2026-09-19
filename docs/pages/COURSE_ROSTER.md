@@ -19,7 +19,7 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
   - **From roster** — multi-select eligible org students (filter, select all, clear). Optional **Class preset** checks that class’s members who aren’t already enrolled (one-shot; not a live link).
   - **New students** — batch create org profiles (multi-row or paste names) and enroll them in one confirm.
 - Unenroll (withdrawn) from the row; parent **course** access requires enrollment in an active published course (membership is created on invite claim).
-- **Invite parent** from an enrolled student — copy `/invite/<token>` for a parent email (v0 does not send email). Multiple parents are managed on the student profile.
+- **Invite parent** from an enrolled student — emails `/invite/<token>` for a parent email (copy-link remains). Multiple parents are managed on the student profile.
 - Empty roster allowed — printing materials does not require students.
 
 ## Data shown
@@ -35,13 +35,13 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
 - Enrolled list → [STUDENT_PROFILE](./STUDENT_PROFILE.md)
 - **Enroll students** progressive panel (batch existing + batch new)
 - Unenroll on each row
-- Parent email / invite from course context — copy claim link (no email send)
+- Parent email / invite from course context — email + copy claim link
 - Empty state: students optional — **create → print does not require a roster**
 
 ## Primary actions
 
 - Enroll / unenroll (batch enroll preferred)
-- Invite parent and copy the claim link
+- Invite parent (email + copy the claim link)
 - Open [STUDENT_PROFILE](./STUDENT_PROFILE.md)
 
 ## Links to

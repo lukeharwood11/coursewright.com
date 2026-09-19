@@ -13,11 +13,13 @@ export function ParentInvitePanel({
   addEmail,
   invitingEmail,
   cancelingId,
+  sendingId,
   copiedId,
   origin,
   onAddEmailChange,
   onInvite,
   onCopy,
+  onSendEmail,
   onCancel,
 }: {
   parentEmail: string | null;
@@ -30,11 +32,13 @@ export function ParentInvitePanel({
   addEmail: string;
   invitingEmail: string | null;
   cancelingId: number | null;
+  sendingId: number | null;
   copiedId: number | null;
   origin: string;
   onAddEmailChange: (value: string) => void;
   onInvite: (email: string) => void;
   onCopy: (invite: PendingOrgInvite) => void;
+  onSendEmail: (invite: PendingOrgInvite) => void;
   onCancel: (invite: PendingOrgInvite) => void;
 }) {
   if (!canInvite) return null;
@@ -57,9 +61,10 @@ export function ParentInvitePanel({
     <section className="mt-6 max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
       <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Parents</h2>
       <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink-soft)]">
-        Add as many parents as you need. Copy a link for each email — they sign
-        in with that address. Joining the organization does not open course
-        materials until this student is enrolled in an active published course.
+        Add as many parents as you need. We’ll email each one a link — they
+        sign in with that address. You can also copy the link. Joining the
+        organization does not open course materials until this student is
+        enrolled in an active published course.
       </p>
 
       {loading ? (
@@ -99,6 +104,13 @@ export function ParentInvitePanel({
             />
             <Button variant="secondary" onClick={() => onCopy(invite)}>
               {copiedId === invite.id ? "Copied" : "Copy link"}
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={sendingId === invite.id}
+              onClick={() => onSendEmail(invite)}
+            >
+              {sendingId === invite.id ? "Sending…" : "Send email"}
             </Button>
             <Button
               variant="secondary"

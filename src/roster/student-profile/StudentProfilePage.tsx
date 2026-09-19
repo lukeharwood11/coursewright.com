@@ -117,11 +117,13 @@ export function StudentProfilePage() {
         addEmail={parentInvite.addEmail}
         invitingEmail={parentInvite.invitingEmail}
         cancelingId={parentInvite.cancelingId}
+        sendingId={parentInvite.sendingId}
         copiedId={parentInvite.copiedId}
         origin={parentInvite.origin}
         onAddEmailChange={parentInvite.setAddEmail}
         onInvite={parentInvite.onInvite}
         onCopy={parentInvite.onCopy}
+        onSendEmail={parentInvite.onSendEmail}
         onCancel={parentInvite.onCancel}
       />
 

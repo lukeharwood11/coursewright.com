@@ -108,6 +108,7 @@ export function OrgSettingsPage() {
           formError={staff.formError}
           inviting={staff.inviting}
           copiedId={staff.copiedId}
+          sendingId={staff.sendingId}
           cancelingId={staff.cancelingId}
           changingId={staff.changingId}
           removingId={staff.removingId}
@@ -117,6 +118,7 @@ export function OrgSettingsPage() {
           onRoleChange={staff.onRoleChange}
           onInvite={staff.onInvite}
           onCopy={staff.onCopy}
+          onSendEmail={staff.onSendEmail}
           onCancel={staff.onCancel}
           onChangeRole={staff.onChangeRole}
           onRemove={staff.onRemove}

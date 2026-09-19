@@ -9,7 +9,7 @@ Someone invited as org **owner**, **admin**, **instructor**, or **parent**. They
 
 ## Purpose
 
-Accept an email-claim invite from a copied link. **v0 does not send email** — staff share the link themselves. Parent and staff use the **same** token URL; role is on the invite.
+Accept an emailed invite from `/invite/<token>`. Staff can also copy that same link. Parent and staff use the **same** token URL; role is on the invite.
 
 
 ## Behavior
@@ -55,4 +55,4 @@ Accept an email-claim invite from a copied link. **v0 does not send email** — 
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Admin invites and parent invites (v0: copyable link, no email send). One token model; role is payload.
+[FEATURES.md](../FEATURES.md) — Admin invites and parent invites (Resend email + copyable link). One token model; role is payload.

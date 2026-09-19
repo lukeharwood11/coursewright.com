@@ -71,6 +71,34 @@ export function validateCreateParentInvite(input: {
   return { ok: true, value: { email } };
 }
 
+export function inviteCreatedMessage(input: {
+  recipientEmail: string;
+  emailSent: boolean;
+  linkCopied: boolean;
+}): string {
+  if (input.emailSent && input.linkCopied) {
+    return `Invite emailed to ${input.recipientEmail}. Link copied if they need it.`;
+  }
+  if (input.emailSent) {
+    return `Invite emailed to ${input.recipientEmail}.`;
+  }
+  if (input.linkCopied) {
+    return "Invite created, but the email didn’t send. Link copied — send it yourself.";
+  }
+  return "Invite created, but the email didn’t send. Copy the link and send it yourself.";
+}
+
+export function inviteEmailResultMessage(input: {
+  recipientEmail: string;
+  emailSent: boolean;
+  emailError: string | null;
+}): string {
+  if (input.emailSent) {
+    return `Invite emailed to ${input.recipientEmail}.`;
+  }
+  return input.emailError || "Couldn’t send the invite email. Copy the link and send it yourself.";
+}
+
 export function inviteWriteErrorMessage(error: {
   code?: string;
   message: string;

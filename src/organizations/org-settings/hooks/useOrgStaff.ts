@@ -11,6 +11,7 @@ import {
 import {
   cancelStaffInvite,
   createStaffInvite,
+  sendOrganizationInviteEmail,
   listOrgPendingInvites,
   listOrgStaff,
   staffInviteQueryKeys,
@@ -34,7 +35,13 @@ import {
   validateChangeStaffRole,
   validateRemoveStaffMember,
 } from "@/organizations/model/staffAccount";
-import { compareStaffRole, staffInviteUrl, validateCreateStaffInvite } from "@/organizations/model/staffInvite";
+import {
+  compareStaffRole,
+  inviteCreatedMessage,
+  inviteEmailResultMessage,
+  staffInviteUrl,
+  validateCreateStaffInvite,
+} from "@/organizations/model/staffInvite";
 
 export type StaffMemberRow = OrgStaffMember & {
   isYou: boolean;
@@ -104,20 +111,45 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
         invitedBy: user.id,
       });
     },
-    onSuccess: async (invite) => {
+    onSuccess: async ({ invite, email: emailStatus }) => {
       setEmail("");
       setFormError(null);
       const url = staffInviteUrl(window.location.origin, invite.token);
       setLastInviteId(invite.id);
-      setCopiedId(invite.id);
-      await navigator.clipboard.writeText(url).catch(() => undefined);
-      toast("Invite created. Link copied — send it yourself.");
+      const copied = await navigator.clipboard
+        .writeText(url)
+        .then(() => true)
+        .catch(() => false);
+      if (copied) setCopiedId(invite.id);
+      toast(
+        inviteCreatedMessage({
+          recipientEmail: invite.email,
+          emailSent: emailStatus.sent,
+          linkCopied: copied,
+        }),
+      );
       await queryClient.invalidateQueries({
         queryKey: staffInviteQueryKeys.org(organizationId ?? 0),
       });
     },
     onError: (error: Error) => {
       setFormError(error.message);
+    },
+  });
+
+  const sendEmailMutation = useMutation({
+    mutationFn: (invite: PendingStaffInvite) => sendOrganizationInviteEmail(invite.id),
+    onSuccess: (status, invite) => {
+      toast(
+        inviteEmailResultMessage({
+          recipientEmail: invite.email,
+          emailSent: status.sent,
+          emailError: status.error,
+        }),
+      );
+    },
+    onError: (error: Error) => {
+      toast(error.message);
     },
   });
 
@@ -247,6 +279,9 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     formError,
     inviting: inviteMutation.isPending,
     copiedId,
+    sendingId: sendEmailMutation.isPending
+      ? (sendEmailMutation.variables?.id ?? null)
+      : null,
     cancelingId: cancelMutation.isPending
       ? (cancelMutation.variables?.id ?? null)
       : null,
@@ -270,6 +305,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     },
     onInvite,
     onCopy,
+    onSendEmail: (invite: PendingStaffInvite) => sendEmailMutation.mutate(invite),
     onCancel: (invite: PendingStaffInvite) => cancelMutation.mutate(invite),
     onChangeRole,
     onRemove: (member: OrgStaffMember) => removeMutation.mutate(member),

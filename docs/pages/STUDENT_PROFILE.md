@@ -16,7 +16,7 @@ View/edit one org-level **student profile** (not a dedicated student account in 
 
 - View/edit one `student_profile` (no dedicated student role in P0/P1).
 - Edit name, optional student email, optional grade (must match org grade scheme when set).
-- **Parents:** add **one or more** parent emails; each can get a copyable `/invite/<token>` (v0 does not send email). Linked parents and pending invites are listed.
+- **Parents:** add **one or more** parent emails; each is emailed an `/invite/<token>` (copy-link remains). Linked parents and pending invites are listed.
 - **Student email:** optional. Invite uses the same claim path so that email can sign in and see this student's work.
 - **Save** / **Cancel** in the page header; Save disabled when nothing changed; Cancel goes back (confirms if dirty).
 - Show course enrollments and class membership.
@@ -45,14 +45,14 @@ View/edit one org-level **student profile** (not a dedicated student account in 
 
 - Enrollments in courses in this org → links to those [COURSE_ROSTER](./COURSE_ROSTER.md) contexts
 - Classes in this org → [CLASS](./CLASS.md)
-- Parent invite / claim status on this page; copy `/invite/<token>` (no email send)
+- Parent invite / claim status on this page; email + copy `/invite/<token>`
 - Family membership is not shown here while the families directory is unrouted
 - No dedicated student-role controls (accounts = P2; student email uses parent claim path)
 
 ## Primary actions
 
 - Edit profile fields
-- Create parent (or student-email) invite and copy the claim link; cancel a pending invite; add another parent
+- Create parent (or student-email) invite (email + copy the claim link); cancel a pending invite; add another parent
 - Open class / course enrollments
 
 ## Links to

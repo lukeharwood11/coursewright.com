@@ -25,7 +25,7 @@ We follow **Screaming Architecture**: the codebase should scream *Course Wright*
 2. **Frameworks are plugins** — UI and data adapters live at the edges (`infrastructure/`, `ui/`, `app/`). Domain code depends inward on product concepts; it does not sprawl “React patterns” as the organizing principle.
 3. **Name folders after the product vocabulary** in [BRANDING.md](./BRANDING.md) / [FEATURES.md](./FEATURES.md): Organization, Course, Unit, Material, Roster, Print — not “resources,” “entities,” or “services.” (**Template** = **P1**.)
 4. **One SPA, many screams** — admin, instructor, and parent are **roles** over the same domains, not separate applications that scream “three frontends.”
-5. **Backend screams jobs** — `supabase/functions/create-course-from-course` screams a use case; `supabase/functions/api-v2` does not. (**P1:** `create-course-from-template`.)
+5. **Backend screams jobs** — `supabase/functions/create-course-from-course` and `send-organization-invite` scream a use case; `supabase/functions/api-v2` does not. (**P1:** `create-course-from-template`.)
 
 If a new folder is named after a library (`redux/`, `hooks/`, `contexts/`) at the top of `src/`, it fails the scream test — push it under `infrastructure/` or into a domain.
 
@@ -130,6 +130,11 @@ UI (courses/)
   → Postgres (+ Storage as needed)
   → client invalidates TanStack queries
 
+UI (organizations/)
+  → api.invoke('send-organization-invite')
+  → Edge Function (Resend secret)
+  → Resend event `organization-invite`
+
 # P1: create-course-from-template, sync-template-resource, promote-to-template
 ```
 
@@ -154,7 +159,7 @@ Parent access rules (invite email, active course enrollment) live in schema/RLS 
 | Piece | Screams | Notes |
 |-------|---------|-------|
 | `supabase/migrations/` | Tables and policies named for the domain | Runtime schema source of truth |
-| `supabase/functions/<use-case>/` | Use case names | create-course-from-course (**P0**); create-course-from-template, sync-template-resource, promote-to-template (**P1**); … |
+| `supabase/functions/<use-case>/` | Use case names | create-course-from-course, send-organization-invite (**P0**); create-course-from-template, sync-template-resource, promote-to-template (**P1**); … |
 | `database/SCHEMA.md` | Human-readable model | Planning under `docs/database/`; keep in sync with migrations |
 
 Functions are **use-case adapters**, not a general REST API. Prefer few, obvious jobs over a growing “backend app.”

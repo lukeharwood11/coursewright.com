@@ -6,6 +6,7 @@ import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
   cancelInvite,
   createParentInvite,
+  sendOrganizationInviteEmail,
   listOrgPendingParentInvites,
   listParentLinksForStudents,
   staffInviteQueryKeys,
@@ -13,6 +14,8 @@ import {
 } from "@/organizations/databridge/staffInvites";
 import { canInviteParent } from "@/organizations/model/role";
 import {
+  inviteCreatedMessage,
+  inviteEmailResultMessage,
   inviteUrl,
   validateCreateParentInvite,
 } from "@/organizations/model/staffInvite";
@@ -54,7 +57,7 @@ export function useParentInvite(studentId: number | null) {
       const parsed = validateCreateParentInvite({ email });
       if (!parsed.ok) throw new Error(parsed.error);
       if (studentId == null) throw new Error("Student isn’t loaded yet.");
-      const invite = await createParentInvite({
+      const { invite, email: emailStatus } = await createParentInvite({
         organizationId: organization.id,
         studentProfileId: studentId,
         email: parsed.value.email,
@@ -69,11 +72,18 @@ export function useParentInvite(studentId: number | null) {
           gradeLevel: student.gradeLevel,
         });
       }
-      return invite;
+      return { invite, emailStatus };
     },
-    onSuccess: async (invite) => {
+    onSuccess: async ({ invite, emailStatus }) => {
       setAddEmail("");
-      await copyInvite(invite);
+      const copied = await copyInvite(invite, { toast: false });
+      toast(
+        inviteCreatedMessage({
+          recipientEmail: invite.email,
+          emailSent: emailStatus.sent,
+          linkCopied: copied,
+        }),
+      );
       await queryClient.invalidateQueries({
         queryKey: staffInviteQueryKeys.parents(organization.id),
       });
@@ -85,6 +95,22 @@ export function useParentInvite(studentId: number | null) {
           queryKey: studentQueryKeys.list(organization.id),
         });
       }
+    },
+    onError: (error: Error) => {
+      toast(error.message);
+    },
+  });
+
+  const sendEmailMutation = useMutation({
+    mutationFn: (invite: PendingOrgInvite) => sendOrganizationInviteEmail(invite.id),
+    onSuccess: (status, invite) => {
+      toast(
+        inviteEmailResultMessage({
+          recipientEmail: invite.email,
+          emailSent: status.sent,
+          emailError: status.error,
+        }),
+      );
     },
     onError: (error: Error) => {
       toast(error.message);
@@ -105,15 +131,24 @@ export function useParentInvite(studentId: number | null) {
     },
   });
 
-  async function copyInvite(invite: PendingOrgInvite) {
+  async function copyInvite(
+    invite: PendingOrgInvite,
+    options?: { toast?: string | false },
+  ): Promise<boolean> {
     const url = inviteUrl(window.location.origin, invite.token);
     try {
       await navigator.clipboard.writeText(url);
       setCopiedId(invite.id);
-      toast("Invite link copied — send it yourself.");
+      if (options?.toast !== false) {
+        toast(options?.toast ?? "Invite link copied.");
+      }
+      return true;
     } catch {
       setCopiedId(null);
-      toast("Copy the link from the field.");
+      if (options?.toast !== false) {
+        toast(options?.toast ?? "Copy the link from the field.");
+      }
+      return false;
     }
   }
 
@@ -134,12 +169,18 @@ export function useParentInvite(studentId: number | null) {
     cancelingId: cancelMutation.isPending
       ? (cancelMutation.variables?.id ?? null)
       : null,
+    sendingId: sendEmailMutation.isPending
+      ? (sendEmailMutation.variables?.id ?? null)
+      : null,
     copiedId,
     origin: typeof window === "undefined" ? "" : window.location.origin,
     setAddEmail,
     onInvite: (email: string) => inviteMutation.mutate(email),
     onCopy: (invite: PendingOrgInvite) => {
       void copyInvite(invite);
+    },
+    onSendEmail: (invite: PendingOrgInvite) => {
+      sendEmailMutation.mutate(invite);
     },
     onCancel: (invite: PendingOrgInvite) => {
       cancelMutation.mutate(invite);

@@ -12,6 +12,7 @@ import {
 } from "@/organizations/databridge/staffInvites";
 import { canInviteParent } from "@/organizations/model/role";
 import {
+  inviteCreatedMessage,
   inviteUrl,
   validateCreateParentInvite,
 } from "@/organizations/model/staffInvite";
@@ -65,8 +66,15 @@ export function useCourseParentInvites(students: StudentSummary[]) {
         invitedBy: user.id,
       });
     },
-    onSuccess: async (invite) => {
-      await copyInvite(invite);
+    onSuccess: async ({ invite, email: emailStatus }) => {
+      const copied = await copyInvite(invite, { toast: false });
+      toast(
+        inviteCreatedMessage({
+          recipientEmail: invite.email,
+          emailSent: emailStatus.sent,
+          linkCopied: copied,
+        }),
+      );
       await queryClient.invalidateQueries({
         queryKey: staffInviteQueryKeys.parents(organization.id),
       });
@@ -76,14 +84,23 @@ export function useCourseParentInvites(students: StudentSummary[]) {
     },
   });
 
-  async function copyInvite(invite: PendingOrgInvite) {
+  async function copyInvite(
+    invite: PendingOrgInvite,
+    options?: { toast?: string | false },
+  ): Promise<boolean> {
     const url = inviteUrl(window.location.origin, invite.token);
     try {
       await navigator.clipboard.writeText(url);
       setCopiedId(invite.id);
-      toast("Invite link copied — send it yourself.");
+      if (options?.toast !== false) {
+        toast(options?.toast ?? "Invite link copied.");
+      }
+      return true;
     } catch {
-      toast("Couldn’t copy the link. Open the student profile to copy it.");
+      if (options?.toast !== false) {
+        toast(options?.toast ?? "Couldn’t copy the link. Open the student profile to copy it.");
+      }
+      return false;
     }
   }
 

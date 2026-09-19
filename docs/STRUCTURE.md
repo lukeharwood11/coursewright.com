@@ -146,6 +146,7 @@ supabase/
 ├── functions/                # use-case names (scream jobs)
 │   ├── _shared/
 │   ├── create-course-from-course/   # P0
+│   ├── send-organization-invite/    # Resend organization-invite (HN-015)
 │   ├── create-course-from-template/ # P1
 │   ├── sync-template-resource/      # P1
 │   ├── promote-to-template/         # P1
@@ -205,6 +206,7 @@ Same stack definition for every tier — **do not** fork separate `envs/testing`
 | New table / RLS | `supabase/migrations/` |
 | Simple CRUD UI | `src/<domain>/api` + `pages` |
 | Create course from course (P0) | `supabase/functions/create-course-from-course/` |
+| Send organization invite email | `supabase/functions/send-organization-invite/` |
 | Template copy / sync / promote (**P1**) | `supabase/functions/<use-case>/` |
 | Print | `src/print/` |
 | Public marketing pages | `src/marketing/` |

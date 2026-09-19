@@ -30,6 +30,7 @@
 | **UI component docs** | **Storybook** | Develop / document `src/ui` (and related) components in isolation |
 | **CI/CD** | **GitHub Actions** | Lint/typecheck/build; deploy SPA and related pipelines |
 | **Product analytics** | **PostHog** | Product usage / funnels; client exception capture in the SPA |
+| **Transactional email** | **Resend** | Organization invite emails (`organization-invite` event) via Edge Function `send-organization-invite`. API key is a Supabase Function secret (**HN-015**) |
 | **Billing (P1)** | **Stripe Billing** *(hypothesis)* | Course Wright charges orgs — not P0 |
 
 ---
@@ -37,7 +38,7 @@
 ## Architecture rules
 
 1. **PostgREST-first** — Prefer the Supabase client + RLS for create/read/update/delete. Do not put simple CRUD behind a Function by default.
-2. **Functions for complexity** — Use Supabase Functions when the work needs secrets, multi-step transactions, privileged logic, or rules that should not be enforceable by RLS alone (e.g. **course → course copy**, invite claim flows, versioning/revert edge cases; **P1:** template → course copy/sync, promote).
+2. **Functions for complexity** — Use Supabase Functions when the work needs secrets, multi-step transactions, privileged logic, or rules that should not be enforceable by RLS alone (e.g. **course → course copy**, **invite email (Resend)**, invite claim flows, versioning/revert edge cases; **P1:** template → course copy/sync, promote).
 3. **RLS is the access gate** — Frontend CRUD assumes Row Level Security encodes org/role rules (admin, instructor, parent). Schema and policies must match [FEATURES.md](./FEATURES.md) / [database/SCHEMA.md](./database/SCHEMA.md). Storage policies follow the same org/role intent for file access.
 4. **Auth** — Supabase Auth owns identity. Login screen: **email + password**, **email magic link**, and **Sign in with Google** (Google Cloud OAuth → Supabase). Signup is Google or **email + password** and signs the person in on success. Invite claim uses the same email identity rules as product docs.
 5. **Files** — Uploads go to **Supabase Storage**; `File` rows in Postgres hold metadata / `storage_ref`. Prefer Storage + RLS (or signed URLs via Function when needed) over a separate file host. Playback / versioning / escalation design: [FILE_STORAGE.md](./FILE_STORAGE.md).
@@ -59,13 +60,13 @@
 | Prefer PostgREST (frontend) | Prefer Supabase Functions |
 |-----------------------------|---------------------------|
 | Load org, courses, units, materials | **Create course from course** (copy units/materials — **P0**) |
-| Edit a material title / dates / text | Invite claim / privileged membership writes |
-| Roster list / enroll when rules fit RLS | Soft-delete cascades / revert that touch many rows |
-| Parent dashboard reads for this week | Anything needing service-role or external email |
-| Mark important now (if RLS allows) | **P1:** Create course from template (copy + lineage) |
-| ShareLink create/read when RLS allows | **P1:** Template → course sync for unmodified copies |
-| Auth session via Supabase client | **P1:** Promote instance content → template |
-| Storage upload/download when policies allow | Signed URL / privileged file ops if RLS alone is insufficient |
+| Edit a material title / dates / text | **Send organization invite email** (`send-organization-invite` → Resend) |
+| Roster list / enroll when rules fit RLS | Invite claim / privileged membership writes |
+| Parent dashboard reads for this week | Soft-delete cascades / revert that touch many rows |
+| Mark important now (if RLS allows) | Anything needing service-role or **external email** |
+| ShareLink create/read when RLS allows | **P1:** Create course from template (copy + lineage) |
+| Auth session via Supabase client | **P1:** Template → course sync for unmodified copies |
+| Storage upload/download when policies allow | **P1:** Promote instance content → template; signed URL / privileged file ops if RLS alone is insufficient |
 
 Exact Function list is implementation detail; the rule is **simple = PostgREST, complex = Function**.
 

@@ -20,7 +20,7 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 - Save org name/metadata; changing **permalink slug** shows a warning that existing links break (no auto-redirect in P0) and requires an explicit confirmation.
 - **Save** and **Cancel** stay in the page header (upper right). Save is disabled when nothing changed; Cancel goes back (confirms first if there are unsaved changes).
 - Set org **type** (co-op / micro-school) and **grade scheme** (K–12 / custom labels).
-- Staff section on this page: invite owner / admin / instructor by email, **copy a claim link** (v0 does not send email), list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). Owners and admins **change admin ↔ instructor** and **remove** admins/instructors; the last remaining owner or admin cannot be removed or demoted. Those writes update **org membership** (who can run settings and invites). They do **not** change who can see course content — materials and roster stay **enrollment-gated** (and `parent_student_links` where applicable).
+- Staff section on this page: invite owner / admin / instructor by email (Resend `organization-invite`) and **copy a claim link**, list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). Owners and admins **change admin ↔ instructor** and **remove** admins/instructors; the last remaining owner or admin cannot be removed or demoted. Those writes update **org membership** (who can run settings and invites). They do **not** change who can see course content — materials and roster stay **enrollment-gated** (and `parent_student_links` where applicable).
 - Billing section is P1 placeholder, **shown only to owners**.
 
 ## Data shown
@@ -29,7 +29,7 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 - Current **grade scheme** and labels (K–12 preset or custom)
 - Staff list: person **name** / **email**, **role** (owner | admin | instructor); owners and admins see change-role and remove actions for admins/instructors
 - Last owner/admin rows explain why they can’t be removed or demoted
-- Pending staff invites: **email**, **role**, copyable `/invite/<token>` link, cancel
+- Pending staff invites: **email**, **role**, copyable `/invite/<token>` link, send email, cancel
 - Billing status — P1, owner only
 
 ## Contents
@@ -49,8 +49,8 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 ### Staff / roles (section)
 
 - List owners, admins, and instructors
-- Invite owners / admins / instructors by email; copy the claim link (no email send in v0)
-- Pending invites: copy link again, or cancel
+- Invite owners / admins / instructors by email; Course Wright emails the claim link and you can copy it again
+- Pending invites: copy link again, resend email, or cancel
 - Change **admin ↔ instructor** for existing staff (owners and admins; owner seats stay invite-only). Membership role only — not a materials/roster access gate
 - Remove admins/instructors (membership only)
 - Guard: cannot remove or demote the **last remaining owner or admin**
@@ -65,7 +65,7 @@ Configure the organization: identity, permalink, type, grade scheme, and **staff
 - Save org settings / slug (with warning) — header Save disabled when unchanged; Cancel leaves (confirm if dirty)
 - Cancel — discard unsaved changes
 - Set grade scheme
-- Invite staff and copy the claim link; cancel a pending invite
+- Invite staff (email + copy the claim link); cancel a pending invite; resend the email
 - Change admin ↔ instructor for existing staff (membership role only)
 - Remove an admin or instructor from staff (blocked when they are the last owner/admin)
 
