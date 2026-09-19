@@ -23,7 +23,7 @@ export function publicHost(): string {
 export const privacyLastUpdated = "September 19, 2026";
 
 export function privacyIntro(host = publicHost()): string {
-  return `This Privacy Policy explains Course Wright’s data collection and usage practices when you visit ${host} or use the Course Wright app — including how we access, use, store, and share Google user data if you choose Sign in with Google. It is written for co-ops, micro-schools, instructors, and parents who trust us with school and family information.`;
+  return `This Privacy Policy applies specifically to the Course Wright application available at https://${host} (including Sign in with Google). It explains Course Wright’s data collection and usage practices — including how we access, use, store, and share Google user data. It is written for co-ops, micro-schools, instructors, and parents who trust us with school and family information. This is not a sample or template policy; it describes Course Wright’s actual practices.`;
 }
 
 export function privacySections(host = publicHost()): PrivacySection[] {
@@ -67,15 +67,16 @@ export function privacySections(host = publicHost()): PrivacySection[] {
       title: "How Course Wright stores and protects Google user data",
       paragraphs: [
         "Google user data used for sign-in is stored with our authentication and database provider (Supabase) as part of your Course Wright account record, and the Course Wright application is hosted on Amazon Web Services (AWS).",
-        "We protect Google user data with encrypted connections (HTTPS), account authentication, and organization role-based access controls. No method of transmission or storage is completely secure; we work to protect your information and improve our practices over time.",
+        "Data protection mechanisms: We protect Google user data and other personal information with encrypted connections in transit (HTTPS/TLS), access controls that require authentication, and organization role-based authorization so only authorized members can see relevant account information. Where Google user data could be considered sensitive in context (for example, account credentials and identifiers used for sign-in), we apply these same protections and limit access to systems and personnel needed to operate Course Wright.",
+        "No method of transmission or storage is completely secure; we work to protect your information and improve our practices over time.",
       ],
     },
     {
       id: "google-share",
       title: "How Course Wright shares Google user data",
       paragraphs: [
-        "We do not sell Google user data. We do not share Google user data with independent third parties for their own marketing or advertising purposes.",
-        "We share Google user data only: (1) with service providers that process it on our behalf to operate Course Wright (notably Supabase for authentication/account storage and AWS for application hosting); (2) within your organization according to roles your admins set (for example, your name/email as a member); (3) when required by law or to protect security; or (4) as part of a merger, acquisition, or similar corporate transaction with appropriate safeguards.",
+        "We do not sell Google user data. We do not transfer Google user data to third parties for advertising, data brokerage, or any purpose other than providing or improving Course Wright’s user-facing functionality.",
+        "We share Google user data only: (1) with service providers that process it on our behalf solely to provide or improve Course Wright (notably Supabase for authentication/account storage and AWS for application hosting); (2) within your organization according to roles your admins set (for example, your name/email as a member); (3) when required by law or to protect security; or (4) as part of a merger, acquisition, or similar corporate transaction with appropriate safeguards and, where required, notice or consent.",
       ],
     },
     {
