@@ -17,9 +17,11 @@ import type { BlockRecord } from "@/materials/databridge/blocks";
 import { looksLikeHttpUrl } from "@/materials/model/blocks";
 import { PageQuizViewProvider } from "./PageQuizViewContext";
 import { FloatingFormatToolbar } from "./page-editor/FloatingFormatToolbar";
+import { FileUploadStatus } from "./page-editor/FileUploadStatus";
 import { KeyboardShortcutsPlugin } from "./page-editor/KeyboardShortcutsPlugin";
 import { PageEditorActionsProvider } from "./page-editor/PageEditorActions";
 import { PageEditorToolbar } from "./page-editor/PageEditorToolbar";
+import { PasteImagesPlugin } from "./page-editor/PasteImagesPlugin";
 import { SlashCommandPlugin } from "./page-editor/SlashCommandPlugin";
 import {
   PAGE_AUTOLINK_MATCHERS,
@@ -63,6 +65,7 @@ export function PageContentEditor({
         {editable ? (
           <PageEditorActionsProvider>
             <PageEditorToolbar />
+            <FileUploadStatus />
             <div className="relative">
               <RichTextPlugin
                 contentEditable={
@@ -81,6 +84,7 @@ export function PageContentEditor({
               <FloatingFormatToolbar />
             </div>
             <SlashCommandPlugin />
+            <PasteImagesPlugin />
             <KeyboardShortcutsPlugin />
             <HistoryPlugin />
             <ListPlugin />

@@ -47,7 +47,7 @@ export function BulletinFormFields({
           required
           value={title}
           onChange={(event) => onTitle(event.target.value)}
-          placeholder="This week in science"
+          placeholder="This week in Biology"
         />
       </label>
       <label className="mt-4 flex flex-col gap-1">

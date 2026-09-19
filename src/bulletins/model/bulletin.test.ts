@@ -5,7 +5,18 @@ import {
   isBulletinAvailable,
 } from "./availability.ts";
 import { groupCourseBulletins, groupMaterialsForPicker } from "./grouping.ts";
-import { toggleMaterialId, validateBulletinDraft } from "./validate.ts";
+import {
+  defaultBulletinTitle,
+  toggleMaterialId,
+  validateBulletinDraft,
+} from "./validate.ts";
+
+test("defaultBulletinTitle uses the course name", () => {
+  assert.equal(defaultBulletinTitle("Biology"), "This week in Biology");
+  assert.equal(defaultBulletinTitle("  Algebra I  "), "This week in Algebra I");
+  assert.equal(defaultBulletinTitle(""), "This week");
+  assert.equal(defaultBulletinTitle("   "), "This week");
+});
 
 test("isBulletinAvailable is inclusive of start and end dates", () => {
   assert.equal(isBulletinAvailable("2026-09-13", "2026-09-13", "2026-09-19"), true);
