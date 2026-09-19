@@ -174,8 +174,8 @@ export function MaterialEditPage() {
             <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Content</h2>
             <p className="mt-1 text-[13px] text-[var(--ink-faint)]">
               Write the lesson here — headings, lists, tables, links, videos,
-              and files. Save at the top when you’re ready — a new version is
-              stored only if this page changed.
+              and files. Type / to insert a block. Save at the top when you’re
+              ready — a new version is stored only if this page changed.
             </p>
             <div className="mt-3">
               <Suspense

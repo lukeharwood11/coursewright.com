@@ -76,19 +76,146 @@ body {
 }
 
 .cw-editor-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 1px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
   border-bottom: 1px solid var(--line-soft);
-  padding: 0.65rem 0.75rem;
+  padding: 6px 8px;
+  background: var(--surface);
+}
+
+.cw-editor-toolbar-item {
+  display: inline-flex;
+  height: 32px;
+  min-width: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  padding: 0 7px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.cw-editor-toolbar-item:hover:not(:disabled) {
   background: var(--paper);
+}
+
+.cw-editor-toolbar-item.is-active {
+  background: var(--green-tint);
+  color: var(--green-deep);
+}
+
+.cw-editor-toolbar-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.cw-editor-toolbar-item:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 1px;
+}
+
+.cw-editor-toolbar-dropdown {
+  padding-right: 4px;
+}
+
+.cw-editor-toolbar-divider {
+  width: 1px;
+  height: 22px;
+  margin: 0 4px;
+  flex-shrink: 0;
+  background: var(--line-soft);
+}
+
+.cw-editor-menu,
+.cw-slash-menu,
+.cw-editor-float {
+  z-index: 50;
+  min-width: 220px;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.cw-editor-menu {
+  position: fixed;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.cw-slash-menu {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.cw-editor-float {
+  position: fixed;
+  display: flex;
+  min-width: 0;
+  padding: 4px;
+  gap: 1px;
+}
+
+.cw-editor-menu-item,
+.cw-slash-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  padding: 7px 8px;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cw-editor-menu-item:hover,
+.cw-slash-item:hover,
+.cw-editor-menu-item.is-active,
+.cw-slash-item.is-active {
+  background: var(--green-tint);
+  color: var(--green-deep);
+}
+
+.cw-editor-menu-icon {
+  display: inline-flex;
+  height: 28px;
+  width: 28px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink-soft);
 }
 
 .cw-editor-input {
   min-height: 16rem;
-  padding: 0.9rem 1rem 1.25rem;
-  font-size: 14.5px;
-  line-height: 1.55;
+  padding: 1.15rem 1.25rem 1.5rem;
+  font-size: 15px;
+  line-height: 1.6;
   color: var(--ink);
   outline: none;
 }
@@ -100,23 +227,34 @@ body {
 
 .cw-editor-placeholder {
   position: absolute;
-  top: 0.9rem;
-  left: 1rem;
+  top: 1.15rem;
+  left: 1.25rem;
   margin: 0;
   color: var(--ink-faint);
   pointer-events: none;
 }
 
-.cw-editor-p {
-  margin: 0 0 0.65rem;
+.cw-editor-input > :first-child {
+  margin-top: 0;
 }
 
 .cw-editor-h {
-  margin: 0 0 0.7rem;
+  margin: 0.85rem 0 0.55rem;
   font-family: var(--font-ui);
-  font-size: 1.15rem;
   font-weight: 800;
   line-height: 1.3;
+}
+
+.cw-editor-h1 {
+  font-size: 1.55rem;
+}
+
+.cw-editor-h2 {
+  font-size: 1.25rem;
+}
+
+.cw-editor-h3 {
+  font-size: 1.08rem;
 }
 
 .cw-editor-ul {
@@ -133,6 +271,14 @@ body {
 
 .cw-editor-li {
   margin: 0.15rem 0;
+}
+
+.cw-editor-li-nested {
+  list-style-type: circle;
+}
+
+.cw-editor-indent {
+  --lexical-indent-base-value: 1.4rem;
 }
 
 .cw-editor-quote {
@@ -185,6 +331,10 @@ body {
 .cw-editor-th {
   background: var(--paper);
   font-weight: 700;
+}
+
+.cw-editor-td-selected {
+  background: var(--green-tint);
 }
 
 .cw-editor-input hr {
