@@ -48,8 +48,8 @@ export function ParentHome({
       : printThisWeekPath(orgSlug);
 
   return (
-    <div className="mx-auto max-w-2xl px-5 pb-24 pt-8 md:px-8 md:pb-10">
-      <header className="flex flex-wrap items-start justify-between gap-4">
+    <div className="mx-auto max-w-2xl px-5 pb-20 pt-6 md:px-8 md:pb-8">
+      <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1
             className="text-[22px] font-semibold leading-snug text-[var(--ink)] md:text-[24px]"
@@ -57,7 +57,7 @@ export function ParentHome({
           >
             Hi, {firstName}
           </h1>
-          <p className="mt-1.5 text-[14px] text-[var(--ink-soft)]">{weekLabel}</p>
+          <p className="mt-1 text-[14px] text-[var(--ink-soft)]">{weekLabel}</p>
         </div>
         {selectedIds.length > 0 ? (
           <ButtonLink variant="secondary" to={printTo}>
@@ -72,7 +72,7 @@ export function ParentHome({
         )}
       </header>
 
-      <p className="mt-3 text-[13px]">
+      <p className="mt-2 text-[13px]">
         <Link
           to="/my"
           className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
@@ -82,11 +82,11 @@ export function ParentHome({
       </p>
 
       {loading ? (
-        <p className="mt-8 text-[14px] text-[var(--ink-soft)]">Loading this week…</p>
+        <p className="mt-6 text-[14px] text-[var(--ink-soft)]">Loading this week…</p>
       ) : null}
 
       {error ? (
-        <p className="mt-8 text-[13.5px] text-[var(--amber-deep)]" role="alert">
+        <p className="mt-6 text-[13.5px] text-[var(--amber-deep)]" role="alert">
           {error}
         </p>
       ) : null}
@@ -139,7 +139,7 @@ function ParentDashboardBody({
 }) {
   if (!full.hasActiveEnrollment) {
     return (
-      <p className="mt-8 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
+      <p className="mt-6 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
         You’re not on a course yet. When your co-op adds you, this week’s
         materials will show up here.
       </p>
@@ -158,7 +158,7 @@ function ParentDashboardBody({
 
   if (showTags && selectedIds.length === 0) {
     return (
-      <div className="mt-8 flex flex-col gap-6">
+      <div className="mt-6 flex flex-col gap-4">
         <StudentTags
           students={full.students}
           selectedIds={selectedIds}
@@ -172,7 +172,7 @@ function ParentDashboardBody({
   }
 
   return (
-    <div className="mt-8 flex flex-col gap-8">
+    <div className="mt-6 flex flex-col gap-5">
       {showTags ? (
         <StudentTags
           students={full.students}
@@ -195,9 +195,9 @@ function ParentDashboardBody({
       ) : null}
 
       <section>
-        <div className="mb-3">
+        <div className="mb-2">
           <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">This week</h2>
-          <p className="mt-1 text-[13px] text-[var(--ink-faint)]">
+          <p className="mt-0.5 text-[13px] text-[var(--ink-faint)]">
             Work assigned for this week, and anything due this week.
           </p>
         </div>
@@ -208,7 +208,7 @@ function ParentDashboardBody({
             when something’s ready.
           </p>
         ) : (
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
             {visible.students.map((student) => (
               <StudentWeek
                 key={student.id}
@@ -274,10 +274,10 @@ function ComingUpSection({
   return (
     <section>
       <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Coming up</h2>
-      <p className="mt-1 text-[13px] text-[var(--ink-faint)]">
+      <p className="mt-0.5 text-[13px] text-[var(--ink-faint)]">
         What’s next to work on, and what’s due soon.
       </p>
-      <ul className="mt-3 divide-y divide-[var(--line-soft)] border-y border-[var(--line-soft)]">
+      <ul className="mt-2 divide-y divide-[var(--line-soft)] border-y border-[var(--line-soft)]">
         {nextAssigned ? (
           <ComingUpRow
             orgSlug={orgSlug}
@@ -319,7 +319,7 @@ function ComingUpRow({
   showStudent: boolean;
 }) {
   return (
-    <li className="flex items-start gap-3 py-3.5">
+    <li className="flex items-start gap-2.5 py-2.5">
       <div className="min-w-0 flex-1">
         <p className="text-[12px] font-bold text-[var(--ink-faint)]">{label}</p>
         <Link
@@ -329,20 +329,20 @@ function ComingUpRow({
             unitId: item.material.unitId,
             materialId: item.material.id,
           })}
-          className="mt-1 block min-w-0 text-left"
+          className="mt-0.5 block min-w-0 text-left"
         >
           <span className="block text-[15px] font-bold text-[var(--ink)]">
             {item.material.title}
           </span>
           <span
             className={[
-              "mt-1 block text-[12.5px] font-bold",
+              "mt-0.5 block text-[12.5px] font-bold",
               dateTone === "due" ? "text-[var(--amber-deep)]" : "text-[var(--slate)]",
             ].join(" ")}
           >
             {dateLabel}
           </span>
-          <span className="mt-0.5 block text-[12.5px] text-[var(--ink-soft)]">
+          <span className="block text-[12.5px] text-[var(--ink-soft)]">
             {showStudent ? `${item.studentName} · ` : ""}
             {item.courseTitle}
           </span>
@@ -350,7 +350,7 @@ function ComingUpRow({
       </div>
       <ButtonLink
         variant="secondary"
-        className="mt-5 shrink-0 px-2.5 py-1.5 text-[12px]"
+        className="mt-3 shrink-0 px-2.5 py-1.5 text-[12px]"
         to={materialPrintPath({
           orgSlug,
           courseId: item.courseId,
@@ -375,11 +375,11 @@ function ImportantNowList({
   return (
     <section>
       <h2 className="text-[13px] font-bold text-[var(--amber-deep)]">Important now</h2>
-      <ul className="mt-3 flex flex-col gap-2">
+      <ul className="mt-2 flex flex-col gap-1.5">
         {items.map((item) => (
           <li
             key={item.id}
-            className="flex items-start gap-3 border-l-4 border-[var(--amber)] bg-[var(--amber-tint)] py-3 pr-3 pl-3"
+            className="flex items-start gap-2.5 border-l-4 border-[var(--amber)] bg-[var(--amber-tint)] py-2 pr-2.5 pl-2.5"
           >
             <Link
               to={materialPath({
@@ -434,7 +434,7 @@ function StudentWeek({
   return (
     <div>
       {showHeader ? (
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-2 flex items-center gap-2">
           <Avatar name={student.name} size={28} />
           <p className="text-[15px] font-extrabold text-[var(--ink)]">{student.name}</p>
           {student.gradeLevel ? (
@@ -449,7 +449,7 @@ function StudentWeek({
         </p>
       ) : null}
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {student.courses.map((course) => (
           <div key={course.id}>
             <Link
@@ -459,11 +459,11 @@ function StudentWeek({
               {course.title}
             </Link>
             {course.materials.length === 0 ? (
-              <p className="mt-2 text-[13.5px] text-[var(--ink-faint)]">
+              <p className="mt-1.5 text-[13.5px] text-[var(--ink-faint)]">
                 Nothing assigned or due this week.
               </p>
             ) : (
-              <ul className="mt-2 divide-y divide-[var(--line-soft)] border-y border-[var(--line-soft)]">
+              <ul className="mt-1.5 divide-y divide-[var(--line-soft)] border-y border-[var(--line-soft)]">
                 {course.materials.map((material) => (
                   <MaterialWeekRow
                     key={material.id}
@@ -491,7 +491,7 @@ function MaterialWeekRow({
   material: ParentDashboardMaterial;
 }) {
   return (
-    <li className="flex items-start gap-3 py-3">
+    <li className="flex items-start gap-2.5 py-2.5">
       <Link
         to={materialPath({
           orgSlug,
@@ -531,7 +531,7 @@ function MaterialDateLabels({
   if (!material.assignedDate && !material.dueDate) return null;
 
   return (
-    <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+    <span className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
       {material.assignedDate ? (
         <span className="text-[12.5px] font-bold text-[var(--slate)]">
           Assigned {formatMaterialDate(material.assignedDate)}

@@ -92,11 +92,25 @@ export function quizCorrectChoiceLetters(quiz: QuizBody): string {
     .join(", ");
 }
 
-export type QuizPrintLine = {
+export type QuizPrintTextLine = {
   id: string;
+  kind: "text";
   tone: "label" | "body" | "meta";
   text: string;
 };
+
+/** Multiple-choice row for PDF: checkbox is drawn, not bracket text. */
+export type QuizPrintChoiceLine = {
+  id: string;
+  kind: "choice";
+  letter: string;
+  text: string;
+  /** Filled / marked only on staff answer-key packets. */
+  checked: boolean;
+  showCorrectLabel: boolean;
+};
+
+export type QuizPrintLine = QuizPrintTextLine | QuizPrintChoiceLine;
 
 export function quizPrintLines(
   quiz: QuizBody,
@@ -105,11 +119,13 @@ export function quizPrintLines(
   const lines: QuizPrintLine[] = [
     {
       id: "label",
+      kind: "text",
       tone: "label",
       text: includeAnswerKey ? "Quiz · Answer key" : "Quiz",
     },
     {
       id: "prompt",
+      kind: "text",
       tone: quiz.prompt.trim() ? "body" : "meta",
       text: quiz.prompt.trim() || "Question",
     },
@@ -117,6 +133,7 @@ export function quizPrintLines(
   if (quiz.questionKind === "short_answer") {
     lines.push({
       id: "answer",
+      kind: "text",
       tone: "body",
       text: includeAnswerKey
         ? `Answer: ${quiz.answer.trim() || "Not marked yet"}`
@@ -126,17 +143,24 @@ export function quizPrintLines(
   }
   quiz.choices.forEach((choice, index) => {
     if (!choice.text.trim() && !includeAnswerKey) return;
-    const mark = includeAnswerKey && choice.correct ? "[X]" : "[ ]";
-    const correct = includeAnswerKey && choice.correct ? "  (correct)" : "";
+    const checked = includeAnswerKey && choice.correct;
     lines.push({
       id: choice.id,
-      tone: "body",
-      text: `${mark} ${quizChoiceLetter(index)}. ${choice.text.trim() || "Empty choice"}${correct}`,
+      kind: "choice",
+      letter: quizChoiceLetter(index),
+      text: choice.text.trim() || "Empty choice",
+      checked,
+      showCorrectLabel: checked,
     });
   });
   const letters = quizCorrectChoiceLetters(quiz);
   if (includeAnswerKey && letters) {
-    lines.push({ id: "correct", tone: "meta", text: `Correct: ${letters}` });
+    lines.push({
+      id: "correct",
+      kind: "text",
+      tone: "meta",
+      text: `Correct: ${letters}`,
+    });
   }
   return lines;
 }
