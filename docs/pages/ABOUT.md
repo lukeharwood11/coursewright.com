@@ -41,7 +41,7 @@ Explain who Course Wright is for and what problem it solves — without LMS jarg
 - [HOME](./HOME.md) — back to landing
 - [PRICING](./PRICING.md) — pricing
 - [SIGNUP](./SIGNUP.md) — get started
-- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [COOKIES](./COOKIES.md), [CONSTRUCTION](./CONSTRUCTION.md) (`/terms`)
+- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [DOCS](./DOCS.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [COOKIES](./COOKIES.md), [CONSTRUCTION](./CONSTRUCTION.md) (`/terms`)
 
 ## Notes
 

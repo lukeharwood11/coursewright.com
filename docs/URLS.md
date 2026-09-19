@@ -34,6 +34,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | [CONTACT](./pages/CONTACT.md) | `/contact` | Public emails (`hi@` / `support@`; `legal@` only on privacy) |
 | [PRIVACY](./pages/PRIVACY.md) | `/privacy` | Privacy policy (incl. PostHog disclosure) |
 | [COOKIES](./pages/COOKIES.md) | `/cookies` | Cookie policy (essential + PostHog when enabled) |
+| [DOCS](./pages/DOCS.md) | `/docs` | Help — Getting started; nested `/docs/<slug>` topics |
 | [CONSTRUCTION](./pages/CONSTRUCTION.md) | `/terms` | Shared footer placeholder until copy exists |
 
 ---

@@ -21,6 +21,9 @@ export function MarketingHeader() {
           <NavLink to="/pricing" className={navClass}>
             Pricing
           </NavLink>
+          <NavLink to="/docs" className={navClass}>
+            Help
+          </NavLink>
           <NavLink to="/login" className={navClass}>
             Sign in
           </NavLink>

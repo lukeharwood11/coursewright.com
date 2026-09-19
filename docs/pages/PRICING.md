@@ -46,7 +46,7 @@ Say that Course Wright is an **invite-only pilot**. Do not present plan options 
 - [ABOUT](./ABOUT.md) — about
 - [HOME](./HOME.md) — home
 - [CONTACT](./CONTACT.md) — email directory (mailto `hi@`)
-- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [COOKIES](./COOKIES.md), [CONSTRUCTION](./CONSTRUCTION.md) (`/terms`)
+- via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [DOCS](./DOCS.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [COOKIES](./COOKIES.md), [CONSTRUCTION](./CONSTRUCTION.md) (`/terms`)
 
 ## Notes
 

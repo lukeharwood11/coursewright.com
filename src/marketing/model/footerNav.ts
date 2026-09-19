@@ -18,6 +18,7 @@ export const footerColumns: FooterColumn[] = [
       { to: "/", label: "Home", ready: true },
       { to: "/about", label: "About", ready: true },
       { to: "/pricing", label: "Pricing", ready: true },
+      { to: "/docs", label: "Help", ready: true },
     ],
   },
   {

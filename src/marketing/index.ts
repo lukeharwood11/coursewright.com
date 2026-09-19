@@ -7,3 +7,6 @@ export { PricingPage } from "./pages/PricingPage";
 export { PrivacyPage } from "./pages/PrivacyPage";
 export { ConstructionPage } from "./pages/ConstructionPage";
 export { LogosPage } from "./pages/LogosPage";
+export { DocsLayout } from "./docs/DocsLayout";
+export { DocsHomePage } from "./docs/DocsHomePage";
+export { DocsTopicPage } from "./docs/DocsTopicPage";

@@ -15,6 +15,9 @@ import {
   ConstructionPage,
   ContactPage,
   CookiesPage,
+  DocsHomePage,
+  DocsLayout,
+  DocsTopicPage,
   HomePage,
   LogosPage,
   MarketingLayout,
@@ -51,6 +54,10 @@ export function AppRoutes() {
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<ConstructionPage />} />
         <Route path="/cookies" element={<CookiesPage />} />
+        <Route path="/docs" element={<DocsLayout />}>
+          <Route index element={<DocsHomePage />} />
+          <Route path=":slug" element={<DocsTopicPage />} />
+        </Route>
       </Route>
       <Route
         path="/login"
