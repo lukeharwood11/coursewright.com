@@ -7,13 +7,15 @@ import {
   inviteAuthGoogleHint,
   inviteAuthSubcopy,
 } from "@/auth/model/inviteAuth";
+import { applyPublicDocumentMeta } from "@/marketing/model/documentMeta";
+import { publicSeoPageForPath } from "@/marketing/model/publicSeo";
 
 export function SignupPage() {
   const location = useLocation();
   const invite = inviteAuthFromSearch(location.search);
 
   useEffect(() => {
-    document.title = "Sign up · Course Wright";
+    applyPublicDocumentMeta(publicSeoPageForPath("/signup"));
   }, []);
 
   return (

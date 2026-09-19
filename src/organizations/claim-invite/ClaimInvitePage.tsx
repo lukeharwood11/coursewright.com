@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { applyNoIndexDocumentMeta } from "@/marketing/model/documentMeta";
 import { ClaimInviteCard } from "./components/ClaimInviteCard";
 import { useClaimInvite } from "./hooks/useClaimInvite";
 
@@ -8,7 +9,7 @@ export function ClaimInvitePage() {
   const claim = useClaimInvite(token);
 
   useEffect(() => {
-    document.title = "Invite · Course Wright";
+    applyNoIndexDocumentMeta("Invite · Course Wright");
   }, []);
 
   return (

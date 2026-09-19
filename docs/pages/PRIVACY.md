@@ -49,3 +49,4 @@ Publish the privacy policy for Course Wright.
 - Hostname in copy: `VITE_PUBLIC_HOST` (set in `.env.testing` / `build-spa.sh` from Terraform `site_domain`).
 - Align disclosures with [STACK.md](../STACK.md). Do not claim PostHog session replay until enabled. Policy body should not mention other deploy tiers.
 - This is product-facing policy copy for the pilot; a lawyer review can refine it later if needed.
+- Build prerenders static HTML for this path (and terms/cookies) so crawlers/verifiers that do not execute JavaScript still see the policy body. SPA JS still mounts for interactive visits after deploy.

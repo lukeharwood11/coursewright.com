@@ -1,4 +1,4 @@
-import { contactEmails } from "./contactEmails";
+import { contactEmails } from "./contactEmails.ts";
 
 export type PrivacySection = {
   id: string;

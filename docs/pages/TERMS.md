@@ -48,3 +48,4 @@ Publish Course Wright’s Terms of Use (generic pilot copy).
 - Hostname in copy: `VITE_PUBLIC_HOST`.
 - Generic / pilot legal copy; a lawyer review can refine it later if needed.
 - Do not invent dollar amounts for paid plans on this page beyond the liability floor already stated.
+- Build prerenders static HTML for this path (with privacy/cookies) so non-JS verifiers see the terms body.

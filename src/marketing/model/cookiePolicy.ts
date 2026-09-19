@@ -1,5 +1,5 @@
-import { contactEmails } from "./contactEmails";
-import { publicHost } from "./privacyPolicy";
+import { contactEmails } from "./contactEmails.ts";
+import { publicHost } from "./privacyPolicy.ts";
 
 export type CookieSection = {
   id: string;

@@ -1,0 +1,4 @@
+Contact: mailto:legal@coursewright.com
+Contact: mailto:support@coursewright.com
+Preferred-Languages: en
+Canonical: https://coursewright.com/.well-known/security.txt

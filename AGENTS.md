@@ -88,6 +88,7 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | [infra/tfvars/AGENTS.md](./infra/tfvars/AGENTS.md) | Tier var files (testing / production) |
 | [.github/AGENTS.md](./.github/AGENTS.md) | GitHub Actions (dispatch-only Terraform plan/apply) |
 | [scripts/AGENTS.md](./scripts/AGENTS.md) | Root utility scripts (e.g. experiment-mode `nuke.sh`) |
+| [public/AGENTS.md](./public/AGENTS.md) | Static public assets + SEO discovery files |
 
 ## Environments
 

@@ -51,8 +51,8 @@ coursewright.com/
 ├── index.html
 ├── .env.testing              # Shared public Vite client env (testing branch)
 ├── .env.example              # Documents required VITE_* keys
-├── public/
-├── dist/                     # gitignored — build → S3
+├── public/                   # static assets (icons, manifest, llms.txt, security.txt)
+├── dist/                     # gitignored — build → S3 (includes generated robots.txt / sitemap.xml)
 │
 ├── src/                      # SPA — domains scream here
 ├── supabase/                 # migrations + Edge Functions

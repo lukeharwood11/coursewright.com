@@ -7,13 +7,14 @@ import {
   inviteAuthGoogleHint,
   inviteAuthSubcopy,
 } from "@/auth/model/inviteAuth";
+import { applyNoIndexDocumentMeta } from "@/marketing/model/documentMeta";
 
 export function LoginPage() {
   const location = useLocation();
   const invite = inviteAuthFromSearch(location.search);
 
   useEffect(() => {
-    document.title = "Sign in · Course Wright";
+    applyNoIndexDocumentMeta("Sign in · Course Wright");
   }, []);
 
   return (

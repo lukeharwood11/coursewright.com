@@ -43,4 +43,4 @@ Explain how Course Wright uses cookies and similar technologies (including PostH
 
 ## Notes
 
-Align with [STACK.md](../STACK.md). Do not claim session replay until enabled. Do not mention other deploy tiers in the body.
+Align with [STACK.md](../STACK.md). Do not claim session replay until enabled. Do not mention other deploy tiers in the body. Build prerenders static HTML for this path (with privacy/terms) so non-JS verifiers see the cookie policy body.

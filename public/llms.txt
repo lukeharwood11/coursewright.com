@@ -1,0 +1,23 @@
+# Course Wright
+
+> One place for homeschool co-ops and micro-schools to plan courses, share materials with parents, and print what you need.
+
+Course Wright is learning management built for small organizations — clear for instructors, simple for parents who dislike complicated software.
+
+## Site
+
+- Home: https://coursewright.com/
+- About: https://coursewright.com/about
+- Pricing: https://coursewright.com/pricing
+- Contact: https://coursewright.com/contact
+- Help: https://coursewright.com/docs
+- Privacy: https://coursewright.com/privacy
+- Terms: https://coursewright.com/terms
+- Cookies: https://coursewright.com/cookies
+- Sign up: https://coursewright.com/signup
+
+## Contact
+
+- Partnership / product: hi@coursewright.com
+- Support: support@coursewright.com
+- Legal: legal@coursewright.com

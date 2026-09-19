@@ -2,24 +2,18 @@ import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { MarketingFooter } from "./MarketingFooter";
 import { MarketingHeader } from "./MarketingHeader";
-import { footerLinkForPath } from "../model/footerNav";
-import { helpDocTitle } from "../model/helpDocs";
+import { applyNoIndexDocumentMeta, applyPublicDocumentMeta } from "../model/documentMeta";
+import { publicSeoPageForPath } from "../model/publicSeo";
 
 export function MarketingLayout() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    if (pathname === "/") {
-      document.title = "Course Wright";
+    if (pathname === "/logos") {
+      applyNoIndexDocumentMeta("Logos · Course Wright");
       return;
     }
-    const docsTitle = helpDocTitle(pathname);
-    if (docsTitle) {
-      document.title = `${docsTitle} · Course Wright`;
-      return;
-    }
-    const link = footerLinkForPath(pathname);
-    document.title = link ? `${link.label} · Course Wright` : "Course Wright";
+    applyPublicDocumentMeta(publicSeoPageForPath(pathname));
   }, [pathname]);
 
   return (
