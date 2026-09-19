@@ -55,7 +55,8 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | Page | URL | Notes |
 |------|-----|-------|
 | [ORG_PICKER](./pages/ORG_PICKER.md) | `/my` | Org picker + create org |
-| [ORG_HOME](./pages/ORG_HOME.md) | `/my/<org-slug>` | Role-aware dashboard (parent “this week” lives here) |
+| [ORG_HOME](./pages/ORG_HOME.md) | `/my/<org-slug>` | Role-aware dashboard (parent “this week” calendar lives here) |
+| [CALENDAR](./pages/CALENDAR.md) | `/my/<org-slug>/calendar` | Month/week calendar (`?view=month\|week`, `?date=YYYY-MM-DD`) |
 
 ---
 
@@ -83,10 +84,10 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | [COURSE_LIST](./pages/COURSE_LIST.md) | `/my/<org-slug>/courses` | |
 | [COURSE](./pages/COURSE.md) | `/my/<org-slug>/courses/<course_id>` | Builder home |
 | [COURSE_ROSTER](./pages/COURSE_ROSTER.md) | `/my/<org-slug>/courses/<course_id>/roster` | Enrollments |
-| [COURSE_SETTINGS](./pages/COURSE_SETTINGS.md) | `/my/<org-slug>/courses/<course_id>/settings` | Dates, status, instructors, grades |
-| [BULLETIN](./pages/BULLETIN.md) (view) | `/my/<org-slug>/courses/<course_id>/bulletins/<bulletin_id>` | Notice + links to attached materials |
-| [BULLETIN](./pages/BULLETIN.md) (new) | `/my/<org-slug>/courses/<course_id>/bulletins/new` | Staff compose |
-| [BULLETIN](./pages/BULLETIN.md) (edit) | `/my/<org-slug>/courses/<course_id>/bulletins/<bulletin_id>/edit` | Staff edit |
+| [COURSE_SETTINGS](./pages/COURSE_SETTINGS.md) | `/my/<org-slug>/courses/<course_id>/settings` | Dates, status, instructors, grades, calendar color |
+| [LESSON_PLAN](./pages/LESSON_PLAN.md) (view) | `/my/<org-slug>/courses/<course_id>/lesson-plans/<lesson_plan_id>` | Week plan + day notes and materials |
+| [LESSON_PLAN](./pages/LESSON_PLAN.md) (new) | `/my/<org-slug>/courses/<course_id>/lesson-plans/new` | Staff compose (`?week=` optional Sunday) |
+| [LESSON_PLAN](./pages/LESSON_PLAN.md) (edit) | `/my/<org-slug>/courses/<course_id>/lesson-plans/<lesson_plan_id>/edit` | Staff edit |
 
 ---
 
@@ -150,7 +151,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 
 ## Parent experience
 
-Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / unit / material tree. **Bulletins** open [BULLETIN](./pages/BULLETIN.md). No separate `/home` path in P0. Staff can switch to that presentation with **Parent view** in org chrome.
+Covered by [ORG_HOME](./pages/ORG_HOME.md) + [CALENDAR](./pages/CALENDAR.md) + read-focused use of the course / unit / material tree. **Lesson plans** open [LESSON_PLAN](./pages/LESSON_PLAN.md). No separate `/home` path in P0. Staff can switch to that presentation with **Parent view** in org chrome.
 
 ---
 

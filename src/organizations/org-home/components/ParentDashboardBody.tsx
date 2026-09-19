@@ -1,20 +1,14 @@
-import { useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import { useMemo, useState } from "react";
+import { CourseLegend } from "@/calendar/components/CourseLegend";
+import { WeekCalendar } from "@/calendar/components/WeekCalendar";
+import { toggleHiddenCourse } from "@/calendar/model/events";
 import {
-  datedMaterialCount,
-  dueThisWeekStudents,
-  extraAssignedThisWeekCount,
-  extraAssignedThisWeekLabel,
-  parentHomeStudentSections,
-  thisWeekStudents,
+  parentWeekHasContent,
   type ParentDashboard,
 } from "@/parent/model/dashboard";
-import { Button } from "@/ui/Button";
-import { ParentBulletinList } from "./ParentBulletinList";
-import { ParentComingUpSection } from "./ParentComingUpSection";
-import { ParentImportantNowList } from "./ParentImportantNowList";
+import { parentWeekCalendar } from "@/parent/model/weekCalendar";
+import { ParentFocusRail } from "./ParentFocusRail";
 import { ParentStudentTags } from "./ParentStudentTags";
-import { ParentStudentWeek } from "./ParentStudentWeek";
 
 export function ParentDashboardBody({
   orgSlug,
@@ -31,7 +25,8 @@ export function ParentDashboardBody({
   preview?: boolean;
   onToggleStudent: (id: number) => void;
 }) {
-  const [showExtraAssigned, setShowExtraAssigned] = useState(false);
+  const [hidden, setHidden] = useState<number[]>([]);
+  const hiddenCourseIds = useMemo(() => new Set(hidden), [hidden]);
 
   if (!full.hasActiveEnrollment) {
     if (preview) {
@@ -52,26 +47,11 @@ export function ParentDashboardBody({
 
   const showTags = full.students.length > 1;
   const showStudentHeaders = visible.students.length > 1;
-  const extraCount = extraAssignedThisWeekCount(visible.students, visible.week);
-  const showExtra = showExtraAssigned && extraCount > 0;
-  const datedCount = datedMaterialCount(visible.students);
-  const dueStudents = dueThisWeekStudents(visible.students, visible.week);
-  const dueCount = datedMaterialCount(dueStudents);
-  const weekStudents = showExtra
-    ? thisWeekStudents(visible.students)
-    : dueStudents;
-  const groupByStudent = showStudentHeaders;
-  const studentSections = groupByStudent
-    ? parentHomeStudentSections(
-        visible.students,
-        weekStudents,
-        visible.bulletins,
-      )
-    : [];
-  const hasComingUp = Boolean(visible.nextAssignedItem || visible.nextDueItem);
-  const hasImportantNow = visible.importantNow.length > 0;
-  const hasBulletins = visible.bulletins.length > 0;
-  const attentionGrid = hasComingUp && hasImportantNow;
+  const calendar = parentWeekCalendar(visible);
+  const hasContent = parentWeekHasContent(visible);
+  const hasFocus =
+    visible.importantNow.length > 0 ||
+    Boolean(visible.nextAssignedItem || visible.nextDueItem);
 
   if (showTags && selectedIds.length === 0) {
     return (
@@ -89,7 +69,7 @@ export function ParentDashboardBody({
   }
 
   return (
-    <div className="mt-6 flex flex-col gap-3">
+    <div className="mt-6 flex flex-col gap-4">
       {showTags ? (
         <ParentStudentTags
           students={full.students}
@@ -98,110 +78,48 @@ export function ParentDashboardBody({
         />
       ) : null}
 
-      {hasBulletins && !groupByStudent ? (
-        <ParentBulletinList
-          orgSlug={orgSlug}
-          items={visible.bulletins}
-          showStudent={false}
-        />
-      ) : null}
+      <div
+        className={
+          hasFocus
+            ? "grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]"
+            : undefined
+        }
+      >
+        <section>
+          <CourseLegend
+            courses={calendar.courses}
+            hiddenCourseIds={hiddenCourseIds}
+            onToggle={(id) => setHidden((current) => toggleHiddenCourse(current, id))}
+          />
+          {!hasContent ? (
+            <p className="mt-4 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
+              Nothing on the calendar this week. Check back soon, or open a
+              course when something’s ready.
+            </p>
+          ) : (
+            <div className="mt-4">
+              <WeekCalendar
+                orgSlug={orgSlug}
+                weekStart={visible.week.start}
+                weekNotes={calendar.weekNotes}
+                lessonDays={calendar.lessonDays}
+                chips={calendar.chips}
+                hiddenCourseIds={hiddenCourseIds}
+              />
+            </div>
+          )}
+        </section>
 
-      {hasImportantNow || hasComingUp ? (
-        <div
-          className={
-            attentionGrid
-              ? "grid items-start content-start auto-rows-min gap-x-5 gap-y-3 md:grid-cols-2"
-              : undefined
-          }
-        >
-          {hasImportantNow ? (
-            <ParentImportantNowList
-              orgSlug={orgSlug}
-              items={visible.importantNow}
-            />
-          ) : null}
-          {hasComingUp ? (
-            <ParentComingUpSection
-              orgSlug={orgSlug}
-              nextAssigned={visible.nextAssignedItem}
-              nextDue={visible.nextDueItem}
-              showStudent={showStudentHeaders}
-            />
-          ) : null}
-        </div>
-      ) : null}
-
-      <section>
-        <div className="mb-2">
-          <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">This week</h2>
-          <p className="mt-0.5 text-[13px] text-[var(--ink-faint)]">
-            {extraCount > 0
-              ? "Work due this week. Other assigned work is under More assigned this week."
-              : "Work assigned for this week, and anything due this week."}
-          </p>
-        </div>
-
-        {datedCount === 0 && !(groupByStudent && hasBulletins) ? (
-          <p className="text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-            Nothing assigned or due this week. Check back soon, or open a course
-            when something’s ready.
-          </p>
-        ) : (
-          <div className="flex flex-col gap-5">
-            {dueCount === 0 && extraCount > 0 && !showExtra ? (
-              <p className="text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-                Nothing due this week.
-              </p>
-            ) : null}
-            {groupByStudent
-              ? studentSections.map((section) => (
-                  <ParentStudentWeek
-                    key={section.student.id}
-                    orgSlug={orgSlug}
-                    student={section.weekStudent ?? {
-                      ...section.student,
-                      courses: [],
-                    }}
-                    showHeader
-                    lead={
-                      section.bulletins.length > 0 ? (
-                        <ParentBulletinList
-                          orgSlug={orgSlug}
-                          items={section.bulletins}
-                          showStudent={false}
-                        />
-                      ) : null
-                    }
-                  />
-                ))
-              : weekStudents.map((student) => (
-                  <ParentStudentWeek
-                    key={student.id}
-                    orgSlug={orgSlug}
-                    student={student}
-                    showHeader={false}
-                  />
-                ))}
-            {extraCount > 0 ? (
-              <Button
-                variant="secondary"
-                className="self-start px-3 py-2 text-[13px]"
-                aria-expanded={showExtra}
-                onClick={() => setShowExtraAssigned((open) => !open)}
-              >
-                {showExtra ? (
-                  <ChevronUpIcon className="h-4 w-4" aria-hidden />
-                ) : (
-                  <ChevronDownIcon className="h-4 w-4" aria-hidden />
-                )}
-                {showExtra
-                  ? "Hide extra assigned work"
-                  : extraAssignedThisWeekLabel(extraCount)}
-              </Button>
-            ) : null}
-          </div>
-        )}
-      </section>
+        {hasFocus ? (
+          <ParentFocusRail
+            orgSlug={orgSlug}
+            importantNow={visible.importantNow}
+            nextAssigned={visible.nextAssignedItem}
+            nextDue={visible.nextDueItem}
+            showStudent={showStudentHeaders}
+          />
+        ) : null}
+      </div>
     </div>
   );
 }

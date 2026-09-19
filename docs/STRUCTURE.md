@@ -81,8 +81,9 @@ src/
 ├── search/                   # P0 advanced / cross-facet search (when implemented)
 ├── sharing/                  # resource links, share with parents
 ├── print/                    # print material / unit / this week
-├── parent/                   # this week + important now + bulletins dashboard
-├── bulletins/                # dated course notices + attached materials
+├── parent/                   # this week calendar + Focus dashboard
+├── lesson-plans/             # weekly course plans + per-day materials
+├── calendar/                 # month/week calendar of assigned, due, lesson plans
 ├── auth/                     # login, signup, invite entry, session helpers
 ├── marketing/                # public home, about, pricing, privacy, terms, help `/docs`
 ├── billing/                  # P1 stub — Stripe later

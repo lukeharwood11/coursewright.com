@@ -7,7 +7,7 @@ import {
 } from "@/materials/databridge/materials";
 import { getUnit } from "@/units/databridge/units";
 import { loadParentDashboard } from "@/parent/databridge/dashboard";
-import { thisWeekPrintRefs, printMaterialFromBulletin } from "@/print/model/thisWeekPacket";
+import { thisWeekPrintRefs, printMaterialFromLessonPlan } from "@/print/model/thisWeekPacket";
 import type { PrintMaterial, PrintPacket } from "@/print/model/packet";
 
 async function toPrintMaterial(
@@ -89,8 +89,8 @@ export async function loadWeekPrintPacket(args: {
   const refs = thisWeekPrintRefs(dashboard, args.studentIds);
   const printed: PrintMaterial[] = [];
   for (const ref of refs) {
-    if (ref.source === "bulletin") {
-      printed.push(printMaterialFromBulletin(ref));
+    if (ref.source === "lesson_plan") {
+      printed.push(printMaterialFromLessonPlan(ref));
       continue;
     }
     const material = await getMaterial(ref.id);

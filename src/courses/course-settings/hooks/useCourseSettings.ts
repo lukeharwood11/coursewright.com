@@ -21,6 +21,8 @@ import { allowedGradeLevels, toggleGradeLevel } from "@/courses/model/gradeLevel
 import { getOrganization, orgQueryKeys } from "@/organizations/databridge/organizations";
 import { canManageOrgSettings, isStaffRole } from "@/organizations/model/role";
 import type { CourseIconValue } from "@/courses/model/courseIcon";
+import type { CourseColorKey } from "@/courses/model/courseColor";
+import { parseCourseColorKey } from "@/courses/model/courseColor";
 import type { CourseVisibility } from "@/courses/model/visibility";
 
 export const COURSE_SETTINGS_FORM_ID = "course-settings-form";
@@ -61,6 +63,7 @@ export function useCourseSettings() {
   const [location, setLocation] = useState("");
   const [subject, setSubject] = useState("");
   const [iconKey, setIconKey] = useState<CourseIconValue>(null);
+  const [colorKey, setColorKey] = useState<CourseColorKey>("moss");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [status, setStatus] = useState("active");
@@ -75,6 +78,7 @@ export function useCourseSettings() {
     setLocation(course.location);
     setSubject(course.subject);
     setIconKey(course.iconKey);
+    setColorKey(parseCourseColorKey(course.colorKey));
     setStartDate(course.startDate ?? "");
     setEndDate(course.endDate ?? "");
     setStatus(course.status);
@@ -94,6 +98,7 @@ export function useCourseSettings() {
         location,
         subject,
         iconKey,
+        colorKey,
         startDate,
         endDate,
         gradeLevels: allowedGradeLevels(
@@ -116,6 +121,8 @@ export function useCourseSettings() {
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.listWithCatalog(organization.id),
       });
+      await queryClient.invalidateQueries({ queryKey: ["calendar", organization.id] });
+      await queryClient.invalidateQueries({ queryKey: ["parent", "dashboard", organization.id] });
     },
     onError: (error: Error) => setFormError(error.message),
   });
@@ -162,6 +169,7 @@ export function useCourseSettings() {
           location,
           subject,
           iconKey,
+          colorKey,
           startDate,
           endDate,
           gradeLevels,
@@ -197,6 +205,8 @@ export function useCourseSettings() {
     setSubject,
     iconKey,
     setIconKey,
+    colorKey,
+    setColorKey,
     startDate,
     setStartDate,
     endDate,

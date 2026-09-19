@@ -2,16 +2,13 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   buildParentDashboard,
-  bulletinForStudentsLabel,
   datedMaterialCount,
-  dueThisWeekStudents,
-  extraAssignedThisWeekCount,
-  extraAssignedThisWeekLabel,
   filterParentDashboard,
-  parentHomeStudentSections,
+  parentWeekHasContent,
   thisWeekStudents,
   type ParentDashboardSource,
 } from "./dashboard.ts";
+import { parentWeekCalendar } from "./weekCalendar.ts";
 import { calendarWeekContaining, isInCalendarWeek } from "./thisWeek.ts";
 
 const week = {
@@ -37,7 +34,7 @@ function source(
     ],
     materials: [],
     importantNow: [],
-    bulletins: [],
+    lessonPlans: [],
     ...overrides,
   };
 }
@@ -264,7 +261,7 @@ test("calendarWeekContaining builds a Sunday–Saturday week", () => {
   assert.equal(result.end, "2026-09-19");
 });
 
-test("dashboard includes available bulletins for enrolled courses only", () => {
+test("dashboard includes published lesson plans for this week only", () => {
   const dashboard = buildParentDashboard(
     source({
       enrollments: [
@@ -273,54 +270,73 @@ test("dashboard includes available bulletins for enrolled courses only", () => {
           courseId: 10,
           courseTitle: "Science",
           courseStatus: "active",
+          colorKey: "sea",
         },
       ],
-      bulletins: [
+      lessonPlans: [
         {
           id: 1,
-          title: "Week 3 packet",
-          body: "Start with the lab.",
-          startDate: "2026-09-13",
-          endDate: "2026-09-19",
+          title: "This week in Science",
+          weekNote: "Start with the lab.",
+          weekStart: "2026-09-13",
           courseId: 10,
           courseTitle: "Science",
-          materialCount: 2,
+          colorKey: "sea",
+          visibility: "published",
+          days: [
+            {
+              date: "2026-09-15",
+              body: "Lab day",
+              materials: [{ id: 9, title: "Lab write-up", unitId: null }],
+            },
+          ],
         },
         {
           id: 2,
           title: "Next week",
-          body: "",
-          startDate: "2026-09-20",
-          endDate: "2026-09-26",
+          weekNote: "Preview",
+          weekStart: "2026-09-20",
           courseId: 10,
           courseTitle: "Science",
-          materialCount: 1,
+          colorKey: "sea",
+          visibility: "published",
+          days: [],
         },
         {
           id: 3,
           title: "Art note",
-          body: "",
-          startDate: "2026-09-13",
-          endDate: "2026-09-19",
+          weekNote: "Paint",
+          weekStart: "2026-09-13",
           courseId: 11,
           courseTitle: "Art",
-          materialCount: 0,
+          colorKey: "clay",
+          visibility: "published",
+          days: [],
+        },
+        {
+          id: 4,
+          title: "Draft",
+          weekNote: "Hidden",
+          weekStart: "2026-09-13",
+          courseId: 10,
+          courseTitle: "Science",
+          colorKey: "sea",
+          visibility: "unpublished",
+          days: [],
         },
       ],
     }),
   );
 
   assert.deepEqual(
-    dashboard.bulletins.map((row) => row.title),
-    ["Week 3 packet"],
+    dashboard.lessonPlans.map((row) => row.title),
+    ["This week in Science"],
   );
-  assert.deepEqual(
-    dashboard.bulletins[0]?.students.map((student) => student.name),
-    ["Maya"],
-  );
+  assert.equal(dashboard.lessonPlans[0]?.weekNote, "Start with the lab.");
+  assert.equal(parentWeekHasContent(dashboard), true);
 });
 
-test("filterParentDashboard scopes bulletins by selected student", () => {
+test("filterParentDashboard scopes lesson plans by selected student", () => {
   const dashboard = buildParentDashboard(
     source({
       students: [
@@ -333,34 +349,38 @@ test("filterParentDashboard scopes bulletins by selected student", () => {
           courseId: 10,
           courseTitle: "Science",
           courseStatus: "active",
+          colorKey: "sea",
         },
         {
           studentId: 2,
           courseId: 11,
           courseTitle: "Art",
           courseStatus: "active",
+          colorKey: "clay",
         },
       ],
-      bulletins: [
+      lessonPlans: [
         {
           id: 1,
           title: "Science note",
-          body: "",
-          startDate: "2026-09-13",
-          endDate: "2026-09-19",
+          weekNote: "Lab",
+          weekStart: "2026-09-13",
           courseId: 10,
           courseTitle: "Science",
-          materialCount: 1,
+          colorKey: "sea",
+          visibility: "published",
+          days: [],
         },
         {
           id: 2,
           title: "Art note",
-          body: "",
-          startDate: "2026-09-13",
-          endDate: "2026-09-19",
+          weekNote: "Paint",
+          weekStart: "2026-09-13",
           courseId: 11,
           courseTitle: "Art",
-          materialCount: 0,
+          colorKey: "clay",
+          visibility: "published",
+          days: [],
         },
       ],
     }),
@@ -368,68 +388,61 @@ test("filterParentDashboard scopes bulletins by selected student", () => {
 
   const filtered = filterParentDashboard(dashboard, [2]);
   assert.deepEqual(
-    filtered.bulletins.map((row) => row.title),
+    filtered.lessonPlans.map((row) => row.title),
     ["Art note"],
   );
   assert.deepEqual(
-    filtered.bulletins[0]?.students.map((student) => student.name),
-    ["Eli"],
+    filtered.courses.map((course) => course.title),
+    ["Art"],
   );
 });
 
-test("shared-course bulletin lists every enrolled student", () => {
+test("parent week calendar puts week notes above days and dedupes chips", () => {
   const dashboard = buildParentDashboard(
     source({
-      students: [
-        { id: 1, name: "Maya", gradeLevel: "4" },
-        { id: 2, name: "Eli", gradeLevel: "2" },
-      ],
-      enrollments: [
+      materials: [
         {
-          studentId: 1,
+          id: 9,
+          title: "Lab write-up",
+          scheduledDate: "2026-09-15",
+          dueDate: "2026-09-15",
           courseId: 10,
-          courseTitle: "Science",
-          courseStatus: "active",
-        },
-        {
-          studentId: 2,
-          courseId: 10,
-          courseTitle: "Science",
-          courseStatus: "active",
+          unitId: null,
+          unitStart: null,
+          unitEnd: null,
         },
       ],
-      bulletins: [
+      lessonPlans: [
         {
           id: 1,
-          title: "Science note",
-          body: "",
-          startDate: "2026-09-13",
-          endDate: "2026-09-19",
+          title: "This week in Science",
+          weekNote: "Bring goggles.",
+          weekStart: "2026-09-13",
           courseId: 10,
           courseTitle: "Science",
-          materialCount: 1,
+          colorKey: "sea",
+          visibility: "published",
+          days: [
+            {
+              date: "2026-09-15",
+              body: "Lab day",
+              materials: [{ id: 9, title: "Lab write-up", unitId: null }],
+            },
+          ],
         },
       ],
     }),
   );
 
-  assert.deepEqual(
-    dashboard.bulletins[0]?.students.map((student) => student.name),
-    ["Eli", "Maya"],
-  );
-  assert.equal(
-    bulletinForStudentsLabel(dashboard.bulletins[0]?.students ?? []),
-    "For Eli and Maya",
-  );
-
-  const filtered = filterParentDashboard(dashboard, [1]);
-  assert.deepEqual(
-    filtered.bulletins[0]?.students.map((student) => student.name),
-    ["Maya"],
-  );
+  const calendar = parentWeekCalendar(dashboard);
+  assert.equal(calendar.weekNotes[0]?.weekNote, "Bring goggles.");
+  assert.equal(calendar.lessonDays[0]?.body, "Lab day");
+  assert.equal(calendar.chips.filter((chip) => chip.materialId === 9).length, 2);
+  assert.ok(calendar.chips.some((chip) => chip.kind === "assigned"));
+  assert.ok(calendar.chips.some((chip) => chip.kind === "due"));
 });
 
-test("parent home defaults this week to due work and counts extra assigned", () => {
+test("this week calendar still lists assigned and due work without a lesson plan", () => {
   const dashboard = buildParentDashboard(
     source({
       materials: [
@@ -453,140 +466,15 @@ test("parent home defaults this week to due work and counts extra assigned", () 
           unitStart: null,
           unitEnd: null,
         },
-        {
-          id: 3,
-          title: "Journal pages",
-          scheduledDate: null,
-          dueDate: "2026-09-19",
-          courseId: 10,
-          unitId: null,
-          unitStart: null,
-          unitEnd: null,
-        },
       ],
     }),
   );
 
-  const fullWeek = thisWeekStudents(dashboard.students);
+  const calendar = parentWeekCalendar(dashboard);
+  assert.equal(calendar.weekNotes.length, 0);
   assert.deepEqual(
-    fullWeek[0]?.courses[0]?.materials.map((material) => material.title),
-    ["Reading pages", "Lab write-up", "Journal pages"],
-  );
-
-  const dueWeek = dueThisWeekStudents(dashboard.students, week);
-  assert.deepEqual(
-    dueWeek[0]?.courses[0]?.materials.map((material) => material.title),
-    ["Lab write-up", "Journal pages"],
-  );
-  assert.equal(extraAssignedThisWeekCount(dashboard.students, week), 1);
-  assert.equal(extraAssignedThisWeekLabel(1), "1 more assigned this week");
-  assert.equal(extraAssignedThisWeekLabel(3), "3 more assigned this week");
-});
-
-test("bulletinForStudentsLabel names one, two, or many students", () => {
-  assert.equal(bulletinForStudentsLabel([]), null);
-  assert.equal(
-    bulletinForStudentsLabel([{ id: 1, name: "Maya" }]),
-    "For Maya",
-  );
-  assert.equal(
-    bulletinForStudentsLabel([
-      { id: 2, name: "Eli" },
-      { id: 1, name: "Maya" },
-    ]),
-    "For Eli and Maya",
-  );
-  assert.equal(
-    bulletinForStudentsLabel([
-      { id: 2, name: "Eli" },
-      { id: 1, name: "Maya" },
-      { id: 3, name: "Sam" },
-    ]),
-    "For Eli, Maya, and Sam",
-  );
-});
-
-test("parent home groups bulletins ahead of this-week work by student name", () => {
-  const dashboard = buildParentDashboard(
-    source({
-      students: [
-        { id: 1, name: "Maya", gradeLevel: "4" },
-        { id: 2, name: "Eli", gradeLevel: "2" },
-      ],
-      enrollments: [
-        {
-          studentId: 1,
-          courseId: 10,
-          courseTitle: "Science",
-          courseStatus: "active",
-        },
-        {
-          studentId: 2,
-          courseId: 11,
-          courseTitle: "Art",
-          courseStatus: "active",
-        },
-      ],
-      materials: [
-        {
-          id: 1,
-          title: "Science packet",
-          scheduledDate: "2026-09-16",
-          dueDate: "2026-09-18",
-          courseId: 10,
-          unitId: null,
-          unitStart: null,
-          unitEnd: null,
-        },
-      ],
-      bulletins: [
-        {
-          id: 1,
-          title: "Science note",
-          body: "",
-          startDate: "2026-09-13",
-          endDate: "2026-09-19",
-          courseId: 10,
-          courseTitle: "Science",
-          materialCount: 1,
-        },
-        {
-          id: 2,
-          title: "Art note",
-          body: "",
-          startDate: "2026-09-13",
-          endDate: "2026-09-19",
-          courseId: 11,
-          courseTitle: "Art",
-          materialCount: 0,
-        },
-      ],
-    }),
-  );
-
-  assert.deepEqual(
-    dashboard.students.map((student) => student.name),
-    ["Eli", "Maya"],
-  );
-
-  const sections = parentHomeStudentSections(
-    dashboard.students,
-    dueThisWeekStudents(dashboard.students, week),
-    dashboard.bulletins,
-  );
-  assert.deepEqual(
-    sections.map((section) => ({
-      name: section.student.name,
-      bulletins: section.bulletins.map((item) => item.title),
-      materials:
-        section.weekStudent?.courses.flatMap((course) =>
-          course.materials.map((material) => material.title),
-        ) ?? [],
-    })),
-    [
-      { name: "Eli", bulletins: ["Art note"], materials: [] },
-      { name: "Maya", bulletins: ["Science note"], materials: ["Science packet"] },
-    ],
+    calendar.chips.map((chip) => `${chip.kind}:${chip.title}`).sort(),
+    ["assigned:Lab write-up", "assigned:Reading pages", "due:Lab write-up"],
   );
 });
 

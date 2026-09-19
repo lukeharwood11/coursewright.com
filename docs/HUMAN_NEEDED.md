@@ -71,21 +71,21 @@ Optional companion secret **`SITE_URL`** (used when the browser `Origin` header 
 
 **Done when:** opening `/invite/<token>` while signed out shows the invited email (and Create account / Sign in), without requiring a session first.
 
-### HN-014 — Apply `bulletins` migration on the testing database
+### HN-014 — Apply lesson-plans migration on the testing database
 
 | | |
 |--|--|
-| **Why** | Instructors can compose dated course bulletins in the SPA, and parent/student home loads `bulletins` / `bulletin_materials`. Until this migration is applied, those queries against the testing project will error. |
+| **Why** | Instructors compose weekly lesson plans in the SPA, and parent/student home + calendar load `lesson_plans` / `lesson_plan_days` / `lesson_plan_day_materials` (and `courses.color_key`). This migration also drops `bulletins` / `bulletin_materials`. Until it is applied, those queries against the testing project will error. |
 | **Where** | Supabase CLI / Dashboard; testing project used by `.env.testing` (`yplmaauelutcosqqvnya`) |
-| **Placeholder** | `supabase/migrations/20260919180000_bulletins.sql` (`HN-014`) |
+| **Placeholder** | `supabase/migrations/20260919220000_lesson_plans.sql` (`HN-014`) |
 
 **Steps:**
 
 1. From a machine with `SUPABASE_ACCESS_TOKEN` (HN-012) and the project linked, run `supabase db push` (or `scripts/nuke.sh` in experiment mode if a full reset is acceptable).
-2. Confirm tables `bulletins` and `bulletin_materials` exist (`information_schema.tables`).
+2. Confirm tables `lesson_plans`, `lesson_plan_days`, and `lesson_plan_day_materials` exist, `courses.color_key` exists, and `bulletins` / `bulletin_materials` do not (`information_schema.tables` / `columns`).
 3. Repeat for production when that project is in use (HN-007).
 
-**Done when:** creating a bulletin on a course succeeds in the SPA against the database the app uses, and it appears on parent home during the date window.
+**Done when:** creating a lesson plan on a course succeeds in the SPA against the database the app uses, and a published plan appears on parent This week / Calendar.
 
 ### HN-013 — Apply `student_email` migration on the testing database
 

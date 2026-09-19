@@ -103,8 +103,9 @@ Aligned with P0 in [FEATURES.md](./FEATURES.md):
 | `search/` | Advanced / cross-facet find (“where is this resource?”) | Admin, instructor (parent TBD) |
 | `sharing/` | Resource links, share-with-parents | Instructor → parent |
 | `print/` | Print material / unit / this week | Creator + parent |
-| `parent/` | This week + important now + **bulletins** dashboard | Parent role |
-| `bulletins/` | Dated course notices with attached materials | Instructor; parent views |
+| `parent/` | This week calendar + Focus dashboard | Parent role |
+| `lesson-plans/` | Weekly course plans with per-day materials | Instructor; parent views |
+| `calendar/` | Month/week calendar of assigned, due, lesson plans | Instructor; parent |
 | `billing/` | Org SaaS (P1) | Admin |
 
 Cross-cutting usability (tech-averse parents, print in the open) is a **constraint on every domain**, not a separate `usability/` package.

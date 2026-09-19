@@ -1,6 +1,8 @@
+import type { CourseColorKey } from "@/courses/model/courseColor";
+import { parseCourseColorKey } from "@/courses/model/courseColor";
+import { lessonPlanIsPublished } from "@/lesson-plans/model/visibility";
 import type { CalendarWeek } from "./thisWeek";
 import { isDueInCalendarWeek, isInCalendarWeek, localIsoDate } from "./thisWeek";
-import { isBulletinAvailable } from "@/bulletins/model/availability";
 
 export type ParentDashboardMaterial = {
   id: number;
@@ -14,6 +16,7 @@ export type ParentDashboardMaterial = {
 export type ParentDashboardCourse = {
   id: number;
   title: string;
+  colorKey: CourseColorKey;
   materials: ParentDashboardMaterial[];
 };
 
@@ -35,21 +38,28 @@ export type ParentImportantNowItem = {
   unitId: number | null;
 };
 
-export type ParentBulletinStudent = {
-  id: number;
-  name: string;
+export type ParentLessonPlanDay = {
+  date: string;
+  body: string;
+  materials: Array<{ id: number; title: string; unitId: number | null }>;
 };
 
-export type ParentBulletinItem = {
+export type ParentLessonPlanItem = {
   id: number;
   title: string;
-  body: string;
-  startDate: string;
-  endDate: string;
+  weekNote: string;
+  weekStart: string;
   courseId: number;
   courseTitle: string;
-  materialCount: number;
-  students: ParentBulletinStudent[];
+  colorKey: CourseColorKey;
+  unpublished: boolean;
+  days: ParentLessonPlanDay[];
+};
+
+export type ParentDashboardCourseMeta = {
+  id: number;
+  title: string;
+  colorKey: CourseColorKey;
 };
 
 export type ParentDashboardNextItem = {
@@ -65,7 +75,8 @@ export type ParentDashboardNextItem = {
 export type ParentDashboard = {
   week: CalendarWeek;
   importantNow: ParentImportantNowItem[];
-  bulletins: ParentBulletinItem[];
+  lessonPlans: ParentLessonPlanItem[];
+  courses: ParentDashboardCourseMeta[];
   students: ParentDashboardStudent[];
   /** Soonest assigned materials on or after today. */
   nextAssigned: ParentDashboardNextItem[];
@@ -85,6 +96,7 @@ export type ParentDashboardSource = {
     courseId: number;
     courseTitle: string;
     courseStatus: string;
+    colorKey?: string | null;
   }>;
   materials: Array<{
     id: number;
@@ -105,15 +117,20 @@ export type ParentDashboardSource = {
     courseTitle: string;
     unitId: number | null;
   }>;
-  bulletins?: Array<{
+  lessonPlans?: Array<{
     id: number;
     title: string;
-    body: string;
-    startDate: string;
-    endDate: string;
+    weekNote: string;
+    weekStart: string;
     courseId: number;
     courseTitle: string;
-    materialCount: number;
+    colorKey?: string | null;
+    visibility: string;
+    days: Array<{
+      date: string;
+      body: string;
+      materials: Array<{ id: number; title: string; unitId: number | null }>;
+    }>;
   }>;
 };
 
@@ -143,6 +160,12 @@ function toDashboardMaterial(
   };
 }
 
+function colorForEnrollment(
+  enrollment: ParentDashboardSource["enrollments"][number],
+): CourseColorKey {
+  return parseCourseColorKey(enrollment.colorKey);
+}
+
 export function buildParentDashboard(source: ParentDashboardSource): ParentDashboard {
   const activeCourseIds = new Set(
     source.enrollments
@@ -153,60 +176,72 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
   const students = [...source.students]
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((student) => {
-    const studentEnrollments = source.enrollments.filter(
-      (row) => row.studentId === student.id && row.courseStatus === "active",
-    );
-    const courses = studentEnrollments.map((enrollment) => {
-      const materials = source.materials
-        .filter(
-          (material) =>
-            material.courseId === enrollment.courseId &&
-            isInCalendarWeek(
-              source.week,
-              material.scheduledDate,
-              material.unitStart,
-              material.unitEnd,
-              material.dueDate,
-            ),
-        )
-        .map(toDashboardMaterial)
-        .sort(compareWeekMaterials);
+      const studentEnrollments = source.enrollments.filter(
+        (row) => row.studentId === student.id && row.courseStatus === "active",
+      );
+      const courses = studentEnrollments.map((enrollment) => {
+        const materials = source.materials
+          .filter(
+            (material) =>
+              material.courseId === enrollment.courseId &&
+              isInCalendarWeek(
+                source.week,
+                material.scheduledDate,
+                material.unitStart,
+                material.unitEnd,
+                material.dueDate,
+              ),
+          )
+          .map(toDashboardMaterial)
+          .sort(compareWeekMaterials);
+        return {
+          id: enrollment.courseId,
+          title: enrollment.courseTitle,
+          colorKey: colorForEnrollment(enrollment),
+          materials,
+        };
+      });
       return {
-        id: enrollment.courseId,
-        title: enrollment.courseTitle,
-        materials,
+        id: student.id,
+        name: student.name,
+        gradeLevel: student.gradeLevel,
+        hasActiveEnrollment: studentEnrollments.length > 0,
+        courses,
       };
     });
-    return {
-      id: student.id,
-      name: student.name,
-      gradeLevel: student.gradeLevel,
-      hasActiveEnrollment: studentEnrollments.length > 0,
-      courses,
-    };
-  });
 
   const importantNow = source.importantNow.filter((item) =>
     activeCourseIds.has(item.courseId),
   );
 
-  const seenBulletins = new Set<number>();
-  const bulletins = (source.bulletins ?? [])
+  const lessonPlans = (source.lessonPlans ?? [])
     .filter((item) => {
       if (!activeCourseIds.has(item.courseId)) return false;
-      if (!isBulletinAvailable(source.today, item.startDate, item.endDate)) {
+      if (item.weekStart !== source.week.start) return false;
+      if (!lessonPlanIsPublished(item.visibility === "published" ? "published" : "unpublished")) {
         return false;
       }
-      if (seenBulletins.has(item.id)) return false;
-      seenBulletins.add(item.id);
       return true;
     })
     .map((item) => ({
-      ...item,
-      students: studentsForCourse(source, item.courseId),
+      id: item.id,
+      title: item.title,
+      weekNote: item.weekNote,
+      weekStart: item.weekStart,
+      courseId: item.courseId,
+      courseTitle: item.courseTitle,
+      colorKey: parseCourseColorKey(item.colorKey),
+      unpublished: false,
+      days: [...item.days]
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .map((day) => ({
+          date: day.date,
+          body: day.body,
+          materials: day.materials,
+        })),
     }))
     .sort((a, b) => {
-      if (a.startDate !== b.startDate) return a.startDate.localeCompare(b.startDate);
+      if (a.courseTitle !== b.courseTitle) return a.courseTitle.localeCompare(b.courseTitle);
       return a.title.localeCompare(b.title);
     });
 
@@ -216,7 +251,8 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
   return {
     week: source.week,
     importantNow,
-    bulletins,
+    lessonPlans,
+    courses: coursesFromStudents(students),
     students,
     nextAssigned,
     nextDue,
@@ -238,12 +274,9 @@ export function filterParentDashboard(
   const importantNow = dashboard.importantNow.filter((item) =>
     courseIds.has(item.courseId),
   );
-  const bulletins = dashboard.bulletins
-    .map((item) => ({
-      ...item,
-      students: item.students.filter((student) => allowed.has(student.id)),
-    }))
-    .filter((item) => item.students.length > 0);
+  const lessonPlans = dashboard.lessonPlans.filter((item) =>
+    courseIds.has(item.courseId),
+  );
   const nextAssigned = dashboard.nextAssigned.filter((item) =>
     allowed.has(item.studentId),
   );
@@ -251,8 +284,9 @@ export function filterParentDashboard(
   return {
     ...dashboard,
     students,
+    courses: coursesFromStudents(students),
     importantNow,
-    bulletins,
+    lessonPlans,
     nextAssigned,
     nextDue,
     nextAssignedItem: nextAssigned[0] ?? null,
@@ -274,20 +308,36 @@ export function datedMaterialCount(students: ParentDashboardStudent[]): number {
   );
 }
 
-export function coursesWithDatedMaterials(
-  courses: ParentDashboardCourse[],
-): ParentDashboardCourse[] {
-  return courses.filter((course) => course.materials.length > 0);
+export function parentWeekHasContent(dashboard: ParentDashboard): boolean {
+  return dashboard.lessonPlans.length > 0 || datedMaterialCount(dashboard.students) > 0;
 }
 
-/** This-week list: drop empty course shells; keep unenrolled students for a plain-language note. */
+function coursesFromStudents(
+  students: ParentDashboardStudent[],
+): ParentDashboardCourseMeta[] {
+  const map = new Map<number, ParentDashboardCourseMeta>();
+  for (const student of students) {
+    for (const course of student.courses) {
+      if (!map.has(course.id)) {
+        map.set(course.id, {
+          id: course.id,
+          title: course.title,
+          colorKey: course.colorKey,
+        });
+      }
+    }
+  }
+  return [...map.values()].sort((a, b) => a.title.localeCompare(b.title));
+}
+
+/** Print this week still uses the full dated list. */
 export function thisWeekStudents(
   students: ParentDashboardStudent[],
 ): ParentDashboardStudent[] {
   return students
     .map((student) => ({
       ...student,
-      courses: coursesWithDatedMaterials(student.courses),
+      courses: student.courses.filter((course) => course.materials.length > 0),
     }))
     .filter(
       (student) => student.courses.length > 0 || !student.hasActiveEnrollment,
@@ -299,103 +349,6 @@ export function isMaterialDueInWeek(
   material: ParentDashboardMaterial,
 ): boolean {
   return isDueInCalendarWeek(week, material.dueDate);
-}
-
-/** Parent home default: due this week only. Print this week still uses the full dated list. */
-export function dueThisWeekStudents(
-  students: ParentDashboardStudent[],
-  week: CalendarWeek,
-): ParentDashboardStudent[] {
-  return thisWeekStudents(
-    students.map((student) => ({
-      ...student,
-      courses: student.courses.map((course) => ({
-        ...course,
-        materials: course.materials.filter((material) =>
-          isMaterialDueInWeek(week, material),
-        ),
-      })),
-    })),
-  );
-}
-
-export function extraAssignedThisWeekCount(
-  students: ParentDashboardStudent[],
-  week: CalendarWeek,
-): number {
-  return datedMaterialCount(
-    students.map((student) => ({
-      ...student,
-      courses: student.courses.map((course) => ({
-        ...course,
-        materials: course.materials.filter(
-          (material) => !isMaterialDueInWeek(week, material),
-        ),
-      })),
-    })),
-  );
-}
-
-export function extraAssignedThisWeekLabel(count: number): string {
-  return count === 1
-    ? "1 more assigned this week"
-    : `${count} more assigned this week`;
-}
-
-export function bulletinsForStudent(
-  bulletins: ParentBulletinItem[],
-  studentId: number,
-): ParentBulletinItem[] {
-  return bulletins.filter((item) =>
-    item.students.some((student) => student.id === studentId),
-  );
-}
-
-export type ParentHomeStudentSection = {
-  student: ParentDashboardStudent;
-  weekStudent: ParentDashboardStudent | null;
-  bulletins: ParentBulletinItem[];
-};
-
-/** Visible students in name order, with that child's bulletins ahead of this-week work. */
-export function parentHomeStudentSections(
-  students: ParentDashboardStudent[],
-  weekStudents: ParentDashboardStudent[],
-  bulletins: ParentBulletinItem[],
-): ParentHomeStudentSection[] {
-  const weekById = new Map(weekStudents.map((student) => [student.id, student]));
-  return students.flatMap((student) => {
-    const notes = bulletinsForStudent(bulletins, student.id);
-    const weekStudent = weekById.get(student.id) ?? null;
-    if (notes.length === 0 && !weekStudent) return [];
-    return [{ student, weekStudent, bulletins: notes }];
-  });
-}
-
-/** Multi-student parent home: which children a bulletin is for. */
-export function bulletinForStudentsLabel(
-  students: ParentBulletinStudent[],
-): string | null {
-  if (students.length === 0) return null;
-  const names = students.map((student) => student.name);
-  if (names.length === 1) return `For ${names[0]}`;
-  if (names.length === 2) return `For ${names[0]} and ${names[1]}`;
-  return `For ${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
-}
-
-function studentsForCourse(
-  source: ParentDashboardSource,
-  courseId: number,
-): ParentBulletinStudent[] {
-  const ids = new Set(
-    source.enrollments
-      .filter((row) => row.courseId === courseId && row.courseStatus === "active")
-      .map((row) => row.studentId),
-  );
-  return source.students
-    .filter((student) => ids.has(student.id))
-    .map((student) => ({ id: student.id, name: student.name }))
-    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function compareWeekMaterials(

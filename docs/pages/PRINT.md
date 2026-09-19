@@ -24,7 +24,7 @@ One composition: **generate a PDF** of the grain, **preview that PDF** in the pa
 - On load: build a PDF client-side from the grain’s content; show a **loading** state while generating; then embed the **actual PDF** in an in-app viewer (iframe / PDF viewer — what you see is the file).
 - Sticky action bar: **Download** (`.pdf` blob), **Print** (print that PDF via browser/system), **Back** to the source page.
 - **Never** label the product surface Export / Generate PDF as the primary nav action — entry points stay **Print** / **Print unit** / **Print this week**.
-- Empty: unit with no materials, or week with no dated / important-now / bulletin items — plain language + back.
+- Empty: unit with no materials, or week with no dated / important-now / lesson-plan items — plain language + back.
 - Generation should feel fast for a single material; large unit / week packets may need a brief wait — still no format picker.
 
 ### By grain
@@ -33,7 +33,7 @@ One composition: **generate a PDF** of the grain, **preview that PDF** in the pa
 |-------|-------------|
 | **Material** | One material by kind — **page:** blocks in order (quizzes print on the whole page: **parents** and staff **Parent view** see questions only; **staff Teacher view** see the answer key from block data; multiple-choice choices use drawn checkbox squares, not bracket text); **link:** title + URL/QR; **file:** if the attached file is already a PDF/image, prefer previewing **that file**; otherwise a cover sheet (title, description). Video blocks → title + URL/QR, not a player frame. No quiz-block-only print in P0. |
 | **Unit** | Materials in `position` order as one packet; page breaks **between** materials. |
-| **This week** | Current Sunday–Saturday dated materials (+ important now, if any) **and available bulletin notices** for **active** students on parent home, grouped like [ORG_HOME](./ORG_HOME.md) **by student**. Each student: **bulletins first**, then materials. Includes **assigned and due** work for the week even when the home list hides extra assigned under **More assigned this week**. One student at a time; **page break before the next student**. Pack that student’s items onto a page when they fit, separated by a rule; if there isn’t enough room to start the next assignment cleanly, it starts on the next page. Optional `?students=` filters the packet. |
+| **This week** | Current Sunday–Saturday dated materials (+ important now, if any) **and published lesson plans** for **active** students on parent home, grouped like [ORG_HOME](./ORG_HOME.md) **by student**. Each student: **lesson plans first** (week note + day notes), then materials. Includes assigned and due work for the week. One student at a time; **page break before the next student**. Pack that student’s items onto a page when they fit, separated by a rule; if there isn’t enough room to start the next assignment cleanly, it starts on the next page. Optional `?students=` filters the packet. |
 
 **Not on this page:** print whole course (out of scope).
 

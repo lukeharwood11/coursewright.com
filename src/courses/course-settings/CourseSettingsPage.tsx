@@ -6,6 +6,7 @@ import { PageFormActions } from "@/ui/PageFormActions";
 import { Avatar } from "@/ui/Avatar";
 import { coursePath } from "@/courses/model/paths";
 import { CourseIconPicker } from "@/courses/components/CourseIconPicker";
+import { CourseColorPicker } from "@/courses/components/CourseColorPicker";
 import {
   COURSE_SETTINGS_FORM_ID,
   useCourseSettings,
@@ -217,6 +218,12 @@ export function CourseSettingsPage() {
               <CourseIconPicker
                 value={settings.iconKey}
                 onChange={settings.setIconKey}
+              />
+            </div>
+            <div className="mt-3">
+              <CourseColorPicker
+                value={settings.colorKey}
+                onChange={settings.setColorKey}
               />
             </div>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
