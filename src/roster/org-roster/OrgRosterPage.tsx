@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
@@ -24,10 +24,6 @@ export function OrgRosterPage() {
       >
         Roster
       </h1>
-      <p className="mt-1 max-w-2xl text-[14px] text-[var(--ink-soft)]">
-        Students in this organization. Select people to add to a class or enroll
-        in a course.
-      </p>
 
       {roster.loading ? (
         <PageLoading embedded label="Loading roster…" />
@@ -57,6 +53,7 @@ export function OrgRosterPage() {
             </label>
             {!roster.panelOpen ? (
               <Button type="button" onClick={roster.openPanel}>
+                <UserPlusIcon className="h-5 w-5" aria-hidden />
                 Add students
               </Button>
             ) : null}
@@ -139,10 +136,6 @@ export function OrgRosterPage() {
             <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">
               Classes
             </h2>
-            <p className="mt-1 max-w-xl text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-              A class is a named group of students you can add to a course later.
-              It doesn’t have lessons or materials.
-            </p>
           </div>
           {!roster.creatingClassOpen ? (
             <Button type="button" variant="secondary" onClick={roster.openCreateClass}>

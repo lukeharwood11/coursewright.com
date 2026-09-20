@@ -11,6 +11,7 @@ import { PublishedBadge } from "@/ui/PublishedBadge";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { formatDateRange } from "@/courses/model/dates";
+import { formatGradeLevels } from "@/courses/model/gradeLevels";
 import { courseRosterPath, courseSettingsPath, coursesPath } from "@/courses/model/paths";
 import { courseStatusLabel, type CourseStatus } from "@/courses/model/status";
 import { isCoursePublished, type CourseVisibility } from "@/courses/model/visibility";
@@ -28,6 +29,7 @@ export function CourseHeader({
   startDate,
   endDate,
   gradeLevels,
+  gradeLabels,
   copiedFromTitle,
   canEdit,
   isParent,
@@ -44,6 +46,7 @@ export function CourseHeader({
   startDate: string | null;
   endDate: string | null;
   gradeLevels: string[];
+  gradeLabels: string[];
   copiedFromTitle: string | null;
   canEdit: boolean;
   isParent: boolean;
@@ -71,11 +74,11 @@ export function CourseHeader({
           )}
           {dates ? <Badge variant="neutral">{dates}</Badge> : null}
           {subject ? <Badge variant="slate">{subject}</Badge> : null}
-          {gradeLevels.map((level) => (
-            <Badge key={level} variant="neutral">
-              {level}
+          {gradeLevels.length > 0 ? (
+            <Badge variant="neutral">
+              {formatGradeLevels(gradeLevels, gradeLabels)}
             </Badge>
-          ))}
+          ) : null}
         </div>
         {description ? (
           <p className="mt-3 max-w-2xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">

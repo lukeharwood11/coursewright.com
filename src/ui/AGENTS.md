@@ -4,8 +4,9 @@ Design-system primitives from [STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md).
 
 ## Scope
 
-- Button, ButtonLink, Input, Select, Wordmark, Badge, PublishedBadge, Avatar, PageFormActions, ConfirmDialog, **PageLoading** (animated mark + optional label)
+- Button, ButtonLink, Input, Select, Wordmark, Badge, PublishedBadge, Avatar, PageFormActions, ConfirmDialog, InfoHint, **PageLoading** (animated mark + optional label)
 - `AnchoredPopup` — viewport-aware menus / tooltips (flip and stay in frame)
+- `InfoHint` — information-circle button + anchored tooltip (lesson plans, class leads, …)
 - `toastNotImplemented` (sonner) for screens that are not built yet
 - Storybook stories colocated as `*.stories.tsx`
 - No product flows

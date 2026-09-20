@@ -27,14 +27,14 @@ Per course row (TBD density):
 - Optional **description**, **location**, **subject / area**
 - **Status** (e.g. active) and **unpublished** badge when hidden from families
 - Optional **start/end dates**
-- **Grade metadata** (grades/ranges per org scheme)
+- **Grade metadata** in one pill (comma-separated, org scheme order)
 - **Instructors** (avatars + names on catalog cards)
 - **Active enrollment count** (students enrolled in the course)
 - Optional “created from …” origin indicator when copied from another course (TBD density)
 
 ## Contents
 
-- List of courses in the org (title, description, location, subject, status, unpublished badge, dates, grade metadata, instructors — TBD density)
+- List of courses in the org (title, description, location, subject, status, unpublished badge, dates, **grade metadata in one pill**, instructors — TBD density)
 - Find toolbar: search + subject by default; **Advanced search** expands grade chips; clear filters; Previous / Next pagination
 - Create course:
   - **From scratch** — blank course (starts unpublished)

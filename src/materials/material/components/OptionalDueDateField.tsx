@@ -27,7 +27,7 @@ export function OptionalDueDateField({
   }
 
   return (
-    <label className="mt-3 flex flex-col gap-1">
+    <label className="mt-3 flex min-w-0 flex-col gap-1">
       <span className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-[13px] font-bold text-[var(--ink-soft)]">Due date</span>
         <button

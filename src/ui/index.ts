@@ -4,6 +4,7 @@ export { Badge } from "./Badge";
 export { PublishedBadge } from "./PublishedBadge";
 export { Button, ButtonLink } from "./Button";
 export { ConfirmDialog } from "./ConfirmDialog";
+export { InfoHint } from "./InfoHint";
 export { Input } from "./Input";
 export { PageFormActions } from "./PageFormActions";
 export { PageLoading } from "./PageLoading";

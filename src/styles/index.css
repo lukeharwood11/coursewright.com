@@ -48,6 +48,20 @@ body {
   background: var(--paper);
 }
 
+/* Native date fields have a large intrinsic width on mobile browsers. */
+.cw-date-input {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.cw-date-input::-webkit-datetime-edit,
+.cw-date-input::-webkit-datetime-edit-fields-wrapper {
+  min-width: 0;
+  max-width: 100%;
+}
+
 @media print {
   .cw-org-chrome {
     display: none !important;

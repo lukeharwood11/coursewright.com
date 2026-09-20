@@ -56,11 +56,11 @@ export function OrgSettingsPage() {
           >
             Organization settings
           </h1>
-          <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
-            {settings.canEdit
-              ? "Name, web address, type, how grades work, and who can help run this organization."
-              : "Only owners and admins can change these settings."}
-          </p>
+          {!settings.canEdit ? (
+            <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
+              Only owners and admins can change these settings.
+            </p>
+          ) : null}
         </div>
         {settings.canEdit ? (
           <PageFormActions
