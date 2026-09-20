@@ -22,6 +22,6 @@ One-way **announcements**: a notice to one or more courses, classes, or students
 
 ## Don’t
 
-- Treat this as a bulletin (those attach materials) or a discussion thread.
+- Treat this as a bulletin (those attach materials) or a discussion thread (**P1** `discussions/`).
 - Hard-delete announcement rows from the app.
 - Mix audience kinds on one announcement (course + class together).

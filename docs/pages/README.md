@@ -30,6 +30,8 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [LESSON_PLAN](./LESSON_PLAN.md) | `/my/<org-slug>/courses/<course_id>/lesson-plans/<lesson_plan_id>` (new `…/lesson-plans/new`; edit `…/edit`) |
 | [ANNOUNCEMENTS](./ANNOUNCEMENTS.md) | `/my/<org-slug>/announcements` |
 | [ANNOUNCEMENT](./ANNOUNCEMENT.md) | `/my/<org-slug>/announcements/<announcement_id>` (new `…/announcements/new`; edit `…/edit`) |
+| [DISCUSSIONS](./DISCUSSIONS.md) | `/my/<org-slug>/discussions` | **P1** |
+| [DISCUSSION](./DISCUSSION.md) | `/my/<org-slug>/discussions/<discussion_id>` (new `…/discussions/new`) | **P1** |
 | [TEMPLATE_LIST](./TEMPLATE_LIST.md) | `/my/<org-slug>/templates` | **P1** |
 | [TEMPLATE](./TEMPLATE.md) | `/my/<org-slug>/templates/<template_id>` | **P1** |
 | [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) | `/my/<org-slug>/templates/<template_id>/settings` | **P1** |
@@ -82,6 +84,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Course templates + ACL / promote / sync | **P1** — [TEMPLATE_LIST](./TEMPLATE_LIST.md), [TEMPLATE](./TEMPLATE.md), [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) |
 | Quiz online take + autograde | **P1** |
 | Parent summary layer / Progress tab | **P1** |
+| Discussions | **P1** — [DISCUSSIONS](./DISCUSSIONS.md), [DISCUSSION](./DISCUSSION.md); in design |
 | Billing UI | **P1** (marketing on [PRICING](./PRICING.md); stub on [ORG_SETTINGS](./ORG_SETTINGS.md)) |
 | Print whole course | Explicitly out of scope for initial release |
 | Student accounts / cross-org families | **P2** |

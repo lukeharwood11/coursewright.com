@@ -34,13 +34,13 @@ Organization
        ▲
        │ file_id reference(s)
        │
-Material / Page block / …   ←── lives on Course or CourseTemplate
+Material / Page block / DiscussionMessageAttachment (P1) / …
 ```
 
 | Rule | Detail |
 |------|--------|
 | **File** | First-class org row + Storage blob(s). Not nested under a single material as the sole owner. |
-| **Placement** | Materials (and page blocks) hold **`file_id`** (or equivalent). Same file can be referenced from more than one place. |
+| **Placement** | Materials (and page blocks) hold **`file_id`** (or equivalent). **P1 discussions** attach `file_id` on a message. Same file can be referenced from more than one place. |
 | **Course → course (P0)** / **Template → course (P1)** | New Material (and structure) rows are created; **`file_id` stays the same**. No new Storage object. |
 | **Promote / sync** | Same idea — copy or sync the **reference**, not the bytes (unless we later add an explicit fork). |
 | **P0 UI** | Still “files on materials,” not a full org file browser — entity shape ≠ product chrome. |
@@ -149,7 +149,7 @@ Reject or warn on containers that **won't play on iPhone Safari** (e.g. some AVI
 
 Two gates must agree:
 
-1. **Postgres RLS** — can this user see the `File` / parent `Material`?
+1. **Postgres RLS** — can this user see the `File` via a parent `Material` **or** (P1) a discussion message attachment?
 2. **Storage** — can they read the object?
 
 | Approach | Pros | Cons |

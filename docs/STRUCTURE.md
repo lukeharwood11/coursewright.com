@@ -83,6 +83,7 @@ src/
 ├── print/                    # print material / unit / this week
 ├── parent/                   # this week calendar + Focus + announcements
 ├── announcements/            # one-way notices (course / class / student)
+├── discussions/              # P1 — two-way threads (one course or one class)
 ├── lesson-plans/             # weekly course plans + per-day materials
 ├── calendar/                 # month/week calendar of assigned, due, lesson plans
 ├── auth/                     # login, signup, invite entry, session helpers
