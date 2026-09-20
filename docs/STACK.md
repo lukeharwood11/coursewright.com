@@ -31,6 +31,7 @@
 | **CI/CD** | **GitHub Actions** | Lint/typecheck/build; deploy SPA and related pipelines |
 | **Product analytics** | **PostHog** | Product usage / funnels; client exception capture in the SPA |
 | **Transactional email** | **Resend** | Organization invite emails (`organization-invite`) via `send-organization-invite`. Announcement opt-in emails (`announcement-notification`) via `send-announcement-notification`. API key is a Supabase Function secret (**HN-015**) |
+| **Realtime (P1 discussions)** | **Supabase Realtime** | Postgres changes on discussion tables while the SPA is open. RLS still applies. Not email, not push, not typing indicators in this slice |
 | **Billing (P1)** | **Stripe Billing** *(hypothesis)* | Course Wright charges orgs — not P0 |
 
 ---
@@ -52,6 +53,7 @@
 13. **CI/CD** — **GitHub Actions** owns check and deploy pipelines (`.github/workflows/`). Terraform plan/apply are **dispatch-only** and call shared `scripts/`. SPA publish is `deploy-spa.sh` (S3 sync + CloudFront invalidate). Confirm HN-003 / HN-010 / HN-011 before live apply (ACM HN-005 is done). See [HUMAN_NEEDED.md](./HUMAN_NEEDED.md).
 14. **Analytics** — **PostHog** for product analytics (page views, key actions, funnels) and **error tracking** (exception autocapture + catch-all boundary reports). Wire the browser SDK from the SPA; do not invent a second analytics stack. Project keys come from human setup ([HUMAN_NEEDED.md](./HUMAN_NEEDED.md)). Respect auth/privacy: identify only after login when needed; no PII beyond what product docs allow.
 15. **Search is a first-class data concern** — Schema, indexes, and material metadata must support **cross-facet search** (P0 in [FEATURES.md](./FEATURES.md)). Prefer Postgres full-text / structured filters via PostgREST when they meet the bar; introduce a dedicated search service only if FTS + facets cannot. Do not treat search as a late UI filter over unindexed lists.
+16. **Realtime is opt-in per product surface** — **P1 discussions** subscribe to Postgres changes through the existing Supabase browser client while the SPA is open. RLS still gates payloads. Do not add a second websocket stack. Email / push stay on the P1 Notifications row.
 
 ---
 
@@ -63,7 +65,7 @@
 | Edit a material title / dates / text | **Send organization invite email** (`send-organization-invite` → Resend); **send announcement notification** (`send-announcement-notification` → Resend) |
 | Roster list / enroll when rules fit RLS | Invite claim / privileged membership writes |
 | Parent dashboard reads for this week | Soft-delete cascades / revert that touch many rows |
-| Mark important now (if RLS allows) | Anything needing service-role or **external email** |
+| Discussion CRUD + Realtime subscribe (P1) | Anything needing service-role or **external email** |
 | ShareLink create/read when RLS allows | **P1:** Create course from template (copy + lineage) |
 | Auth session via Supabase client | **P1:** Template → course sync for unmodified copies |
 | Storage upload/download when policies allow | **P1:** Promote instance content → template; signed URL / privileged file ops if RLS alone is insufficient |

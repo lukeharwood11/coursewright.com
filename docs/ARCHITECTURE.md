@@ -105,6 +105,7 @@ Aligned with P0 in [FEATURES.md](./FEATURES.md):
 | `print/` | Print material / unit / this week | Creator + parent |
 | `parent/` | This week calendar + Focus + **announcements** | Parent role |
 | `announcements/` | One-way notices (course / class / student) | Instructor, admin; parent views |
+| `discussions/` | **P1** — two-way threads (one course or one class) | Instructor, admin; parent views |
 | `lesson-plans/` | Weekly course plans with per-day materials | Instructor; parent views |
 | `calendar/` | Month/week calendar of assigned, due, lesson plans | Instructor; parent |
 | `billing/` | Org SaaS (P1) | Admin |
@@ -141,6 +142,11 @@ UI (announcements/)
   → api.invoke('send-announcement-notification')
   → Edge Function (Resend secret)
   → Resend event `announcement-notification` (one send per recipient)
+
+UI (discussions/)   # P1
+  → PostgREST insert/select (RLS)
+  → supabase.channel postgres_changes (Realtime) while the thread, list, or org chrome is open
+  → TanStack Query cache updates from those events
 
 # P1: create-course-from-template, sync-template-resource, promote-to-template
 ```

@@ -12,6 +12,12 @@ export function staffSearchPages(orgSlug: string): SearchResult[] {
       href: `${base}/announcements`,
     },
     {
+      id: "page:discussions",
+      type: "page",
+      title: "Discussions",
+      href: `${base}/discussions`,
+    },
+    {
       id: "page:courses",
       type: "page",
       title: "Courses",

@@ -104,6 +104,20 @@ One-way notices (course, class, or student). Org-scoped because the audience is 
 
 ---
 
+## Discussions (**P1**)
+
+Two-way threads (one course or one class). Org-scoped because the audience is not always a course.
+
+| Page | URL | Notes |
+|------|-----|-------|
+| [DISCUSSIONS](./pages/DISCUSSIONS.md) | `/my/<org-slug>/discussions` | Staff list (Teacher view); family list (parent chrome / Parent view) |
+| [DISCUSSION](./pages/DISCUSSION.md) (view) | `/my/<org-slug>/discussions/<discussion_id>` | Thread: posts, one-level replies, attachments, answered |
+| [DISCUSSION](./pages/DISCUSSION.md) (new) | `/my/<org-slug>/discussions/new` | Compose. Optional `?audience=course\|class` plus `courseId` / `classId` |
+
+No `/edit` route — title and audience are not edited after create in this slice.
+
+---
+
 ## Course templates (**P1**)
 
 | Page | URL | Notes |
@@ -164,7 +178,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 
 ## Parent experience
 
-Covered by [ORG_HOME](./pages/ORG_HOME.md) + [CALENDAR](./pages/CALENDAR.md) + read-focused use of the course / unit / material tree. **Lesson plans** open [LESSON_PLAN](./pages/LESSON_PLAN.md). **Announcements** open [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md). No separate `/home` path in P0. Staff can switch to that presentation with **Parent view** in org chrome.
+Covered by [ORG_HOME](./pages/ORG_HOME.md) + [CALENDAR](./pages/CALENDAR.md) + read-focused use of the course / unit / material tree. **Lesson plans** open [LESSON_PLAN](./pages/LESSON_PLAN.md). **Announcements** open [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md). **Discussions** (**P1**) open [DISCUSSION](./pages/DISCUSSION.md). No separate `/home` path in P0. Staff can switch to that presentation with **Parent view** in org chrome.
 
 ---
 

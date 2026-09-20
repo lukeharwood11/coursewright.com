@@ -40,6 +40,10 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | LessonPlanDayMaterial | `lesson_plan_day_materials` | Materials listed under a day |
 | Announcement | `announcements` | One-way notice to one or more courses, classes, or students (same kind) |
 | AnnouncementRead | `announcement_reads` | Per-user read receipt (clears the notification icon) |
+| Discussion | `discussions` | **P1** — two-way thread for one course or one class |
+| DiscussionMessage | `discussion_messages` | **P1** — post or one-level reply |
+| DiscussionMessageAttachment | `discussion_message_attachments` | **P1** — file / material / url on a message |
+| DiscussionRead | `discussion_reads` | **P1** — per-user last read (unread badge) |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates + published lesson plans (Sunday–Saturday). |
 | Page / Block / Quiz / Form | `blocks` (quiz is a Lexical node on a page) | Material **kind** page\|link\|file; blocks on pages only; **no** quiz table |
 
@@ -65,7 +69,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | Phase | Entities in focus |
 |-------|-------------------|
 | **P0** | Organization, User, Membership, **AdminInvite**, **AdminInviteStudents**, **StudentProfile**, **Class**, **ClassMember**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **LessonPlan**, **LessonPlanDay**, **LessonPlanDayMaterial**, **Announcement**, **AnnouncementRead**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
-| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs) |
+| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead** |
 | **P2** | Cross-org Family management, StudentProfile.user_id, Quiz online, Submission, **ParentPayments** (orgs collect from parents) |
 
 ---
@@ -125,7 +129,7 @@ A claimed parent with no enrollment can open the org (empty “this week”) but
 ## Creating a course from another course (P0)
 
 1. Copies **units and materials** (and file **references** — same `file_id`, no blob clone) into a **new course**.
-2. Does **not** copy roster, enrollments, important-now, share links, **lesson plans**, or **announcements**.
+2. Does **not** copy roster, enrollments, important-now, share links, **lesson plans**, **announcements**, or **discussions**.
 3. New course is **independent** — edits do not sync back to the source (template-style sync is **P1**).
 4. Grade metadata **may** copy and remain editable on the new course.
 5. Description, location, and subject **may** copy from the create form (prefilled from the source). The copy starts **unpublished**.
@@ -258,7 +262,7 @@ Multiple instructors per course (co-teaching). **P0.**
 | uploaded_at | timestamptz | |
 | deleted_at | timestamptz | soft delete — warn/block if still referenced (TBD) |
 
-**References:** `Material.file_id` and/or page blocks hold `file_id` → `File`. No `File.material_id` owner FK. No `copied_from_id` on File for template copy — copy shares the same id.
+**References:** `Material.file_id` and/or page blocks hold `file_id` → `File`. **P1 discussions** also reference `File` from `DiscussionMessageAttachment`. No `File.material_id` owner FK. No `copied_from_id` on File for template copy — copy shares the same id.
 
 Generous types/sizes — keep open. **Audio and video MIME types are first-class** (in-app players in the product). Replacing a file creates a new `FileVersion` + new Storage blob; prior blobs stay for revert. **Replace updates all referrers** unless a fork creates a new `File` (open — FILE_STORAGE).
 
@@ -684,7 +688,7 @@ Unique `(lesson_plan_day_id, material_id)`. Families only follow links to **publ
 
 ### Announcement
 
-A **one-way** notice to one or more targets of a single audience kind: **course(s)**, **class(es)**, or **student(s)**. Families see it on the parent/student home while it is current. Opening it writes an `AnnouncementRead` and clears the notification icon. **Not** a lesson plan (no attached materials) and **not** a discussion thread.
+A **one-way** notice to one or more targets of a single audience kind: **course(s)**, **class(es)**, or **student(s)**. Families see it on the parent/student home while it is current. Opening it writes an `AnnouncementRead` and clears the notification icon. **Not** a lesson plan (no attached materials) and **not** a discussion thread (**P1 Discussions**).
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -735,6 +739,102 @@ Parents and students insert their own row when they open the notice. That clears
 
 CourseSummary, Grade, InstructorNote, ChecklistItem. **OrgSubscription** = Course Wright charging the org.
 
+**Discussions** (in progress — product rules in [FEATURES.md](../FEATURES.md)): a two-way thread for **one course** or **one class**. Distinct from announcements.
+
+### Discussion
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| audience | text | `course` · `class` |
+| course_id | bigint | FK → Course when `audience = course`; else null |
+| class_id | bigint | FK → Class when `audience = class`; else null |
+| title | text | required |
+| created_by | uuid | FK → User (`profiles`) — the person who started it |
+| last_message_at | timestamptz | denormalized last non-deleted message time (list sort); set by trigger |
+| answered_at | timestamptz | nullable — set when marked answered |
+| answered_by | uuid | FK → User, nullable |
+| created_at | timestamptz | |
+| updated_at | timestamptz | |
+| deleted_at | timestamptz | soft delete |
+| deleted_by | uuid | FK → User, nullable |
+
+**Audience:** exactly one kind, with exactly **one** matching FK and the other null. The course or class must belong to the same organization. Audience cannot change after insert.
+
+**Answered:** `answered_at` / `answered_by` set together; cleared together to unmark. Does **not** lock posting. Who may update these columns: `created_by`, or org staff who can see the row.
+
+**Who can insert:** org owners/admins (any course/class in the org). Instructors for a course they teach, or a class they can already manage on the roster (`is_org_staff` class rule — same as announcements). Parents (and invited student emails on the parent claim path) for a course their linked student is enrolled in (`status = active`, `visibility = published`) or a class their linked student is a member of.
+
+**Who can read:** org staff (all non-deleted discussions in the org). Parents (and invited student emails) when it applies to a linked student: enrolled in that **course** (active + published), **or** a member of that **class**. Class membership can surface a class discussion even without a course enrollment. Materials / this-week / print stay enrollment-gated. The discussions SELECT policy must use the new row’s audience columns (not a re-query by `id`) so PostgREST `INSERT … RETURNING` succeeds for a parent who is allowed to start the thread.
+
+**Who can soft-delete the discussion:** org staff only.
+
+Course-from-course copy does **not** copy discussions. No versions table — soft-delete only (not course content).
+
+**Realtime:** include `discussions` in the `supabase_realtime` publication. RLS still applies to change payloads.
+
+### DiscussionMessage
+
+A post on a discussion. Optional `parent_id` is a **one-level** reply (parent must be a root message in the **same** discussion — `parent_id` of the parent is null).
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| discussion_id | bigint | FK → Discussion |
+| parent_id | bigint | FK → DiscussionMessage, nullable — reply-to; same discussion; parent is a root |
+| author_id | uuid | FK → User (`profiles`) |
+| body | text | optional when at least one attachment exists; empty string when unset |
+| created_at | timestamptz | |
+| updated_at | timestamptz | |
+| deleted_at | timestamptz | soft delete |
+| deleted_by | uuid | FK → User, nullable |
+
+Check: `body` trimmed non-empty **or** the message has ≥ 1 attachment (enforce with trigger after attachments insert, or require body on insert and allow attachment-only via a follow-up write — implementation must not leave an empty root post). Prefer: opening post is inserted with the discussion; attachments added immediately after.
+
+**Who can insert:** anyone who can SELECT the parent discussion.
+
+**Who can soft-delete:** the author (own row) or org staff.
+
+Creating a discussion writes the `Discussion` row **and** the first root `DiscussionMessage` in the same user action (PostgREST two-step is OK; hide threads with zero non-deleted messages from lists).
+
+**Realtime:** publish `discussion_messages`.
+
+### DiscussionMessageAttachment
+
+Join: files, materials, or URLs on a message.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| message_id | bigint | FK → DiscussionMessage |
+| kind | text | `file` · `material` · `url` |
+| file_id | bigint | FK → File when `kind = file`; else null |
+| material_id | bigint | FK → Material when `kind = material`; else null |
+| url | text | when `kind = url` |
+| label | text | optional display label (URL or material override) |
+| position | int | order on the message |
+| created_at | timestamptz | |
+
+Check: exactly one of `file_id` / `material_id` / `url` according to `kind`. File must be in the same org. Material must be **published** and the poster must already be allowed to SELECT it (course materials RLS). Soft-deleting a message leaves attachment rows; the app path does not hard-delete.
+
+**File read:** a user may SELECT a `File` (and its Storage object) if they can SELECT a discussion message that attaches it, **or** via existing material references. Storage policies must match.
+
+**Realtime:** publish `discussion_message_attachments` (or refetch attachments when a message insert arrives).
+
+### DiscussionRead
+
+Per-user cursor for unread. Unique `(discussion_id, user_id)`.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| discussion_id | bigint | FK → Discussion |
+| user_id | uuid | FK → User (`profiles`) |
+| last_read_at | timestamptz | |
+
+Unread = discussion is visible, not deleted, and (`last_read_at` is null or `last_message_at` > `last_read_at`). Opening the thread upserts `last_read_at = now()`; while the thread is open, live new messages also advance `last_read_at` for that person. Two parents each have their own unread state.
+
 **P2:** parent-pay / tuition — stub only.
 
 ---
@@ -770,6 +870,15 @@ Organization ──< Announcement (course(s) | class(es) | student(s)) ──< A
 Course ──< ShareLink
 ```
 
+**P1 (additive):**
+
+```
+Organization ──< Discussion (one course | one class)
+Discussion ──< DiscussionMessage (optional parent_id, one-level reply)
+DiscussionMessage ──< DiscussionMessageAttachment >── File | Material | url
+Discussion ──< DiscussionRead >── User
+```
+
 **Open:** Course ↔ Class link (enroll class, enroll individuals, or both).
 
 **P2 (additive):**
@@ -803,6 +912,7 @@ Family cross-org management (extends P0 org Family)
 | Course `grade_levels` storage (array vs join table vs range columns) | Course, CourseTemplate, search facets | **`text[]`** |
 | Search: FTS columns vs materialized search document | Indexes, PostgREST views | **Generated `tsvector` + GIN** on searchable tables |
 | Template product surface | CourseTemplate, TemplateAccess, sync Functions | **P1** — tables may exist; no P0 UI |
+| Discussion audience beyond one course or one class | Discussion | **Later** — ad-hoc student-group audience not in this slice |
 | Material kinds page/link/file + Block rows | materials, blocks | **Migrated** in baseline |
 
 ---
@@ -816,6 +926,6 @@ Family cross-org management (extends P0 org Family)
 - **Files:** Supabase Storage bucket `org-files`; `File.storage_ref` is `{organization_id}/{file_id}/{version_id}/{filename}`. Audio/video playback in the SPA for those mime types.
 - **Search:** generated `search_vector` columns + GIN indexes; facets are ordinary columns (`course_id`, `kind`, `mime_type`, `grade_levels`, …) filtered under the same RLS.
 - **Analytics:** PostHog (client) — not a schema entity.
-- Access control via **RLS** (and Storage policies) aligned with Membership roles and parent access rules above. Parent SELECT of a course requires an active `parent` membership, a `ParentStudentLink`, an active `Enrollment`, `Course.status = active`, and `Course.visibility = published`. **Family membership is not part of that gate.** Parents (and future students) SELECT materials only when `visibility = published` **and** they can view the course. Instructors/admins see unpublished courses and materials.
+- Access control via **RLS** (and Storage policies) aligned with Membership roles and parent access rules above. Parent SELECT of a course requires an active `parent` membership, a `ParentStudentLink`, an active `Enrollment`, `Course.status = active`, and `Course.visibility = published`. **Family membership is not part of that gate.** Parents (and future students) SELECT materials only when `visibility = published` **and** they can view the course. Instructors/admins see unpublished courses and materials. **P1 discussions:** publish selected tables on `supabase_realtime`; Realtime payloads must still pass the same RLS. Discussion-attached files are readable when the actor can SELECT the attaching message.
 - **Migrations:** `supabase db migrate` — see [STACK.md](../STACK.md).
 - **ID format:** App entities use **`bigserial` / `bigint`**. Auth-linked ids (`profiles`, FKs to `auth.users`) stay **`uuid`**. Baseline migrations match this convention.

@@ -14,6 +14,11 @@ import {
   AnnouncementPage,
   AnnouncementsPage,
 } from "@/announcements";
+import {
+  DiscussionNewPage,
+  DiscussionPage,
+  DiscussionsPage,
+} from "@/discussions";
 import { LessonPlanEditPage, LessonPlanPage } from "@/lesson-plans";
 import { MaterialEditPage, MaterialPage } from "@/materials";
 import {
@@ -147,6 +152,12 @@ export function AppRoutes() {
                   <AnnouncementEditPage />
                 </RequireStaff>
               }
+            />
+            <Route path="discussions" element={<DiscussionsPage />} />
+            <Route path="discussions/new" element={<DiscussionNewPage />} />
+            <Route
+              path="discussions/:discussionId"
+              element={<DiscussionPage />}
             />
             <Route
               path="courses/:courseId/lesson-plans/new"

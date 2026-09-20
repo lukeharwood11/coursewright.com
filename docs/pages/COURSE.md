@@ -20,6 +20,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Add unit / add material (top-level or into a unit) when permitted.
 - **Lesson plans:** staff list weekly plans on this course; **Add lesson plan** → [LESSON_PLAN](./LESSON_PLAN.md) new. Opening a row goes to the plan. Families see **published** plans only. An info icon next to the heading explains what a lesson plan is.
 - **Create Announcement:** staff toolbar on this page posts a one-way [ANNOUNCEMENT](./ANNOUNCEMENT.md) to this course (`…/announcements/new?audience=course&courseId=`).
+- **Start a discussion** (**P1**): same course as the audience (`…/discussions/new?audience=course&courseId=`). Families on the parent variant can start one when their child is enrolled (active + published).
 - Print controls stay visible on materials and units (not overflow-only). Course Share / Duplicate live under the header **More** menu.
 - Instructors can **publish / unpublish** the course (distinct from archive). Unpublished courses show an amber warning + Publish on this page. Published courses show a green **Published** badge by the title; **Unpublish** lives in [COURSE_SETTINGS](./COURSE_SETTINGS.md).
 - Soft-delete / versioning entry points for dangerous actions (UX TBD).
@@ -47,7 +48,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Units list (ordered) → [UNIT](./UNIT.md); add unit
 - Materials under units: **title**, **description**, kind/badge, dates, print affordance
 - Sidebar / secondary: instructors, link to [COURSE_ROSTER](./COURSE_ROSTER.md)
-- Actions: Add material (page · link · file), **Add lesson plan**, Create Announcement / Settings (header), **More** menu (Share / Duplicate), Print entry points; **Create course from this course** (copy → new independent course)
+- Actions: Add material (page · link · file), **Add lesson plan**, Create Announcement / **Start a discussion** (**P1**) / Settings (header), **More** menu (Share / Duplicate), Print entry points; **Create course from this course** (copy → new independent course)
 - Versioning / soft-delete awareness for dangerous actions (TBD exact UX)
 
 ## Primary actions
@@ -55,6 +56,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Add / open unit or material
 - Add / open a lesson plan
 - Create Announcement
+- Start a discussion (**P1**)
 - Open roster / settings
 - Publish / unpublish the course (instructors)
 - Print unit or material (never buried)
@@ -67,6 +69,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Unpublished courses are not visible (same URL 404s)
 - Staff **Parent view** uses this variant (unpublished materials omitted; no edit)
 - Parent/student home tags do not apply here — this page is one course
+- **Start a discussion** (**P1**) for this course when the child is enrolled
 
 ## Links to
 
@@ -74,6 +77,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - [MATERIAL](./MATERIAL.md) — open material from unit rows
 - [LESSON_PLAN](./LESSON_PLAN.md) — open / add lesson plan
 - [ANNOUNCEMENT](./ANNOUNCEMENT.md) — Create Announcement for this course
+- [DISCUSSION](./DISCUSSION.md) — Start a discussion for this course (**P1**)
 - [CALENDAR](./CALENDAR.md) — via org chrome
 - [PRINT](./PRINT.md) — **Print** on materials / **Print unit** entry points
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — course roster

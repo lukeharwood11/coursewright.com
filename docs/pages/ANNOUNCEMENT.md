@@ -13,7 +13,7 @@ Staff compose (owners, admins, instructors in Teacher view). Parents and invited
 
 ## Purpose
 
-A **one-way** notice to one or more courses, classes, or students (same kind). Families open it from home or [ANNOUNCEMENTS](./ANNOUNCEMENTS.md). There is no reply thread.
+A **one-way** notice to one or more courses, classes, or students (same kind). Families open it from home or [ANNOUNCEMENTS](./ANNOUNCEMENTS.md). There is no reply thread — two-way talk is **P1** [DISCUSSION](./DISCUSSION.md).
 
 ## Behavior
 
@@ -79,8 +79,9 @@ Writeable on new/edit: audience (new only), targets (new only), title, body, sta
 - [COURSE](./COURSE.md) — compose entry from a course (`?audience=course&courseId=`)
 - [CLASS](./CLASS.md) — compose entry from a class
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — compose entry from a student
-- Via org chrome (staff Teacher view): [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); search overlay TBD
+- Via org chrome (staff Teacher view): [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); search overlay TBD
+- Via parent chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md)
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Announcements. Not a bulletin. Optional **Send notification** email. No discussion thread in this phase.
+[FEATURES.md](../FEATURES.md) — Announcements. Not a bulletin. Optional **Send notification** email. No discussion thread on this screen — two-way talk is **P1** [DISCUSSION](./DISCUSSION.md).

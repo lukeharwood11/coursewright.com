@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import {
+  ChatBubbleLeftRightIcon,
   Cog6ToothIcon,
   MegaphoneIcon,
   PrinterIcon,
@@ -8,6 +9,7 @@ import { Badge } from "@/ui/Badge";
 import { ButtonLink } from "@/ui/Button";
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { newAnnouncementPath } from "@/announcements/model/paths";
+import { newDiscussionPath } from "@/discussions/model/paths";
 import { formatDateRange } from "@/courses/model/dates";
 import { courseRosterPath, courseSettingsPath, coursesPath } from "@/courses/model/paths";
 import { courseStatusLabel, type CourseStatus } from "@/courses/model/status";
@@ -118,6 +120,18 @@ export function CourseHeader({
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
+        {canEdit || isParent ? (
+          <ButtonLink
+            variant="secondary"
+            to={newDiscussionPath(orgSlug, {
+              audience: "course",
+              courseId,
+            })}
+          >
+            <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
+            Start a discussion
+          </ButtonLink>
+        ) : null}
         {canEdit ? (
           <ButtonLink
             variant="secondary"

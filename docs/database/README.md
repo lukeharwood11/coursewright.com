@@ -27,7 +27,7 @@ Document entities, relationships, and constraints so implementation can start fr
 **P0 tables are in migrations** — entity rules stay here; SQL follows this document. Phasing:
 
 - **P0:** co-ops and micro-schools; course builder; org management & RBAC; roster management; **student profiles** (no accounts, created on first course enrollment); file sharing (minimum); **print** (material / unit / this week — not a stored entity); parent email invites; link or account access; parent sharing & dashboard
-- **P1:** progress, auto-drafted summaries, Course Wright billing orgs
+- **P1:** progress, auto-drafted summaries, Course Wright billing orgs, **discussions** (in design)
 - **P2:** student accounts; parent family management; orgs collecting from parents
 - **P2:** student accounts linked to existing profiles; parent family management across orgs; **quiz online take** (author + print is P0)
 

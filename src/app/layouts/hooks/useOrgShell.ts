@@ -1,7 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProfile, profileQueryKeys } from "@/auth/api/profiles";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { courseQueryKeys, listCourses } from "@/courses/databridge/courses";
+import {
+  discussionQueryKeys,
+  listDiscussionsForOrganization,
+} from "@/discussions/databridge/discussions";
+import { subscribeToOrgDiscussions } from "@/discussions/databridge/realtime";
+import { countUnreadDiscussions } from "@/discussions/model/unread";
 import {
   getMembershipByOrgSlug,
   orgQueryKeys,
@@ -23,6 +30,7 @@ import { useStaffViewMode } from "../stores/viewMode";
 
 export function useOrgShellData(orgSlug: string | undefined) {
   const user = useAuthedUser();
+  const queryClient = useQueryClient();
   const { staffViewMode, setStaffViewMode } = useStaffViewMode(orgSlug);
 
   const membershipQuery = useQuery({
@@ -61,6 +69,21 @@ export function useOrgShellData(orgSlug: string | undefined) {
     enabled: parentPresentation && Boolean(organizationId),
   });
 
+  const discussionsQuery = useQuery({
+    queryKey: discussionQueryKeys.org(organizationId ?? 0, user.id),
+    queryFn: () => listDiscussionsForOrganization(organizationId!, user.id),
+    enabled: Boolean(organizationId),
+  });
+
+  useEffect(() => {
+    if (!organizationId) return;
+    return subscribeToOrgDiscussions(organizationId, () => {
+      void queryClient.invalidateQueries({
+        queryKey: discussionQueryKeys.org(organizationId, user.id),
+      });
+    });
+  }, [organizationId, user.id, queryClient]);
+
   const courseRows = Array.isArray(coursesQuery.data) ? coursesQuery.data : [];
   const navCourses = parentPresentation
     ? familyVisibleCourses(courseRows)
@@ -80,12 +103,16 @@ export function useOrgShellData(orgSlug: string | undefined) {
   const unreadAnnouncements = (parentDashboardQuery.data?.announcements ?? []).filter(
     (item) => !item.read,
   ).length;
+  const unreadDiscussions = countUnreadDiscussions(discussionsQuery.data ?? []);
 
   const navSections =
     organization && role
       ? parentPresentation
-        ? buildParentNav(organization.slug, lists, { unreadAnnouncements })
-        : buildStaffNav(organization.slug, lists)
+        ? buildParentNav(organization.slug, lists, {
+            unreadAnnouncements,
+            unreadDiscussions,
+          })
+        : buildStaffNav(organization.slug, lists, { unreadDiscussions })
       : [];
 
   const profileName = profileQuery.data?.name ?? "";

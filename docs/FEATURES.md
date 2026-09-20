@@ -95,7 +95,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Instructor "important now"** | Flag items needing immediate parent attention | shipped | Toggle on material; parent home surfaces it |
 | **Lesson plans** | Weekly course plan: optional week note, per-day notes, optional materials per day; **published / unpublished** | shipped | One plan per course per Sunday–Saturday week. Default title `This week in <course title>`. New plans start unpublished. Families only see published plans. Replaces **bulletins** (no data migration). Course-from-course does **not** copy lesson plans. |
 | **Calendar** | Month and week view of assigned/due work and lesson plans, color-coded by course | shipped | Sidebar **Calendar** for staff and parents. Assigned = outline chip; due = filled chip. Course colors from a small palette (`courses.color_key`) with a filterable legend. Week view shows lesson-plan text in seven columns; This week uses wrapping day cards and hides empty days |
-| **Announcements** | One-way notice to one or more **courses**, **classes**, or **students** (same kind). Optional start/end dates control homepage visibility. Opening it marks it read and clears the notification icon. Families also have an **Announcements** list with a read-receipt icon once opened, and a red unread count on the sidebar. Optional **Send notification** emails families who already have an account. No reply thread | in progress | Distinct from **lesson plans** (those attach this week’s materials) and from later **discussions**. Org owners/admins can post any audience. Instructors can post for courses they teach, and for classes or students they can already manage on roster. Families see current announcements on home and `/announcements`. Opt-in email via Resend `announcement-notification` to claimed accounts only (same `RESEND_API_KEY` as HN-015). |
+| **Announcements** | One-way notice to one or more **courses**, **classes**, or **students** (same kind). Optional start/end dates control homepage visibility. Opening it marks it read and clears the notification icon. Families also have an **Announcements** list with a read-receipt icon once opened, and a red unread count on the sidebar. Optional **Send notification** emails families who already have an account. No reply thread | in progress | Distinct from **lesson plans** (those attach this week’s materials) and from **P1 discussions**. Org owners/admins can post any audience. Instructors can post for courses they teach, and for classes or students they can already manage on roster. Families see current announcements on home and `/announcements`. Opt-in email via Resend `announcement-notification` to claimed accounts only (same `RESEND_API_KEY` as HN-015). |
 | **Staff parent view** | Owners, admins, and instructors switch most org pages to parent presentation | in progress | Header **Teacher** / **Parent view**. Real this-week if they have linked students; otherwise a preview. Hidden for parent-only users. SPA + unit tests in; browser E2E against testing Auth blocked by email send rate limit |
 
 ### Roster management (P0)
@@ -252,7 +252,7 @@ Parents appear on a family **only** via existing `parent_student_links` to those
 **Creating a course (P0):**
 
 1. **From scratch** — blank course; add units and materials manually.
-2. **From another course** — copy that course’s **units and materials** into a **new independent course**. Does **not** copy roster, enrollments, important-now flags, share links, **lesson plans**, or **announcements**. **No live sync** between source and copy (template-style sync is **P1**).
+2. **From another course** — copy that course’s **units and materials** into a **new independent course**. Does **not** copy roster, enrollments, important-now flags, share links, **lesson plans**, **announcements**, or **discussions**. **No live sync** between source and copy (template-style sync is **P1**).
 
 **P1 (templates) — deferred:**
 
@@ -386,6 +386,7 @@ Do **not** ship a separate “Export” product name in P0. Print *is* the path 
 | **(C) Important now** | P0 | Instructor-flagged items needing attention (courses of active students) |
 | **Lesson plans** | P0 | Teacher-composed weekly plan for a course (week note + optional per-day notes and materials). **Published / unpublished** like other content. Shown on This week’s calendar and the Calendar page. A published plan with only a week note is a whole-week note. **Print this week** includes each student’s published lesson-plan content first |
 | **Announcements** | P0 | One-way notice to one or more courses, classes, or students (same kind). Optional start/end for homepage visibility. Unread notification until opened; parent list + sidebar unread badge. Optional email via **Send notification**. No reply thread |
+| **Discussions** | P1 | Two-way thread for **one course** or **one class**. Title + audience. Families and staff who belong to that group can start a thread and post. One-level replies. Author or staff can mark **answered**. Files, links to materials, and URLs on a post. Live updates while the app is open. Sidebar list + unread badge — **not** on This week home |
 | **(A) This week** | P0 | Current Sunday–Saturday week as **wrapping day cards** (empty days omitted): lesson-plan text in each day, materials after a divider with that class, assigned = outline / due = filled. **Focus** rail: Important now + Coming up |
 | **Calendar** | P0 | Sidebar month/week view of assigned and due work (and lesson plans on week view), color-coded by course with a filter legend |
 | **(B) Summary** | P1 | System-drafted overview; instructor can edit |
@@ -423,7 +424,7 @@ Content on **courses** may use **units** for grouping (templates are **P1**). Ma
 
 **P0 lesson plans:** a course **Lesson plan** covers one Sunday–Saturday week. Instructors write an optional **week note**, optional notes for each day, and may **select materials** for each day (same course). New plans start **unpublished**; families only see **published** plans (same publish controls as materials). A published plan with only a week note is a whole-week note for families. Attaching a material to a day does **not** change that material’s assignment or due date. Soft-delete to take it down. Unpublished materials attached to a plan are omitted for families (same as elsewhere). Course-from-course copy does **not** copy lesson plans (instance communication, like important now). This is **in-app**, not email. **Bulletins** are removed.
 
-**P0 announcements:** an **Announcement** is a **one-way** notice (title + optional body) aimed at one audience kind: **course(s)**, **class(es)**, or **student(s)** — one or more targets of that kind. It is **not** a lesson plan (no attached materials) and **not** a discussion (no reply thread — that is later). Optional **start date** and **end date**: if set, families see it on home (and the parent **Announcements** list) while today is in that window (inclusive); if omitted, it stays current until staff remove it. Opening the notice marks it **read** for that person, removes the **notification icon**, shows a **read receipt** on the list, and clears that item from the sidebar unread badge. Parents of a matching student (and that student, when they sign in on the parent claim path) see it. **Who can post:** org **owners and admins** (any audience in the org); **instructors** for courses they teach, or for a class / student they can already manage on the roster. Soft-delete to take it down. Course-from-course copy does **not** copy announcements. Staff may opt in to **Send notification**, which emails families who already have an account (Resend `announcement-notification`). Pending invites are not mailed. The notice still saves if email fails. Broader P1 Notifications (lesson plans, etc.) stay separate.
+**P0 announcements:** an **Announcement** is a **one-way** notice (title + optional body) aimed at one audience kind: **course(s)**, **class(es)**, or **student(s)** — one or more targets of that kind. It is **not** a lesson plan (no attached materials) and **not** a discussion (no reply thread — **P1 Discussions**). Optional **start date** and **end date**: if set, families see it on home (and the parent **Announcements** list) while today is in that window (inclusive); if omitted, it stays current until staff remove it. Opening the notice marks it **read** for that person, removes the **notification icon**, shows a **read receipt** on the list, and clears that item from the sidebar unread badge. Parents of a matching student (and that student, when they sign in on the parent claim path) see it. **Who can post:** org **owners and admins** (any audience in the org); **instructors** for courses they teach, or for a class / student they can already manage on the roster. Soft-delete to take it down. Course-from-course copy does **not** copy announcements. Staff may opt in to **Send notification**, which emails families who already have an account (Resend `announcement-notification`). Pending invites are not mailed. The notice still saves if email fails. Broader P1 Notifications (lesson plans, etc.) stay separate.
 
 ### Materials & content creation
 
@@ -563,7 +564,7 @@ Page materials use a **Lexical** WYSIWYG editor ([lexical.dev](https://lexical.d
 
 ## P1 — Important next
 
-Progress tracking, auto-summaries, Course Wright billing orgs, and **course templates**.
+Progress tracking, auto-summaries, Course Wright billing orgs, **course templates**, and **discussions**.
 
 | Feature | Description | Status | Notes |
 |---------|-------------|--------|-------|
@@ -582,7 +583,8 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | **Quizzes (take online + autograde)** | Take quizzes in-app; score from P0-stored correct answers | planned | Authoring + print already P0 |
 | **Forms** | Structured response collection | in design | Purpose + respondents TBD — see materials workshop |
 | **Course Wright billing (orgs)** | We charge organizations so they can serve parents | planned | `billing/` SPA stub + owner-only placeholder on org settings. Packaging: per teacher or per course — **hypothesis**. Provider: **Stripe** *(hypothesis)* |
-| **Notifications** | <!-- TBD --> | planned | Broader email/in-app alerts. Announcement opt-in email is P0 (**Send notification**). In-app **lesson plans** stay P0 and are not this row |
+| **Discussions** | Two-way thread for **one course** or **one class**. Title + who it is for. Staff and families in that group can start a thread and everyone on it can post. One-level replies. The person who started it, or staff who can see it, can mark it **answered**. Posts can attach **files**, **links to course materials**, and **URLs**. While the app is open, new posts, replies, and answered state appear without a refresh (**Supabase Realtime**). Distinct from **announcements** | in progress | Schema + SPA list/compose/thread in this branch (`20260922000000_discussions.sql`). Parent Start discussion `INSERT … RETURNING` needs `20260922000001_discussions_parent_insert_returning.sql` if the first discussions migration is already applied. Families start a discussion only for a **course their child is enrolled in** (active + published) or a **class their child is in**. Staff: owners/admins any course/class in the org; instructors for courses they teach and classes they can already manage on the roster. Invited student emails use the parent claim path. No email in this slice. Ad-hoc student-group audience later. Apply the migration to the linked DB before trying the UI against remote data. |
+| **Notifications** | <!-- TBD --> | planned | Broader email/in-app alerts. Announcement opt-in email is P0 (**Send notification**). In-app **lesson plans** stay P0 and are not this row. **Discussions** use in-app Realtime + an unread badge, not this email row |
 | **Reporting** | <!-- TBD --> | planned | |
 | **Designed PDF packets** | Richer branded PDF layouts beyond the P0 ink packet | planned | P0 already generates + previews a PDF; P1 = stronger brand / layout polish |
 
@@ -595,6 +597,47 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 - As a **parent**, I want to **see my student's progress** (grades, notes, checklists) so that **I know how they're doing**.
 - As an **org owner**, I want to **pay Course Wright for our org** so that **parents and instructors can use the product**.
 - As a **parent or student**, I want to **take a quiz online and get an autograded score** so that **we don't have to grade every item by hand**.
+- As a **parent**, I want to **start a discussion for a course or class my child is in** so that **other families and teachers can talk in one place**.
+- As an **instructor or admin**, I want to **start a discussion for a course I teach or a class I manage** so that **families can ask and answer together**.
+- As a **parent or instructor**, I want to **reply to a message and attach a file, a material, or a link** so that **we can share the worksheet or page we are talking about**.
+- As the **person who started a discussion**, or as **staff**, I want to **mark it answered** so that **families can see the question is resolved**.
+- As anyone **looking at discussions in the app**, I want **new posts to show up without refreshing** so that **I don't miss a reply that is happening now**.
+
+### Discussions (P1)
+
+A **Discussion** is a **two-way** thread (title + posts) aimed at **one course** or **one class**. It is **not** an announcement (those stay one-way, no replies) and **not** a lesson plan.
+
+**Audience (this slice):** exactly **one** target of one kind — `course` or `class`. A class already is the named group of students (and therefore their parents). An ad-hoc list of students (announcement-style `student` audience) is **later**.
+
+**Who is on the thread:** org **staff** who can see it, **parents** of matching students, and **invited student emails** on the parent claim path. Course threads: enrolled families of that **active + published** course, plus that course’s instructors (and other org staff). Class threads: parents of class members (class membership is enough — no course enrollment required), plus org staff. Everyone who can see the thread can **post**.
+
+**Who can start one:**
+
+| Actor | Can start for |
+|-------|----------------|
+| **Parent** (and invited student email) | A **course their linked student is enrolled in** (active + published), or a **class their linked student is in** |
+| **Instructor** | Courses they teach; classes they can already manage on the roster |
+| **Owner / admin** | Any course or class in the org |
+
+Staff **Parent view** uses the family rules (create only if they have linked students). Teacher view uses the staff rules. Staff Parent view without linked students is an empty preview — no compose.
+
+**Thread shape:** required **title**; required **opening post** (plain text and/or at least one attachment). Root posts are newest-last (conversation order). **Reply** is one level under a root post — no nested replies to replies. Marking **answered** does **not** lock the thread; people can still post. **Answered** / **Open** is a status badge. The person who **started** the discussion, or **staff** who can see it, can mark answered and unmark it. Title is not edited after create in this slice. **Remove** (soft-delete) a discussion: staff only. A poster may remove **their own** post (soft-delete); staff may remove any post. Removed posts show a short “This message was removed.” Audience cannot change after create.
+
+**Attachments** on a post (any combination):
+
+| Kind | What |
+|------|------|
+| **File** | Upload to org `File` / Storage (`org-files`) — same players as materials for audio/video |
+| **Material** | Link a **published** material the poster can already view |
+| **Link** | External URL + optional label |
+
+**Unread:** per signed-in person (`DiscussionRead.last_read_at`). Opening the thread (and staying on it as live posts arrive) marks it read for that person. Sidebar **Discussions** shows a red count of unread threads. Unread is **not** shown as a stack of cards on This week home — keep home for the week calendar + announcements.
+
+**Realtime:** while the SPA is open, **Supabase Realtime** (Postgres changes, RLS still applies) updates the open thread (posts, replies, attachments, answered, removes), the open list (new threads, last activity, answered), and the sidebar unread count. No typing indicators in this slice. Closed tab / email / push is **not** this feature (see P1 Notifications).
+
+**Copy / search:** course-from-course does **not** copy discussions. Discussion titles are not in P0 chrome search in this slice.
+
+**Usability:** parent chrome stays simpler than staff. Sentence case. No “forum” / LMS jargon. **New discussion**, **Reply**, **Mark as answered**.
 
 ---
 
@@ -687,7 +730,8 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | Auth: email + Google | **Decided** | Supabase Auth + Google Cloud OAuth — STACK.md |
 | P0 homework = dated materials in a unit | **Decided** | Parent "this week"; assignments next |
 | P0 lesson plan = weekly course plan with publish controls | **Decided** | One per course per Sunday–Saturday week; week note + per-day notes/materials; unpublished until published; replaces bulletins; not email; not an assignment object |
-| P0 announcement = one-way notice to one or more courses, classes, or students (same kind) | **Decided** | Optional start/end for homepage visibility; unread notification until opened; no reply thread (discussions later); not a lesson plan; optional **Send notification** email |
+| P0 announcement = one-way notice to one or more courses, classes, or students (same kind) | **Decided** | Optional start/end for homepage visibility; unread notification until opened; no reply thread (**P1 Discussions**); not a lesson plan; optional **Send notification** email |
+| P1 discussion = two-way thread for one course or one class | **Decided (in design)** | Families create for a course their child is enrolled in or a class their child is in; everyone on the thread can post; one-level replies; author or staff marks answered; attachments = file / material / URL; Realtime while the SPA is open; not email; not an announcement; ad-hoc student-group audience later |
 | Course calendar color | **Decided** | `courses.color_key` from a small muted palette; auto-assigned on create; staff can change in course settings; legend filters the calendar |
 | Course Wright bills orgs (not parents) | **Decided** | SaaS; parent-pay is future |
 | SaaS packaging per teacher or per course | **Hypothesis** | Not decided |

@@ -65,6 +65,7 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | [src/print/AGENTS.md](./src/print/AGENTS.md) | Print material / unit / this week |
 | [src/parent/AGENTS.md](./src/parent/AGENTS.md) | Parent dashboard |
 | [src/announcements/AGENTS.md](./src/announcements/AGENTS.md) | One-way notices (course / class / student) |
+| [src/discussions/AGENTS.md](./src/discussions/AGENTS.md) | **P1** two-way threads (one course or one class) |
 | [src/lesson-plans/AGENTS.md](./src/lesson-plans/AGENTS.md) | Weekly course plans + attached materials |
 | [src/calendar/AGENTS.md](./src/calendar/AGENTS.md) | Month/week calendar |
 | [src/auth/AGENTS.md](./src/auth/AGENTS.md) | Login, signup, invites, session |
