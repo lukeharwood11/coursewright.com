@@ -6,7 +6,7 @@ import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { coursePath } from "@/courses/model/paths";
 import { lessonPlanEditPath } from "@/lesson-plans/model/paths";
-import { emptyDaysForWeek, weekdayDateLabel } from "@/lesson-plans/model/validate";
+import { lessonPlanDaysToShow, weekdayDateLabel } from "@/lesson-plans/model/validate";
 import { lessonPlanIsPublished } from "@/lesson-plans/model/visibility";
 import {
   UnpublishControl,
@@ -83,10 +83,8 @@ export function LessonPlanPage() {
     );
   }
 
-  const slots = emptyDaysForWeek(page.plan.weekStart);
-  const byDate = new Map(page.days.map((day) => [day.date, day]));
+  const days = lessonPlanDaysToShow(page.days);
   const course = page.course;
-
 
   return (
     <div className="px-5 py-8 md:px-8">
@@ -156,35 +154,36 @@ export function LessonPlanPage() {
         </p>
       ) : null}
 
-      <div className="mt-8 grid gap-3 md:grid-cols-7">
-        {slots.map((slot) => {
-          const day = byDate.get(slot.date);
-          return (
+      {days.length > 0 ? (
+        <div className="mt-8 grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(min(100%,18rem),1fr))]">
+          {days.map((day) => (
             <section
-              key={slot.date}
-              className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-3"
+              key={day.date}
+              className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
             >
-              <h2 className="text-[12.5px] font-bold text-[var(--ink)]">
-                {weekdayDateLabel(slot.date)}
+              <h2 className="text-[14px] font-extrabold text-[var(--ink)]">
+                {weekdayDateLabel(day.date)}
               </h2>
-              {day?.body ? (
+              {day.body ? (
                 <p className="mt-2 whitespace-pre-wrap text-[13.5px] leading-relaxed text-[var(--ink)]">
                   {day.body}
                 </p>
-              ) : (
-                <p className="mt-2 text-[13px] text-[var(--ink-faint)]">No plan for this day.</p>
-              )}
-              <div className="my-3 border-t border-[var(--line)]" />
-              <LessonPlanMaterialList
-                orgSlug={page.organization.slug}
-                courseId={course.id}
-                materials={day?.materials ?? []}
-                showUnpublished={page.canEdit}
-              />
+              ) : null}
+              {day.materials.length > 0 ? (
+                <>
+                  <div className="my-3 border-t border-[var(--line)]" />
+                  <LessonPlanMaterialList
+                    orgSlug={page.organization.slug}
+                    courseId={course.id}
+                    materials={day.materials}
+                    showUnpublished={page.canEdit}
+                  />
+                </>
+              ) : null}
             </section>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      ) : null}
 
       {page.error ? (
         <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">

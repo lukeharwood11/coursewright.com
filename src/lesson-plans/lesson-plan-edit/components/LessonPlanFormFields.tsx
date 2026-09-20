@@ -73,13 +73,13 @@ export function LessonPlanFormFields({
         />
       </label>
 
-      <div className="mt-6 grid gap-3 md:grid-cols-7">
+      <div className="mt-6 grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(min(100%,18rem),1fr))]">
         {days.map((day) => {
           const selected = new Set(day.materialIds);
           return (
             <section
               key={day.date}
-              className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--paper)] p-3"
+              className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--paper)] p-4"
             >
               <h3 className="text-[12.5px] font-bold text-[var(--ink)]">
                 {weekdayDateLabel(day.date)}

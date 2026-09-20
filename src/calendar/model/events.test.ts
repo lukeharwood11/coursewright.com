@@ -2,11 +2,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   chipsForMaterials,
+  chipsOutsideLessonPlans,
   dayHasCalendarContent,
   filterCourses,
   leftoverChips,
   mergeDayMaterials,
   toggleHiddenCourse,
+  weekClassCards,
   weekDatesToShow,
 } from "./events.ts";
 import { addIsoDays, monthContaining } from "./dates.ts";
@@ -94,6 +96,91 @@ test("toggleHiddenCourse and month grid", () => {
       new Set([3]),
     ).map((row) => row.courseId),
     [4],
+  );
+});
+
+test("week class cards keep each class’s materials with its plan text", () => {
+  const chips = chipsForMaterials([
+    {
+      id: 1,
+      title: "Lab",
+      courseId: 10,
+      courseTitle: "Science",
+      colorKey: "moss",
+      scheduledDate: "2026-09-15",
+      dueDate: null,
+      unitId: null,
+      unitStart: null,
+      unitEnd: null,
+      unpublished: false,
+    },
+    {
+      id: 2,
+      title: "Sketch",
+      courseId: 11,
+      courseTitle: "Art",
+      colorKey: "clay",
+      scheduledDate: "2026-09-15",
+      dueDate: null,
+      unitId: null,
+      unitStart: null,
+      unitEnd: null,
+      unpublished: false,
+    },
+  ]);
+  const scienceDay = {
+    planId: 1,
+    courseId: 10,
+    courseTitle: "Science",
+    colorKey: "moss" as const,
+    date: "2026-09-15",
+    body: "Lab day",
+    unpublished: false,
+    materials: [{ id: 1, title: "Lab", unitId: null, assigned: false, due: false }],
+  };
+  const cards = weekClassCards(["2026-09-15"], [scienceDay], chips);
+  assert.equal(cards.length, 2);
+  assert.equal(cards[0]?.courseTitle, "Science");
+  assert.equal(cards[0]?.body, "Lab day");
+  assert.deepEqual(
+    cards[0]?.materials.map((material) => material.id),
+    [1],
+  );
+  assert.equal(cards[0]?.chips.length, 0);
+  assert.equal(cards[1]?.courseTitle, "Art");
+  assert.equal(cards[1]?.body, "");
+  assert.equal(cards[1]?.chips[0]?.title, "Sketch");
+  assert.equal(chipsOutsideLessonPlans(chips, [scienceDay], "2026-09-15").length, 1);
+  assert.equal(leftoverChips(chips, [scienceDay], "2026-09-15").length, 1);
+
+  const twoClasses = weekClassCards(
+    ["2026-09-15"],
+    [
+      scienceDay,
+      {
+        planId: 2,
+        courseId: 11,
+        courseTitle: "Art",
+        colorKey: "clay",
+        date: "2026-09-15",
+        body: "Sketch hour",
+        unpublished: false,
+        materials: [{ id: 2, title: "Sketch", unitId: null, assigned: false, due: false }],
+      },
+    ],
+    chips,
+  );
+  assert.equal(twoClasses.length, 2);
+  assert.equal(twoClasses[0]?.courseTitle, "Art");
+  assert.equal(twoClasses[0]?.body, "Sketch hour");
+  assert.deepEqual(
+    twoClasses[0]?.materials.map((material) => material.id),
+    [2],
+  );
+  assert.equal(twoClasses[1]?.courseTitle, "Science");
+  assert.deepEqual(
+    twoClasses[1]?.materials.map((material) => material.id),
+    [1],
   );
 });
 

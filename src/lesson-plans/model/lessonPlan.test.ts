@@ -4,6 +4,7 @@ import {
   daysToPersist,
   emptyDaysForWeek,
   isSunday,
+  lessonPlanDaysToShow,
   remapDaysToWeek,
   validateLessonPlanDraft,
   weekDates,
@@ -64,6 +65,18 @@ test("daysToPersist keeps days with text or materials only", () => {
     { date: "2026-09-14", body: "Lab", materialIds: [] },
     { date: "2026-09-15", body: "", materialIds: [3] },
   ]);
+});
+
+test("lessonPlanDaysToShow omits empty days and sorts by date", () => {
+  const shown = lessonPlanDaysToShow([
+    { date: "2026-09-16", body: "Quiz", materials: [] },
+    { date: "2026-09-14", body: "  ", materials: [] },
+    { date: "2026-09-15", body: "", materials: [{ id: 3 }] },
+  ]);
+  assert.deepEqual(
+    shown.map((day) => day.date),
+    ["2026-09-15", "2026-09-16"],
+  );
 });
 
 test("remapDaysToWeek keeps weekday content when the week changes", () => {

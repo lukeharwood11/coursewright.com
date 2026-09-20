@@ -189,6 +189,92 @@ export function leftoverChips(
   });
 }
 
+/** Assigned/due chips for courses that already have a plan that day (those merge into the class card). */
+export function chipsOutsideLessonPlans(
+  chips: CalendarMaterialChip[],
+  lessonDays: CalendarLessonPlanDay[],
+  date: string,
+): CalendarMaterialChip[] {
+  const coursesWithPlan = new Set(
+    lessonDays.filter((day) => day.date === date).map((day) => day.courseId),
+  );
+  return chips.filter((chip) => chip.date === date && !coursesWithPlan.has(chip.courseId));
+}
+
+export type WeekClassCard = {
+  date: string;
+  courseId: number;
+  courseTitle: string;
+  colorKey: CourseColorKey;
+  planId: number | null;
+  unpublished: boolean;
+  body: string;
+  materials: CalendarLessonPlanDay["materials"];
+  chips: CalendarMaterialChip[];
+};
+
+/** One card per class on a day: plan text + that class’s materials together. */
+export function weekClassCards(
+  dates: string[],
+  lessonDays: CalendarLessonPlanDay[],
+  chips: CalendarMaterialChip[],
+): WeekClassCard[] {
+  const cards: WeekClassCard[] = [];
+  for (const date of dates) {
+    const dayPlans = lessonDays
+      .filter((day) => day.date === date)
+      .slice()
+      .sort((a, b) => a.courseTitle.localeCompare(b.courseTitle));
+    for (const plan of dayPlans) {
+      cards.push({
+        date,
+        courseId: plan.courseId,
+        courseTitle: plan.courseTitle,
+        colorKey: plan.colorKey,
+        planId: plan.planId,
+        unpublished: plan.unpublished,
+        body: plan.body,
+        materials: mergeDayMaterials(
+          plan.materials.map((material) => ({
+            id: material.id,
+            title: material.title,
+            unitId: material.unitId,
+          })),
+          chips,
+          plan.courseId,
+          date,
+        ),
+        chips: [],
+      });
+    }
+    const leftoverByCourse = new Map<number, CalendarMaterialChip[]>();
+    for (const chip of chipsOutsideLessonPlans(chips, lessonDays, date)) {
+      const group = leftoverByCourse.get(chip.courseId) ?? [];
+      group.push(chip);
+      leftoverByCourse.set(chip.courseId, group);
+    }
+    const leftoverCards: WeekClassCard[] = [];
+    for (const group of leftoverByCourse.values()) {
+      const first = group[0];
+      if (!first) continue;
+      leftoverCards.push({
+        date,
+        courseId: first.courseId,
+        courseTitle: first.courseTitle,
+        colorKey: first.colorKey,
+        planId: null,
+        unpublished: false,
+        body: "",
+        materials: [],
+        chips: group,
+      });
+    }
+    leftoverCards.sort((a, b) => a.courseTitle.localeCompare(b.courseTitle));
+    cards.push(...leftoverCards);
+  }
+  return cards;
+}
+
 /** A day belongs on This week when it has plan text, attached materials, or assigned/due chips. */
 export function dayHasCalendarContent(
   date: string,

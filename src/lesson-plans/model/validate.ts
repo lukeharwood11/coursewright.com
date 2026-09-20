@@ -95,6 +95,16 @@ export function daysToPersist(days: LessonPlanDayDraft[]): LessonPlanDayDraft[] 
     .filter((day) => day.body.length > 0 || day.materialIds.length > 0);
 }
 
+/** Teacher/family view: skip days with no note and no materials; keep date order. */
+export function lessonPlanDaysToShow<T extends { date: string; body: string; materials: readonly unknown[] }>(
+  days: T[],
+): T[] {
+  return days
+    .filter((day) => day.body.trim().length > 0 || day.materials.length > 0)
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
 export function validateLessonPlanDraft(draft: LessonPlanDraft): string | null {
   if (!draft.title.trim()) return "Add a title so families know what this is.";
   if (!draft.weekStart) return "Choose the week this plan is for.";
