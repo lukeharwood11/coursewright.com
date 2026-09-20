@@ -1,6 +1,7 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { AnchoredPopup } from "@/ui/AnchoredPopup";
 import { Badge } from "@/ui/Badge";
 import { ButtonLink } from "@/ui/Button";
 import type { LessonPlanListItem } from "@/lesson-plans/databridge/lessonPlans";
@@ -48,62 +49,35 @@ function PlanRow({
 
 function LessonPlanHint() {
   const tooltipId = useId();
-  const rootRef = useRef<HTMLSpanElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    if (!open) return;
-
-    function onPointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
-
   return (
-    <span
-      ref={rootRef}
-      className="relative inline-flex"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-    >
+    <span className="inline-flex">
       <button
+        ref={buttonRef}
         type="button"
         className="inline-flex rounded-full text-[var(--ink-faint)] hover:text-[var(--ink-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
         aria-label="What is a lesson plan?"
         aria-expanded={open}
         aria-controls={tooltipId}
         onClick={() => setOpen((value) => !value)}
+        onMouseEnter={() => setOpen(true)}
         onFocus={() => setOpen(true)}
-        onBlur={(event) => {
-          if (!rootRef.current?.contains(event.relatedTarget as Node)) {
-            setOpen(false);
-          }
-        }}
       >
         <InformationCircleIcon className="h-4 w-4" aria-hidden />
       </button>
-      {open ? (
-        <span
-          id={tooltipId}
-          role="tooltip"
-          className="absolute left-0 top-full z-20 mt-1.5 w-[16rem] rounded-[var(--r-md)] border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 text-[12.5px] font-medium leading-snug text-[var(--ink-soft)] shadow-[var(--shadow)]"
-        >
-          {LESSON_PLAN_HINT}
-        </span>
-      ) : null}
+      <AnchoredPopup
+        open={open}
+        onClose={() => setOpen(false)}
+        anchorRef={buttonRef}
+        id={tooltipId}
+        role="tooltip"
+        preferredAlign="start"
+        className="w-[16rem] px-3 py-2 text-[12.5px] font-medium leading-snug text-[var(--ink-soft)]"
+      >
+        {LESSON_PLAN_HINT}
+      </AnchoredPopup>
     </span>
   );
 }

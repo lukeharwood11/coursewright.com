@@ -8,6 +8,7 @@ Header **Activity** bell (right of the avatar). Dropdown previews unread notific
 - Top 3 unread; `+ N unread` when there are more
 - Empty: **You're all caught up!**
 - Click a row to ack and open; same as the Activity list
+- Popup uses shared `AnchoredPopup` so it flips and stays on screen on mobile
 
 ## Don’t
 

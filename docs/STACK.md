@@ -143,8 +143,10 @@ Product/planning content stays curated markdown; VitePress only publishes/naviga
 |-------|------|
 | **Storybook** | Isolated stories for `src/ui` primitives (and other presentational pieces as needed) |
 | **STYLE_GUIDE** | Visual rules Storybook should reflect — [STYLE_GUIDE.md](./STYLE_GUIDE.md) |
+| **Run** | `npm run storybook` (Vite builder, port 6006) |
+| **Stories** | Colocated `src/ui/*.stories.tsx` — start with `AnchoredPopup` (viewport-aware menus) |
 
-<!-- TBD: Storybook Vite builder setup, story location convention, CI build of Storybook -->
+Config lives in [`.storybook/`](../.storybook/). Do not wire Storybook/Vitest into the app `vite.config.ts`.
 
 ---
 
@@ -200,7 +202,7 @@ Product behavior: [FEATURES.md](./FEATURES.md). Schema must index searchable fie
 | CloudFront SPA fallback / cache headers | <!-- TBD --> |
 | SaaS packaging (per teacher vs per course) | Hypothesis only |
 | VitePress config / sidebar / where docs site is hosted | <!-- TBD --> |
-| Storybook layout / which components get stories first | <!-- TBD --> |
+| Storybook CI publish | <!-- TBD --> |
 | PR/main checks; migrate/Functions deploy from CI | <!-- TBD --> |
 | PostHog: event taxonomy / session replay / env split | <!-- TBD --> |
 | Search: Postgres FTS vs dedicated index | Hypothesis — start Postgres-first |

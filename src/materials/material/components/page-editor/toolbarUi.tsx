@@ -9,6 +9,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { AnchoredPopup } from "@/ui/AnchoredPopup";
 import { Button } from "@/ui/Button";
 
 const CloseMenuContext = createContext<() => void>(() => {});
@@ -83,48 +84,6 @@ export function ToolbarDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-
-  useEffect(() => {
-    if (!open) return;
-
-    function place() {
-      const rect = buttonRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const width = 220;
-      setPosition({
-        top: rect.bottom + 4,
-        left: Math.min(rect.left, window.innerWidth - width - 8),
-      });
-    }
-
-    place();
-
-    function onPointerDown(event: PointerEvent) {
-      const target = event.target;
-      if (!(target instanceof Node)) return;
-      if (buttonRef.current?.contains(target) || menuRef.current?.contains(target)) {
-        return;
-      }
-      setOpen(false);
-    }
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-
-    window.addEventListener("resize", place);
-    window.addEventListener("scroll", place, true);
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("resize", place);
-      window.removeEventListener("scroll", place, true);
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
 
   return (
     <>
@@ -144,22 +103,18 @@ export function ToolbarDropdown({
         {icon}
         <ChevronDownIcon className="h-3.5 w-3.5 opacity-70" aria-hidden />
       </button>
-      {open
-        ? createPortal(
-            <CloseMenuContext.Provider value={() => setOpen(false)}>
-              <div
-                ref={menuRef}
-                role="menu"
-                aria-label={label}
-                className="cw-editor-menu"
-                style={{ top: position.top, left: position.left }}
-              >
-                {children}
-              </div>
-            </CloseMenuContext.Provider>,
-            document.body,
-          )
-        : null}
+      <CloseMenuContext.Provider value={() => setOpen(false)}>
+        <AnchoredPopup
+          open={open}
+          onClose={() => setOpen(false)}
+          anchorRef={buttonRef}
+          label={label}
+          preferredAlign="start"
+          className="cw-editor-menu"
+        >
+          {children}
+        </AnchoredPopup>
+      </CloseMenuContext.Provider>
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
@@ -11,6 +11,11 @@ import {
 import { $isLinkNode } from "@lexical/link";
 import { mergeRegister } from "@lexical/utils";
 import { LinkIcon } from "@heroicons/react/24/outline";
+import {
+  popupStyle,
+  usePopupPlacement,
+  type Rect,
+} from "@/ui/AnchoredPopup";
 import { usePageEditorActions } from "./PageEditorActions";
 import { FormatMark, ToolbarIconButton } from "./toolbarUi";
 
@@ -26,9 +31,7 @@ type FormatState = {
 export function FloatingFormatToolbar() {
   const [editor] = useLexicalComposerContext();
   const actions = usePageEditorActions();
-  const [position, setPosition] = useState<{ top: number; left: number } | null>(
-    null,
-  );
+  const [anchorRect, setAnchorRect] = useState<Rect | null>(null);
   const [format, setFormat] = useState<FormatState>({
     bold: false,
     italic: false,
@@ -52,7 +55,7 @@ export function FloatingFormatToolbar() {
         !native.anchorNode ||
         !root.contains(native.anchorNode)
       ) {
-        setPosition(null);
+        setAnchorRect(null);
         return;
       }
       const anchor = selection.anchor.getNode();
@@ -70,10 +73,12 @@ export function FloatingFormatToolbar() {
         isLink: linkNode != null,
         linkUrl: linkNode?.getURL() ?? "",
       });
-      const rect = native.getRangeAt(0).getBoundingClientRect();
-      setPosition({
-        top: rect.top - 44,
-        left: Math.max(8, rect.left + rect.width / 2 - 90),
+      const box = native.getRangeAt(0).getBoundingClientRect();
+      setAnchorRect({
+        top: box.top,
+        left: box.left,
+        width: box.width,
+        height: box.height,
       });
     });
   }, [editor]);
@@ -94,14 +99,10 @@ export function FloatingFormatToolbar() {
     );
   }, [editor, update]);
 
-  if (!position) return null;
+  if (!anchorRect) return null;
 
-  return createPortal(
-    <div
-      className="cw-editor-float"
-      onMouseDown={(event) => event.preventDefault()}
-      style={{ top: position.top, left: position.left }}
-    >
+  return (
+    <FloatingToolbarSurface rect={anchorRect}>
       <ToolbarIconButton
         pressed={format.bold}
         label="Bold"
@@ -139,6 +140,34 @@ export function FloatingFormatToolbar() {
       >
         <LinkIcon className="h-4 w-4" />
       </ToolbarIconButton>
+    </FloatingToolbarSurface>
+  );
+}
+
+function FloatingToolbarSurface({
+  rect,
+  children,
+}: {
+  rect: Rect;
+  children: ReactNode;
+}) {
+  const popupRef = useRef<HTMLDivElement>(null);
+  const placement = usePopupPlacement({
+    open: true,
+    popupRef,
+    anchorRect: rect,
+    preferredAlign: "center",
+    preferredSide: "top",
+  });
+
+  return createPortal(
+    <div
+      ref={popupRef}
+      className="cw-editor-float"
+      onMouseDown={(event) => event.preventDefault()}
+      style={popupStyle(placement)}
+    >
+      {children}
     </div>,
     document.body,
   );
