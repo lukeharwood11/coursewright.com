@@ -2,25 +2,33 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildParentNav, buildStaffNav } from "./nav.ts";
 
-test("staff and parent nav include announcements", () => {
+test("staff and parent nav include announcements and discussions", () => {
   const staff = buildStaffNav("coop", { courses: [], classes: [] });
   assert.deepEqual(
     staff.map((section) => section.id),
-    ["home", "calendar", "announcements", "courses", "roster", "settings"],
+    ["home", "calendar", "announcements", "discussions", "courses", "roster", "settings"],
   );
   assert.equal(
     staff.find((section) => section.id === "announcements")?.href,
     "/my/coop/announcements",
   );
+  assert.equal(
+    staff.find((section) => section.id === "discussions")?.href,
+    "/my/coop/discussions",
+  );
 
   const parent = buildParentNav("coop", { courses: [], classes: [] });
   assert.deepEqual(
     parent.map((section) => section.id),
-    ["home", "calendar", "announcements", "progress"],
+    ["home", "calendar", "announcements", "discussions", "progress"],
   );
   assert.equal(
     parent.find((section) => section.id === "announcements")?.href,
     "/my/coop/announcements",
+  );
+  assert.equal(
+    parent.find((section) => section.id === "discussions")?.href,
+    "/my/coop/discussions",
   );
   assert.equal(
     parent.find((section) => section.id === "announcements")?.badgeCount,
@@ -47,6 +55,28 @@ test("parent announcements nav shows unread badge count", () => {
   assert.equal(
     none.find((section) => section.id === "announcements")?.badgeCount,
     undefined,
+  );
+});
+
+test("discussions nav shows unread badge count for staff and parents", () => {
+  const staff = buildStaffNav(
+    "coop",
+    { courses: [], classes: [] },
+    { unreadDiscussions: 2 },
+  );
+  assert.equal(
+    staff.find((section) => section.id === "discussions")?.badgeCount,
+    2,
+  );
+
+  const parent = buildParentNav(
+    "coop",
+    { courses: [], classes: [] },
+    { unreadDiscussions: 4 },
+  );
+  assert.equal(
+    parent.find((section) => section.id === "discussions")?.badgeCount,
+    4,
   );
 });
 

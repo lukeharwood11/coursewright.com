@@ -47,6 +47,10 @@ test("filterPageResults matches staff destinations by title", () => {
     filterPageResults(pages, "announ").map((row) => row.id),
     ["page:announcements"],
   );
+  assert.deepEqual(
+    filterPageResults(pages, "discuss").map((row) => row.id),
+    ["page:discussions"],
+  );
   assert.equal(filterPageResults(pages, "").length, 0);
 });
 

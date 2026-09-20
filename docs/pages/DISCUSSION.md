@@ -89,4 +89,4 @@ Writeable on view: new post / reply, answered state (when allowed), remove (when
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Discussions (**P1**, in design). Not an announcement. No email in this slice. Realtime only while the SPA is open.
+[FEATURES.md](../FEATURES.md) — Discussions (**P1**, in progress). Not an announcement. No email in this slice. Realtime only while the SPA is open.

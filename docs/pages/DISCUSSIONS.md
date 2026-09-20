@@ -55,4 +55,4 @@ Empty: plain language plus **New discussion** when compose is allowed. Families 
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Discussions (**P1**, in design). Parent sidebar shows a red count of unread discussions. Do not put a discussion card stack on This week home.
+[FEATURES.md](../FEATURES.md) — Discussions (**P1**, in progress). Parent sidebar shows a red count of unread discussions. Do not put a discussion card stack on This week home.

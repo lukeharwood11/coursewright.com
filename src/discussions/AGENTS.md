@@ -2,7 +2,7 @@
 
 Two-way **discussions**: a thread for **one course** or **one class**. Title, posts, one-level replies, attachments, answered state. Live updates while the SPA is open.
 
-**Status:** product is **P1 / in design** — [FEATURES.md](../../docs/FEATURES.md). Do not ship UI or migrations until that row leaves `in design`. This folder exists so the domain has a home.
+**Status:** product is **P1 / in progress** — [FEATURES.md](../../docs/FEATURES.md).
 
 ## Scope (when implementing)
 

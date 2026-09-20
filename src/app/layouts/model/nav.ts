@@ -13,7 +13,7 @@ export type NavSection = {
   href: string | null;
   match: NavMatch;
   soon?: boolean;
-  /** Unread count badge (parent announcements). Hidden when 0 / unset. */
+  /** Unread count badge. Hidden when 0 / unset. */
   badgeCount?: number;
   children: NavLinkItem[];
 };
@@ -52,8 +52,13 @@ function childLinks(
   ];
 }
 
-export function buildStaffNav(orgSlug: string, lists: NavLists): NavSection[] {
+export function buildStaffNav(
+  orgSlug: string,
+  lists: NavLists,
+  options?: { unreadDiscussions?: number },
+): NavSection[] {
   const base = `/my/${orgSlug}`;
+  const unreadDiscussions = options?.unreadDiscussions ?? 0;
   return [
     { id: "home", label: "Home", href: base, match: "exact", children: [] },
     { id: "calendar", label: "Calendar", href: `${base}/calendar`, match: "prefix", children: [] },
@@ -62,6 +67,14 @@ export function buildStaffNav(orgSlug: string, lists: NavLists): NavSection[] {
       label: "Announcements",
       href: `${base}/announcements`,
       match: "prefix",
+      children: [],
+    },
+    {
+      id: "discussions",
+      label: "Discussions",
+      href: `${base}/discussions`,
+      match: "prefix",
+      badgeCount: unreadDiscussions > 0 ? unreadDiscussions : undefined,
       children: [],
     },
     {
@@ -102,10 +115,11 @@ export function buildStaffNav(orgSlug: string, lists: NavLists): NavSection[] {
 export function buildParentNav(
   orgSlug: string,
   lists: NavLists,
-  options?: { unreadAnnouncements?: number },
+  options?: { unreadAnnouncements?: number; unreadDiscussions?: number },
 ): NavSection[] {
   const base = `/my/${orgSlug}`;
   const unreadAnnouncements = options?.unreadAnnouncements ?? 0;
+  const unreadDiscussions = options?.unreadDiscussions ?? 0;
   const courseChildren = childLinks(
     lists.courses.map((course) => ({ id: course.id, label: course.title })),
     (id) => `${base}/courses/${id}`,
@@ -133,6 +147,14 @@ export function buildParentNav(
       href: `${base}/announcements`,
       match: "prefix",
       badgeCount: unreadAnnouncements > 0 ? unreadAnnouncements : undefined,
+      children: [],
+    },
+    {
+      id: "discussions",
+      label: "Discussions",
+      href: `${base}/discussions`,
+      match: "prefix",
+      badgeCount: unreadDiscussions > 0 ? unreadDiscussions : undefined,
       children: [],
     },
   ];

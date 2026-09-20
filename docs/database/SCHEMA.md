@@ -739,7 +739,7 @@ Parents and students insert their own row when they open the notice. That clears
 
 CourseSummary, Grade, InstructorNote, ChecklistItem. **OrgSubscription** = Course Wright charging the org.
 
-**Discussions** (in design — product rules in [FEATURES.md](../FEATURES.md)): a two-way thread for **one course** or **one class**. Distinct from announcements.
+**Discussions** (in progress — product rules in [FEATURES.md](../FEATURES.md)): a two-way thread for **one course** or **one class**. Distinct from announcements.
 
 ### Discussion
 
