@@ -5,7 +5,7 @@ Month and week **calendar** of assigned/due materials and lesson plans. Course-c
 ## Scope
 
 - Calendar page (`/my/<org-slug>/calendar`)
-- Shared `WeekCalendar` / `MonthCalendar` used by parent This week (`layout="cards"` there: skip empty days, wrap one card per class on a day)
+- Shared `WeekCalendar` / `MonthCalendar` used by parent This week (`layout="cards"` there: skip empty days, wrap remaining days)
 - Assigned = outline chip; due = filled chip
 
 ## Rules

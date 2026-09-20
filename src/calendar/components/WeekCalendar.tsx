@@ -31,7 +31,7 @@ export function WeekCalendar({
   lessonDays: CalendarLessonPlanDay[];
   chips: CalendarMaterialChip[];
   hiddenCourseIds: Set<number>;
-  /** `cards` (This week): skip empty days and wrap one card per class. `week` (Calendar): all seven columns. */
+  /** `cards` (This week): skip empty days and wrap. `week` (Calendar): all seven columns. */
   layout?: "week" | "cards";
 }) {
   const notes = weekNotes.filter((note) => !hiddenCourseIds.has(note.courseId));
@@ -44,7 +44,6 @@ export function WeekCalendar({
     layout === "cards",
   );
   const cards = layout === "cards";
-  const classCards = cards ? weekClassCards(dates, visibleDays, visibleChips) : [];
 
   return (
     <div>
@@ -80,56 +79,50 @@ export function WeekCalendar({
       ) : null}
 
       {dates.length > 0 ? (
-        cards ? (
-          <div className={wrappingCardGridClass}>
-            {classCards.map((card) => (
-              <ClassDayCard
-                key={`${card.date}-${card.courseId}-${card.planId ?? "chips"}`}
-                orgSlug={orgSlug}
-                card={card}
-                showDateHeading
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="grid gap-2 md:grid-cols-7">
-            {dates.map((date) => (
-              <section
-                key={date}
-                className="min-h-[9rem] rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-2"
+        <div className={cards ? wrappingCardGridClass : "grid gap-2 md:grid-cols-7"}>
+          {dates.map((date) => (
+            <section
+              key={date}
+              className={
+                cards
+                  ? "rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
+                  : "min-h-[9rem] rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-2"
+              }
+            >
+              <h3
+                className={
+                  cards
+                    ? "text-[14px] font-extrabold text-[var(--ink)]"
+                    : "text-[12px] font-bold text-[var(--ink-soft)]"
+                }
               >
-                <h3 className="text-[12px] font-bold text-[var(--ink-soft)]">
-                  {weekdayShort(date)}
-                  <span className="ml-1 text-[var(--ink-faint)]">{date.slice(8)}</span>
-                </h3>
-                <div className="mt-2 flex flex-col gap-2">
-                  {weekClassCards([date], visibleDays, visibleChips).map((card) => (
-                    <ClassDayCard
-                      key={`${card.date}-${card.courseId}-${card.planId ?? "chips"}`}
-                      orgSlug={orgSlug}
-                      card={card}
-                      showDateHeading={false}
-                    />
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        )
+                {cards ? (
+                  weekdayDateHeading(date)
+                ) : (
+                  <>
+                    {weekdayShort(date)}
+                    <span className="ml-1 text-[var(--ink-faint)]">{date.slice(8)}</span>
+                  </>
+                )}
+              </h3>
+              <div className="mt-2 flex flex-col gap-2">
+                {weekClassCards([date], visibleDays, visibleChips).map((card) => (
+                  <ClassBlock
+                    key={`${card.date}-${card.courseId}-${card.planId ?? "chips"}`}
+                    orgSlug={orgSlug}
+                    card={card}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
       ) : null}
     </div>
   );
 }
 
-function ClassDayCard({
-  orgSlug,
-  card,
-  showDateHeading,
-}: {
-  orgSlug: string;
-  card: WeekClassCard;
-  showDateHeading: boolean;
-}) {
+function ClassBlock({ orgSlug, card }: { orgSlug: string; card: WeekClassCard }) {
   const courseLabel = (
     <>
       {card.courseTitle}
@@ -137,8 +130,9 @@ function ClassDayCard({
     </>
   );
   const courseStyle = { color: courseColorCssVar(card.colorKey) };
-  const inner = (
-    <>
+
+  return (
+    <div>
       {card.planId != null ? (
         <Link
           to={lessonPlanPath(orgSlug, card.courseId, card.planId)}
@@ -177,7 +171,7 @@ function ClassDayCard({
         </>
       ) : null}
       {card.chips.length > 0 ? (
-        <div className={`${card.body || card.planId != null ? "mt-2" : ""} flex flex-col gap-1`}>
+        <div className="mt-2 flex flex-col gap-1">
           {card.chips.map((chip) => (
             <MaterialChip
               key={`${chip.kind}-${chip.materialId}`}
@@ -193,19 +187,6 @@ function ClassDayCard({
           ))}
         </div>
       ) : null}
-    </>
-  );
-
-  if (!showDateHeading) {
-    return <div>{inner}</div>;
-  }
-
-  return (
-    <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
-      <h3 className="text-[14px] font-extrabold text-[var(--ink)]">
-        {weekdayDateHeading(card.date)}
-      </h3>
-      <div className="mt-2">{inner}</div>
-    </section>
+    </div>
   );
 }

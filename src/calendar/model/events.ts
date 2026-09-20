@@ -213,7 +213,7 @@ export type WeekClassCard = {
   chips: CalendarMaterialChip[];
 };
 
-/** One card per class on a day: plan text + that class’s materials together. */
+/** One block per class on a day: plan text + that class’s materials together. */
 export function weekClassCards(
   dates: string[],
   lessonDays: CalendarLessonPlanDay[],

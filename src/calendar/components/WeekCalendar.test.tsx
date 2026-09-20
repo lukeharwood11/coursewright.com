@@ -6,7 +6,7 @@ import { MemoryRouter } from "react-router-dom";
 import type { CalendarLessonPlanDay } from "../model/events.ts";
 import { WeekCalendar } from "./WeekCalendar.tsx";
 
-test("This week cards keep each class’s materials with its text", () => {
+test("This week cards keep each class’s materials with its text on the same day card", () => {
   const lessonDays: CalendarLessonPlanDay[] = [
     {
       planId: 1,
@@ -45,13 +45,13 @@ test("This week cards keep each class’s materials with its text", () => {
   const sections = [...html.matchAll(/<section[^>]*>([\s\S]*?)<\/section>/g)].map(
     (match) => match[1] ?? "",
   );
-  assert.equal(sections.length, 2);
-  const science = sections.find((section) => section.includes("Science"));
-  const art = sections.find((section) => section.includes("Art"));
-  assert.ok(science?.includes("Lab day"));
-  assert.ok(science?.includes("Lab write-up"));
-  assert.equal(science?.includes("Still life"), false);
-  assert.ok(art?.includes("Sketch hour"));
-  assert.ok(art?.includes("Still life"));
-  assert.equal(art?.includes("Lab write-up"), false);
+  assert.equal(sections.length, 1);
+  const tuesday = sections[0] ?? "";
+  assert.ok(tuesday.includes("Tuesday"));
+  assert.ok(tuesday.includes("Science"));
+  assert.ok(tuesday.includes("Lab day"));
+  assert.ok(tuesday.includes("Lab write-up"));
+  assert.ok(tuesday.includes("Art"));
+  assert.ok(tuesday.includes("Sketch hour"));
+  assert.ok(tuesday.includes("Still life"));
 });
