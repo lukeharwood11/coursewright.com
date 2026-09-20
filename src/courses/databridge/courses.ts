@@ -1,7 +1,12 @@
 import { requireSupabase } from "./client";
-import type { CreateCourseInput } from "@/courses/model/createCourse";
+import type { CourseSettingsInput, CreateCourseInput } from "@/courses/model/createCourse";
 import { parseCourseStatus, type CourseStatus } from "@/courses/model/status";
 import { parseCourseIconKey, type CourseIconValue } from "@/courses/model/courseIcon";
+import {
+  parseCourseColorKey,
+  autoCourseColorKey,
+  type CourseColorKey,
+} from "@/courses/model/courseColor";
 import {
   parseCourseVisibility,
   type CourseVisibility,
@@ -21,6 +26,7 @@ export type CourseSummary = {
   endDate: string | null;
   gradeLevels: string[];
   copiedFromCourseId: number | null;
+  colorKey: CourseColorKey;
 };
 
 export type CourseInstructor = {
@@ -35,7 +41,7 @@ export type CourseCatalogMeta = {
 };
 
 const COURSE_COLUMNS =
-  "id, organization_id, title, description, location, subject, icon_key, status, visibility, start_date, end_date, grade_levels, copied_from_course_id";
+  "id, organization_id, title, description, location, subject, icon_key, status, visibility, start_date, end_date, grade_levels, copied_from_course_id, color_key";
 
 export const courseQueryKeys = {
   list: (orgId: number) => ["courses", "list", orgId] as const,
@@ -59,6 +65,7 @@ type CourseRow = {
   end_date: string | null;
   grade_levels: string[];
   copied_from_course_id: number | null;
+  color_key: string;
 };
 
 function toCourseSummary(row: CourseRow): CourseSummary {
@@ -76,6 +83,7 @@ function toCourseSummary(row: CourseRow): CourseSummary {
     endDate: row.end_date,
     gradeLevels: row.grade_levels ?? [],
     copiedFromCourseId: row.copied_from_course_id,
+    colorKey: parseCourseColorKey(row.color_key),
   };
 }
 
@@ -131,12 +139,22 @@ export async function createCourse(
   if (!data) {
     throw new Error("The course was created but couldn’t be opened yet. Refresh and try again.");
   }
-  return toCourseSummary(data);
+  const created = toCourseSummary(data);
+  const colorKey = autoCourseColorKey(created.id);
+  if (created.colorKey === colorKey) return created;
+  const { data: painted, error: colorError } = await db
+    .from("courses")
+    .update({ color_key: colorKey })
+    .eq("id", created.id)
+    .select(COURSE_COLUMNS)
+    .maybeSingle();
+  if (colorError || !painted) return { ...created, colorKey };
+  return toCourseSummary(painted);
 }
 
 export async function updateCourse(
   id: number,
-  input: Omit<CreateCourseInput, "copiedFromCourseId">,
+  input: CourseSettingsInput,
 ): Promise<CourseSummary> {
   const db = requireSupabase();
   const { data, error } = await db
@@ -151,6 +169,7 @@ export async function updateCourse(
       end_date: input.endDate,
       grade_levels: input.gradeLevels,
       status: input.status,
+      color_key: input.colorKey,
     })
     .eq("id", id)
     .select(COURSE_COLUMNS)

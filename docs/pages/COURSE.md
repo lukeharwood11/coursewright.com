@@ -18,7 +18,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Browse **top-level materials** (no unit) **above** ordered units; materials may also nest under units.
 - Optional **outline** panel (file-tree of top-level materials + units with nested materials); open by default on large screens (`lg`+), closed on smaller screens; **Show outline** / hide so it is not always open.
 - Add unit / add material (top-level or into a unit) when permitted.
-- **Bulletins:** staff list dated notices on this course; **Add bulletin** → [BULLETIN](./BULLETIN.md) new. Opening a row goes to the bulletin. Families see currently available bulletins only.
+- **Lesson plans:** staff list weekly plans on this course; **Add lesson plan** → [LESSON_PLAN](./LESSON_PLAN.md) new. Opening a row goes to the plan. Families see **published** plans only.
 - **Announce:** staff can post a one-way [ANNOUNCEMENT](./ANNOUNCEMENT.md) to this course (`…/announcements/new?audience=course&courseId=`).
 - Print and share controls stay visible (not in overflow-only menus).
 - Instructors can **publish / unpublish** the course (distinct from archive). Unpublished courses show an amber warning + Publish on this page. Published courses show a green **Published** badge by the title; **Unpublish** lives in [COURSE_SETTINGS](./COURSE_SETTINGS.md).
@@ -34,8 +34,8 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Materials under units: **title**, **description**, kind/badge, dates, print affordance
 - **Outline** (when shown): same units/materials as a compact tree (titles + kind icons); links to unit/material pages
 - **Instructors** (sidebar)
-- **Bulletins** (title, date range, material count; available now / upcoming / ended for staff)
-- Parent variant: same structure without edit controls; **unpublished courses 404**; **unpublished materials are omitted**; only **available** bulletins (today in start–end)
+- **Lesson plans** (title, week range, published/unpublished for staff; published only for families)
+- Parent variant: same structure without edit controls; **unpublished courses 404**; **unpublished materials are omitted**; only **published** lesson plans
 
 ## Contents
 
@@ -47,13 +47,13 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Units list (ordered) → [UNIT](./UNIT.md); add unit
 - Materials under units: **title**, **description**, kind/badge, dates, print affordance
 - Sidebar / secondary: instructors, link to [COURSE_ROSTER](./COURSE_ROSTER.md)
-- Actions: Add material (page · link · file), **Add bulletin**, **Announce**, Share (resource links), Print entry points; **Create course from this course** (copy → new independent course)
+- Actions: Add material (page · link · file), **Add lesson plan**, **Announce**, Share (resource links), Print entry points; **Create course from this course** (copy → new independent course)
 - Versioning / soft-delete awareness for dangerous actions (TBD exact UX)
 
 ## Primary actions
 
 - Add / open unit or material
-- Add / open a bulletin
+- Add / open a lesson plan
 - Announce to this course
 - Open roster / settings
 - Publish / unpublish the course (instructors)
@@ -72,8 +72,9 @@ Course builder home — structure units/materials for this offering; jump to ros
 
 - [UNIT](./UNIT.md) — open / add unit
 - [MATERIAL](./MATERIAL.md) — open material from unit rows
-- [BULLETIN](./BULLETIN.md) — open / add bulletin
+- [LESSON_PLAN](./LESSON_PLAN.md) — open / add lesson plan
 - [ANNOUNCEMENT](./ANNOUNCEMENT.md) — announce to this course
+- [CALENDAR](./CALENDAR.md) — via org chrome
 - [PRINT](./PRINT.md) — **Print** on materials / **Print unit** entry points
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — course roster
 - [COURSE_SETTINGS](./COURSE_SETTINGS.md) — course settings

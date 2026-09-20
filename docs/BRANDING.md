@@ -179,12 +179,13 @@ Other drafts kept for reference (not in use):
 | Soft-remove from template | **Delete** | **P1** — soft-deletes template + unmodified course copies |
 | Parent invite | **Invite** | email invite |
 | Parent entry | **Invite → account** | same email as invite |
-| This week's content | **This week** | material scheduled date if set, else unit date range; Sunday–Saturday |
+| Calendar page | **Calendar** | month/week view of assigned (outline) and due (filled) work, color-coded by course |
+| This week's content | **This week** | week calendar of lesson plans + assigned/due chips; Sunday–Saturday |
 | Dated unit material (P0 homework) | **Material** (with dates) | not an assignment object yet |
 | Extra org admin | **Admin invite** | email, claimable |
 | Instructor priority flag | **Important now** | pinned, highlight, urgent |
-| Dated course notice with materials | **Bulletin** | available between start and end dates; not an assignment object; not email |
-| One-way notice (course, class, or student) | **Announcement** | optional start/end on home; unread notification until opened; not a bulletin; no reply thread |
+| Dated weekly course plan | **Lesson plan** | one Sunday–Saturday week; published / unpublished; optional week note + per-day notes and materials; not an assignment object; not email |
+| One-way notice (course, class, or student) | **Announcement** | optional start/end on home; unread notification until opened; not a lesson plan; no reply thread |
 | Course context blurb | **Summary** | **P1** — auto-drafted “what’s going on this week”; not the course **Description** |
 | Parent view (with account) | **Progress** | grades, notes, checklists, homework |
 | Person being taught | **Student** (profile) | student_profile, learner |

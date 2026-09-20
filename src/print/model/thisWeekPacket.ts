@@ -1,9 +1,10 @@
-import { filterParentDashboard, type ParentDashboard } from "@/parent/model/dashboard";
+import { filterParentDashboard, type ParentDashboard, type ParentLessonPlanItem } from "@/parent/model/dashboard";
+import { weekdayDateLabel } from "@/lesson-plans/model/validate";
 import { richTextBody } from "@/materials/model/blocks";
 import type { PrintMaterial } from "./packet";
 
 export type ThisWeekPrintRef = {
-  source: "bulletin" | "material";
+  source: "lesson_plan" | "material";
   id: number;
   courseId: number;
   sectionKey: string;
@@ -21,26 +22,37 @@ function courseTitleForStudent(
   return student.courses.find((course) => course.id === courseId)?.title ?? fallback;
 }
 
-function bulletinRefsForStudent(
+export function lessonPlanPrintBody(plan: ParentLessonPlanItem): string {
+  const parts: string[] = [];
+  if (plan.weekNote.trim()) parts.push(plan.weekNote.trim());
+  for (const day of plan.days) {
+    if (!day.body.trim()) continue;
+    parts.push(`${weekdayDateLabel(day.date)}\n${day.body.trim()}`);
+  }
+  return parts.join("\n\n");
+}
+
+function lessonPlanRefsForStudent(
   dashboard: ParentDashboard,
   student: ParentDashboard["students"][number],
   sectionKey: string,
 ): ThisWeekPrintRef[] {
-  return dashboard.bulletins
-    .filter((item) => item.students.some((row) => row.id === student.id))
+  const courseIds = new Set(student.courses.map((course) => course.id));
+  return dashboard.lessonPlans
+    .filter((item) => courseIds.has(item.courseId))
     .map((item) => ({
-      source: "bulletin" as const,
+      source: "lesson_plan" as const,
       id: item.id,
       courseId: item.courseId,
       sectionKey,
       sectionTitle: student.name,
-      contextLines: [item.courseTitle, "Bulletin"],
+      contextLines: [item.courseTitle, "Lesson plan"],
       title: item.title,
-      body: item.body,
+      body: lessonPlanPrintBody(item),
     }));
 }
 
-/** One student at a time: that child's bulletins, then important now, then this-week materials. */
+/** One student at a time: that child's lesson plans, then important now, then this-week materials. */
 export function thisWeekPrintRefs(
   dashboard: ParentDashboard,
   studentIds?: number[] | null,
@@ -55,8 +67,7 @@ export function thisWeekPrintRefs(
     const seen = new Set<number>();
     const courseIds = new Set(student.courses.map((course) => course.id));
     const sectionKey = `student-${student.id}`;
-    const bulletins = bulletinRefsForStudent(scoped, student, sectionKey);
-    refs.push(...bulletins);
+    refs.push(...lessonPlanRefsForStudent(scoped, student, sectionKey));
 
     for (const item of scoped.importantNow) {
       if (!courseIds.has(item.courseId) || seen.has(item.materialId)) continue;
@@ -95,16 +106,16 @@ export function thisWeekPrintRefs(
   return refs;
 }
 
-export function printMaterialFromBulletin(ref: ThisWeekPrintRef): PrintMaterial {
+export function printMaterialFromLessonPlan(ref: ThisWeekPrintRef): PrintMaterial {
   const body = ref.body?.trim() ?? "";
   return {
     id: ref.id,
-    title: ref.title ?? "Bulletin",
+    title: ref.title ?? "Lesson plan",
     description: "",
     kind: "page",
     url: null,
     scheduledDate: null,
-    itemRole: "bulletin",
+    itemRole: "lesson_plan",
     sectionKey: ref.sectionKey,
     sectionTitle: ref.sectionTitle,
     contextLines: ref.contextLines,

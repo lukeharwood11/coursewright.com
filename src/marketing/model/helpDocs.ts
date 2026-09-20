@@ -143,10 +143,15 @@ export const helpDocTopics: HelpDocTopic[] = [
           "Mark items Important now when families need to notice them on home.",
         ],
       },
-      { type: "h2", text: "Bulletins" },
+      { type: "h2", text: "Lesson plans" },
       {
         type: "p",
-        text: "A bulletin is a dated notice with materials attached. While today’s date falls in its start–end window, it appears on the parent home under From your teachers.",
+        text: "A lesson plan is a weekly note for one Sunday–Saturday week. You can write a note for the whole week, notes for each day, and attach materials to a day. New plans start unpublished. Publish when families should see them on This week and Calendar.",
+      },
+      { type: "h2", text: "Calendar" },
+      {
+        type: "p",
+        text: "Calendar in the sidebar shows assigned and due work as chips, color-coded by course. Outlined chips are assigned; filled chips are due. Tap a class in the legend to hide it.",
       },
       { type: "h2", text: "Announcements" },
       {
@@ -302,10 +307,10 @@ export const helpDocTopics: HelpDocTopic[] = [
       {
         type: "ul",
         items: [
-          "This week — work assigned or due this calendar week",
-          "Important now — items teachers flagged for attention",
+          "This week — this week’s calendar (lesson plans and assigned/due work)",
+          "Focus — Important now plus what’s assigned or due next",
           "Announcements — one-way notes for a course, class, or student, with a notification until you open them",
-          "From your teachers — bulletins that are available today, with links to attached materials",
+          "Calendar — month or week view of the same work",
           "Print this week — print the week’s packet when you want it on paper",
         ],
       },

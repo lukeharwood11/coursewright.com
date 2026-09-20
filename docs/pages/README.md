@@ -21,12 +21,13 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [ORG_PICKER](./ORG_PICKER.md) | `/my` |
 | [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) | `/my/settings` |
 | [ORG_HOME](./ORG_HOME.md) | `/my/<org-slug>` |
+| [CALENDAR](./CALENDAR.md) | `/my/<org-slug>/calendar` |
 | [ORG_SETTINGS](./ORG_SETTINGS.md) | `/my/<org-slug>/settings` |
 | [COURSE_LIST](./COURSE_LIST.md) | `/my/<org-slug>/courses` |
 | [COURSE](./COURSE.md) | `/my/<org-slug>/courses/<course_id>` |
 | [COURSE_ROSTER](./COURSE_ROSTER.md) | `/my/<org-slug>/courses/<course_id>/roster` |
 | [COURSE_SETTINGS](./COURSE_SETTINGS.md) | `/my/<org-slug>/courses/<course_id>/settings` |
-| [BULLETIN](./BULLETIN.md) | `/my/<org-slug>/courses/<course_id>/bulletins/<bulletin_id>` (new `…/bulletins/new`; edit `…/edit`) |
+| [LESSON_PLAN](./LESSON_PLAN.md) | `/my/<org-slug>/courses/<course_id>/lesson-plans/<lesson_plan_id>` (new `…/lesson-plans/new`; edit `…/edit`) |
 | [ANNOUNCEMENTS](./ANNOUNCEMENTS.md) | `/my/<org-slug>/announcements` |
 | [ANNOUNCEMENT](./ANNOUNCEMENT.md) | `/my/<org-slug>/announcements/<announcement_id>` (new `…/announcements/new`; edit `…/edit`) |
 | [TEMPLATE_LIST](./TEMPLATE_LIST.md) | `/my/<org-slug>/templates` | **P1** |
@@ -65,7 +66,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Rich materials — Add: page / link / file; pages use blocks | [MATERIAL](./MATERIAL.md) |
 | Classes (student groups) | [ORG_ROSTER](./ORG_ROSTER.md) (list/create), [CLASS](./CLASS.md) |
 | File / content versioning, soft deletes | [MATERIAL](./MATERIAL.md), [COURSE](./COURSE.md) |
-| Homework = dated materials; Important now; **Announcements**; **Bulletins** | [ORG_HOME](./ORG_HOME.md), [MATERIAL](./MATERIAL.md), [ANNOUNCEMENT](./ANNOUNCEMENT.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [BULLETIN](./BULLETIN.md), [COURSE](./COURSE.md) |
+| Homework = dated materials; Important now; **Lesson plans**; Calendar; **Announcements** | [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [MATERIAL](./MATERIAL.md), [LESSON_PLAN](./LESSON_PLAN.md), [ANNOUNCEMENT](./ANNOUNCEMENT.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [COURSE](./COURSE.md) |
 | Parent dashboard / access rules | [ORG_HOME](./ORG_HOME.md); claim via [INVITE_CLAIM](./INVITE_CLAIM.md) / [LOGIN](./LOGIN.md) / [SIGNUP](./SIGNUP.md) |
 | Print (material / unit / this week) | [PRINT](./PRINT.md); entry from [MATERIAL](./MATERIAL.md), [UNIT](./UNIT.md), [ORG_HOME](./ORG_HOME.md) |
 | Resource links / share with parents | [MATERIAL](./MATERIAL.md) (entry URL TBD) |

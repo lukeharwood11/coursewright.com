@@ -13,7 +13,7 @@ import {
   CourseOutlineToggle,
 } from "./components/CourseOutline";
 import { CourseSidebar } from "./components/CourseSidebar";
-import { CourseBulletinsSection } from "./components/CourseBulletinsSection";
+import { CourseLessonPlansSection } from "./components/CourseLessonPlansSection";
 import { UnitCard } from "./components/UnitCard";
 import { useCourse } from "./hooks/useCourse";
 import { coursesPath } from "@/courses/model/paths";
@@ -31,7 +31,7 @@ export function CoursePage() {
     instructors,
     students,
     importantIds,
-    bulletins,
+    lessonPlans,
     loading,
     error,
     notFound,
@@ -147,10 +147,10 @@ export function CoursePage() {
           onClose={() => setOutlineOpen(false)}
         />
         <div className="min-w-0">
-          <CourseBulletinsSection
+          <CourseLessonPlansSection
             orgSlug={organization.slug}
             courseId={course.id}
-            bulletins={bulletins}
+            plans={lessonPlans}
             canEdit={canEdit}
             isParent={isParent}
           />

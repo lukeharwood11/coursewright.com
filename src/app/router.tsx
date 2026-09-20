@@ -8,12 +8,13 @@ import { OrgLayout } from "@/app/layouts/OrgLayout";
 import { PrintLayout } from "@/app/layouts/PrintLayout";
 import { StubPage } from "@/app/StubPage";
 import { CourseListPage, CoursePage, CourseRosterPage, CourseSettingsPage } from "@/courses";
-import { BulletinEditPage, BulletinPage } from "@/bulletins";
+import { CalendarPage } from "@/calendar";
 import {
   AnnouncementEditPage,
   AnnouncementPage,
   AnnouncementsPage,
 } from "@/announcements";
+import { LessonPlanEditPage, LessonPlanPage } from "@/lesson-plans";
 import { MaterialEditPage, MaterialPage } from "@/materials";
 import {
   AboutPage,
@@ -123,6 +124,10 @@ export function AppRoutes() {
               }
             />
             <Route
+              path="calendar"
+              element={<CalendarPage />}
+            />
+            <Route
               path="announcements"
               element={
                 <RequireStaff>
@@ -151,22 +156,22 @@ export function AppRoutes() {
               }
             />
             <Route
-              path="courses/:courseId/bulletins/new"
+              path="courses/:courseId/lesson-plans/new"
               element={
                 <RequireStaff>
-                  <BulletinEditPage />
+                  <LessonPlanEditPage />
                 </RequireStaff>
               }
             />
             <Route
-              path="courses/:courseId/bulletins/:bulletinId"
-              element={<BulletinPage />}
+              path="courses/:courseId/lesson-plans/:lessonPlanId"
+              element={<LessonPlanPage />}
             />
             <Route
-              path="courses/:courseId/bulletins/:bulletinId/edit"
+              path="courses/:courseId/lesson-plans/:lessonPlanId/edit"
               element={
                 <RequireStaff>
-                  <BulletinEditPage />
+                  <LessonPlanEditPage />
                 </RequireStaff>
               }
             />

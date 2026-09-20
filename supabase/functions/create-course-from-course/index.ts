@@ -93,6 +93,14 @@ Deno.serve(async (request) => {
     if (createError) throw createError;
     if (!created) throw new Error("Course insert returned no id.");
 
+    const palette = ["moss", "slate", "clay", "plum", "sea", "wine", "sand", "pine"] as const;
+    const colorKey = palette[Math.abs(Number(created.id)) % palette.length];
+    const { error: colorError } = await db
+      .from("courses")
+      .update({ color_key: colorKey })
+      .eq("id", created.id);
+    if (colorError) throw colorError;
+
     const { error: instructorError } = await db
       .from("course_instructors")
       .insert({ course_id: created.id, user_id: user.id })

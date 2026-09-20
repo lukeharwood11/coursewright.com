@@ -26,9 +26,21 @@ import {
   termsSections,
 } from "../src/marketing/model/termsOfUse.ts";
 
+/** S3 object keys (no extension) so CloudFront serves real HTML instead of Soft-404 → index.html. */
+export const EXTENSIONLESS_HTML_SLUGS = [
+  "privacy",
+  "terms",
+  "cookies",
+  "about",
+  "pricing",
+  "contact",
+  "login",
+  "signup",
+] as const;
+
 export type LegalPageSlug = "privacy" | "terms" | "cookies";
 
-/** S3 object keys (no extension) so CloudFront serves `/privacy` without a rewrite. */
+/** @deprecated Prefer EXTENSIONLESS_HTML_SLUGS — kept for legal-only callers. */
 export const LEGAL_STATIC_PAGE_SLUGS: LegalPageSlug[] = [
   "privacy",
   "terms",
@@ -239,16 +251,308 @@ function buildLegalDocument(slug: LegalPageSlug, host: string, indexHtml: string
 }
 
 /**
- * Write extensionless HTML documents into `outDir` so S3 keys match `/privacy`,
- * `/terms`, and `/cookies`, and inject homepage content into `index.html` so
- * Google OAuth branding crawlers see app description + privacy/terms links.
+ * Write extensionless HTML into `outDir` for public routes Google (and other
+ * non-JS crawlers) hit. Critical: `/login` must NOT Soft-404 to the same bytes
+ * as `/`, or OAuth branding marks the homepage as “behind a login page.”
  */
 export function writeLegalStaticPages(outDir: string, host: string): void {
   const indexHtml = readFileSync(join(outDir, "index.html"), "utf8");
   for (const slug of LEGAL_STATIC_PAGE_SLUGS) {
     writeFileSync(join(outDir, slug), buildLegalDocument(slug, host, indexHtml), "utf8");
   }
+  writeFileSync(join(outDir, "about"), buildAboutDocument(host, indexHtml), "utf8");
+  writeFileSync(join(outDir, "pricing"), buildPricingDocument(host, indexHtml), "utf8");
+  writeFileSync(join(outDir, "contact"), buildContactDocument(host, indexHtml), "utf8");
+  writeFileSync(join(outDir, "login"), buildAuthDocument("login", host, indexHtml), "utf8");
+  writeFileSync(join(outDir, "signup"), buildAuthDocument("signup", host, indexHtml), "utf8");
   writeFileSync(join(outDir, "index.html"), buildHomeDocument(host, indexHtml), "utf8");
+}
+
+function shellChrome(
+  host: string,
+  indexHtml: string,
+  opts: {
+    path: string;
+    title: string;
+    description: string;
+    robots: string;
+    body: string;
+  },
+): string {
+  const canonical = absoluteUrl(host, opts.path);
+  const ogImage = absoluteUrl(host, SITE_OG_IMAGE_PATH);
+  const { styles, scripts } = extractBuiltAssets(indexHtml);
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${escapeHtml(opts.title)}</title>
+    <meta name="description" content="${escapeHtml(opts.description)}" />
+    <meta name="robots" content="${opts.robots}" />
+    <meta name="theme-color" content="#33604D" />
+    <link rel="canonical" href="${escapeHtml(canonical)}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="${escapeHtml(SITE_NAME)}" />
+    <meta property="og:title" content="${escapeHtml(opts.title)}" />
+    <meta property="og:description" content="${escapeHtml(opts.description)}" />
+    <meta property="og:url" content="${escapeHtml(canonical)}" />
+    <meta property="og:image" content="${escapeHtml(ogImage)}" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    ${styles}
+    <style>
+      .cw-static-shell { min-height: 100vh; display: flex; flex-direction: column; background: #f7f5ee; color: #202b23; font-family: Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .cw-static-header, .cw-static-footer { border-bottom: 1px solid #dedacb; background: #fff; }
+      .cw-static-footer { border-bottom: 0; border-top: 1px solid #dedacb; margin-top: auto; }
+      .cw-static-header__inner, .cw-static-footer__inner, .cw-static-main { margin: 0 auto; max-width: 48rem; padding: 1rem 1.25rem; }
+      .cw-static-header a, .cw-static-footer a, .cw-static-main a { color: #33604d; font-weight: 700; text-decoration: none; }
+      .cw-wordmark { font-family: Lora, Georgia, serif; font-size: 1.125rem; font-weight: 600; color: #33604d; }
+      .cw-static-main { padding-top: 3rem; padding-bottom: 3rem; }
+      .cw-static-main h1 { font-family: Lora, Georgia, serif; font-size: 1.75rem; font-weight: 600; margin: 0.25rem 0 0; color: #202b23; }
+      .cw-static-main h2 { font-family: Lora, Georgia, serif; font-size: 1.25rem; font-weight: 600; margin: 2rem 0 0.75rem; color: #202b23; }
+      .cw-kicker { font-size: 0.8125rem; font-weight: 700; color: #8b9186; margin: 0; }
+      .cw-static-main p, .cw-static-main li { font-size: 0.95rem; line-height: 1.6; color: #5b6459; margin: 0.75rem 0 0; }
+      .cw-static-main ul { margin: 0.75rem 0 0; padding-left: 1.25rem; }
+      .cw-static-nav, .cw-static-footer__inner, .cw-static-cta { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; }
+      .cw-static-cta { margin-top: 1.5rem; }
+      .cw-auth-card { margin-top: 1.5rem; max-width: 22rem; border: 1px solid #dedacb; border-radius: 10px; background: #fff; padding: 1.25rem; }
+      .cw-auth-card label { display: block; font-size: 0.8125rem; font-weight: 700; color: #5b6459; margin-top: 0.75rem; }
+      .cw-auth-card input { display: block; width: 100%; margin-top: 0.35rem; box-sizing: border-box; border: 1px solid #dedacb; border-radius: 6px; padding: 0.6rem 0.75rem; font: inherit; }
+      .cw-auth-card button { margin-top: 1rem; width: 100%; border: 0; border-radius: 6px; background: #33604d; color: #fff; font-weight: 700; padding: 0.7rem 1rem; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+${opts.body}
+    </div>
+    ${scripts}
+  </body>
+</html>
+`;
+}
+
+function buildAboutDocument(host: string, indexHtml: string): string {
+  const robots = isIndexablePublicHost(host) ? "index, follow" : "noindex, nofollow";
+  const body = `      <div class="cw-static-shell">
+        <header class="cw-static-header">
+          <div class="cw-static-header__inner cw-static-nav">
+            <a class="cw-wordmark" href="/">${escapeHtml(SITE_NAME)}</a>
+            <a href="/">Home</a>
+            <a href="/pricing">Pricing</a>
+            <a href="/privacy">Privacy policy</a>
+            <a href="/terms">Terms of use</a>
+          </div>
+        </header>
+        <main class="cw-static-main">
+          <p class="cw-kicker">About</p>
+          <h1>For homeschool co-ops and micro-schools</h1>
+          <p>
+            Course Wright is a public web application at https://${escapeHtml(host)}.
+            You can read about the product on this page without signing in.
+          </p>
+          <p>
+            Course Wright gives you one place to plan courses, share materials with
+            parents, and run your program. It is meant to feel obvious — especially
+            for families opening a link on a phone.
+          </p>
+          <h2>Who it is for</h2>
+          <ul>
+            <li><strong>Admins</strong> — run the organization: people, roles, and the shape of your program.</li>
+            <li><strong>Instructors</strong> — plan courses, copy what worked last term, and share or print materials.</li>
+            <li><strong>Parents</strong> — see this week’s work and print what you need, without complicated software.</li>
+          </ul>
+          <h2>What you can do</h2>
+          <ul>
+            <li>Plan courses and group work into units</li>
+            <li>Copy a course so you aren’t starting from a blank page each term</li>
+            <li>Share materials with parents — including print</li>
+            <li>Run the org with clear admin, instructor, and parent roles</li>
+            <li>Sign in with email or Google when you are ready to use the product</li>
+          </ul>
+          <div class="cw-static-cta">
+            <a href="/">Back to home</a>
+            <a href="/privacy">Privacy policy</a>
+            <a href="/terms">Terms of use</a>
+            <a href="/signup">Sign up</a>
+          </div>
+        </main>
+        <footer class="cw-static-footer">
+          <div class="cw-static-footer__inner">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/privacy">Privacy policy</a>
+            <a href="/terms">Terms of use</a>
+            <a href="/contact">Contact</a>
+          </div>
+        </footer>
+      </div>`;
+  return shellChrome(host, indexHtml, {
+    path: "/about",
+    title: `About · ${SITE_NAME}`,
+    description:
+      "Who Course Wright is for — homeschool co-ops and micro-schools that need one simple hub for courses, materials, and parents.",
+    robots,
+    body,
+  });
+}
+
+function buildPricingDocument(host: string, indexHtml: string): string {
+  const robots = isIndexablePublicHost(host) ? "index, follow" : "noindex, nofollow";
+  const body = `      <div class="cw-static-shell">
+        <header class="cw-static-header">
+          <div class="cw-static-header__inner cw-static-nav">
+            <a class="cw-wordmark" href="/">${escapeHtml(SITE_NAME)}</a>
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/privacy">Privacy policy</a>
+          </div>
+        </header>
+        <main class="cw-static-main">
+          <p class="cw-kicker">Pricing</p>
+          <h1>Free (for now)</h1>
+          <p>
+            Course Wright might change its pricing in the future, but right now we’re
+            working with a handful of small organizations to polish the product.
+            There are no plans or dollar amounts to publish yet.
+          </p>
+          <p>
+            This pricing information is public — you do not need to sign in to read it.
+          </p>
+          <div class="cw-static-cta">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/privacy">Privacy policy</a>
+            <a href="/signup">Sign up</a>
+          </div>
+        </main>
+        <footer class="cw-static-footer">
+          <div class="cw-static-footer__inner">
+            <a href="/">Home</a>
+            <a href="/privacy">Privacy policy</a>
+            <a href="/terms">Terms of use</a>
+          </div>
+        </footer>
+      </div>`;
+  return shellChrome(host, indexHtml, {
+    path: "/pricing",
+    title: `Pricing · ${SITE_NAME}`,
+    description:
+      "Course Wright is free for now. Create an organization and invite your co-op or micro-school — pricing may change later.",
+    robots,
+    body,
+  });
+}
+
+function buildContactDocument(host: string, indexHtml: string): string {
+  const robots = isIndexablePublicHost(host) ? "index, follow" : "noindex, nofollow";
+  const body = `      <div class="cw-static-shell">
+        <header class="cw-static-header">
+          <div class="cw-static-header__inner cw-static-nav">
+            <a class="cw-wordmark" href="/">${escapeHtml(SITE_NAME)}</a>
+            <a href="/">Home</a>
+            <a href="/privacy">Privacy policy</a>
+          </div>
+        </header>
+        <main class="cw-static-main">
+          <p class="cw-kicker">Contact</p>
+          <h1>Contact Course Wright</h1>
+          <p>You can reach us without signing in:</p>
+          <ul>
+            <li><strong>hi@coursewright.com</strong> — partnerships and product questions</li>
+            <li><strong>support@coursewright.com</strong> — help using Course Wright</li>
+            <li><strong>legal@coursewright.com</strong> — privacy and legal questions</li>
+          </ul>
+          <div class="cw-static-cta">
+            <a href="/">Home</a>
+            <a href="/privacy">Privacy policy</a>
+            <a href="/terms">Terms of use</a>
+          </div>
+        </main>
+        <footer class="cw-static-footer">
+          <div class="cw-static-footer__inner">
+            <a href="/">Home</a>
+            <a href="/privacy">Privacy policy</a>
+          </div>
+        </footer>
+      </div>`;
+  return shellChrome(host, indexHtml, {
+    path: "/contact",
+    title: `Contact · ${SITE_NAME}`,
+    description:
+      "Contact Course Wright — partnership and product questions at hi@coursewright.com, support at support@coursewright.com.",
+    robots,
+    body,
+  });
+}
+
+function buildAuthDocument(
+  kind: "login" | "signup",
+  host: string,
+  indexHtml: string,
+): string {
+  const isLogin = kind === "login";
+  const title = isLogin ? `Sign in · ${SITE_NAME}` : `Sign up · ${SITE_NAME}`;
+  const heading = isLogin ? "Welcome back" : "Create an account";
+  const submit = isLogin ? "Sign in" : "Create account";
+  const swap = isLogin
+    ? `New here? <a href="/signup">Sign up</a>`
+    : `Already have an account? <a href="/login">Sign in</a>`;
+  const body = `      <div class="cw-static-shell">
+        <header class="cw-static-header">
+          <div class="cw-static-header__inner cw-static-nav">
+            <a class="cw-wordmark" href="/">${escapeHtml(SITE_NAME)}</a>
+            <a href="/">Home (no login required)</a>
+            <a href="/about">About</a>
+            <a href="/privacy">Privacy policy</a>
+          </div>
+        </header>
+        <main class="cw-static-main">
+          <p class="cw-kicker">Account</p>
+          <h1>${escapeHtml(heading)}</h1>
+          <p>
+            This is the Course Wright ${isLogin ? "sign-in" : "sign-up"} page.
+            Product information is on the <a href="/">home page</a> and
+            <a href="/about">about page</a> — those pages do not require a login.
+          </p>
+          <div class="cw-auth-card">
+            <p><strong>${escapeHtml(submit)} to Course Wright</strong></p>
+            <label>Email <input type="email" name="email" autocomplete="username" /></label>
+            <label>Password <input type="password" name="password" autocomplete="${isLogin ? "current-password" : "new-password"}" /></label>
+            <button type="button">${escapeHtml(submit)}</button>
+            <p style="margin-top:0.75rem;font-size:0.8125rem">${swap}</p>
+          </div>
+          <p>
+            By continuing you agree to our
+            <a href="/terms">terms of use</a> and
+            <a href="/privacy">privacy policy</a>.
+          </p>
+        </main>
+        <footer class="cw-static-footer">
+          <div class="cw-static-footer__inner">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/privacy">Privacy policy</a>
+            <a href="/terms">Terms of use</a>
+          </div>
+        </footer>
+      </div>`;
+  return shellChrome(host, indexHtml, {
+    path: `/${kind}`,
+    title,
+    description: isLogin
+      ? "Sign in to Course Wright. Product information is available on the public home and about pages without logging in."
+      : "Create a Course Wright account. You can read about the product on the public home and about pages without logging in.",
+    robots: "noindex, nofollow",
+    body,
+  });
 }
 
 function buildHomeDocument(host: string, indexHtml: string): string {
@@ -322,6 +626,11 @@ function buildHomeDocument(host: string, indexHtml: string): string {
           <p class="cw-wordmark">${escapeHtml(SITE_NAME)}</p>
           <h1>${escapeHtml(SITE_TAGLINE)}</h1>
           <p>${escapeHtml(SITE_DESCRIPTION)}</p>
+          <p>
+            <strong>You do not need to sign in to read this page.</strong>
+            Course Wright’s public home page explains the product for visitors.
+            Sign-in is only required to use the app after you create an account.
+          </p>
           <p>
             Course Wright helps homeschool co-ops and micro-schools plan courses,
             share materials with parents, and print what they need — without the

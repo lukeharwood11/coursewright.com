@@ -17,7 +17,7 @@ function emptyCopy(grain: "material" | "unit" | "thisWeek" | null): {
   if (grain === "thisWeek") {
     return {
       title: "Nothing to print this week",
-      body: "There’s no dated work, important-now items, or bulletins for this Sunday–Saturday week.",
+      body: "There’s no dated work, important-now items, or lesson plans for this Sunday–Saturday week.",
     };
   }
   return {

@@ -19,7 +19,7 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 - PostgREST + RLS for normal org CRUD; Functions only if invite claim needs privileged writes.
 - Anyone can create an org ([FEATURES.md](../../docs/FEATURES.md)).
 - Slug uniqueness is enforced in the DB; never invent redirects for old slugs unless FEATURES says so.
-- Parent “this week” on org home uses `parent/` model + databridge. Staff **Parent view** renders that same home.
+- Parent “this week” on org home uses `parent/` model + databridge and the shared `calendar/` week view. Staff **Parent view** renders that same home.
 - **Owners and admins** can update org settings. Instructors/parents cannot (RLS + UI).
 - **Billing is owner-only** — do not show billing controls to admins. Billing UI lives in `billing/`.
 

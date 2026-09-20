@@ -301,119 +301,6 @@ export type Database = {
           },
         ]
       }
-      bulletin_materials: {
-        Row: {
-          bulletin_id: number
-          created_at: string
-          id: number
-          material_id: number
-          position: number
-        }
-        Insert: {
-          bulletin_id: number
-          created_at?: string
-          id?: number
-          material_id: number
-          position?: number
-        }
-        Update: {
-          bulletin_id?: number
-          created_at?: string
-          id?: number
-          material_id?: number
-          position?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bulletin_materials_bulletin_id_fkey"
-            columns: ["bulletin_id"]
-            isOneToOne: false
-            referencedRelation: "bulletins"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bulletin_materials_material_id_fkey"
-            columns: ["material_id"]
-            isOneToOne: false
-            referencedRelation: "materials"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      bulletins: {
-        Row: {
-          body: string
-          course_id: number
-          created_at: string
-          created_by: string
-          deleted_at: string | null
-          deleted_by: string | null
-          end_date: string
-          id: number
-          organization_id: number
-          start_date: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          body?: string
-          course_id: number
-          created_at?: string
-          created_by: string
-          deleted_at?: string | null
-          deleted_by?: string | null
-          end_date: string
-          id?: number
-          organization_id: number
-          start_date: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          body?: string
-          course_id?: number
-          created_at?: string
-          created_by?: string
-          deleted_at?: string | null
-          deleted_by?: string | null
-          end_date?: string
-          id?: number
-          organization_id?: number
-          start_date?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bulletins_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bulletins_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bulletins_deleted_by_fkey"
-            columns: ["deleted_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bulletins_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       class_members: {
         Row: {
           class_id: number
@@ -597,6 +484,7 @@ export type Database = {
           title: string
           updated_at: string
           visibility: string
+          color_key: string
         }
         Insert: {
           copied_from_course_id?: number | null
@@ -616,6 +504,7 @@ export type Database = {
           title: string
           updated_at?: string
           visibility?: string
+          color_key?: string
         }
         Update: {
           copied_from_course_id?: number | null
@@ -635,6 +524,7 @@ export type Database = {
           title?: string
           updated_at?: string
           visibility?: string
+          color_key?: string
         }
         Relationships: [
           {
@@ -949,6 +839,154 @@ export type Database = {
           },
           {
             foreignKeyName: "important_now_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_plan_day_materials: {
+        Row: {
+          created_at: string
+          id: number
+          lesson_plan_day_id: number
+          material_id: number
+          position: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          lesson_plan_day_id: number
+          material_id: number
+          position?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          lesson_plan_day_id?: number
+          material_id?: number
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plan_day_materials_lesson_plan_day_id_fkey"
+            columns: ["lesson_plan_day_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plan_days"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_day_materials_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_plan_days: {
+        Row: {
+          body: string
+          created_at: string
+          day_date: string
+          id: number
+          lesson_plan_id: number
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          day_date: string
+          id?: number
+          lesson_plan_id: number
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          day_date?: string
+          id?: number
+          lesson_plan_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plan_days_lesson_plan_id_fkey"
+            columns: ["lesson_plan_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_plans: {
+        Row: {
+          course_id: number
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          deleted_by: string | null
+          id: number
+          organization_id: number
+          title: string
+          updated_at: string
+          visibility: string
+          week_note: string
+          week_start: string
+        }
+        Insert: {
+          course_id: number
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: number
+          organization_id: number
+          title: string
+          updated_at?: string
+          visibility?: string
+          week_note?: string
+          week_start: string
+        }
+        Update: {
+          course_id?: number
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: number
+          organization_id?: number
+          title?: string
+          updated_at?: string
+          visibility?: string
+          week_note?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plans_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plans_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plans_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"

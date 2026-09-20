@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import zlib from "node:zlib";
+import React from "react";
 import { pdf } from "@react-pdf/renderer";
 import { PacketDocument } from "./PacketDocument.tsx";
 import type { PrintMaterialView, PrintPacketView } from "../../model/previewAssets.ts";

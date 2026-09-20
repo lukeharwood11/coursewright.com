@@ -6,7 +6,7 @@ test("staff nav includes announcements; parent nav does not", () => {
   const staff = buildStaffNav("coop", { courses: [], classes: [] });
   assert.deepEqual(
     staff.map((section) => section.id),
-    ["home", "announcements", "courses", "roster", "settings"],
+    ["home", "calendar", "announcements", "courses", "roster", "settings"],
   );
   assert.equal(
     staff.find((section) => section.id === "announcements")?.href,

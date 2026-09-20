@@ -65,7 +65,8 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | [src/print/AGENTS.md](./src/print/AGENTS.md) | Print material / unit / this week |
 | [src/parent/AGENTS.md](./src/parent/AGENTS.md) | Parent dashboard |
 | [src/announcements/AGENTS.md](./src/announcements/AGENTS.md) | One-way notices (course / class / student) |
-| [src/bulletins/AGENTS.md](./src/bulletins/AGENTS.md) | Dated course notices + attached materials |
+| [src/lesson-plans/AGENTS.md](./src/lesson-plans/AGENTS.md) | Weekly course plans + attached materials |
+| [src/calendar/AGENTS.md](./src/calendar/AGENTS.md) | Month/week calendar |
 | [src/auth/AGENTS.md](./src/auth/AGENTS.md) | Login, signup, invites, session |
 | [src/marketing/AGENTS.md](./src/marketing/AGENTS.md) | Public home, about, pricing, contact, privacy, cookies |
 | [src/billing/AGENTS.md](./src/billing/AGENTS.md) | P1 Stripe stub only |
