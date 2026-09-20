@@ -1,3 +1,4 @@
+import { PageLoading } from "@/ui/PageLoading";
 import { useEffect } from "react";
 import { CourseLegend } from "@/calendar/components/CourseLegend";
 import { MonthCalendar } from "@/calendar/components/MonthCalendar";
@@ -49,7 +50,7 @@ export function CalendarPage() {
       </div>
 
       {page.loading ? (
-        <p className="mt-6 text-[14px] text-[var(--ink-soft)]">Loading calendar…</p>
+        <PageLoading embedded label="Loading calendar…" />
       ) : (
         <div className="mt-5">
           {page.view === "week" ? (

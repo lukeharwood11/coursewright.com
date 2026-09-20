@@ -5,7 +5,9 @@ Static assets copied into `dist/` by Vite (icons, logos, SEO discovery files).
 ## Scope
 
 - Favicons / Apple touch icon / wordmark images
-- `site.webmanifest`, `llms.txt`, `.well-known/security.txt`
+- `site.webmanifest` (PWA pt 1: `display: standalone`, start URL `/my`)
+- `sw.js` (network-first navigations; cache icons)
+- `llms.txt`, `.well-known/security.txt`
 - Do **not** commit `robots.txt` or `sitemap.xml` — generated at build by [`scripts/vite-seo-assets.ts`](../scripts/vite-seo-assets.ts)
 
 ## Rules

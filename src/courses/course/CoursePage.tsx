@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import { resourceShareMessage } from "@/sharing/model/copyLink";
 import { Button } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
@@ -21,6 +23,7 @@ import { coursesPath } from "@/courses/model/paths";
 export function CoursePage() {
   const {
     organization,
+    gradeLabels,
     canEdit,
     isParent,
     course,
@@ -64,9 +67,7 @@ export function CoursePage() {
 
   if (loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading course…</p>
-      </div>
+      <PageLoading label="Loading course…" />
     );
   }
 
@@ -108,6 +109,7 @@ export function CoursePage() {
         startDate={course.startDate}
         endDate={course.endDate}
         gradeLevels={course.gradeLevels}
+        gradeLabels={gradeLabels}
         copiedFromTitle={copiedFromTitle}
         canEdit={canEdit}
         isParent={isParent}
@@ -254,6 +256,7 @@ export function CoursePage() {
               ) : (
                 <div className="mt-3">
                   <Button variant="ghost" fullWidth onClick={() => setAddingUnit(true)}>
+                    <PlusIcon className="h-5 w-5" aria-hidden />
                     Add unit
                   </Button>
                 </div>

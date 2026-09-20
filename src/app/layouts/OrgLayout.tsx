@@ -3,6 +3,7 @@ import type { AuthedOutletContext } from "@/auth/hooks/useAuthedUser";
 import { OrgNotFound } from "./components/OrgNotFound";
 import { useOrgShellData } from "./hooks/useOrgShell";
 import { OrgShellContext } from "./OrgShellContext";
+import { PageLoading } from "@/ui/PageLoading";
 
 export function OrgLayout() {
   const { orgSlug } = useParams();
@@ -10,11 +11,7 @@ export function OrgLayout() {
   const shell = useOrgShellData(orgSlug);
 
   if (shell.loading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[var(--paper)]">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading organization…</p>
-      </main>
-    );
+    return <PageLoading fullScreen label="Loading organization…" />;
   }
 
   if (shell.notFound || !shell.value.organization || !shell.value.role) {

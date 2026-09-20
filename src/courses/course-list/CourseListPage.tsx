@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { CourseCard } from "./components/CourseCard";
 import { CourseListFilters } from "./components/CourseListFilters";
@@ -27,10 +28,6 @@ export function CourseListPage() {
           >
             Courses
           </h1>
-          <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
-            Offerings families participate in. You can create a course and print
-            without a roster.
-          </p>
         </div>
         {!create.open ? (
           <Button onClick={() => create.setOpen(true)}>
@@ -74,7 +71,7 @@ export function CourseListPage() {
       ) : null}
 
       {list.loading ? (
-        <p className="mt-6 text-[14px] text-[var(--ink-soft)]">Loading courses…</p>
+        <PageLoading embedded label="Loading courses…" />
       ) : null}
 
       {!list.loading && list.allCourseCount > 0 ? (
@@ -113,6 +110,7 @@ export function CourseListPage() {
                 <CourseCard
                   course={course}
                   orgSlug={list.organization.slug}
+                  gradeLabels={list.gradeLabels}
                   catalogMeta={list.catalogByCourseId[course.id]}
                 />
               </li>

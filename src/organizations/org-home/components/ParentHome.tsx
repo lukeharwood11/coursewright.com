@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { PrinterIcon } from "@heroicons/react/24/outline";
 import { ButtonLink } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { toastNotImplemented } from "@/ui/toast";
 import {
   filterParentDashboard,
@@ -74,7 +75,7 @@ export function ParentHome({
       ) : null}
 
       {loading ? (
-        <p className="mt-6 text-[14px] text-[var(--ink-soft)]">Loading this week…</p>
+        <PageLoading embedded label="Loading this week…" />
       ) : null}
 
       {dashboard && visible && !loading ? (

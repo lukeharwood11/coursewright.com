@@ -90,6 +90,7 @@ src/
 ├── auth/                     # login, signup, invite entry, session helpers
 ├── marketing/                # public home, about, pricing, privacy, terms, help `/docs`
 ├── billing/                  # P1 stub — Stripe later
+├── feedback/                 # signed-in Send feedback form
 │
 ├── app/                      # delivery: router, providers, shells, gates
 │   ├── App.tsx
@@ -104,6 +105,7 @@ src/
 │   │   ├── client.ts
 │   │   └── storage.ts
 │   ├── posthog/              # PostHog client (HN-006)
+│   ├── pwa/                  # register production service worker
 │   ├── query-client.ts       # TanStack Query
 │   └── utils.ts
 │

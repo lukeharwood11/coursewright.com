@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { BillingPlaceholder } from "@/billing";
 import { PageFormActions } from "@/ui/PageFormActions";
+import { PageLoading } from "@/ui/PageLoading";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
   ORG_SETTINGS_FORM_ID,
@@ -26,9 +27,7 @@ export function OrgSettingsPage() {
 
   if (settings.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading settings…</p>
-      </div>
+      <PageLoading label="Loading settings…" />
     );
   }
 
@@ -56,11 +55,11 @@ export function OrgSettingsPage() {
           >
             Organization settings
           </h1>
-          <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
-            {settings.canEdit
-              ? "Name, web address, type, how grades work, and who can help run this organization."
-              : "Only owners and admins can change these settings."}
-          </p>
+          {!settings.canEdit ? (
+            <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
+              Only owners and admins can change these settings.
+            </p>
+          ) : null}
         </div>
         {settings.canEdit ? (
           <PageFormActions

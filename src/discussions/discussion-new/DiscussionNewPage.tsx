@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PageFormActions } from "@/ui/PageFormActions";
+import { PageLoading } from "@/ui/PageLoading";
 import { discussionsPath } from "@/discussions/model/paths";
 import { MessageComposer } from "@/discussions/discussion/components/MessageComposer";
 import { DiscussionNewFormFields } from "./components/DiscussionNewFormFields";
@@ -18,9 +19,7 @@ export function DiscussionNewPage() {
 
   if (page.loading || page.redirectHome) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading…</p>
-      </div>
+      <PageLoading label="Loading…" />
     );
   }
 

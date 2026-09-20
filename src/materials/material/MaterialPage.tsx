@@ -1,8 +1,9 @@
 import { useEffect, lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { PrinterIcon, ShareIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, PrinterIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import { Badge } from "@/ui/Badge";
+import { PageLoading } from "@/ui/PageLoading";
 import { Button, ButtonLink } from "@/ui/Button";
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { useToastOnError } from "@/ui/useToastOnError";
@@ -40,9 +41,7 @@ export function MaterialPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading material…</p>
-      </div>
+      <PageLoading label="Loading material…" />
     );
   }
 
@@ -162,7 +161,10 @@ export function MaterialPage() {
             Print
           </ButtonLink>
           {page.canEdit && !page.material.deletedAt ? (
-            <ButtonLink to={editHref}>Edit</ButtonLink>
+            <ButtonLink to={editHref}>
+              <PencilSquareIcon className="h-5 w-5" aria-hidden />
+              Edit
+            </ButtonLink>
           ) : null}
         </div>
       </div>
@@ -294,7 +296,7 @@ function MaterialBody({
 
   return (
     <Suspense
-      fallback={<p className="text-[14px] text-[var(--ink-soft)]">Loading page…</p>}
+      fallback={<PageLoading embedded label="Loading page…" />}
     >
       <PageContentView
         blocks={page.blocks}

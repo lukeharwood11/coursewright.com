@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { MegaphoneIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
+import { PageLoading } from "@/ui/PageLoading";
 import { ButtonLink } from "@/ui/Button";
 import { useToastOnError } from "@/ui/useToastOnError";
 import {
@@ -34,9 +36,7 @@ export function AnnouncementsPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading announcements…</p>
-      </div>
+      <PageLoading label="Loading announcements…" />
     );
   }
 
@@ -75,6 +75,7 @@ export function AnnouncementsPage() {
           </h1>
         </div>
         <ButtonLink to={newAnnouncementPath(page.organization.slug)}>
+          <MegaphoneIcon className="h-5 w-5" aria-hidden />
           New announcement
         </ButtonLink>
       </div>

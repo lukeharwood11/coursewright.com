@@ -56,16 +56,11 @@ export function ParentInvitePanel({
     studentEmail !== parentEmail &&
     !pendingEmails.has(studentEmail ?? "") &&
     !linkedEmails.has(studentEmail ?? "");
+  const hasParents = linked.length > 0 || pending.length > 0 || Boolean(parentEmail);
 
   return (
     <section className="mt-6 max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
       <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Parents</h2>
-      <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink-soft)]">
-        Add as many parents as you need. We’ll email each one a link — they
-        sign in with that address. You can also copy the link. Joining the
-        organization does not open course materials until this student is
-        enrolled in an active published course.
-      </p>
 
       {loading ? (
         <p className="mt-3 text-[14px] text-[var(--ink-soft)]">Loading parents…</p>
@@ -146,7 +141,7 @@ export function ParentInvitePanel({
         >
           <label className="flex flex-col gap-1">
             <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-              Add another parent
+              {hasParents ? "Add another parent" : "Add a parent"}
             </span>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input

@@ -1,5 +1,7 @@
 import { useEffect } from "react";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import { ButtonLink } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { DiscussionFilterChips } from "./components/DiscussionFilterChips";
@@ -17,9 +19,7 @@ export function DiscussionsPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading discussions…</p>
-      </div>
+      <PageLoading label="Loading discussions…" />
     );
   }
 
@@ -41,6 +41,7 @@ export function DiscussionsPage() {
         </div>
         {page.canCompose ? (
           <ButtonLink to={newDiscussionPath(page.organization.slug)}>
+            <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
             New discussion
           </ButtonLink>
         ) : null}

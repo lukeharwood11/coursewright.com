@@ -40,7 +40,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 
 ## Contents
 
-- Course title; badges for status, published (green check) / unpublished, dates, subject / area, grade metadata ([STYLE_GUIDE.md](../STYLE_GUIDE.md) instructor course pattern)
+- Course title; badges for status, published (green check) / unpublished, dates, subject / area, **grade metadata in one pill** (comma-separated, org scheme order)
 - Optional description and location under the title
 - Unpublished warning + Publish (instructors); published courses have no visibility banner here
 - Collapsible **outline** (left on large screens): tree of top-level materials and units → materials; links open [UNIT](./UNIT.md) / [MATERIAL](./MATERIAL.md)

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/ui/Badge";
 import { Button, ButtonLink } from "@/ui/Button";
 import { Wordmark } from "@/ui/Wordmark";
+import { PageLoading } from "@/ui/PageLoading";
 import { roleBadgeVariant, roleLabel } from "@/organizations/model/role";
 import type { InvitePreview } from "@/organizations/databridge/staffInvites";
 import { mismatchedInvitePrompt } from "@/organizations/model/inviteClaim";
@@ -71,7 +72,7 @@ export function ClaimInviteCard({
         </p>
 
         {loading ? (
-          <p className="text-center text-[14px] text-[var(--ink-soft)]">Loading invite…</p>
+          <PageLoading embedded label="Loading invite…" />
         ) : null}
 
         {loadError ? (

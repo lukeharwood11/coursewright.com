@@ -20,6 +20,7 @@
 | YouTube (etc.) **URL embeds** are separate — Page blocks, not `File` rows | FEATURES / SCHEMA |
 | Access follows org RBAC + parent enrollment / active course | FEATURES |
 | Parents play on **phones** without a download dance | FEATURES usability |
+| Instructors may **record a microphone clip** (under 5 minutes) as a file material | FEATURES |
 | Advanced ABR / caption editor / transcoding tiers **not** required for P0 unless Storage forces it | FEATURES |
 
 **P0 success:** instructor uploads a PDF, worksheet, audio clip, or video file; parent opens the material and **plays or opens it in place** — authenticated, on mobile, without Microsoft folders.

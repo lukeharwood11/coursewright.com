@@ -26,9 +26,9 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 | | |
 |--|--|
-| **Why** | Staff and parent invites call Edge Function `send-organization-invite`, which posts Resend event `organization-invite`. Announcement **Send notification** calls `send-announcement-notification` (`announcement-notification`). Without `RESEND_API_KEY` on the Supabase project the Function runs on, the invite/announcement row is still created, but nobody gets an email. |
+| **Why** | Staff and parent invites call Edge Function `send-organization-invite`, which posts Resend event `organization-invite`. Announcement **Send notification** calls `send-announcement-notification` (`announcement-notification`). **Send feedback** calls `send-product-feedback`, which emails `hi@coursewright.com` with the Resend Emails API. Without `RESEND_API_KEY` on the Supabase project the Function runs on, invite/announcement rows and feedback notes are still created, but nobody gets an email. |
 | **Where** | Resend dashboard (API key) + **Supabase Edge Function secrets** (testing branch and production). **Not** `.env.testing` and **not** a `VITE_*` variable — those are browser-exposed. |
-| **Placeholder** | `supabase/functions/send-organization-invite/index.ts` (`HN-015`) |
+| **Placeholder** | `supabase/functions/send-organization-invite/index.ts`, `supabase/functions/send-product-feedback/index.ts` (`HN-015`) |
 
 **Where to put the key**
 

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { Avatar } from "@/ui/Avatar";
@@ -37,9 +38,7 @@ export function CourseSettingsPage() {
 
   if (settings.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading settings…</p>
-      </div>
+      <PageLoading label="Loading settings…" />
     );
   }
 
@@ -153,7 +152,7 @@ export function CourseSettingsPage() {
               Schedule & status
             </h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <label className="flex flex-col gap-1">
+              <label className="flex min-w-0 flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
                   Start date
                 </span>
@@ -164,7 +163,7 @@ export function CourseSettingsPage() {
                   onChange={(event) => settings.setStartDate(event.target.value)}
                 />
               </label>
-              <label className="flex flex-col gap-1">
+              <label className="flex min-w-0 flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
                   End date
                 </span>
@@ -229,7 +228,7 @@ export function CourseSettingsPage() {
               />
             </div>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <label className="flex flex-col gap-1">
+              <label className="flex min-w-0 flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
                   Subject
                 </span>
@@ -240,7 +239,7 @@ export function CourseSettingsPage() {
                   placeholder="Math, nature study…"
                 />
               </label>
-              <label className="flex flex-col gap-1">
+              <label className="flex min-w-0 flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
                   Location
                 </span>
