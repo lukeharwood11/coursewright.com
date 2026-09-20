@@ -10,7 +10,7 @@
     "dev": "vite --mode testing",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "tsx --test src/materials/model/pageContent.test.ts src/materials/model/quiz.test.ts src/materials/model/pageEditor.test.ts src/materials/model/playback.test.ts src/materials/material/components/VideoNode.test.ts src/materials/material/components/QuizNode.test.ts src/auth/model/profile.test.ts src/auth/model/inviteAuth.test.ts src/search/model/search.test.ts src/parent/model/dashboard.test.ts src/bulletins/model/bulletin.test.ts src/app/layouts/model/viewMode.test.ts src/print/model/thisWeekPacket.test.ts src/print/print/components/PacketDocument.test.tsx src/organizations/model/staffInvite.test.ts src/organizations/model/inviteClaim.test.ts"
+    "test": "tsx --test src/materials/model/pageContent.test.ts src/materials/model/quiz.test.ts src/materials/model/pageEditor.test.ts src/materials/model/playback.test.ts src/materials/material/components/VideoNode.test.ts src/materials/material/components/QuizNode.test.ts src/auth/model/profile.test.ts src/auth/model/inviteAuth.test.ts src/search/model/search.test.ts src/parent/model/dashboard.test.ts src/lesson-plans/model/lessonPlan.test.ts src/lesson-plans/lesson-plan-edit/components/LessonPlanFormFields.test.tsx src/calendar/model/events.test.ts src/calendar/components/WeekCalendar.test.tsx src/courses/model/courseColor.test.ts src/app/layouts/model/viewMode.test.ts src/print/model/thisWeekPacket.test.ts src/print/print/components/PacketDocument.test.tsx src/organizations/model/staffInvite.test.ts src/organizations/model/inviteClaim.test.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

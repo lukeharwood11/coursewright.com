@@ -281,7 +281,7 @@ function MaterialBody({
   material: PrintMaterialView;
   includeAnswerKey: boolean;
 }) {
-  if (material.itemRole === "bulletin" && material.blocks.length === 0) {
+  if (material.itemRole === "lesson_plan" && material.blocks.length === 0) {
     return null;
   }
   if (material.kind === "link") {

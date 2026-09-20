@@ -5,7 +5,8 @@ import {
   type ParentDashboardSource,
 } from "../../parent/model/dashboard.ts";
 import {
-  printMaterialFromBulletin,
+  lessonPlanPrintBody,
+  printMaterialFromLessonPlan,
   thisWeekPrintRefs,
 } from "./thisWeekPacket.ts";
 import { groupPacketSections } from "./packet.ts";
@@ -16,7 +17,7 @@ const week = {
   label: "Week of Sep 13 – Sep 19",
 };
 
-function twoKidsBulletin(): ParentDashboardSource {
+function twoKidsWeek(): ParentDashboardSource {
   return {
     week,
     today: "2026-09-15",
@@ -28,26 +29,29 @@ function twoKidsBulletin(): ParentDashboardSource {
       {
         studentId: 1,
         courseId: 10,
-        courseTitle: "Weekly Bulletin",
+        courseTitle: "Science",
         courseStatus: "active",
+        colorKey: "sea",
       },
       {
         studentId: 2,
         courseId: 10,
-        courseTitle: "Weekly Bulletin",
+        courseTitle: "Science",
         courseStatus: "active",
+        colorKey: "sea",
       },
       {
         studentId: 1,
         courseId: 11,
-        courseTitle: "Science",
+        courseTitle: "Nature",
         courseStatus: "active",
+        colorKey: "moss",
       },
     ],
     materials: [
       {
         id: 100,
-        title: "Weekly Bulletin",
+        title: "Lab write-up",
         scheduledDate: "2026-09-15",
         dueDate: null,
         courseId: 10,
@@ -70,30 +74,37 @@ function twoKidsBulletin(): ParentDashboardSource {
       {
         id: 1,
         materialId: 100,
-        materialTitle: "Weekly Bulletin",
+        materialTitle: "Lab write-up",
         materialDescription: "",
         courseId: 10,
-        courseTitle: "Weekly Bulletin",
+        courseTitle: "Science",
         unitId: null,
       },
     ],
-    bulletins: [
+    lessonPlans: [
       {
         id: 50,
-        title: "Week 3 note",
-        body: "Start with the lab.",
-        startDate: "2026-09-13",
-        endDate: "2026-09-19",
+        title: "This week in Science",
+        weekNote: "Start with the lab.",
+        weekStart: "2026-09-13",
         courseId: 10,
-        courseTitle: "Weekly Bulletin",
-        materialCount: 1,
+        courseTitle: "Science",
+        colorKey: "sea",
+        visibility: "published",
+        days: [
+          {
+            date: "2026-09-15",
+            body: "Goggles on.",
+            materials: [{ id: 100, title: "Lab write-up", unitId: null }],
+          },
+        ],
       },
     ],
   };
 }
 
 test("this-week print lists each student's materials separately", () => {
-  const refs = thisWeekPrintRefs(buildParentDashboard(twoKidsBulletin()));
+  const refs = thisWeekPrintRefs(buildParentDashboard(twoKidsWeek()));
   assert.deepEqual(
     refs.map((ref) => ({
       source: ref.source,
@@ -103,50 +114,50 @@ test("this-week print lists each student's materials separately", () => {
     })),
     [
       {
-        source: "bulletin",
+        source: "lesson_plan",
         id: 50,
         sectionTitle: "Emma Caldwell",
-        context: "Weekly Bulletin · Bulletin",
+        context: "Science · Lesson plan",
       },
       {
         source: "material",
         id: 100,
         sectionTitle: "Emma Caldwell",
-        context: "Weekly Bulletin · Important now",
+        context: "Science · Important now",
       },
       {
         source: "material",
         id: 101,
         sectionTitle: "Emma Caldwell",
-        context: "Science",
+        context: "Nature",
       },
       {
-        source: "bulletin",
+        source: "lesson_plan",
         id: 50,
         sectionTitle: "Noah Caldwell",
-        context: "Weekly Bulletin · Bulletin",
+        context: "Science · Lesson plan",
       },
       {
         source: "material",
         id: 100,
         sectionTitle: "Noah Caldwell",
-        context: "Weekly Bulletin · Important now",
+        context: "Science · Important now",
       },
     ],
   );
   assert.notEqual(refs[0]?.sectionKey, refs[3]?.sectionKey);
 });
 
-test("this-week print puts bulletin content first for each student", () => {
-  const refs = thisWeekPrintRefs(buildParentDashboard(twoKidsBulletin()));
+test("this-week print puts lesson-plan content first for each student", () => {
+  const refs = thisWeekPrintRefs(buildParentDashboard(twoKidsWeek()));
   const emma = refs.filter((ref) => ref.sectionTitle === "Emma Caldwell");
-  assert.equal(emma[0]?.source, "bulletin");
-  assert.equal(emma[0]?.title, "Week 3 note");
+  assert.equal(emma[0]?.source, "lesson_plan");
+  assert.equal(emma[0]?.title, "This week in Science");
   assert.ok(emma.slice(1).every((ref) => ref.source === "material"));
 });
 
 test("this-week print does not mash every student into one context line", () => {
-  const refs = thisWeekPrintRefs(buildParentDashboard(twoKidsBulletin()));
+  const refs = thisWeekPrintRefs(buildParentDashboard(twoKidsWeek()));
   for (const ref of refs) {
     const joined = ref.contextLines.join(" · ");
     assert.equal(joined.includes("Emma") && joined.includes("Noah"), false);
@@ -154,7 +165,7 @@ test("this-week print does not mash every student into one context line", () => 
 });
 
 test("this-week print keeps one copy when a material is important now and dated", () => {
-  const refs = thisWeekPrintRefs(buildParentDashboard(twoKidsBulletin()));
+  const refs = thisWeekPrintRefs(buildParentDashboard(twoKidsWeek()));
   const emma = refs.filter((ref) => ref.sectionTitle === "Emma Caldwell");
   assert.equal(
     emma.filter((ref) => ref.source === "material" && ref.id === 100).length,
@@ -163,15 +174,15 @@ test("this-week print keeps one copy when a material is important now and dated"
 });
 
 test("this-week print honors active student filter", () => {
-  const refs = thisWeekPrintRefs(buildParentDashboard(twoKidsBulletin()), [2]);
+  const refs = thisWeekPrintRefs(buildParentDashboard(twoKidsWeek()), [2]);
   assert.equal(refs.length, 2);
   assert.ok(refs.every((ref) => ref.sectionTitle === "Noah Caldwell"));
-  assert.equal(refs[0]?.source, "bulletin");
+  assert.equal(refs[0]?.source, "lesson_plan");
   assert.equal(refs[1]?.id, 100);
 });
 
 test("packet sections pack the same student and page-break the next", () => {
-  const refs = thisWeekPrintRefs(buildParentDashboard(twoKidsBulletin()));
+  const refs = thisWeekPrintRefs(buildParentDashboard(twoKidsWeek()));
   const sections = groupPacketSections(refs);
   assert.equal(sections.length, 2);
   assert.deepEqual(
@@ -197,19 +208,24 @@ test("materials without a section key stay on their own page", () => {
   );
 });
 
-test("printMaterialFromBulletin puts the notice body on the page", () => {
-  const material = printMaterialFromBulletin({
-    source: "bulletin",
-    id: 50,
-    courseId: 10,
+test("printMaterialFromLessonPlan puts the week note and day notes on the page", () => {
+  const dashboard = buildParentDashboard(twoKidsWeek());
+  const plan = dashboard.lessonPlans[0];
+  assert.ok(plan);
+  const material = printMaterialFromLessonPlan({
+    source: "lesson_plan",
+    id: plan.id,
+    courseId: plan.courseId,
     sectionKey: "student-1",
     sectionTitle: "Emma Caldwell",
-    contextLines: ["Science", "Bulletin"],
-    title: "Week 3 note",
-    body: "Start with the lab.",
+    contextLines: ["Science", "Lesson plan"],
+    title: plan.title,
+    body: lessonPlanPrintBody(plan),
   });
-  assert.equal(material.itemRole, "bulletin");
-  assert.equal(material.title, "Week 3 note");
+  assert.equal(material.itemRole, "lesson_plan");
+  assert.equal(material.title, "This week in Science");
   assert.equal(material.kind, "page");
   assert.equal(material.blocks.length, 1);
+  assert.match(lessonPlanPrintBody(plan), /Start with the lab/);
+  assert.match(lessonPlanPrintBody(plan), /Goggles on/);
 });

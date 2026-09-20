@@ -1,4 +1,7 @@
 import { supabase } from "@/infrastructure/supabase/client";
+import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
+import { listLessonPlansInRange } from "@/lesson-plans/databridge/lessonPlans";
+import { isPublished } from "@/materials/model/visibility";
 import { calendarWeekContaining, localIsoDate } from "@/parent/model/thisWeek";
 import { buildParentDashboard } from "@/parent/model/dashboard";
 import type { ParentDashboard, ParentDashboardSource } from "@/parent/model/dashboard";
@@ -46,12 +49,11 @@ export async function loadParentDashboard(
       enrollments: [],
       materials: [],
       importantNow: [],
-      bulletins: [],
+      lessonPlans: [],
     });
   }
 
-  const [studentsResult, enrollmentsResult, importantResult, bulletinsResult] =
-    await Promise.all([
+  const [studentsResult, enrollmentsResult, importantResult] = await Promise.all([
     db
       .from("student_profiles")
       .select("id, name, grade_level")
@@ -61,7 +63,7 @@ export async function loadParentDashboard(
     db
       .from("enrollments")
       .select(
-        "student_profile_id, status, course:courses(id, title, status, visibility, organization_id)",
+        "student_profile_id, status, course:courses(id, title, status, visibility, organization_id, color_key)",
       )
       .eq("status", "active")
       .in("student_profile_id", studentIds),
@@ -71,19 +73,11 @@ export async function loadParentDashboard(
         "id, material_id, course_id, material:materials(title, description, unit_id), course:courses(title)",
       )
       .eq("organization_id", organizationId),
-    db
-      .from("bulletins")
-      .select(
-        "id, title, body, start_date, end_date, course_id, course:courses(title), bulletin_materials(id)",
-      )
-      .eq("organization_id", organizationId)
-      .is("deleted_at", null),
   ]);
 
   if (studentsResult.error) throw new Error(studentsResult.error.message);
   if (enrollmentsResult.error) throw new Error(enrollmentsResult.error.message);
   if (importantResult.error) throw new Error(importantResult.error.message);
-  if (bulletinsResult.error) throw new Error(bulletinsResult.error.message);
 
   const enrollments = (enrollmentsResult.data ?? []).flatMap((row) => {
     const course = one(row.course);
@@ -95,6 +89,7 @@ export async function loadParentDashboard(
         courseId: course.id,
         courseTitle: course.title,
         courseStatus: course.status,
+        colorKey: course.color_key,
       },
     ];
   });
@@ -151,25 +146,33 @@ export async function loadParentDashboard(
     ];
   });
 
-  const bulletins = (bulletinsResult.data ?? []).flatMap((row) => {
-    const course = one(row.course);
-    if (!course) return [];
-    const links = Array.isArray(row.bulletin_materials)
-      ? row.bulletin_materials
-      : [];
-    return [
-      {
-        id: row.id,
-        title: row.title,
-        body: row.body,
-        startDate: row.start_date,
-        endDate: row.end_date,
-        courseId: row.course_id,
-        courseTitle: course.title,
-        materialCount: links.length,
-      },
-    ];
-  });
+  const plans = await listLessonPlansInRange(organizationId, week.start, week.end);
+  const lessonPlans = plans
+    .filter(
+      (plan) =>
+        plan.weekStart === week.start &&
+        isPublished(plan.visibility) &&
+        courseIds.includes(plan.courseId),
+    )
+    .map((plan) => ({
+      id: plan.id,
+      title: plan.title,
+      weekNote: plan.weekNote,
+      weekStart: plan.weekStart,
+      courseId: plan.courseId,
+      courseTitle: plan.courseTitle,
+      colorKey: plan.colorKey,
+      visibility: plan.visibility,
+      days: plan.days.map((day) => ({
+        date: day.date,
+        body: day.body,
+        materials: familyVisibleMaterials(day.materials).map((material) => ({
+          id: material.id,
+          title: material.title,
+          unitId: material.unitId,
+        })),
+      })),
+    }));
 
   return buildParentDashboard({
     week,
@@ -182,6 +185,6 @@ export async function loadParentDashboard(
     enrollments,
     materials,
     importantNow,
-    bulletins,
+    lessonPlans,
   });
 }

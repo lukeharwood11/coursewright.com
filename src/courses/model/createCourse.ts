@@ -1,5 +1,9 @@
 import type { CourseIconValue } from "@/courses/model/courseIcon";
 import { parseCourseIconKey } from "@/courses/model/courseIcon";
+import {
+  parseCourseColorKey,
+  type CourseColorKey,
+} from "@/courses/model/courseColor";
 
 export type CreateCourseInput = {
   title: string;
@@ -60,6 +64,14 @@ export function validateCreateCourse(raw: {
   };
 }
 
+export type CourseSettingsInput = Omit<CreateCourseInput, "copiedFromCourseId"> & {
+  colorKey: CourseColorKey;
+};
+
+export type CourseSettingsParse =
+  | { ok: true; value: CourseSettingsInput }
+  | { ok: false; error: string };
+
 export function validateCourseSettings(raw: {
   title: string;
   description: string;
@@ -70,8 +82,17 @@ export function validateCourseSettings(raw: {
   endDate: string;
   gradeLevels: string[];
   status: string;
-}): CreateCourseParse {
-  return validateCreateCourse({ ...raw, copiedFromCourseId: null });
+  colorKey: string;
+}): CourseSettingsParse {
+  const parsed = validateCreateCourse({ ...raw, copiedFromCourseId: null });
+  if (!parsed.ok) return parsed;
+  return {
+    ok: true,
+    value: {
+      ...parsed.value,
+      colorKey: parseCourseColorKey(raw.colorKey),
+    },
+  };
 }
 
 export type CourseSettingsDraft = {
@@ -84,6 +105,7 @@ export type CourseSettingsDraft = {
   endDate: string;
   gradeLevels: string[];
   status: string;
+  colorKey: CourseColorKey;
 };
 
 export type CourseSettingsSaved = {
@@ -96,6 +118,7 @@ export type CourseSettingsSaved = {
   endDate: string | null;
   gradeLevels: string[];
   status: string;
+  colorKey: CourseColorKey;
 };
 
 function sameGradeLevels(left: string[], right: string[]): boolean {
@@ -115,6 +138,7 @@ export function courseSettingsHaveChanges(
   if (draft.location !== saved.location) return true;
   if (draft.subject !== saved.subject) return true;
   if (draft.iconKey !== saved.iconKey) return true;
+  if (draft.colorKey !== saved.colorKey) return true;
   if (draft.startDate !== (saved.startDate ?? "")) return true;
   if (draft.endDate !== (saved.endDate ?? "")) return true;
   if (draft.status !== saved.status) return true;

@@ -1,6 +1,6 @@
 # AGENTS — `src/courses/components/`
 
-Shared course UI used on more than one screen (catalog icon + icon picker).
+Shared course UI used on more than one screen (catalog icon + icon picker, calendar color picker).
 
 ## Don’t
 

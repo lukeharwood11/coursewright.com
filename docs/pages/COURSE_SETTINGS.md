@@ -28,6 +28,7 @@ Configure the course instance (not content authoring — that’s [COURSE](./COU
 - Course **name** (editable)
 - **Description**, **subject / area**, **location** (optional, editable)
 - **Icon** (optional catalog icon for course list cards)
+- **Calendar color** (from the course palette; used on This week / Calendar)
 - **Start date**, **end date** (optional, editable)
 - **Status** and **visibility** (publish / unpublish)
 - **Grade-level metadata** (multi grade/range per org scheme)
@@ -39,7 +40,7 @@ Configure the course instance (not content authoring — that’s [COURSE](./COU
 - Header: course name (slate tint chip) + “Course settings”; **Cancel** / **Save** (Save disabled when unchanged)
 - Two-column layout on large screens (stacks on smaller viewports)
 - Left: course name / description; schedule & status (dates, active / archived); **Unpublish** when published
-- Right: catalog (icon, subject / area, location, grade levels); instructors / co-teaching
+- Right: catalog (icon, **calendar color**, subject / area, location, grade levels); instructors / co-teaching
 - **Unpublished:** amber warning + Publish above the grid. **Published:** green Published badge; Unpublish under schedule & status
 - Soft-delete / archive controls — TBD UX; content is soft-deleted only
 - **P1:** Template link / promote to template

@@ -3,6 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   BookOpenIcon,
   BuildingOffice2Icon,
+  CalendarDaysIcon,
   ChartBarIcon,
   Cog6ToothIcon,
   HomeIcon,
@@ -12,6 +13,7 @@ import {
 import {
   BookOpenIcon as BookOpenSolidIcon,
   BuildingOffice2Icon as BuildingOffice2SolidIcon,
+  CalendarDaysIcon as CalendarDaysSolidIcon,
   ChartBarIcon as ChartBarSolidIcon,
   Cog6ToothIcon as Cog6ToothSolidIcon,
   HomeIcon as HomeSolidIcon,
@@ -32,6 +34,7 @@ const sectionIcons: Record<string, { outline: IconComponent; solid: IconComponen
   organizations: { outline: BuildingOffice2Icon, solid: BuildingOffice2SolidIcon },
   account: { outline: UserCircleIcon, solid: UserCircleSolidIcon },
   home: { outline: HomeIcon, solid: HomeSolidIcon },
+  calendar: { outline: CalendarDaysIcon, solid: CalendarDaysSolidIcon },
   courses: { outline: BookOpenIcon, solid: BookOpenSolidIcon },
   roster: { outline: UsersIcon, solid: UsersSolidIcon },
   settings: { outline: Cog6ToothIcon, solid: Cog6ToothSolidIcon },

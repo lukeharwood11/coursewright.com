@@ -46,7 +46,20 @@ Named as on the brand sheet. Use CSS variables below.
 | Line soft | `--line-soft` | `#EAE7DB` | Hairline dividers, device chrome |
 | Proto gray | — | `#ECE9DE` | Concept-page surround only — **not** product chrome |
 
-Amber is **sparing**. Green does the work. Slate means “system/info,” not a second brand color.
+Amber is **sparing** for product chrome (Important now, due dates). Green does the work. Slate means “system/info,” not a second brand color.
+
+**Course calendar colors** are a separate small palette used only to tell courses apart on This week / Calendar (chips, legend, week-note bars). They are not brand colors and must stay muted on `--paper`.
+
+| Key | Token | Hex | Role |
+|-----|-------|-----|------|
+| moss | `--course-moss` | `#33604D` | Default / Wright Green |
+| slate | `--course-slate` | `#4C7691` | |
+| clay | `--course-clay` | `#A56B4C` | |
+| plum | `--course-plum` | `#6B5478` | |
+| sea | `--course-sea` | `#3D7A7A` | |
+| wine | `--course-wine` | `#8B4A56` | |
+| sand | `--course-sand` | `#9A7B3C` | |
+| pine | `--course-pine` | `#2F5D50` | |
 
 ### CSS variables
 
@@ -67,6 +80,14 @@ Amber is **sparing**. Green does the work. Slate means “system/info,” not a 
   --amber-tint: #F7E7D0;
   --slate: #4C7691;
   --slate-tint: #E4EDF1;
+  --course-moss: #33604D;
+  --course-slate: #4C7691;
+  --course-clay: #A56B4C;
+  --course-plum: #6B5478;
+  --course-sea: #3D7A7A;
+  --course-wine: #8B4A56;
+  --course-sand: #9A7B3C;
+  --course-pine: #2F5D50;
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 18px;
@@ -201,15 +222,15 @@ Paper canvas. Centered card, max-width ~320px. Wordmark → Lora heading → one
 1. Top bar: **CW** or tiny wordmark + **org name** (700) + avatar. On desktop, a simpler collapsible sidebar (This week, their courses, Progress) sits beside the page. Content uses the remaining width — do not center a narrow column on large screens.
 2. Greeting (Lora) + week range (“Week of Sep 1 – Sep 7”, Sunday–Saturday) + **Print this week**
 3. **Student tags** when more than one child — tap to include or hide that student’s work
-4. **From your teachers** (if any), then **Important now** (if any), then **Coming up** — **Assigned next** (soonest assignment date from today) and **Due next** (soonest due date from today). Bulletin cards put the **course** title in green-deep extrabold. One student: bulletins stay at the top. More than one student showing: group the page **by student** (bulletins, then that child’s this-week work). On desktop, Important now and Coming up sit side by side when both exist.
-5. **This week** — **due** materials by default. **Assigned** dates in slate; **Due** dates in amber-deep. **More assigned this week** reveals assigned-not-due. Course cards only for courses with visible dated work (empty shells omitted); two columns on larger screens. Per student (when more than one is active): avatar, name, grade badge → course cards → material rows with **Print**. One student: same cards without the extra header.
-6. Bottom tabs on phone: **This week** | **Progress** (Progress may be P1 — dim/inactive until then). On desktop, those destinations live in the sidebar instead.
+4. Two columns on large screens: **this week’s calendar** | **Focus** (**Important now** + **Coming up** — Assigned next / Due next). Course-colored week notes sit above the grid. Stacks on small screens (calendar first).
+5. Week calendar cells show lesson-plan text, then a divider, then materials. **Assigned** chips are outlined in the course color; **Due** chips are filled. A course legend filters classes.
+6. Bottom tabs on phone: **This week** | **Progress** (Progress may be P1 — dim/inactive until then). On desktop, those destinations live in the sidebar instead (plus **Calendar**).
 
 Keep parent chrome minimal. One job on the home tab.
 
 ### Instructor / owner / admin (desktop)
 
-Collapsible **sidebar** for org navigation: Home, Courses (nested course names), Roster, Families (nested family names), Settings. Collapse to icons; on small screens it becomes an overlay drawer. (**P1:** Templates in nav.)
+Collapsible **sidebar** for org navigation: Home, Calendar, Courses (nested course names), Roster, Families (nested family names), Settings. Collapse to icons; on small screens it becomes an overlay drawer. (**P1:** Templates in nav.)
 
 Top bar: search (staff) + account menu. Content uses the remaining width — do not center a narrow column on large screens.
 

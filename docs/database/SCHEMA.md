@@ -34,9 +34,10 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | FileVersion | `file_versions` | |
 | ShareLink | `share_links` | |
 | ImportantNow | `important_now` | |
-| Bulletin | `bulletins` | Dated course notice; start/end availability |
-| BulletinMaterial | `bulletin_materials` | Materials attached under a bulletin |
-| WeeklyContent | *(not a table)* | Derived from material/unit dates (Sunday–Saturday). |
+| LessonPlan | `lesson_plans` | Weekly course plan; published / unpublished |
+| LessonPlanDay | `lesson_plan_days` | Optional note for one day in that week |
+| LessonPlanDayMaterial | `lesson_plan_day_materials` | Materials listed under a day |
+| WeeklyContent | *(not a table)* | Derived from material/unit dates + published lesson plans (Sunday–Saturday). |
 | Page / Block / Quiz / Form | `blocks` (quiz is a Lexical node on a page) | Material **kind** page\|link\|file; blocks on pages only; **no** quiz table |
 
 **Locked conventions:**
@@ -60,7 +61,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 
 | Phase | Entities in focus |
 |-------|-------------------|
-| **P0** | Organization, User, Membership, **AdminInvite**, **StudentProfile**, **Class**, **ClassMember**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **Bulletin**, **BulletinMaterial**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
+| **P0** | Organization, User, Membership, **AdminInvite**, **StudentProfile**, **Class**, **ClassMember**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **LessonPlan**, **LessonPlanDay**, **LessonPlanDayMaterial**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
 | **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs) |
 | **P2** | Cross-org Family management, StudentProfile.user_id, Quiz online, Submission, **ParentPayments** (orgs collect from parents) |
 
@@ -121,7 +122,7 @@ A claimed parent with no enrollment can open the org (empty “this week”) but
 ## Creating a course from another course (P0)
 
 1. Copies **units and materials** (and file **references** — same `file_id`, no blob clone) into a **new course**.
-2. Does **not** copy roster, enrollments, important-now, share links, or **bulletins**.
+2. Does **not** copy roster, enrollments, important-now, share links, or **lesson plans**.
 3. New course is **independent** — edits do not sync back to the source (template-style sync is **P1**).
 4. Grade metadata **may** copy and remain editable on the new course.
 5. Description, location, and subject **may** copy from the create form (prefilled from the source). The copy starts **unpublished**.
@@ -467,6 +468,7 @@ Org-scoped **group of students**. Not a Course — no units/materials.
 | location | text | optional where the offering meets (free text) |
 | subject | text | optional subject / area (free text, not a taxonomy) |
 | icon_key | text | **optional** — Heroicons outline key for course catalog cards; null = none |
+| color_key | text | Calendar / legend color from a small palette (`moss` · `slate` · `clay` · `plum` · `sea` · `wine` · `sand` · `pine`). Auto-assigned on create; staff can change in course settings |
 | template_id | bigint | FK → CourseTemplate, **nullable** — **P1** live link when created from a template; unused in P0 product flows |
 | copied_from_course_id | bigint | FK → Course, **nullable** — P0 origin when created from another course (informational, no sync) |
 | start_date | date | nullable — informational |
@@ -612,42 +614,59 @@ Parent-facing URL. **P0: must be logged in** before the destination is shown.
   - A material appears on This week when its assignment date falls in the week **and/or** its `due_date` falls in the week.
   - Top-level materials (`unit_id` null) without `scheduled_date` are not “assigned” for the week unless they have a `due_date` in range.
 
-### Bulletin
+### LessonPlan
 
-A course-scoped **notice** instructors make available for a date window. Families see it on the parent/student home while today is in range; opening it lists attached materials. **Not** an assignment object and **not** email.
+A course-scoped **weekly plan** for one Sunday–Saturday week. Instructors write an optional week note, optional notes for each day, and may attach same-course materials to a day. **Published / unpublished** controls whether families can see it (same as materials). **Not** an assignment object and **not** email. Replaces bulletins.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
 | course_id | bigint | FK → Course |
-| title | text | required |
-| body | text | optional note (empty string when unset) |
-| start_date | date | first day the bulletin is available (inclusive) |
-| end_date | date | last day the bulletin is available (inclusive); must be ≥ `start_date` |
+| week_start | date | Sunday of the week this plan covers |
+| title | text | required; new form defaults to `This week in <course title>` |
+| week_note | text | optional whole-week note (empty string when unset) |
+| visibility | text | **`unpublished`** (instructors/admins) · **`published`** (enrolled parents). New plans default unpublished |
 | created_by | uuid | FK → User (`profiles`) |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 | deleted_at | timestamptz | soft delete |
 | deleted_by | uuid | FK → User, nullable |
 
-**Availability:** app uses the viewer’s **local calendar date**. Staff who can manage the course always see non-deleted bulletins (including upcoming and past). Families see a bulletin on home only when the course is parent-viewable (active + published + enrollment) and today is in `[start_date, end_date]`. Date window **is** availability — no separate publish column.
+Unique `(course_id, week_start)` among non-deleted rows. `week_start` must be a Sunday.
 
-Course-from-course copy does **not** copy bulletins.
+Staff who can manage the course always see non-deleted plans (including unpublished). Families SELECT a plan only when the course is parent-viewable **and** `visibility = published` **and** `deleted_at is null`.
 
-### BulletinMaterial
+Course-from-course copy does **not** copy lesson plans.
 
-Join: materials attached under a bulletin, ordered.
+### LessonPlanDay
+
+One calendar day inside a lesson plan.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
-| bulletin_id | bigint | FK → Bulletin |
-| material_id | bigint | FK → Material — must belong to the **same course** as the bulletin |
-| position | int | order on the bulletin page |
+| lesson_plan_id | bigint | FK → LessonPlan |
+| day_date | date | must fall in that plan’s Sunday–Saturday week |
+| body | text | optional day’s plan text |
+| created_at | timestamptz | |
+| updated_at | timestamptz | |
+
+Unique `(lesson_plan_id, day_date)`. Persist only days that have body text or materials.
+
+### LessonPlanDayMaterial
+
+Join: materials listed under a lesson-plan day, ordered.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| lesson_plan_day_id | bigint | FK → LessonPlanDay |
+| material_id | bigint | FK → Material — must belong to the **same course** as the plan |
+| position | int | order under that day |
 | created_at | timestamptz | |
 
-Unique `(bulletin_id, material_id)`. Families only follow links to **published** materials (same material RLS). Soft-deleting a bulletin leaves join rows; the app path does not hard-delete bulletins.
+Unique `(lesson_plan_day_id, material_id)`. Families only follow links to **published** materials (same material RLS). Attaching a material does **not** change `scheduled_date` or `due_date`. Soft-deleting a plan leaves join rows; the app path does not hard-delete lesson plans.
 
 ---
 
@@ -685,7 +704,7 @@ Course ──> CourseTemplate (optional; **P1**)
 Course / CourseTemplate.grade_levels (catalog metadata)
 Course ──< CourseInstructor >── User (instructor)  ← many
 Course ──< ImportantNow
-Course ──< Bulletin ──< BulletinMaterial >── Material
+Course ──< LessonPlan ──< LessonPlanDay ──< LessonPlanDayMaterial >── Material
 Course ──< ShareLink
 ```
 
