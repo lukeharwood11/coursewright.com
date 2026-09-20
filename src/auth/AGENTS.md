@@ -23,3 +23,4 @@ Auth APIs call the browser Supabase client (`infrastructure/supabase/client.ts`)
 
 - Build magic-link no-account viewing in P0.
 - Put org/course business logic here.
+- **Sign up a new account with username/password when testing — even a dummy one.** Emails are verified and get bounce-checked; never submit `/signup` in tests. Test auth via a failed sign-in, a real provisioned account, or Google OAuth instead.

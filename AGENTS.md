@@ -98,3 +98,7 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 |-----|-----|-----------|
 | Production | `coursewright.com` | `-var-file=../tfvars/production.tfvars` |
 | Testing | `beta.coursewright.com` | `-var-file=../tfvars/testing.tfvars` |
+
+## Testing / Cursor Cloud specific instructions
+
+- **Never create an account (sign up) with a username/password during testing — not even with dummy/throwaway credentials.** Supabase Auth verifies emails, so signup attempts send real verification mail and get bounce-checked. When exercising auth, only demonstrate reaching the backend in a non-creating way (e.g. a failed sign-in that returns `Invalid login credentials`), use an already-provisioned real test account, or use Google OAuth — do not submit `/signup`.
