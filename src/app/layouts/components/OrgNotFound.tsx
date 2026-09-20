@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { ButtonLink } from "@/ui/Button";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { Wordmark } from "@/ui/Wordmark";
 
 export function OrgNotFound({ error }: { error: string | null }) {
+  useToastOnError(error);
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col gap-4 px-5 py-16">
       <Wordmark to="/my" size="nav" />
@@ -16,9 +18,6 @@ export function OrgNotFound({ error }: { error: string | null }) {
         The web address may have changed, or you may not be a member. Choose an
         organization you belong to.
       </p>
-      {error ? (
-        <p className="text-[13px] text-[var(--amber-deep)]">{error}</p>
-      ) : null}
       <ButtonLink to="/my" variant="secondary">
         Back to organizations
       </ButtonLink>

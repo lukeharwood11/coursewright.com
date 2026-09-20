@@ -19,6 +19,7 @@ import {
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { Badge } from "@/ui/Badge";
 import { isCoursePublished } from "@/courses/model/visibility";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -27,6 +28,7 @@ const controlClass = [
 
 export function CourseSettingsPage() {
   const settings = useCourseSettings();
+  useToastOnError(settings.addInstructor.error?.message ?? null);
 
   useEffect(() => {
     document.title = settings.course
@@ -329,11 +331,6 @@ export function CourseSettingsPage() {
                 Owners and admins can add co-teachers.
               </p>
             )}
-            {settings.addInstructor.error ? (
-              <p className="mt-2 text-[13px] text-[var(--amber-deep)]">
-                {settings.addInstructor.error.message}
-              </p>
-            ) : null}
           </section>
         </div>
       </form>

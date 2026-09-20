@@ -4,3 +4,7 @@ import { toast } from "sonner";
 export function toastNotImplemented(action: string) {
   toast(`${action} isn’t ready yet.`);
 }
+
+export function toastSomethingWentWrong() {
+  toast("Something went wrong.");
+}

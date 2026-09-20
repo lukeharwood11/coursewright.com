@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import { ButtonLink } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { DiscussionFilterChips } from "./components/DiscussionFilterChips";
 import { DiscussionList } from "./components/DiscussionList";
@@ -10,6 +11,7 @@ import type { DiscussionFilter } from "@/discussions/model/audience";
 
 export function DiscussionsPage() {
   const page = useDiscussions();
+  useToastOnError(page.error);
 
   useEffect(() => {
     document.title = "Discussions · Course Wright";
@@ -44,12 +46,6 @@ export function DiscussionsPage() {
           </ButtonLink>
         ) : null}
       </div>
-
-      {page.error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {page.error}
-        </p>
-      ) : null}
 
       <div className="mt-5">
         <DiscussionFilterChips

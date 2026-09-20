@@ -16,10 +16,12 @@ import {
 } from "@/materials/material/components/VisibilityBanner";
 import { LessonPlanMaterialList } from "./components/LessonPlanMaterialList";
 import { useLessonPlan } from "./hooks/useLessonPlan";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 export function LessonPlanPage() {
   const page = useLessonPlan();
   const [confirmRemove, setConfirmRemove] = useState(false);
+  useToastOnError(page.error);
 
   useEffect(() => {
     document.title = page.plan
@@ -184,12 +186,6 @@ export function LessonPlanPage() {
             </section>
           ))}
         </div>
-      ) : null}
-
-      {page.error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {page.error}
-        </p>
       ) : null}
 
       <UnpublishControl

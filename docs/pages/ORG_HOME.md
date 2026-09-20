@@ -33,8 +33,8 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 - Operational **dashboard** (sidebar still provides full nav, including **Calendar**). Home body summarizes the co-op; it does not only list destinations.
 - **Getting started** when there are no courses and/or no students: short checklist (create course → add students → enroll / publish). Create → print does **not** require a roster.
 - **Needs attention** (only when non-empty): active courses with zero enrollments; unpublished courses that already have enrollments.
-- **Courses**: compact preview cards (title, icon, subject, published/status, enrollment count), up to six, plus link to [COURSE_LIST](./COURSE_LIST.md). Primary **Create course**.
-- **This week**: week label; org-wide **Important now**; per active course dated-material counts for the Sunday–Saturday week (staff sees active materials, including unpublished).
+- **Courses**: compact preview cards (title, icon, subject, published/status, enrollment count), up to six, plus link to [COURSE_LIST](./COURSE_LIST.md). Instructors see courses they teach (and published courses they parent in). Primary **Create course**.
+- **This week**: week label; **Important now** and dated-material counts for courses they can see (staff sees those materials, including unpublished).
 - **People**: student + class counts → [ORG_ROSTER](./ORG_ROSTER.md).
 - Switch org returns to org picker.
 - **Teacher / Parent view** in the header: Parent view swaps this dashboard for the parent home (and parent chrome). Staff-only pages (roster, course list, settings) return here while Parent view is on.

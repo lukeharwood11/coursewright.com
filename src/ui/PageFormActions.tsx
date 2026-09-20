@@ -10,6 +10,7 @@ export function PageFormActions({
   hasChanges,
   canSave = true,
   cancelTo,
+  onCancel,
   saveLabel = "Save",
 }: {
   formId: string;
@@ -17,17 +18,18 @@ export function PageFormActions({
   hasChanges: boolean;
   /** When false, Save stays disabled even if the form has changes. */
   canSave?: boolean;
-  /** Fallback when there’s no history entry to go back to. */
+  /** View URL to open when Cancel is not handled locally. */
   cancelTo: string;
+  /** When set, Cancel leaves edit mode here instead of navigating. */
+  onCancel?: () => void;
   saveLabel?: string;
 }) {
   const navigate = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   function leave() {
-    const idx = (window.history.state as { idx?: number } | null)?.idx;
-    if (typeof idx === "number" && idx > 0) {
-      navigate(-1);
+    if (onCancel) {
+      onCancel();
       return;
     }
     navigate(cancelTo);

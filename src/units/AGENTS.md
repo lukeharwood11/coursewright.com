@@ -11,8 +11,8 @@ Optional **units** group materials. Materials may also be course top-level (`uni
 
 ## Rules
 
-- Units are **optional** — do not require every material to have a unit.
-- Top-level materials (no unit) live on the **course** surface, above the units list — compose with `courses/` / `materials/`.
+- Units are **optional** in the database — existing materials may have `unit_id` null.
+- New materials are added **on a unit** in the UI (no course-level Add material). Top-level materials still show on the **course** surface when present.
 - Parent “this week” is calendar Sunday–Saturday — unit dates only apply to materials in that unit.
 - Domain databridge for unit CRUD; print behavior stays in `print/`.
 
@@ -20,4 +20,4 @@ Optional **units** group materials. Materials may also be course top-level (`uni
 
 - Force units to map 1:1 to calendar weeks.
 - Implement whole-course print (out of scope for initial release).
-- Require a unit to add a material.
+- Require a unit in the database to store a material (the UI adds materials on a unit; `unit_id` may still be null).

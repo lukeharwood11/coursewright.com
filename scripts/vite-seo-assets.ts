@@ -1,7 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Plugin } from "vite";
-import { writeLegalStaticPages } from "./prerender-legal-html.ts";
 import {
   SITE_DESCRIPTION,
   SITE_NAME,
@@ -67,10 +66,9 @@ function writeSeoFiles(outDir: string, host: string): void {
 }
 
 /**
- * Emits robots.txt + sitemap.xml for the public host, prerenders legal HTML
- * (`privacy` / `terms` / `cookies`) for non-JS crawlers, and serves discovery
- * files in dev. Production apex is indexable; beta and other hosts are fully
- * disallowed.
+ * Emits robots.txt + sitemap.xml for the public host and injects SEO
+ * placeholders in index.html. Production apex is indexable; beta and other
+ * hosts are fully disallowed.
  */
 export function seoPublicAssets(): Plugin {
   let outDir = "dist";
@@ -133,7 +131,6 @@ export function seoPublicAssets(): Plugin {
     },
     closeBundle() {
       writeSeoFiles(outDir, host);
-      writeLegalStaticPages(outDir, host);
     },
   };
 }

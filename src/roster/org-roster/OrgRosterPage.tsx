@@ -8,9 +8,11 @@ import { BatchCreateStudentsForm } from "@/roster/student-profile/components/Bat
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
 import { AssignSelectedBar } from "./components/AssignSelectedBar";
 import { useOrgRoster } from "./hooks/useOrgRoster";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 export function OrgRosterPage() {
   const roster = useOrgRoster();
+  useToastOnError(roster.error);
 
   useEffect(() => {
     document.title = `Roster · ${roster.organization.name} · Course Wright`;
@@ -27,12 +29,6 @@ export function OrgRosterPage() {
 
       {roster.loading ? (
         <PageLoading embedded label="Loading roster…" />
-      ) : null}
-
-      {roster.error ? (
-        <p className="mt-6 text-[13.5px] text-[var(--amber-deep)]" role="alert">
-          {roster.error}
-        </p>
       ) : null}
 
       <section className="mt-8">

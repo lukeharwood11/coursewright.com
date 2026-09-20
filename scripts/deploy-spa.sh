@@ -38,20 +38,7 @@ if [[ -z "$DIST_ID" ]]; then
   exit 1
 fi
 
-aws s3 sync "${DIST_DIR}/" "s3://${BUCKET}" --delete \
-  --exclude "privacy" --exclude "terms" --exclude "cookies"
-
-# Extensionless legal HTML (built by vite-seo-assets) must be text/html so
-# verifiers/crawlers that do not run JS still see the policy body at /privacy etc.
-for page in privacy terms cookies; do
-  if [[ ! -f "${DIST_DIR}/${page}" ]]; then
-    red "Missing ${DIST_DIR}/${page} — rebuild the SPA (legal prerender)."
-    exit 1
-  fi
-  aws s3 cp "${DIST_DIR}/${page}" "s3://${BUCKET}/${page}" \
-    --content-type "text/html; charset=utf-8" \
-    --cache-control "public, max-age=60"
-done
+aws s3 sync "${DIST_DIR}/" "s3://${BUCKET}" --delete
 
 aws cloudfront create-invalidation --distribution-id "${DIST_ID}" --paths "/*"
 green "Deployed dist/ → s3://${BUCKET} (CloudFront ${DIST_ID})."

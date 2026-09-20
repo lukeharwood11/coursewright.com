@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { CourseCard } from "./components/CourseCard";
 import { CourseListFilters } from "./components/CourseListFilters";
 import { CourseListPagination } from "./components/CourseListPagination";
@@ -11,6 +12,7 @@ import { useCourseList, useCreateCourse } from "./hooks/useCourseList";
 export function CourseListPage() {
   const list = useCourseList();
   const create = useCreateCourse();
+  useToastOnError(list.error);
 
   useEffect(() => {
     document.title = `Courses · ${list.organization.name} · Course Wright`;
@@ -70,12 +72,6 @@ export function CourseListPage() {
 
       {list.loading ? (
         <PageLoading embedded label="Loading courses…" />
-      ) : null}
-
-      {list.error ? (
-        <p className="mt-6 text-[13.5px] text-[var(--amber-deep)]" role="alert">
-          {list.error}
-        </p>
       ) : null}
 
       {!list.loading && list.allCourseCount > 0 ? (

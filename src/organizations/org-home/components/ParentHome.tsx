@@ -16,7 +16,7 @@ export function ParentHome({
   orgSlug,
   dashboard,
   loading,
-  error,
+  error: _error,
   preview = false,
 }: {
   firstName: string;
@@ -76,12 +76,6 @@ export function ParentHome({
 
       {loading ? (
         <PageLoading embedded label="Loading this week…" />
-      ) : null}
-
-      {error ? (
-        <p className="mt-6 text-[13.5px] text-[var(--amber-deep)]" role="alert">
-          {error}
-        </p>
       ) : null}
 
       {dashboard && visible && !loading ? (

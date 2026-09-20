@@ -510,7 +510,9 @@ Leads are notified in **Activity** when someone posts in a discussion for that c
 | end_date | date | nullable — informational |
 | grade_levels | text[] | **optional** — one or more labels from org `grade_labels` |
 | status | text | **active** · archived — offering is running vs archived |
-| visibility | text | **unpublished** (instructors/admins) · **published** (enrolled parents; students when that role exists). New courses default unpublished |
+| visibility | text | **unpublished** (owners/admins, and instructors who teach the course) · **published** (those staff, plus enrolled parents; students when that role exists). New courses default unpublished |
+
+**Who can SELECT:** `can_view_course` = `can_manage_course` (org owner/admin, or `course_instructors` for this course) **or** `parent_can_view_course` (linked student enrolled in an **active + published** course). Membership **role need not be `parent`** — an instructor who parents a student still sees that published course, read-only in the app. Instructors do **not** see other instructors’ courses they neither teach nor parent in.
 
 **Grade levels:** `text[]` of scheme values (exact grades and/or range labels). Same model on `CourseTemplate`.
 
@@ -893,9 +895,9 @@ Per-user **Activity** row. Written by a trigger on `discussion_messages` insert 
 | audience_label | text | Course title or class name |
 | created_at | timestamptz | |
 | read_at | timestamptz | nullable — set when the person acks (click Activity). Opening the thread acks `discussion_message` only |
-| unique | (user_id, discussion_message_id) | |
+| unique | (user_id, discussion_message_id); plus one `discussion_message` row per (user_id, discussion_id) | |
 
-**Who is notified:** course **instructors** for a course thread; class **leads** for a class thread; **@mentioned** people who can currently see the thread; never the author. If `discussions.notify_all` is true on the opening post and the starter is staff, also notify everyone `list_discussion_members` returns. An **@mention** on a post or edit writes (or upgrades) a `discussion_mention` row for that person when they are on the thread.
+**Who is notified:** course **instructors** for a course thread; class **leads** for a class thread; the person who **started** the thread; anyone who **already posted** in it; **@mentioned** people who can currently see the thread; never the author. One `discussion_message` Activity row per person per discussion (later posts update that row). If `discussions.notify_all` is true on the opening post and the starter is staff, also notify everyone `list_discussion_members` returns. An **@mention** on a post or edit writes (or upgrades) a `discussion_mention` row for that person when they are on the thread.
 
 **Who can read/update:** `user_id = auth.uid()`. Client update may only change `read_at`. A mention trigger may upgrade `kind` from `discussion_message` to `discussion_mention` and clear `read_at` so the mention is unread.
 
@@ -1017,6 +1019,6 @@ Family cross-org management (extends P0 org Family)
 - **Files:** Supabase Storage bucket `org-files`; `File.storage_ref` is `{organization_id}/{file_id}/{version_id}/{filename}`. Audio/video playback in the SPA for those mime types.
 - **Search:** generated `search_vector` columns + GIN indexes; facets are ordinary columns (`course_id`, `kind`, `mime_type`, `grade_levels`, …) filtered under the same RLS.
 - **Analytics:** PostHog (client) — not a schema entity.
-- Access control via **RLS** (and Storage policies) aligned with Membership roles and parent access rules above. Parent SELECT of a course requires an active `parent` membership, a `ParentStudentLink`, an active `Enrollment`, `Course.status = active`, and `Course.visibility = published`. **Family membership is not part of that gate.** Parents (and future students) SELECT materials only when `visibility = published` **and** they can view the course. Instructors/admins see unpublished courses and materials. **P1 discussions:** publish selected tables on `supabase_realtime`; Realtime payloads must still pass the same RLS. Discussion-attached files are readable when the actor can SELECT the attaching message.
+- Access control via **RLS** (and Storage policies) aligned with Membership roles and parent access rules above. Parent SELECT of a course requires a `ParentStudentLink`, an active `Enrollment`, `Course.status = active`, and `Course.visibility = published` (active org membership; role need not be `parent`). **Family membership is not part of that gate.** Parents (and future students) SELECT materials only when `visibility = published` **and** they can view the course. Instructors SELECT unpublished courses and materials only for courses they teach; owners/admins see all. **P1 discussions:** publish selected tables on `supabase_realtime`; Realtime payloads must still pass the same RLS. Discussion-attached files are readable when the actor can SELECT the attaching message.
 - **Migrations:** `supabase db migrate` — see [STACK.md](../STACK.md).
 - **ID format:** App entities use **`bigserial` / `bigint`**. Auth-linked ids (`profiles`, FKs to `auth.users`) stay **`uuid`**. Baseline migrations match this convention.

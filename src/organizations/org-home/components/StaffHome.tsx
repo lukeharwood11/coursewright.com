@@ -16,7 +16,7 @@ export function StaffHome({
   orgSlug,
   dashboard,
   loading,
-  error,
+  error: _error,
 }: {
   orgName: string;
   orgSlug: string;
@@ -46,12 +46,6 @@ export function StaffHome({
 
       {loading ? (
         <PageLoading embedded label="Loading overview…" />
-      ) : null}
-
-      {error ? (
-        <p className="mt-6 text-[13.5px] text-[var(--amber-deep)]" role="alert">
-          {error}
-        </p>
       ) : null}
 
       {dashboard && !loading ? (

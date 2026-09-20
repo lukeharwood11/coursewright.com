@@ -6,6 +6,7 @@ import { Badge } from "@/ui/Badge";
 import { PageLoading } from "@/ui/PageLoading";
 import { Button, ButtonLink } from "@/ui/Button";
 import { PublishedBadge } from "@/ui/PublishedBadge";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { formatIsoDate } from "@/courses/model/dates";
 import { coursePath } from "@/courses/model/paths";
 import { materialKindLabel } from "@/materials/model/kind";
@@ -30,6 +31,7 @@ const PageContentView = lazy(async () => {
 export function MaterialPage() {
   const page = useMaterial();
   const navigate = useNavigate();
+  useToastOnError(page.error);
 
   useEffect(() => {
     document.title = page.material
@@ -241,10 +243,6 @@ export function MaterialPage() {
           pending={page.setVisibility.isPending}
           onUnpublish={() => page.setVisibility.mutate("unpublished")}
         />
-      ) : null}
-
-      {page.error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]">{page.error}</p>
       ) : null}
     </div>
   );

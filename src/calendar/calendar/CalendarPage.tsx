@@ -5,9 +5,11 @@ import { MonthCalendar } from "@/calendar/components/MonthCalendar";
 import { WeekCalendar } from "@/calendar/components/WeekCalendar";
 import { CalendarToolbar } from "./components/CalendarToolbar";
 import { useCalendar } from "./hooks/useCalendar";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 export function CalendarPage() {
   const page = useCalendar();
+  useToastOnError(page.error);
 
   useEffect(() => {
     document.title = "Calendar · Course Wright";
@@ -49,10 +51,6 @@ export function CalendarPage() {
 
       {page.loading ? (
         <PageLoading embedded label="Loading calendar…" />
-      ) : page.error ? (
-        <p className="mt-6 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {page.error}
-        </p>
       ) : (
         <div className="mt-5">
           {page.view === "week" ? (

@@ -20,7 +20,7 @@ List stored **Activity** notifications — events that need this person’s atte
 - Clicking a row **acks** it (`read_at`) and opens the activity (a discussion post). Opening the discussion another way acks matching **new post** notifications for that person. **@mentions** stay unread until clicked.
 - While this page is open, **Realtime** adds new rows without a full reload.
 - Empty: **Nothing here yet.**
-- Staff Teacher view and parent chrome share the same list; recipients differ by who was notified (instructors / class leads by default; families when a teacher chose **Notify everyone**; anyone @mentioned on the thread).
+- Staff Teacher view and parent chrome share the same list; recipients differ by who was notified (instructors / class leads, people who started or posted on the thread, families when a teacher chose **Notify everyone**, anyone @mentioned). One new-post Activity item per discussion.
 
 ## Data shown
 

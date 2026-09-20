@@ -1,6 +1,6 @@
 # AGENTS — `src/notifications/`
 
-In-app **Activity**: stored notifications for the signed-in person. Discussion posts notify course instructors or class leads; **@mentions** notify that person; staff may **Notify everyone** on create.
+In-app **Activity**: stored notifications for the signed-in person. Discussion posts notify course instructors or class leads, people who started or posted on the thread (one row per discussion), **@mentions**, and staff **Notify everyone** on create.
 
 ## Scope
 

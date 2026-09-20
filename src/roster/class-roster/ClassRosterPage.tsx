@@ -9,9 +9,11 @@ import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudent
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
 import { ClassLeadsSection } from "./components/ClassLeadsSection";
 import { useClassRoster } from "./hooks/useClassRoster";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 export function ClassRosterPage() {
   const roster = useClassRoster();
+  useToastOnError(roster.error);
 
   useEffect(() => {
     document.title = roster.classGroup
@@ -37,9 +39,6 @@ export function ClassRosterPage() {
         <p className="mt-2 text-[14.5px] text-[var(--ink-soft)]">
           It may have been removed, or you may not have access.
         </p>
-        {roster.error ? (
-          <p className="mt-2 text-[13px] text-[var(--amber-deep)]">{roster.error}</p>
-        ) : null}
         <p className="mt-4 text-[13px]">
           <Link
             to={`/my/${roster.organization.slug}/roster`}

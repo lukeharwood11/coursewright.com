@@ -8,7 +8,8 @@ export { InfoHint } from "./InfoHint";
 export { Input } from "./Input";
 export { PageFormActions } from "./PageFormActions";
 export { PageLoading } from "./PageLoading";
-export { toastNotImplemented } from "./toast";
+export { toastNotImplemented, toastSomethingWentWrong } from "./toast";
+export { useToastOnError } from "./useToastOnError";
 export { Mark, Wordmark } from "./Wordmark";
 export {
   ConceptAFull,
