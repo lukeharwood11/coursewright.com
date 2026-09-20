@@ -2,6 +2,7 @@ import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { MATERIAL_KINDS, materialKindLabel, type MaterialKind } from "@/materials/model/kind";
 import { useAddMaterial } from "../hooks/useAddMaterial";
+import { AudioSnippetRecorder } from "./AudioSnippetRecorder";
 import { OptionalDueDateField } from "./OptionalDueDateField";
 
 const controlClass = [
@@ -77,17 +78,24 @@ export function AddMaterialForm({
         </label>
       ) : null}
       {add.kind === "file" ? (
-        <label className="mt-3 flex flex-col gap-1">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">File</span>
-          <input
-            type="file"
-            className="text-[13.5px] text-[var(--ink-soft)]"
-            onChange={(event) => add.setFile(event.target.files?.[0] ?? null)}
-          />
-          <span className="text-[12px] text-[var(--ink-faint)]">
-            Audio: MP3 or M4A works best on phones.
-          </span>
-        </label>
+        <div className="mt-3 flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-[13px] font-bold text-[var(--ink-soft)]">File</span>
+            <input
+              type="file"
+              className="text-[13.5px] text-[var(--ink-soft)]"
+              onChange={(event) => add.setFile(event.target.files?.[0] ?? null)}
+            />
+            {add.file ? (
+              <span className="text-[12px] text-[var(--ink-soft)]">{add.file.name}</span>
+            ) : null}
+            <span className="text-[12px] text-[var(--ink-faint)]">
+              Audio: MP3 or M4A works best on phones. You can also record a clip
+              below.
+            </span>
+          </label>
+          <AudioSnippetRecorder file={add.file} onFile={add.setFile} />
+        </div>
       ) : null}
       <label className="mt-3 flex flex-col gap-1">
         <span className="text-[13px] font-bold text-[var(--ink-soft)]">

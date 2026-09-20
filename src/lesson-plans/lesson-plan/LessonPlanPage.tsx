@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/ui/Badge";
+import { PageLoading } from "@/ui/PageLoading";
 import { Button, ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PublishedBadge } from "@/ui/PublishedBadge";
@@ -27,9 +28,7 @@ export function LessonPlanPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading lesson plan…</p>
-      </div>
+      <PageLoading label="Loading lesson plan…" />
     );
   }
 

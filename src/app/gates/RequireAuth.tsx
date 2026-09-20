@@ -3,7 +3,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuthSession } from "@/auth/hooks/useAuthSession";
 import type { AuthedOutletContext } from "@/auth/hooks/useAuthedUser";
 import { safeNextPath } from "@/auth/model/safeNext";
-import { Wordmark } from "@/ui/Wordmark";
+import { PageLoading } from "@/ui/PageLoading";
 
 export function RequireAuth() {
   const session = useAuthSession();
@@ -38,12 +38,5 @@ export function RedirectIfAuthed({ children }: { children: ReactNode }) {
 }
 
 function AuthLoading() {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-[var(--paper)] px-4">
-      <div className="text-center">
-        <Wordmark size="login" />
-        <p className="mt-4 text-[13.5px] text-[var(--ink-soft)]">Loading…</p>
-      </div>
-    </main>
-  );
+  return <PageLoading fullScreen label="Loading…" />;
 }

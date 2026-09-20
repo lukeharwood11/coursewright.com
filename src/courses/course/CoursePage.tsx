@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { resourceShareMessage } from "@/sharing/model/copyLink";
 import { Button } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
@@ -63,9 +64,7 @@ export function CoursePage() {
 
   if (loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading course…</p>
-      </div>
+      <PageLoading label="Loading course…" />
     );
   }
 

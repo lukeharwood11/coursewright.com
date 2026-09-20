@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { BillingPlaceholder } from "@/billing";
 import { PageFormActions } from "@/ui/PageFormActions";
+import { PageLoading } from "@/ui/PageLoading";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
   ORG_SETTINGS_FORM_ID,
@@ -24,9 +25,7 @@ export function OrgSettingsPage() {
 
   if (settings.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading settings…</p>
-      </div>
+      <PageLoading label="Loading settings…" />
     );
   }
 

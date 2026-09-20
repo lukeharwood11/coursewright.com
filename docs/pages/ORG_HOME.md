@@ -95,7 +95,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - This week (important now + dated counts)
 - People snapshot (roster)
 - Switch org → [ORG_PICKER](./ORG_PICKER.md)
-- Account menu (avatar) → User (Settings / Sign out) and Organization (Org settings / Switch → [ORG_PICKER](./ORG_PICKER.md)) — [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md), [ORG_SETTINGS](./ORG_SETTINGS.md)
+- Account menu (avatar) → User (Settings / **Send feedback** / Sign out) and Organization (Org settings / Switch → [ORG_PICKER](./ORG_PICKER.md)) — [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md), [FEEDBACK](./FEEDBACK.md), [ORG_SETTINGS](./ORG_SETTINGS.md)
 - **Search** in chrome (staff overlay: pages / courses / materials; dedicated route TBD)
 
 ## Primary actions
@@ -133,6 +133,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - [UNIT](./UNIT.md) — open a unit when linked from materials
 - [COURSE](./COURSE.md) — open course context (read-focused)
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — account affordance
+- [FEEDBACK](./FEEDBACK.md) — Send feedback (account menu)
 - [ORG_PICKER](./ORG_PICKER.md) — switch org (when multi-org)
 - [PRINT](./PRINT.md) — **Print this week** → `/my/<org-slug>/print-this-week`; per-material **Print** → material `…/print`
 
@@ -150,6 +151,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - [ORG_SETTINGS](./ORG_SETTINGS.md) — via chrome / account menu
 - [ORG_PICKER](./ORG_PICKER.md) — switch org
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — account
+- [FEEDBACK](./FEEDBACK.md) — Send feedback (account menu)
 - Search — staff chrome overlay (pages / courses / materials); dedicated route still TBD
 - **P1:** [TEMPLATE_LIST](./TEMPLATE_LIST.md) — templates
 

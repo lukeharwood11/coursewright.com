@@ -117,6 +117,7 @@ export function useAddMaterial(args: {
     setScheduledDate,
     dueDate,
     setDueDate,
+    file,
     setFile,
     formError,
     submitting: mutation.isPending,

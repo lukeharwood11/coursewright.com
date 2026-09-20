@@ -1,6 +1,7 @@
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { useQuery } from "@tanstack/react-query";
@@ -12,6 +13,7 @@ import {
   VisibilityBanner,
 } from "./components/VisibilityBanner";
 import { OptionalDueDateField } from "./components/OptionalDueDateField";
+import { AudioSnippetRecorder } from "./components/AudioSnippetRecorder";
 import { PageEditorMediaProvider } from "./components/PageEditorMediaContext";
 import { fileQueryKeys } from "@/materials/databridge/files";
 
@@ -51,9 +53,7 @@ export function MaterialEditPage() {
 
   if (page.loading || (page.material?.kind === "page" && page.blocksLoading)) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading editor…</p>
-      </div>
+      <PageLoading label="Loading editor…" />
     );
   }
 
@@ -179,11 +179,7 @@ export function MaterialEditPage() {
             </p>
             <div className="mt-3">
               <Suspense
-                fallback={
-                  <p className="text-[14px] text-[var(--ink-soft)]">
-                    Loading editor…
-                  </p>
-                }
+                fallback={<PageLoading embedded label="Loading editor…" />}
               >
                 <PageEditorMediaProvider
                   value={{
@@ -273,6 +269,14 @@ function FileEditor({
     queryKey: fileQueryKeys.versions(fileId),
     queryFn: () => listFileVersions(fileId),
   });
+  const [recorded, setRecorded] = useState<File | null>(null);
+
+  async function applyReplacement(next: File | null) {
+    setRecorded(next);
+    if (!next) return;
+    await replaceFile({ fileId, organizationId, file: next });
+    onChange();
+  }
 
   return (
     <section className="mt-8 max-w-xl">
@@ -286,14 +290,17 @@ function FileEditor({
           onChange={async (event) => {
             const next = event.target.files?.[0];
             if (!next) return;
-            await replaceFile({ fileId, organizationId, file: next });
-            onChange();
+            await applyReplacement(next);
           }}
         />
       </label>
       <p className="mt-1 text-[12px] text-[var(--ink-faint)]">
-        Audio: MP3 or M4A works best on phones.
+        Audio: MP3 or M4A works best on phones. You can also record a clip
+        below.
       </p>
+      <div className="mt-3">
+        <AudioSnippetRecorder file={recorded} onFile={applyReplacement} />
+      </div>
       <ul className="mt-4 divide-y divide-[var(--line-soft)] rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]">
         {(versionsQuery.data ?? []).map((version) => (
           <li

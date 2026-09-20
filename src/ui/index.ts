@@ -6,6 +6,7 @@ export { Button, ButtonLink } from "./Button";
 export { ConfirmDialog } from "./ConfirmDialog";
 export { Input } from "./Input";
 export { PageFormActions } from "./PageFormActions";
+export { PageLoading } from "./PageLoading";
 export { toastNotImplemented } from "./toast";
 export { Mark, Wordmark } from "./Wordmark";
 export {

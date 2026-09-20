@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { ButtonLink } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { DiscussionFilterChips } from "./components/DiscussionFilterChips";
 import { DiscussionList } from "./components/DiscussionList";
@@ -15,9 +16,7 @@ export function DiscussionsPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading discussions…</p>
-      </div>
+      <PageLoading label="Loading discussions…" />
     );
   }
 

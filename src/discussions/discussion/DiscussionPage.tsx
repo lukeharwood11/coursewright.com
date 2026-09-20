@@ -6,6 +6,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
+import { PageLoading } from "@/ui/PageLoading";
 import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import {
@@ -67,9 +68,7 @@ export function DiscussionPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading discussion…</p>
-      </div>
+      <PageLoading label="Loading discussion…" />
     );
   }
 
