@@ -100,7 +100,14 @@ export async function loadParentDashboard(
   if (importantResult.error) throw new Error(importantResult.error.message);
   if (bulletinsResult.error) throw new Error(bulletinsResult.error.message);
   if (membersResult.error) throw new Error(membersResult.error.message);
-  if (announcementsResult.error) throw new Error(announcementsResult.error.message);
+  // HN-017: the testing database may not have `announcements` yet. Skip rather
+  // than failing the whole parent home.
+  if (
+    announcementsResult.error &&
+    announcementsResult.error.code !== "PGRST205"
+  ) {
+    throw new Error(announcementsResult.error.message);
+  }
 
   const enrollments = (enrollmentsResult.data ?? []).flatMap((row) => {
     const course = one(row.course);
