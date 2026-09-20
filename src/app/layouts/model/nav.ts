@@ -13,6 +13,8 @@ export type NavSection = {
   href: string | null;
   match: NavMatch;
   soon?: boolean;
+  /** Unread count badge (parent announcements). Hidden when 0 / unset. */
+  badgeCount?: number;
   children: NavLinkItem[];
 };
 
@@ -21,18 +23,33 @@ export type NavLists = {
   classes: Array<{ id: string; title: string }>;
 };
 
-const CHILD_LIMIT = 12;
+const VISIBLE_CHILD_LIMIT = 5;
+const ACCOUNT_ORG_LIMIT = 12;
 
 function childLinks(
   items: Array<{ id: string; label: string }>,
   hrefFor: (id: string) => string,
+  moreHref: string,
 ): NavLinkItem[] {
-  return items.slice(0, CHILD_LIMIT).map((item) => ({
+  const visible = items.slice(0, VISIBLE_CHILD_LIMIT).map((item) => ({
     id: item.id,
     label: item.label,
     href: hrefFor(item.id),
-    match: "exact",
+    match: "exact" as const,
   }));
+
+  const remaining = items.length - visible.length;
+  if (remaining <= 0) return visible;
+
+  return [
+    ...visible,
+    {
+      id: "__more__",
+      label: remaining === 1 ? "+ 1 other" : `+ ${remaining} others`,
+      href: moreHref,
+      match: "exact",
+    },
+  ];
 }
 
 export function buildStaffNav(orgSlug: string, lists: NavLists): NavSection[] {
@@ -55,6 +72,7 @@ export function buildStaffNav(orgSlug: string, lists: NavLists): NavSection[] {
       children: childLinks(
         lists.courses.map((course) => ({ id: course.id, label: course.title })),
         (id) => `${base}/courses/${id}`,
+        `${base}/courses`,
       ),
     },
     {
@@ -68,6 +86,7 @@ export function buildStaffNav(orgSlug: string, lists: NavLists): NavSection[] {
           label: classGroup.title,
         })),
         (id) => `${base}/classes/${id}`,
+        `${base}/roster`,
       ),
     },
     {
@@ -80,11 +99,17 @@ export function buildStaffNav(orgSlug: string, lists: NavLists): NavSection[] {
   ];
 }
 
-export function buildParentNav(orgSlug: string, lists: NavLists): NavSection[] {
+export function buildParentNav(
+  orgSlug: string,
+  lists: NavLists,
+  options?: { unreadAnnouncements?: number },
+): NavSection[] {
   const base = `/my/${orgSlug}`;
+  const unreadAnnouncements = options?.unreadAnnouncements ?? 0;
   const courseChildren = childLinks(
     lists.courses.map((course) => ({ id: course.id, label: course.title })),
     (id) => `${base}/courses/${id}`,
+    `${base}/courses`,
   );
 
   const sections: NavSection[] = [
@@ -100,6 +125,14 @@ export function buildParentNav(orgSlug: string, lists: NavLists): NavSection[] {
       label: "Calendar",
       href: `${base}/calendar`,
       match: "prefix",
+      children: [],
+    },
+    {
+      id: "announcements",
+      label: "Announcements",
+      href: `${base}/announcements`,
+      match: "prefix",
+      badgeCount: unreadAnnouncements > 0 ? unreadAnnouncements : undefined,
       children: [],
     },
   ];
@@ -148,7 +181,7 @@ export function buildAccountNav(
       label: "Organizations",
       href: "/my",
       match: "exact",
-      children: organizations.slice(0, CHILD_LIMIT).map((organization) => ({
+      children: organizations.slice(0, ACCOUNT_ORG_LIMIT).map((organization) => ({
         id: String(organization.id),
         label: organization.name,
         href: `/my/${organization.slug}`,

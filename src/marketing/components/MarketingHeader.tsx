@@ -1,6 +1,14 @@
-import { NavLink } from "react-router-dom";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useEffect, useId, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import { ButtonLink } from "@/ui/Button";
 import { Wordmark } from "@/ui/Wordmark";
+
+const secondaryLinks = [
+  { to: "/about", label: "About" },
+  { to: "/pricing", label: "Pricing" },
+  { to: "/docs", label: "Help" },
+] as const;
 
 function navClass({ isActive }: { isActive: boolean }) {
   return [
@@ -10,26 +18,86 @@ function navClass({ isActive }: { isActive: boolean }) {
 }
 
 export function MarketingHeader() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuId = useId();
+  const location = useLocation();
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
   return (
     <header className="border-b border-[var(--line-soft)] bg-[var(--surface)]">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-5 py-3.5">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-5 py-3.5">
         <Wordmark to="/" size="nav" shortOnMobile />
-        <nav className="flex flex-wrap items-center gap-x-5 gap-y-2" aria-label="Marketing">
-          <NavLink to="/about" className={navClass}>
-            About
-          </NavLink>
-          <NavLink to="/pricing" className={navClass}>
-            Pricing
-          </NavLink>
-          <NavLink to="/docs" className={navClass}>
-            Help
-          </NavLink>
-          <NavLink to="/login" className={navClass}>
-            Sign in
-          </NavLink>
-          <ButtonLink to="/signup">Sign up</ButtonLink>
-        </nav>
+        <div className="flex items-center gap-x-3 sm:gap-x-5">
+          <nav
+            className="hidden items-center gap-x-5 md:flex"
+            aria-label="Marketing"
+          >
+            {secondaryLinks.map((link) => (
+              <NavLink key={link.to} to={link.to} className={navClass}>
+                {link.label}
+              </NavLink>
+            ))}
+            <NavLink to="/login" className={navClass}>
+              Sign in
+            </NavLink>
+            <ButtonLink to="/signup">Sign up</ButtonLink>
+          </nav>
+
+          <nav
+            className="flex items-center gap-x-3 sm:gap-x-4 md:hidden"
+            aria-label="Account"
+          >
+            <NavLink to="/login" className={navClass}>
+              Sign in
+            </NavLink>
+            <ButtonLink to="/signup">Sign up</ButtonLink>
+            <button
+              type="button"
+              className="shrink-0 rounded-[6px] p-1.5 text-[var(--ink-soft)] hover:bg-[var(--green-tint)] hover:text-[var(--green)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              aria-controls={menuId}
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              {menuOpen ? (
+                <XMarkIcon className="h-6 w-6" aria-hidden />
+              ) : (
+                <Bars3Icon className="h-6 w-6" aria-hidden />
+              )}
+            </button>
+          </nav>
+        </div>
       </div>
+
+      {menuOpen ? (
+        <nav
+          id={menuId}
+          className="border-t border-[var(--line-soft)] md:hidden"
+          aria-label="Marketing"
+        >
+          <div className="mx-auto flex max-w-5xl flex-col gap-1 px-5 py-3">
+            {secondaryLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) =>
+                  [
+                    "rounded-[6px] px-2 py-2.5 text-[14px] font-bold",
+                    isActive
+                      ? "bg-[var(--green-tint)] text-[var(--green)]"
+                      : "text-[var(--ink-soft)] hover:bg-[var(--green-tint)] hover:text-[var(--ink)]",
+                  ].join(" ")
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
+      ) : null}
     </header>
   );
 }

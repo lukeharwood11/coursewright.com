@@ -1,3 +1,3 @@
 # AGENTS — `src/calendar/calendar/`
 
-Calendar page: month/week toggle, legend, prev/next.
+Calendar page: period pagination and month/week view segment (see `components/CalendarToolbar`), legend, grid.

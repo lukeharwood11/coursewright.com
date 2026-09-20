@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom";
-import { BellAlertIcon } from "@heroicons/react/24/solid";
+import {
+  BellAlertIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/24/solid";
 import {
   announcementTargetName,
   announcementAudienceLabel,
 } from "@/announcements/model/audience";
 import { announcementPath } from "@/announcements/model/paths";
+import { announcementMetaParts } from "@/announcements/model/postedAt";
 import { formatDateRange } from "@/courses/model/dates";
 import {
   bulletinForStudentsLabel,
@@ -33,6 +37,12 @@ export function ParentAnnouncementList({
           const forLabel = showStudent
             ? bulletinForStudentsLabel(item.students)
             : null;
+          const meta = announcementMetaParts({
+            audienceLabel: announcementAudienceLabel(item.audience),
+            authorName: item.authorName,
+            createdAt: item.createdAt,
+            dateRange: dates,
+          }).join(" · ");
           return (
             <li key={item.id}>
               <Link
@@ -44,20 +54,27 @@ export function ParentAnnouncementList({
                 }`}
               >
                 <span className="flex items-start gap-2">
-                  {!item.read ? (
+                  {item.read ? (
+                    <CheckCircleIcon
+                      className="mt-0.5 h-5 w-5 shrink-0 text-[var(--green)]"
+                      aria-hidden
+                    />
+                  ) : (
                     <BellAlertIcon
                       className="mt-0.5 h-5 w-5 shrink-0 text-[var(--green)]"
                       aria-hidden
                     />
-                  ) : null}
+                  )}
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-center gap-2">
                       <span className="text-[15px] font-extrabold text-[var(--ink)]">
                         {item.title}
                       </span>
-                      {!item.read ? (
+                      {item.read ? (
+                        <span className="sr-only">Seen</span>
+                      ) : (
                         <span className="sr-only">New</span>
-                      ) : null}
+                      )}
                     </span>
                     {item.body ? (
                       <span className="mt-1 block line-clamp-2 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
@@ -73,8 +90,7 @@ export function ParentAnnouncementList({
                       </span>
                     ) : null}
                     <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
-                      {announcementAudienceLabel(item.audience)}
-                      {dates ? ` · ${dates}` : ""}
+                      {meta}
                     </span>
                   </span>
                 </span>

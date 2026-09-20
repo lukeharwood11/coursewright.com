@@ -1,5 +1,5 @@
-import type { ChangeableStaffRole, OrgRole } from "@/organizations/model/role";
-import { CHANGEABLE_STAFF_ROLES, parseOrgRole } from "@/organizations/model/role";
+import type { OrgRole, StaffInviteRole } from "@/organizations/model/role";
+import { EDITABLE_STAFF_ROLES, parseOrgRole } from "@/organizations/model/role";
 import { staffMembershipWriteErrorMessage } from "@/organizations/model/staffAccount";
 import { requireSupabase } from "./client";
 
@@ -135,15 +135,18 @@ export async function listOrgPeople(
 
 export async function updateStaffMembershipRole(input: {
   membershipId: number;
-  role: ChangeableStaffRole;
+  role: StaffInviteRole;
 }): Promise<void> {
+  if (!Number.isFinite(input.membershipId)) {
+    throw new Error("That staff member couldn’t be updated. Refresh and try again.");
+  }
   const db = requireSupabase();
   const { data, error } = await db
     .from("memberships")
     .update({ role: input.role })
     .eq("id", input.membershipId)
     .eq("status", "active")
-    .in("role", [...CHANGEABLE_STAFF_ROLES])
+    .in("role", [...EDITABLE_STAFF_ROLES])
     .select("id")
     .maybeSingle();
 
@@ -154,6 +157,9 @@ export async function updateStaffMembershipRole(input: {
 }
 
 export async function removeStaffMembership(membershipId: number): Promise<void> {
+  if (!Number.isFinite(membershipId)) {
+    throw new Error("That staff member couldn’t be removed. Refresh and try again.");
+  }
   const db = requireSupabase();
   // Memberships have no deleted_at. status=suspended would block a later invite
   // (unique org + user). Do not cascade into enrollments, parent links, or
@@ -163,7 +169,7 @@ export async function removeStaffMembership(membershipId: number): Promise<void>
     .delete()
     .eq("id", membershipId)
     .eq("status", "active")
-    .in("role", [...CHANGEABLE_STAFF_ROLES])
+    .in("role", [...EDITABLE_STAFF_ROLES])
     .select("id")
     .maybeSingle();
 

@@ -30,7 +30,7 @@
 | **UI component docs** | **Storybook** | Develop / document `src/ui` (and related) components in isolation |
 | **CI/CD** | **GitHub Actions** | Lint/typecheck/build; deploy SPA and related pipelines |
 | **Product analytics** | **PostHog** | Product usage / funnels; client exception capture in the SPA |
-| **Transactional email** | **Resend** | Organization invite emails (`organization-invite` event) via Edge Function `send-organization-invite`. API key is a Supabase Function secret (**HN-015**) |
+| **Transactional email** | **Resend** | Organization invite emails (`organization-invite`) via `send-organization-invite`. Announcement opt-in emails (`announcement-notification`) via `send-announcement-notification`. API key is a Supabase Function secret (**HN-015**) |
 | **Billing (P1)** | **Stripe Billing** *(hypothesis)* | Course Wright charges orgs — not P0 |
 
 ---
@@ -60,7 +60,7 @@
 | Prefer PostgREST (frontend) | Prefer Supabase Functions |
 |-----------------------------|---------------------------|
 | Load org, courses, units, materials | **Create course from course** (copy units/materials — **P0**) |
-| Edit a material title / dates / text | **Send organization invite email** (`send-organization-invite` → Resend) |
+| Edit a material title / dates / text | **Send organization invite email** (`send-organization-invite` → Resend); **send announcement notification** (`send-announcement-notification` → Resend) |
 | Roster list / enroll when rules fit RLS | Invite claim / privileged membership writes |
 | Parent dashboard reads for this week | Soft-delete cascades / revert that touch many rows |
 | Mark important now (if RLS allows) | Anything needing service-role or **external email** |

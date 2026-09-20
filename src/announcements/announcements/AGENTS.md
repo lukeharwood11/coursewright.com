@@ -1,3 +1,4 @@
 # AGENTS — `src/announcements/announcements/`
 
-Staff list of org announcements. Teacher view only.
+Org announcements list. Staff Teacher view: compose + availability groups. Parent chrome (and staff **Parent view**): current notices with unread / seen icons.
+

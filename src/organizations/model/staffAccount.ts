@@ -1,8 +1,8 @@
 import {
   canManageStaff,
-  changeableStaffRoles,
-  parseChangeableStaffRole,
-  type ChangeableStaffRole,
+  assignableStaffRoles,
+  parseStaffInviteRole,
+  type EditableStaffRole,
   type OrgRole,
   type StaffInviteRole,
 } from "./role";
@@ -14,10 +14,17 @@ export function isOrgManagerRole(role: StaffInviteRole): boolean {
   return role === "owner" || role === "admin";
 }
 
+export function isEditableStaffRole(
+  role: StaffInviteRole,
+): role is EditableStaffRole {
+  return role === "admin" || role === "instructor";
+}
+
+/** @deprecated Prefer isEditableStaffRole. */
 export function isChangeableStaffRole(
   role: StaffInviteRole,
-): role is ChangeableStaffRole {
-  return role === "admin" || role === "instructor";
+): role is EditableStaffRole {
+  return isEditableStaffRole(role);
 }
 
 export function isLastOrgManager(
@@ -36,14 +43,14 @@ export function staffMemberActions(input: {
 }): {
   canChangeRole: boolean;
   canRemove: boolean;
-  changeRoles: ChangeableStaffRole[];
+  changeRoles: StaffInviteRole[];
   lastManagerGuard: boolean;
 } {
   const lastManagerGuard = isLastOrgManager(
     input.members,
     input.member.membershipId,
   );
-  const changeRoles = input.actorRole ? changeableStaffRoles(input.actorRole) : [];
+  const changeRoles = input.actorRole ? assignableStaffRoles(input.actorRole) : [];
 
   if (!input.actorRole || !canManageStaff(input.actorRole)) {
     return {
@@ -54,13 +61,13 @@ export function staffMemberActions(input: {
     };
   }
 
-  const changeableTarget = isChangeableStaffRole(input.member.role);
+  const editableTarget = isEditableStaffRole(input.member.role);
   const wouldDemoteLastManager =
     lastManagerGuard && isOrgManagerRole(input.member.role);
 
   return {
-    canChangeRole: changeableTarget && changeRoles.length > 0 && !wouldDemoteLastManager,
-    canRemove: changeableTarget && !wouldDemoteLastManager,
+    canChangeRole: editableTarget && changeRoles.length > 0 && !wouldDemoteLastManager,
+    canRemove: editableTarget && !wouldDemoteLastManager,
     changeRoles,
     lastManagerGuard,
   };
@@ -72,23 +79,29 @@ export function validateChangeStaffRole(input: {
   nextRole: string;
   isLastManager: boolean;
 }):
-  | { ok: true; value: ChangeableStaffRole }
+  | { ok: true; value: StaffInviteRole }
   | { ok: false; error: string } {
   if (!canManageStaff(input.actorRole)) {
-    return { ok: false, error: "You don’t have permission to change staff roles." };
+    return { ok: false, error: "You don’t have permission to change collaborator roles." };
   }
 
-  if (!isChangeableStaffRole(input.currentRole)) {
+  if (!isEditableStaffRole(input.currentRole)) {
     return { ok: false, error: "Owner roles can’t be changed here." };
   }
 
-  const nextRole = parseChangeableStaffRole(input.nextRole);
+  const nextRole = parseStaffInviteRole(input.nextRole);
   if (!nextRole) {
-    return { ok: false, error: "Choose admin or instructor." };
+    return { ok: false, error: "Choose instructor, admin, or owner." };
   }
 
-  if (!changeableStaffRoles(input.actorRole).includes(nextRole)) {
-    return { ok: false, error: "You don’t have permission to assign that role." };
+  if (!assignableStaffRoles(input.actorRole).includes(nextRole)) {
+    return {
+      ok: false,
+      error:
+        nextRole === "owner"
+          ? "Only an owner can make someone an owner."
+          : "You don’t have permission to assign that role.",
+    };
   }
 
   if (
@@ -108,10 +121,10 @@ export function validateRemoveStaffMember(input: {
   isLastManager: boolean;
 }): { ok: true } | { ok: false; error: string } {
   if (!canManageStaff(input.actorRole)) {
-    return { ok: false, error: "You don’t have permission to remove staff." };
+    return { ok: false, error: "You don’t have permission to remove collaborators." };
   }
 
-  if (!isChangeableStaffRole(input.targetRole)) {
+  if (!isEditableStaffRole(input.targetRole)) {
     return { ok: false, error: "Owners can’t be removed here." };
   }
 
@@ -134,7 +147,7 @@ export function staffMembershipWriteErrorMessage(error: {
     error.code === "42501" ||
     message.includes("row-level security")
   ) {
-    return "You don’t have permission to update that staff member.";
+    return "You don’t have permission to update that collaborator.";
   }
   return error.message;
 }

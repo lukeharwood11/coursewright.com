@@ -75,13 +75,15 @@ export type ParentAnnouncementItem = {
   body: string;
   startDate: string | null;
   endDate: string | null;
+  createdAt: string;
+  authorName: string;
   audience: AnnouncementAudience;
-  courseId: number | null;
-  classId: number | null;
-  studentId: number | null;
-  courseTitle: string | null;
-  classTitle: string | null;
-  studentName: string | null;
+  courseIds: number[];
+  classIds: number[];
+  studentIds: number[];
+  courseTitles: string[];
+  classTitles: string[];
+  studentNames: string[];
   read: boolean;
   students: ParentAnnouncementStudent[];
 };
@@ -164,13 +166,15 @@ export type ParentDashboardSource = {
     body: string;
     startDate: string | null;
     endDate: string | null;
+    createdAt: string;
+    authorName: string;
     audience: AnnouncementAudience;
-    courseId: number | null;
-    classId: number | null;
-    studentId: number | null;
-    courseTitle: string | null;
-    classTitle: string | null;
-    studentName: string | null;
+    courseIds: number[];
+    classIds: number[];
+    studentIds: number[];
+    courseTitles: string[];
+    classTitles: string[];
+    studentNames: string[];
     read: boolean;
   }>;
 };
@@ -452,13 +456,20 @@ function studentsForAnnouncement(
   source: ParentDashboardSource,
   item: NonNullable<ParentDashboardSource["announcements"]>[number],
 ): ParentAnnouncementStudent[] {
-  if (item.audience === "course" && item.courseId != null) {
-    return studentsForCourse(source, item.courseId);
+  if (item.audience === "course" && item.courseIds.length > 0) {
+    const byId = new Map<number, ParentAnnouncementStudent>();
+    for (const courseId of item.courseIds) {
+      for (const student of studentsForCourse(source, courseId)) {
+        byId.set(student.id, student);
+      }
+    }
+    return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
   }
-  if (item.audience === "class" && item.classId != null) {
+  if (item.audience === "class" && item.classIds.length > 0) {
+    const classIdSet = new Set(item.classIds);
     const ids = new Set(
       (source.classMemberships ?? [])
-        .filter((row) => row.classId === item.classId)
+        .filter((row) => classIdSet.has(row.classId))
         .map((row) => row.studentId),
     );
     return source.students
@@ -466,10 +477,12 @@ function studentsForAnnouncement(
       .map((student) => ({ id: student.id, name: student.name }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }
-  if (item.audience === "student" && item.studentId != null) {
+  if (item.audience === "student" && item.studentIds.length > 0) {
+    const idSet = new Set(item.studentIds);
     return source.students
-      .filter((student) => student.id === item.studentId)
-      .map((student) => ({ id: student.id, name: student.name }));
+      .filter((student) => idSet.has(student.id))
+      .map((student) => ({ id: student.id, name: student.name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
   return [];
 }

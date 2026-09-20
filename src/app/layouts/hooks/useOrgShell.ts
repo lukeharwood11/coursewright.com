@@ -7,6 +7,7 @@ import {
   orgQueryKeys,
 } from "@/organizations/databridge/memberships";
 import { isStaffRole } from "@/organizations/model/role";
+import { loadParentDashboard, parentQueryKeys } from "@/parent/databridge/dashboard";
 import {
   classQueryKeys,
   listClasses,
@@ -54,6 +55,12 @@ export function useOrgShellData(orgSlug: string | undefined) {
     enabled: isStaff && Boolean(organizationId) && !parentPresentation,
   });
 
+  const parentDashboardQuery = useQuery({
+    queryKey: parentQueryKeys.dashboard(organizationId ?? 0, user.id),
+    queryFn: () => loadParentDashboard(organizationId!, user.id),
+    enabled: parentPresentation && Boolean(organizationId),
+  });
+
   const courseRows = Array.isArray(coursesQuery.data) ? coursesQuery.data : [];
   const navCourses = parentPresentation
     ? familyVisibleCourses(courseRows)
@@ -70,10 +77,14 @@ export function useOrgShellData(orgSlug: string | undefined) {
     })),
   };
 
+  const unreadAnnouncements = (parentDashboardQuery.data?.announcements ?? []).filter(
+    (item) => !item.read,
+  ).length;
+
   const navSections =
     organization && role
       ? parentPresentation
-        ? buildParentNav(organization.slug, lists)
+        ? buildParentNav(organization.slug, lists, { unreadAnnouncements })
         : buildStaffNav(organization.slug, lists)
       : [];
 

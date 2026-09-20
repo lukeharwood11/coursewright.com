@@ -2,14 +2,9 @@ import { useState } from "react";
 import { Badge } from "@/ui/Badge";
 import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
+import { Select } from "@/ui/Select";
 import { roleBadgeVariant, roleLabel } from "@/organizations/model/role";
 import type { StaffMemberRow } from "../hooks/useOrgStaff";
-
-const controlClass = [
-  "rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-[13px] font-bold text-[var(--ink)] outline-none",
-  "focus:border-[var(--green)] focus:shadow-[0_0_0_3px_var(--green-tint)]",
-  "disabled:bg-[var(--paper)] disabled:text-[var(--ink-soft)]",
-].join(" ");
 
 export function StaffMemberList({
   members,
@@ -60,18 +55,13 @@ export function StaffMemberList({
                 {member.name ? (
                   <p className="truncate text-[12.5px] text-[var(--ink-faint)]">{member.email}</p>
                 ) : null}
-                {member.guardMessage ? (
-                  <p className="mt-1 text-[12.5px] text-[var(--ink-soft)]">
-                    {member.guardMessage}
-                  </p>
-                ) : null}
               </div>
 
               {member.canChangeRole ? (
                 <label>
                   <span className="sr-only">Role for {displayName}</span>
-                  <select
-                    className={controlClass}
+                  <Select
+                    size="compact"
                     value={member.role}
                     disabled={busy}
                     onChange={(event) => onChangeRole(member, event.target.value)}
@@ -81,7 +71,7 @@ export function StaffMemberList({
                         {roleLabel(option)}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </label>
               ) : (
                 <Badge variant={roleBadgeVariant(member.role)}>{roleLabel(member.role)}</Badge>
@@ -103,11 +93,11 @@ export function StaffMemberList({
 
       <ConfirmDialog
         open={Boolean(pendingRemove)}
-        title="Remove from staff?"
+        title="Remove collaborator?"
         body={
           pendingRemove?.isYou
-            ? "You’ll no longer be staff in this organization until someone invites you again."
-            : `${pendingName} will no longer be staff in this organization until you invite them again.`
+            ? "You’ll no longer be a collaborator in this organization until someone invites you again."
+            : `${pendingName} will no longer be a collaborator in this organization until you invite them again.`
         }
         confirmLabel="Remove"
         cancelLabel="Keep them"

@@ -61,15 +61,15 @@ export function StaffSection({
 }) {
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Staff</h2>
+      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Collaborators</h2>
       <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink-soft)]">
         {canManage
-          ? "Invite an owner, admin, or instructor. We’ll email them a link to join. Change admin and instructor roles, or remove them from staff."
+          ? "Invite an owner, admin, or instructor. We’ll email them a link to join."
           : "Owners, admins, and instructors in this organization."}
       </p>
 
       {loading ? (
-        <p className="mt-3 text-[14px] text-[var(--ink-soft)]">Loading staff…</p>
+        <p className="mt-3 text-[14px] text-[var(--ink-soft)]">Loading collaborators…</p>
       ) : null}
 
       {loadError ? (

@@ -55,6 +55,9 @@ infra/terraform/*.tfplan
 # Keep the lockfile for reproducible provider versions in CI:
 # infra/terraform/.terraform.lock.hcl
 
+# Experiment-mode DB parachute dumps (do not commit)
+backups/
+
 # Misc
 *.pem
 .cache/

@@ -4,9 +4,16 @@ export type OrgRole = (typeof ORG_ROLES)[number];
 export const STAFF_INVITE_ROLES = ["owner", "admin", "instructor"] as const;
 export type StaffInviteRole = (typeof STAFF_INVITE_ROLES)[number];
 
-/** Existing staff roles that owners/admins may change (not owner). */
-export const CHANGEABLE_STAFF_ROLES = ["admin", "instructor"] as const;
-export type ChangeableStaffRole = (typeof CHANGEABLE_STAFF_ROLES)[number];
+/**
+ * Existing memberships that owners/admins may edit or remove.
+ * Owner rows stay badge-only (invite or promote someone else to owner).
+ */
+export const EDITABLE_STAFF_ROLES = ["admin", "instructor"] as const;
+export type EditableStaffRole = (typeof EDITABLE_STAFF_ROLES)[number];
+
+/** @deprecated Prefer EDITABLE_STAFF_ROLES. */
+export const CHANGEABLE_STAFF_ROLES = EDITABLE_STAFF_ROLES;
+export type ChangeableStaffRole = EditableStaffRole;
 
 export function parseOrgRole(value: string): OrgRole | null {
   if (
@@ -39,7 +46,7 @@ export function canInviteStaff(role: OrgRole): boolean {
   return role === "owner" || role === "admin";
 }
 
-/** Owners and admins change admin ↔ instructor and remove staff. Same gate as invites. */
+/** Owners and admins change roles and remove staff. Same gate as invites. */
 export function canManageStaff(role: OrgRole): boolean {
   return canInviteStaff(role);
 }
@@ -56,24 +63,35 @@ export function parseStaffInviteRole(value: string): StaffInviteRole | null {
   return null;
 }
 
-export function parseChangeableStaffRole(value: string): ChangeableStaffRole | null {
+export function parseEditableStaffRole(value: string): EditableStaffRole | null {
   if (value === "admin" || value === "instructor") return value;
   return null;
 }
 
-/** Admins may invite admin or instructor. Only owners may invite an owner. */
+/** @deprecated Prefer parseEditableStaffRole / parseStaffInviteRole. */
+export function parseChangeableStaffRole(value: string): EditableStaffRole | null {
+  return parseEditableStaffRole(value);
+}
+
+/** Admins may invite admin or instructor. Only owners may invite an owner.
+ * Instructor first so the invite default stays the lowest privilege. */
 export function inviteableStaffRoles(actor: OrgRole): StaffInviteRole[] {
-  if (actor === "owner") return ["owner", "admin", "instructor"];
-  if (actor === "admin") return ["admin", "instructor"];
+  if (actor === "owner") return ["instructor", "admin", "owner"];
+  if (actor === "admin") return ["instructor", "admin"];
   return [];
 }
 
-/** Admin ↔ instructor only. Owner stays invite-only; billing remains owner-only. */
-export function changeableStaffRoles(actor: OrgRole): ChangeableStaffRole[] {
-  return inviteableStaffRoles(actor).filter(
-    (role): role is ChangeableStaffRole =>
-      role === "admin" || role === "instructor",
-  );
+/**
+ * Roles an actor may assign when changing an existing collaborator.
+ * Owners can promote to owner; admins cannot.
+ */
+export function assignableStaffRoles(actor: OrgRole): StaffInviteRole[] {
+  return inviteableStaffRoles(actor);
+}
+
+/** @deprecated Prefer assignableStaffRoles. */
+export function changeableStaffRoles(actor: OrgRole): StaffInviteRole[] {
+  return assignableStaffRoles(actor);
 }
 
 export function isStaffInviteRole(role: OrgRole): role is StaffInviteRole {

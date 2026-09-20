@@ -8,7 +8,7 @@ import {
   courseQueryKeys,
   getCourse,
   listCourseInstructors,
-  listOrgStaff,
+  listOrgStaffForPicker,
   removeCourseInstructor,
   updateCourse,
   updateCourseVisibility,
@@ -50,8 +50,9 @@ export function useCourseSettings() {
     enabled: Number.isFinite(courseId),
   });
   const staffQuery = useQuery({
-    queryKey: ["org-staff", organization.id],
-    queryFn: () => listOrgStaff(organization.id),
+    // Distinct from org-settings staff list (`["org-staff", id]`), which includes membershipId.
+    queryKey: ["courses", "org-staff-picker", organization.id],
+    queryFn: () => listOrgStaffForPicker(organization.id),
     enabled: canManageInstructors,
   });
 

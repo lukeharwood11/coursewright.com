@@ -8,12 +8,15 @@ export function PageFormActions({
   formId,
   saving,
   hasChanges,
+  canSave = true,
   cancelTo,
   saveLabel = "Save",
 }: {
   formId: string;
   saving: boolean;
   hasChanges: boolean;
+  /** When false, Save stays disabled even if the form has changes. */
+  canSave?: boolean;
   /** Fallback when there’s no history entry to go back to. */
   cancelTo: string;
   saveLabel?: string;
@@ -53,7 +56,7 @@ export function PageFormActions({
         <Button
           type="submit"
           form={formId}
-          disabled={saving || !hasChanges}
+          disabled={saving || !hasChanges || !canSave}
         >
           {saving ? "Saving…" : saveLabel}
         </Button>

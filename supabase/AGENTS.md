@@ -19,4 +19,4 @@ Supabase CLI project: config, migrations, Edge Functions.
 
 - Build a general custom REST API in Functions.
 - Duplicate planning prose here — link to `docs/database/SCHEMA.md`.
-- Run `nuke.sh` against a production project or after experiment mode ends.
+- Run `nuke.sh` against a production project except via `--production` (experiment mode), or after experiment mode ends.

@@ -99,7 +99,9 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
       const typed = row as StaffMembershipRow;
       const role = parseStaffInviteRole(typed.role);
       const profile = unwrapOne(typed.profile);
-      if (!role || !profile || !typed.user_id) return null;
+      if (!role || !profile || !typed.user_id || !Number.isFinite(typed.id)) {
+        return null;
+      }
       return {
         membershipId: typed.id,
         userId: typed.user_id,

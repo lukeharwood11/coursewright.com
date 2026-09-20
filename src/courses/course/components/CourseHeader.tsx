@@ -1,17 +1,18 @@
 import { Link } from "react-router-dom";
 import {
   Cog6ToothIcon,
-  DocumentDuplicateIcon,
+  MegaphoneIcon,
   PrinterIcon,
-  ShareIcon,
 } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
-import { Button, ButtonLink } from "@/ui/Button";
+import { ButtonLink } from "@/ui/Button";
 import { PublishedBadge } from "@/ui/PublishedBadge";
+import { newAnnouncementPath } from "@/announcements/model/paths";
 import { formatDateRange } from "@/courses/model/dates";
-import { courseRosterPath, courseSettingsPath, coursesPath, newCourseFromPath } from "@/courses/model/paths";
+import { courseRosterPath, courseSettingsPath, coursesPath } from "@/courses/model/paths";
 import { courseStatusLabel, type CourseStatus } from "@/courses/model/status";
 import { isCoursePublished, type CourseVisibility } from "@/courses/model/visibility";
+import { CourseActionsMenu } from "./CourseActionsMenu";
 
 export function CourseHeader({
   orgSlug,
@@ -117,14 +118,16 @@ export function CourseHeader({
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" onClick={onShare}>
-          <ShareIcon className="h-5 w-5" aria-hidden />
-          Share
-        </Button>
         {canEdit ? (
-          <ButtonLink variant="secondary" to={newCourseFromPath(orgSlug, courseId)}>
-            <DocumentDuplicateIcon className="h-5 w-5" aria-hidden />
-            Duplicate
+          <ButtonLink
+            variant="secondary"
+            to={newAnnouncementPath(orgSlug, {
+              audience: "course",
+              courseId,
+            })}
+          >
+            <MegaphoneIcon className="h-5 w-5" aria-hidden />
+            Create Announcement
           </ButtonLink>
         ) : null}
         {canEdit ? (
@@ -133,6 +136,12 @@ export function CourseHeader({
             Settings
           </ButtonLink>
         ) : null}
+        <CourseActionsMenu
+          orgSlug={orgSlug}
+          courseId={courseId}
+          canDuplicate={canEdit}
+          onShare={onShare}
+        />
       </div>
     </div>
   );

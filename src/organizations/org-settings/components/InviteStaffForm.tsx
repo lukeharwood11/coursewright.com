@@ -1,14 +1,9 @@
 import type { FormEvent } from "react";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
+import { Select } from "@/ui/Select";
 import type { StaffInviteRole } from "@/organizations/model/role";
 import { parseStaffInviteRole, roleLabel } from "@/organizations/model/role";
-
-const controlClass = [
-  "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
-  "focus:border-[var(--green)] focus:shadow-[0_0_0_3px_var(--green-tint)]",
-  "disabled:bg-[var(--paper)] disabled:text-[var(--ink-soft)]",
-].join(" ");
 
 export function InviteStaffForm({
   email,
@@ -45,8 +40,8 @@ export function InviteStaffForm({
       </label>
       <label className="flex flex-col gap-1">
         <span className="text-[13px] font-bold text-[var(--ink-soft)]">Role</span>
-        <select
-          className={controlClass}
+        <Select
+          wrapperClassName="w-full"
           value={role}
           onChange={(event) => {
             const next = parseStaffInviteRole(event.target.value);
@@ -58,7 +53,7 @@ export function InviteStaffForm({
               {roleLabel(option)}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
       <div className="flex items-end">
         <Button type="submit" disabled={submitting} className="w-full sm:w-auto">

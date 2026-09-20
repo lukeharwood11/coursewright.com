@@ -97,7 +97,7 @@ One-way notices (course, class, or student). Org-scoped because the audience is 
 
 | Page | URL | Notes |
 |------|-----|-------|
-| [ANNOUNCEMENTS](./pages/ANNOUNCEMENTS.md) | `/my/<org-slug>/announcements` | Staff list |
+| [ANNOUNCEMENTS](./pages/ANNOUNCEMENTS.md) | `/my/<org-slug>/announcements` | Staff list (Teacher view); parent list of current notices (parent chrome / Parent view) |
 | [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md) (view) | `/my/<org-slug>/announcements/<announcement_id>` | Families open from home; staff open from the list |
 | [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md) (new) | `/my/<org-slug>/announcements/new` | Staff compose. Optional `?audience=course\|class\|student` plus `courseId` / `classId` / `studentId` |
 | [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md) (edit) | `/my/<org-slug>/announcements/<announcement_id>/edit` | Staff edit |

@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   announcementAudienceLabel,
+  announcementTargetList,
   announcementTargetName,
+  announcementTargetNames,
+  announcementTargetSummary,
   parseAnnouncementAudience,
 } from "./audience.ts";
 import {
@@ -13,6 +16,7 @@ import {
 import {
   draftFromSearchParams,
   validateAnnouncementDraft,
+  announcementDraftHasTitleAndTargets,
 } from "./validate.ts";
 
 test("parseAnnouncementAudience accepts course, class, and student", () => {
@@ -28,33 +32,69 @@ test("announcementAudienceLabel is sentence-case product words", () => {
   assert.equal(announcementAudienceLabel("student"), "Student");
 });
 
-test("announcementTargetName uses the matching audience name", () => {
+test("announcementTargetName joins matching audience names", () => {
   assert.equal(
     announcementTargetName({
       audience: "course",
-      courseTitle: "Biology",
-      classTitle: "Room A",
-      studentName: "Maya",
+      courseTitles: ["Biology"],
+      classTitles: ["Room A"],
+      studentNames: ["Maya"],
     }),
     "Biology",
   );
   assert.equal(
     announcementTargetName({
       audience: "class",
-      courseTitle: "Biology",
-      classTitle: "Wednesday cohort",
-      studentName: "Maya",
+      courseTitles: ["Biology"],
+      classTitles: ["Wednesday cohort", "Thursday cohort"],
+      studentNames: ["Maya"],
     }),
-    "Wednesday cohort",
+    "Wednesday cohort and Thursday cohort",
   );
   assert.equal(
     announcementTargetName({
       audience: "student",
-      courseTitle: null,
-      classTitle: null,
-      studentName: "Maya",
+      courseTitles: [],
+      classTitles: [],
+      studentNames: ["Maya", "Eli", "Sam"],
     }),
-    "Maya",
+    "Maya, Eli, and Sam",
+  );
+});
+
+test("announcementTargetNames picks the matching audience list", () => {
+  assert.deepEqual(
+    announcementTargetNames({
+      audience: "class",
+      courseTitles: ["Biology"],
+      classTitles: ["Grade 5", "Grade 6"],
+      studentNames: ["Maya"],
+    }),
+    ["Grade 5", "Grade 6"],
+  );
+});
+
+test("announcementTargetSummary truncates after two names", () => {
+  assert.equal(announcementTargetSummary(["Grade 5"]), "Grade 5");
+  assert.equal(
+    announcementTargetSummary(["Grade 5", "Grade 6"]),
+    "Grade 5 and Grade 6",
+  );
+  assert.equal(
+    announcementTargetSummary(["Grade 5", "Grade 6", "Grade 7", "Grade 8"]),
+    "Grade 5, Grade 6 and 2 others",
+  );
+  assert.equal(
+    announcementTargetSummary(["Maya", "Eli", "Sam"]),
+    "Maya, Eli and 1 other",
+  );
+  assert.equal(announcementTargetSummary([]), "Audience");
+});
+
+test("announcementTargetList is the full joined list", () => {
+  assert.equal(
+    announcementTargetList(["Grade 5", "Grade 6", "Grade 7"]),
+    "Grade 5, Grade 6, and Grade 7",
   );
 });
 
@@ -103,13 +143,13 @@ test("groupAnnouncementsByAvailability buckets by status", () => {
   );
 });
 
-test("validateAnnouncementDraft requires audience, target, and title", () => {
+test("validateAnnouncementDraft requires audience, targets, and title", () => {
   assert.equal(
     validateAnnouncementDraft({
       audience: null,
-      courseId: null,
-      classId: null,
-      studentId: null,
+      courseIds: [],
+      classIds: [],
+      studentIds: [],
       title: "Snow day",
       body: "",
       startDate: "",
@@ -120,22 +160,22 @@ test("validateAnnouncementDraft requires audience, target, and title", () => {
   assert.equal(
     validateAnnouncementDraft({
       audience: "course",
-      courseId: null,
-      classId: null,
-      studentId: null,
+      courseIds: [],
+      classIds: [],
+      studentIds: [],
       title: "Snow day",
       body: "",
       startDate: "",
       endDate: "",
     }),
-    "Choose a course.",
+    "Choose at least one course.",
   );
   assert.equal(
     validateAnnouncementDraft({
       audience: "course",
-      courseId: 10,
-      classId: null,
-      studentId: null,
+      courseIds: [10],
+      classIds: [],
+      studentIds: [],
       title: "",
       body: "",
       startDate: "",
@@ -146,9 +186,9 @@ test("validateAnnouncementDraft requires audience, target, and title", () => {
   assert.equal(
     validateAnnouncementDraft({
       audience: "course",
-      courseId: 10,
-      classId: null,
-      studentId: null,
+      courseIds: [10, 11],
+      classIds: [],
+      studentIds: [],
       title: "Snow day",
       body: "",
       startDate: "2026-09-19",
@@ -159,9 +199,9 @@ test("validateAnnouncementDraft requires audience, target, and title", () => {
   assert.equal(
     validateAnnouncementDraft({
       audience: "student",
-      courseId: null,
-      classId: null,
-      studentId: 4,
+      courseIds: [],
+      classIds: [],
+      studentIds: [4, 5],
       title: "Pickup change",
       body: "Grandma at 2.",
       startDate: "",
@@ -171,19 +211,61 @@ test("validateAnnouncementDraft requires audience, target, and title", () => {
   );
 });
 
-test("draftFromSearchParams prefills a single audience", () => {
+test("announcementDraftHasTitleAndTargets needs a title and at least one target", () => {
+  assert.equal(
+    announcementDraftHasTitleAndTargets({
+      audience: "course",
+      courseIds: [10],
+      classIds: [],
+      studentIds: [],
+      title: "",
+      body: "",
+      startDate: "",
+      endDate: "",
+    }),
+    false,
+  );
+  assert.equal(
+    announcementDraftHasTitleAndTargets({
+      audience: "course",
+      courseIds: [],
+      classIds: [],
+      studentIds: [],
+      title: "Snow day",
+      body: "",
+      startDate: "",
+      endDate: "",
+    }),
+    false,
+  );
+  assert.equal(
+    announcementDraftHasTitleAndTargets({
+      audience: "course",
+      courseIds: [10],
+      classIds: [],
+      studentIds: [],
+      title: "Snow day",
+      body: "",
+      startDate: "",
+      endDate: "",
+    }),
+    true,
+  );
+});
+
+test("draftFromSearchParams prefills a single audience target", () => {
   const course = draftFromSearchParams(
     new URLSearchParams("audience=course&courseId=12&classId=9"),
   );
   assert.deepEqual(course, {
     audience: "course",
-    courseId: 12,
-    classId: null,
-    studentId: null,
+    courseIds: [12],
+    classIds: [],
+    studentIds: [],
   });
   const student = draftFromSearchParams(
     new URLSearchParams("audience=student&studentId=4"),
   );
   assert.equal(student.audience, "student");
-  assert.equal(student.studentId, 4);
+  assert.deepEqual(student.studentIds, [4]);
 });

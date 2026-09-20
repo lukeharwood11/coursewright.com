@@ -1,6 +1,6 @@
 -- RLS, grants, and Storage for docs/database/SCHEMA.md P0 access model.
 -- Parent SELECT of course content: parent membership + ParentStudentLink +
--- Enrollment.status = active + Course.status = active.
+-- Enrollment.status = active + Course.status = active + Course.visibility = published.
 -- App entity IDs are bigint; profiles remain uuid.
 
 -- ---------------------------------------------------------------------------
@@ -57,7 +57,6 @@ begin
     'student_profiles',
     'families',
     'family_members',
-    'parent_invites',
     'parent_student_links',
     'enrollments',
     'classes',
@@ -69,7 +68,12 @@ begin
     'blocks',
     'material_versions',
     'share_links',
-    'important_now'
+    'important_now',
+    'lesson_plans',
+    'lesson_plan_days',
+    'lesson_plan_day_materials',
+    'announcements',
+    'announcement_reads'
   ]
   loop
     execute format('alter table public.%I enable row level security', t);
@@ -80,7 +84,7 @@ end $$;
 grant select, insert, update on table public.profiles to authenticated;
 grant select, insert, update on table public.organizations to authenticated;
 grant select, insert, update, delete on table public.memberships to authenticated;
-grant select, insert, update, delete on table public.admin_invites to authenticated;
+grant select, insert, delete on table public.admin_invites to authenticated;
 grant select, insert, update on table public.course_templates to authenticated;
 grant select, insert, update, delete on table public.template_access to authenticated;
 grant select, insert, update on table public.courses to authenticated;
@@ -88,7 +92,6 @@ grant select, insert, delete on table public.course_instructors to authenticated
 grant select, insert, update on table public.student_profiles to authenticated;
 grant select, insert, update on table public.families to authenticated;
 grant select, insert, update, delete on table public.family_members to authenticated;
-grant select, insert, update, delete on table public.parent_invites to authenticated;
 grant select, insert, delete on table public.parent_student_links to authenticated;
 grant select, insert, update on table public.enrollments to authenticated;
 grant select, insert, update on table public.classes to authenticated;
@@ -101,6 +104,15 @@ grant select, insert, update on table public.blocks to authenticated;
 grant select on table public.material_versions to authenticated;
 grant select, insert, update, delete on table public.share_links to authenticated;
 grant select, insert, delete on table public.important_now to authenticated;
+grant select, insert, update on table public.lesson_plans to authenticated;
+grant select, insert, update, delete on table public.lesson_plan_days to authenticated;
+grant select, insert, update, delete on table public.lesson_plan_day_materials to authenticated;
+grant select, insert, update on table public.announcements to authenticated;
+grant select, insert on table public.announcement_reads to authenticated;
+
+grant usage, select on all sequences in schema public to authenticated, service_role;
+alter default privileges in schema public
+  grant usage, select on sequences to authenticated, service_role;
 
 grant select, insert, update, delete on all tables in schema public to service_role;
 
@@ -131,6 +143,12 @@ with check (id = (select auth.uid()));
 create policy organizations_select on public.organizations
 for select to authenticated
 using ((select private.is_org_member(id)));
+
+create policy organizations_select_pending_invite
+  on public.organizations
+  for select
+  to authenticated
+  using ((select private.has_pending_invite_for_me(id)));
 
 create policy organizations_insert on public.organizations
 for insert to authenticated
@@ -177,24 +195,56 @@ using (
 -- ---------------------------------------------------------------------------
 
 create policy admin_invites_select on public.admin_invites
-for select to authenticated
-using ((select private.is_org_admin(organization_id)));
+  for select
+  to authenticated
+  using (
+    (
+      accepted_at is null
+      and email = (select private.current_profile_email())
+    )
+    or (
+      role in ('owner', 'admin', 'instructor')
+      and (select private.is_org_admin(organization_id))
+    )
+    or (
+      role = 'parent'
+      and (select private.is_org_staff(organization_id))
+    )
+  );
 
 create policy admin_invites_insert on public.admin_invites
-for insert to authenticated
-with check (
-  (select private.is_org_admin(organization_id))
-  and invited_by = (select auth.uid())
-);
-
-create policy admin_invites_update on public.admin_invites
-for update to authenticated
-using ((select private.is_org_admin(organization_id)))
-with check ((select private.is_org_admin(organization_id)));
+  for insert
+  to authenticated
+  with check (
+    invited_by = (select auth.uid())
+    and (
+      (
+        role in ('owner', 'admin', 'instructor')
+        and (select private.is_org_admin(organization_id))
+      )
+      or (
+        role = 'parent'
+        and (select private.is_org_staff(organization_id))
+      )
+    )
+  );
 
 create policy admin_invites_delete on public.admin_invites
-for delete to authenticated
-using ((select private.is_org_admin(organization_id)));
+  for delete
+  to authenticated
+  using (
+    accepted_at is null
+    and (
+      (
+        role in ('owner', 'admin', 'instructor')
+        and (select private.is_org_admin(organization_id))
+      )
+      or (
+        role = 'parent'
+        and (select private.is_org_staff(organization_id))
+      )
+    )
+  );
 
 -- ---------------------------------------------------------------------------
 -- course_templates / template_access
@@ -361,26 +411,6 @@ for delete to authenticated
 using ((select private.is_org_staff((
   select private.family_organization_id(family_id)
 ))));
-
-create policy parent_invites_select on public.parent_invites
-for select to authenticated
-using ((select private.is_org_staff(organization_id)));
-
-create policy parent_invites_insert on public.parent_invites
-for insert to authenticated
-with check (
-  (select private.is_org_staff(organization_id))
-  and invited_by = (select auth.uid())
-);
-
-create policy parent_invites_update on public.parent_invites
-for update to authenticated
-using ((select private.is_org_staff(organization_id)))
-with check ((select private.is_org_staff(organization_id)));
-
-create policy parent_invites_delete on public.parent_invites
-for delete to authenticated
-using ((select private.is_org_staff(organization_id)));
 
 create policy parent_student_links_select on public.parent_student_links
 for select to authenticated
@@ -551,10 +581,7 @@ for select to authenticated
 using (
   (course_id is not null and (
     (select private.is_org_staff(organization_id))
-    or (
-      deleted_at is null
-      and (select private.parent_can_view_course(course_id))
-    )
+    or (select private.parent_can_view_material(id))
   ))
   or (template_id is not null and (select private.can_view_template(template_id)))
 );
@@ -588,10 +615,7 @@ using (
       and (
         (m.course_id is not null and (
           (select private.is_org_staff(m.organization_id))
-          or (
-            m.deleted_at is null
-            and (select private.parent_can_view_course(m.course_id))
-          )
+          or (select private.parent_can_view_material(m.id))
         ))
         or (m.template_id is not null and (select private.can_view_template(m.template_id)))
       )
@@ -647,7 +671,7 @@ using (
       and (
         (m.course_id is not null and (
           (select private.is_org_staff(m.organization_id))
-          or (select private.parent_can_view_course(m.course_id))
+          or (select private.parent_can_view_material(m.id))
         ))
         or (m.template_id is not null and (select private.can_view_template(m.template_id)))
       )
@@ -685,7 +709,7 @@ create policy important_now_select on public.important_now
 for select to authenticated
 using (
   (select private.is_org_staff(organization_id))
-  or (select private.parent_can_view_course(course_id))
+  or (select private.parent_can_view_material(material_id))
 );
 
 create policy important_now_insert on public.important_now
@@ -698,6 +722,242 @@ with check (
 create policy important_now_delete on public.important_now
 for delete to authenticated
 using ((select private.can_manage_course(course_id)));
+
+
+-- ---------------------------------------------------------------------------
+-- Classes: families may SELECT classes they are linked to (announcement attribution)
+-- ---------------------------------------------------------------------------
+
+create policy classes_parent_select on public.classes
+for select to authenticated
+using (
+  deleted_at is null
+  and (select private.parent_linked_to_class(id))
+);
+
+create policy class_members_parent_select on public.class_members
+for select to authenticated
+using ((select private.parent_linked_to_student(student_profile_id)));
+
+-- ---------------------------------------------------------------------------
+-- Lesson plans
+-- ---------------------------------------------------------------------------
+
+create policy lesson_plans_select on public.lesson_plans
+for select to authenticated
+using (
+  (select private.is_org_staff(organization_id))
+  or (
+    deleted_at is null
+    and visibility = 'published'
+    and (select private.parent_can_view_course(course_id))
+  )
+);
+
+create policy lesson_plans_insert on public.lesson_plans
+for insert to authenticated
+with check (
+  (select private.can_manage_course(course_id))
+  and created_by = (select auth.uid())
+);
+
+create policy lesson_plans_update on public.lesson_plans
+for update to authenticated
+using ((select private.can_manage_course(course_id)))
+with check ((select private.can_manage_course(course_id)));
+
+create policy lesson_plan_days_select on public.lesson_plan_days
+for select to authenticated
+using (
+  exists (
+    select 1
+    from public.lesson_plans lp
+    where lp.id = lesson_plan_id
+      and (
+        (select private.is_org_staff(lp.organization_id))
+        or (
+          lp.deleted_at is null
+          and lp.visibility = 'published'
+          and (select private.parent_can_view_course(lp.course_id))
+        )
+      )
+  )
+);
+
+create policy lesson_plan_days_insert on public.lesson_plan_days
+for insert to authenticated
+with check (
+  exists (
+    select 1
+    from public.lesson_plans lp
+    where lp.id = lesson_plan_id
+      and lp.deleted_at is null
+      and (select private.can_manage_course(lp.course_id))
+  )
+);
+
+create policy lesson_plan_days_update on public.lesson_plan_days
+for update to authenticated
+using (
+  exists (
+    select 1
+    from public.lesson_plans lp
+    where lp.id = lesson_plan_id
+      and (select private.can_manage_course(lp.course_id))
+  )
+)
+with check (
+  exists (
+    select 1
+    from public.lesson_plans lp
+    where lp.id = lesson_plan_id
+      and (select private.can_manage_course(lp.course_id))
+  )
+);
+
+create policy lesson_plan_days_delete on public.lesson_plan_days
+for delete to authenticated
+using (
+  exists (
+    select 1
+    from public.lesson_plans lp
+    where lp.id = lesson_plan_id
+      and (select private.can_manage_course(lp.course_id))
+  )
+);
+
+create policy lesson_plan_day_materials_select on public.lesson_plan_day_materials
+for select to authenticated
+using (
+  exists (
+    select 1
+    from public.lesson_plan_days d
+    join public.lesson_plans lp on lp.id = d.lesson_plan_id
+    where d.id = lesson_plan_day_id
+      and (
+        (select private.is_org_staff(lp.organization_id))
+        or (
+          lp.deleted_at is null
+          and lp.visibility = 'published'
+          and (select private.parent_can_view_course(lp.course_id))
+        )
+      )
+  )
+);
+
+create policy lesson_plan_day_materials_insert on public.lesson_plan_day_materials
+for insert to authenticated
+with check (
+  exists (
+    select 1
+    from public.lesson_plan_days d
+    join public.lesson_plans lp on lp.id = d.lesson_plan_id
+    where d.id = lesson_plan_day_id
+      and lp.deleted_at is null
+      and (select private.can_manage_course(lp.course_id))
+  )
+);
+
+create policy lesson_plan_day_materials_update on public.lesson_plan_day_materials
+for update to authenticated
+using (
+  exists (
+    select 1
+    from public.lesson_plan_days d
+    join public.lesson_plans lp on lp.id = d.lesson_plan_id
+    where d.id = lesson_plan_day_id
+      and (select private.can_manage_course(lp.course_id))
+  )
+)
+with check (
+  exists (
+    select 1
+    from public.lesson_plan_days d
+    join public.lesson_plans lp on lp.id = d.lesson_plan_id
+    where d.id = lesson_plan_day_id
+      and (select private.can_manage_course(lp.course_id))
+  )
+);
+
+create policy lesson_plan_day_materials_delete on public.lesson_plan_day_materials
+for delete to authenticated
+using (
+  exists (
+    select 1
+    from public.lesson_plan_days d
+    join public.lesson_plans lp on lp.id = d.lesson_plan_id
+    where d.id = lesson_plan_day_id
+      and (select private.can_manage_course(lp.course_id))
+  )
+);
+
+-- ---------------------------------------------------------------------------
+-- Announcements
+-- ---------------------------------------------------------------------------
+
+create policy announcements_select on public.announcements
+for select to authenticated
+using (
+  (select private.is_org_staff(organization_id))
+  or (
+    deleted_at is null
+    and (select private.parent_can_view_announcement(id))
+  )
+);
+
+create policy announcements_insert on public.announcements
+for insert to authenticated
+with check (
+  created_by = (select auth.uid())
+  and (select private.can_post_announcement(
+    organization_id,
+    audience,
+    course_ids,
+    class_ids,
+    student_profile_ids
+  ))
+);
+
+create policy announcements_update on public.announcements
+for update to authenticated
+using (
+  (select private.can_post_announcement(
+    organization_id,
+    audience,
+    course_ids,
+    class_ids,
+    student_profile_ids
+  ))
+)
+with check (
+  (select private.can_post_announcement(
+    organization_id,
+    audience,
+    course_ids,
+    class_ids,
+    student_profile_ids
+  ))
+);
+
+create policy announcement_reads_select on public.announcement_reads
+for select to authenticated
+using (user_id = (select auth.uid()));
+
+create policy announcement_reads_insert on public.announcement_reads
+for insert to authenticated
+with check (
+  user_id = (select auth.uid())
+  and exists (
+    select 1
+    from public.announcements a
+    where a.id = announcement_id
+      and a.deleted_at is null
+      and (
+        (select private.is_org_staff(a.organization_id))
+        or (select private.parent_can_view_announcement(a.id))
+      )
+  )
+);
 
 -- ---------------------------------------------------------------------------
 -- Storage: org-files / {organization_id}/{file_id}/{version_id}/filename

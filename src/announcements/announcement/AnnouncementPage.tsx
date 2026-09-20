@@ -6,8 +6,9 @@ import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { formatDateRange } from "@/courses/model/dates";
 import {
   announcementAudienceLabel,
-  announcementTargetName,
+  announcementTargetNames,
 } from "@/announcements/model/audience";
+import { AnnouncementAudienceTargets } from "./components/AnnouncementAudienceTargets";
 import {
   announcementAvailability,
   announcementAvailabilityLabel,
@@ -16,6 +17,7 @@ import {
   announcementEditPath,
   announcementsPath,
 } from "@/announcements/model/paths";
+import { announcementPostedLabel, announcementAuthorLabel } from "@/announcements/model/postedAt";
 import { useAnnouncement } from "./hooks/useAnnouncement";
 
 export function AnnouncementPage() {
@@ -48,14 +50,14 @@ export function AnnouncementPage() {
         </h1>
         <p className="mt-2 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
           Your teacher set when this shows up. Check back during that window, or
-          go back to this week.
+          go back to announcements.
         </p>
         <p className="mt-4 text-[13px]">
           <Link
-            to={`/my/${page.organization.slug}`}
+            to={announcementsPath(page.organization.slug)}
             className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
           >
-            Back to this week
+            Back to announcements
           </Link>
         </p>
       </div>
@@ -73,11 +75,7 @@ export function AnnouncementPage() {
         </h1>
         <p className="mt-4 text-[13px]">
           <Link
-            to={
-              page.isParent
-                ? `/my/${page.organization.slug}`
-                : announcementsPath(page.organization.slug)
-            }
+            to={announcementsPath(page.organization.slug)}
             className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
           >
             Back
@@ -91,6 +89,8 @@ export function AnnouncementPage() {
     page.announcement.startDate,
     page.announcement.endDate,
   );
+  const posted = announcementPostedLabel(page.announcement.createdAt);
+  const author = announcementAuthorLabel(page.announcement.authorName);
   const status = announcementAvailability(
     page.today,
     page.announcement.startDate,
@@ -116,21 +116,19 @@ export function AnnouncementPage() {
             <Badge variant="slate">
               {announcementAudienceLabel(page.announcement.audience)}
             </Badge>
-            <Badge variant="neutral">
-              {announcementTargetName(page.announcement)}
-            </Badge>
+            <AnnouncementAudienceTargets
+              names={announcementTargetNames(page.announcement)}
+            />
+            {author ? <Badge variant="neutral">{author}</Badge> : null}
+            {posted ? <Badge variant="neutral">{posted}</Badge> : null}
             {dates ? <Badge variant="neutral">{dates}</Badge> : null}
           </div>
           <p className="mt-3 text-[13px]">
             <Link
-              to={
-                page.isParent
-                  ? `/my/${page.organization.slug}`
-                  : announcementsPath(page.organization.slug)
-              }
+              to={announcementsPath(page.organization.slug)}
               className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
             >
-              {page.isParent ? "Back to this week" : "Back to announcements"}
+              Back to announcements
             </Link>
           </p>
         </div>
@@ -160,11 +158,7 @@ export function AnnouncementPage() {
         <p className="mt-6 max-w-2xl whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--ink)]">
           {page.announcement.body}
         </p>
-      ) : (
-        <p className="mt-6 text-[14.5px] text-[var(--ink-soft)]">
-          No extra note with this announcement.
-        </p>
-      )}
+      ) : null}
 
       {page.error ? (
         <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">

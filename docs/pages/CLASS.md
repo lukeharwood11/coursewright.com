@@ -42,13 +42,13 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 
 - Add / remove class members (batch add preferred)
 - Open a student profile
-- Announce to this class
+- Create Announcement
 
 ## Links to
 
 - [ORG_ROSTER](./ORG_ROSTER.md) — class list and org students
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — open a member
-- [ANNOUNCEMENT](./ANNOUNCEMENT.md) — announce to this class
+- [ANNOUNCEMENT](./ANNOUNCEMENT.md) — Create Announcement for this class
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — enroll in a course (Class as preset)
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 

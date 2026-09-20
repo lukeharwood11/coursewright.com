@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import {
   BookOpenIcon,
-  CalendarDaysIcon,
   ExclamationTriangleIcon,
   EyeSlashIcon,
   UsersIcon,
@@ -19,7 +18,6 @@ import { StaffCourseCard } from "./StaffCourseCard";
 const attentionIcon = {
   no_enrollments: UsersIcon,
   unpublished_with_roster: EyeSlashIcon,
-  no_dated_this_week: CalendarDaysIcon,
 } as const satisfies Record<StaffAttentionKind, typeof UsersIcon>;
 
 export function StaffGettingStarted({

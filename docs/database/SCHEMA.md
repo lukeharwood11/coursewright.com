@@ -37,7 +37,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | LessonPlan | `lesson_plans` | Weekly course plan; published / unpublished |
 | LessonPlanDay | `lesson_plan_days` | Optional note for one day in that week |
 | LessonPlanDayMaterial | `lesson_plan_day_materials` | Materials listed under a day |
-| Announcement | `announcements` | One-way notice to a course, class, or student |
+| Announcement | `announcements` | One-way notice to one or more courses, classes, or students (same kind) |
 | AnnouncementRead | `announcement_reads` | Per-user read receipt (clears the notification icon) |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates + published lesson plans (Sunday–Saturday). |
 | Page / Block / Quiz / Form | `blocks` (quiz is a Lexical node on a page) | Material **kind** page\|link\|file; blocks on pages only; **no** quiz table |
@@ -309,7 +309,7 @@ UI map: [URLS.md](../URLS.md), [PRINT](../pages/PRINT.md).
 | id | bigint | PK |
 | name | text | |
 | slug | text | **Unique permalink** — generated on create; changeable with UX warning that links will break |
-| org_type | text | `coop` · `micro_school` |
+| org_type | text | `coop` · `micro_school` · `family` |
 | grade_scheme | text | `k12` · `custom` |
 | grade_labels | text[] | Allowed labels for student `grade_level` and course/template `grade_levels`. K–12 preset includes K, 1–12, and common bands (K-2, 3-5, 6-8, 9-12). Custom is org-defined. |
 
@@ -672,16 +672,16 @@ Unique `(lesson_plan_day_id, material_id)`. Families only follow links to **publ
 
 ### Announcement
 
-A **one-way** notice to exactly one audience: a **course**, a **class**, or a **student**. Families see it on the parent/student home while it is current. Opening it writes an `AnnouncementRead` and clears the notification icon. **Not** a lesson plan (no attached materials) and **not** a discussion thread.
+A **one-way** notice to one or more targets of a single audience kind: **course(s)**, **class(es)**, or **student(s)**. Families see it on the parent/student home while it is current. Opening it writes an `AnnouncementRead` and clears the notification icon. **Not** a lesson plan (no attached materials) and **not** a discussion thread.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
 | audience | text | `course` · `class` · `student` |
-| course_id | bigint | FK → Course, **required when audience = course**, else null |
-| class_id | bigint | FK → Class, **required when audience = class**, else null |
-| student_profile_id | bigint | FK → StudentProfile, **required when audience = student**, else null |
+| course_ids | bigint[] | Course targets when `audience = course` (cardinality ≥ 1); else `{}` |
+| class_ids | bigint[] | Class targets when `audience = class` (cardinality ≥ 1); else `{}` |
+| student_profile_ids | bigint[] | Student targets when `audience = student` (cardinality ≥ 1); else `{}` |
 | title | text | required |
 | body | text | optional note (empty string when unset) |
 | start_date | date | nullable — first local calendar day on home (inclusive) |
@@ -692,13 +692,15 @@ A **one-way** notice to exactly one audience: a **course**, a **class**, or a **
 | deleted_at | timestamptz | soft delete |
 | deleted_by | uuid | FK → User, nullable |
 
-**Audience:** exactly one of `course_id` / `class_id` / `student_profile_id`, matching `audience`.
+**Audience:** exactly one kind (`audience`), with one or more IDs in the matching array and the other arrays empty. All target IDs must belong to the same organization.
 
 **Homepage visibility:** app uses the viewer’s **local calendar date**. Current = `(start_date` is null or today ≥ start`)` and `(end_date` is null or today ≤ end`)`. No dates means current until staff remove it. Staff always see non-deleted announcements (including upcoming and ended). Date window **is** homepage availability — no separate publish column.
 
-**Who can post:** org owners and admins (any audience in the org). Instructors for a course they can manage, or for a class / student they can already manage on the roster (`is_org_staff`).
+**Who can post:** org owners and admins (any audience in the org). Instructors for courses they can manage (every selected course), or for a class / student they can already manage on the roster (`is_org_staff`).
 
-**Who can read:** staff in the org. Parents (and invited student emails on the parent claim path) when the notice applies to a linked student: enrolled in that **course** (active + published), **or** a member of that **class**, **or** that **student**. Class membership can surface a class announcement even without a course enrollment. Materials / this-week / print stay enrollment-gated.
+**Who can read:** staff in the org. Parents (and invited student emails on the parent claim path) when the notice applies to a linked student: enrolled in **any** of the **courses** (active + published), **or** a member of **any** of the **classes**, **or** listed as **any** of the **students**. Class membership can surface a class announcement even without a course enrollment. Materials / this-week / print stay enrollment-gated.
+
+**Email:** not stored on the row. Staff may opt in to **Send notification** on save; Edge Function `send-announcement-notification` emails claimed family accounts only (`parent_student_links` → `profiles.email` with an active org membership) for affected students — one Resend `announcement-notification` event per unique address. Pending invites and `student_email` contact fields are not mailed. Payload includes a truncated audience preview (`audience_summary`) and the full target list (`audience_list`).
 
 Course-from-course copy does **not** copy announcements.
 
@@ -752,7 +754,7 @@ Course / CourseTemplate.grade_levels (catalog metadata)
 Course ──< CourseInstructor >── User (instructor)  ← many
 Course ──< ImportantNow
 Course ──< LessonPlan ──< LessonPlanDay ──< LessonPlanDayMaterial >── Material
-Organization ──< Announcement (course | class | student) ──< AnnouncementRead >── User
+Organization ──< Announcement (course(s) | class(es) | student(s)) ──< AnnouncementRead >── User
 Course ──< ShareLink
 ```
 

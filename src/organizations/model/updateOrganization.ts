@@ -1,6 +1,6 @@
 import { K12_GRADE_LABELS } from "./createDefaults";
 import { parseGradeLabels, parseGradeScheme } from "./gradeScheme";
-import { parseOrgType } from "./orgType";
+import { parseOrgType, type OrgType } from "./orgType";
 import { isReservedSlug, isValidSlug, slugify } from "./slug";
 
 export type UpdateOrganizationInput = {
@@ -16,7 +16,7 @@ export type UpdateOrganizationInput = {
 export type ValidatedUpdateOrganization = {
   name: string;
   slug: string;
-  orgType: "coop" | "micro_school";
+  orgType: OrgType;
   gradeScheme: "k12" | "custom";
   gradeLabels: string[];
   slugChanged: boolean;
@@ -51,7 +51,7 @@ export function validateUpdateOrganization(
 
   const orgType = parseOrgType(input.orgType);
   if (!orgType) {
-    return { ok: false, error: "Choose co-op or micro-school." };
+    return { ok: false, error: "Choose an organization type." };
   }
 
   const gradeScheme = parseGradeScheme(input.gradeScheme);

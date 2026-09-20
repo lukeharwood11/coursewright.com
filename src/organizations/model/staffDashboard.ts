@@ -7,8 +7,7 @@ export const STAFF_COURSE_PREVIEW_LIMIT = 6;
 
 export type StaffAttentionKind =
   | "no_enrollments"
-  | "unpublished_with_roster"
-  | "no_dated_this_week";
+  | "unpublished_with_roster";
 
 export type StaffAttentionItem = {
   id: string;
@@ -126,15 +125,6 @@ export function buildStaffDashboard(source: StaffDashboardSource): StaffDashboar
         courseId: course.id,
         courseTitle: course.title,
         message: `${course.title} isn’t published yet, but students are enrolled`,
-      });
-    }
-    if (enrolled > 0 && (datedCounts.get(course.id) ?? 0) === 0) {
-      attention.push({
-        id: `no_dated_this_week-${course.id}`,
-        kind: "no_dated_this_week",
-        courseId: course.id,
-        courseTitle: course.title,
-        message: `${course.title} has no dated materials this week`,
       });
     }
   }

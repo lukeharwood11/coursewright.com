@@ -26,7 +26,7 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 | | |
 |--|--|
-| **Why** | Staff and parent invites call Edge Function `send-organization-invite`, which posts Resend event `organization-invite`. Without `RESEND_API_KEY` on the Supabase project the Function runs on, the invite row is still created and the copy-link works, but nobody gets an email. |
+| **Why** | Staff and parent invites call Edge Function `send-organization-invite`, which posts Resend event `organization-invite`. Announcement **Send notification** calls `send-announcement-notification` (`announcement-notification`). Without `RESEND_API_KEY` on the Supabase project the Function runs on, the invite/announcement row is still created, but nobody gets an email. |
 | **Where** | Resend dashboard (API key) + **Supabase Edge Function secrets** (testing branch and production). **Not** `.env.testing` and **not** a `VITE_*` variable — those are browser-exposed. |
 | **Placeholder** | `supabase/functions/send-organization-invite/index.ts` (`HN-015`) |
 
@@ -54,70 +54,6 @@ Optional companion secret **`SITE_URL`** (used when the browser `Origin` header 
 5. From org settings on the matching site, invite your own email and confirm the Resend `organization-invite` event arrives.
 
 **Done when:** inviting a person to an organization (staff or parent) delivers the Resend email with a working `/invite/<token>` link, without putting the API key in the frontend env.
-
-### HN-016 — Apply `anon_get_invite` migration on the testing database
-
-| | |
-|--|--|
-| **Why** | Invite links must load `/invite/<token>` while signed out so parents see the invited address and signup/login can prefill it. That needs `get_invite` granted to `anon`. Until this migration is applied, unsigned visitors get “not authenticated” and the claim page cannot name the address. |
-| **Where** | Supabase CLI / Dashboard; testing project used by `.env.testing` (`yplmaauelutcosqqvnya`) |
-| **Placeholder** | `supabase/migrations/20260919200000_anon_get_invite.sql` (`HN-016`) |
-
-**Steps:**
-
-1. From a machine with `SUPABASE_ACCESS_TOKEN` (HN-012) and the project linked, run `supabase db push` (or `scripts/nuke.sh` in experiment mode if a full reset is acceptable).
-2. Confirm `anon` can execute `get_invite` (`information_schema.routine_privileges`) and that `claim_invite` is still authenticated-only.
-3. Repeat for production when that project is in use (HN-007).
-
-**Done when:** opening `/invite/<token>` while signed out shows the invited email (and Create account / Sign in), without requiring a session first.
-
-### HN-014 — Apply lesson-plans migration on the testing database
-
-| | |
-|--|--|
-| **Why** | Instructors compose weekly lesson plans in the SPA, and parent/student home + calendar load `lesson_plans` / `lesson_plan_days` / `lesson_plan_day_materials` (and `courses.color_key`). This migration also drops `bulletins` / `bulletin_materials`. Until it is applied, those queries against the testing project will error. |
-| **Where** | Supabase CLI / Dashboard; testing project used by `.env.testing` (`yplmaauelutcosqqvnya`) |
-| **Placeholder** | `supabase/migrations/20260919220000_lesson_plans.sql` (`HN-014`) |
-
-**Steps:**
-
-1. From a machine with `SUPABASE_ACCESS_TOKEN` (HN-012) and the project linked, run `supabase db push` (or `scripts/nuke.sh` in experiment mode if a full reset is acceptable).
-2. Confirm tables `lesson_plans`, `lesson_plan_days`, and `lesson_plan_day_materials` exist, `courses.color_key` exists, and `bulletins` / `bulletin_materials` do not (`information_schema.tables` / `columns`).
-3. Repeat for production when that project is in use (HN-007).
-
-**Done when:** creating a lesson plan on a course succeeds in the SPA against the database the app uses, and a published plan appears on parent This week / Calendar.
-
-### HN-017 — Apply `announcements` migration on the testing database
-
-| | |
-|--|--|
-| **Why** | Staff compose one-way announcements (course / class / student) in the SPA, and parent/student home loads `announcements` / `announcement_reads`. Until this migration is applied, those queries against the testing project will error. |
-| **Where** | Supabase CLI / Dashboard; testing project used by `.env.testing` (`yplmaauelutcosqqvnya`) |
-| **Placeholder** | `supabase/migrations/20260920010000_announcements.sql` (`HN-017`) |
-
-**Steps:**
-
-1. From a machine with `SUPABASE_ACCESS_TOKEN` (HN-012) and the project linked, run `supabase db push` (or `scripts/nuke.sh` in experiment mode if a full reset is acceptable).
-2. Confirm tables `announcements` and `announcement_reads` exist (`information_schema.tables`).
-3. Repeat for production when that project is in use (HN-007).
-
-**Done when:** creating an announcement succeeds in the SPA against the database the app uses, it appears on parent home while current, and opening it clears the unread icon.
-
-### HN-013 — Apply `student_email` migration on the testing database
-
-| | |
-|--|--|
-| **Why** | Parent/student roster on branch `cursor/parent-student-view-52f1` selects `student_profiles.student_email`. Until this migration is applied, roster and parent home queries against the testing project will error. |
-| **Where** | Supabase CLI / Dashboard; testing project used by `.env.testing` (`yplmaauelutcosqqvnya`) |
-| **Placeholder** | `supabase/migrations/20260918033100_student_email.sql` (`HN-013`) |
-
-**Steps:**
-
-1. From a machine with `SUPABASE_ACCESS_TOKEN` (HN-012) and the project linked, run `supabase db push` (or `scripts/nuke.sh` in experiment mode if a full reset is acceptable).
-2. Confirm `student_profiles.student_email` exists (`information_schema.columns`).
-3. Repeat for production when that project is in use (HN-007).
-
-**Done when:** `student_email` is on `student_profiles` in the database the SPA uses; creating a student with a student email succeeds.
 
 ### HN-003 — AWS account access for Terraform + deploy
 
@@ -199,6 +135,10 @@ Optional companion secret **`SITE_URL`** (used when the browser `Origin` header 
 ---
 
 ## Completed
+
+### HN-013 / HN-014 / HN-016 / HN-017 — Apply incremental migrations on testing
+
+**Completed:** 2026-09-19 — experiment-mode squash replaced those ALTERs with `supabase/migrations/20260921000000_schema.sql` + `20260921000001_rls_and_storage.sql`. Testing (`yplmaauelutcosqqvnya`) was reset and reseeded (`seed-doxa`); production/main (`hlecttkgrfhtzvwnxtyb`) was reset empty. `student_email`, lesson plans, `anon` `get_invite`, and announcements are in the squashed schema on both.
 
 ### HN-012 — `SUPABASE_ACCESS_TOKEN` for Terraform + CLI
 

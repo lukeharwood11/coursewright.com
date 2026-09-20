@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Badge } from "@/ui/Badge";
 import { ButtonLink } from "@/ui/Button";
 import {
   announcementAudienceLabel,
-  announcementTargetName,
+  announcementTargetNames,
+  announcementTargetSummary,
 } from "@/announcements/model/audience";
 import {
   announcementAvailability,
@@ -15,7 +16,9 @@ import {
   announcementPath,
   newAnnouncementPath,
 } from "@/announcements/model/paths";
+import { announcementMetaParts } from "@/announcements/model/postedAt";
 import { formatDateRange } from "@/courses/model/dates";
+import { ParentAnnouncementsList } from "./components/ParentAnnouncementsList";
 import { useAnnouncements } from "./hooks/useAnnouncements";
 
 const GROUP_ORDER = ["available", "upcoming", "ended"] as const;
@@ -27,14 +30,36 @@ export function AnnouncementsPage() {
     document.title = "Announcements · Course Wright";
   }, []);
 
-  if (!page.canEdit) {
-    return <Navigate to={`/my/${page.organization.slug}`} replace />;
-  }
-
   if (page.loading) {
     return (
       <div className="px-5 py-8 md:px-8">
         <p className="text-[14px] text-[var(--ink-soft)]">Loading announcements…</p>
+      </div>
+    );
+  }
+
+  if (page.isParent) {
+    return (
+      <div className="px-5 py-8 md:px-8">
+        <h1
+          className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          Announcements
+        </h1>
+        <p className="mt-1 max-w-xl text-[14px] leading-relaxed text-[var(--ink-soft)]">
+          Notes from your teachers. Opening one marks it as seen.
+        </p>
+        {page.error ? (
+          <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
+            {page.error}
+          </p>
+        ) : null}
+        <ParentAnnouncementsList
+          orgSlug={page.organization.slug}
+          items={page.parentAnnouncements}
+          showStudent={page.showStudent}
+        />
       </div>
     );
   }
@@ -51,10 +76,6 @@ export function AnnouncementsPage() {
           >
             Announcements
           </h1>
-          <p className="mt-2 max-w-xl text-[14px] text-[var(--ink-soft)]">
-            One-way notes to a course, a class, or a student. Families see them
-            on home. There isn’t a reply thread.
-          </p>
         </div>
         <ButtonLink to={newAnnouncementPath(page.organization.slug)}>
           New announcement
@@ -83,6 +104,11 @@ export function AnnouncementsPage() {
                 <ul className="mt-1 divide-y divide-[var(--line-soft)] rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]">
                   {groups[key].map((item) => {
                     const dates = formatDateRange(item.startDate, item.endDate);
+                    const meta = announcementMetaParts({
+                      authorName: item.authorName,
+                      createdAt: item.createdAt,
+                      dateRange: dates,
+                    }).join(" · ");
                     const status = announcementAvailability(
                       page.today,
                       item.startDate,
@@ -104,11 +130,14 @@ export function AnnouncementsPage() {
                               {announcementAudienceLabel(item.audience)}
                             </Badge>
                             <span className="text-[12.5px] text-[var(--ink-soft)]">
-                              {announcementTargetName(item)}
+                              {announcementTargetSummary(
+                                announcementTargetNames(item),
+                                announcementAudienceLabel(item.audience),
+                              )}
                             </span>
-                            {dates ? (
+                            {meta ? (
                               <span className="text-[12.5px] text-[var(--ink-faint)]">
-                                {dates}
+                                {meta}
                               </span>
                             ) : null}
                           </span>

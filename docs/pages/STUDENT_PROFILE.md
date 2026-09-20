@@ -53,14 +53,14 @@ View/edit one org-level **student profile** (not a dedicated student account in 
 ## Primary actions
 
 - Edit profile fields
-- Announce to this student
+- Create Announcement
 - Create parent (or student-email) invite (email + copy the claim link); **Resend email** or cancel a pending invite; add another parent
 - Open class / course enrollments
 
 ## Links to
 
 - [ORG_ROSTER](./ORG_ROSTER.md) — back to roster
-- [ANNOUNCEMENT](./ANNOUNCEMENT.md) — announce to this student
+- [ANNOUNCEMENT](./ANNOUNCEMENT.md) — Create Announcement for this student
 - [INVITE_CLAIM](./INVITE_CLAIM.md) — copied parent invite link (recipient)
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — course enrollment contexts
 - [CLASS](./CLASS.md) — class membership

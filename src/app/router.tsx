@@ -127,14 +127,7 @@ export function AppRoutes() {
               path="calendar"
               element={<CalendarPage />}
             />
-            <Route
-              path="announcements"
-              element={
-                <RequireStaff>
-                  <AnnouncementsPage />
-                </RequireStaff>
-              }
-            />
+            <Route path="announcements" element={<AnnouncementsPage />} />
             <Route
               path="announcements/new"
               element={

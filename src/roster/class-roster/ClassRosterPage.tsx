@@ -75,7 +75,7 @@ export function ClassRosterPage() {
             classId: roster.classGroup.id,
           })}
         >
-          Announce to this class
+          Create Announcement
         </ButtonLink>
       </div>
 

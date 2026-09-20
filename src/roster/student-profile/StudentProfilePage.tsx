@@ -82,7 +82,7 @@ export function StudentProfilePage() {
                 studentId: profile.student.id,
               })}
             >
-              Announce to this student
+              Create Announcement
             </ButtonLink>
           </p>
         </div>

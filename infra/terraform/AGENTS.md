@@ -52,4 +52,4 @@ Never mix a tier’s `-var-file` with the other tier’s backend key.
 - Create a `supabase_project` resource for the existing production project (password validation + accidental create).
 - Sync SPA from a Terraform `null_resource`.
 - Point testing SPA at **main** — `build-spa.sh testing` refuses parent keys.
-- Run `nuke.sh` against production main.
+- Run `nuke.sh` against production main except via `./scripts/nuke.sh --production` (experiment mode; types `NUKE PRODUCTION`).

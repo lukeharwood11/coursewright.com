@@ -1,23 +1,27 @@
 # AGENTS — `src/announcements/`
 
-One-way **announcements**: a notice to a course, class, or student. Optional start/end dates. No reply thread.
+One-way **announcements**: a notice to one or more courses, classes, or students (same kind). Optional start/end dates. No reply thread.
 
 ## Scope
 
-- Org list + **New announcement**
+- Org list + **New announcement** (staff Teacher view)
+- Parent list of **current** announcements (same URL; parent chrome / Parent view)
 - Create / edit / view / soft-delete
-- Parent/student home surfaces **current** announcements (date window, or until removed)
-- Opening the view page marks it **read** (clears the notification icon)
+- Parent/student home also surfaces **current** announcements
+- Opening the view page marks it **read** (clears the notification icon and sidebar unread badge)
 
 ## Rules
 
-- Exactly one audience: course, class, or student.
+- Audience kind is course, class, or student; pick **one or more** targets of that kind.
 - Date window **is** homepage availability — do not add a publish toggle.
-- Soft-delete only. Course-from-course does **not** copy announcements.
-- Page folders: `announcements/` (staff list), `announcement/` (view), `announcement-edit/` (new + edit). Shared `model/` + `databridge/`.
-- Parent home composes this domain; do not put announcement CRUD in `parent/`.
+- Soft-delete only. Course-from-course copy does **not** copy announcements.
+- Page folders: `announcements/` (staff + parent list), `announcement/` (view), `announcement-edit/` (new + edit). Shared `model/` + `databridge/`.
+- Parent home and the parent list compose this domain via `parent/` dashboard data; do not put announcement CRUD in `parent/`.
+- Parent chrome shows a red unread count on **Announcements** for notices not yet opened.
+- Optional **Send notification** emails `send-announcement-notification` (Resend `announcement-notification`). Recipients are claimed family accounts only (not pending invites). The announcement still saves if mail fails.
 
 ## Don’t
 
-- Treat this as email (P1 Notifications), a bulletin (those attach materials), or a discussion thread.
+- Treat this as a bulletin (those attach materials) or a discussion thread.
 - Hard-delete announcement rows from the app.
+- Mix audience kinds on one announcement (course + class together).

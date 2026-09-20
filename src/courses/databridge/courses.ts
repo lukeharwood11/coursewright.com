@@ -307,14 +307,17 @@ export async function removeCourseInstructor(
   if (error) throw new Error(error.message);
 }
 
-export type OrgStaffMember = {
+export type OrgStaffPickerPerson = {
   userId: string;
   name: string;
   email: string;
   role: string;
 };
 
-export async function listOrgStaff(organizationId: number): Promise<OrgStaffMember[]> {
+/** Staff names for the co-teacher picker — not the org-settings membership list. */
+export async function listOrgStaffForPicker(
+  organizationId: number,
+): Promise<OrgStaffPickerPerson[]> {
   const db = requireSupabase();
   const { data, error } = await db
     .from("memberships")

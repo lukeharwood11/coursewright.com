@@ -6,7 +6,8 @@ Repo-root utility scripts (not app runtime).
 
 | Script | Purpose |
 |--------|---------|
-| `nuke.sh` | Experiment-mode only: wipe linked/local Supabase DB and re-apply migrations. **Refuses parent/main** (`hlecttkgrfhtzvwnxtyb`); prefer the testing branch ref. |
+| `nuke.sh` | Experiment-mode only: wipe linked/local Supabase DB and re-apply migrations. **Refuses parent/main** (`hlecttkgrfhtzvwnxtyb`) unless `--production` (must type `NUKE PRODUCTION`). Prefer the testing branch ref. |
+| `seed-doxa-org.sh` | Idempotent **testing** seed for **Doxa Christian Academy** (roster, teachers, this-week bulletins). `--reset` clears org children first. See [`seed-doxa/`](./seed-doxa/). |
 | `tf-plan.sh <tier>` | `terraform init` + `plan -out=tf.plan` for `testing` \| `production` |
 | `tf-apply.sh <tier>` | Apply saved `infra/terraform/tf.plan` for that tier |
 | `build-spa.sh <tier>` | Write gitignored `.env.production` from Terraform outputs (incl. `VITE_PUBLIC_HOST` from `site_domain`; testing refuses parent/main) + `npm run build` |

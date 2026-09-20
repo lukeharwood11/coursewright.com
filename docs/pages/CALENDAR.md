@@ -32,7 +32,7 @@ Month and week view of when work is **assigned** and **due**, plus lesson-plan t
 
 ## Contents
 
-- Header: Calendar + month/week toggle + prev/next
+- Header: Calendar + period label; controls split into **prev/next** (pagination) and a separate **month/week** view segment (icons + labels)
 - Legend
 - Month grid or week calendar
 - Click a material → [MATERIAL](./MATERIAL.md); click a lesson plan block → [LESSON_PLAN](./LESSON_PLAN.md)

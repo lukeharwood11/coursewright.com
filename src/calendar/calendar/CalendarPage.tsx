@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { Button } from "@/ui/Button";
 import { CourseLegend } from "@/calendar/components/CourseLegend";
 import { MonthCalendar } from "@/calendar/components/MonthCalendar";
 import { WeekCalendar } from "@/calendar/components/WeekCalendar";
+import { CalendarToolbar } from "./components/CalendarToolbar";
 import { useCalendar } from "./hooks/useCalendar";
 
 export function CalendarPage() {
@@ -26,28 +26,12 @@ export function CalendarPage() {
             {page.view === "week" ? page.week.label : page.month.label}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" type="button" onClick={page.goPrev}>
-            Previous
-          </Button>
-          <Button variant="secondary" type="button" onClick={page.goNext}>
-            Next
-          </Button>
-          <Button
-            variant={page.view === "month" ? "primary" : "secondary"}
-            type="button"
-            onClick={() => page.setView("month")}
-          >
-            Month
-          </Button>
-          <Button
-            variant={page.view === "week" ? "primary" : "secondary"}
-            type="button"
-            onClick={() => page.setView("week")}
-          >
-            Week
-          </Button>
-        </div>
+        <CalendarToolbar
+          view={page.view}
+          onPrev={page.goPrev}
+          onNext={page.goNext}
+          onViewChange={page.setView}
+        />
       </div>
 
       <p className="mt-3 text-[13px] text-[var(--ink-faint)]">

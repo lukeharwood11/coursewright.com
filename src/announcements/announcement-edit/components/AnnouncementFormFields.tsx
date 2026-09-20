@@ -1,3 +1,9 @@
+import type { ComponentType, SVGProps } from "react";
+import {
+  BookOpenIcon,
+  UserGroupIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
 import { Input } from "@/ui/Input";
 import {
   announcementAudienceLabel,
@@ -12,12 +18,79 @@ const controlClass = [
   "focus:border-[var(--green)] focus:shadow-[0_0_0_3px_var(--green-tint)]",
 ].join(" ");
 
+type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+const audienceOptions: Array<{
+  value: AnnouncementAudience;
+  Icon: IconComponent;
+}> = [
+  { value: "course", Icon: BookOpenIcon },
+  { value: "class", Icon: UserGroupIcon },
+  { value: "student", Icon: UserIcon },
+];
+
+const segmentIdle =
+  "inline-flex flex-1 items-center justify-center gap-1.5 px-3 py-[9px] text-[13px] font-bold text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)] motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent disabled:hover:text-[var(--ink-soft)]";
+
+const segmentActive =
+  "inline-flex flex-1 items-center justify-center gap-1.5 px-3 py-[9px] text-[13px] font-bold bg-[var(--green-tint)] text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)] disabled:cursor-not-allowed disabled:opacity-60";
+
+const segmentGroupClass =
+  "mt-2 flex w-full overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--surface)]";
+
+function TargetChecklist({
+  label,
+  emptyHint,
+  options,
+  selectedIds,
+  disabled,
+  onToggle,
+}: {
+  label: string;
+  emptyHint?: string;
+  options: Array<{ id: number; name: string }>;
+  selectedIds: number[];
+  disabled: boolean;
+  onToggle: (id: number) => void;
+}) {
+  const selected = new Set(selectedIds);
+  return (
+    <fieldset className="mt-4">
+      <legend className="text-[13px] font-bold text-[var(--ink-soft)]">{label}</legend>
+      {options.length === 0 ? (
+        <p className="mt-2 text-[12.5px] text-[var(--ink-faint)]">
+          {emptyHint ?? "Nothing to choose yet."}
+        </p>
+      ) : (
+        <ul className="mt-2 max-h-56 divide-y divide-[var(--line-soft)] overflow-y-auto rounded-[6px] border border-[var(--line)]">
+          {options.map((option) => (
+            <li key={option.id}>
+              <label className="flex cursor-pointer items-center gap-2 px-3 py-2.5">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 shrink-0 accent-[var(--green)]"
+                  checked={selected.has(option.id)}
+                  disabled={disabled}
+                  onChange={() => onToggle(option.id)}
+                />
+                <span className="text-[14px] font-semibold text-[var(--ink)]">
+                  {option.name}
+                </span>
+              </label>
+            </li>
+          ))}
+        </ul>
+      )}
+    </fieldset>
+  );
+}
+
 export function AnnouncementFormFields({
   isNew,
   audience,
-  courseId,
-  classId,
-  studentId,
+  courseIds,
+  classIds,
+  studentIds,
   title,
   body,
   startDate,
@@ -26,34 +99,38 @@ export function AnnouncementFormFields({
   classes,
   students,
   onAudience,
-  onCourseId,
-  onClassId,
-  onStudentId,
+  onToggleCourseId,
+  onToggleClassId,
+  onToggleStudentId,
   onTitle,
   onBody,
   onStartDate,
   onEndDate,
+  sendNotification,
+  onSendNotification,
 }: {
   isNew: boolean;
   audience: AnnouncementAudience | null;
-  courseId: number | null;
-  classId: number | null;
-  studentId: number | null;
+  courseIds: number[];
+  classIds: number[];
+  studentIds: number[];
   title: string;
   body: string;
   startDate: string;
   endDate: string;
+  sendNotification: boolean;
   courses: CourseSummary[];
   classes: ClassSummary[];
   students: StudentSummary[];
   onAudience: (value: AnnouncementAudience) => void;
-  onCourseId: (value: number | null) => void;
-  onClassId: (value: number | null) => void;
-  onStudentId: (value: number | null) => void;
+  onToggleCourseId: (id: number) => void;
+  onToggleClassId: (id: number) => void;
+  onToggleStudentId: (id: number) => void;
   onTitle: (value: string) => void;
   onBody: (value: string) => void;
   onStartDate: (value: string) => void;
   onEndDate: (value: string) => void;
+  onSendNotification: (value: boolean) => void;
 }) {
   return (
     <>
@@ -61,90 +138,72 @@ export function AnnouncementFormFields({
         <legend className="text-[13px] font-bold text-[var(--ink-soft)]">
           Who is this for?
         </legend>
-        <div className="mt-2 flex flex-col gap-1.5">
-          {(["course", "class", "student"] as const).map((value) => (
-            <label key={value} className="flex cursor-pointer items-center gap-2">
-              <input
-                type="radio"
-                name="announcement-audience"
-                checked={audience === value}
+        <div
+          className={segmentGroupClass}
+          role="group"
+          aria-label="Announcement audience"
+        >
+          {audienceOptions.map(({ value, Icon }, index) => {
+            const active = audience === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={active}
                 disabled={!isNew}
-                onChange={() => onAudience(value)}
-              />
-              <span className="text-[14px] font-semibold text-[var(--ink)]">
+                className={`${active ? segmentActive : segmentIdle}${
+                  index < audienceOptions.length - 1
+                    ? " border-r border-[var(--line)]"
+                    : ""
+                }`}
+                onClick={() => onAudience(value)}
+              >
+                <Icon className="h-4 w-4 shrink-0" aria-hidden />
                 {announcementAudienceLabel(value)}
-              </span>
-            </label>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </fieldset>
 
       {audience === "course" ? (
-        <label className="mt-4 flex flex-col gap-1">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Course</span>
-          <select
-            className={controlClass}
-            value={courseId ?? ""}
-            disabled={!isNew}
-            onChange={(event) =>
-              onCourseId(event.target.value ? Number(event.target.value) : null)
-            }
-          >
-            <option value="">Choose a course</option>
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.title}
-              </option>
-            ))}
-          </select>
-          {isNew && courses.length === 0 ? (
-            <span className="text-[12.5px] text-[var(--ink-faint)]">
-              You can announce to a course you teach.
-            </span>
-          ) : null}
-        </label>
+        <TargetChecklist
+          label="Courses"
+          emptyHint="You can announce to a course you teach."
+          options={courses.map((course) => ({
+            id: course.id,
+            name: course.title,
+          }))}
+          selectedIds={courseIds}
+          disabled={!isNew}
+          onToggle={onToggleCourseId}
+        />
       ) : null}
 
       {audience === "class" ? (
-        <label className="mt-4 flex flex-col gap-1">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Class</span>
-          <select
-            className={controlClass}
-            value={classId ?? ""}
-            disabled={!isNew}
-            onChange={(event) =>
-              onClassId(event.target.value ? Number(event.target.value) : null)
-            }
-          >
-            <option value="">Choose a class</option>
-            {classes.map((classGroup) => (
-              <option key={classGroup.id} value={classGroup.id}>
-                {classGroup.title}
-              </option>
-            ))}
-          </select>
-        </label>
+        <TargetChecklist
+          label="Classes"
+          options={classes.map((classGroup) => ({
+            id: classGroup.id,
+            name: classGroup.title,
+          }))}
+          selectedIds={classIds}
+          disabled={!isNew}
+          onToggle={onToggleClassId}
+        />
       ) : null}
 
       {audience === "student" ? (
-        <label className="mt-4 flex flex-col gap-1">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Student</span>
-          <select
-            className={controlClass}
-            value={studentId ?? ""}
-            disabled={!isNew}
-            onChange={(event) =>
-              onStudentId(event.target.value ? Number(event.target.value) : null)
-            }
-          >
-            <option value="">Choose a student</option>
-            {students.map((student) => (
-              <option key={student.id} value={student.id}>
-                {student.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <TargetChecklist
+          label="Students"
+          options={students.map((student) => ({
+            id: student.id,
+            name: student.name,
+          }))}
+          selectedIds={studentIds}
+          disabled={!isNew}
+          onToggle={onToggleStudentId}
+        />
       ) : null}
 
       <label className="mt-4 flex flex-col gap-1">
@@ -194,6 +253,22 @@ export function AnnouncementFormFields({
         Leave dates blank to show this on home until you remove it. If you set
         dates, families only see it between them.
       </p>
+      <label className="mt-5 flex cursor-pointer items-start gap-2">
+        <input
+          type="checkbox"
+          className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--green)]"
+          checked={sendNotification}
+          onChange={() => onSendNotification(!sendNotification)}
+        />
+        <span>
+          <span className="block text-[14px] font-semibold text-[var(--ink)]">
+            Send notification
+          </span>
+          <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
+            Email families who already have an account for this notice.
+          </span>
+        </span>
+      </label>
     </>
   );
 }

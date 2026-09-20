@@ -1,6 +1,6 @@
--- P0 schema translated from docs/database/SCHEMA.md
+-- Course Wright schema translated from docs/database/SCHEMA.md.
 -- App entity PKs are bigserial; profiles.id stays uuid (= auth.users.id).
--- Do not add extra entities here. RLS policies live in a separate migration.
+-- Final table shapes (no later ALTER chain). RLS lives in the next migration.
 
 -- ---------------------------------------------------------------------------
 -- Extensions
@@ -161,7 +161,7 @@ create table public.organizations (
   search_vector tsvector generated always as (
     to_tsvector('english', coalesce(name, ''))
   ) stored,
-  constraint organizations_org_type_chk check (org_type in ('coop', 'micro_school')),
+  constraint organizations_org_type_chk check (org_type in ('coop', 'micro_school', 'family')),
   constraint organizations_grade_scheme_chk check (grade_scheme in ('k12', 'custom')),
   constraint organizations_slug_format_chk check (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
   constraint organizations_slug_len_chk check (char_length(slug) between 2 and 60),
@@ -332,40 +332,35 @@ create table public.admin_invites (
   token text not null default encode(extensions.gen_random_bytes(32), 'hex'),
   accepted_at timestamptz,
   membership_id bigint references public.memberships (id) on delete set null,
+  role text not null default 'admin',
+  student_profile_id bigint,
   created_at timestamptz not null default now(),
   constraint admin_invites_email_lower_chk check (email = lower(email)),
-  constraint admin_invites_token_key unique (token)
+  constraint admin_invites_token_key unique (token),
+  constraint admin_invites_role_check
+    check (role in ('owner', 'admin', 'instructor', 'parent')),
+  constraint admin_invites_parent_student_chk check (
+    (role = 'parent' and student_profile_id is not null)
+    or (role in ('owner', 'admin', 'instructor') and student_profile_id is null)
+  )
 );
 
 create index admin_invites_organization_id_idx on public.admin_invites (organization_id);
 create index admin_invites_email_idx on public.admin_invites (email);
-create unique index admin_invites_pending_org_email_uidx
+create unique index admin_invites_pending_staff_email_uidx
   on public.admin_invites (organization_id, email)
+  where accepted_at is null and role in ('owner', 'admin', 'instructor');
+create unique index admin_invites_pending_parent_uidx
+  on public.admin_invites (organization_id, email, student_profile_id)
+  where accepted_at is null and role = 'parent';
+create index admin_invites_pending_email
+  on public.admin_invites (email)
   where accepted_at is null;
+create index admin_invites_student_profile_id_idx
+  on public.admin_invites (student_profile_id);
 
-comment on table public.admin_invites is 'SCHEMA.md AdminInvite';
-
-create or replace function private.admin_invites_before_insert()
-returns trigger
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
-  mid bigint;
-begin
-  new.email := lower(new.email);
-  insert into public.memberships (organization_id, user_id, role, status)
-  values (new.organization_id, null, 'admin', 'invited')
-  returning id into mid;
-  new.membership_id := mid;
-  return new;
-end;
-$$;
-
-create trigger admin_invites_before_insert
-before insert on public.admin_invites
-for each row execute function private.admin_invites_before_insert();
+comment on table public.admin_invites is
+  'SCHEMA.md AdminInvite — email-claim tokens for owner/admin/instructor/parent. Membership is created on claim.';
 
 -- ---------------------------------------------------------------------------
 -- CourseTemplate, TemplateAccess
@@ -444,22 +439,69 @@ create table public.courses (
   end_date date,
   grade_levels text[] not null default '{}',
   status text not null default 'active',
+  location text not null default '',
+  subject text not null default '',
+  visibility text not null default 'unpublished',
+  icon_key text,
+  color_key text not null default 'moss',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   search_vector tsvector generated always as (
-    to_tsvector('english', coalesce(title, '') || ' ' || coalesce(description, ''))
+    to_tsvector(
+      'english',
+      coalesce(title, '') || ' ' ||
+      coalesce(description, '') || ' ' ||
+      coalesce(subject, '') || ' ' ||
+      coalesce(location, '')
+    )
   ) stored,
   constraint courses_status_chk check (status in ('active', 'archived')),
-  constraint courses_dates_chk check (end_date is null or start_date is null or end_date >= start_date)
+  constraint courses_dates_chk check (end_date is null or start_date is null or end_date >= start_date),
+  constraint courses_visibility_chk check (visibility in ('published', 'unpublished')),
+  constraint courses_color_key_chk check (color_key in (
+    'moss', 'slate', 'clay', 'plum', 'sea', 'wine', 'sand', 'pine'
+  )),
+  constraint courses_icon_key_chk check (
+    icon_key is null
+    or icon_key in (
+      'academic-cap',
+      'book-open',
+      'beaker',
+      'building-library',
+      'calculator',
+      'computer-desktop',
+      'globe-americas',
+      'heart',
+      'map',
+      'light-bulb',
+      'musical-note',
+      'paint-brush',
+      'pencil-square',
+      'sparkles',
+      'sun',
+      'user-group'
+    )
+  )
 );
 
 create index courses_organization_id_idx on public.courses (organization_id);
 create index courses_template_id_idx on public.courses (template_id);
 create index courses_copied_from_course_id_idx on public.courses (copied_from_course_id);
 create index courses_status_idx on public.courses (organization_id, status);
+create index courses_org_published_idx
+  on public.courses (organization_id)
+  where visibility = 'published' and status = 'active';
 create index courses_search_idx on public.courses using gin (search_vector);
 
 comment on table public.courses is 'SCHEMA.md Course';
+comment on column public.courses.location is 'Optional where the offering meets';
+comment on column public.courses.subject is 'Optional subject / area, free text';
+comment on column public.courses.visibility is
+  'published = enrolled parents (and students later); unpublished = instructors/admins only';
+comment on column public.courses.icon_key is
+  'Optional Heroicons outline key for course list cards; null = no icon';
+comment on column public.courses.color_key is
+  'SCHEMA.md Course.color_key — calendar / legend color';
 
 create trigger courses_set_updated_at
 before update on public.courses
@@ -500,7 +542,7 @@ after insert on public.courses
 for each row execute function private.on_course_created();
 
 -- ---------------------------------------------------------------------------
--- StudentProfile, Family, FamilyMember, ParentInvite, ParentStudentLink, Enrollment
+-- StudentProfile, Family, FamilyMember, ParentStudentLink, Enrollment
 -- ---------------------------------------------------------------------------
 
 create table public.student_profiles (
@@ -513,12 +555,16 @@ create table public.student_profiles (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   created_via_course_id bigint references public.courses (id) on delete set null,
+  student_email text,
   search_vector tsvector generated always as (
     to_tsvector('english', coalesce(name, ''))
   ) stored,
   constraint student_profiles_name_chk check (char_length(btrim(name)) > 0),
   constraint student_profiles_parent_email_lower_chk check (
     parent_email is null or parent_email = lower(parent_email)
+  ),
+  constraint student_profiles_student_email_lower_chk check (
+    student_email is null or student_email = lower(student_email)
   )
 );
 
@@ -528,6 +574,15 @@ create index student_profiles_created_via_course_id_idx on public.student_profil
 create index student_profiles_search_idx on public.student_profiles using gin (search_vector);
 
 comment on table public.student_profiles is 'SCHEMA.md StudentProfile';
+comment on column public.student_profiles.student_email is
+  'Optional student contact email. Invite uses parent claim path; student role is P2.';
+comment on column public.student_profiles.parent_email is
+  'Optional first parent email for search/create. Additional parents live on parent_student_links and admin_invites.';
+
+alter table public.admin_invites
+  add constraint admin_invites_student_profile_id_fkey
+  foreign key (student_profile_id) references public.student_profiles (id) on delete cascade;
+
 
 create trigger student_profiles_set_updated_at
 before update on public.student_profiles
@@ -541,7 +596,16 @@ as $$
 begin
   new.name := btrim(new.name);
   if new.parent_email is not null then
-    new.parent_email := lower(new.parent_email);
+    new.parent_email := lower(btrim(new.parent_email));
+    if new.parent_email = '' then
+      new.parent_email := null;
+    end if;
+  end if;
+  if new.student_email is not null then
+    new.student_email := lower(btrim(new.student_email));
+    if new.student_email = '' then
+      new.student_email := null;
+    end if;
   end if;
   if new.grade_level is not null then
     if not exists (
@@ -605,44 +669,6 @@ create unique index family_members_family_parent_uidx
   where parent_user_id is not null;
 
 comment on table public.family_members is 'SCHEMA.md FamilyMember';
-
-create table public.parent_invites (
-  id bigserial primary key,
-  organization_id bigint not null references public.organizations (id) on delete cascade,
-  email text not null,
-  student_profile_id bigint not null references public.student_profiles (id) on delete cascade,
-  invited_by uuid not null references public.profiles (id),
-  token text not null default encode(extensions.gen_random_bytes(32), 'hex'),
-  accepted_at timestamptz,
-  expires_at timestamptz,
-  created_at timestamptz not null default now(),
-  constraint parent_invites_email_lower_chk check (email = lower(email)),
-  constraint parent_invites_token_key unique (token)
-);
-
-create index parent_invites_organization_id_idx on public.parent_invites (organization_id);
-create index parent_invites_student_profile_id_idx on public.parent_invites (student_profile_id);
-create index parent_invites_invited_by_idx on public.parent_invites (invited_by);
-create unique index parent_invites_pending_uidx
-  on public.parent_invites (organization_id, email, student_profile_id)
-  where accepted_at is null;
-
-comment on table public.parent_invites is 'SCHEMA.md ParentInvite';
-
-create or replace function private.parent_invites_before_insert()
-returns trigger
-language plpgsql
-set search_path = ''
-as $$
-begin
-  new.email := lower(new.email);
-  return new;
-end;
-$$;
-
-create trigger parent_invites_before_insert
-before insert on public.parent_invites
-for each row execute function private.parent_invites_before_insert();
 
 create table public.parent_student_links (
   id bigserial primary key,
@@ -893,6 +919,9 @@ create table public.materials (
   url text,
   file_id bigint references public.files (id) on delete set null,
   scheduled_date date,
+  due_date date,
+  position int not null default 0,
+  visibility text not null default 'unpublished',
   copied_from_id bigint references public.materials (id) on delete set null,
   is_overridden boolean not null default false,
   status text not null default 'active',
@@ -918,7 +947,8 @@ create table public.materials (
   ),
   constraint materials_link_url_chk check (kind <> 'link' or url is not null),
   constraint materials_file_ref_chk check (kind <> 'file' or file_id is not null),
-  constraint materials_current_version_chk check (current_version >= 1)
+  constraint materials_current_version_chk check (current_version >= 1),
+  constraint materials_visibility_chk check (visibility in ('published', 'unpublished'))
 );
 
 create index materials_organization_id_idx on public.materials (organization_id);
@@ -932,9 +962,23 @@ create index materials_scheduled_date_idx on public.materials (scheduled_date);
 create index materials_course_top_level_idx
   on public.materials (course_id, scheduled_date)
   where unit_id is null and deleted_at is null;
+create index materials_unit_position_idx
+  on public.materials (unit_id, position)
+  where deleted_at is null;
+create index materials_course_toplevel_position_idx
+  on public.materials (course_id, position)
+  where unit_id is null and deleted_at is null;
+create index materials_course_published_idx
+  on public.materials (course_id)
+  where deleted_at is null and visibility = 'published';
 create index materials_search_idx on public.materials using gin (search_vector);
 
 comment on table public.materials is 'SCHEMA.md Material — page (blocks) | link | file; unit_id null = course/template top-level';
+comment on column public.materials.visibility is
+  'published = enrolled parents (and students later); unpublished = instructors/admins only';
+comment on column public.materials.due_date is
+  'Optional due date for parents/instructors. Distinct from scheduled_date (assignment / this-week date).';
+
 
 create trigger materials_set_updated_at
 before update on public.materials
@@ -1135,6 +1179,9 @@ security definer
 set search_path = ''
 as $$
 begin
+  if current_setting('coursewright.skip_version', true) = 'on' then
+    return new;
+  end if;
   if to_jsonb(new) - 'updated_at' - 'current_version' - 'search_vector'
      is not distinct from to_jsonb(old) - 'updated_at' - 'current_version' - 'search_vector' then
     return new;
@@ -1181,6 +1228,9 @@ declare
   mid bigint;
   new_version int;
 begin
+  if current_setting('coursewright.skip_version', true) = 'on' then
+    return coalesce(new, old);
+  end if;
   if tg_op = 'UPDATE'
      and to_jsonb(new) - 'updated_at'
          is not distinct from to_jsonb(old) - 'updated_at' then
@@ -1227,7 +1277,7 @@ create table public.share_links (
   course_id bigint references public.courses (id) on delete cascade,
   student_profile_id bigint references public.student_profiles (id) on delete cascade,
   material_id bigint references public.materials (id) on delete cascade,
-  parent_invite_id bigint references public.parent_invites (id) on delete cascade,
+  parent_invite_id bigint references public.admin_invites (id) on delete cascade,
   expires_at timestamptz,
   created_at timestamptz not null default now(),
   constraint share_links_link_type_chk check (link_type in ('invite', 'dashboard', 'resource')),
@@ -1460,6 +1510,7 @@ as $$
      and m.status = 'active'
     where c.id = p_course_id
       and c.status = 'active'
+      and c.visibility = 'published'
   );
 $$;
 
@@ -1478,6 +1529,24 @@ as $$
   );
 $$;
 
+create or replace function private.parent_can_view_material(p_material_id bigint)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.materials m
+    where m.id = p_material_id
+      and m.course_id is not null
+      and m.deleted_at is null
+      and m.visibility = 'published'
+      and private.parent_can_view_course(m.course_id)
+  );
+$$;
+
 create or replace function private.parent_can_view_file(p_file_id bigint)
 returns boolean
 language sql
@@ -1491,6 +1560,7 @@ as $$
     where m.file_id = p_file_id
       and m.course_id is not null
       and m.deleted_at is null
+      and m.visibility = 'published'
       and private.parent_can_view_course(m.course_id)
   )
   or exists (
@@ -1501,7 +1571,912 @@ as $$
       and b.deleted_at is null
       and m.course_id is not null
       and m.deleted_at is null
+      and m.visibility = 'published'
       and private.parent_can_view_course(m.course_id)
+  );
+$$;
+
+
+-- ---------------------------------------------------------------------------
+-- Invite claim helpers / RPCs (membership is created on claim)
+-- ---------------------------------------------------------------------------
+
+create or replace function private.current_profile_email()
+returns text
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select p.email
+  from public.profiles p
+  where p.id = (select auth.uid());
+$$;
+
+create or replace function private.has_pending_invite_for_me(p_organization_id bigint)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.admin_invites i
+    where i.organization_id = p_organization_id
+      and i.accepted_at is null
+      and i.email = private.current_profile_email()
+  );
+$$;
+
+revoke all on function private.current_profile_email() from public, anon, authenticated;
+revoke all on function private.has_pending_invite_for_me(bigint) from public, anon, authenticated;
+grant execute on function private.current_profile_email() to authenticated, service_role;
+grant execute on function private.has_pending_invite_for_me(bigint) to authenticated, service_role;
+
+create or replace function public.normalize_org_invite()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  student_org bigint;
+begin
+  new.email := lower(trim(new.email));
+  if new.email is null or new.email !~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$' then
+    raise exception 'Enter a valid email address.' using errcode = 'P0001';
+  end if;
+
+  if new.role not in ('owner', 'admin', 'instructor', 'parent') then
+    raise exception 'Choose a valid invite role.' using errcode = 'P0001';
+  end if;
+
+  if (select auth.uid()) is null then
+    raise exception 'not authenticated' using errcode = '42501';
+  end if;
+
+  if new.invited_by is null then
+    new.invited_by := (select auth.uid());
+  end if;
+
+  if new.role = 'parent' then
+    if new.student_profile_id is null then
+      raise exception 'Choose a student to invite this parent for.' using errcode = 'P0001';
+    end if;
+
+    if not private.is_org_staff(new.organization_id) then
+      raise exception 'Only staff can invite parents.' using errcode = '42501';
+    end if;
+
+    select sp.organization_id into student_org
+    from public.student_profiles sp
+    where sp.id = new.student_profile_id;
+
+    if student_org is distinct from new.organization_id then
+      raise exception 'That student is not in this organization.' using errcode = 'P0001';
+    end if;
+
+    if exists (
+      select 1
+      from public.parent_student_links psl
+      join public.profiles p on p.id = psl.parent_user_id
+      where psl.student_profile_id = new.student_profile_id
+        and p.email = new.email
+    ) then
+      raise exception 'That parent is already linked to this student.' using errcode = 'P0001';
+    end if;
+  else
+    new.student_profile_id := null;
+
+    if not private.is_org_admin(new.organization_id) then
+      raise exception 'Only owners and admins can invite collaborators.' using errcode = '42501';
+    end if;
+
+    if new.role = 'owner' and not private.is_org_owner(new.organization_id) then
+      raise exception 'Only an owner can invite another owner.' using errcode = '42501';
+    end if;
+
+    if exists (
+      select 1
+      from public.memberships m
+      join public.profiles p on p.id = m.user_id
+      where m.organization_id = new.organization_id
+        and m.status = 'active'
+        and p.email = new.email
+    ) then
+      raise exception 'That person is already in this organization.' using errcode = 'P0001';
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger admin_invites_normalize
+  before insert or update of email, role, organization_id, invited_by, student_profile_id
+  on public.admin_invites
+  for each row
+  execute function public.normalize_org_invite();
+
+create or replace function public.get_invite(p_token text)
+returns table (
+  id bigint,
+  organization_id bigint,
+  organization_name text,
+  organization_slug text,
+  email text,
+  role text,
+  student_profile_id bigint,
+  student_name text,
+  accepted_at timestamptz,
+  email_matches boolean
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  caller uuid := (select auth.uid());
+  caller_email text;
+begin
+  if caller is not null then
+    select p.email into caller_email
+    from public.profiles p
+    where p.id = caller;
+  end if;
+
+  return query
+  select
+    i.id,
+    i.organization_id,
+    o.name,
+    o.slug,
+    i.email,
+    i.role,
+    i.student_profile_id,
+    sp.name,
+    i.accepted_at,
+    ((caller_email is not null) and (i.email = caller_email)) as email_matches
+  from public.admin_invites i
+  join public.organizations o on o.id = i.organization_id
+  left join public.student_profiles sp on sp.id = i.student_profile_id
+  where i.token = p_token;
+end;
+$$;
+
+create or replace function public.claim_invite(p_token text)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller uuid := (select auth.uid());
+  caller_email text;
+  invite public.admin_invites%rowtype;
+  member_id bigint;
+  member_role text;
+  org_slug text;
+begin
+  if caller is null then
+    raise exception 'not authenticated' using errcode = '42501';
+  end if;
+
+  select * into invite
+  from public.admin_invites
+  where token = p_token
+  for update;
+
+  if not found then
+    raise exception 'This invite is missing or no longer valid.' using errcode = 'P0002';
+  end if;
+
+  select o.slug into org_slug
+  from public.organizations o
+  where o.id = invite.organization_id;
+
+  select p.email into caller_email
+  from public.profiles p
+  where p.id = caller;
+
+  if caller_email is distinct from invite.email then
+    raise exception 'Sign in with the invited email to accept.' using errcode = 'P0001';
+  end if;
+
+  if invite.role = 'parent' then
+    if invite.student_profile_id is null then
+      raise exception 'This invite is missing or no longer valid.' using errcode = 'P0002';
+    end if;
+
+    insert into public.parent_student_links (parent_user_id, student_profile_id)
+    values (caller, invite.student_profile_id)
+    on conflict (parent_user_id, student_profile_id) do nothing;
+  end if;
+
+  select m.id, m.role into member_id, member_role
+  from public.memberships m
+  where m.organization_id = invite.organization_id
+    and m.user_id = caller
+    and m.status = 'active';
+
+  if member_id is not null then
+    if invite.role in ('owner', 'admin', 'instructor')
+       and member_role = 'parent' then
+      update public.memberships
+      set role = invite.role
+      where id = member_id;
+    end if;
+
+    if invite.accepted_at is null then
+      update public.admin_invites
+      set accepted_at = now(), membership_id = member_id
+      where id = invite.id;
+    end if;
+    return org_slug;
+  end if;
+
+  if invite.accepted_at is not null then
+    raise exception 'This invite was already accepted.' using errcode = 'P0001';
+  end if;
+
+  insert into public.memberships (organization_id, user_id, role, status)
+  values (invite.organization_id, caller, invite.role, 'active')
+  returning id into member_id;
+
+  update public.admin_invites
+  set accepted_at = now(), membership_id = member_id
+  where id = invite.id;
+
+  return org_slug;
+end;
+$$;
+
+create or replace function public.get_staff_invite(p_token text)
+returns table (
+  id bigint,
+  organization_id bigint,
+  organization_name text,
+  organization_slug text,
+  email text,
+  role text,
+  student_profile_id bigint,
+  student_name text,
+  accepted_at timestamptz,
+  email_matches boolean
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select * from public.get_invite(p_token);
+$$;
+
+create or replace function public.claim_staff_invite(p_token text)
+returns text
+language sql
+security definer
+set search_path = ''
+as $$
+  select public.claim_invite(p_token);
+$$;
+
+revoke all on function public.get_invite(text) from public;
+grant execute on function public.get_invite(text) to anon, authenticated;
+
+revoke all on function public.claim_invite(text) from public, anon;
+grant execute on function public.claim_invite(text) to authenticated;
+
+revoke all on function public.get_staff_invite(text) from public, anon;
+grant execute on function public.get_staff_invite(text) to authenticated;
+
+revoke all on function public.claim_staff_invite(text) from public, anon;
+grant execute on function public.claim_staff_invite(text) to authenticated;
+
+revoke all on function public.normalize_org_invite() from public, anon;
+grant execute on function public.normalize_org_invite() to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- save_material_page
+-- ---------------------------------------------------------------------------
+
+create or replace function public.save_material_page(
+  p_material_id bigint,
+  p_placement jsonb default null,
+  p_blocks jsonb default null
+)
+returns int
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  material public.materials%rowtype;
+  next_title text;
+  next_description text;
+  next_url text;
+  next_scheduled date;
+  next_due date;
+  placement_changed boolean := false;
+  current_blocks jsonb;
+  next_blocks jsonb;
+  blocks_changed boolean := false;
+  new_version int;
+begin
+  if (select auth.uid()) is null then
+    raise exception 'Sign in to save.' using errcode = '42501';
+  end if;
+
+  select * into material
+  from public.materials
+  where id = p_material_id;
+
+  if not found then
+    raise exception 'That material isn’t there.' using errcode = 'P0002';
+  end if;
+
+  if material.course_id is not null then
+    if not private.can_manage_course(material.course_id) then
+      raise exception 'You can’t edit this material.' using errcode = '42501';
+    end if;
+  elsif material.template_id is not null then
+    if not private.can_edit_template(material.template_id) then
+      raise exception 'You can’t edit this material.' using errcode = '42501';
+    end if;
+  else
+    raise exception 'You can’t edit this material.' using errcode = '42501';
+  end if;
+
+  if p_placement is not null then
+    next_title := coalesce(p_placement->>'title', material.title);
+    next_description := coalesce(p_placement->>'description', material.description);
+    if material.kind = 'link' then
+      next_url := p_placement->>'url';
+    else
+      next_url := material.url;
+    end if;
+    if jsonb_exists(p_placement, 'scheduled_date') then
+      next_scheduled := nullif(p_placement->>'scheduled_date', '')::date;
+    else
+      next_scheduled := material.scheduled_date;
+    end if;
+    if jsonb_exists(p_placement, 'due_date') then
+      next_due := nullif(p_placement->>'due_date', '')::date;
+    else
+      next_due := material.due_date;
+    end if;
+    placement_changed :=
+      next_title is distinct from material.title
+      or next_description is distinct from material.description
+      or next_url is distinct from material.url
+      or next_scheduled is distinct from material.scheduled_date
+      or next_due is distinct from material.due_date;
+  end if;
+
+  if p_blocks is not null then
+    if material.kind <> 'page' then
+      raise exception 'Only page materials have lesson content.' using errcode = 'P0001';
+    end if;
+    if jsonb_typeof(p_blocks) <> 'array' then
+      raise exception 'Page content is not in a shape we can save.' using errcode = 'P0001';
+    end if;
+
+    select coalesce(
+      (
+        select jsonb_agg(
+          jsonb_build_object(
+            'kind', b.kind,
+            'body', b.body,
+            'position', b.position,
+            'file_id', b.file_id
+          )
+          order by b.position, b.id
+        )
+        from public.blocks b
+        where b.material_id = p_material_id
+          and b.deleted_at is null
+      ),
+      '[]'::jsonb
+    )
+    into current_blocks;
+
+    select coalesce(
+      jsonb_agg(
+        jsonb_build_object(
+          'kind', elem->>'kind',
+          'body', coalesce(elem->'body', '{}'::jsonb),
+          'position', coalesce((elem->>'position')::int, (ord - 1)::int),
+          'file_id', case
+            when elem->>'file_id' ~ '^[0-9]+$' then (elem->>'file_id')::bigint
+            else null
+          end
+        )
+        order by coalesce((elem->>'position')::int, (ord - 1)::int), ord
+      ),
+      '[]'::jsonb
+    )
+    into next_blocks
+    from jsonb_array_elements(p_blocks) with ordinality as t(elem, ord);
+
+    if exists (
+      select 1
+      from jsonb_array_elements(p_blocks) as elem
+      where coalesce(elem->>'kind', '') not in ('rich_text', 'video')
+    ) then
+      raise exception 'That block type isn’t supported yet.' using errcode = 'P0001';
+    end if;
+
+    blocks_changed := current_blocks is distinct from next_blocks;
+  end if;
+
+  if not placement_changed and not blocks_changed then
+    return material.current_version;
+  end if;
+
+  perform set_config('coursewright.skip_version', 'on', true);
+
+  if placement_changed then
+    update public.materials
+    set
+      title = next_title,
+      description = next_description,
+      url = next_url,
+      scheduled_date = next_scheduled,
+      due_date = next_due
+    where id = p_material_id;
+  end if;
+
+  if blocks_changed then
+    update public.blocks
+    set deleted_at = now()
+    where material_id = p_material_id
+      and deleted_at is null;
+
+    insert into public.blocks (material_id, kind, body, position, file_id)
+    select
+      p_material_id,
+      elem->>'kind',
+      coalesce(elem->'body', '{}'::jsonb),
+      coalesce((elem->>'position')::int, (ord - 1)::int),
+      case
+        when elem->>'file_id' ~ '^[0-9]+$' then (elem->>'file_id')::bigint
+        else null
+      end
+    from jsonb_array_elements(p_blocks) with ordinality as t(elem, ord);
+  end if;
+
+  update public.materials m
+  set current_version = m.current_version + 1
+  where m.id = p_material_id
+  returning m.current_version into new_version;
+
+  insert into public.material_versions (material_id, version, snapshot, changed_by, change_type)
+  values (
+    p_material_id,
+    new_version,
+    private.material_page_snapshot(p_material_id),
+    (select auth.uid()),
+    'update'
+  );
+
+  return new_version;
+end;
+$$;
+
+revoke all on function public.save_material_page(bigint, jsonb, jsonb) from public, anon;
+grant execute on function public.save_material_page(bigint, jsonb, jsonb) to authenticated;
+
+comment on function public.save_material_page(bigint, jsonb, jsonb) is
+  'Save material placement and/or page blocks; insert one material_versions row only when something changed.';
+
+-- ---------------------------------------------------------------------------
+-- Lesson plans
+-- ---------------------------------------------------------------------------
+
+create table public.lesson_plans (
+  id bigserial primary key,
+  organization_id bigint not null references public.organizations (id) on delete cascade,
+  course_id bigint not null references public.courses (id) on delete cascade,
+  week_start date not null,
+  title text not null,
+  week_note text not null default '',
+  visibility text not null default 'unpublished',
+  created_by uuid not null references public.profiles (id),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz,
+  deleted_by uuid references public.profiles (id),
+  constraint lesson_plans_title_chk check (char_length(btrim(title)) > 0),
+  constraint lesson_plans_visibility_chk check (visibility in ('published', 'unpublished')),
+  constraint lesson_plans_week_start_sunday_chk check (extract(dow from week_start) = 0)
+);
+
+create unique index lesson_plans_course_week_uidx
+  on public.lesson_plans (course_id, week_start)
+  where deleted_at is null;
+
+create index lesson_plans_organization_id_idx on public.lesson_plans (organization_id);
+create index lesson_plans_course_id_idx on public.lesson_plans (course_id)
+  where deleted_at is null;
+create index lesson_plans_created_by_idx on public.lesson_plans (created_by);
+
+create trigger lesson_plans_set_updated_at
+before update on public.lesson_plans
+for each row execute function private.set_updated_at();
+
+comment on table public.lesson_plans is
+  'SCHEMA.md LessonPlan — weekly course plan; published / unpublished';
+comment on column public.lesson_plans.week_start is
+  'Sunday of the Sunday–Saturday week this plan covers';
+
+create table public.lesson_plan_days (
+  id bigserial primary key,
+  lesson_plan_id bigint not null references public.lesson_plans (id) on delete cascade,
+  day_date date not null,
+  body text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint lesson_plan_days_plan_day_key unique (lesson_plan_id, day_date)
+);
+
+create index lesson_plan_days_lesson_plan_id_idx
+  on public.lesson_plan_days (lesson_plan_id, day_date);
+
+create trigger lesson_plan_days_set_updated_at
+before update on public.lesson_plan_days
+for each row execute function private.set_updated_at();
+
+comment on table public.lesson_plan_days is
+  'SCHEMA.md LessonPlanDay — optional note for one day in a lesson plan';
+
+create or replace function private.lesson_plan_day_in_week()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  plan_start date;
+begin
+  select lp.week_start into plan_start
+  from public.lesson_plans lp
+  where lp.id = new.lesson_plan_id;
+
+  if plan_start is null
+     or new.day_date < plan_start
+     or new.day_date > (plan_start + 6) then
+    raise exception 'That day needs to be in the same week as this lesson plan.'
+      using errcode = '23514';
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger lesson_plan_days_in_week
+before insert or update on public.lesson_plan_days
+for each row execute function private.lesson_plan_day_in_week();
+
+create table public.lesson_plan_day_materials (
+  id bigserial primary key,
+  lesson_plan_day_id bigint not null references public.lesson_plan_days (id) on delete cascade,
+  material_id bigint not null references public.materials (id) on delete cascade,
+  position int not null default 0,
+  created_at timestamptz not null default now(),
+  constraint lesson_plan_day_materials_day_material_key
+    unique (lesson_plan_day_id, material_id)
+);
+
+create index lesson_plan_day_materials_day_id_idx
+  on public.lesson_plan_day_materials (lesson_plan_day_id, position);
+create index lesson_plan_day_materials_material_id_idx
+  on public.lesson_plan_day_materials (material_id);
+
+comment on table public.lesson_plan_day_materials is
+  'SCHEMA.md LessonPlanDayMaterial — materials listed under a lesson-plan day';
+
+create or replace function private.lesson_plan_day_material_same_course()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  plan_course bigint;
+  material_course bigint;
+begin
+  select lp.course_id into plan_course
+  from public.lesson_plan_days d
+  join public.lesson_plans lp on lp.id = d.lesson_plan_id
+  where d.id = new.lesson_plan_day_id;
+
+  select m.course_id into material_course
+  from public.materials m
+  where m.id = new.material_id;
+
+  if plan_course is null or material_course is null
+     or plan_course is distinct from material_course then
+    raise exception 'Those materials need to be in the same course as this lesson plan.'
+      using errcode = '23514';
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger lesson_plan_day_materials_same_course
+before insert or update on public.lesson_plan_day_materials
+for each row execute function private.lesson_plan_day_material_same_course();
+
+-- ---------------------------------------------------------------------------
+-- Announcements (multi-target arrays)
+-- ---------------------------------------------------------------------------
+
+create table public.announcements (
+  id bigserial primary key,
+  organization_id bigint not null references public.organizations (id) on delete cascade,
+  audience text not null,
+  course_ids bigint[] not null default '{}',
+  class_ids bigint[] not null default '{}',
+  student_profile_ids bigint[] not null default '{}',
+  title text not null,
+  body text not null default '',
+  start_date date,
+  end_date date,
+  created_by uuid not null references public.profiles (id),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz,
+  deleted_by uuid references public.profiles (id),
+  constraint announcements_title_chk check (char_length(btrim(title)) > 0),
+  constraint announcements_audience_chk check (audience in ('course', 'class', 'student')),
+  constraint announcements_audience_targets_chk check (
+    (
+      audience = 'course'
+      and cardinality(course_ids) >= 1
+      and class_ids = '{}'::bigint[]
+      and student_profile_ids = '{}'::bigint[]
+    )
+    or (
+      audience = 'class'
+      and cardinality(class_ids) >= 1
+      and course_ids = '{}'::bigint[]
+      and student_profile_ids = '{}'::bigint[]
+    )
+    or (
+      audience = 'student'
+      and cardinality(student_profile_ids) >= 1
+      and course_ids = '{}'::bigint[]
+      and class_ids = '{}'::bigint[]
+    )
+  ),
+  constraint announcements_date_range_chk check (
+    start_date is null
+    or end_date is null
+    or end_date >= start_date
+  )
+);
+
+create index announcements_organization_id_idx
+  on public.announcements (organization_id)
+  where deleted_at is null;
+create index announcements_course_ids_gin
+  on public.announcements using gin (course_ids)
+  where deleted_at is null and audience = 'course';
+create index announcements_class_ids_gin
+  on public.announcements using gin (class_ids)
+  where deleted_at is null and audience = 'class';
+create index announcements_student_profile_ids_gin
+  on public.announcements using gin (student_profile_ids)
+  where deleted_at is null and audience = 'student';
+create index announcements_created_by_idx on public.announcements (created_by);
+
+create trigger announcements_set_updated_at
+before update on public.announcements
+for each row execute function private.set_updated_at();
+
+comment on table public.announcements is
+  'SCHEMA.md Announcement — one-way notice to one or more courses, classes, or students';
+comment on column public.announcements.start_date is
+  'First local calendar day families see this on home (inclusive); null = already current';
+comment on column public.announcements.end_date is
+  'Last local calendar day families see this on home (inclusive); null = until removed';
+comment on column public.announcements.course_ids is
+  'Course targets when audience = course (one or more)';
+comment on column public.announcements.class_ids is
+  'Class targets when audience = class (one or more)';
+comment on column public.announcements.student_profile_ids is
+  'Student targets when audience = student (one or more)';
+
+create or replace function private.announcement_targets_in_org()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  target_id bigint;
+  target_org bigint;
+begin
+  if new.audience = 'course' then
+    foreach target_id in array new.course_ids loop
+      select c.organization_id into target_org
+      from public.courses c
+      where c.id = target_id;
+      if target_org is null or target_org is distinct from new.organization_id then
+        raise exception 'That audience needs to be in this organization.'
+          using errcode = '23514';
+      end if;
+    end loop;
+  elsif new.audience = 'class' then
+    foreach target_id in array new.class_ids loop
+      select c.organization_id into target_org
+      from public.classes c
+      where c.id = target_id;
+      if target_org is null or target_org is distinct from new.organization_id then
+        raise exception 'That audience needs to be in this organization.'
+          using errcode = '23514';
+      end if;
+    end loop;
+  else
+    foreach target_id in array new.student_profile_ids loop
+      select s.organization_id into target_org
+      from public.student_profiles s
+      where s.id = target_id;
+      if target_org is null or target_org is distinct from new.organization_id then
+        raise exception 'That audience needs to be in this organization.'
+          using errcode = '23514';
+      end if;
+    end loop;
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger announcements_targets_in_org
+before insert or update on public.announcements
+for each row execute function private.announcement_targets_in_org();
+
+create table public.announcement_reads (
+  id bigserial primary key,
+  announcement_id bigint not null references public.announcements (id) on delete cascade,
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  read_at timestamptz not null default now(),
+  constraint announcement_reads_announcement_user_key unique (announcement_id, user_id)
+);
+
+create index announcement_reads_user_id_idx
+  on public.announcement_reads (user_id);
+create index announcement_reads_announcement_id_idx
+  on public.announcement_reads (announcement_id);
+
+comment on table public.announcement_reads is
+  'SCHEMA.md AnnouncementRead — per-user read receipt';
+
+create or replace function private.can_post_announcement(
+  p_org_id bigint,
+  p_audience text,
+  p_course_ids bigint[],
+  p_class_ids bigint[],
+  p_student_ids bigint[]
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select
+    case p_audience
+      when 'course' then
+        cardinality(p_course_ids) >= 1
+        and (
+          select bool_and(private.can_manage_course(cid))
+          from unnest(p_course_ids) as cid
+        )
+      when 'class' then
+        private.is_org_staff(p_org_id)
+        and cardinality(p_class_ids) >= 1
+        and (
+          select bool_and(
+            exists (
+              select 1
+              from public.classes c
+              where c.id = cid
+                and c.organization_id = p_org_id
+                and c.deleted_at is null
+            )
+          )
+          from unnest(p_class_ids) as cid
+        )
+      when 'student' then
+        private.is_org_staff(p_org_id)
+        and cardinality(p_student_ids) >= 1
+        and (
+          select bool_and(
+            exists (
+              select 1
+              from public.student_profiles s
+              where s.id = sid
+                and s.organization_id = p_org_id
+            )
+          )
+          from unnest(p_student_ids) as sid
+        )
+      else false
+    end;
+$$;
+
+-- Bypass RLS so class parent-select does not recurse through class_members → classes.
+create or replace function private.parent_linked_to_class(p_class_id bigint)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.class_members cm
+    join public.parent_student_links psl
+      on psl.student_profile_id = cm.student_profile_id
+     and psl.parent_user_id = (select auth.uid())
+    where cm.class_id = p_class_id
+  );
+$$;
+
+create or replace function private.parent_can_view_announcement(p_announcement_id bigint)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.announcements a
+    join public.memberships m
+      on m.organization_id = a.organization_id
+     and m.user_id = (select auth.uid())
+     and m.role = 'parent'
+     and m.status = 'active'
+    where a.id = p_announcement_id
+      and (
+        (
+          a.audience = 'course'
+          and exists (
+            select 1
+            from unnest(a.course_ids) as cid
+            where private.parent_can_view_course(cid)
+          )
+        )
+        or (
+          a.audience = 'class'
+          and exists (
+            select 1
+            from unnest(a.class_ids) as cid
+            where private.parent_linked_to_class(cid)
+              and exists (
+                select 1
+                from public.classes c
+                where c.id = cid
+                  and c.organization_id = a.organization_id
+                  and c.deleted_at is null
+              )
+          )
+        )
+        or (
+          a.audience = 'student'
+          and exists (
+            select 1
+            from unnest(a.student_profile_ids) as sid
+            where private.parent_linked_to_student(sid)
+          )
+        )
+      )
   );
 $$;
 

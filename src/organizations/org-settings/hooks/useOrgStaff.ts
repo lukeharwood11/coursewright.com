@@ -22,14 +22,12 @@ import {
   canInviteStaff,
   canManageStaff,
   inviteableStaffRoles,
-  parseChangeableStaffRole,
+  parseStaffInviteRole,
   roleLabel,
-  type ChangeableStaffRole,
   type OrgRole,
   type StaffInviteRole,
 } from "@/organizations/model/role";
 import {
-  LAST_OWNER_ADMIN_MESSAGE,
   isLastOrgManager,
   staffMemberActions,
   validateChangeStaffRole,
@@ -47,9 +45,8 @@ export type StaffMemberRow = OrgStaffMember & {
   isYou: boolean;
   canChangeRole: boolean;
   canRemove: boolean;
-  changeRoles: ChangeableStaffRole[];
+  changeRoles: StaffInviteRole[];
   lastManagerGuard: boolean;
-  guardMessage: string | null;
 };
 
 export function useOrgStaff(organizationId: number | undefined, role: OrgRole | null) {
@@ -61,13 +58,17 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
   const roles = role ? inviteableStaffRoles(role) : [];
 
   const [email, setEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<StaffInviteRole>(roles[0] ?? "instructor");
+  const [inviteRole, setInviteRole] = useState<StaffInviteRole>("instructor");
   const [formError, setFormError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [lastInviteId, setLastInviteId] = useState<number | null>(null);
   const [lastInviteSent, setLastInviteSent] = useState(false);
 
-  const selectedRole = roles.includes(inviteRole) ? inviteRole : (roles[0] ?? "instructor");
+  const selectedRole = roles.includes(inviteRole)
+    ? inviteRole
+    : roles.includes("instructor")
+      ? "instructor"
+      : (roles[0] ?? "instructor");
 
   const staffQuery = useQuery({
     queryKey: staffInviteQueryKeys.staff(organizationId ?? 0),
@@ -165,8 +166,8 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
   });
 
   const changeRoleMutation = useMutation({
-    mutationFn: async (input: { member: OrgStaffMember; nextRole: ChangeableStaffRole }) => {
-      if (!role) throw new Error("You don’t have permission to change staff roles.");
+    mutationFn: async (input: { member: OrgStaffMember; nextRole: StaffInviteRole }) => {
+      if (!role) throw new Error("You don’t have permission to change collaborator roles.");
       const parsed = validateChangeStaffRole({
         actorRole: role,
         currentRole: input.member.role,
@@ -179,7 +180,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
         membershipId: input.member.membershipId,
         role: parsed.value,
       });
-      return input;
+      return { ...input, nextRole: parsed.value };
     },
     onSuccess: async (input) => {
       const name = input.member.name || input.member.email;
@@ -193,7 +194,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
 
   const removeMutation = useMutation({
     mutationFn: async (member: OrgStaffMember) => {
-      if (!role) throw new Error("You don’t have permission to remove staff.");
+      if (!role) throw new Error("You don’t have permission to remove collaborators.");
       const parsed = validateRemoveStaffMember({
         actorRole: role,
         targetRole: member.role,
@@ -206,13 +207,13 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     onSuccess: async (member) => {
       const removedSelf = member.userId === user.id;
       if (removedSelf) {
-        toast("You were removed from staff in this organization.");
+        toast("You were removed as a collaborator in this organization.");
         await invalidateStaff();
         navigate("/my");
         return;
       }
       const name = member.name || member.email;
-      toast(`Removed ${name} from staff.`);
+      toast(`Removed ${name} as a collaborator.`);
       await invalidateStaff();
     },
     onError: (error: Error) => {
@@ -229,8 +230,6 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
       ...member,
       isYou: member.userId === user.id,
       ...actions,
-      guardMessage:
-        canManage && actions.lastManagerGuard ? LAST_OWNER_ADMIN_MESSAGE : null,
     };
   });
 
@@ -252,7 +251,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
   }
 
   function onChangeRole(member: OrgStaffMember, nextRole: string) {
-    const parsed = parseChangeableStaffRole(nextRole);
+    const parsed = parseStaffInviteRole(nextRole);
     if (!parsed || parsed === member.role) return;
     changeRoleMutation.mutate({ member, nextRole: parsed });
   }

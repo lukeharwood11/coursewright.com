@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
@@ -9,6 +10,7 @@ import {
   createAnnouncement,
   getAnnouncement,
   listCourseIdsTaughtBy,
+  sendAnnouncementNotification,
   updateAnnouncement,
 } from "@/announcements/databridge/announcements";
 import {
@@ -19,7 +21,10 @@ import type { AnnouncementAudience } from "@/announcements/model/audience";
 import {
   draftFromSearchParams,
   emptyAnnouncementDraft,
+  sameIdList,
+  toggleDraftId,
   validateAnnouncementDraft,
+  announcementDraftHasTitleAndTargets,
   type AnnouncementDraft,
 } from "@/announcements/model/validate";
 import { courseQueryKeys, listCourses } from "@/courses/databridge/courses";
@@ -35,6 +40,28 @@ import {
 } from "@/roster/databridge/students";
 
 export const ANNOUNCEMENT_FORM_ID = "announcement-form";
+
+function draftFromRecord(loaded: {
+  audience: AnnouncementAudience;
+  courseIds: number[];
+  classIds: number[];
+  studentIds: number[];
+  title: string;
+  body: string;
+  startDate: string | null;
+  endDate: string | null;
+}): AnnouncementDraft {
+  return {
+    audience: loaded.audience,
+    courseIds: loaded.courseIds,
+    classIds: loaded.classIds,
+    studentIds: loaded.studentIds,
+    title: loaded.title,
+    body: loaded.body,
+    startDate: loaded.startDate ?? "",
+    endDate: loaded.endDate ?? "",
+  };
+}
 
 export function useAnnouncementEdit() {
   const params = useParams();
@@ -83,21 +110,13 @@ export function useAnnouncementEdit() {
     ...emptyAnnouncementDraft(),
     ...prefill,
   }));
+  const [sendNotification, setSendNotification] = useState(false);
   const [hydratedId, setHydratedId] = useState<number | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loaded || hydratedId === loaded.id) return;
-    setDraft({
-      audience: loaded.audience,
-      courseId: loaded.courseId,
-      classId: loaded.classId,
-      studentId: loaded.studentId,
-      title: loaded.title,
-      body: loaded.body,
-      startDate: loaded.startDate ?? "",
-      endDate: loaded.endDate ?? "",
-    });
+    setDraft(draftFromRecord(loaded));
     setHydratedId(loaded.id);
   }, [loaded, hydratedId]);
 
@@ -109,35 +128,29 @@ export function useAnnouncementEdit() {
   const students = studentsQuery.data ?? [];
 
   const initial: AnnouncementDraft = loaded
-    ? {
-        audience: loaded.audience,
-        courseId: loaded.courseId,
-        classId: loaded.classId,
-        studentId: loaded.studentId,
-        title: loaded.title,
-        body: loaded.body,
-        startDate: loaded.startDate ?? "",
-        endDate: loaded.endDate ?? "",
-      }
+    ? draftFromRecord(loaded)
     : { ...emptyAnnouncementDraft(), ...prefill };
 
   const hasChanges =
     draft.audience !== initial.audience ||
-    draft.courseId !== initial.courseId ||
-    draft.classId !== initial.classId ||
-    draft.studentId !== initial.studentId ||
+    !sameIdList(draft.courseIds, initial.courseIds) ||
+    !sameIdList(draft.classIds, initial.classIds) ||
+    !sameIdList(draft.studentIds, initial.studentIds) ||
     draft.title !== initial.title ||
     draft.body !== initial.body ||
     draft.startDate !== initial.startDate ||
-    draft.endDate !== initial.endDate;
+    draft.endDate !== initial.endDate ||
+    sendNotification;
+
+  const canSave = announcementDraftHasTitleAndTargets(draft);
 
   function setAudience(audience: AnnouncementAudience) {
     setDraft((current) => ({
       ...current,
       audience,
-      courseId: audience === "course" ? current.courseId : null,
-      classId: audience === "class" ? current.classId : null,
-      studentId: audience === "student" ? current.studentId : null,
+      courseIds: audience === "course" ? current.courseIds : [],
+      classIds: audience === "class" ? current.classIds : [],
+      studentIds: audience === "student" ? current.studentIds : [],
     }));
   }
 
@@ -161,18 +174,28 @@ export function useAnnouncementEdit() {
         throw new Error(message);
       }
       setFormError(null);
-      if (isNew) {
-        return createAnnouncement({
-          organizationId: organization.id,
-          createdBy: user.id,
-          draft,
-        });
+      const saved = isNew
+        ? await createAnnouncement({
+            organizationId: organization.id,
+            createdBy: user.id,
+            draft,
+          })
+        : await updateAnnouncement(announcementId, draft).then(() => ({
+            id: announcementId,
+          }));
+      if (!sendNotification) {
+        return { id: saved.id, email: null };
       }
-      await updateAnnouncement(announcementId, draft);
-      return { id: announcementId };
+      const email = await sendAnnouncementNotification(saved.id);
+      return { id: saved.id, email };
     },
     onSuccess: (result) => {
       invalidate(result.id);
+      if (result.email?.error) {
+        toast(result.email.error);
+      } else if (result.email && result.email.sent > 0) {
+        toast("Notification emailed to families.");
+      }
       navigate(announcementPath(organization.slug, result.id));
     },
   });
@@ -192,26 +215,29 @@ export function useAnnouncementEdit() {
     startDate: draft.startDate,
     endDate: draft.endDate,
     audience: draft.audience,
-    courseId: draft.courseId,
-    classId: draft.classId,
-    studentId: draft.studentId,
+    courseIds: draft.courseIds,
+    classIds: draft.classIds,
+    studentIds: draft.studentIds,
     setTitle: (title: string) => setDraft((current) => ({ ...current, title })),
     setBody: (body: string) => setDraft((current) => ({ ...current, body })),
     setStartDate: (startDate: string) =>
       setDraft((current) => ({ ...current, startDate })),
     setEndDate: (endDate: string) =>
       setDraft((current) => ({ ...current, endDate })),
+    sendNotification,
+    setSendNotification,
     setAudience,
-    setCourseId: (courseId: number | null) =>
-      setDraft((current) => ({ ...current, courseId })),
-    setClassId: (classId: number | null) =>
-      setDraft((current) => ({ ...current, classId })),
-    setStudentId: (studentId: number | null) =>
-      setDraft((current) => ({ ...current, studentId })),
+    toggleCourseId: (id: number) =>
+      setDraft((current) => toggleDraftId(current, "courseIds", id)),
+    toggleClassId: (id: number) =>
+      setDraft((current) => toggleDraftId(current, "classIds", id)),
+    toggleStudentId: (id: number) =>
+      setDraft((current) => toggleDraftId(current, "studentIds", id)),
     courses,
     classes,
     students,
     hasChanges,
+    canSave,
     formError: formError ?? save.error?.message ?? null,
     saving: save.isPending,
     loading:

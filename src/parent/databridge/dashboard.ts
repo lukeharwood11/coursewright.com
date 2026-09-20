@@ -21,6 +21,14 @@ function one<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? (value[0] ?? null) : value;
 }
 
+function announcementAuthorName(
+  author: { name: string } | { name: string }[] | null | undefined,
+): string {
+  const profile = one(author);
+  const name = profile?.name?.trim();
+  return name || "Teacher";
+}
+
 export const parentQueryKeys = {
   dashboard: (orgId: number, userId: string) =>
     ["parent", "dashboard", orgId, userId] as const,
@@ -84,7 +92,7 @@ export async function loadParentDashboard(
     db
       .from("announcements")
       .select(
-        "id, title, body, start_date, end_date, audience, course_id, class_id, student_profile_id, course:courses!announcements_course_id_fkey(title), class_group:classes!announcements_class_id_fkey(title), student:student_profiles!announcements_student_profile_id_fkey(name), announcement_reads(user_id)",
+        "id, title, body, start_date, end_date, created_at, created_by, audience, course_ids, class_ids, student_profile_ids, author:profiles!announcements_created_by_fkey(name), announcement_reads(user_id)",
       )
       .eq("organization_id", organizationId)
       .is("deleted_at", null)
@@ -95,14 +103,7 @@ export async function loadParentDashboard(
   if (enrollmentsResult.error) throw new Error(enrollmentsResult.error.message);
   if (importantResult.error) throw new Error(importantResult.error.message);
   if (membersResult.error) throw new Error(membersResult.error.message);
-  // HN-017: the testing database may not have `announcements` yet. Skip rather
-  // than failing the whole parent home.
-  if (
-    announcementsResult.error &&
-    announcementsResult.error.code !== "PGRST205"
-  ) {
-    throw new Error(announcementsResult.error.message);
-  }
+  if (announcementsResult.error) throw new Error(announcementsResult.error.message);
 
   const enrollments = (enrollmentsResult.data ?? []).flatMap((row) => {
     const course = one(row.course);
@@ -204,11 +205,16 @@ export async function loadParentDashboard(
     studentId: row.student_profile_id,
   }));
 
-  const announcements = (announcementsResult.data ?? []).flatMap((row) => {
+  const announcementsRaw = (announcementsResult.data ?? []).flatMap((row) => {
     const audience = parseAnnouncementAudience(row.audience);
     if (!audience) return [];
     const reads = Array.isArray(row.announcement_reads)
       ? row.announcement_reads
+      : [];
+    const courseIds = Array.isArray(row.course_ids) ? row.course_ids : [];
+    const classIds = Array.isArray(row.class_ids) ? row.class_ids : [];
+    const studentIds = Array.isArray(row.student_profile_ids)
+      ? row.student_profile_ids
       : [];
     return [
       {
@@ -217,17 +223,62 @@ export async function loadParentDashboard(
         body: row.body,
         startDate: row.start_date,
         endDate: row.end_date,
+        createdAt: row.created_at,
+        authorName: announcementAuthorName(row.author),
         audience,
-        courseId: row.course_id,
-        classId: row.class_id,
-        studentId: row.student_profile_id,
-        courseTitle: one(row.course)?.title ?? null,
-        classTitle: one(row.class_group)?.title ?? null,
-        studentName: one(row.student)?.name ?? null,
+        courseIds,
+        classIds,
+        studentIds,
         read: reads.some((entry) => entry.user_id === userId),
       },
     ];
   });
+
+  const announcementCourseIds = [
+    ...new Set(announcementsRaw.flatMap((row) => row.courseIds)),
+  ];
+  const announcementClassIds = [
+    ...new Set(announcementsRaw.flatMap((row) => row.classIds)),
+  ];
+  const announcementStudentIds = [
+    ...new Set(announcementsRaw.flatMap((row) => row.studentIds)),
+  ];
+
+  const [courseTitleRows, classTitleRows, studentNameRows] = await Promise.all([
+    announcementCourseIds.length === 0
+      ? Promise.resolve({ data: [] as Array<{ id: number; title: string }>, error: null })
+      : db.from("courses").select("id, title").in("id", announcementCourseIds),
+    announcementClassIds.length === 0
+      ? Promise.resolve({ data: [] as Array<{ id: number; title: string }>, error: null })
+      : db.from("classes").select("id, title").in("id", announcementClassIds),
+    announcementStudentIds.length === 0
+      ? Promise.resolve({ data: [] as Array<{ id: number; name: string }>, error: null })
+      : db
+          .from("student_profiles")
+          .select("id, name")
+          .in("id", announcementStudentIds),
+  ]);
+
+  if (courseTitleRows.error) throw new Error(courseTitleRows.error.message);
+  if (classTitleRows.error) throw new Error(classTitleRows.error.message);
+  if (studentNameRows.error) throw new Error(studentNameRows.error.message);
+
+  const courseTitleById = new Map(
+    (courseTitleRows.data ?? []).map((row) => [row.id, row.title]),
+  );
+  const classTitleById = new Map(
+    (classTitleRows.data ?? []).map((row) => [row.id, row.title]),
+  );
+  const studentNameById = new Map(
+    (studentNameRows.data ?? []).map((row) => [row.id, row.name]),
+  );
+
+  const announcements = announcementsRaw.map((row) => ({
+    ...row,
+    courseTitles: row.courseIds.map((id) => courseTitleById.get(id) ?? "Course"),
+    classTitles: row.classIds.map((id) => classTitleById.get(id) ?? "Class"),
+    studentNames: row.studentIds.map((id) => studentNameById.get(id) ?? "Student"),
+  }));
 
   return buildParentDashboard({
     week,

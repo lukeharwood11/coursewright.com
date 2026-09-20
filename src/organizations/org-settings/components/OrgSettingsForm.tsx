@@ -1,6 +1,12 @@
 import type { FormEvent } from "react";
 import { Input } from "@/ui/Input";
-import { ORG_TYPES, orgTypeLabel } from "@/organizations/model/orgType";
+import { Select } from "@/ui/Select";
+import {
+  ORG_TYPES,
+  orgTypeHint,
+  orgTypeLabel,
+  parseOrgType,
+} from "@/organizations/model/orgType";
 import { GRADE_SCHEMES } from "@/organizations/model/gradeScheme";
 
 export const ORG_SETTINGS_FORM_ID = "org-settings-form";
@@ -46,6 +52,9 @@ export function OrgSettingsForm({
   onConfirmPermalinkChange: (value: boolean) => void;
   onSubmit: (event: FormEvent) => void;
 }) {
+  const parsedOrgType = parseOrgType(orgType);
+  const orgTypeHintText = parsedOrgType ? orgTypeHint(parsedOrgType) : null;
+
   return (
     <form
       id={ORG_SETTINGS_FORM_ID}
@@ -72,8 +81,8 @@ export function OrgSettingsForm({
             <span className="text-[13px] font-bold text-[var(--ink-soft)]">
               Organization type
             </span>
-            <select
-              className={controlClass}
+            <Select
+              wrapperClassName="w-full"
               value={orgType}
               onChange={(event) => onOrgTypeChange(event.target.value)}
               disabled={!canEdit}
@@ -83,7 +92,10 @@ export function OrgSettingsForm({
                   {orgTypeLabel(type)}
                 </option>
               ))}
-            </select>
+            </Select>
+            {orgTypeHintText ? (
+              <span className="text-[12px] text-[var(--ink-faint)]">{orgTypeHintText}</span>
+            ) : null}
           </label>
         </div>
 
@@ -130,8 +142,8 @@ export function OrgSettingsForm({
 
         <label className="mt-3 flex flex-col gap-1">
           <span className="text-[13px] font-bold text-[var(--ink-soft)]">Grade list</span>
-          <select
-            className={controlClass}
+          <Select
+            wrapperClassName="w-full"
             value={gradeScheme}
             onChange={(event) => onGradeSchemeChange(event.target.value)}
             disabled={!canEdit}
@@ -141,7 +153,7 @@ export function OrgSettingsForm({
                 {scheme === "k12" ? "K–12" : "Custom"}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
 
         {gradeScheme === "k12" ? (

@@ -228,7 +228,7 @@ export function CoursePage() {
             </div>
             {units.length === 0 ? (
               <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">
-                Units are optional. Add one when you want to group materials.
+                Create a new unit to start adding material.
               </p>
             ) : null}
             {canEdit ? (

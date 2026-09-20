@@ -101,6 +101,7 @@ function SidebarSection({
         active={sectionActive}
         collapsed={collapsed}
         icon={Icon}
+        badgeCount={section.badgeCount}
         onNavigate={onNavigate}
       />
       {showChildren ? (
@@ -127,6 +128,31 @@ function SidebarSection({
   );
 }
 
+function NavBadge({
+  count,
+  collapsed,
+}: {
+  count: number;
+  collapsed: boolean;
+}) {
+  const label = count > 99 ? "99+" : String(count);
+  if (collapsed) {
+    return (
+      <span
+        className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#C44536] px-0.5 text-[9px] font-extrabold leading-none text-white"
+        aria-hidden
+      >
+        {label}
+      </span>
+    );
+  }
+  return (
+    <span className="ml-auto flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-[#C44536] px-1.5 text-[11px] font-extrabold leading-none text-white">
+      {label}
+    </span>
+  );
+}
+
 function SidebarRow({
   label,
   href,
@@ -134,6 +160,7 @@ function SidebarRow({
   active,
   collapsed,
   icon: Icon,
+  badgeCount,
   onNavigate,
 }: {
   label: string;
@@ -142,9 +169,11 @@ function SidebarRow({
   active: boolean;
   collapsed: boolean;
   icon: IconComponent;
+  badgeCount?: number;
   onNavigate: () => void;
 }) {
-  const className = `${itemClass} ${collapsed ? "justify-center px-0" : ""} ${
+  const showBadge = badgeCount != null && badgeCount > 0;
+  const className = `${itemClass} ${collapsed ? "relative justify-center px-0" : ""} ${
     active
       ? "bg-[var(--green-tint)] text-[var(--green-deep)]"
       : soon
@@ -152,10 +181,31 @@ function SidebarRow({
         : "text-[var(--ink)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]"
   }`;
 
+  const title = showBadge
+    ? `${label} (${badgeCount} unread)`
+    : label;
+
   const content = (
     <>
-      <Icon className="h-5 w-5 shrink-0" aria-hidden />
-      {collapsed ? <span className="sr-only">{label}</span> : <span className="truncate">{label}</span>}
+      {collapsed ? (
+        <span className="relative">
+          <Icon className="h-5 w-5 shrink-0" aria-hidden />
+          {showBadge ? <NavBadge count={badgeCount} collapsed /> : null}
+        </span>
+      ) : (
+        <Icon className="h-5 w-5 shrink-0" aria-hidden />
+      )}
+      {collapsed ? (
+        <span className="sr-only">{label}</span>
+      ) : (
+        <span className="truncate">{label}</span>
+      )}
+      {!collapsed && showBadge ? (
+        <NavBadge count={badgeCount} collapsed={false} />
+      ) : null}
+      {showBadge ? (
+        <span className="sr-only">{`${badgeCount} unread`}</span>
+      ) : null}
     </>
   );
 
@@ -163,7 +213,7 @@ function SidebarRow({
     return (
       <button
         type="button"
-        title={label}
+        title={title}
         className={className}
         onClick={() => toastNotImplemented(label)}
       >
@@ -175,7 +225,7 @@ function SidebarRow({
   if (!href) {
     return (
       <h4
-        title={label}
+        title={title}
         className={`${itemClass} ${collapsed ? "justify-center px-0" : ""} cursor-default text-[12.5px] text-[var(--ink-soft)]`}
       >
         {content}
@@ -184,7 +234,7 @@ function SidebarRow({
   }
 
   return (
-    <NavLink to={href} title={label} onClick={onNavigate} className={className}>
+    <NavLink to={href} title={title} onClick={onNavigate} className={className}>
       {content}
     </NavLink>
   );

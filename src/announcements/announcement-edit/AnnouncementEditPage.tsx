@@ -79,6 +79,7 @@ export function AnnouncementEditPage() {
           formId={ANNOUNCEMENT_FORM_ID}
           saving={page.saving}
           hasChanges={page.hasChanges}
+          canSave={page.canSave}
           cancelTo={page.cancelTo}
           saveLabel={page.isNew ? "Post announcement" : "Save announcement"}
         />
@@ -92,9 +93,9 @@ export function AnnouncementEditPage() {
         <AnnouncementFormFields
           isNew={page.isNew}
           audience={page.audience}
-          courseId={page.courseId}
-          classId={page.classId}
-          studentId={page.studentId}
+          courseIds={page.courseIds}
+          classIds={page.classIds}
+          studentIds={page.studentIds}
           title={page.title}
           body={page.body}
           startDate={page.startDate}
@@ -103,13 +104,15 @@ export function AnnouncementEditPage() {
           classes={page.classes}
           students={page.students}
           onAudience={page.setAudience}
-          onCourseId={page.setCourseId}
-          onClassId={page.setClassId}
-          onStudentId={page.setStudentId}
+          onToggleCourseId={page.toggleCourseId}
+          onToggleClassId={page.toggleClassId}
+          onToggleStudentId={page.toggleStudentId}
           onTitle={page.setTitle}
           onBody={page.setBody}
           onStartDate={page.setStartDate}
           onEndDate={page.setEndDate}
+          sendNotification={page.sendNotification}
+          onSendNotification={page.setSendNotification}
         />
         {page.formError ? (
           <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">

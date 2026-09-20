@@ -37,7 +37,7 @@ export function OrgShellHeader() {
         {brandLabel}
       </p>
       {showSearch && organization ? (
-        <div className="min-w-0 flex-1">
+        <div className="hidden min-w-0 flex-1 md:block">
           <OrgSearchBar
             organizationId={organization.id}
             orgSlug={organization.slug}

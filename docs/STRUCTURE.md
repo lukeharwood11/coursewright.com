@@ -149,6 +149,7 @@ supabase/
 │   ├── _shared/
 │   ├── create-course-from-course/   # P0
 │   ├── send-organization-invite/    # Resend organization-invite (HN-015)
+│   ├── send-announcement-notification/ # Resend announcement-notification
 │   ├── create-course-from-template/ # P1
 │   ├── sync-template-resource/      # P1
 │   ├── promote-to-template/         # P1
@@ -209,6 +210,7 @@ Same stack definition for every tier — **do not** fork separate `envs/testing`
 | Simple CRUD UI | `src/<domain>/api` + `pages` |
 | Create course from course (P0) | `supabase/functions/create-course-from-course/` |
 | Send organization invite email | `supabase/functions/send-organization-invite/` |
+| Send announcement notification email | `supabase/functions/send-announcement-notification/` |
 | Template copy / sync / promote (**P1**) | `supabase/functions/<use-case>/` |
 | Print | `src/print/` |
 | Public marketing pages | `src/marketing/` |

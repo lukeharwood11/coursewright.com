@@ -11,15 +11,43 @@ import {
   listCoursesCatalogMeta,
 } from "@/courses/databridge/courses";
 import type { CourseIconValue } from "@/courses/model/courseIcon";
+import {
+  COURSE_LIST_PAGE_SIZE,
+  clampCourseListPage,
+  courseListPageCount,
+  courseListRangeLabel,
+  filterCourses,
+  paginateCourses,
+  uniqueCourseSubjects,
+} from "@/courses/model/courseListFilters";
 import { validateCreateCourse } from "@/courses/model/createCourse";
 import { allowedGradeLevels, toggleGradeLevel } from "@/courses/model/gradeLevels";
 import { coursePath } from "@/courses/model/paths";
 import { getOrganization, orgQueryKeys } from "@/organizations/databridge/organizations";
 import { staffDashboardQueryKey } from "@/organizations/databridge/staffDashboard";
 
+function parseGradesParam(raw: string | null): string[] {
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((grade) => grade.trim())
+    .filter(Boolean);
+}
+
+function serializeGradesParam(grades: string[]): string | null {
+  return grades.length > 0 ? grades.join(",") : null;
+}
+
 export function useCourseList() {
   const { organization } = useOrgShell();
-  const query = useQuery({
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const queryText = searchParams.get("q") ?? "";
+  const subject = searchParams.get("subject") ?? "";
+  const grades = parseGradesParam(searchParams.get("grades"));
+  const pageParam = Number(searchParams.get("page") ?? "1");
+
+  const listQuery = useQuery({
     queryKey: courseQueryKeys.listWithCatalog(organization.id),
     queryFn: async () => {
       const courses = await listCourses(organization.id);
@@ -30,12 +58,93 @@ export function useCourseList() {
     },
   });
 
+  const organizationQuery = useQuery({
+    queryKey: orgQueryKeys.detail(organization.id),
+    queryFn: () => getOrganization(organization.id),
+  });
+
+  const allCourses = listQuery.data?.courses ?? [];
+  const filteredCourses = filterCourses(allCourses, {
+    query: queryText,
+    subject,
+    grades,
+  });
+  const page = clampCourseListPage(pageParam, filteredCourses.length);
+  const pageCount = courseListPageCount(filteredCourses.length);
+  const courses = paginateCourses(filteredCourses, page);
+  const hasFilters = Boolean(queryText.trim() || subject || grades.length > 0);
+
+  function patchParams(patch: {
+    q?: string;
+    subject?: string;
+    grades?: string[];
+    page?: number | null;
+  }) {
+    const next = new URLSearchParams(searchParams);
+    if (patch.q !== undefined) {
+      // Keep raw text (including spaces while typing); only drop all-whitespace.
+      if (patch.q.trim()) next.set("q", patch.q);
+      else next.delete("q");
+    }
+    if (patch.subject !== undefined) {
+      if (patch.subject) next.set("subject", patch.subject);
+      else next.delete("subject");
+    }
+    if (patch.grades !== undefined) {
+      const serialized = serializeGradesParam(patch.grades);
+      if (serialized) next.set("grades", serialized);
+      else next.delete("grades");
+    }
+    if (patch.page === null || patch.page === 1) next.delete("page");
+    else if (typeof patch.page === "number") next.set("page", String(patch.page));
+    setSearchParams(next, { replace: true });
+  }
+
+  function setQuery(value: string) {
+    patchParams({ q: value, page: 1 });
+  }
+
+  function setSubject(value: string) {
+    patchParams({ subject: value, page: 1 });
+  }
+
+  function toggleGrade(label: string) {
+    patchParams({ grades: toggleGradeLevel(grades, label), page: 1 });
+  }
+
+  function clearFilters() {
+    patchParams({ q: "", subject: "", grades: [], page: 1 });
+  }
+
+  function setPage(nextPage: number) {
+    patchParams({ page: clampCourseListPage(nextPage, filteredCourses.length) });
+  }
+
   return {
     organization,
-    courses: query.data?.courses ?? [],
-    catalogByCourseId: query.data?.catalogByCourseId ?? {},
-    loading: query.isLoading,
-    error: query.error ? query.error.message : null,
+    courses,
+    allCourseCount: allCourses.length,
+    filteredCount: filteredCourses.length,
+    catalogByCourseId: listQuery.data?.catalogByCourseId ?? {},
+    loading: listQuery.isLoading,
+    error: listQuery.error ? listQuery.error.message : null,
+    query: queryText,
+    setQuery,
+    subject,
+    setSubject,
+    subjects: uniqueCourseSubjects(allCourses),
+    grades,
+    toggleGrade,
+    gradeLabels: organizationQuery.data?.gradeLabels ?? [],
+    hasFilters,
+    clearFilters,
+    page,
+    pageCount,
+    pageSize: COURSE_LIST_PAGE_SIZE,
+    setPage,
+    rangeLabel: courseListRangeLabel(filteredCourses.length, page),
+    canPrev: page > 1,
+    canNext: page < pageCount,
   };
 }
 
