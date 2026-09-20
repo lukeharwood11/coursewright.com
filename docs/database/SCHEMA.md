@@ -766,7 +766,7 @@ CourseSummary, Grade, InstructorNote, ChecklistItem. **OrgSubscription** = Cours
 
 **Who can insert:** org owners/admins (any course/class in the org). Instructors for a course they teach, or a class they can already manage on the roster (`is_org_staff` class rule — same as announcements). Parents (and invited student emails on the parent claim path) for a course their linked student is enrolled in (`status = active`, `visibility = published`) or a class their linked student is a member of.
 
-**Who can read:** org staff (all non-deleted discussions in the org). Parents (and invited student emails) when it applies to a linked student: enrolled in that **course** (active + published), **or** a member of that **class**. Class membership can surface a class discussion even without a course enrollment. Materials / this-week / print stay enrollment-gated.
+**Who can read:** org staff (all non-deleted discussions in the org). Parents (and invited student emails) when it applies to a linked student: enrolled in that **course** (active + published), **or** a member of that **class**. Class membership can surface a class discussion even without a course enrollment. Materials / this-week / print stay enrollment-gated. The discussions SELECT policy must use the new row’s audience columns (not a re-query by `id`) so PostgREST `INSERT … RETURNING` succeeds for a parent who is allowed to start the thread.
 
 **Who can soft-delete the discussion:** org staff only.
 

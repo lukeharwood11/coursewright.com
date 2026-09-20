@@ -420,6 +420,36 @@ as $$
     end;
 $$;
 
+-- Parent visibility from the row's audience columns — not a re-query of
+-- public.discussions by id. PostgREST INSERT … RETURNING evaluates SELECT
+-- USING against the new tuple; a nested SELECT of discussions cannot see
+-- that in-flight row (same command ID), which rejected parent creates.
+create or replace function private.parent_can_view_discussion(
+  p_org_id bigint,
+  p_audience text,
+  p_course_id bigint,
+  p_class_id bigint
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.memberships m
+    where m.organization_id = p_org_id
+      and m.user_id = (select auth.uid())
+      and m.role = 'parent'
+      and m.status = 'active'
+      and (
+        (p_audience = 'course' and private.parent_can_view_course(p_course_id))
+        or (p_audience = 'class' and private.parent_linked_to_class(p_class_id))
+      )
+  );
+$$;
+
 create or replace function private.parent_can_view_discussion(p_discussion_id bigint)
 returns boolean
 language sql
@@ -430,15 +460,12 @@ as $$
   select exists (
     select 1
     from public.discussions d
-    join public.memberships m
-      on m.organization_id = d.organization_id
-     and m.user_id = (select auth.uid())
-     and m.role = 'parent'
-     and m.status = 'active'
     where d.id = p_discussion_id
-      and (
-        (d.audience = 'course' and private.parent_can_view_course(d.course_id))
-        or (d.audience = 'class' and private.parent_linked_to_class(d.class_id))
+      and private.parent_can_view_discussion(
+        d.organization_id,
+        d.audience,
+        d.course_id,
+        d.class_id
       )
   );
 $$;
@@ -524,6 +551,8 @@ grant usage, select on sequence public.discussion_reads_id_seq to authenticated,
 
 grant execute on function private.can_start_discussion(bigint, text, bigint, bigint)
   to authenticated, service_role;
+grant execute on function private.parent_can_view_discussion(bigint, text, bigint, bigint)
+  to authenticated, service_role;
 grant execute on function private.parent_can_view_discussion(bigint)
   to authenticated, service_role;
 grant execute on function private.can_see_discussion(bigint)
@@ -542,7 +571,12 @@ using (
   (select private.is_org_staff(organization_id))
   or (
     deleted_at is null
-    and (select private.parent_can_view_discussion(id))
+    and (select private.parent_can_view_discussion(
+      organization_id,
+      audience,
+      course_id,
+      class_id
+    ))
   )
 );
 
