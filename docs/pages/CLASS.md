@@ -20,7 +20,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - First-time add creates the org `student_profile` when they are new.
 - Removing a student from the class does **not** unenroll them from courses.
 - Empty class is allowed.
-- Owners and admins **assign class leads** (zero or more owners, admins, or instructors). Instructors can see the list. Leads are notified in [ACTIVITY](./ACTIVITY.md) when someone posts in a discussion for this class.
+- Owners and admins **assign teachers** (class leads — zero or more owners, admins, or instructors). Instructors can see the list. Leads are notified in [ACTIVITY](./ACTIVITY.md) when someone posts in a discussion for this class.
 - **Announce** to this class → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
 - **Start a discussion** (**P1**) → [DISCUSSION](./DISCUSSION.md) new with this class prefilled.
 - Disclaimer: membership here does not enroll in a course — use [COURSE_ROSTER](./COURSE_ROSTER.md) (Class may be a batch preset there).
@@ -28,7 +28,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 ## Data shown
 
 - Class **name** (title)
-- Optional **leads** (owners, admins, or instructors assigned to this class)
+- Optional **teachers / leads** (owners, admins, or instructors assigned to this class)
 - Members: **name**, optional **grade**, optional parent / student email
 - Batch picker of org students not already in the class
 - New-student draft rows: name (required), parent email, student email, grade (org scheme)
@@ -36,7 +36,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 ## Contents
 
 - Member list → [STUDENT_PROFILE](./STUDENT_PROFILE.md)
-- **Leads** (add/remove for owners and admins). An info icon next to the heading explains that leads are optional and are notified in Activity when someone posts in a discussion for this class.
+- **Teachers** (add/remove for owners and admins). An info icon next to the heading explains that they are optional class leads and are notified in Activity when someone posts in a discussion for this class.
 - **Add students** panel (batch existing + batch new)
 - Remove from class on each row
 - Empty state: add students when ready
@@ -45,7 +45,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 ## Primary actions
 
 - Add / remove class members (batch add preferred)
-- Assign / remove class leads (owners and admins)
+- Assign / remove teachers (owners and admins)
 - Open a student profile
 - Create Announcement
 - Start a discussion (**P1**)
@@ -53,6 +53,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 ## Links to
 
 - [ORG_ROSTER](./ORG_ROSTER.md) — class list and org students
+- [USER_PROFILE](./USER_PROFILE.md) — teacher cards
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — open a member
 - [ANNOUNCEMENT](./ANNOUNCEMENT.md) — Create Announcement for this class
 - [DISCUSSION](./DISCUSSION.md) — Start a discussion for this class (**P1**)

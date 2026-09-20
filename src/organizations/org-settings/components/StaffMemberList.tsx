@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { UserCard } from "@/organizations/user-card/UserCard";
 import { Badge } from "@/ui/Badge";
 import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
@@ -7,12 +8,14 @@ import { roleBadgeVariant, roleLabel } from "@/organizations/model/role";
 import type { StaffMemberRow } from "../hooks/useOrgStaff";
 
 export function StaffMemberList({
+  orgSlug,
   members,
   changingId,
   removingId,
   onChangeRole,
   onRemove,
 }: {
+  orgSlug: string;
   members: StaffMemberRow[];
   changingId: number | null;
   removingId: number | null;
@@ -44,16 +47,20 @@ export function StaffMemberList({
           return (
             <li key={member.membershipId} className="flex flex-wrap items-center gap-3 py-3">
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[14.5px] font-extrabold text-[var(--ink)]">
-                  {displayName}
-                  {member.isYou ? (
-                    <span className="ml-2 text-[12.5px] font-bold text-[var(--ink-faint)]">
-                      You
-                    </span>
-                  ) : null}
-                </p>
+                <UserCard
+                  orgSlug={orgSlug}
+                  userId={member.userId}
+                  name={displayName}
+                />
+                {member.isYou ? (
+                  <p className="pl-11 text-[12.5px] font-bold text-[var(--ink-faint)]">
+                    You
+                  </p>
+                ) : null}
                 {member.name ? (
-                  <p className="truncate text-[12.5px] text-[var(--ink-faint)]">{member.email}</p>
+                  <p className="truncate pl-11 text-[12.5px] text-[var(--ink-faint)]">
+                    {member.email}
+                  </p>
                 ) : null}
               </div>
 

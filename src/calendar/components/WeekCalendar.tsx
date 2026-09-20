@@ -2,16 +2,16 @@ import { Link } from "react-router-dom";
 import { courseColorCssVar } from "@/courses/model/courseColor";
 import { lessonPlanPath } from "@/lesson-plans/model/paths";
 import { weekdayDateHeading, weekdayShort } from "@/calendar/model/dates";
+import { calendarPath } from "@/calendar/model/paths";
 import {
   weekClassCards,
   weekDatesToShow,
   type CalendarLessonPlanDay,
   type CalendarMaterialChip,
   type CalendarWeekNote,
-  type WeekClassCard,
 } from "@/calendar/model/events";
 import { weekDates } from "@/lesson-plans/model/validate";
-import { chipKind, MaterialChip } from "./MaterialChip";
+import { CalendarClassBlock } from "./CalendarClassBlock";
 
 const wrappingCardGridClass =
   "grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(min(100%,18rem),1fr))]";
@@ -85,15 +85,20 @@ export function WeekCalendar({
               key={date}
               className={
                 cards
-                  ? "rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
-                  : "min-h-[9rem] rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-2"
+                  ? "relative rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
+                  : "relative min-h-[9rem] rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-2"
               }
             >
+              <Link
+                to={calendarPath(orgSlug, { view: "day", date })}
+                className="absolute inset-0 rounded-[10px]"
+                aria-label={`Open ${weekdayDateHeading(date)}`}
+              />
               <h3
                 className={
                   cards
-                    ? "text-[14px] font-extrabold text-[var(--ink)]"
-                    : "text-[12px] font-bold text-[var(--ink-soft)]"
+                    ? "relative z-10 pointer-events-none text-[14px] font-extrabold text-[var(--ink)]"
+                    : "relative z-10 pointer-events-none text-[12px] font-bold text-[var(--ink-soft)]"
                 }
               >
                 {cards ? (
@@ -105,9 +110,9 @@ export function WeekCalendar({
                   </>
                 )}
               </h3>
-              <div className="mt-2 flex flex-col gap-2">
+              <div className="relative z-10 mt-2 flex flex-col gap-2">
                 {weekClassCards([date], visibleDays, visibleChips).map((card) => (
-                  <ClassBlock
+                  <CalendarClassBlock
                     key={`${card.date}-${card.courseId}-${card.planId ?? "chips"}`}
                     orgSlug={orgSlug}
                     card={card}
@@ -115,75 +120,6 @@ export function WeekCalendar({
                 ))}
               </div>
             </section>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function ClassBlock({ orgSlug, card }: { orgSlug: string; card: WeekClassCard }) {
-  const courseLabel = (
-    <>
-      {card.courseTitle}
-      {card.unpublished ? " · draft" : ""}
-    </>
-  );
-  const courseStyle = { color: courseColorCssVar(card.colorKey) };
-
-  return (
-    <div>
-      {card.planId != null ? (
-        <Link
-          to={lessonPlanPath(orgSlug, card.courseId, card.planId)}
-          className="block text-[11.5px] font-extrabold"
-          style={courseStyle}
-        >
-          {courseLabel}
-        </Link>
-      ) : (
-        <p className="text-[11.5px] font-extrabold" style={courseStyle}>
-          {courseLabel}
-        </p>
-      )}
-      {card.body ? (
-        <p className="mt-1 whitespace-pre-wrap text-[12.5px] leading-relaxed text-[var(--ink)]">
-          {card.body}
-        </p>
-      ) : null}
-      {card.materials.length > 0 ? (
-        <>
-          <div className="my-2 border-t border-[var(--line)]" />
-          <div className="flex flex-col gap-1">
-            {card.materials.map((material) => (
-              <MaterialChip
-                key={material.id}
-                orgSlug={orgSlug}
-                courseId={card.courseId}
-                unitId={material.unitId}
-                materialId={material.id}
-                title={material.title}
-                kind={chipKind(material.assigned, material.due)}
-                colorKey={card.colorKey}
-              />
-            ))}
-          </div>
-        </>
-      ) : null}
-      {card.chips.length > 0 ? (
-        <div className="mt-2 flex flex-col gap-1">
-          {card.chips.map((chip) => (
-            <MaterialChip
-              key={`${chip.kind}-${chip.materialId}`}
-              orgSlug={orgSlug}
-              courseId={chip.courseId}
-              unitId={chip.unitId}
-              materialId={chip.materialId}
-              title={chip.title}
-              kind={chip.kind}
-              colorKey={chip.colorKey}
-              unpublished={chip.unpublished}
-            />
           ))}
         </div>
       ) : null}

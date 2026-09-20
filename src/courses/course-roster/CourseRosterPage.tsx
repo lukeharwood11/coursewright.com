@@ -6,6 +6,7 @@ import { PageLoading } from "@/ui/PageLoading";
 import { coursePath, coursesPath } from "@/courses/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
+import { InstructorsSection } from "@/courses/instructors/InstructorsSection";
 import { useCourseRoster } from "./hooks/useCourseRoster";
 import { useCourseParentInvites } from "./hooks/useCourseParentInvites";
 import { useToastOnError } from "@/ui/useToastOnError";
@@ -84,6 +85,21 @@ export function CourseRosterPage() {
           Org roster
         </Link>
       </p>
+
+      <div className="mt-8">
+        <InstructorsSection
+          orgSlug={roster.organization.slug}
+          instructors={roster.instructors}
+          staff={roster.staff}
+          canManage={roster.canManageInstructors}
+          addUserId={roster.addUserId}
+          onAddUserId={roster.setAddUserId}
+          onAdd={roster.addInstructor}
+          onRemove={roster.onRemoveInstructor}
+          adding={roster.addingInstructor}
+          addError={roster.addInstructorError}
+        />
+      </div>
 
       <section className="mt-8">
         <div className="flex flex-wrap items-end justify-between gap-3">

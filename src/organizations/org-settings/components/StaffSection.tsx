@@ -7,6 +7,7 @@ import { PendingInviteList } from "./PendingInviteList";
 import { StaffMemberList } from "./StaffMemberList";
 
 export function StaffSection({
+  orgSlug,
   canInvite,
   canManage,
   loading,
@@ -33,6 +34,7 @@ export function StaffSection({
   onChangeRole,
   onRemove,
 }: {
+  orgSlug: string;
   canInvite: boolean;
   canManage: boolean;
   loading: boolean;
@@ -80,6 +82,7 @@ export function StaffSection({
 
       {!loading ? (
         <StaffMemberList
+          orgSlug={orgSlug}
           members={members}
           changingId={changingId}
           removingId={removingId}

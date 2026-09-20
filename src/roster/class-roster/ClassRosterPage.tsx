@@ -88,6 +88,7 @@ export function ClassRosterPage() {
       </div>
 
       <ClassLeadsSection
+        orgSlug={roster.organization.slug}
         leads={roster.leads}
         staff={roster.staff}
         canManage={roster.canManageLeads}

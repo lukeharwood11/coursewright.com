@@ -42,6 +42,7 @@ import {
   OrgHomePage,
   OrgPickerPage,
   OrgSettingsPage,
+  UserProfilePage,
 } from "@/organizations";
 import { PrintPage } from "@/print";
 import {
@@ -132,10 +133,8 @@ export function AppRoutes() {
                 </RequireStaff>
               }
             />
-            <Route
-              path="calendar"
-              element={<CalendarPage />}
-            />
+            <Route path="calendar" element={<CalendarPage />} />
+            <Route path="people/:userId" element={<UserProfilePage />} />
             <Route path="announcements" element={<AnnouncementsPage />} />
             <Route
               path="announcements/new"

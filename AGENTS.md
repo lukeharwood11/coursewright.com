@@ -54,7 +54,7 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | Path | Guide |
 |------|--------|
 | [src/AGENTS.md](./src/AGENTS.md) | SPA overview |
-| [src/organizations/AGENTS.md](./src/organizations/AGENTS.md) | Orgs, grade scheme, admin invites |
+| [src/organizations/AGENTS.md](./src/organizations/AGENTS.md) | Orgs, grade scheme, admin invites, org-visible user profiles |
 | [src/roster/AGENTS.md](./src/roster/AGENTS.md) | Students, enrollments, parent links |
 | [src/course-templates/AGENTS.md](./src/course-templates/AGENTS.md) | Templates + access |
 | [src/courses/AGENTS.md](./src/courses/AGENTS.md) | Course instances |

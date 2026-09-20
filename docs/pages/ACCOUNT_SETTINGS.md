@@ -19,6 +19,7 @@ Cross-org account controls — not scoped to a single organization (contrast [OR
 - **Email is read-only** in P0 — owned by Supabase Auth and synced onto `profiles.email`.
 - **Save** is disabled when the name is unchanged. Sign out stays on this page (and in chrome) and returns the user to login.
 - Does not edit org slug, grade scheme, or staff (those are [ORG_SETTINGS](./ORG_SETTINGS.md)).
+- Other people in an organization see a **read-only** [USER_PROFILE](./USER_PROFILE.md) (`/my/<org-slug>/people/<user_id>`), not this page.
 - Avatar upload, Google connection actions, and other preferences are **TBD** — not on this screen in P0.
 
 ## Data shown
@@ -43,6 +44,7 @@ Cross-org account controls — not scoped to a single organization (contrast [OR
 
 ## Links to
 
+- [USER_PROFILE](./USER_PROFILE.md) — how others in an org see you
 - [ORG_PICKER](./ORG_PICKER.md) — back to org list
 - [ORG_HOME](./ORG_HOME.md) — return to last org (when known)
 - [FEEDBACK](./FEEDBACK.md) — Send feedback (account menu)

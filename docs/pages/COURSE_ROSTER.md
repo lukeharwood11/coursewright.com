@@ -20,11 +20,13 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
   - **New students** — batch create org profiles (multi-row or paste names) and enroll them in one confirm.
 - Unenroll (withdrawn) from the row; parent **course** access requires enrollment in an active published course (membership is created on invite claim).
 - **Invite parent** from an enrolled student — emails `/invite/<token>` for a parent email (copy-link remains). Multiple parents are managed on the student profile.
+- Owners and admins **assign teachers** (course instructors). Instructors can see the list. Same assignment as [COURSE_SETTINGS](./COURSE_SETTINGS.md).
 - Empty roster allowed — printing materials does not require students.
 
 ## Data shown
 
 - Course context (title) for orientation
+- **Teachers** assigned to the course
 - Enrolled students: **name**, optional **grade**, parent / student email / invite status
 - Batch picker of org students not already enrolled
 - Optional class list for preset
@@ -32,6 +34,7 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
 
 ## Contents
 
+- **Teachers** (add/remove for owners and admins)
 - Enrolled list → [STUDENT_PROFILE](./STUDENT_PROFILE.md)
 - **Enroll students** progressive panel (batch existing + batch new)
 - Unenroll on each row
@@ -40,6 +43,7 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
 
 ## Primary actions
 
+- Assign / remove teachers (owners and admins)
 - Enroll / unenroll (batch enroll preferred)
 - Invite parent (email + copy the claim link)
 - Open [STUDENT_PROFILE](./STUDENT_PROFILE.md)
@@ -47,7 +51,8 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
 ## Links to
 
 - [COURSE](./COURSE.md) — back to course
-- [COURSE_SETTINGS](./COURSE_SETTINGS.md) — instructors / related settings (TBD split)
+- [COURSE_SETTINGS](./COURSE_SETTINGS.md) — other course settings
+- [USER_PROFILE](./USER_PROFILE.md) — teacher cards
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — open student
 - [INVITE_CLAIM](./INVITE_CLAIM.md) — copied parent invite link (recipient)
 - [ORG_ROSTER](./ORG_ROSTER.md) — org-wide roster

@@ -1,7 +1,7 @@
 # CALENDAR
 
 **URL:** `/my/<org-slug>/calendar`  
-**Query:** `?view=month` (default) or `?view=week`; `?date=YYYY-MM-DD` focuses that day (defaults to today)  
+**Query:** `?view=month` (default), `?view=week`, or `?view=day`; `?date=YYYY-MM-DD` focuses that day (defaults to today)  
 **URL map:** [URLS.md](../URLS.md)
 
 ## Audience
@@ -10,13 +10,14 @@ Parents (and staff **Parent view**) for linked students’ courses. Staff Teache
 
 ## Purpose
 
-Month and week view of when work is **assigned** and **due**, plus lesson-plan text on week view. Color-coded by course with a filterable legend.
+Month, week, and day view of when work is **assigned** and **due**, plus lesson-plan text on week and day views. Color-coded by course with a filterable legend.
 
 ## Behavior
 
 - Sidebar **Calendar** for staff and parents.
-- **Month** view: day cells with chips — **assigned** outlined in the course color, **due** filled. Lesson-plan text is not shown in month cells (too tight); switch to week to read plans.
-- **Week** view: Sunday–Saturday columns. Each day, per visible course: day plan text (if any), then a divider, then that day’s lesson-plan materials **and** assigned/due materials (deduped, kept with that class). Week notes sit as a colored bar per course above the grid. [ORG_HOME](./ORG_HOME.md) This week uses the same chips and notes, but **omits empty days** and wraps remaining days as cards.
+- **Month** view: day cells with chips — **assigned** outlined in the course color, **due** filled. Lesson-plan text is not shown in month cells (too tight); switch to week or day to read plans. Chips and course labels open the material or lesson plan. Tapping the day (not a chip) switches to **day** view for that date.
+- **Week** view: Sunday–Saturday columns. Each day, per visible course: day plan text (if any), then a divider, then that day’s lesson-plan materials **and** assigned/due materials (deduped, kept with that class). Week notes sit as a colored bar per course above the grid. Items open the material or lesson plan. Tapping the day (not an item) switches to **day** view. [ORG_HOME](./ORG_HOME.md) This week uses the same chips and notes, but **omits empty days** and wraps remaining days as cards (those day cards also open day view).
+- **Day** view: that date only — same class blocks as week (plan text + materials). Previous / next move one day.
 - **Legend** lists courses with their color; tap to show/hide. Filter is client-side (this browser).
 - Parents: published materials + published lesson plans on enrolled, active, published courses of **active** students (student tags are on This week; Calendar shows all linked enrolled students unless later filtered the same way — Calendar uses the same student set as the parent dashboard without collapsing tags; if the parent has multiple students, all their courses appear, color-coded).
 - Staff Teacher view: courses they can manage, including unpublished lesson plans (draft styling) and unpublished dated materials.
@@ -24,25 +25,26 @@ Month and week view of when work is **assigned** and **due**, plus lesson-plan t
 
 ## Data shown
 
-- Month or week grid for the focused date
+- Month, week, or day grid for the focused date
 - Course legend (title + color)
 - Material chips: title; **Assigned** vs **Due**
-- Week view: lesson-plan week notes and day text
+- Week / day view: lesson-plan week notes (week) and day text
 - Unpublished / draft cue for staff
 
 ## Contents
 
-- Header: Calendar + period label; controls split into **prev/next** (pagination) and a separate **month/week** view segment (icons + labels)
+- Header: Calendar + period label; controls split into **prev/next** (pagination) and a separate **month/week/day** view segment (icons + labels)
 - Legend
-- Month grid or week calendar
-- Click a material → [MATERIAL](./MATERIAL.md); click a lesson plan block → [LESSON_PLAN](./LESSON_PLAN.md)
+- Month grid, week calendar, or day list
+- Click a material → [MATERIAL](./MATERIAL.md); click a lesson plan block → [LESSON_PLAN](./LESSON_PLAN.md); click a day → this page with `?view=day`
 
 ## Primary actions
 
-- Switch month / week
+- Switch month / week / day
 - Move to previous / next period
 - Filter courses in the legend
 - Open a material or lesson plan
+- Open a day
 
 ## Links to
 

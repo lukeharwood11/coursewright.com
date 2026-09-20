@@ -281,6 +281,7 @@ export function DiscussionPage() {
         }}
       />
       <DiscussionMembersModal
+        orgSlug={page.organization.slug}
         open={page.membersOpen}
         members={page.members}
         loading={page.membersLoading}

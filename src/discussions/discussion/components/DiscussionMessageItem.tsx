@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import type { SerializedEditorState } from "lexical";
 import { formatDiscussionMessageTime } from "@/discussions/model/time";
@@ -6,6 +7,7 @@ import {
   discussionMessageElementId,
   discussionMessagePath,
 } from "@/discussions/model/paths";
+import { userProfilePath } from "@/organizations/model/paths";
 import type { DiscussionMessageRecord } from "@/discussions/databridge/discussions";
 import type { MentionPerson } from "@/discussions/model/mentions";
 import { DiscussionAttachments } from "./DiscussionAttachments";
@@ -105,7 +107,12 @@ export function DiscussionMessageItem({
       >
         <div className="flex flex-wrap items-start justify-between gap-2">
           <p className="text-[13.5px] font-extrabold text-[var(--ink)]">
-            {message.authorName}
+            <Link
+              to={userProfilePath(orgSlug, message.authorId)}
+              className="hover:text-[var(--green-deep)]"
+            >
+              {message.authorName}
+            </Link>
             <span className="ml-2 font-semibold text-[var(--ink-faint)]">
               {formatDiscussionMessageTime({
                 createdAt: message.createdAt,

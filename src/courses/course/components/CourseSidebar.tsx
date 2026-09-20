@@ -1,5 +1,6 @@
-import { Avatar } from "@/ui/Avatar";
 import { ButtonLink } from "@/ui/Button";
+import { UserCard } from "@/organizations/user-card/UserCard";
+import { Avatar } from "@/ui/Avatar";
 import { courseRosterPath } from "@/courses/model/paths";
 import type { CourseInstructor } from "@/courses/databridge/courses";
 import type { CourseEnrollment } from "@/roster/databridge/enrollments";
@@ -19,19 +20,21 @@ export function CourseSidebar({
 }) {
   return (
     <aside className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
-      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Instructors</h2>
+      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Teachers</h2>
       {instructors.length === 0 ? (
         <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">
-          No instructors listed yet.
+          No teachers listed yet.
         </p>
       ) : (
-        <ul className="mt-3 flex flex-col gap-2">
+        <ul className="mt-3 flex flex-col gap-1">
           {instructors.map((person) => (
-            <li key={person.userId} className="flex items-center gap-2">
-              <Avatar name={person.name} size={28} />
-              <span className="min-w-0 truncate text-[13.5px] font-semibold text-[var(--ink)]">
-                {person.name}
-              </span>
+            <li key={person.userId}>
+              <UserCard
+                orgSlug={orgSlug}
+                userId={person.userId}
+                name={person.name}
+                compact
+              />
             </li>
           ))}
         </ul>

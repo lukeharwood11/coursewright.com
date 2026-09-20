@@ -7,7 +7,7 @@ Two-way **discussions**: a thread for **one course** or **one class**. Title, fl
 ## Scope (when implementing)
 
 - Org list + **New discussion** (staff Teacher view and families who may start one)
-- Thread view: posts, quotes, file / material / URL attachments, **Mark as answered**, thread **⋯** → **Members**
+- Thread view: posts, quotes, file / material / URL attachments, **Mark as answered**, thread **⋯** → **Members** (user cards → org profile)
 - Composer: plain textarea by default; **T** activates the same Lexical chrome as page materials (toolbar, `/`, floating format) without quiz / in-page file upload; **@** mentions a person on the thread; file icon; **+** opens modal for material or link
 - Parent list of threads that apply to linked students (same URL; parent chrome / Parent view)
 - Sidebar unread count (red) of threads with new activity since `last_read_at`

@@ -1,23 +1,19 @@
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/ui/Button";
-import { Avatar } from "@/ui/Avatar";
-import { Badge } from "@/ui/Badge";
-import {
-  parseOrgRole,
-  roleBadgeVariant,
-  roleLabel,
-} from "@/organizations/model/role";
+import { UserCard } from "@/organizations/user-card/UserCard";
 import type { DiscussionMemberRecord } from "@/discussions/databridge/discussions";
 import { useToastOnError } from "@/ui/useToastOnError";
 
 export function DiscussionMembersModal({
+  orgSlug,
   open,
   members,
   loading,
   error,
   onClose,
 }: {
+  orgSlug: string;
   open: boolean;
   members: DiscussionMemberRecord[];
   loading: boolean;
@@ -77,27 +73,16 @@ export function DiscussionMembersModal({
           ) : null}
           {!loading && !error && members.length > 0 ? (
             <ul className="flex flex-col gap-1">
-              {members.map((member) => {
-                const role = parseOrgRole(member.role);
-                return (
-                  <li
-                    key={member.userId}
-                    className="flex items-center gap-3 rounded-[8px] px-2 py-2"
-                  >
-                    <Avatar name={member.name} size={32} />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[14px] font-extrabold text-[var(--ink)]">
-                        {member.name}
-                      </p>
-                    </div>
-                    {role ? (
-                      <Badge variant={roleBadgeVariant(role)}>
-                        {roleLabel(role)}
-                      </Badge>
-                    ) : null}
-                  </li>
-                );
-              })}
+              {members.map((member) => (
+                <li key={member.userId}>
+                  <UserCard
+                    orgSlug={orgSlug}
+                    userId={member.userId}
+                    name={member.name}
+                    role={member.role}
+                  />
+                </li>
+              ))}
             </ul>
           ) : null}
         </div>

@@ -27,7 +27,7 @@ Configure the organization: identity, permalink, organization type, grade scheme
 
 - Organization **name**, **slug**, **organization type**
 - Current **grade scheme** and labels (K–12 preset or custom)
-- Collaborators list: person **name** / **email**, **role** (owner | admin | instructor | parent); owners and admins see change-role (and remove when allowed)
+- Collaborators list: person **name** / **email**, **role** (owner | admin | instructor | parent); name opens [USER_PROFILE](./USER_PROFILE.md); owners and admins see change-role (and remove when allowed)
 - Last owner/admin rows explain why they can’t be removed or demoted
 - Pending collaborator invites: **email**, **role**, copyable `/invite/<token>` link, **Resend email**, cancel
 - Billing status — Free plan (owners only)
@@ -72,6 +72,7 @@ Configure the organization: identity, permalink, organization type, grade scheme
 ## Links to
 
 - [ORG_HOME](./ORG_HOME.md) — back to the organization
+- [USER_PROFILE](./USER_PROFILE.md) — collaborator name
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — cross-org account settings (distinct from this page)
 - [INVITE_CLAIM](./INVITE_CLAIM.md) — copied staff invite link (recipient); parent invites use the same URL from roster
 - [LOGIN](./LOGIN.md) — after sign-out (if sign-out lives in chrome)

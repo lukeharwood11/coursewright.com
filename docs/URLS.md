@@ -56,7 +56,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 |------|-----|-------|
 | [ORG_PICKER](./pages/ORG_PICKER.md) | `/my` | Org picker + create org |
 | [ORG_HOME](./pages/ORG_HOME.md) | `/my/<org-slug>` | Role-aware dashboard (parent “this week” calendar lives here) |
-| [CALENDAR](./pages/CALENDAR.md) | `/my/<org-slug>/calendar` | Month/week calendar (`?view=month\|week`, `?date=YYYY-MM-DD`) |
+| [CALENDAR](./pages/CALENDAR.md) | `/my/<org-slug>/calendar` | Month/week/day calendar (`?view=month\|week\|day`, `?date=YYYY-MM-DD`) |
 | [ACTIVITY](./pages/ACTIVITY.md) | `/my/<org-slug>/activity` | In-app notifications (unread first; click acks and opens the activity) |
 
 ---
@@ -75,6 +75,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | Page | URL | Notes |
 |------|-----|-------|
 | [ORG_SETTINGS](./pages/ORG_SETTINGS.md) | `/my/<org-slug>/settings` | Slug, grade scheme, **staff section** (not a separate top-level page) |
+| [USER_PROFILE](./pages/USER_PROFILE.md) | `/my/<org-slug>/people/<user_id>` | Org-visible profile for a person with an account |
 | Billing (P1) | <!-- TBD — under settings --> | Course Wright → org |
 
 ---

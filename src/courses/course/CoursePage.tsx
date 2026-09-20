@@ -8,7 +8,7 @@ import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
-import { CourseHeader, PrintHint } from "./components/CourseHeader";
+import { CourseHeader } from "./components/CourseHeader";
 import { CourseVisibilityBanner } from "./components/CourseVisibilityBanner";
 import {
   CourseOutline,
@@ -124,8 +124,6 @@ export function CoursePage() {
         pending={setVisibility.isPending}
         onPublish={() => setVisibility.mutate("published")}
       />
-      <PrintHint />
-
       {!outlineOpen ? (
         <div className="mt-6">
           <CourseOutlineToggle onOpen={() => setOutlineOpen(true)} />

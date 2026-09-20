@@ -2089,6 +2089,17 @@ export type Database = {
     Functions: {
       claim_invite: { Args: { p_token: string }; Returns: string }
       claim_staff_invite: { Args: { p_token: string }; Returns: string }
+      get_org_person_profile: {
+        Args: { p_organization_id: number; p_user_id: string }
+        Returns: {
+          courses: Json
+          leads: Json
+          name: string
+          role: string
+          teaches: Json
+          user_id: string
+        }[]
+      }
       get_invite: {
         Args: { p_token: string }
         Returns: {
