@@ -107,6 +107,42 @@ export type Database = {
           },
         ]
       }
+      admin_invite_students: {
+        Row: {
+          created_at: string
+          id: number
+          invite_id: number
+          student_profile_id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          invite_id: number
+          student_profile_id: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          invite_id?: number
+          student_profile_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_invite_students_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "admin_invites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_invite_students_student_profile_id_fkey"
+            columns: ["student_profile_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcement_reads: {
         Row: {
           announcement_id: number

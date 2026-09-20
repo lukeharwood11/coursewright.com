@@ -40,10 +40,11 @@ export function useCourseParentInvites(students: StudentSummary[]) {
 
   const pendingByStudent = new Map<number, PendingOrgInvite[]>();
   for (const invite of pendingQuery.data ?? []) {
-    if (invite.studentProfileId == null) continue;
-    const current = pendingByStudent.get(invite.studentProfileId) ?? [];
-    current.push(invite);
-    pendingByStudent.set(invite.studentProfileId, current);
+    for (const studentProfileId of invite.studentProfileIds) {
+      const current = pendingByStudent.get(studentProfileId) ?? [];
+      current.push(invite);
+      pendingByStudent.set(studentProfileId, current);
+    }
   }
 
   const linkedByStudent = new Map<number, string[]>();
@@ -66,13 +67,17 @@ export function useCourseParentInvites(students: StudentSummary[]) {
         invitedBy: user.id,
       });
     },
-    onSuccess: async ({ invite, email: emailStatus }) => {
-      const copied = await copyInvite(invite, { toast: false });
+    onSuccess: async ({ invite, email: emailStatus, attached }) => {
+      const wasAttached = attached ?? false;
+      const copied = wasAttached
+        ? false
+        : await copyInvite(invite, { toast: false });
       toast(
         inviteCreatedMessage({
           recipientEmail: invite.email,
           emailSent: emailStatus.sent,
           linkCopied: copied,
+          attached: wasAttached,
         }),
       );
       await queryClient.invalidateQueries({

@@ -24,7 +24,7 @@ export function StaffMemberList({
   if (members.length === 0) {
     return (
       <p className="mt-3 text-[14px] text-[var(--ink-soft)]">
-        No owners, admins, or instructors yet.
+        No owners, admins, instructors, or parents yet.
       </p>
     );
   }

@@ -50,6 +50,7 @@ begin
     'organizations',
     'memberships',
     'admin_invites',
+    'admin_invite_students',
     'course_templates',
     'template_access',
     'courses',
@@ -85,6 +86,7 @@ grant select, insert, update on table public.profiles to authenticated;
 grant select, insert, update on table public.organizations to authenticated;
 grant select, insert, update, delete on table public.memberships to authenticated;
 grant select, insert, delete on table public.admin_invites to authenticated;
+grant select, insert, delete on table public.admin_invite_students to authenticated;
 grant select, insert, update on table public.course_templates to authenticated;
 grant select, insert, update, delete on table public.template_access to authenticated;
 grant select, insert, update on table public.courses to authenticated;
@@ -243,6 +245,59 @@ create policy admin_invites_delete on public.admin_invites
         role = 'parent'
         and (select private.is_org_staff(organization_id))
       )
+    )
+  );
+
+-- ---------------------------------------------------------------------------
+-- admin_invite_students
+-- ---------------------------------------------------------------------------
+
+create policy admin_invite_students_select on public.admin_invite_students
+  for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from public.admin_invites i
+      where i.id = invite_id
+        and (
+          (
+            i.accepted_at is null
+            and i.email = (select private.current_profile_email())
+          )
+          or (
+            i.role = 'parent'
+            and (select private.is_org_staff(i.organization_id))
+          )
+        )
+    )
+  );
+
+create policy admin_invite_students_insert on public.admin_invite_students
+  for insert
+  to authenticated
+  with check (
+    exists (
+      select 1
+      from public.admin_invites i
+      where i.id = invite_id
+        and i.role = 'parent'
+        and i.accepted_at is null
+        and (select private.is_org_staff(i.organization_id))
+    )
+  );
+
+create policy admin_invite_students_delete on public.admin_invite_students
+  for delete
+  to authenticated
+  using (
+    exists (
+      select 1
+      from public.admin_invites i
+      where i.id = invite_id
+        and i.role = 'parent'
+        and i.accepted_at is null
+        and (select private.is_org_staff(i.organization_id))
     )
   );
 

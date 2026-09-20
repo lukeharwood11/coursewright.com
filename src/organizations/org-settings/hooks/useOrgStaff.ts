@@ -22,8 +22,9 @@ import {
   canInviteStaff,
   canManageStaff,
   inviteableStaffRoles,
-  parseStaffInviteRole,
+  parseAssignableMembershipRole,
   roleLabel,
+  type AssignableMembershipRole,
   type OrgRole,
   type StaffInviteRole,
 } from "@/organizations/model/role";
@@ -45,7 +46,7 @@ export type StaffMemberRow = OrgStaffMember & {
   isYou: boolean;
   canChangeRole: boolean;
   canRemove: boolean;
-  changeRoles: StaffInviteRole[];
+  changeRoles: AssignableMembershipRole[];
   lastManagerGuard: boolean;
 };
 
@@ -166,13 +167,17 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
   });
 
   const changeRoleMutation = useMutation({
-    mutationFn: async (input: { member: OrgStaffMember; nextRole: StaffInviteRole }) => {
+    mutationFn: async (input: {
+      member: OrgStaffMember;
+      nextRole: AssignableMembershipRole;
+    }) => {
       if (!role) throw new Error("You don’t have permission to change collaborator roles.");
       const parsed = validateChangeStaffRole({
         actorRole: role,
         currentRole: input.member.role,
         nextRole: input.nextRole,
         isLastManager: isLastOrgManager(members, input.member.membershipId),
+        hasLinkedStudent: input.member.hasLinkedStudent,
       });
       if (!parsed.ok) throw new Error(parsed.error);
       if (parsed.value === input.member.role) return input;
@@ -199,6 +204,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
         actorRole: role,
         targetRole: member.role,
         isLastManager: isLastOrgManager(members, member.membershipId),
+        hasLinkedStudent: member.hasLinkedStudent,
       });
       if (!parsed.ok) throw new Error(parsed.error);
       await removeStaffMembership(member.membershipId);
@@ -251,7 +257,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
   }
 
   function onChangeRole(member: OrgStaffMember, nextRole: string) {
-    const parsed = parseStaffInviteRole(nextRole);
+    const parsed = parseAssignableMembershipRole(nextRole);
     if (!parsed || parsed === member.role) return;
     changeRoleMutation.mutate({ member, nextRole: parsed });
   }

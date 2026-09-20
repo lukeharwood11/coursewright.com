@@ -62,11 +62,11 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Org permalink** | Stable org URL (`slug`) created with the org | shipped | Create + settings change with break-links warning |
 | **Org grade scheme** | Org chooses how grades work (exact / range / custom; presets K–12, Custom) | shipped | Defaults on create; owners/admins edit in org settings |
 | **Admin invites** | Add other admins by email; those emails can be **claimed** by accounts | shipped | Invite owner/admin/instructor; **email via Resend** `organization-invite` (HN-015) plus copyable `/invite/<token>`; unsigned claim page names the invited email and prefills signup/login (HN-016) |
-| **Student profiles** | Org-level student records — no dedicated student role required | shipped | Org roster create/edit + profile page; **multiple parent invites** + optional **student email** (same claim path). Parent invite email + copy-link on profile and course roster. Created when first added to a course or class; dedicated student role later (P2) |
+| **Student profiles** | Org-level student records — no dedicated student role required | shipped | Org roster create/edit + profile page; **multiple parent invites** (one pending token per email; siblings share it) + optional **student email** (same claim path). Parent invite email + copy-link on profile and course roster. Created when first added to a course or class; dedicated student role later (P2) |
 | **Classes** | Org-scoped **group of students** — separate from a Course | shipped | Create class + batch add/remove members. Class is a **batch preset** into course enroll (not a live link) |
 | **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | shipped | List-first org / class / course roster with **batch select** enroll/add; multiple parent invites + optional student email; parent invite emails via Resend `organization-invite` (HN-015) plus copyable claim link |
 | **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches parent vs staff home. **P0 roles:** owner, admin, instructor, parent. Owner vs admin = billing. Staff change/remove is **membership-only** — materials/roster stay enrollment-gated. **Staff parent view** in progress (header toggle) |
-| **Admin account management** | Admins invite, **change roles**, and **remove** admins/instructors | shipped | Org settings updates `memberships` only (owners can promote to owner; admins change admin ↔ instructor; remove admin/instructor). Last owner/admin blocked in DB + UI. Does **not** add a staff-role gate on materials/roster RLS. Invite emails via Resend; copy-link remains |
+| **Admin account management** | Admins invite, **change roles**, and **remove** admins/instructors | shipped | Org settings updates `memberships` only (owners can promote to owner; admins change admin ↔ instructor ↔ **parent**; remove admin/instructor when they have no linked student). **Promote parent → staff** is a direct role change (no new invite). **Demote staff → parent** only when they have a `parent_student_links` row for a student in the org. Last owner/admin blocked in DB + UI. Does **not** add a staff-role gate on materials/roster RLS. Invite emails via Resend; copy-link remains |
 | **Homework (P0)** | Dated materials in a unit — appear on parent "this week" when dates fall in Sun–Sat | shipped | Optional **assignment date** (`scheduled_date`) and optional **due date** (`due_date`). Parent home shows **Assigned next** / **Due next**; This week includes either date in range. **Not** a separate assignment type |
 | **Course builder** | Create and organize **courses** within an org (no templates in P0) | shipped | Create, course home, units, materials (page/link/file), print/share chrome; collapsible course outline (units + materials tree) |
 | **Courses (instances)** | Runnable offerings with dates and a roster — from scratch or **copied from another course** | shipped | Create from scratch + settings + roster. Copy via Function. Catalog: **description**, **location**, **subject / area**, optional **icon** on list cards. Course list: search, subject + grade filters, pagination. **Templates are P1** |
@@ -86,7 +86,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Lesson materials & planning** | Unified storage for course content, files, and plans | shipped | Course builder authoring on courses |
 | **Content versioning** | Versions of course content; who changed what; revert dangerous actions | shipped | Restore a `material_versions` snapshot from material edit; file blob revert on file materials. Page/placement edits version only on Save when something changed |
 | **Soft deletes** | Content is never hard-deleted | shipped | Remove/restore on units and materials (`deleted_at`) |
-| **Parent invites (email)** | Invite parents by email to access shared content | shipped | Emails Resend `organization-invite` (HN-015) and keeps copy `/invite/<token>` (same path as staff). Membership + student link on claim. Unrouted family directory can also insert `admin_invites` `role=parent` when linking an email with no account |
+| **Parent invites (email)** | Invite parents by email to access shared content | shipped | One pending invite per org+email; more students attach without a second email. Emails Resend `organization-invite` (HN-015) and keeps copy `/invite/<token>` (same path as staff). Membership + links for all attached students on claim. Unrouted family directory attaches chosen students to one pending invite when linking an email with no account |
 | **Parent access (link or account)** | Parent clicks invite link **or** signs up / logs in with the **same email** | shipped | Unsigned `/invite/<token>` shows the invited address; signup/login prefills it (HN-016). Course access still requires enrollment |
 | **Parent org membership** | Parent becomes a parent in the org when they claim an invite | shipped | Membership created on claim; materials still gated on enrollment + published course |
 | **Share resources with parents** | Share course content and files with enrolled families | shipped | Copy material URL (account required). Dedicated share-entry path still TBD |
@@ -146,8 +146,8 @@ Keep **Course.enrollment → student_profile** as the access gate for parents.
 | **Admins** | Same org management as owners (name, permalink, grade scheme, staff) except **billing** |
 | **More admins** | Owner/any admin adds **emails**; those people **claim** the seat with an account on that email. Course Wright **emails** the invite (Resend `organization-invite`, HN-015) and still offers a copyable `/invite/<token>` link. The claim page names that email and prefills signup/login; pending requests also show after login |
 | **Multiple admins** | Yes — no single-admin limit |
-| **Change staff roles** | Owners and admins can change roles for existing collaborators. **Owners** may assign instructor, admin, or **owner**. **Admins** may assign instructor or admin only. Writes **`memberships.role` only**. Does **not** gate course materials or roster on staff role — families still see content via **enrollment** (and `parent_student_links` where applicable) |
-| **Remove staff** | Owners and admins can **remove** admins and instructors from the org (end that membership). Does **not** rewrite materials/roster RLS |
+| **Change staff roles** | Owners and admins can change roles for existing collaborators (including **parents** already in the org). **Owners** may assign instructor, admin, or **owner**. **Admins** may assign instructor or admin. Either may set **parent** when the person has a linked student in the org (no new invite — update `memberships.role` only). Does **not** gate course materials or roster on staff role — families still see content via **enrollment** (and `parent_student_links` where applicable) |
+| **Remove staff** | Owners and admins can **remove** admins and instructors from the org (end that membership) when they have **no** linked student. If they have a linked student, demote to **parent** instead of removing. Does **not** rewrite materials/roster RLS |
 | **Last owner/admin** | Cannot remove or demote the **last remaining owner or admin** (org lockout guard) |
 | **Org permalink** | On create, generate a unique **`slug`** used as the org’s permalink URL. Owners and admins may change it later; the UI **must warn** that changing the slug **breaks existing links** (no automatic redirect required in P0) |
 
@@ -220,7 +220,7 @@ Teachers will ask **“where do I have this resource?”** Search is a **core P0
 
 **Access lock:** Family = named group of `student_profile`s (Class-mirror). Empty family is OK. Access stays course enrollment + `parent_student_links`. A family profile does **not** grant materials, this-week, or print.
 
-Parents appear on a family **only** via existing `parent_student_links` to those students. Do **not** invent a family-membership access table, and do not treat `family_members.parent_user_id` as an access gate (column unused for P0 app writes). Linking a parent reuses or creates `parent_student_links` (and may save a pending `admin_invites` row with `role=parent` and `student_profile_id` if they have no account). **Never write enrollments** from this directory. A parent on two families is **yes by default** (via links to students in each).
+Parents appear on a family **only** via existing `parent_student_links` to those students. Do **not** invent a family-membership access table, and do not treat `family_members.parent_user_id` as an access gate (column unused for P0 app writes). Linking a parent reuses or creates `parent_student_links` (and may save one pending `admin_invites` row with `role=parent`, attaching chosen students via `admin_invite_students`, if they have no account). **Never write enrollments** from this directory. A parent on two families is **yes by default** (via links to students in each).
 
 | Concept | Detail |
 |---------|--------|
@@ -229,7 +229,7 @@ Parents appear on a family **only** via existing `parent_student_links` to those
 | **Parent directory** | Org list + sidebar of families — find a household without hunting the course roster |
 | **How it forms** | Staff create a named family, then add existing or new student profiles (a student is in at most one family) |
 | **Parents on a family** | Derived from `parent_student_links` to member students — not from family membership rows |
-| **Link parent** | Create or reuse `parent_student_links` for the chosen student(s); if no account, save `admin_invites` with `role=parent` and those `student_profile_id`s |
+| **Link parent** | Create or reuse `parent_student_links` for the chosen student(s); if no account, one `admin_invites` `role=parent` with students attached via `admin_invite_students` |
 | **Visibility** | Owners, admins, and instructors (Class-mirror). Parent-facing family profile is TBD |
 
 **Not P0:** full parent-managed household **across organizations** — that stays **P2** ([Parent family management](#p2--later-long-term)). Invite emails use the same Resend `organization-invite` event as staff (HN-015). Copy-link claim is `/invite/<token>` from roster/profile (this directory, when routed, may insert a pending `admin_invites` row with `role=parent`).
@@ -363,7 +363,7 @@ Do **not** ship a separate “Export” product name in P0. Print *is* the path 
 
 1. Parents are **invited by email** into the system.
 2. A parent may access content by **creating an account or logging in** with the **same email** as the invite. The invite link opens `/invite/<token>` **unsigned**, names that address, and sends them to sign up / log in with it prefilled. **P0: account required to view.** Magic links (view without an account) may come later.
-3. Claiming a parent invite creates **parent membership** (and a student link). **Course access** still requires that student to be enrolled in a course with **`status = active`** and **`visibility = published`**. The invite itself does not open materials.
+3. Claiming a parent invite creates **parent membership** and `parent_student_links` for every student attached to that invite. **Course access** still requires that student to be enrolled in a course with **`status = active`** and **`visibility = published`**. The invite itself does not open materials.
 
 **Active course** = `Course.status = active`. Start/end dates are informational only.
 
@@ -647,6 +647,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | File sharing minimum in P0 | **Decided** | File upload, Material attachments, parent access |
 | Product analytics: PostHog | **Decided** | STACK.md; HUMAN_NEEDED for project keys |
 | P0 roles: owner, admin, instructor, parent | **Decided** | RBAC, Membership. Owner vs admin = billing (P1). |
+| Parent ↔ staff role change (no re-invite) | **Decided** | One membership row per user/org. Promote parent → staff by updating `memberships.role`. Demote staff → parent only with a `parent_student_links` row for a student in that org. Remove staff only when they have no linked student. |
 | Admin manages accounts in P0 | **Decided** | Invite; **change admin ↔ instructor**; **remove** admins/instructors; cannot remove/demote last owner or admin |
 | Org permalink slug on create | **Decided** | Unique `Organization.slug`; changing it warns that existing links break (no auto-redirect in P0) |
 | Parents invited by email in P0 | **Decided** | ParentInvite, auth |

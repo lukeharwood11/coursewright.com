@@ -20,14 +20,14 @@ Configure the organization: identity, permalink, organization type, grade scheme
 - Save org name/metadata; changing **permalink slug** shows a warning that existing links break (no auto-redirect in P0) and requires an explicit confirmation.
 - **Save** and **Cancel** stay in the page header (upper right). Save is disabled when nothing changed; Cancel goes back (confirms first if there are unsaved changes).
 - Set **organization type** (co-op / school / family) and **grade scheme** (K–12 / custom labels). Family is for parents making materials at home.
-- Collaborators section on this page: invite owner / admin / instructor by email (Resend `organization-invite`) and **copy a claim link**, list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). Owners and admins **change admin ↔ instructor** and **remove** admins/instructors; the last remaining owner or admin cannot be removed or demoted. Those writes update **org membership** (who can run settings and invites). They do **not** change who can see course content — materials and roster stay **enrollment-gated** (and `parent_student_links` where applicable).
+- Collaborators section on this page: invite owner / admin / instructor by email (Resend `organization-invite`) and **copy a claim link**, list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). The list includes **parents** already in the org so owners/admins can **promote** them to instructor/admin/owner **without a new invite**. Owners and admins **change roles** (including demote to **parent** when the person has a linked student) and **remove** admins/instructors who have no linked student; the last remaining owner or admin cannot be removed or demoted. Those writes update **org membership** (who can run settings and invites). They do **not** change who can see course content — materials and roster stay **enrollment-gated** (and `parent_student_links` where applicable).
 - Billing section shows Free plan, **owners only**.
 
 ## Data shown
 
 - Organization **name**, **slug**, **organization type**
 - Current **grade scheme** and labels (K–12 preset or custom)
-- Collaborators list: person **name** / **email**, **role** (owner | admin | instructor); owners and admins see change-role and remove actions for admins/instructors
+- Collaborators list: person **name** / **email**, **role** (owner | admin | instructor | parent); owners and admins see change-role (and remove when allowed)
 - Last owner/admin rows explain why they can’t be removed or demoted
 - Pending collaborator invites: **email**, **role**, copyable `/invite/<token>` link, **Resend email**, cancel
 - Billing status — Free plan (owners only)
@@ -48,11 +48,11 @@ Configure the organization: identity, permalink, organization type, grade scheme
 
 ### Collaborators / roles (section)
 
-- List owners, admins, and instructors
+- List owners, admins, instructors, and parents
 - Invite owners / admins / instructors by email; Course Wright emails the claim link and you can copy it again
 - Pending invites: copy link again, **Resend email**, or cancel
-- Change **roles** for existing collaborators: owners may set instructor / admin / owner; admins may set instructor / admin. Membership role only — not a materials/roster access gate
-- Remove admins/instructors (membership only)
+- Change **roles** for existing members: owners may set instructor / admin / owner; admins may set instructor / admin; either may set **parent** only when that person has a linked student in the org. Promote parent → staff with no new invite. Membership role only — not a materials/roster access gate
+- Remove admins/instructors who have **no** linked student (membership only). If they have a linked student, demote to parent instead
 - Guard: cannot remove or demote the **last remaining owner or admin**
 - Existing **owner** rows stay badge-only (promote others to owner; don’t demote owners from this list)
 
@@ -66,8 +66,8 @@ Configure the organization: identity, permalink, organization type, grade scheme
 - Cancel — discard unsaved changes
 - Set grade scheme
 - Invite collaborators (email + copy the claim link); cancel a pending invite; resend the email
-- Change admin ↔ instructor for existing collaborators (membership role only)
-- Remove an admin or instructor (blocked when they are the last owner/admin)
+- Change roles for existing collaborators (including promote parent → staff and demote staff → parent when linked to a student)
+- Remove an admin or instructor with no linked student (blocked when they are the last owner/admin)
 
 ## Links to
 

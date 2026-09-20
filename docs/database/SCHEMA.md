@@ -17,7 +17,8 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | StudentProfile | `student_profiles` | |
 | Family | `families` | |
 | FamilyMember | `family_members` | |
-| ParentInvite | `admin_invites` (`role = parent`) | Same token table as staff. `student_profile_id` required for parent. Separate `parent_invites` table retired. |
+| ParentInvite | `admin_invites` (`role = parent`) | Same token table as staff. One pending per `(org, email)`; students via `admin_invite_students`. Separate `parent_invites` table retired. |
+| AdminInviteStudents | `admin_invite_students` | Students attached to a parent AdminInvite. Claim links all of them. |
 | ParentStudentLink | `parent_student_links` | |
 | Enrollment | `enrollments` | |
 | Course | `courses` | P0 |
@@ -63,7 +64,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 
 | Phase | Entities in focus |
 |-------|-------------------|
-| **P0** | Organization, User, Membership, **AdminInvite**, **StudentProfile**, **Class**, **ClassMember**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **LessonPlan**, **LessonPlanDay**, **LessonPlanDayMaterial**, **Announcement**, **AnnouncementRead**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
+| **P0** | Organization, User, Membership, **AdminInvite**, **AdminInviteStudents**, **StudentProfile**, **Class**, **ClassMember**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **LessonPlan**, **LessonPlanDay**, **LessonPlanDayMaterial**, **Announcement**, **AnnouncementRead**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
 | **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs) |
 | **P2** | Cross-org Family management, StudentProfile.user_id, Quiz online, Submission, **ParentPayments** (orgs collect from parents) |
 
@@ -330,7 +331,7 @@ Authenticated users only: admins, instructors, parents. **Not students** (P0/P1)
 
 ### Membership
 
-Org staff and parent memberships. Owners and admins may **change** `admin` ↔ `instructor` and **remove** admin/instructor memberships. **Cannot** remove or demote the last remaining `owner` or `admin`. These writes touch **`memberships` only**. Course materials and roster stay **enrollment-gated** (and `ParentStudentLink` where applicable) — do **not** add a second staff-role gate on content RLS.
+Org staff and parent memberships. One active membership per user per org (single `role`). Owners and admins may **change** roles among `admin` ↔ `instructor` ↔ `parent` (and owners may assign `owner`) and **remove** admin/instructor memberships that have no linked student. Setting `role = parent` requires an existing `ParentStudentLink` to a `StudentProfile` in that org (so a parent can be promoted to staff without a new invite, and staff can be demoted back to parent only when they still parent a student). **Cannot** remove or demote the last remaining `owner` or `admin`. These writes touch **`memberships` only**. Course materials and roster stay **enrollment-gated** (and `ParentStudentLink` where applicable) — do **not** add a second staff-role gate on content RLS.
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -350,15 +351,17 @@ Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor
 | organization_id | bigint | FK → Organization |
 | email | text | Lowercased — must match the account that claims |
 | role | text | `owner` · `admin` · `instructor` · `parent` |
-| student_profile_id | bigint | FK → StudentProfile, **required when `role = parent`**, else null |
+| student_profile_id | bigint | FK → StudentProfile, **required when `role = parent`** (anchor student), else null |
 | invited_by | uuid | FK → User |
 | token | text | Unique invite token (returned on insert; used in `/invite/<token>`) |
 | accepted_at | timestamptz | nullable |
 | membership_id | bigint | FK → Membership, nullable |
 
+**Pending uniqueness:** one pending staff invite per `(organization_id, email)`; one pending parent invite per `(organization_id, email)`. Additional students for a parent invite attach via `admin_invite_students`.
+
 **Who can invite staff:** owners and admins. Admins may invite `admin` or `instructor`. Only owners may invite another `owner`. Instructors cannot invite org staff.
 
-**Who can invite parents:** owners, admins, and instructors. Parent invites are created from roster / student profile (copy `/invite/<token>`). The Families directory, when routed, may also insert a pending parent row when linking an email with no account.
+**Who can invite parents:** owners, admins, and instructors. Parent invites are created from roster / student profile (copy `/invite/<token>`). Same email for another student attaches to the existing pending invite (no second email). The Families directory, when routed, attaches chosen students to one pending invite when linking an email with no account.
 
 ---
 
@@ -410,9 +413,18 @@ Org-scoped **named group of student profiles** for the parent directory (Class-m
 
 Stored on `admin_invites` with `role = parent` (same token / claim RPCs as staff). The separate `parent_invites` table is retired.
 
-Parent-specific fields: `student_profile_id` (required), plus the shared email / token / invited_by / accepted_at columns on AdminInvite.
+**One pending invite per `(organization_id, email)`.** `student_profile_id` on the invite is the **anchor** (first student). Additional students attach via `admin_invite_students` — inviting the same email again for another student attaches without a new token or email.
 
-Emails Resend `organization-invite` and keeps copy `/invite/<token>`. On claim: create parent membership (if needed) and `parent_student_links`. Do **not** grant course access from the invite alone. Unrouted Families directory may also save a pending parent row per chosen student.
+Emails Resend `organization-invite` and keeps copy `/invite/<token>`. On claim: create parent membership (if needed) and `parent_student_links` for **every** attached student. Do **not** grant course access from the invite alone. Unrouted Families directory attaches chosen students to one pending parent invite (one email).
+
+### AdminInviteStudents
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| invite_id | bigint | FK → AdminInvite (cascade) |
+| student_profile_id | bigint | FK → StudentProfile (cascade) |
+| unique | (invite_id, student_profile_id) | |
 
 ### ParentStudentLink
 

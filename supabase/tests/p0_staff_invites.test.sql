@@ -159,8 +159,53 @@ select lives_ok(
   $$insert into admin_invites (organization_id, email, role, student_profile_id)
     select o.id, 'parent@example.com', 'parent', sp.id
     from organizations o
-    join student_profiles sp on sp.organization_id = o.id$$,
+    join student_profiles sp on sp.organization_id = o.id
+    where sp.name = 'Sam Student'$$,
   'instructor can invite a parent'
+);
+
+select results_eq(
+  $$select count(*)::int from admin_invite_students$$,
+  array[1],
+  'creating a parent invite attaches the anchor student'
+);
+
+select lives_ok(
+  $$insert into student_profiles (organization_id, name, parent_email)
+    select id, 'Alex Sibling', 'parent@example.com' from organizations$$,
+  'instructor can create a second student with the same parent email'
+);
+
+select lives_ok(
+  $$insert into admin_invite_students (invite_id, student_profile_id)
+    select i.id, sp.id
+    from admin_invites i
+    join student_profiles sp on sp.organization_id = i.organization_id
+    where i.role = 'parent' and sp.name = 'Alex Sibling'$$,
+  'instructor can attach a second student to the same pending parent invite'
+);
+
+select throws_ok(
+  $$insert into admin_invites (organization_id, email, role, student_profile_id)
+    select o.id, 'parent@example.com', 'parent', sp.id
+    from organizations o
+    join student_profiles sp on sp.organization_id = o.id
+    where sp.name = 'Alex Sibling'$$,
+  'P0001',
+  'That email already has a pending invite.',
+  'second parent invite row for the same email is rejected'
+);
+
+select results_eq(
+  $$select count(*)::int from admin_invites where role = 'parent' and accepted_at is null$$,
+  array[1],
+  'only one pending parent invite exists for the shared email'
+);
+
+select results_eq(
+  $$select count(*)::int from admin_invite_students$$,
+  array[2],
+  'both students are attached to the pending parent invite'
 );
 
 select throws_ok(
@@ -231,10 +276,11 @@ select results_eq(
   'parent claim creates a parent membership'
 );
 
-select isnt_empty(
-  $$select 1 from parent_student_links
+select results_eq(
+  $$select count(*)::int from parent_student_links
     where parent_user_id = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'$$,
-  'parent claim links the parent to the student'
+  array[2],
+  'parent claim links the parent to every attached student'
 );
 
 select is_empty(

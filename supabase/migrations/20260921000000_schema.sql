@@ -300,6 +300,39 @@ create trigger memberships_guard_last_admin
 before update or delete on public.memberships
 for each row execute function private.guard_last_admin();
 
+-- Demote to parent only when the person still parents a student in this org.
+-- Promote parent → staff is a plain role update (no new invite).
+create or replace function private.guard_membership_parent_role()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if tg_op = 'UPDATE'
+     and new.role = 'parent'
+     and old.role is distinct from 'parent' then
+    if new.user_id is null
+       or not exists (
+         select 1
+         from public.parent_student_links psl
+         join public.student_profiles sp
+           on sp.id = psl.student_profile_id
+         where psl.parent_user_id = new.user_id
+           and sp.organization_id = new.organization_id
+       ) then
+      raise exception
+        'That person can only become a parent if they are linked to a student in this organization.'
+        using errcode = 'P0001';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger memberships_guard_parent_role
+before update on public.memberships
+for each row execute function private.guard_membership_parent_role();
+
 create or replace function private.on_organization_created()
 returns trigger
 language plpgsql
@@ -351,7 +384,7 @@ create unique index admin_invites_pending_staff_email_uidx
   on public.admin_invites (organization_id, email)
   where accepted_at is null and role in ('owner', 'admin', 'instructor');
 create unique index admin_invites_pending_parent_uidx
-  on public.admin_invites (organization_id, email, student_profile_id)
+  on public.admin_invites (organization_id, email)
   where accepted_at is null and role = 'parent';
 create index admin_invites_pending_email
   on public.admin_invites (email)
@@ -360,7 +393,7 @@ create index admin_invites_student_profile_id_idx
   on public.admin_invites (student_profile_id);
 
 comment on table public.admin_invites is
-  'SCHEMA.md AdminInvite — email-claim tokens for owner/admin/instructor/parent. Membership is created on claim.';
+  'SCHEMA.md AdminInvite — email-claim tokens for owner/admin/instructor/parent. Membership is created on claim. Parent invites are one pending row per (org, email); students attach via admin_invite_students.';
 
 -- ---------------------------------------------------------------------------
 -- CourseTemplate, TemplateAccess
@@ -583,6 +616,109 @@ alter table public.admin_invites
   add constraint admin_invites_student_profile_id_fkey
   foreign key (student_profile_id) references public.student_profiles (id) on delete cascade;
 
+-- ---------------------------------------------------------------------------
+-- AdminInviteStudents — students attached to a pending parent invite
+-- ---------------------------------------------------------------------------
+
+create table public.admin_invite_students (
+  id bigserial primary key,
+  invite_id bigint not null references public.admin_invites (id) on delete cascade,
+  student_profile_id bigint not null references public.student_profiles (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  constraint admin_invite_students_invite_student_key unique (invite_id, student_profile_id)
+);
+
+create index admin_invite_students_student_profile_id_idx
+  on public.admin_invite_students (student_profile_id);
+create index admin_invite_students_invite_id_idx
+  on public.admin_invite_students (invite_id);
+
+comment on table public.admin_invite_students is
+  'Students attached to a parent AdminInvite. Claim links the parent to every attached student.';
+
+create or replace function private.attach_anchor_invite_student()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.role = 'parent' and new.student_profile_id is not null then
+    insert into public.admin_invite_students (invite_id, student_profile_id)
+    values (new.id, new.student_profile_id)
+    on conflict (invite_id, student_profile_id) do nothing;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger admin_invites_attach_anchor_student
+after insert on public.admin_invites
+for each row
+execute function private.attach_anchor_invite_student();
+
+revoke all on function private.attach_anchor_invite_student() from public, anon, authenticated;
+
+create or replace function public.normalize_admin_invite_student()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  invite_row public.admin_invites%rowtype;
+  student_org bigint;
+begin
+  if (select auth.uid()) is null then
+    raise exception 'not authenticated' using errcode = '42501';
+  end if;
+
+  select * into invite_row
+  from public.admin_invites
+  where id = new.invite_id;
+
+  if not found then
+    raise exception 'This invite is missing or no longer valid.' using errcode = 'P0002';
+  end if;
+
+  if invite_row.role is distinct from 'parent' then
+    raise exception 'Only parent invites can attach students.' using errcode = 'P0001';
+  end if;
+
+  if invite_row.accepted_at is not null then
+    raise exception 'This invite was already accepted.' using errcode = 'P0001';
+  end if;
+
+  if not private.is_org_staff(invite_row.organization_id) then
+    raise exception 'Only staff can invite parents.' using errcode = '42501';
+  end if;
+
+  select sp.organization_id into student_org
+  from public.student_profiles sp
+  where sp.id = new.student_profile_id;
+
+  if student_org is distinct from invite_row.organization_id then
+    raise exception 'That student is not in this organization.' using errcode = 'P0001';
+  end if;
+
+  if exists (
+    select 1
+    from public.parent_student_links psl
+    join public.profiles p on p.id = psl.parent_user_id
+    where psl.student_profile_id = new.student_profile_id
+      and p.email = invite_row.email
+  ) then
+    raise exception 'That parent is already linked to this student.' using errcode = 'P0001';
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger admin_invite_students_normalize
+before insert on public.admin_invite_students
+for each row
+execute function public.normalize_admin_invite_student();
 
 create trigger student_profiles_set_updated_at
 before update on public.student_profiles
@@ -1666,6 +1802,17 @@ begin
     ) then
       raise exception 'That parent is already linked to this student.' using errcode = 'P0001';
     end if;
+
+    if tg_op = 'INSERT' and exists (
+      select 1
+      from public.admin_invites i
+      where i.organization_id = new.organization_id
+        and i.email = new.email
+        and i.role = 'parent'
+        and i.accepted_at is null
+    ) then
+      raise exception 'That email already has a pending invite.' using errcode = 'P0001';
+    end if;
   else
     new.student_profile_id := null;
 
@@ -1790,9 +1937,21 @@ begin
       raise exception 'This invite is missing or no longer valid.' using errcode = 'P0002';
     end if;
 
-    insert into public.parent_student_links (parent_user_id, student_profile_id)
-    values (caller, invite.student_profile_id)
-    on conflict (parent_user_id, student_profile_id) do nothing;
+    if exists (
+      select 1
+      from public.admin_invite_students ais
+      where ais.invite_id = invite.id
+    ) then
+      insert into public.parent_student_links (parent_user_id, student_profile_id)
+      select caller, ais.student_profile_id
+      from public.admin_invite_students ais
+      where ais.invite_id = invite.id
+      on conflict (parent_user_id, student_profile_id) do nothing;
+    else
+      insert into public.parent_student_links (parent_user_id, student_profile_id)
+      values (caller, invite.student_profile_id)
+      on conflict (parent_user_id, student_profile_id) do nothing;
+    end if;
   end if;
 
   select m.id, m.role into member_id, member_role

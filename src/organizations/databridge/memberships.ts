@@ -1,5 +1,5 @@
-import type { OrgRole, StaffInviteRole } from "@/organizations/model/role";
-import { EDITABLE_STAFF_ROLES, parseOrgRole } from "@/organizations/model/role";
+import type { AssignableMembershipRole, OrgRole } from "@/organizations/model/role";
+import { EDITABLE_MEMBERSHIP_ROLES, EDITABLE_STAFF_ROLES, parseOrgRole } from "@/organizations/model/role";
 import { staffMembershipWriteErrorMessage } from "@/organizations/model/staffAccount";
 import { requireSupabase } from "./client";
 
@@ -135,7 +135,7 @@ export async function listOrgPeople(
 
 export async function updateStaffMembershipRole(input: {
   membershipId: number;
-  role: StaffInviteRole;
+  role: AssignableMembershipRole;
 }): Promise<void> {
   if (!Number.isFinite(input.membershipId)) {
     throw new Error("That staff member couldn’t be updated. Refresh and try again.");
@@ -146,7 +146,7 @@ export async function updateStaffMembershipRole(input: {
     .update({ role: input.role })
     .eq("id", input.membershipId)
     .eq("status", "active")
-    .in("role", [...EDITABLE_STAFF_ROLES])
+    .in("role", [...EDITABLE_MEMBERSHIP_ROLES])
     .select("id")
     .maybeSingle();
 

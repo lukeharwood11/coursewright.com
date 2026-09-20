@@ -7,13 +7,21 @@ export type StaffInviteRole = (typeof STAFF_INVITE_ROLES)[number];
 /**
  * Existing memberships that owners/admins may edit or remove.
  * Owner rows stay badge-only (invite or promote someone else to owner).
+ * Parent rows are editable so they can be promoted to staff without a new invite.
  */
+export const EDITABLE_MEMBERSHIP_ROLES = ["admin", "instructor", "parent"] as const;
+export type EditableMembershipRole = (typeof EDITABLE_MEMBERSHIP_ROLES)[number];
+
+/** @deprecated Prefer EDITABLE_MEMBERSHIP_ROLES. */
 export const EDITABLE_STAFF_ROLES = ["admin", "instructor"] as const;
 export type EditableStaffRole = (typeof EDITABLE_STAFF_ROLES)[number];
 
-/** @deprecated Prefer EDITABLE_STAFF_ROLES. */
+/** @deprecated Prefer EDITABLE_MEMBERSHIP_ROLES. */
 export const CHANGEABLE_STAFF_ROLES = EDITABLE_STAFF_ROLES;
 export type ChangeableStaffRole = EditableStaffRole;
+
+/** Roles assignable on an existing membership (staff invite roles + parent demotion). */
+export type AssignableMembershipRole = StaffInviteRole | "parent";
 
 export function parseOrgRole(value: string): OrgRole | null {
   if (
@@ -63,6 +71,13 @@ export function parseStaffInviteRole(value: string): StaffInviteRole | null {
   return null;
 }
 
+export function parseAssignableMembershipRole(
+  value: string,
+): AssignableMembershipRole | null {
+  if (value === "parent") return "parent";
+  return parseStaffInviteRole(value);
+}
+
 export function parseEditableStaffRole(value: string): EditableStaffRole | null {
   if (value === "admin" || value === "instructor") return value;
   return null;
@@ -82,8 +97,9 @@ export function inviteableStaffRoles(actor: OrgRole): StaffInviteRole[] {
 }
 
 /**
- * Roles an actor may assign when changing an existing collaborator.
- * Owners can promote to owner; admins cannot.
+ * Staff roles an actor may assign when changing an existing collaborator.
+ * Owners can promote to owner; admins cannot. Parent is added separately when
+ * the target has a linked student.
  */
 export function assignableStaffRoles(actor: OrgRole): StaffInviteRole[] {
   return inviteableStaffRoles(actor);

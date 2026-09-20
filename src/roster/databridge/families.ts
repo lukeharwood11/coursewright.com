@@ -1,4 +1,7 @@
-import { sendOrganizationInviteEmail } from "@/organizations/databridge/staffInvites";
+import {
+  attachStudentToParentInvite,
+  createParentInvite,
+} from "@/organizations/databridge/staffInvites";
 import { familyWriteErrorMessage } from "@/roster/model/family";
 import { rosterWriteErrorMessage } from "@/roster/model/studentProfile";
 import type { ValidatedFamily } from "@/roster/model/family";
@@ -185,20 +188,20 @@ async function listPendingInvites(
   if (studentIds.length === 0) return [];
   const db = requireSupabase();
   const { data, error } = await db
-    .from("admin_invites")
-    .select("id, email, student_profile_id")
-    .eq("role", "parent")
+    .from("admin_invite_students")
+    .select("student_profile_id, invite:admin_invites!inner(id, email, accepted_at, role)")
     .in("student_profile_id", studentIds)
-    .is("accepted_at", null)
-    .order("created_at");
+    .eq("invite.role", "parent")
+    .is("invite.accepted_at", null);
 
   if (error) throw new Error(error.message);
   return (data ?? []).flatMap((row) => {
-    if (row.student_profile_id == null) return [];
+    const invite = Array.isArray(row.invite) ? row.invite[0] : row.invite;
+    if (!invite || row.student_profile_id == null) return [];
     return [
       {
-        id: row.id,
-        email: row.email,
+        id: invite.id,
+        email: invite.email,
         studentProfileId: row.student_profile_id,
       },
     ];
@@ -356,32 +359,18 @@ export async function createParentInvites(input: {
 }): Promise<void> {
   if (input.studentIds.length === 0) return;
 
-  const db = requireSupabase();
-  const results = await Promise.all(
-    input.studentIds.map(async (studentProfileId) => {
-      const { data, error } = await db
-        .from("admin_invites")
-        .insert({
-          organization_id: input.organizationId,
-          email: input.email,
-          role: "parent",
-          invited_by: input.invitedBy,
-          student_profile_id: studentProfileId,
-        })
-        .select("id")
-        .maybeSingle();
-      return { data, error };
-    }),
-  );
+  const email = input.email.trim().toLowerCase();
+  const firstStudentId = input.studentIds[0];
+  if (firstStudentId == null) return;
 
-  const inviteIds: number[] = [];
-  for (const result of results) {
-    if (result.error) {
-      if (result.error.code === "23505") continue;
-      throw new Error(familyWriteErrorMessage(result.error));
-    }
-    if (result.data?.id) inviteIds.push(result.data.id);
+  const { invite } = await createParentInvite({
+    organizationId: input.organizationId,
+    studentProfileId: firstStudentId,
+    email,
+    invitedBy: input.invitedBy,
+  });
+
+  for (const studentProfileId of input.studentIds.slice(1)) {
+    await attachStudentToParentInvite(invite.id, studentProfileId);
   }
-
-  await Promise.all(inviteIds.map((id) => sendOrganizationInviteEmail(id)));
 }

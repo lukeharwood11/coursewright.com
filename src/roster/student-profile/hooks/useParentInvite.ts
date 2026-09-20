@@ -45,8 +45,8 @@ export function useParentInvite(studentId: number | null) {
     enabled: canInvite && studentId != null,
   });
 
-  const pending = (pendingQuery.data ?? []).filter(
-    (invite) => invite.studentProfileId === studentId,
+  const pending = (pendingQuery.data ?? []).filter((invite) =>
+    studentId != null && invite.studentProfileIds.includes(studentId),
   );
   const linked = (linksQuery.data ?? []).filter(
     (link) => link.studentProfileId === studentId,
@@ -57,7 +57,7 @@ export function useParentInvite(studentId: number | null) {
       const parsed = validateCreateParentInvite({ email });
       if (!parsed.ok) throw new Error(parsed.error);
       if (studentId == null) throw new Error("Student isn’t loaded yet.");
-      const { invite, email: emailStatus } = await createParentInvite({
+      const { invite, email: emailStatus, attached } = await createParentInvite({
         organizationId: organization.id,
         studentProfileId: studentId,
         email: parsed.value.email,
@@ -72,16 +72,19 @@ export function useParentInvite(studentId: number | null) {
           gradeLevel: student.gradeLevel,
         });
       }
-      return { invite, emailStatus };
+      return { invite, emailStatus, attached: attached ?? false };
     },
-    onSuccess: async ({ invite, emailStatus }) => {
+    onSuccess: async ({ invite, emailStatus, attached }) => {
       setAddEmail("");
-      const copied = await copyInvite(invite, { toast: false });
+      const copied = attached
+        ? false
+        : await copyInvite(invite, { toast: false });
       toast(
         inviteCreatedMessage({
           recipientEmail: invite.email,
           emailSent: emailStatus.sent,
           linkCopied: copied,
+          attached,
         }),
       );
       await queryClient.invalidateQueries({

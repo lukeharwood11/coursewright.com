@@ -13,6 +13,18 @@ test("inviteCreatedMessage celebrates a sent email without a copied link", () =>
   );
 });
 
+test("inviteCreatedMessage notes when a student was attached to an existing invite", () => {
+  assert.equal(
+    inviteCreatedMessage({
+      recipientEmail: "alex@example.com",
+      emailSent: false,
+      linkCopied: true,
+      attached: true,
+    }),
+    "Already invited — this student was added to the existing invite.",
+  );
+});
+
 test("inviteCreatedMessage falls back to copy-yourself when email fails", () => {
   assert.equal(
     inviteCreatedMessage({

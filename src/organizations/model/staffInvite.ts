@@ -75,7 +75,11 @@ export function inviteCreatedMessage(input: {
   recipientEmail: string;
   emailSent: boolean;
   linkCopied: boolean;
+  attached?: boolean;
 }): string {
+  if (input.attached) {
+    return "Already invited — this student was added to the existing invite.";
+  }
   if (input.emailSent) {
     return "Email invite sent!";
   }
@@ -119,12 +123,13 @@ export function staffInviteWriteErrorMessage(error: {
   return inviteWriteErrorMessage(error);
 }
 
-const STAFF_ROLE_ORDER: Record<StaffInviteRole, number> = {
+const MEMBER_ROLE_ORDER: Record<OrgRole, number> = {
   owner: 0,
   admin: 1,
   instructor: 2,
+  parent: 3,
 };
 
-export function compareStaffRole(a: StaffInviteRole, b: StaffInviteRole): number {
-  return STAFF_ROLE_ORDER[a] - STAFF_ROLE_ORDER[b];
+export function compareStaffRole(a: OrgRole, b: OrgRole): number {
+  return MEMBER_ROLE_ORDER[a] - MEMBER_ROLE_ORDER[b];
 }

@@ -7,9 +7,10 @@ import type { OrganizationSummary } from "./memberships";
 export type OrgStaffMember = {
   membershipId: number;
   userId: string;
-  role: StaffInviteRole;
+  role: OrgRole;
   name: string;
   email: string;
+  hasLinkedStudent: boolean;
 };
 
 export type PendingOrgInvite = {
@@ -19,6 +20,7 @@ export type PendingOrgInvite = {
   token: string;
   createdAt: string;
   studentProfileId: number | null;
+  studentProfileIds: number[];
   organization: OrganizationSummary;
 };
 
@@ -63,6 +65,10 @@ type PendingInviteRow = {
   created_at: string;
   student_profile_id: number | null;
   organization: OrganizationSummary | OrganizationSummary[] | null;
+  invite_students?:
+    | { student_profile_id: number }[]
+    | { student_profile_id: number }
+    | null;
 };
 
 function unwrapOne<T>(value: T | T[] | null | undefined): T | null {
@@ -81,7 +87,7 @@ export const staffInviteQueryKeys = {
 };
 
 const INVITE_COLUMNS =
-  "id, email, role, token, created_at, student_profile_id, organization:organizations(id, name, slug)";
+  "id, email, role, token, created_at, student_profile_id, organization:organizations(id, name, slug), invite_students:admin_invite_students(student_profile_id)";
 
 export async function listOrgStaff(organizationId: number): Promise<OrgStaffMember[]> {
   const db = requireSupabase();
@@ -90,14 +96,14 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
     .select("id, user_id, role, profile:profiles!memberships_user_id_fkey(name, email)")
     .eq("organization_id", organizationId)
     .eq("status", "active")
-    .in("role", ["owner", "admin", "instructor"]);
+    .in("role", ["owner", "admin", "instructor", "parent"]);
 
   if (error) throw new Error(error.message);
 
-  return (data ?? [])
+  const members = (data ?? [])
     .map((row) => {
       const typed = row as StaffMembershipRow;
-      const role = parseStaffInviteRole(typed.role);
+      const role = parseOrgRole(typed.role);
       const profile = unwrapOne(typed.profile);
       if (!role || !profile || !typed.user_id || !Number.isFinite(typed.id)) {
         return null;
@@ -108,9 +114,48 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
         role,
         name: profile.name,
         email: profile.email,
+        hasLinkedStudent: false,
       };
     })
     .filter((row): row is OrgStaffMember => row !== null);
+
+  const linkedParents = await listLinkedParentUserIds(
+    organizationId,
+    members.map((member) => member.userId),
+  );
+
+  return members.map((member) => ({
+    ...member,
+    hasLinkedStudent: linkedParents.has(member.userId),
+  }));
+}
+
+async function listLinkedParentUserIds(
+  organizationId: number,
+  userIds: string[],
+): Promise<Set<string>> {
+  if (userIds.length === 0) return new Set();
+
+  const db = requireSupabase();
+  const { data: students, error: studentsError } = await db
+    .from("student_profiles")
+    .select("id")
+    .eq("organization_id", organizationId);
+
+  if (studentsError) throw new Error(studentsError.message);
+
+  const studentIds = (students ?? []).map((row) => row.id);
+  if (studentIds.length === 0) return new Set();
+
+  const { data, error } = await db
+    .from("parent_student_links")
+    .select("parent_user_id")
+    .in("parent_user_id", userIds)
+    .in("student_profile_id", studentIds);
+
+  if (error) throw new Error(error.message);
+
+  return new Set((data ?? []).map((row) => row.parent_user_id));
 }
 
 export async function listOrgPendingInvites(
@@ -206,6 +251,7 @@ export type InviteEmailStatus = {
 export type CreatedOrgInvite<T> = {
   invite: T;
   email: InviteEmailStatus;
+  attached?: boolean;
 };
 
 export async function sendOrganizationInviteEmail(
@@ -252,15 +298,94 @@ export async function createParentInvite(input: {
   email: string;
   invitedBy: string;
 }): Promise<CreatedOrgInvite<PendingOrgInvite>> {
-  const invite = await insertInvite({
-    organizationId: input.organizationId,
-    email: input.email,
-    role: "parent",
-    invitedBy: input.invitedBy,
-    studentProfileId: input.studentProfileId,
+  const email = input.email.trim().toLowerCase();
+  const existing = await findPendingParentInvite(input.organizationId, email);
+  if (existing) {
+    return attachToExistingParentInvite(existing, input.studentProfileId);
+  }
+
+  try {
+    const invite = await insertInvite({
+      organizationId: input.organizationId,
+      email,
+      role: "parent",
+      invitedBy: input.invitedBy,
+      studentProfileId: input.studentProfileId,
+    });
+    const emailStatus = await sendOrganizationInviteEmail(invite.id);
+    return { invite, email: emailStatus, attached: false };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (!message.includes("already has a pending invite")) throw error;
+    const raced = await findPendingParentInvite(input.organizationId, email);
+    if (!raced) throw error;
+    return attachToExistingParentInvite(raced, input.studentProfileId);
+  }
+}
+
+async function attachToExistingParentInvite(
+  existing: PendingOrgInvite,
+  studentProfileId: number,
+): Promise<CreatedOrgInvite<PendingOrgInvite>> {
+  await attachStudentToParentInvite(existing.id, studentProfileId);
+  const invite = await getPendingParentInviteById(existing.id);
+  return {
+    invite: invite ?? {
+      ...existing,
+      studentProfileIds: Array.from(
+        new Set([...existing.studentProfileIds, studentProfileId]),
+      ),
+    },
+    email: { sent: false, error: null },
+    attached: true,
+  };
+}
+
+async function findPendingParentInvite(
+  organizationId: number,
+  email: string,
+): Promise<PendingOrgInvite | null> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("admin_invites")
+    .select(INVITE_COLUMNS)
+    .eq("organization_id", organizationId)
+    .eq("email", email)
+    .eq("role", "parent")
+    .is("accepted_at", null)
+    .maybeSingle();
+
+  if (error) throw new Error(inviteWriteErrorMessage(error));
+  return data ? toPendingInvite(data as PendingInviteRow) : null;
+}
+
+async function getPendingParentInviteById(
+  inviteId: number,
+): Promise<PendingOrgInvite | null> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("admin_invites")
+    .select(INVITE_COLUMNS)
+    .eq("id", inviteId)
+    .maybeSingle();
+
+  if (error) throw new Error(inviteWriteErrorMessage(error));
+  return data ? toPendingInvite(data as PendingInviteRow) : null;
+}
+
+export async function attachStudentToParentInvite(
+  inviteId: number,
+  studentProfileId: number,
+): Promise<void> {
+  const db = requireSupabase();
+  const { error } = await db.from("admin_invite_students").insert({
+    invite_id: inviteId,
+    student_profile_id: studentProfileId,
   });
-  const email = await sendOrganizationInviteEmail(invite.id);
-  return { invite, email };
+  if (error) {
+    if (error.code === "23505") return;
+    throw new Error(inviteWriteErrorMessage(error));
+  }
 }
 
 export async function cancelInvite(id: number): Promise<void> {
@@ -345,6 +470,17 @@ function toPendingInvite(row: PendingInviteRow): PendingOrgInvite | null {
   const role = parseOrgRole(row.role);
   const organization = unwrapOne(row.organization);
   if (!role || !organization) return null;
+  const fromJunction = Array.isArray(row.invite_students)
+    ? row.invite_students.map((entry) => entry.student_profile_id)
+    : row.invite_students
+      ? [row.invite_students.student_profile_id]
+      : [];
+  const studentProfileIds = Array.from(
+    new Set([
+      ...fromJunction,
+      ...(row.student_profile_id != null ? [row.student_profile_id] : []),
+    ]),
+  );
   return {
     id: row.id,
     email: row.email,
@@ -352,6 +488,7 @@ function toPendingInvite(row: PendingInviteRow): PendingOrgInvite | null {
     token: row.token,
     createdAt: row.created_at,
     studentProfileId: row.student_profile_id,
+    studentProfileIds,
     organization,
   };
 }
