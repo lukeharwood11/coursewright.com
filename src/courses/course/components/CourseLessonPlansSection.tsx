@@ -1,9 +1,8 @@
-import { useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { AnchoredPopup } from "@/ui/AnchoredPopup";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { ButtonLink } from "@/ui/Button";
+import { InfoHint } from "@/ui/InfoHint";
 import type { LessonPlanListItem } from "@/lesson-plans/databridge/lessonPlans";
 import { lessonPlanPath, newLessonPlanPath } from "@/lesson-plans/model/paths";
 import { weekdayDateLabel } from "@/lesson-plans/model/validate";
@@ -47,41 +46,6 @@ function PlanRow({
   );
 }
 
-function LessonPlanHint() {
-  const tooltipId = useId();
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const [open, setOpen] = useState(false);
-
-  return (
-    <span className="inline-flex">
-      <button
-        ref={buttonRef}
-        type="button"
-        className="inline-flex rounded-full text-[var(--ink-faint)] hover:text-[var(--ink-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
-        aria-label="What is a lesson plan?"
-        aria-expanded={open}
-        aria-controls={tooltipId}
-        onClick={() => setOpen((value) => !value)}
-        onMouseEnter={() => setOpen(true)}
-        onFocus={() => setOpen(true)}
-      >
-        <InformationCircleIcon className="h-4 w-4" aria-hidden />
-      </button>
-      <AnchoredPopup
-        open={open}
-        onClose={() => setOpen(false)}
-        anchorRef={buttonRef}
-        id={tooltipId}
-        role="tooltip"
-        preferredAlign="start"
-        className="w-[16rem] px-3 py-2 text-[12.5px] font-medium leading-snug text-[var(--ink-soft)]"
-      >
-        {LESSON_PLAN_HINT}
-      </AnchoredPopup>
-    </span>
-  );
-}
-
 export function CourseLessonPlansSection({
   orgSlug,
   courseId,
@@ -103,7 +67,7 @@ export function CourseLessonPlansSection({
     <section>
       <div className="flex items-center gap-1.5">
         <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Lesson plans</h2>
-        <LessonPlanHint />
+        <InfoHint label="What is a lesson plan?">{LESSON_PLAN_HINT}</InfoHint>
       </div>
 
       {visible.length === 0 ? (
@@ -128,6 +92,7 @@ export function CourseLessonPlansSection({
       {canEdit ? (
         <div className="mt-3">
           <ButtonLink variant="ghost" fullWidth to={newLessonPlanPath(orgSlug, courseId)}>
+            <PlusIcon className="h-5 w-5" aria-hidden />
             Add lesson plan
           </ButtonLink>
         </div>

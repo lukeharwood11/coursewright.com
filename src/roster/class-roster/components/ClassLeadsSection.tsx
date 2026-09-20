@@ -1,5 +1,6 @@
 import { Avatar } from "@/ui/Avatar";
 import { Button } from "@/ui/Button";
+import { InfoHint } from "@/ui/InfoHint";
 import type { ClassLeader } from "@/roster/databridge/classes";
 
 const controlClass = [
@@ -30,11 +31,14 @@ export function ClassLeadsSection({
 }) {
   return (
     <section className="mt-8 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-      <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Leads</h2>
-      <p className="mt-1 max-w-xl text-[13.5px] text-[var(--ink-soft)]">
-        Optional. Leads are notified in Activity when someone posts in a
-        discussion for this class. A class can have more than one lead, or none.
-      </p>
+      <div className="flex items-center gap-1.5">
+        <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Leads</h2>
+        <InfoHint label="What is a class lead?">
+          Optional. Leads are notified in Activity when someone posts in a
+          discussion for this class. A class can have more than one lead, or
+          none.
+        </InfoHint>
+      </div>
       {leads.length === 0 ? (
         <p className="mt-3 text-[13.5px] text-[var(--ink-faint)]">
           No leads yet.

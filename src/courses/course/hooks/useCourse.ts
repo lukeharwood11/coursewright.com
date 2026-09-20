@@ -33,6 +33,10 @@ import {
 } from "@/units/databridge/units";
 import { swapPositions } from "@/units/model/order";
 import type { CourseVisibility } from "@/courses/model/visibility";
+import {
+  getOrganization,
+  orgQueryKeys,
+} from "@/organizations/databridge/organizations";
 
 export function useCourse() {
   const { courseId: courseIdParam } = useParams();
@@ -45,6 +49,10 @@ export function useCourse() {
     queryKey: courseQueryKeys.detail(courseId),
     queryFn: () => getCourse(courseId),
     enabled: Number.isFinite(courseId),
+  });
+  const organizationQuery = useQuery({
+    queryKey: orgQueryKeys.detail(organization.id),
+    queryFn: () => getOrganization(organization.id),
   });
   const unitsQuery = useQuery({
     queryKey: unitQueryKeys.list(courseId),
@@ -146,6 +154,7 @@ export function useCourse() {
 
   return {
     organization,
+    gradeLabels: organizationQuery.data?.gradeLabels ?? [],
     canEdit,
     isParent: parentPresentation,
     course: belongsHere ? course : null,

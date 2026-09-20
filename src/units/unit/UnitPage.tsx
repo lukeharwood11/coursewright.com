@@ -156,7 +156,7 @@ export function UnitPage() {
                 onChange={(event) => setTitle(event.target.value)}
               />
             </label>
-            <label className="flex flex-col gap-1">
+            <label className="flex min-w-0 flex-col gap-1">
               <span className="text-[13px] font-bold text-[var(--ink-soft)]">Start</span>
               <Input
                 className="w-full"
@@ -165,7 +165,7 @@ export function UnitPage() {
                 onChange={(event) => setStartDate(event.target.value)}
               />
             </label>
-            <label className="flex flex-col gap-1">
+            <label className="flex min-w-0 flex-col gap-1">
               <span className="text-[13px] font-bold text-[var(--ink-soft)]">End</span>
               <Input
                 className="w-full"

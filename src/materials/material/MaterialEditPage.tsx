@@ -118,7 +118,7 @@ export function MaterialEditPage() {
           await edit.save();
         }}
       >
-        <div className="max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
+        <div className="max-w-xl min-w-0 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
           <label className="flex flex-col gap-1">
             <span className="text-[13px] font-bold text-[var(--ink-soft)]">Title</span>
             <Input
@@ -149,7 +149,7 @@ export function MaterialEditPage() {
               />
             </label>
           ) : null}
-          <label className="mt-3 flex flex-col gap-1">
+          <label className="mt-3 flex min-w-0 flex-col gap-1">
             <span className="text-[13px] font-bold text-[var(--ink-soft)]">
               Assignment date (optional)
             </span>

@@ -28,7 +28,7 @@ View/edit one org-level **student profile** (not a dedicated student account in 
 - **Name** (required, editable)
 - **Student email** (optional, editable)
 - **Grade level** (optional, editable; scheme-constrained)
-- Parents: linked accounts, pending invites, add another parent email
+- Parents: linked accounts, pending invites; **Add a parent** when none yet, **Add another parent** after the first
 - Enrollments: course title + status + link to that course roster
 - Class memberships: class name + link
 - Parent invite / claim status (pending link, copyable claim URL, or accepted)
@@ -54,7 +54,7 @@ View/edit one org-level **student profile** (not a dedicated student account in 
 
 - Edit profile fields
 - Create Announcement
-- Create parent (or student-email) invite (email + copy the claim link); **Resend email** or cancel a pending invite; add another parent
+- Create parent (or student-email) invite (email + copy the claim link); **Resend email** or cancel a pending invite; add a parent (then another)
 - Open class / course enrollments
 
 ## Links to
