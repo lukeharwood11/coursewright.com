@@ -7,6 +7,7 @@ import {
   discussionMessagePath,
 } from "@/discussions/model/paths";
 import type { DiscussionMessageRecord } from "@/discussions/databridge/discussions";
+import type { MentionPerson } from "@/discussions/model/mentions";
 import { DiscussionAttachments } from "./DiscussionAttachments";
 import { DiscussionLexicalEditor } from "./DiscussionLexicalEditor";
 import { MessageActionsMenu } from "./MessageActionsMenu";
@@ -15,6 +16,7 @@ import {
   type ComposerMode,
   type PendingAttachment,
 } from "./MessageComposer";
+import { MentionedPlainText } from "./MentionedPlainText";
 
 export function DiscussionMessageItem({
   orgSlug,
@@ -40,6 +42,9 @@ export function DiscussionMessageItem({
   onSaveEdit,
   onQuote,
   onRemove,
+  mentionPeople,
+  mentionExcludeUserId,
+  mentionsLoading,
 }: {
   orgSlug: string;
   discussionId: number;
@@ -64,6 +69,9 @@ export function DiscussionMessageItem({
   onSaveEdit: () => void;
   onQuote: () => void;
   onRemove: () => void;
+  mentionPeople: MentionPerson[];
+  mentionExcludeUserId: string;
+  mentionsLoading: boolean;
 }) {
   const removed = message.deletedAt != null;
   const body = parseDiscussionBody(message.body);
@@ -158,6 +166,9 @@ export function DiscussionMessageItem({
               error={editError}
               onSubmit={onSaveEdit}
               onCancel={onCancelEdit}
+              mentionPeople={mentionPeople}
+              mentionExcludeUserId={mentionExcludeUserId}
+              mentionsLoading={mentionsLoading}
             />
             {message.attachments.length > 0 ? (
               <DiscussionAttachments
@@ -169,9 +180,7 @@ export function DiscussionMessageItem({
         ) : (
           <>
             {body.format === "plain" && body.text.trim() ? (
-              <p className="mt-2 whitespace-pre-wrap text-[14.5px] leading-relaxed text-[var(--ink)]">
-                {body.text}
-              </p>
+              <MentionedPlainText text={body.text} people={mentionPeople} />
             ) : null}
             {body.format === "lexical" ? (
               <div className="mt-2">

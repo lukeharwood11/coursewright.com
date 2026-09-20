@@ -101,6 +101,9 @@ export function DiscussionNewPage() {
             error={page.formError}
             onSubmit={page.start}
             showSubmit={false}
+            mentionPeople={page.mentionPeople}
+            mentionExcludeUserId={page.userId}
+            mentionsLoading={page.mentionsLoading}
           />
         </div>
       </form>

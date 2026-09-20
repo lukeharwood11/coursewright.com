@@ -163,6 +163,20 @@ export const discussionQueryKeys = {
     ["discussions", "parentContext", organizationId, userId] as const,
   members: (discussionId: number) =>
     ["discussions", "members", discussionId] as const,
+  audienceMembers: (
+    organizationId: number,
+    audience: string | null,
+    courseId: number | null,
+    classId: number | null,
+  ) =>
+    [
+      "discussions",
+      "audienceMembers",
+      organizationId,
+      audience,
+      courseId,
+      classId,
+    ] as const,
 };
 
 function one<T>(value: T | T[] | null | undefined): T | null {
@@ -364,6 +378,7 @@ export async function createDiscussion(args: {
   draft: DiscussionDraft;
   attachments: AttachmentInsert[];
   notifyAll?: boolean;
+  mentionedUserIds?: string[];
 }): Promise<DiscussionRecord> {
   const audience = args.draft.audience;
   if (!audience) throw new Error("Choose a course or a class.");
@@ -396,8 +411,14 @@ export async function createDiscussion(args: {
       authorId: args.createdBy,
       body: args.draft.body,
       attachments: args.attachments,
+      mentionedUserIds: args.mentionedUserIds,
     });
   } catch (cause) {
+    try {
+      await softDeleteDiscussion(discussion.id, args.createdBy);
+    } catch {
+      // Keep the original post error.
+    }
     throw cause instanceof Error
       ? cause
       : new Error("Couldn’t post the first message.");
@@ -411,6 +432,7 @@ export async function createDiscussionMessage(args: {
   authorId: string;
   body: string;
   attachments: AttachmentInsert[];
+  mentionedUserIds?: string[];
 }): Promise<void> {
   const db = requireSupabase();
   const { data, error } = await db
@@ -425,6 +447,22 @@ export async function createDiscussionMessage(args: {
 
   if (error) throw new Error(error.message);
   if (!data) throw new Error("The message was posted but couldn’t be opened yet.");
+
+  try {
+    await insertMessageMentions({
+      messageId: data.id,
+      authorId: args.authorId,
+      mentionedUserIds: args.mentionedUserIds,
+    });
+  } catch (cause) {
+    await abandonPostedMessage({
+      messageId: data.id,
+      authorId: args.authorId,
+    });
+    throw cause instanceof Error
+      ? cause
+      : new Error("Couldn’t mention people on that message.");
+  }
 
   if (args.attachments.length === 0) return;
 
@@ -511,7 +549,9 @@ export async function softDeleteDiscussionMessage(
 
 export async function updateDiscussionMessageBody(args: {
   messageId: number;
+  authorId: string;
   body: string;
+  mentionedUserIds?: string[];
 }): Promise<void> {
   const db = requireSupabase();
   const { data, error } = await db
@@ -525,6 +565,11 @@ export async function updateDiscussionMessageBody(args: {
   if (!data) {
     throw new Error("That message couldn’t be updated. Refresh and try again.");
   }
+  await insertMessageMentions({
+    messageId: args.messageId,
+    authorId: args.authorId,
+    mentionedUserIds: args.mentionedUserIds,
+  });
 }
 
 export async function markDiscussionRead(
@@ -675,9 +720,79 @@ export async function listDiscussionMembers(
   });
   if (error) throw new Error(error.message);
 
-  return (data ?? []).map((row) => ({
+  return (data ?? []).map(toMember);
+}
+
+export async function listDiscussionAudienceMembers(args: {
+  organizationId: number;
+  audience: DiscussionAudience;
+  courseId: number | null;
+  classId: number | null;
+}): Promise<DiscussionMemberRecord[]> {
+  const db = requireSupabase();
+  const { data, error } = await db.rpc("list_discussion_audience_members", {
+    p_organization_id: args.organizationId,
+    p_audience: args.audience,
+    p_course_id: args.courseId,
+    p_class_id: args.classId,
+  });
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map(toMember);
+}
+
+function toMember(row: {
+  user_id: string;
+  name: string | null;
+  role: string;
+}): DiscussionMemberRecord {
+  return {
     userId: row.user_id,
     name: row.name?.trim() || "Someone",
     role: row.role,
-  }));
+  };
+}
+
+function uniqueMentionIds(
+  userIds: string[] | undefined,
+  authorId: string,
+): string[] {
+  if (!userIds || userIds.length === 0) return [];
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  for (const userId of userIds) {
+    if (!userId || userId === authorId || seen.has(userId)) continue;
+    seen.add(userId);
+    ids.push(userId);
+  }
+  return ids;
+}
+
+async function insertMessageMentions(args: {
+  messageId: number;
+  authorId: string;
+  mentionedUserIds?: string[];
+}): Promise<void> {
+  const mentionIds = uniqueMentionIds(args.mentionedUserIds, args.authorId);
+  if (mentionIds.length === 0) return;
+  const db = requireSupabase();
+  const { error } = await db.from("discussion_message_mentions").upsert(
+    mentionIds.map((userId) => ({
+      message_id: args.messageId,
+      user_id: userId,
+    })),
+    { onConflict: "message_id,user_id", ignoreDuplicates: true },
+  );
+  if (error) throw new Error(error.message);
+}
+
+async function abandonPostedMessage(args: {
+  messageId: number;
+  authorId: string;
+}): Promise<void> {
+  try {
+    await softDeleteDiscussionMessage(args.messageId, args.authorId);
+  } catch {
+    // Keep the original post error.
+  }
 }

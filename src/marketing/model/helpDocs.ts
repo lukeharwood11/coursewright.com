@@ -96,11 +96,14 @@ export const helpDocTopics: HelpDocTopic[] = [
           "Calendar — month or week view of assigned and due work",
           "Announcements — one-way notes to a course, class, or student",
           "Discussions — two-way threads for one course or one class",
-          "Activity — notices when someone posts in a discussion you lead or teach (clicking marks them read)",
           "Courses — list and open course offerings",
           "Roster — students and classes",
           "Settings — name, permalink, grade scheme, and staff (owners and admins manage; instructors may view)",
         ],
+      },
+      {
+        type: "p",
+        text: "Activity is the bell to the right of your avatar — not a sidebar tab. It shows unread notices when someone posts in a discussion you lead or teach. Open one to mark it read, or choose View all activity.",
       },
       { type: "h2", text: "Settings" },
       {
@@ -315,10 +318,13 @@ export const helpDocTopics: HelpDocTopic[] = [
           "Focus — Important now plus what’s assigned or due next",
           "Announcements — one-way notes for a course, class, or student, with a notification until you open them",
           "Discussions — two-way threads for a course or class your child is in",
-          "Activity — notices when a teacher wants everyone to see a discussion post; clicking marks them read",
           "Calendar — month or week view of the same work",
           "Print this week — print the week’s packet when you want it on paper",
         ],
+      },
+      {
+        type: "p",
+        text: "Activity is the bell to the right of your avatar. It shows unread notices when a teacher wants you to see a discussion post. Open one to mark it read, or choose View all activity.",
       },
       {
         type: "p",

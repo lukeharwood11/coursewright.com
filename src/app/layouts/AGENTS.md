@@ -8,12 +8,12 @@ App chrome: collapsible sidebar + top bar for signed-in `/my` pages.
 - **Org shell** (`/my/<org-slug>/…`) — staff vs parent nav (role decides chrome, not a second app). Staff get a **Teacher / Parent view** toggle in the header.
 - Collapse on desktop; overlay drawer on small screens
 - Nested course / class links from domain databridge lists (org shell only)
-- Staff nav includes **Calendar**, **Announcements**, **Discussions**, and **Activity**.
+- Staff nav includes **Calendar**, **Announcements**, and **Discussions**. **Activity** is a header bell (right of the avatar), not a sidebar tab.
 
 ## Rules
 
 - Keep this layer thin — no course/roster business rules. Lists come from domain `databridge/`.
-- Parent chrome stays simpler than staff (This week, Calendar, Announcements, Discussions, Activity, their courses, Progress). Do not dump instructor destinations onto parent screens.
+- Parent chrome stays simpler than staff (This week, Calendar, Announcements, Discussions, their courses, Progress). **Activity** is the header bell for staff and parents. Do not dump instructor destinations onto parent screens.
 - **Parent view** for staff uses that same parent chrome. Parent-only users never see the toggle.
 - Account-level chrome must not show org destinations (courses, roster, org settings).
 - Hide chrome on print routes (`PrintLayout` — no org sidebar). HTML `@media print` also hides `.cw-org-chrome`.
@@ -24,3 +24,4 @@ App chrome: collapsible sidebar + top bar for signed-in `/my` pages.
 
 - Put marketing or login in this shell.
 - Invent extra search facets here — chrome mounts `search/`’s org search bar (staff only).
+- Put Activity in the sidebar — chrome mounts `notifications/`’s header bell.

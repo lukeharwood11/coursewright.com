@@ -1,5 +1,6 @@
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { AccountMenu } from "@/auth/components/AccountMenu";
+import { ActivityMenu } from "@/notifications";
 import { roleBadgeVariant, roleLabel } from "@/organizations/model/role";
 import { OrgSearchBar } from "@/search";
 import { useAppShell } from "../OrgShellContext";
@@ -49,15 +50,18 @@ export function OrgShellHeader() {
       {showStaffViewToggle ? (
         <StaffViewToggle mode={staffViewMode} onChange={setStaffViewMode} />
       ) : null}
-      <AccountMenu
-        name={profileName}
-        email={profileEmail}
-        roleLabel={role ? roleLabel(role) : undefined}
-        roleBadgeVariant={role ? roleBadgeVariant(role) : undefined}
-        orgName={organization?.name}
-        orgSlug={organization?.slug}
-        showOrgSettings={Boolean(organization) && !parentPresentation}
-      />
+      <div className="flex shrink-0 items-center gap-1.5">
+        <AccountMenu
+          name={profileName}
+          email={profileEmail}
+          roleLabel={role ? roleLabel(role) : undefined}
+          roleBadgeVariant={role ? roleBadgeVariant(role) : undefined}
+          orgName={organization?.name}
+          orgSlug={organization?.slug}
+          showOrgSettings={Boolean(organization) && !parentPresentation}
+        />
+        <ActivityMenu />
+      </div>
     </header>
   );
 }

@@ -185,6 +185,28 @@ body {
   padding: 6px;
 }
 
+.cw-mention-empty {
+  margin: 0;
+  padding: 7px 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.cw-mention {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 1px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--green-tint);
+  color: var(--green-deep);
+  font-weight: 700;
+  line-height: 1.55;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
 .cw-editor-float {
   position: fixed;
   display: flex;
@@ -241,6 +263,22 @@ body {
 
 .cw-editor-input-discussion {
   min-height: 5.5rem;
+}
+
+.cw-editor-shell-simple .cw-editor-input-discussion {
+  padding: 11px 13px;
+  font-size: 14.5px;
+}
+
+.cw-editor-shell-simple .cw-editor-placeholder {
+  top: 11px;
+  left: 13px;
+  font-size: 14.5px;
+}
+
+.cw-editor-shell-embedded.cw-editor-shell-simple:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--green-tint);
 }
 
 .cw-editor-input-view {

@@ -27,11 +27,13 @@ import {
 import { subscribeToDiscussionThread } from "@/discussions/databridge/realtime";
 import {
   buildDiscussionQuote,
+  composerStateToBody,
   emptyLexicalState,
   lexicalStateWithQuote,
   seedComposerFromMessageBody,
   serializeDiscussionBody,
 } from "@/discussions/model/messageBody";
+import { mentionedUserIdsFromDraft } from "@/discussions/model/mentions";
 import {
   canEditMessage as mayEditMessage,
   canMarkDiscussionAnswered,
@@ -98,7 +100,7 @@ export function useDiscussion() {
   const membersQuery = useQuery({
     queryKey: discussionQueryKeys.members(discussionId),
     queryFn: () => listDiscussionMembers(discussionId),
-    enabled: belongsHere && membersOpen && Number.isFinite(discussionId),
+    enabled: belongsHere && Number.isFinite(discussionId),
   });
 
   useEffect(() => {
@@ -159,10 +161,7 @@ export function useDiscussion() {
           },
   );
 
-  const draftBody =
-    mode === "plain"
-      ? ({ v: 1 as const, format: "plain" as const, text: body })
-      : ({ v: 1 as const, format: "lexical" as const, lexical });
+  const draftBody = composerStateToBody(lexical);
 
   const post = useMutation({
     mutationFn: async () => {
@@ -205,6 +204,13 @@ export function useDiscussion() {
         authorId: user.id,
         body: serializeDiscussionBody(draftBody),
         attachments: uploaded,
+        mentionedUserIds: mentionedUserIdsFromDraft({
+          mode: "lexical",
+          text: body,
+          lexical,
+          people: membersQuery.data ?? [],
+          excludeUserId: user.id,
+        }),
       });
     },
     onSuccess: () => {
@@ -261,10 +267,7 @@ export function useDiscussion() {
           },
   );
 
-  const editDraftBody =
-    editMode === "plain"
-      ? ({ v: 1 as const, format: "plain" as const, text: editBody })
-      : ({ v: 1 as const, format: "lexical" as const, lexical: editLexical });
+  const editDraftBody = composerStateToBody(editLexical);
 
   const saveEdit = useMutation({
     mutationFn: async () => {
@@ -279,7 +282,15 @@ export function useDiscussion() {
       setEditError(null);
       await updateDiscussionMessageBody({
         messageId: editingMessageId,
+        authorId: user.id,
         body: serializeDiscussionBody(editDraftBody),
+        mentionedUserIds: mentionedUserIdsFromDraft({
+          mode: "lexical",
+          text: editBody,
+          lexical: editLexical,
+          people: membersQuery.data ?? [],
+          excludeUserId: user.id,
+        }),
       });
     },
     onSuccess: () => {
@@ -322,8 +333,7 @@ export function useDiscussion() {
     setLexical(
       lexicalStateWithQuote({
         quote: cite,
-        followingText: mode === "plain" ? body : undefined,
-        followingLexical: mode === "lexical" ? lexical : undefined,
+        followingLexical: lexical,
       }),
     );
     setBody("");

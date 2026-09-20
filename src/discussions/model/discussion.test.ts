@@ -1,3 +1,4 @@
+import type { SerializedEditorState } from "lexical";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
@@ -12,6 +13,8 @@ import { newDiscussionPath, discussionPath, discussionMessagePath, discussionsPa
 import { isNearScrollBottom } from "./thread.ts";
 import {
   buildDiscussionQuote,
+  composerStateToBody,
+  emptyLexicalState,
   lexicalStateWithQuote,
   parseDiscussionBody,
   serializeDiscussionBody,
@@ -340,6 +343,47 @@ test("discussion body keeps plain text and folds quotes into Lexical", () => {
     }),
     { authorName: "Maya", text: "Field trip next week?" },
   );
+});
+
+test("composerStateToBody keeps plain text until a mention pill is present", () => {
+  const plain = composerStateToBody(emptyLexicalState());
+  assert.equal(plain.format, "plain");
+  if (plain.format === "plain") assert.equal(plain.text, "");
+
+  const withMention = {
+    root: {
+      children: [
+        {
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: "token",
+              style: "",
+              text: "@Maya",
+              type: "mention",
+              userId: "user-1",
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: "",
+          indent: 0,
+          type: "paragraph",
+          version: 1,
+        },
+      ],
+      direction: null,
+      format: "",
+      indent: 0,
+      type: "root",
+      version: 1,
+    },
+  };
+  const stored = composerStateToBody(
+    withMention as unknown as SerializedEditorState,
+  );
+  assert.equal(stored.format, "lexical");
 });
 
 test("isNearScrollBottom uses a small threshold", () => {

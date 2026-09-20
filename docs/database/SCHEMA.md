@@ -820,6 +820,25 @@ Creating a discussion writes the `Discussion` row **and** the first root `Discus
 
 **Realtime:** publish `discussion_messages`.
 
+### DiscussionMessageMention
+
+Join: people @mentioned in a post. Written by the client after the message insert, and again when the author edits the body (upsert; existing `(message_id, user_id)` rows are left alone). A trigger writes Activity rows for newly mentioned members who can currently see the thread (never the author). Unique `(message_id, user_id)`.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| message_id | bigint | FK → DiscussionMessage |
+| user_id | uuid | FK → User (`profiles`) — the mentioned person |
+| created_at | timestamptz | |
+
+**Who can insert:** the message author, while the message is not soft-deleted. The mentioned person must currently be able to see the thread, and must not be the author.
+
+**Who can read:** anyone who can SELECT the parent message.
+
+No client UPDATE/DELETE in this slice.
+
+**RPC:** `list_discussion_audience_members(organization_id, audience, course_id, class_id)` returns the same people as `list_discussion_members` for a thread that does not exist yet. Callable by someone allowed to start that discussion.
+
 ### DiscussionMessageAttachment
 
 Join: files, materials, or URLs on a message.
@@ -864,7 +883,7 @@ Per-user **Activity** row. Written by a trigger on `discussion_messages` insert 
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
 | user_id | uuid | FK → User (`profiles`) — the recipient |
-| kind | text | `discussion_message` in this slice |
+| kind | text | `discussion_message` or `discussion_mention` in this slice |
 | discussion_id | bigint | FK → Discussion when kind is discussion |
 | discussion_message_id | bigint | FK → DiscussionMessage |
 | actor_id | uuid | FK → User — who posted |
@@ -872,12 +891,12 @@ Per-user **Activity** row. Written by a trigger on `discussion_messages` insert 
 | preview | text | Truncated post text (or a short fallback) |
 | audience_label | text | Course title or class name |
 | created_at | timestamptz | |
-| read_at | timestamptz | nullable — set when the person acks (click or open the thread) |
+| read_at | timestamptz | nullable — set when the person acks (click Activity). Opening the thread acks `discussion_message` only |
 | unique | (user_id, discussion_message_id) | |
 
-**Who is notified:** course **instructors** for a course thread; class **leads** for a class thread; never the author. If `discussions.notify_all` is true on the opening post and the starter is staff, also notify everyone `list_discussion_members` returns.
+**Who is notified:** course **instructors** for a course thread; class **leads** for a class thread; **@mentioned** people who can currently see the thread; never the author. If `discussions.notify_all` is true on the opening post and the starter is staff, also notify everyone `list_discussion_members` returns. An **@mention** on a post or edit writes (or upgrades) a `discussion_mention` row for that person when they are on the thread.
 
-**Who can read/update:** `user_id = auth.uid()`. Update may only change `read_at`.
+**Who can read/update:** `user_id = auth.uid()`. Client update may only change `read_at`. A mention trigger may upgrade `kind` from `discussion_message` to `discussion_mention` and clear `read_at` so the mention is unread.
 
 **Realtime:** publish `notifications`. RLS still applies to change payloads.
 
@@ -923,6 +942,7 @@ Course ──< ShareLink
 Organization ──< Discussion (one course | one class)
 Discussion ──< DiscussionMessage (flat; body may include Teams-style quote)
 DiscussionMessage ──< DiscussionMessageAttachment >── File | Material | url
+DiscussionMessage ──< DiscussionMessageMention >── User
 Discussion ──< DiscussionRead >── User
 Organization ──< Notification >── User
 ```

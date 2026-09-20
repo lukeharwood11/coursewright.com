@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import type { SerializedEditorState } from "lexical";
 import {
   BookOpenIcon,
@@ -9,7 +9,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import type { AttachableMaterial } from "@/discussions/databridge/discussions";
-import { emptyLexicalState } from "@/discussions/model/messageBody";
+import { plainTextFromLexical } from "@/discussions/model/messageBody";
+import type { MentionPerson } from "@/discussions/model/mentions";
 import { ComposerAttachModal } from "./ComposerAttachModal";
 import { DiscussionLexicalEditor } from "./DiscussionLexicalEditor";
 
@@ -19,12 +20,6 @@ export type PendingAttachment =
   | { key: string; kind: "url"; url: string; label: string };
 
 export type ComposerMode = "plain" | "lexical";
-
-const controlClass = [
-  "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
-  "placeholder:text-[var(--ink-faint)]",
-  "focus:border-[var(--green)] focus:shadow-[0_0_0_3px_var(--green-tint)]",
-].join(" ");
 
 const iconBtn = [
   "inline-flex h-9 w-9 items-center justify-center rounded-[6px] border border-[var(--line)] bg-[var(--surface)] text-[var(--ink-soft)]",
@@ -63,6 +58,9 @@ export function MessageComposer({
   variant = "card",
   onCancel,
   cancelLabel = "Cancel",
+  mentionPeople = [],
+  mentionExcludeUserId,
+  mentionsLoading = false,
 }: {
   mode: ComposerMode;
   onMode: (mode: ComposerMode) => void;
@@ -87,16 +85,13 @@ export function MessageComposer({
   variant?: "card" | "plain";
   onCancel?: () => void;
   cancelLabel?: string;
+  mentionPeople?: MentionPerson[];
+  mentionExcludeUserId?: string;
+  mentionsLoading?: boolean;
 }) {
   const fileInputId = useId();
   const fileRef = useRef<HTMLInputElement>(null);
   const [attachOpen, setAttachOpen] = useState(false);
-  const [localKey, setLocalKey] = useState(0);
-  const [seedPlain, setSeedPlain] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    setSeedPlain(undefined);
-  }, [composeKey]);
 
   function addFile(file: File) {
     onAttachments([
@@ -106,21 +101,21 @@ export function MessageComposer({
   }
 
   function enableRichText() {
-    setSeedPlain(body);
-    onLexical(emptyLexicalState());
-    setLocalKey((key) => key + 1);
     onMode("lexical");
   }
 
   function enablePlainText() {
     onMode("plain");
-    setSeedPlain(undefined);
   }
 
-  function trySubmit() {
-    if (!canSubmit || submitting) return;
+  function trySubmit(): boolean {
+    if (!canSubmit || submitting) return false;
     onSubmit();
+    return true;
   }
+
+  const lexicalEmpty = plainTextFromLexical(lexical).trim() === "";
+  const seedText = lexicalEmpty && body.trim() ? body : undefined;
 
   return (
     <div
@@ -130,35 +125,23 @@ export function MessageComposer({
           : undefined
       }
     >
-      {mode === "plain" ? (
-        <label className="flex flex-col gap-1">
-          <span className="sr-only">Message</span>
-          <textarea
-            className={`${controlClass} min-h-[5.5rem] resize-y`}
-            value={body}
-            onChange={(event) => onBody(event.target.value)}
-            placeholder={placeholder}
-            onKeyDown={(event) => {
-              if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) {
-                return;
-              }
-              event.preventDefault();
-              trySubmit();
-            }}
-          />
-        </label>
-      ) : (
-        <DiscussionLexicalEditor
-          editorKey={`compose-${composeKey}-${localKey}`}
-          initialLexical={seedPlain ? null : lexical}
-          seedPlainText={seedPlain}
-          editable
-          embedded
-          placeholder={placeholder}
-          onChange={onLexical}
-          onSubmit={trySubmit}
-        />
-      )}
+      <DiscussionLexicalEditor
+        editorKey={`compose-${composeKey}`}
+        initialLexical={seedText ? null : lexical}
+        seedPlainText={seedText}
+        mentionPeople={mentionPeople}
+        mentionExcludeUserId={mentionExcludeUserId}
+        mentionsLoading={mentionsLoading}
+        chrome={mode === "lexical" ? "full" : "simple"}
+        editable
+        embedded
+        placeholder={placeholder}
+        onChange={(state) => {
+          onLexical(state);
+          onBody(plainTextFromLexical(state));
+        }}
+        onSubmit={trySubmit}
+      />
 
       {showAttachmentControls && attachments.length > 0 ? (
         <ul className="mt-3 flex flex-col gap-1.5">

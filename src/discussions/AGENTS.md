@@ -1,6 +1,6 @@
 # AGENTS — `src/discussions/`
 
-Two-way **discussions**: a thread for **one course** or **one class**. Title, flat posts, Teams-style **Quote** in the message body, plain or Lexical composer (**T**), attachments, answered state. Live updates while the SPA is open.
+Two-way **discussions**: a thread for **one course** or **one class**. Title, flat posts, Teams-style **Quote** in the message body, plain or Lexical composer (**T**), **@mentions**, attachments, answered state. Live updates while the SPA is open.
 
 **Status:** product is **P1 / in progress** — [FEATURES.md](../../docs/FEATURES.md).
 
@@ -8,10 +8,10 @@ Two-way **discussions**: a thread for **one course** or **one class**. Title, fl
 
 - Org list + **New discussion** (staff Teacher view and families who may start one)
 - Thread view: posts, quotes, file / material / URL attachments, **Mark as answered**, thread **⋯** → **Members**
-- Composer: plain textarea by default; **T** activates the same Lexical chrome as page materials (toolbar, `/`, floating format) without quiz / in-page file upload; file icon; **+** opens modal for material or link
+- Composer: plain textarea by default; **T** activates the same Lexical chrome as page materials (toolbar, `/`, floating format) without quiz / in-page file upload; **@** mentions a person on the thread; file icon; **+** opens modal for material or link
 - Parent list of threads that apply to linked students (same URL; parent chrome / Parent view)
 - Sidebar unread count (red) of threads with new activity since `last_read_at`
-- Staff compose: optional **Notify everyone** (Activity notifications). Course instructors / class leads are always notified of posts.
+- Staff compose: optional **Notify everyone** (Activity notifications). Course instructors / class leads are always notified of posts. **@mentions** also notify that person.
 - Realtime: `databridge/` subscribes via the shared Supabase client; page hooks update TanStack Query
 
 ## Rules

@@ -659,6 +659,42 @@ export type Database = {
           },
         ]
       }
+      discussion_message_mentions: {
+        Row: {
+          created_at: string
+          id: number
+          message_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          message_id: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          message_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_message_mentions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "discussion_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discussion_message_mentions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discussion_messages: {
         Row: {
           author_id: string
@@ -2021,6 +2057,19 @@ export type Database = {
           role: string
           student_name: string
           student_profile_id: number
+        }[]
+      }
+      list_discussion_audience_members: {
+        Args: {
+          p_audience: string
+          p_class_id: number | null
+          p_course_id: number | null
+          p_organization_id: number
+        }
+        Returns: {
+          name: string
+          role: string
+          user_id: string
         }[]
       }
       list_discussion_members: {

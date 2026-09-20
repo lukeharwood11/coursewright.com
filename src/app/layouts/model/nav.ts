@@ -55,11 +55,10 @@ function childLinks(
 export function buildStaffNav(
   orgSlug: string,
   lists: NavLists,
-  options?: { unreadDiscussions?: number; unreadActivity?: number },
+  options?: { unreadDiscussions?: number },
 ): NavSection[] {
   const base = `/my/${orgSlug}`;
   const unreadDiscussions = options?.unreadDiscussions ?? 0;
-  const unreadActivity = options?.unreadActivity ?? 0;
   return [
     { id: "home", label: "Home", href: base, match: "exact", children: [] },
     { id: "calendar", label: "Calendar", href: `${base}/calendar`, match: "prefix", children: [] },
@@ -76,14 +75,6 @@ export function buildStaffNav(
       href: `${base}/discussions`,
       match: "prefix",
       badgeCount: unreadDiscussions > 0 ? unreadDiscussions : undefined,
-      children: [],
-    },
-    {
-      id: "activity",
-      label: "Activity",
-      href: `${base}/activity`,
-      match: "prefix",
-      badgeCount: unreadActivity > 0 ? unreadActivity : undefined,
       children: [],
     },
     {
@@ -127,13 +118,11 @@ export function buildParentNav(
   options?: {
     unreadAnnouncements?: number;
     unreadDiscussions?: number;
-    unreadActivity?: number;
   },
 ): NavSection[] {
   const base = `/my/${orgSlug}`;
   const unreadAnnouncements = options?.unreadAnnouncements ?? 0;
   const unreadDiscussions = options?.unreadDiscussions ?? 0;
-  const unreadActivity = options?.unreadActivity ?? 0;
   const courseChildren = childLinks(
     lists.courses.map((course) => ({ id: course.id, label: course.title })),
     (id) => `${base}/courses/${id}`,
@@ -169,14 +158,6 @@ export function buildParentNav(
       href: `${base}/discussions`,
       match: "prefix",
       badgeCount: unreadDiscussions > 0 ? unreadDiscussions : undefined,
-      children: [],
-    },
-    {
-      id: "activity",
-      label: "Activity",
-      href: `${base}/activity`,
-      match: "prefix",
-      badgeCount: unreadActivity > 0 ? unreadActivity : undefined,
       children: [],
     },
   ];

@@ -206,6 +206,9 @@ export function DiscussionPage() {
               onSaveEdit={page.saveEdit}
               onQuote={() => page.quoteMessage(message)}
               onRemove={() => setRemoveMessageId(message.id)}
+              mentionPeople={page.members}
+              mentionExcludeUserId={page.userId}
+              mentionsLoading={page.membersLoading}
             />
           ))}
         </div>
@@ -246,6 +249,9 @@ export function DiscussionPage() {
           placeholder="Write a message, or add a file, material, or link."
           error={page.formError}
           onSubmit={page.post}
+          mentionPeople={page.members}
+          mentionExcludeUserId={page.userId}
+          mentionsLoading={page.membersLoading}
         />
       </div>
 

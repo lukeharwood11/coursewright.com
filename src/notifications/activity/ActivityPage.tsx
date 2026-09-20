@@ -25,9 +25,6 @@ export function ActivityPage() {
       >
         Activity
       </h1>
-      <p className="mt-1 max-w-xl text-[14px] leading-relaxed text-[var(--ink-soft)]">
-        Posts that need your attention. Opening one marks it as seen.
-      </p>
       {page.error ? (
         <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
           {page.error}

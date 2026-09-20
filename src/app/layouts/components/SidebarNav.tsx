@@ -9,7 +9,6 @@ import {
   ChatBubbleLeftRightIcon,
   Cog6ToothIcon,
   HomeIcon,
-  InboxIcon,
   UserCircleIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
@@ -22,7 +21,6 @@ import {
   ChatBubbleLeftRightIcon as ChatBubbleLeftRightSolidIcon,
   Cog6ToothIcon as Cog6ToothSolidIcon,
   HomeIcon as HomeSolidIcon,
-  InboxIcon as InboxSolidIcon,
   UserCircleIcon as UserCircleSolidIcon,
   UsersIcon as UsersSolidIcon,
 } from "@heroicons/react/24/solid";
@@ -42,7 +40,6 @@ const sectionIcons: Record<string, { outline: IconComponent; solid: IconComponen
   home: { outline: HomeIcon, solid: HomeSolidIcon },
   announcements: { outline: BellAlertIcon, solid: BellAlertSolidIcon },
   discussions: { outline: ChatBubbleLeftRightIcon, solid: ChatBubbleLeftRightSolidIcon },
-  activity: { outline: InboxIcon, solid: InboxSolidIcon },
   calendar: { outline: CalendarDaysIcon, solid: CalendarDaysSolidIcon },
   courses: { outline: BookOpenIcon, solid: BookOpenSolidIcon },
   roster: { outline: UsersIcon, solid: UsersSolidIcon },

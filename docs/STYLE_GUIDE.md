@@ -219,7 +219,7 @@ Paper canvas. Centered card, max-width ~320px. Wordmark → Lora heading → one
 
 ### Parent dashboard (phone — usability anchor)
 
-1. Top bar: **CW** or tiny wordmark + **org name** (700) + avatar. On desktop, a simpler collapsible sidebar (This week, Calendar, Announcements, Discussions, Activity, their courses, Progress) sits beside the page. Content uses the remaining width — do not center a narrow column on large screens.
+1. Top bar: **CW** or tiny wordmark + **org name** (700) + avatar + **Activity bell**. On desktop, a simpler collapsible sidebar (This week, Calendar, Announcements, Discussions, their courses, Progress) sits beside the page. Content uses the remaining width — do not center a narrow column on large screens.
 2. Greeting (Lora) + week range (“Week of Sep 1 – Sep 7”, Sunday–Saturday) + **Print this week**
 3. **Student tags** when more than one child — tap to include or hide that student’s work
 4. Two columns on large screens: **this week’s calendar** | **Focus** (**Important now** + **Coming up** — Assigned next / Due next). Course-colored week notes sit above the grid. Stacks on small screens (calendar first).
@@ -230,9 +230,9 @@ Keep parent chrome minimal. One job on the home tab.
 
 ### Instructor / owner / admin (desktop)
 
-Collapsible **sidebar** for org navigation: Home, Calendar, Announcements, Discussions, Activity, Courses (nested course names), Roster, Families (nested family names), Settings. Collapse to icons; on small screens it becomes an overlay drawer. (**P1:** Templates in nav.)
+Collapsible **sidebar** for org navigation: Home, Calendar, Announcements, Discussions, Courses (nested course names), Roster, Families (nested family names), Settings. Collapse to icons; on small screens it becomes an overlay drawer. (**P1:** Templates in nav.) **Activity** is a header bell to the right of the avatar, not a sidebar tab.
 
-Top bar: search (staff) + account menu. Content uses the remaining width — do not center a narrow column on large screens.
+Top bar: search (staff) + account menu + Activity bell. Content uses the remaining width — do not center a narrow column on large screens.
 
 Course builder body: Lora course title + badge row + **Print** / Share / Add material.  
 Two columns on the course page: **units** | page sidebar (instructors, roster). (**P1:** linked template in sidebar.)

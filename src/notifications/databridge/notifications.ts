@@ -88,6 +88,7 @@ export async function markDiscussionNotificationsRead(
     .from("notifications")
     .update({ read_at: new Date().toISOString() })
     .eq("discussion_id", discussionId)
+    .eq("kind", "discussion_message")
     .is("read_at", null);
 
   if (error) throw new Error(error.message);

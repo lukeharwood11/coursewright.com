@@ -69,8 +69,8 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 
 Tech-averse parents must understand what’s going on immediately — which child, what materials, what’s due.
 
-- Top: org context + account affordance ([STYLE_GUIDE.md](../STYLE_GUIDE.md) parent pattern) → [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
-- Desktop: simpler collapsible sidebar (This week, Calendar, Announcements, Discussions (**P1**), Activity (**P1**), their courses, Progress). Body uses remaining width — not a centered narrow column.
+- Top: org context + account affordance ([STYLE_GUIDE.md](../STYLE_GUIDE.md) parent pattern) → [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); **Activity** bell to the right of the avatar → [ACTIVITY](./ACTIVITY.md)
+- Desktop: simpler collapsible sidebar (This week, Calendar, Announcements, Discussions (**P1**), their courses, Progress). Body uses remaining width — not a centered narrow column.
 - Greeting + **current calendar week** (Sunday–Saturday) + **Print this week**
 - **Student tags** (multi-student parents only) — tap to include/exclude a student
 - **Announcements** — current one-way notices (when any). Unread cards show a notification icon; opening [ANNOUNCEMENT](./ANNOUNCEMENT.md) marks it read. Above the week calendar.
@@ -86,8 +86,8 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 ### Instructor / owner / admin view
 
-- Collapsible **org sidebar** for Home, Calendar, Announcements, Discussions (**P1**), Activity (**P1**), Courses, Roster (nested class names when they exist), Settings (course names nested when present)
-- Header: org name, week label, **Create course**
+- Collapsible **org sidebar** for Home, Calendar, Announcements, Discussions (**P1**), Courses, Roster (nested class names when they exist), Settings (course names nested when present)
+- Header: org name, week label, **Create course**; **Activity** bell (right of the avatar)
 - **Teacher / Parent view** (staff only) in org chrome
 - Getting started (when needed)
 - Needs attention (when needed)
@@ -109,6 +109,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Open a lesson plan from the week calendar
 - Open an announcement (marks it read)
 - Open discussions from the sidebar (**P1**)
+- Open Activity from the header bell (**P1**)
 - Open assigned-next / due-next / important-now items
 
 ### Instructor / owner / admin
@@ -126,6 +127,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - [MATERIAL](./MATERIAL.md) — open a this-week / important-now item
 - [ANNOUNCEMENT](./ANNOUNCEMENT.md) — open a current announcement
 - [DISCUSSIONS](./DISCUSSIONS.md) — via parent chrome (**P1**)
+- [ACTIVITY](./ACTIVITY.md) — header bell (**P1**)
 - [LESSON_PLAN](./LESSON_PLAN.md) — open a published lesson plan
 - [CALENDAR](./CALENDAR.md) — month/week calendar in the sidebar
 - [UNIT](./UNIT.md) — open a unit when linked from materials
@@ -142,7 +144,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - [COURSE_LIST](./COURSE_LIST.md) — view all / create course
 - [ANNOUNCEMENTS](./ANNOUNCEMENTS.md) — via org chrome
 - [DISCUSSIONS](./DISCUSSIONS.md) — via org chrome (**P1**)
-- [ACTIVITY](./ACTIVITY.md) — via org chrome (**P1**)
+- [ACTIVITY](./ACTIVITY.md) — header bell (**P1**)
 - [MATERIAL](./MATERIAL.md) — important-now item
 - [ORG_ROSTER](./ORG_ROSTER.md) — people / students
 - [ORG_SETTINGS](./ORG_SETTINGS.md) — via chrome / account menu
@@ -153,4 +155,4 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Parent experience, units/dating, important now, **announcements**, **lesson plans**, calendar, print grain, RBAC, advanced search. **Discussions** and **Activity** are **P1** (sidebar, not This week cards). Parent summary layer is **P1**, not P0. Homework in P0 = dated materials on the week calendar (no separate assignment object). Staff home is an operational dashboard (attention + course previews + this week + people), not a nav tile grid.
+[FEATURES.md](../FEATURES.md) — Parent experience, units/dating, important now, **announcements**, **lesson plans**, calendar, print grain, RBAC, advanced search. **Discussions** are **P1** (sidebar, not This week cards). **Activity** is **P1** (header bell, not a sidebar tab). Parent summary layer is **P1**, not P0. Homework in P0 = dated materials on the week calendar (no separate assignment object). Staff home is an operational dashboard (attention + course previews + this week + people), not a nav tile grid.

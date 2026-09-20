@@ -209,7 +209,7 @@ export function plainTextFromDiscussionBody(body: DiscussionMessageBody): string
   return plainTextFromLexical(body.lexical);
 }
 
-function plainTextFromLexical(state: SerializedEditorState): string {
+export function plainTextFromLexical(state: SerializedEditorState): string {
   const root = asRecord(state.root);
   if (!root) return "";
   const parts: string[] = [];
@@ -247,6 +247,41 @@ export function discussionBodyHasText(body: DiscussionMessageBody): boolean {
 
 export function emptyLexicalState(): SerializedEditorState {
   return rootState([paragraphNode([])]);
+}
+
+/** Persist mention pills / rich blocks as Lexical; otherwise keep a plain string. */
+export function composerStateToBody(
+  state: SerializedEditorState,
+): DiscussionMessageBody {
+  if (lexicalNeedsRichStorage(state)) {
+    return { v: 1, format: "lexical", lexical: state };
+  }
+  return { v: 1, format: "plain", text: plainTextFromLexical(state) };
+}
+
+function lexicalNeedsRichStorage(state: SerializedEditorState): boolean {
+  const root = asRecord(state.root);
+  return nodeNeedsRichStorage(root);
+}
+
+function nodeNeedsRichStorage(node: LexicalJson | null): boolean {
+  if (!node) return false;
+  const type = node.type;
+  if (type === "mention") return true;
+  if (type === "text") {
+    const format = node.format;
+    const mode = node.mode;
+    if (typeof format === "number" && format !== 0) return true;
+    if (mode === "token" || mode === "segmented") return true;
+    return false;
+  }
+  if (type === "linebreak") return false;
+  if (type === "paragraph" || type === "root") {
+    const children = node.children;
+    if (!Array.isArray(children)) return false;
+    return children.some((child) => nodeNeedsRichStorage(asRecord(child)));
+  }
+  return true;
 }
 
 /** Seed the in-place message editor from a stored body. */

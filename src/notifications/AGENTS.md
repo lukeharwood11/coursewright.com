@@ -1,19 +1,19 @@
 # AGENTS — `src/notifications/`
 
-In-app **Activity**: stored notifications for the signed-in person. Discussion posts notify course instructors or class leads; staff may **Notify everyone** on create.
+In-app **Activity**: stored notifications for the signed-in person. Discussion posts notify course instructors or class leads; **@mentions** notify that person; staff may **Notify everyone** on create.
 
 ## Scope
 
 - Org **Activity** list (`activity/`)
-- Sidebar unread count (red)
-- Ack (`read_at`) on click; opening a discussion also acks matching discussion notifications
+- Header bell (`activity-menu/`) with unread badge; dropdown previews unread
+- Ack (`read_at`) on click; opening a discussion acks matching **post** notifications, not @mentions
 - Realtime: `databridge/` subscribes; page hooks and org chrome invalidate TanStack Query
 
 ## Rules
 
 - Recipients are written by a Postgres trigger — the SPA only **selects** and **acks** own rows.
 - Clicking a row marks it read and opens the activity (discussion post).
-- Page folder: `activity/`. Shared `model/` + `databridge/`.
+- Page folder: `activity/`. Header chrome: `activity-menu/`. Shared `model/` + `databridge/`.
 - Distinct from announcement unread icons and the Discussions unread-thread badge.
 - No email or push in this slice.
 

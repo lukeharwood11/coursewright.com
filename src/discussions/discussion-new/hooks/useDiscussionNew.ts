@@ -13,12 +13,15 @@ import {
   discussionQueryKeys,
   listAttachableMaterials,
   listCourseIdsTaughtBy,
+  listDiscussionAudienceMembers,
   listParentDiscussionContext,
   uploadDiscussionFile,
 } from "@/discussions/databridge/discussions";
 import { discussionPath, discussionsPath } from "@/discussions/model/paths";
 import type { DiscussionAudience } from "@/discussions/model/audience";
+import { mentionedUserIdsFromDraft } from "@/discussions/model/mentions";
 import {
+  composerStateToBody,
   emptyLexicalState,
   serializeDiscussionBody,
 } from "@/discussions/model/messageBody";
@@ -87,6 +90,24 @@ export function useDiscussionNew() {
         courseId: draft.courseId,
       }),
   });
+  const mentionPeopleQuery = useQuery({
+    queryKey: discussionQueryKeys.audienceMembers(
+      organization.id,
+      draft.audience,
+      draft.courseId,
+      draft.classId,
+    ),
+    queryFn: () =>
+      listDiscussionAudienceMembers({
+        organizationId: organization.id,
+        audience: draft.audience ?? "course",
+        courseId: draft.courseId,
+        classId: draft.classId,
+      }),
+    enabled:
+      (draft.audience === "course" && draft.courseId != null) ||
+      (draft.audience === "class" && draft.classId != null),
+  });
 
   const parentContext = parentContextQuery.data;
   const taughtIds = taughtQuery.data ?? [];
@@ -153,10 +174,7 @@ export function useDiscussionNew() {
           },
   );
 
-  const openingBody =
-    mode === "plain"
-      ? ({ v: 1 as const, format: "plain" as const, text: draft.body })
-      : ({ v: 1 as const, format: "lexical" as const, lexical });
+  const openingBody = composerStateToBody(lexical);
 
   const draftForSave: DiscussionDraft = {
     ...draft,
@@ -265,6 +283,13 @@ export function useDiscussionNew() {
         draft: draftForSave,
         attachments: uploaded,
         notifyAll: canEdit && notifyAll,
+        mentionedUserIds: mentionedUserIdsFromDraft({
+          mode: "lexical",
+          text: draft.body,
+          lexical,
+          people: mentionPeopleQuery.data ?? [],
+          excludeUserId: user.id,
+        }),
       });
     },
     onSuccess: (created) => {
@@ -307,6 +332,9 @@ export function useDiscussionNew() {
       ? "You can start a discussion for a class your child is in."
       : "Choose a class.",
     materials: materialsQuery.data ?? [],
+    mentionPeople: mentionPeopleQuery.data ?? [],
+    mentionsLoading: mentionPeopleQuery.isFetching,
+    userId: user.id,
     hasChanges,
     canSave,
     formError: formError ?? save.error?.message ?? null,

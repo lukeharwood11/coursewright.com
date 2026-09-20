@@ -21,8 +21,8 @@ One two-way **discussion**: title, who it is for, flat posts (plain or Lexical),
 - Load one non-deleted discussion the actor can see (RLS). Missing or removed: plain-language “this discussion isn’t available,” with a way back to [DISCUSSIONS](./DISCUSSIONS.md).
 - Opening the page **marks it read** for the signed-in person (`last_read_at`). Two parents each have their own unread state.
 - Posts in conversation order (oldest first). Flat list — no nested replies. Your posts align right (green tint); other people’s align left.
-- **⋯** on a message: **Edit** (own messages — in-place editor + Save), **Quote message** (inserts a Lexical quote into the composer), and **Copy link** (deep link to that message).
-- Composer at the bottom: text field; toolbar with **T** (same Lexical chrome as page materials — icon toolbar, `/`, floating format; no quiz), **file**, and **+** (material or link via modal). Post stays disabled until there is text and/or at least one attachment. Plain mode: **Enter** posts, **Shift+Enter** new line. Rich text (**T**): **⌘/Ctrl+Enter** posts.
+- **⋯** on a message: **Edit** (own messages — in-place editor + Save; **@mentions** added on save notify in [ACTIVITY](./ACTIVITY.md)), **Quote message** (inserts a Lexical quote into the composer), and **Copy link** (deep link to that message).
+- Composer at the bottom: text field; toolbar with **T** (same Lexical chrome as page materials — icon toolbar, `/`, floating format; no quiz), **file**, and **+** (material or link via modal). Typing **@** opens a picker of people on the thread; choosing a name (click or Enter) replaces the query with a mention pill and notifies them in [ACTIVITY](./ACTIVITY.md). Post stays disabled until there is text and/or at least one attachment. Default composer: **Enter** posts, **Shift+Enter** new line (Enter selects from the @ picker when it is open). Rich text (**T**): **⌘/Ctrl+Enter** posts.
 - **Mark as answered** / **Mark as open** for the person who started the thread, and for staff who can see it. Answered does not lock posting. Both actions sit in the thread toolbar with icons.
 - Thread toolbar **⋯**: **Members** opens a modal listing everyone who can currently see the thread (org staff + parents linked to the audience course or class).
 - Staff Teacher view: **Delete** the discussion (soft-delete, confirm). A poster may remove their own post; staff may remove any post. Removed posts show “This message was removed.”
@@ -33,9 +33,9 @@ One two-way **discussion**: title, who it is for, flat posts (plain or Lexical),
 
 - **Audience** required: **Course** or **Class** — pick the kind, then **one** target. Prefill from the query string when arriving from a course or class page.
 - Families only see courses their linked student is enrolled in (active + published) and classes that student is in. Instructors see courses they teach and classes they can manage. Owners and admins see any course or class in the org.
-- Title required. Opening post required (text and/or attachment); same plain / **T** Lexical composer.
+- Title required. Opening post required (text and/or attachment); same plain / **T** Lexical composer. Typing **@** mentions someone who would be on the thread (after a course or class is chosen).
 - **Start discussion** stays disabled until there is a title, one audience target, and an opening post.
-- Staff Teacher view: **Notify everyone** (off by default). When on, the opening post also notifies everyone who can see the thread in [ACTIVITY](./ACTIVITY.md). Course instructors or class leads are always notified of posts (except the author).
+- Staff Teacher view: **Notify everyone** (off by default). When on, the opening post also notifies everyone who can see the thread in [ACTIVITY](./ACTIVITY.md). Course instructors or class leads are always notified of posts (except the author). **@mentions** also notify that person.
 - Cancel returns to the list.
 - Staff **Parent view** without linked students cannot open `/new` (redirect to org home). Parent-only users without a matching course or class see an empty picker and cannot post.
 
@@ -51,7 +51,7 @@ No `/edit` route — title and audience are not edited after create in this slic
 - Unread vs read is shown on the **list**, not as a badge on this page
 
 Writeable on new: audience, one target, title, opening post (body + attachments), **Notify everyone** (staff Teacher view).  
-Writeable on view: new post / quote, answered state (when allowed), remove (when allowed).
+Writeable on view: new post / quote, edit own post (body + @mentions), answered state (when allowed), remove (when allowed).
 
 ## Contents
 

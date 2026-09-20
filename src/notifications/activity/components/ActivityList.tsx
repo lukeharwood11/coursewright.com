@@ -1,13 +1,31 @@
 import {
-  BellAlertIcon,
-  CheckCircleIcon,
+  AtSymbolIcon,
+  ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/solid";
 import { formatDiscussionActivityAt } from "@/discussions/model/time";
 import {
+  activityHeadline,
   activityMetaParts,
   activityPreview,
   type ActivityItem,
+  type ActivityKind,
 } from "@/notifications/model/activity";
+
+function ActivityTypeIcon({
+  kind,
+  unread,
+}: {
+  kind: ActivityKind;
+  unread: boolean;
+}) {
+  const className = `mt-0.5 h-5 w-5 shrink-0 ${
+    unread ? "text-[var(--green)]" : "text-[var(--ink-faint)]"
+  }`;
+  if (kind === "discussion_mention") {
+    return <AtSymbolIcon className={className} aria-hidden />;
+  }
+  return <ChatBubbleLeftRightIcon className={className} aria-hidden />;
+}
 
 export function ActivityList({
   items,
@@ -21,8 +39,7 @@ export function ActivityList({
   if (items.length === 0) {
     return (
       <p className="mt-6 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-        Nothing here yet. You’ll see discussion posts for classes you lead and
-        courses you teach — and notices a teacher asked everyone to see.
+        Nothing here yet.
       </p>
     );
   }
@@ -31,10 +48,12 @@ export function ActivityList({
     <ul className="mt-6 flex max-w-2xl flex-col gap-1.5">
       {items.map((item) => {
         const unread = item.readAt == null;
-        const meta = activityMetaParts({
-          actorName: item.actorName,
+        const headline = activityHeadline({
+          kind: item.kind,
+          title: item.title,
           audienceLabel: item.audienceLabel,
         });
+        const meta = activityMetaParts({ actorName: item.actorName });
         const time = formatDiscussionActivityAt(item.createdAt);
         return (
           <li key={item.id}>
@@ -48,21 +67,11 @@ export function ActivityList({
                   : "border-[var(--line)] bg-[var(--surface)]"
               } hover:border-[var(--green)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]`}
             >
-              {unread ? (
-                <BellAlertIcon
-                  className="mt-0.5 h-5 w-5 shrink-0 text-[var(--green)]"
-                  aria-hidden
-                />
-              ) : (
-                <CheckCircleIcon
-                  className="mt-0.5 h-5 w-5 shrink-0 text-[var(--green)]"
-                  aria-hidden
-                />
-              )}
+              <ActivityTypeIcon kind={item.kind} unread={unread} />
               <span className="min-w-0 flex-1">
                 <span className="flex flex-wrap items-center gap-2">
                   <span className="text-[15px] font-extrabold text-[var(--ink)]">
-                    {item.title}
+                    {headline}
                   </span>
                   {unread ? (
                     <span className="sr-only">New</span>

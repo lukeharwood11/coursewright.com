@@ -19,6 +19,7 @@ import {
   $createTextNode,
   $getRoot,
   COMMAND_PRIORITY_HIGH,
+  COMMAND_PRIORITY_NORMAL,
   KEY_ENTER_COMMAND,
   type EditorState,
   type SerializedEditorState,
@@ -36,14 +37,19 @@ import {
   PAGE_MARKDOWN_TRANSFORMERS,
 } from "@/materials/material/components/pageEditorConfig";
 import { emptyLexicalState } from "@/discussions/model/messageBody";
+import type { MentionPerson } from "@/discussions/model/mentions";
+import { $nodesFromPlainMentionText, MentionNode } from "./MentionNode";
+import { MentionTypeaheadPlugin } from "./MentionTypeaheadPlugin";
 
 const DISCUSSION_EDITOR_FEATURES = { quiz: false } as const;
 
 function SeedPlainTextPlugin({
   text,
+  people,
   onSeeded,
 }: {
   text: string;
+  people: MentionPerson[];
   onSeeded: (state: SerializedEditorState) => void;
 }) {
   const [editor] = useLexicalComposerContext();
@@ -56,7 +62,12 @@ function SeedPlainTextPlugin({
         const root = $getRoot();
         root.clear();
         const paragraph = $createParagraphNode();
-        paragraph.append($createTextNode(text));
+        const nodes = $nodesFromPlainMentionText(text, people);
+        if (nodes.length === 0) {
+          paragraph.append($createTextNode(text));
+        } else {
+          paragraph.append(...nodes);
+        }
         root.append(paragraph);
       },
       {
@@ -65,11 +76,17 @@ function SeedPlainTextPlugin({
         },
       },
     );
-  }, [editor, text, onSeeded]);
+  }, [editor, text, people, onSeeded]);
   return null;
 }
 
-function SubmitShortcutPlugin({ onSubmit }: { onSubmit: () => void }) {
+function SubmitShortcutPlugin({
+  onSubmit,
+  enterToSubmit,
+}: {
+  onSubmit: () => boolean;
+  enterToSubmit: boolean;
+}) {
   const [editor] = useLexicalComposerContext();
   const onSubmitRef = useRef(onSubmit);
   useEffect(() => {
@@ -80,14 +97,24 @@ function SubmitShortcutPlugin({ onSubmit }: { onSubmit: () => void }) {
     return editor.registerCommand(
       KEY_ENTER_COMMAND,
       (event) => {
-        if (!event || !(event.metaKey || event.ctrlKey)) return false;
+        if (!event || event.shiftKey || event.isComposing) {
+          return false;
+        }
+        if (enterToSubmit) {
+          if (!onSubmitRef.current()) return false;
+          event.preventDefault();
+          return true;
+        }
+        if (!(event.metaKey || event.ctrlKey)) return false;
+        if (!onSubmitRef.current()) return false;
         event.preventDefault();
-        onSubmitRef.current();
         return true;
       },
-      COMMAND_PRIORITY_HIGH,
+      // Mention picker is HIGH so Enter can pick a person. Submit is NORMAL so
+      // it still wins over rich-text's EDITOR "new paragraph" once the picker closes.
+      enterToSubmit ? COMMAND_PRIORITY_NORMAL : COMMAND_PRIORITY_HIGH,
     );
-  }, [editor]);
+  }, [editor, enterToSubmit]);
 
   return null;
 }
@@ -101,6 +128,10 @@ export function DiscussionLexicalEditor({
   placeholder,
   onChange,
   onSubmit,
+  mentionPeople = [],
+  mentionExcludeUserId,
+  mentionsLoading = false,
+  chrome = "full",
 }: {
   editorKey: string;
   initialLexical?: SerializedEditorState | null;
@@ -110,23 +141,33 @@ export function DiscussionLexicalEditor({
   embedded?: boolean;
   placeholder: string;
   onChange?: (state: SerializedEditorState) => void;
-  onSubmit?: () => void;
+  onSubmit?: () => boolean;
+  mentionPeople?: MentionPerson[];
+  mentionExcludeUserId?: string;
+  mentionsLoading?: boolean;
+  /** `simple` is the default composer: no toolbar, Enter posts, @mentions become pills. */
+  chrome?: "simple" | "full";
 }) {
   const hasInitial = initialLexical != null;
   const initial = hasInitial ? initialLexical : emptyLexicalState();
+  const simple = chrome === "simple";
 
   const shellClass = !editable
     ? "cw-editor-view"
-    : embedded
-      ? "cw-editor-shell cw-editor-shell-embedded"
-      : "cw-editor-shell";
+    : [
+        "cw-editor-shell",
+        embedded ? "cw-editor-shell-embedded" : "",
+        simple ? "cw-editor-shell-simple" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
 
   return (
     <LexicalComposer
       key={editorKey}
       initialConfig={{
         namespace: "coursewright-discussion",
-        nodes: DISCUSSION_EDITOR_NODES,
+        nodes: [...DISCUSSION_EDITOR_NODES, MentionNode],
         theme: PAGE_EDITOR_THEME,
         editable,
         onError(error) {
@@ -138,7 +179,7 @@ export function DiscussionLexicalEditor({
       <div className={shellClass}>
         {editable ? (
           <PageEditorActionsProvider features={DISCUSSION_EDITOR_FEATURES}>
-            <PageEditorToolbar />
+            {simple ? null : <PageEditorToolbar />}
             <div className="relative">
               <RichTextPlugin
                 contentEditable={
@@ -152,11 +193,21 @@ export function DiscussionLexicalEditor({
                 }
                 ErrorBoundary={LexicalErrorBoundary}
               />
-              <FloatingFormatToolbar />
+              {simple ? null : <FloatingFormatToolbar />}
             </div>
-            <SlashCommandPlugin />
-            <KeyboardShortcutsPlugin />
-            {onSubmit ? <SubmitShortcutPlugin onSubmit={onSubmit} /> : null}
+            {simple ? null : <SlashCommandPlugin />}
+            <MentionTypeaheadPlugin
+              people={mentionPeople}
+              excludeUserId={mentionExcludeUserId}
+              loading={mentionsLoading}
+            />
+            {simple ? null : <KeyboardShortcutsPlugin />}
+            {onSubmit ? (
+              <SubmitShortcutPlugin
+                onSubmit={onSubmit}
+                enterToSubmit={simple}
+              />
+            ) : null}
             <HistoryPlugin />
             <ListPlugin />
             <TablePlugin hasCellMerge={false} hasHorizontalScroll />
@@ -170,7 +221,11 @@ export function DiscussionLexicalEditor({
             <ClickableLinkPlugin disabled />
             <MarkdownShortcutPlugin transformers={PAGE_MARKDOWN_TRANSFORMERS} />
             {seedPlainText && onChange ? (
-              <SeedPlainTextPlugin text={seedPlainText} onSeeded={onChange} />
+              <SeedPlainTextPlugin
+                text={seedPlainText}
+                people={mentionPeople}
+                onSeeded={onChange}
+              />
             ) : null}
             {onChange ? (
               <OnChangePlugin

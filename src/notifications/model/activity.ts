@@ -1,4 +1,9 @@
-export type ActivityKind = "discussion_message";
+import {
+  parseDiscussionBody,
+  plainTextFromDiscussionBody,
+} from "@/discussions/model/messageBody";
+
+export type ActivityKind = "discussion_message" | "discussion_mention";
 
 export type ActivityItem = {
   id: number;
@@ -16,7 +21,9 @@ export type ActivityItem = {
 };
 
 export function parseActivityKind(value: string): ActivityKind | null {
-  if (value === "discussion_message") return value;
+  if (value === "discussion_message" || value === "discussion_mention") {
+    return value;
+  }
   return null;
 }
 
@@ -28,6 +35,37 @@ export function countUnreadActivity(
   items: Array<{ readAt: string | null }>,
 ): number {
   return items.filter(isActivityUnread).length;
+}
+
+export const ACTIVITY_BELL_PREVIEW_LIMIT = 3;
+
+export function unreadActivityNewestFirst<
+  T extends { readAt: string | null; createdAt: string },
+>(items: T[]): T[] {
+  return items
+    .filter(isActivityUnread)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export function activityBellPreview<
+  T extends { readAt: string | null; createdAt: string },
+>(items: T[]): {
+  preview: T[];
+  remainingUnread: number;
+  unreadCount: number;
+} {
+  const unread = unreadActivityNewestFirst(items);
+  const preview = unread.slice(0, ACTIVITY_BELL_PREVIEW_LIMIT);
+  return {
+    preview,
+    remainingUnread: unread.length - preview.length,
+    unreadCount: unread.length,
+  };
+}
+
+export function remainingUnreadLabel(remaining: number): string | null {
+  if (remaining <= 0) return null;
+  return `+ ${remaining} unread`;
 }
 
 export function sortActivityForList<T extends { readAt: string | null; createdAt: string }>(
@@ -42,16 +80,39 @@ export function sortActivityForList<T extends { readAt: string | null; createdAt
 }
 
 export function activityPreview(preview: string): string {
-  const trimmed = preview.trim();
+  const trimmed = readableActivityPreview(preview);
   if (!trimmed) return "Posted in this discussion.";
   return trimmed.length > 160 ? `${trimmed.slice(0, 160).trimEnd()}…` : trimmed;
 }
 
-export function activityMetaParts(args: {
-  actorName: string;
+/** Prefer post text when a stored preview is still a Lexical/JSON body dump. */
+export function readableActivityPreview(preview: string): string {
+  const trimmed = preview.trim();
+  if (!trimmed) return "";
+  if (!trimmed.startsWith("{")) return trimmed;
+  const parsed = parseDiscussionBody(trimmed);
+  const fromBody = plainTextFromDiscussionBody(parsed).trim();
+  if (fromBody && fromBody !== trimmed) return fromBody;
+  if (/^\{\s*"v"\s*:/.test(trimmed)) return fromBody;
+  return trimmed;
+}
+
+export function activityHeadline(args: {
+  kind: ActivityKind;
+  title: string;
   audienceLabel: string;
 }): string {
-  const actor = args.actorName.trim() || "Someone";
+  const title = args.title.trim() || "Discussion";
   const audience = args.audienceLabel.trim();
-  return audience ? `${actor} · ${audience}` : actor;
+  const inAudience = audience ? ` in ${audience}` : "";
+  if (args.kind === "discussion_mention") {
+    return `Mentioned in ${title}${inAudience}`;
+  }
+  return `New discussion: ${title}${inAudience}`;
+}
+
+export function activityMetaParts(args: {
+  actorName: string;
+}): string {
+  return args.actorName.trim() || "Someone";
 }
