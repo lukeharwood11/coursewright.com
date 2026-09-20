@@ -11,6 +11,7 @@ Two-way **discussions**: a thread for **one course** or **one class**. Title, fl
 - Composer: plain textarea by default; **T** activates the same Lexical chrome as page materials (toolbar, `/`, floating format) without quiz / in-page file upload; file icon; **+** opens modal for material or link
 - Parent list of threads that apply to linked students (same URL; parent chrome / Parent view)
 - Sidebar unread count (red) of threads with new activity since `last_read_at`
+- Staff compose: optional **Notify everyone** (Activity notifications). Course instructors / class leads are always notified of posts.
 - Realtime: `databridge/` subscribes via the shared Supabase client; page hooks update TanStack Query
 
 ## Rules
@@ -23,7 +24,7 @@ Two-way **discussions**: a thread for **one course** or **one class**. Title, fl
 - Page folders: `discussions/` (list), `discussion/` (view), `discussion-new/` (compose). Shared `model/` + `databridge/`.
 - Do not put discussion CRUD in `parent/`. Unread badge lives in org chrome via this domain.
 - Attachments reuse org `File` / Storage and published materials the poster can already view.
-- No email in this slice.
+- No email in this slice. In-app Activity notifications live in `notifications/`.
 
 ## Don’t
 

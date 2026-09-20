@@ -20,6 +20,10 @@ import {
   uploadDiscussionFile,
   type DiscussionMessageRecord,
 } from "@/discussions/databridge/discussions";
+import {
+  markDiscussionNotificationsRead,
+  notificationQueryKeys,
+} from "@/notifications/databridge/notifications";
 import { subscribeToDiscussionThread } from "@/discussions/databridge/realtime";
 import {
   buildDiscussionQuote,
@@ -114,12 +118,18 @@ export function useDiscussion() {
     const cursor = `${discussion.id}:${discussion.lastMessageAt}`;
     if (markedReadFor.current === cursor) return;
     markedReadFor.current = cursor;
-    void markDiscussionRead(discussion.id, user.id).then(() => {
+    void Promise.all([
+      markDiscussionRead(discussion.id, user.id),
+      markDiscussionNotificationsRead(discussion.id),
+    ]).then(() => {
       void queryClient.invalidateQueries({
         queryKey: discussionQueryKeys.org(organization.id, user.id),
       });
       void queryClient.invalidateQueries({
         queryKey: discussionQueryKeys.detail(discussion.id, user.id),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: notificationQueryKeys.org(organization.id, user.id),
       });
     });
   }, [belongsHere, discussion, user.id, organization.id, queryClient]);

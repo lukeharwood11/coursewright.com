@@ -22,6 +22,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) | `/my/settings` |
 | [ORG_HOME](./ORG_HOME.md) | `/my/<org-slug>` |
 | [CALENDAR](./CALENDAR.md) | `/my/<org-slug>/calendar` |
+| [ACTIVITY](./ACTIVITY.md) | `/my/<org-slug>/activity` | **P1** |
 | [ORG_SETTINGS](./ORG_SETTINGS.md) | `/my/<org-slug>/settings` |
 | [COURSE_LIST](./COURSE_LIST.md) | `/my/<org-slug>/courses` |
 | [COURSE](./COURSE.md) | `/my/<org-slug>/courses/<course_id>` |
@@ -84,7 +85,8 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Course templates + ACL / promote / sync | **P1** — [TEMPLATE_LIST](./TEMPLATE_LIST.md), [TEMPLATE](./TEMPLATE.md), [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) |
 | Quiz online take + autograde | **P1** |
 | Parent summary layer / Progress tab | **P1** |
-| Discussions | **P1** — [DISCUSSIONS](./DISCUSSIONS.md), [DISCUSSION](./DISCUSSION.md); in design |
+| Discussions | **P1** — [DISCUSSIONS](./DISCUSSIONS.md), [DISCUSSION](./DISCUSSION.md) |
+| Activity / notifications | **P1** — [ACTIVITY](./ACTIVITY.md) |
 | Billing UI | **P1** (marketing on [PRICING](./PRICING.md); stub on [ORG_SETTINGS](./ORG_SETTINGS.md)) |
 | Print whole course | Explicitly out of scope for initial release |
 | Student accounts / cross-org families | **P2** |

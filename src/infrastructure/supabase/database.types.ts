@@ -316,6 +316,42 @@ export type Database = {
           },
         ]
       }
+      class_leaders: {
+        Row: {
+          class_id: number
+          created_at: string
+          id: number
+          user_id: string
+        }
+        Insert: {
+          class_id: number
+          created_at?: string
+          id?: number
+          user_id: string
+        }
+        Update: {
+          class_id?: number
+          created_at?: string
+          id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_leaders_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_leaders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_members: {
         Row: {
           class_id: number
@@ -737,6 +773,7 @@ export type Database = {
           deleted_by: string | null
           id: number
           last_message_at: string
+          notify_all: boolean
           organization_id: number
           title: string
           updated_at: string
@@ -753,6 +790,7 @@ export type Database = {
           deleted_by?: string | null
           id?: number
           last_message_at?: string
+          notify_all?: boolean
           organization_id: number
           title: string
           updated_at?: string
@@ -769,6 +807,7 @@ export type Database = {
           deleted_by?: string | null
           id?: number
           last_message_at?: string
+          notify_all?: boolean
           organization_id?: number
           title?: string
           updated_at?: string
@@ -1496,6 +1535,87 @@ export type Database = {
           },
           {
             foreignKeyName: "memberships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          audience_label: string
+          created_at: string
+          discussion_id: number | null
+          discussion_message_id: number | null
+          id: number
+          kind: string
+          organization_id: number
+          preview: string
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          audience_label?: string
+          created_at?: string
+          discussion_id?: number | null
+          discussion_message_id?: number | null
+          id?: number
+          kind: string
+          organization_id: number
+          preview?: string
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          audience_label?: string
+          created_at?: string
+          discussion_id?: number | null
+          discussion_message_id?: number | null
+          id?: number
+          kind?: string
+          organization_id?: number
+          preview?: string
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_discussion_id_fkey"
+            columns: ["discussion_id"]
+            isOneToOne: false
+            referencedRelation: "discussions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_discussion_message_id_fkey"
+            columns: ["discussion_message_id"]
+            isOneToOne: false
+            referencedRelation: "discussion_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"

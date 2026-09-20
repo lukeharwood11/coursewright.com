@@ -24,6 +24,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | Course | `courses` | P0 |
 | Class | `classes` | **P0** — group of students; **not** a course |
 | ClassMember | `class_members` | **P0** — student_profile ↔ class |
+| ClassLeader | `class_leaders` | **P0** — staff assigned as a lead for a class |
 | CourseTemplate | `course_templates` | **P1** product — table exists |
 | TemplateAccess | `template_access` | **P1** product — table exists |
 | CourseInstructor | `course_instructors` | |
@@ -44,6 +45,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | DiscussionMessage | `discussion_messages` | **P1** — flat post; body plain or Lexical (+ optional quote in body) |
 | DiscussionMessageAttachment | `discussion_message_attachments` | **P1** — file / material / url on a message |
 | DiscussionRead | `discussion_reads` | **P1** — per-user last read (unread badge) |
+| Notification | `notifications` | **P1** — per-user Activity item; ack via `read_at` |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates + published lesson plans (Sunday–Saturday). |
 | Page / Block / Quiz / Form | `blocks` (quiz is a Lexical node on a page) | Material **kind** page\|link\|file; blocks on pages only; **no** quiz table |
 
@@ -68,8 +70,8 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 
 | Phase | Entities in focus |
 |-------|-------------------|
-| **P0** | Organization, User, Membership, **AdminInvite**, **AdminInviteStudents**, **StudentProfile**, **Class**, **ClassMember**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **LessonPlan**, **LessonPlanDay**, **LessonPlanDayMaterial**, **Announcement**, **AnnouncementRead**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
-| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead** |
+| **P0** | Organization, User, Membership, **AdminInvite**, **AdminInviteStudents**, **StudentProfile**, **Class**, **ClassMember**, **ClassLeader**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **LessonPlan**, **LessonPlanDay**, **LessonPlanDayMaterial**, **Announcement**, **AnnouncementRead**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
+| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification** |
 | **P2** | Cross-org Family management, StudentProfile.user_id, Quiz online, Submission, **ParentPayments** (orgs collect from parents) |
 
 ---
@@ -220,6 +222,7 @@ Deprecate is the safe default when content should retire without disrupting live
 | `ParentInvite` / `ParentStudentLink` | Parent user ↔ student profile linkage |
 | `Membership` | Staff (admin, instructor) in org |
 | `CourseInstructor` | Instructor ↔ course instance assignment |
+| `ClassLeader` | Staff (owner / admin / instructor) ↔ class — optional; zero or more |
 
 ### Student profile creation flow
 
@@ -474,6 +477,19 @@ Org-scoped **group of students**. Not a Course — no units/materials.
 | unique | (class_id, student_profile_id) | |
 
 **Open:** Can a student belong to multiple classes? Default assumption **yes** until decided otherwise.
+
+### ClassLeader
+
+Zero or more **leads** for a class. **P0.** Owners and admins assign; instructors may read the list. A class may have no leads.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| class_id | bigint | FK → Class |
+| user_id | uuid | FK → User (`profiles`) — must be an active owner, admin, or instructor in the class’s org |
+| unique | (class_id, user_id) | |
+
+Leads are notified in **Activity** when someone posts in a discussion for that class. Demoting or removing staff membership drops their lead rows for classes in that org.
 
 ### Course
 
@@ -752,6 +768,7 @@ CourseSummary, Grade, InstructorNote, ChecklistItem. **OrgSubscription** = Cours
 | class_id | bigint | FK → Class when `audience = class`; else null |
 | title | text | required |
 | created_by | uuid | FK → User (`profiles`) — the person who started it |
+| notify_all | boolean | default false — opening post also notifies everyone who can see the thread; staff create only |
 | last_message_at | timestamptz | denormalized last non-deleted message time (list sort); set by trigger |
 | answered_at | timestamptz | nullable — set when marked answered |
 | answered_by | uuid | FK → User, nullable |
@@ -838,6 +855,32 @@ Per-user cursor for unread. Unique `(discussion_id, user_id)`.
 
 Unread = discussion is visible, not deleted, and (`last_read_at` is null or `last_message_at` > `last_read_at`). Opening the thread upserts `last_read_at = now()`; while the thread is open, live new messages also advance `last_read_at` for that person. Two parents each have their own unread state.
 
+### Notification
+
+Per-user **Activity** row. Written by a trigger on `discussion_messages` insert (SECURITY DEFINER). Clients **SELECT** their own rows and **UPDATE** `read_at` to ack. No client INSERT.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| user_id | uuid | FK → User (`profiles`) — the recipient |
+| kind | text | `discussion_message` in this slice |
+| discussion_id | bigint | FK → Discussion when kind is discussion |
+| discussion_message_id | bigint | FK → DiscussionMessage |
+| actor_id | uuid | FK → User — who posted |
+| title | text | Discussion title |
+| preview | text | Truncated post text (or a short fallback) |
+| audience_label | text | Course title or class name |
+| created_at | timestamptz | |
+| read_at | timestamptz | nullable — set when the person acks (click or open the thread) |
+| unique | (user_id, discussion_message_id) | |
+
+**Who is notified:** course **instructors** for a course thread; class **leads** for a class thread; never the author. If `discussions.notify_all` is true on the opening post and the starter is staff, also notify everyone `list_discussion_members` returns.
+
+**Who can read/update:** `user_id = auth.uid()`. Update may only change `read_at`.
+
+**Realtime:** publish `notifications`. RLS still applies to change payloads.
+
 **P2:** parent-pay / tuition — stub only.
 
 ---
@@ -852,6 +895,7 @@ Organization ──< AdminInvite
 Organization ──< StudentProfile
 Organization ──< Family ──< FamilyMember >── StudentProfile / User (parent)
 Organization ──< Class ──< ClassMember >── StudentProfile
+Organization ──< Class ──< ClassLeader >── User (owner / admin / instructor)
 Organization ──< StudentProfile ──< Enrollment >── Course (status = active)
 Organization ──< ParentInvite ──> StudentProfile
 User (parent) ──< ParentStudentLink >── StudentProfile
@@ -880,6 +924,7 @@ Organization ──< Discussion (one course | one class)
 Discussion ──< DiscussionMessage (flat; body may include Teams-style quote)
 DiscussionMessage ──< DiscussionMessageAttachment >── File | Material | url
 Discussion ──< DiscussionRead >── User
+Organization ──< Notification >── User
 ```
 
 **Open:** Course ↔ Class link (enroll class, enroll individuals, or both).

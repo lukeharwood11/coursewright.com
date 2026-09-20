@@ -10,6 +10,12 @@ import {
 import { subscribeToOrgDiscussions } from "@/discussions/databridge/realtime";
 import { countUnreadDiscussions } from "@/discussions/model/unread";
 import {
+  listNotifications,
+  notificationQueryKeys,
+} from "@/notifications/databridge/notifications";
+import { subscribeToOrgNotifications } from "@/notifications/databridge/realtime";
+import { countUnreadActivity } from "@/notifications/model/activity";
+import {
   getMembershipByOrgSlug,
   orgQueryKeys,
 } from "@/organizations/databridge/memberships";
@@ -75,11 +81,26 @@ export function useOrgShellData(orgSlug: string | undefined) {
     enabled: Boolean(organizationId),
   });
 
+  const notificationsQuery = useQuery({
+    queryKey: notificationQueryKeys.org(organizationId ?? 0, user.id),
+    queryFn: () => listNotifications(organizationId!),
+    enabled: Boolean(organizationId),
+  });
+
   useEffect(() => {
     if (!organizationId) return;
     return subscribeToOrgDiscussions(organizationId, () => {
       void queryClient.invalidateQueries({
         queryKey: discussionQueryKeys.org(organizationId, user.id),
+      });
+    });
+  }, [organizationId, user.id, queryClient]);
+
+  useEffect(() => {
+    if (!organizationId) return;
+    return subscribeToOrgNotifications(organizationId, user.id, () => {
+      void queryClient.invalidateQueries({
+        queryKey: notificationQueryKeys.org(organizationId, user.id),
       });
     });
   }, [organizationId, user.id, queryClient]);
@@ -104,6 +125,7 @@ export function useOrgShellData(orgSlug: string | undefined) {
     (item) => !item.read,
   ).length;
   const unreadDiscussions = countUnreadDiscussions(discussionsQuery.data ?? []);
+  const unreadActivity = countUnreadActivity(notificationsQuery.data ?? []);
 
   const navSections =
     organization && role
@@ -111,8 +133,12 @@ export function useOrgShellData(orgSlug: string | undefined) {
         ? buildParentNav(organization.slug, lists, {
             unreadAnnouncements,
             unreadDiscussions,
+            unreadActivity,
           })
-        : buildStaffNav(organization.slug, lists, { unreadDiscussions })
+        : buildStaffNav(organization.slug, lists, {
+            unreadDiscussions,
+            unreadActivity,
+          })
       : [];
 
   const profileName = profileQuery.data?.name ?? "";

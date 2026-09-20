@@ -13,7 +13,7 @@ Browser Supabase client (anon key) and Storage helpers.
 - Anon key only in the SPA; never service role.
 - Prefer RLS-friendly patterns; privileged work → Edge Functions.
 - Auth session via this client; Google + email (password or magic link) per [STACK.md](../../../docs/STACK.md).
-- **P1 discussions** subscribe to Realtime (`postgres_changes`) through this same client. Domain `databridge/` owns the channel; do not scatter `channel()` calls in page files.
+- **P1 discussions** and **Activity** notifications subscribe to Realtime (`postgres_changes`) through this same client. Domain `databridge/` owns the channel; do not scatter `channel()` calls in page files.
 
 ## Don’t
 

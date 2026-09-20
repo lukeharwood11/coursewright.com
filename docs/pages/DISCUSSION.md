@@ -35,6 +35,7 @@ One two-way **discussion**: title, who it is for, flat posts (plain or Lexical),
 - Families only see courses their linked student is enrolled in (active + published) and classes that student is in. Instructors see courses they teach and classes they can manage. Owners and admins see any course or class in the org.
 - Title required. Opening post required (text and/or attachment); same plain / **T** Lexical composer.
 - **Start discussion** stays disabled until there is a title, one audience target, and an opening post.
+- Staff Teacher view: **Notify everyone** (off by default). When on, the opening post also notifies everyone who can see the thread in [ACTIVITY](./ACTIVITY.md). Course instructors or class leads are always notified of posts (except the author).
 - Cancel returns to the list.
 - Staff **Parent view** without linked students cannot open `/new` (redirect to org home). Parent-only users without a matching course or class see an empty picker and cannot post.
 
@@ -49,7 +50,7 @@ No `/edit` route — title and audience are not edited after create in this slic
 - Posts: author display name, time (with “(edited)” after an edit), optional quote block, plain or rich body, attachments
 - Unread vs read is shown on the **list**, not as a badge on this page
 
-Writeable on new: audience, one target, title, opening post (body + attachments).  
+Writeable on new: audience, one target, title, opening post (body + attachments), **Notify everyone** (staff Teacher view).  
 Writeable on view: new post / quote, answered state (when allowed), remove (when allowed).
 
 ## Contents
@@ -67,6 +68,7 @@ Writeable on view: new post / quote, answered state (when allowed), remove (when
 
 - Audience picker (course / class + single select)
 - Title
+- **Notify everyone** (staff Teacher view)
 - Opening post (text + attachments; **T** for rich text)
 - Start / Cancel ([STYLE_GUIDE.md](../STYLE_GUIDE.md) settings-style header actions)
 
@@ -87,8 +89,8 @@ Writeable on view: new post / quote, answered state (when allowed), remove (when
 - [CLASS](./CLASS.md) — compose entry from a class (`?audience=class&classId=`)
 - [MATERIAL](./MATERIAL.md) — open an attached material
 - [ORG_HOME](./ORG_HOME.md) — via chrome
-- Via org chrome (staff Teacher view): [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); search overlay TBD
-- Via parent chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md)
+- Via org chrome (staff Teacher view): [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [ACTIVITY](./ACTIVITY.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); search overlay TBD
+- Via parent chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [ACTIVITY](./ACTIVITY.md)
 
 ## Notes
 

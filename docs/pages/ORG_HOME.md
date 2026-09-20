@@ -70,7 +70,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 Tech-averse parents must understand what’s going on immediately — which child, what materials, what’s due.
 
 - Top: org context + account affordance ([STYLE_GUIDE.md](../STYLE_GUIDE.md) parent pattern) → [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
-- Desktop: simpler collapsible sidebar (This week, Calendar, Announcements, Discussions (**P1**), their courses, Progress). Body uses remaining width — not a centered narrow column.
+- Desktop: simpler collapsible sidebar (This week, Calendar, Announcements, Discussions (**P1**), Activity (**P1**), their courses, Progress). Body uses remaining width — not a centered narrow column.
 - Greeting + **current calendar week** (Sunday–Saturday) + **Print this week**
 - **Student tags** (multi-student parents only) — tap to include/exclude a student
 - **Announcements** — current one-way notices (when any). Unread cards show a notification icon; opening [ANNOUNCEMENT](./ANNOUNCEMENT.md) marks it read. Above the week calendar.
@@ -86,7 +86,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 ### Instructor / owner / admin view
 
-- Collapsible **org sidebar** for Home, Calendar, Announcements, Discussions (**P1**), Courses, Roster (nested class names when they exist), Settings (course names nested when present)
+- Collapsible **org sidebar** for Home, Calendar, Announcements, Discussions (**P1**), Activity (**P1**), Courses, Roster (nested class names when they exist), Settings (course names nested when present)
 - Header: org name, week label, **Create course**
 - **Teacher / Parent view** (staff only) in org chrome
 - Getting started (when needed)
@@ -142,6 +142,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - [COURSE_LIST](./COURSE_LIST.md) — view all / create course
 - [ANNOUNCEMENTS](./ANNOUNCEMENTS.md) — via org chrome
 - [DISCUSSIONS](./DISCUSSIONS.md) — via org chrome (**P1**)
+- [ACTIVITY](./ACTIVITY.md) — via org chrome (**P1**)
 - [MATERIAL](./MATERIAL.md) — important-now item
 - [ORG_ROSTER](./ORG_ROSTER.md) — people / students
 - [ORG_SETTINGS](./ORG_SETTINGS.md) — via chrome / account menu
@@ -152,4 +153,4 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Parent experience, units/dating, important now, **announcements**, **lesson plans**, calendar, print grain, RBAC, advanced search. **Discussions** are **P1** (sidebar, not This week cards). Parent summary layer is **P1**, not P0. Homework in P0 = dated materials on the week calendar (no separate assignment object). Staff home is an operational dashboard (attention + course previews + this week + people), not a nav tile grid.
+[FEATURES.md](../FEATURES.md) — Parent experience, units/dating, important now, **announcements**, **lesson plans**, calendar, print grain, RBAC, advanced search. **Discussions** and **Activity** are **P1** (sidebar, not This week cards). Parent summary layer is **P1**, not P0. Homework in P0 = dated materials on the week calendar (no separate assignment object). Staff home is an operational dashboard (attention + course previews + this week + people), not a nav tile grid.

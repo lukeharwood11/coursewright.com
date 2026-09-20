@@ -363,6 +363,7 @@ export async function createDiscussion(args: {
   createdBy: string;
   draft: DiscussionDraft;
   attachments: AttachmentInsert[];
+  notifyAll?: boolean;
 }): Promise<DiscussionRecord> {
   const audience = args.draft.audience;
   if (!audience) throw new Error("Choose a course or a class.");
@@ -376,6 +377,7 @@ export async function createDiscussion(args: {
       class_id: audience === "class" ? args.draft.classId : null,
       title: args.draft.title.trim(),
       created_by: args.createdBy,
+      notify_all: args.notifyAll === true,
     })
     .select(DISCUSSION_LIST_EMBED)
     .maybeSingle();

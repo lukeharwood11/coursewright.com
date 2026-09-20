@@ -38,6 +38,9 @@ export function DiscussionNewFormFields({
   onCourseId,
   onClassId,
   onTitle,
+  showNotifyAll,
+  notifyAll,
+  onNotifyAll,
 }: {
   audience: DiscussionAudience | null;
   courseId: number | null;
@@ -51,6 +54,9 @@ export function DiscussionNewFormFields({
   onCourseId: (value: number | null) => void;
   onClassId: (value: number | null) => void;
   onTitle: (value: string) => void;
+  showNotifyAll?: boolean;
+  notifyAll?: boolean;
+  onNotifyAll?: (value: boolean) => void;
 }) {
   return (
     <>
@@ -155,6 +161,26 @@ export function DiscussionNewFormFields({
           placeholder="Question about this week"
         />
       </label>
+
+      {showNotifyAll ? (
+        <label className="mt-5 flex cursor-pointer items-start gap-2">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--green)]"
+            checked={notifyAll === true}
+            onChange={() => onNotifyAll?.(!(notifyAll === true))}
+          />
+          <span>
+            <span className="block text-[14px] font-semibold text-[var(--ink)]">
+              Notify everyone
+            </span>
+            <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
+              Also send this first post to everyone who can see the discussion.
+              Course instructors or class leads are notified either way.
+            </span>
+          </span>
+        </label>
+      ) : null}
     </>
   );
 }

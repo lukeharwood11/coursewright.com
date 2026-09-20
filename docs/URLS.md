@@ -57,6 +57,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | [ORG_PICKER](./pages/ORG_PICKER.md) | `/my` | Org picker + create org |
 | [ORG_HOME](./pages/ORG_HOME.md) | `/my/<org-slug>` | Role-aware dashboard (parent “this week” calendar lives here) |
 | [CALENDAR](./pages/CALENDAR.md) | `/my/<org-slug>/calendar` | Month/week calendar (`?view=month\|week`, `?date=YYYY-MM-DD`) |
+| [ACTIVITY](./pages/ACTIVITY.md) | `/my/<org-slug>/activity` | In-app notifications (unread first; click acks and opens the activity) |
 
 ---
 

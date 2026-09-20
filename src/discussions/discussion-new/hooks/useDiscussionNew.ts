@@ -59,6 +59,7 @@ export function useDiscussionNew() {
   const [lexical, setLexical] = useState<SerializedEditorState>(emptyLexicalState);
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
+  const [notifyAll, setNotifyAll] = useState(false);
 
   const coursesQuery = useQuery({
     queryKey: courseQueryKeys.list(organization.id),
@@ -169,6 +170,7 @@ export function useDiscussionNew() {
     draft.classId !== initial.classId ||
     draft.title !== initial.title ||
     draft.body !== initial.body ||
+    notifyAll ||
     mode === "lexical" ||
     attachments.length > 0;
 
@@ -262,6 +264,7 @@ export function useDiscussionNew() {
         createdBy: user.id,
         draft: draftForSave,
         attachments: uploaded,
+        notifyAll: canEdit && notifyAll,
       });
     },
     onSuccess: (created) => {
@@ -292,6 +295,9 @@ export function useDiscussionNew() {
       setDraft((current) => ({ ...current, classId })),
     attachments,
     setAttachments,
+    showNotifyAll: canEdit,
+    notifyAll,
+    setNotifyAll,
     courses,
     classes,
     courseEmptyHint: parentPresentation
