@@ -18,7 +18,13 @@ function createBrowserClient(): SupabaseClient<Database> | null {
     );
     return null;
   }
-  return createClient<Database>(url, anonKey);
+  return createClient<Database>(url, anonKey, {
+    auth: {
+      // PKCE avoids implicit-flow tokens in the URL hash (which leave a bare `/path#`
+      // after Supabase clears them via `location.hash = ''`).
+      flowType: "pkce",
+    },
+  });
 }
 
 export const supabase: SupabaseClient<Database> | null = createBrowserClient();
