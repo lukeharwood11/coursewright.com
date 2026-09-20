@@ -12,7 +12,12 @@ export async function signInWithGoogle(nextPath = "/my") {
   const redirectTo = `${window.location.origin}${nextPath}`;
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo },
+    options: {
+      redirectTo,
+      // After Course Wright sign-out, Google still has a browser session.
+      // Without this, OAuth silently reuses that account (no picker).
+      queryParams: { prompt: "select_account" },
+    },
   });
 
   if (error) {
