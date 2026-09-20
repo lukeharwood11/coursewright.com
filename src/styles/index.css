@@ -79,6 +79,17 @@ body {
   background: var(--surface);
 }
 
+/* Nested in discussion composer — matches plain textarea field, no second card */
+.cw-editor-shell-embedded {
+  overflow: visible;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.cw-editor-shell-embedded .cw-editor-toolbar {
+  border-radius: 6px 6px 0 0;
+}
+
 .cw-editor-view {
   max-width: 42rem;
 }
@@ -228,6 +239,10 @@ body {
   outline: none;
 }
 
+.cw-editor-input-discussion {
+  min-height: 5.5rem;
+}
+
 .cw-editor-input-view {
   min-height: 0;
   padding: 0;
@@ -291,9 +306,20 @@ body {
 
 .cw-editor-quote {
   margin: 0 0 0.65rem;
-  padding-left: 0.85rem;
-  border-left: 3px solid var(--line);
+  padding: 0.55rem 0.75rem 0.55rem 0.85rem;
+  border-left: 3px solid var(--green);
+  border-radius: 0 6px 6px 0;
+  background: var(--paper);
   color: var(--ink-soft);
+}
+
+.cw-editor-quote > :first-child {
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.cw-editor-quote > :not(:first-child) {
+  margin-top: 0.2rem;
 }
 
 .cw-editor-link {

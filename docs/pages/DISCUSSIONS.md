@@ -15,8 +15,8 @@ List two-way **discussions** for a course or a class. Distinct from [ANNOUNCEMEN
 
 - Load non-deleted discussions the actor can see (RLS). Hide threads with zero non-deleted messages.
 - Sort by last activity (`last_message_at`), newest first.
-- Filter chips: **All** / **Open** / **Answered**. Default **All**.
-- Unread first within the current filter (no `last_read_at`, or `last_message_at` after it). Unread rows show a notification icon.
+- Filter chips: **All** / **Open** / **Resolved**. Default **All**.
+- Unread first within the current filter (no `last_read_at`, or `last_message_at` after it). Unread rows show a notification icon; up-to-date rows have no leading icon.
 - Opening a row goes to [DISCUSSION](./DISCUSSION.md).
 - **New discussion** goes to compose when the actor may start one. Staff **Parent view** without linked students: empty preview, no compose.
 - While this list is open, **Realtime** refreshes new threads, last activity, answered state, and unread without a full page reload.
@@ -26,11 +26,11 @@ Empty: plain language plus **New discussion** when compose is allowed. Families 
 ## Data shown
 
 - Discussion **title**
-- **Open** / **Answered** badge
+- **Open** / **Resolved** badge (resolved includes a checkmark)
 - **Audience** kind + name (course title or class name)
 - Which child when a multi-student parent is looking at a class/course that only some children belong to
 - **Last activity** time
-- Unread vs seen (icons)
+- Unread notification icon (only when unread)
 - Author of the thread (who started it)
 
 ## Contents

@@ -1,8 +1,5 @@
 import { Link } from "react-router-dom";
-import {
-  BellAlertIcon,
-  CheckCircleIcon,
-} from "@heroicons/react/24/solid";
+import { BellAlertIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
 import { Badge } from "@/ui/Badge";
 import {
   discussionAudienceLabel,
@@ -45,25 +42,19 @@ export function DiscussionList({
                 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--green)]"
                 aria-hidden
               />
-            ) : (
-              <CheckCircleIcon
-                className="mt-0.5 h-5 w-5 shrink-0 text-[var(--green)]"
-                aria-hidden
-              />
-            )}
+            ) : null}
             <span className="min-w-0 flex-1">
               <span className="flex flex-wrap items-center gap-2">
                 <span className="text-[15px] font-extrabold text-[var(--ink)]">
                   {item.title}
                 </span>
-                {item.unread ? (
-                  <span className="sr-only">Unread</span>
-                ) : (
-                  <span className="sr-only">Seen</span>
-                )}
+                {item.unread ? <span className="sr-only">Unread</span> : null}
               </span>
               <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
                 <Badge variant={item.answeredAt ? "green" : "neutral"}>
+                  {item.answeredAt ? (
+                    <CheckCircleIcon className="h-3.5 w-3.5" aria-hidden />
+                  ) : null}
                   {discussionStatusLabel(item.answeredAt)}
                 </Badge>
                 <Badge variant="slate">

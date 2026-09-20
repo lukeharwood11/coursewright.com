@@ -111,7 +111,7 @@ Two-way threads (one course or one class). Org-scoped because the audience is no
 | Page | URL | Notes |
 |------|-----|-------|
 | [DISCUSSIONS](./pages/DISCUSSIONS.md) | `/my/<org-slug>/discussions` | Staff list (Teacher view); family list (parent chrome / Parent view) |
-| [DISCUSSION](./pages/DISCUSSION.md) (view) | `/my/<org-slug>/discussions/<discussion_id>` | Thread: posts, one-level replies, attachments, answered |
+| [DISCUSSION](./pages/DISCUSSION.md) (view) | `/my/<org-slug>/discussions/<discussion_id>` | Thread: flat posts, quote-in-body, plain/Lexical, attachments, answered |
 | [DISCUSSION](./pages/DISCUSSION.md) (new) | `/my/<org-slug>/discussions/new` | Compose. Optional `?audience=course\|class` plus `courseId` / `classId` |
 
 No `/edit` route — title and audience are not edited after create in this slice.

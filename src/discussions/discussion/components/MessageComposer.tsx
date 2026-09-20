@@ -1,25 +1,36 @@
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import type { SerializedEditorState } from "lexical";
 import {
+  BookOpenIcon,
   LinkIcon,
   PaperClipIcon,
-  BookOpenIcon,
+  PlusIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
-import { Input } from "@/ui/Input";
-import { Select } from "@/ui/Select";
 import type { AttachableMaterial } from "@/discussions/databridge/discussions";
-import { isHttpUrl } from "@/discussions/model/validate";
+import { emptyLexicalState } from "@/discussions/model/messageBody";
+import { ComposerAttachModal } from "./ComposerAttachModal";
+import { DiscussionLexicalEditor } from "./DiscussionLexicalEditor";
 
 export type PendingAttachment =
   | { key: string; kind: "file"; file: File; label: string }
   | { key: string; kind: "material"; materialId: number; label: string }
   | { key: string; kind: "url"; url: string; label: string };
 
+export type ComposerMode = "plain" | "lexical";
+
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
   "placeholder:text-[var(--ink-faint)]",
   "focus:border-[var(--green)] focus:shadow-[0_0_0_3px_var(--green-tint)]",
+].join(" ");
+
+const iconBtn = [
+  "inline-flex h-9 w-9 items-center justify-center rounded-[6px] border border-[var(--line)] bg-[var(--surface)] text-[var(--ink-soft)]",
+  "transition-colors hover:border-[var(--green)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]",
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]",
+  "aria-pressed:border-[var(--green)] aria-pressed:bg-[var(--green-tint)] aria-pressed:text-[var(--green-deep)]",
 ].join(" ");
 
 function newKey(): string {
@@ -30,40 +41,62 @@ function newKey(): string {
 }
 
 export function MessageComposer({
+  mode,
+  onMode,
   body,
   onBody,
+  lexical,
+  onLexical,
+  composeKey = 0,
   attachments,
   onAttachments,
   materials,
   canSubmit,
   submitting,
   submitLabel,
+  busyLabel,
   placeholder,
   error,
   onSubmit,
   showSubmit = true,
+  showAttachmentControls = true,
+  variant = "card",
+  onCancel,
+  cancelLabel = "Cancel",
 }: {
+  mode: ComposerMode;
+  onMode: (mode: ComposerMode) => void;
   body: string;
   onBody: (value: string) => void;
+  lexical: SerializedEditorState;
+  onLexical: (value: SerializedEditorState) => void;
+  /** Bump when seeding Lexical from outside (e.g. Quote). */
+  composeKey?: number;
   attachments: PendingAttachment[];
   onAttachments: (next: PendingAttachment[]) => void;
   materials: AttachableMaterial[];
   canSubmit: boolean;
   submitting: boolean;
   submitLabel: string;
+  busyLabel?: string;
   placeholder: string;
   error: string | null;
   onSubmit: () => void;
   showSubmit?: boolean;
+  showAttachmentControls?: boolean;
+  variant?: "card" | "plain";
+  onCancel?: () => void;
+  cancelLabel?: string;
 }) {
   const fileInputId = useId();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [linkOpen, setLinkOpen] = useState(false);
-  const [linkUrl, setLinkUrl] = useState("");
-  const [linkLabel, setLinkLabel] = useState("");
-  const [linkError, setLinkError] = useState<string | null>(null);
-  const [materialOpen, setMaterialOpen] = useState(false);
-  const [materialId, setMaterialId] = useState<number | "">("");
+  const [attachOpen, setAttachOpen] = useState(false);
+  const [localKey, setLocalKey] = useState(0);
+  const [seedPlain, setSeedPlain] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    setSeedPlain(undefined);
+  }, [composeKey]);
 
   function addFile(file: File) {
     onAttachments([
@@ -72,68 +105,92 @@ export function MessageComposer({
     ]);
   }
 
-  function addLink() {
-    if (!isHttpUrl(linkUrl)) {
-      setLinkError("Use a web address that starts with http:// or https://.");
-      return;
-    }
-    onAttachments([
-      ...attachments,
-      {
-        key: newKey(),
-        kind: "url",
-        url: linkUrl.trim(),
-        label: linkLabel.trim(),
-      },
-    ]);
-    setLinkUrl("");
-    setLinkLabel("");
-    setLinkError(null);
-    setLinkOpen(false);
+  function enableRichText() {
+    setSeedPlain(body);
+    onLexical(emptyLexicalState());
+    setLocalKey((key) => key + 1);
+    onMode("lexical");
   }
 
-  function addMaterial() {
-    if (materialId === "") return;
-    const material = materials.find((row) => row.id === materialId);
-    if (!material) return;
-    onAttachments([
-      ...attachments,
-      {
-        key: newKey(),
-        kind: "material",
-        materialId: material.id,
-        label: material.title,
-      },
-    ]);
-    setMaterialId("");
-    setMaterialOpen(false);
+  function enablePlainText() {
+    onMode("plain");
+    setSeedPlain(undefined);
+  }
+
+  function trySubmit() {
+    if (!canSubmit || submitting) return;
+    onSubmit();
   }
 
   return (
-    <div className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
-      <label className="flex flex-col gap-1">
-        <span className="sr-only">Message</span>
-        <textarea
-          className={`${controlClass} min-h-[5.5rem] resize-y`}
-          value={body}
-          onChange={(event) => onBody(event.target.value)}
+    <div
+      className={
+        variant === "card"
+          ? "rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
+          : undefined
+      }
+    >
+      {mode === "plain" ? (
+        <label className="flex flex-col gap-1">
+          <span className="sr-only">Message</span>
+          <textarea
+            className={`${controlClass} min-h-[5.5rem] resize-y`}
+            value={body}
+            onChange={(event) => onBody(event.target.value)}
+            placeholder={placeholder}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) {
+                return;
+              }
+              event.preventDefault();
+              trySubmit();
+            }}
+          />
+        </label>
+      ) : (
+        <DiscussionLexicalEditor
+          editorKey={`compose-${composeKey}-${localKey}`}
+          initialLexical={seedPlain ? null : lexical}
+          seedPlainText={seedPlain}
+          editable
+          embedded
           placeholder={placeholder}
+          onChange={onLexical}
+          onSubmit={trySubmit}
         />
-      </label>
+      )}
 
-      {attachments.length > 0 ? (
+      {showAttachmentControls && attachments.length > 0 ? (
         <ul className="mt-3 flex flex-col gap-1.5">
           {attachments.map((attachment) => (
             <li
               key={attachment.key}
               className="flex items-center justify-between gap-2 rounded-[6px] border border-[var(--line-soft)] bg-[var(--paper)] px-3 py-2"
             >
-              <span className="min-w-0 truncate text-[13px] font-semibold text-[var(--ink)]">
-                {attachment.kind === "file"
-                  ? attachment.label
-                  : attachment.kind === "material"
-                    ? `Material: ${attachment.label}`
-                    : attachment.label || attachment.url}
+              <span className="flex min-w-0 items-center gap-2 text-[13px] font-semibold text-[var(--ink)]">
+                {attachment.kind === "file" ? (
+                  <PaperClipIcon
+                    className="h-4 w-4 shrink-0 text-[var(--ink-soft)]"
+                    aria-hidden
+                  />
+                ) : attachment.kind === "material" ? (
+                  <BookOpenIcon
+                    className="h-4 w-4 shrink-0 text-[var(--green)]"
+                    aria-hidden
+                  />
+                ) : (
+                  <LinkIcon
+                    className="h-4 w-4 shrink-0 text-[var(--green)]"
+                    aria-hidden
+                  />
+                )}
+                <span className="truncate">
+                  {attachment.kind === "file"
+                    ? attachment.label
+                    : attachment.kind === "material"
+                      ? attachment.label
+                      : attachment.label || attachment.url}
+                </span>
               </span>
               <button
                 type="button"
@@ -152,119 +209,122 @@ export function MessageComposer({
         </ul>
       ) : null}
 
-      {linkOpen ? (
-        <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_8rem_auto]">
-          <Input
-            className="w-full"
-            value={linkUrl}
-            onChange={(event) => {
-              setLinkUrl(event.target.value);
-              setLinkError(null);
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {showAttachmentControls ? (
+          <>
+            <input
+              id={fileInputId}
+              ref={fileRef}
+              type="file"
+              className="sr-only"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                if (file) addFile(file);
+              }}
+            />
+            <button
+              type="button"
+              className={iconBtn}
+              aria-pressed={mode === "lexical"}
+              aria-label={
+                mode === "lexical" ? "Turn off rich text" : "Turn on rich text"
+              }
+              title={mode === "lexical" ? "Plain text" : "Rich text"}
+              onClick={() => {
+                if (mode === "lexical") enablePlainText();
+                else enableRichText();
+              }}
+            >
+              <span className="font-serif text-[15px] font-bold leading-none">T</span>
+            </button>
+            <button
+              type="button"
+              className={iconBtn}
+              aria-label="Add file"
+              title="Add file"
+              onClick={() => fileRef.current?.click()}
+            >
+              <PaperClipIcon className="h-4 w-4" aria-hidden />
+            </button>
+            <button
+              type="button"
+              className={iconBtn}
+              aria-label="Add material or link"
+              title="Add material or link"
+              onClick={() => setAttachOpen(true)}
+            >
+              <PlusIcon className="h-4 w-4" aria-hidden />
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            className={iconBtn}
+            aria-pressed={mode === "lexical"}
+            aria-label={
+              mode === "lexical" ? "Turn off rich text" : "Turn on rich text"
+            }
+            title={mode === "lexical" ? "Plain text" : "Rich text"}
+            onClick={() => {
+              if (mode === "lexical") enablePlainText();
+              else enableRichText();
             }}
-            placeholder="https://"
-            aria-label="Link address"
-          />
-          <Input
-            className="w-full"
-            value={linkLabel}
-            onChange={(event) => setLinkLabel(event.target.value)}
-            placeholder="Label (optional)"
-            aria-label="Link label"
-          />
-          <Button type="button" variant="secondary" onClick={addLink}>
-            Add link
-          </Button>
-          {linkError ? (
-            <p className="sm:col-span-3 text-[13px] text-[var(--amber-deep)]" role="alert">
-              {linkError}
-            </p>
+          >
+            <span className="font-serif text-[15px] font-bold leading-none">T</span>
+          </button>
+        )}
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {onCancel ? (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={submitting}
+              onClick={onCancel}
+            >
+              {cancelLabel}
+            </Button>
+          ) : null}
+          {showSubmit ? (
+            <Button
+              type="button"
+              disabled={!canSubmit || submitting}
+              onClick={onSubmit}
+            >
+              {submitting ? (busyLabel ?? "Working…") : submitLabel}
+            </Button>
           ) : null}
         </div>
-      ) : null}
-
-      {materialOpen ? (
-        <div className="mt-3 flex flex-wrap items-end gap-2">
-          <label className="min-w-[12rem] flex-1">
-            <span className="sr-only">Material</span>
-            <Select
-              wrapperClassName="w-full"
-              value={materialId === "" ? "" : String(materialId)}
-              onChange={(event) =>
-                setMaterialId(
-                  event.target.value ? Number(event.target.value) : "",
-                )
-              }
-            >
-              <option value="">Choose a material</option>
-              {materials.map((material) => (
-                <option key={material.id} value={material.id}>
-                  {material.courseTitle}: {material.title}
-                </option>
-              ))}
-            </Select>
-          </label>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={addMaterial}
-            disabled={materialId === ""}
-          >
-            Add material
-          </Button>
-        </div>
-      ) : null}
-
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <input
-          id={fileInputId}
-          ref={fileRef}
-          type="file"
-          className="sr-only"
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            event.target.value = "";
-            if (file) addFile(file);
-          }}
-        />
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => fileRef.current?.click()}
-        >
-          <PaperClipIcon className="h-4 w-4" aria-hidden />
-          Add file
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => setMaterialOpen((open) => !open)}
-        >
-          <BookOpenIcon className="h-4 w-4" aria-hidden />
-          Add material
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => setLinkOpen((open) => !open)}
-        >
-          <LinkIcon className="h-4 w-4" aria-hidden />
-          Add link
-        </Button>
-        {showSubmit ? (
-          <Button
-            className="ml-auto"
-            type="button"
-            disabled={!canSubmit || submitting}
-            onClick={onSubmit}
-          >
-            {submitting ? "Posting…" : submitLabel}
-          </Button>
-        ) : null}
       </div>
       {error ? (
         <p className="mt-3 text-[13px] text-[var(--amber-deep)]" role="alert">
           {error}
         </p>
+      ) : null}
+
+      {showAttachmentControls ? (
+        <ComposerAttachModal
+          open={attachOpen}
+          materials={materials}
+          onClose={() => setAttachOpen(false)}
+          onAddMaterial={(material) => {
+            onAttachments([
+              ...attachments,
+              {
+                key: newKey(),
+                kind: "material",
+                materialId: material.id,
+                label: material.title,
+              },
+            ]);
+          }}
+          onAddLink={({ url, label }) => {
+            onAttachments([
+              ...attachments,
+              { key: newKey(), kind: "url", url, label },
+            ]);
+          }}
+        />
       ) : null}
     </div>
   );

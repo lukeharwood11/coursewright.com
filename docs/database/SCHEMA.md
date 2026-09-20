@@ -41,7 +41,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | Announcement | `announcements` | One-way notice to one or more courses, classes, or students (same kind) |
 | AnnouncementRead | `announcement_reads` | Per-user read receipt (clears the notification icon) |
 | Discussion | `discussions` | **P1** — two-way thread for one course or one class |
-| DiscussionMessage | `discussion_messages` | **P1** — post or one-level reply |
+| DiscussionMessage | `discussion_messages` | **P1** — flat post; body plain or Lexical (+ optional quote in body) |
 | DiscussionMessageAttachment | `discussion_message_attachments` | **P1** — file / material / url on a message |
 | DiscussionRead | `discussion_reads` | **P1** — per-user last read (unread badge) |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates + published lesson plans (Sunday–Saturday). |
@@ -768,6 +768,8 @@ CourseSummary, Grade, InstructorNote, ChecklistItem. **OrgSubscription** = Cours
 
 **Who can read:** org staff (all non-deleted discussions in the org). Parents (and invited student emails) when it applies to a linked student: enrolled in that **course** (active + published), **or** a member of that **class**. Class membership can surface a class discussion even without a course enrollment. Materials / this-week / print stay enrollment-gated. The discussions SELECT policy must use the new row’s audience columns (not a re-query by `id`) so PostgREST `INSERT … RETURNING` succeeds for a parent who is allowed to start the thread.
 
+**Members list:** RPC `list_discussion_members(discussion_id)` returns people who can currently see the thread (org staff + qualifying parents). Callable by anyone who can SELECT the discussion; security definer so parents can see the full list.
+
 **Who can soft-delete the discussion:** org staff only.
 
 Course-from-course copy does **not** copy discussions. No versions table — soft-delete only (not course content).
@@ -776,15 +778,14 @@ Course-from-course copy does **not** copy discussions. No versions table — sof
 
 ### DiscussionMessage
 
-A post on a discussion. Optional `parent_id` is a **one-level** reply (parent must be a root message in the **same** discussion — `parent_id` of the parent is null).
+A post on a discussion. The thread is a **flat** conversation (oldest → newest). Optional **Quote** is Teams-style content **inside** `body` (not separate columns / FKs). Composer defaults to **plain text**; a **T** control turns on a **Lexical** rich-text editor for that post.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | discussion_id | bigint | FK → Discussion |
-| parent_id | bigint | FK → DiscussionMessage, nullable — reply-to; same discussion; parent is a root |
 | author_id | uuid | FK → User (`profiles`) |
-| body | text | optional when at least one attachment exists; empty string when unset |
+| body | text | Plain text **or** JSON `{ v:1, format:"plain"\|"lexical", text?\|lexical? }`. Teams-style **Quote** is a Lexical `quote` block inside `lexical` (legacy `quote` field still reads and is folded into Lexical on parse) |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 | deleted_at | timestamptz | soft delete |
@@ -793,6 +794,8 @@ A post on a discussion. Optional `parent_id` is a **one-level** reply (parent mu
 Check: `body` trimmed non-empty **or** the message has ≥ 1 attachment (enforce with trigger after attachments insert, or require body on insert and allow attachment-only via a follow-up write — implementation must not leave an empty root post). Prefer: opening post is inserted with the discussion; attachments added immediately after.
 
 **Who can insert:** anyone who can SELECT the parent discussion.
+
+**Who can edit body:** the author, while the message is not soft-deleted. Attachments are not rewritten in this slice.
 
 **Who can soft-delete:** the author (own row) or org staff.
 
@@ -874,7 +877,7 @@ Course ──< ShareLink
 
 ```
 Organization ──< Discussion (one course | one class)
-Discussion ──< DiscussionMessage (optional parent_id, one-level reply)
+Discussion ──< DiscussionMessage (flat; body may include Teams-style quote)
 DiscussionMessage ──< DiscussionMessageAttachment >── File | Material | url
 Discussion ──< DiscussionRead >── User
 ```

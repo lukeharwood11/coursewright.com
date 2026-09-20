@@ -53,6 +53,22 @@ export const PAGE_EDITOR_NODES = [
   QuizNode,
 ];
 
+/** Discussion composer/viewer — same nodes as pages except quiz. */
+export const DISCUSSION_EDITOR_NODES = [
+  HeadingNode,
+  QuoteNode,
+  ListNode,
+  ListItemNode,
+  LinkNode,
+  AutoLinkNode,
+  TableNode,
+  TableCellNode,
+  TableRowNode,
+  HorizontalRuleNode,
+  VideoNode,
+  FileNode,
+];
+
 const HORIZONTAL_RULE: ElementTransformer = {
   dependencies: [HorizontalRuleNode],
   export: (node) => ($isHorizontalRuleNode(node) ? "***" : null),

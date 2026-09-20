@@ -45,7 +45,18 @@ import { EditorDialog, FieldLabel } from "./toolbarUi";
 
 type DialogKind = "table" | "link" | "video" | null;
 
+/** Which insert tools appear in the toolbar / slash menu. */
+export type PageEditorFeatures = {
+  /** Quiz blocks — page materials only. */
+  quiz: boolean;
+};
+
+export const DEFAULT_PAGE_EDITOR_FEATURES: PageEditorFeatures = {
+  quiz: true,
+};
+
 type PageEditorActions = {
+  features: PageEditorFeatures;
   canAttachFile: boolean;
   uploading: boolean;
   uploadingFilename: string | null;
@@ -71,7 +82,13 @@ export function usePageEditorActions(): PageEditorActions {
   return value;
 }
 
-export function PageEditorActionsProvider({ children }: { children: ReactNode }) {
+export function PageEditorActionsProvider({
+  children,
+  features: featureOverrides,
+}: {
+  children: ReactNode;
+  features?: Partial<PageEditorFeatures>;
+}) {
   const [editor] = useLexicalComposerContext();
   const media = usePageEditorMedia();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -84,6 +101,11 @@ export function PageEditorActionsProvider({ children }: { children: ReactNode })
   const [uploading, setUploading] = useState(false);
   const [uploadingFilename, setUploadingFilename] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const features = useMemo<PageEditorFeatures>(
+    () => ({ ...DEFAULT_PAGE_EDITOR_FEATURES, ...featureOverrides }),
+    [featureOverrides],
+  );
 
   const closeDialog = useCallback(() => {
     setDialog(null);
@@ -106,10 +128,11 @@ export function PageEditorActionsProvider({ children }: { children: ReactNode })
   }, [editor]);
 
   const insertQuiz = useCallback(() => {
+    if (!features.quiz) return;
     editor.update(() => {
       insertDecoratorBlock($createQuizNode());
     });
-  }, [editor]);
+  }, [editor, features.quiz]);
 
   const insertDivider = useCallback(() => {
     editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined);
@@ -178,6 +201,7 @@ export function PageEditorActionsProvider({ children }: { children: ReactNode })
 
   const value = useMemo<PageEditorActions>(
     () => ({
+      features,
       canAttachFile: media != null,
       uploading,
       uploadingFilename,
@@ -194,6 +218,7 @@ export function PageEditorActionsProvider({ children }: { children: ReactNode })
     }),
     [
       attachFile,
+      features,
       insertDivider,
       insertQuiz,
       insertTable,

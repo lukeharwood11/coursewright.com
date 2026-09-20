@@ -8,6 +8,7 @@ Lexical page editor chrome: icon toolbar, slash menu, insert dialogs, floating f
 - Notion-like **/** slash commands and markdown shortcuts
 - Popups for table size, link URL, and video URL
 - Paste image → upload via `materials/databridge` (same path as `/file`)
+- Optional `features` on `PageEditorActionsProvider` (e.g. `quiz: false` for discussions)
 - Course Wright tokens and Heroicons only
 
 ## Don’t

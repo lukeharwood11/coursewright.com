@@ -37,10 +37,10 @@ export function parseDiscussionFilter(
 
 export function discussionFilterLabel(filter: DiscussionFilter): string {
   if (filter === "open") return "Open";
-  if (filter === "answered") return "Answered";
+  if (filter === "answered") return "Resolved";
   return "All";
 }
 
 export function discussionStatusLabel(answeredAt: string | null): string {
-  return answeredAt ? "Answered" : "Open";
+  return answeredAt ? "Resolved" : "Open";
 }

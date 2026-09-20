@@ -35,7 +35,7 @@ export function DiscussionNewPage() {
             New discussion
           </h1>
           <p className="mt-2 text-[14px] text-[var(--ink-soft)]">
-            Start a thread for one course or one class. Everyone on it can reply.
+            Start a thread for one course or one class. Everyone on it can post.
           </p>
           <p className="mt-3 text-[13px]">
             <Link
@@ -82,8 +82,12 @@ export function DiscussionNewPage() {
             First post
           </p>
           <MessageComposer
+            mode={page.mode}
+            onMode={page.setMode}
             body={page.body}
             onBody={page.setBody}
+            lexical={page.lexical}
+            onLexical={page.setLexical}
             attachments={page.attachments}
             onAttachments={page.setAttachments}
             materials={page.materials}

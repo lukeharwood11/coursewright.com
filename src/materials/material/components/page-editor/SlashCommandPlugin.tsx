@@ -71,18 +71,25 @@ export function SlashCommandPlugin() {
       { id: "table", title: "Table", keywords: ["table", "grid", "spreadsheet"] },
       { id: "link", title: "Link", keywords: ["url", "anchor"] },
       { id: "video", title: "Video", keywords: ["embed", "youtube"] },
-      { id: "quiz", title: "Quiz", keywords: ["question", "test"] },
       { id: "divider", title: "Divider", keywords: ["line", "horizontal", "hr"] },
     ];
+    if (actions.features.quiz) {
+      extra.splice(3, 0, {
+        id: "quiz",
+        title: "Quiz",
+        keywords: ["question", "test"],
+      });
+    }
     if (actions.canAttachFile) {
-      extra.splice(4, 0, {
+      const fileIndex = actions.features.quiz ? 4 : 3;
+      extra.splice(fileIndex, 0, {
         id: "file",
         title: "File",
         keywords: ["attach", "upload", "image"],
       });
     }
     return [...blocks, ...extra];
-  }, [actions.canAttachFile]);
+  }, [actions.canAttachFile, actions.features.quiz]);
 
   const options = useMemo(() => {
     const query = queryString ?? "";

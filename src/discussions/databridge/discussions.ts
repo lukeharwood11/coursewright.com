@@ -51,11 +51,11 @@ export type DiscussionAttachmentRecord = {
 export type DiscussionMessageRecord = {
   id: number;
   discussionId: number;
-  parentId: number | null;
   authorId: string;
   authorName: string;
   body: string;
   createdAt: string;
+  updatedAt: string;
   deletedAt: string | null;
   attachments: DiscussionAttachmentRecord[];
 };
@@ -92,7 +92,7 @@ const DISCUSSION_COLUMNS =
 const DISCUSSION_LIST_EMBED = `${DISCUSSION_COLUMNS}, author:profiles!discussions_created_by_fkey(name), course:courses!discussions_course_id_fkey(title), class:classes!discussions_class_id_fkey(title), discussion_reads(user_id, last_read_at), discussion_messages(id, deleted_at)`;
 
 const MESSAGE_EMBED =
-  "id, discussion_id, parent_id, author_id, body, created_at, deleted_at, author:profiles!discussion_messages_author_id_fkey(name), attachments:discussion_message_attachments(id, kind, file_id, material_id, url, label, position, file:files(id, organization_id, filename, storage_ref, mime_type, size_bytes, current_version), material:materials(id, title, course_id, unit_id))";
+  "id, discussion_id, author_id, body, created_at, updated_at, deleted_at, author:profiles!discussion_messages_author_id_fkey(name), attachments:discussion_message_attachments(id, kind, file_id, material_id, url, label, position, file:files(id, organization_id, filename, storage_ref, mime_type, size_bytes, current_version), material:materials(id, title, course_id, unit_id))";
 
 type ProfileName = { name: string } | { name: string }[] | null | undefined;
 
@@ -143,10 +143,10 @@ type AttachmentRow = {
 type MessageRow = {
   id: number;
   discussion_id: number;
-  parent_id: number | null;
   author_id: string;
   body: string;
   created_at: string;
+  updated_at: string;
   deleted_at: string | null;
   author?: ProfileName;
   attachments?: AttachmentRow[] | null;
@@ -161,6 +161,8 @@ export const discussionQueryKeys = {
     ["discussions", "materials", organizationId, courseId] as const,
   parentContext: (organizationId: number, userId: string) =>
     ["discussions", "parentContext", organizationId, userId] as const,
+  members: (discussionId: number) =>
+    ["discussions", "members", discussionId] as const,
 };
 
 function one<T>(value: T | T[] | null | undefined): T | null {
@@ -267,11 +269,11 @@ function toMessage(row: MessageRow): DiscussionMessageRecord {
   return {
     id: row.id,
     discussionId: row.discussion_id,
-    parentId: row.parent_id,
     authorId: row.author_id,
     authorName: authorNameFrom(row.author),
     body: row.body ?? "",
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
     deletedAt: row.deleted_at,
     attachments,
   };
@@ -391,7 +393,6 @@ export async function createDiscussion(args: {
       discussionId: discussion.id,
       authorId: args.createdBy,
       body: args.draft.body,
-      parentId: null,
       attachments: args.attachments,
     });
   } catch (cause) {
@@ -407,7 +408,6 @@ export async function createDiscussionMessage(args: {
   discussionId: number;
   authorId: string;
   body: string;
-  parentId: number | null;
   attachments: AttachmentInsert[];
 }): Promise<void> {
   const db = requireSupabase();
@@ -416,8 +416,7 @@ export async function createDiscussionMessage(args: {
     .insert({
       discussion_id: args.discussionId,
       author_id: args.authorId,
-      parent_id: args.parentId,
-      body: args.body.trim(),
+      body: args.body,
     })
     .select("id")
     .maybeSingle();
@@ -443,7 +442,12 @@ export async function createDiscussionMessage(args: {
     .insert(rows);
 
   if (attachmentError) {
-    if (!args.body.trim()) {
+    const trimmed = args.body.trim();
+    const looksEmpty =
+      !trimmed ||
+      trimmed === '{"v":1,"format":"plain","text":""}' ||
+      (trimmed.startsWith("{") && /"text"\s*:\s*""/.test(trimmed) && !/"quote"/.test(trimmed));
+    if (looksEmpty) {
       await db
         .from("discussion_messages")
         .update({
@@ -501,6 +505,24 @@ export async function softDeleteDiscussionMessage(
     })
     .eq("id", messageId);
   if (error) throw new Error(error.message);
+}
+
+export async function updateDiscussionMessageBody(args: {
+  messageId: number;
+  body: string;
+}): Promise<void> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("discussion_messages")
+    .update({ body: args.body })
+    .eq("id", args.messageId)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) {
+    throw new Error("That message couldn’t be updated. Refresh and try again.");
+  }
 }
 
 export async function markDiscussionRead(
@@ -634,4 +656,26 @@ export async function uploadDiscussionFile(args: {
   file: File;
 }): Promise<FileRecord> {
   return uploadNewFile(args);
+}
+
+export type DiscussionMemberRecord = {
+  userId: string;
+  name: string;
+  role: string;
+};
+
+export async function listDiscussionMembers(
+  discussionId: number,
+): Promise<DiscussionMemberRecord[]> {
+  const db = requireSupabase();
+  const { data, error } = await db.rpc("list_discussion_members", {
+    p_discussion_id: discussionId,
+  });
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map((row) => ({
+    userId: row.user_id,
+    name: row.name?.trim() || "Someone",
+    role: row.role,
+  }));
 }

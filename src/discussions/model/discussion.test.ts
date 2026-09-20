@@ -8,8 +8,14 @@ import {
   parseDiscussionAudience,
   parseDiscussionFilter,
 } from "./audience.ts";
-import { newDiscussionPath, discussionPath, discussionsPath } from "./paths.ts";
-import { nestDiscussionMessages, isNearScrollBottom } from "./thread.ts";
+import { newDiscussionPath, discussionPath, discussionMessagePath, discussionsPath } from "./paths.ts";
+import { isNearScrollBottom } from "./thread.ts";
+import {
+  buildDiscussionQuote,
+  lexicalStateWithQuote,
+  parseDiscussionBody,
+  serializeDiscussionBody,
+} from "./messageBody.ts";
 import {
   countUnreadDiscussions,
   filterDiscussions,
@@ -20,6 +26,7 @@ import {
   visibleDiscussions,
 } from "./unread.ts";
 import {
+  canEditMessage,
   canMarkDiscussionAnswered,
   canRemoveDiscussion,
   canRemoveMessage,
@@ -42,10 +49,10 @@ test("discussion labels use product words", () => {
   assert.equal(discussionAudienceLabel("course"), "Course");
   assert.equal(discussionAudienceLabel("class"), "Class");
   assert.equal(discussionStatusLabel(null), "Open");
-  assert.equal(discussionStatusLabel("2026-01-01T00:00:00Z"), "Answered");
+  assert.equal(discussionStatusLabel("2026-01-01T00:00:00Z"), "Resolved");
   assert.equal(discussionFilterLabel("all"), "All");
   assert.equal(discussionFilterLabel("open"), "Open");
-  assert.equal(discussionFilterLabel("answered"), "Answered");
+  assert.equal(discussionFilterLabel("answered"), "Resolved");
   assert.equal(parseDiscussionFilter("open"), "open");
   assert.equal(parseDiscussionFilter("nope"), "all");
 });
@@ -72,6 +79,10 @@ test("discussionTargetName uses the matching audience title", () => {
 test("discussion paths nest under the org", () => {
   assert.equal(discussionsPath("coop"), "/my/coop/discussions");
   assert.equal(discussionPath("coop", 9), "/my/coop/discussions/9");
+  assert.equal(
+    discussionMessagePath("coop", 9, 42),
+    "/my/coop/discussions/9#message-42",
+  );
   assert.equal(
     newDiscussionPath("coop", { audience: "course", courseId: 3 }),
     "/my/coop/discussions/new?audience=course&courseId=3",
@@ -237,10 +248,16 @@ test("url attachments must be http(s)", () => {
   assert.equal(isHttpUrl("javascript:alert(1)"), false);
   assert.equal(validateUrlAttachment("not a url"), "Use a web address that starts with http:// or https://.");
   assert.equal(
-    validatePost("", [{ kind: "url", url: "https://example.com", label: "" }]),
+    validatePost(
+      { v: 1, format: "plain", text: "" },
+      [{ kind: "url", url: "https://example.com", label: "" }],
+    ),
     null,
   );
-  assert.equal(validatePost("", []), "Write a message, or add a file, material, or link.");
+  assert.equal(
+    validatePost({ v: 1, format: "plain", text: "" }, []),
+    "Write a message, or add a file, material, or link.",
+  );
   assert.equal(messageHasContent("  ", []), false);
 });
 
@@ -271,25 +288,58 @@ test("starter or staff can mark answered; staff Teacher view removes a thread", 
     canRemoveMessage({ userId: "a", authorId: "b", isStaffTeacherView: true }),
     true,
   );
+  assert.equal(
+    canEditMessage({ userId: "a", authorId: "a", deletedAt: null }),
+    true,
+  );
+  assert.equal(
+    canEditMessage({ userId: "a", authorId: "b", deletedAt: null }),
+    false,
+  );
+  assert.equal(
+    canEditMessage({
+      userId: "a",
+      authorId: "a",
+      deletedAt: "2026-01-01T00:00:00Z",
+    }),
+    false,
+  );
 });
 
-test("nestDiscussionMessages keeps one-level replies in conversation order", () => {
-  const nested = nestDiscussionMessages([
-    { id: 2, parentId: null, createdAt: "2026-01-02T00:00:00Z", body: "later root" },
-    { id: 1, parentId: null, createdAt: "2026-01-01T00:00:00Z", body: "first root" },
-    { id: 4, parentId: 1, createdAt: "2026-01-01T02:00:00Z", body: "second reply" },
-    { id: 3, parentId: 1, createdAt: "2026-01-01T01:00:00Z", body: "first reply" },
-    { id: 5, parentId: 3, createdAt: "2026-01-01T03:00:00Z", body: "nested dropped into parent 3 list" },
-  ]);
-  assert.deepEqual(
-    nested.map((row) => row.id),
-    [1, 2],
+test("discussion body keeps plain text and folds quotes into Lexical", () => {
+  assert.deepEqual(parseDiscussionBody("Hello"), {
+    v: 1,
+    format: "plain",
+    text: "Hello",
+  });
+  const legacy = {
+    v: 1,
+    format: "plain",
+    text: "Thanks",
+    quote: { authorName: "Maya", text: "Can we go?" },
+  };
+  const folded = parseDiscussionBody(JSON.stringify(legacy));
+  assert.equal(folded.format, "lexical");
+  if (folded.format === "lexical") {
+    const root = folded.lexical.root as { children?: Array<{ type?: string }> };
+    assert.equal(root.children?.[0]?.type, "quote");
+  }
+  const built = lexicalStateWithQuote({
+    quote: { authorName: "Maya", text: "Can we go?" },
+    followingText: "Thanks",
+  });
+  assert.equal(
+    serializeDiscussionBody({ v: 1, format: "lexical", lexical: built }),
+    JSON.stringify({ v: 1, format: "lexical", lexical: built }),
   );
   assert.deepEqual(
-    nested[0]?.replies.map((row) => row.id),
-    [3, 4],
+    buildDiscussionQuote({
+      authorName: "Maya",
+      body: "Field trip next week?",
+      hasAttachments: false,
+    }),
+    { authorName: "Maya", text: "Field trip next week?" },
   );
-  assert.deepEqual(nested[1]?.replies, []);
 });
 
 test("isNearScrollBottom uses a small threshold", () => {

@@ -186,7 +186,7 @@ Other drafts kept for reference (not in use):
 | Instructor priority flag | **Important now** | pinned, highlight, urgent |
 | Dated weekly course plan | **Lesson plan** | one Sunday–Saturday week; published / unpublished; optional week note + per-day notes and materials; not an assignment object; not email |
 | One-way notice (course, class, or student) | **Announcement** | optional start/end on home; unread notification until opened; not a lesson plan; no reply thread |
-| Two-way thread (one course or one class) | **Discussion** | **P1** — title + audience; everyone on the thread can post; one-level **Reply**; **Answered** / **Open**; not an announcement |
+| Two-way thread (one course or one class) | **Discussion** | **P1** — title + audience; everyone on the thread can post; flat timeline + optional **Quote** in body; plain or Lexical (**T**); **Resolved** / **Open**; not an announcement |
 | Course context blurb | **Summary** | **P1** — auto-drafted “what’s going on this week”; not the course **Description** |
 | Parent view (with account) | **Progress** | grades, notes, checklists, homework |
 | Person being taught | **Student** (profile) | student_profile, learner |

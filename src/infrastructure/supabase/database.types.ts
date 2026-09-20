@@ -1903,6 +1903,14 @@ export type Database = {
           student_profile_id: number
         }[]
       }
+      list_discussion_members: {
+        Args: { p_discussion_id: number }
+        Returns: {
+          name: string
+          role: string
+          user_id: string
+        }[]
+      }
       save_material_page: {
         Args: { p_blocks?: Json; p_material_id: number; p_placement?: Json }
         Returns: number

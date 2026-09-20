@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  CheckCircleIcon,
+  ArrowUturnLeftIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
@@ -14,7 +19,9 @@ import {
   discussionStartedLabel,
 } from "@/discussions/model/time";
 import { isNearScrollBottom } from "@/discussions/model/thread";
+import { DiscussionMembersModal } from "./components/DiscussionMembersModal";
 import { DiscussionMessageItem } from "./components/DiscussionMessageItem";
+import { DiscussionThreadMenu } from "./components/DiscussionThreadMenu";
 import { MessageComposer } from "./components/MessageComposer";
 import { useDiscussion } from "./hooks/useDiscussion";
 
@@ -34,7 +41,7 @@ export function DiscussionPage() {
       : "Discussion · Course Wright";
   }, [page.discussion]);
 
-  const messageCount = page.discussion?.messages.length ?? 0;
+  const messageCount = page.messages.length;
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -46,6 +53,16 @@ export function DiscussionPage() {
     }
     lastCount.current = messageCount;
   }, [messageCount]);
+
+  useEffect(() => {
+    if (page.loading || page.messages.length === 0) return;
+    const hash = window.location.hash.replace(/^#/, "");
+    if (!hash.startsWith("message-")) return;
+    const target = document.getElementById(hash);
+    if (!target) return;
+    stickToBottom.current = false;
+    target.scrollIntoView({ block: "center" });
+  }, [page.loading, page.messages.length, page.discussion?.id]);
 
   if (page.loading) {
     return (
@@ -80,7 +97,7 @@ export function DiscussionPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-6rem)] flex-col px-5 py-8 md:px-8">
+    <div className="flex min-h-[calc(100vh-6rem)] flex-col px-3 py-8 md:px-6 lg:px-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1
@@ -117,21 +134,28 @@ export function DiscussionPage() {
             </Link>
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {page.canMarkAnswered ? (
             <Button
               variant="secondary"
               disabled={page.answered.isPending}
               onClick={() => page.answered.mutate(!page.discussion?.answeredAt)}
             >
+              {page.discussion.answeredAt ? (
+                <ArrowUturnLeftIcon className="h-4 w-4" aria-hidden />
+              ) : (
+                <CheckCircleIcon className="h-4 w-4" aria-hidden />
+              )}
               {page.discussion.answeredAt ? "Mark as open" : "Mark as answered"}
             </Button>
           ) : null}
           {page.canRemoveThread ? (
             <Button variant="secondary" onClick={() => setConfirmRemove(true)}>
-              Remove
+              <TrashIcon className="h-4 w-4" aria-hidden />
+              Delete
             </Button>
           ) : null}
+          <DiscussionThreadMenu onMembers={() => page.setMembersOpen(true)} />
         </div>
       </div>
 
@@ -143,7 +167,7 @@ export function DiscussionPage() {
 
       <div
         ref={scrollerRef}
-        className="relative mt-6 max-w-2xl flex-1 overflow-y-auto"
+        className="relative mt-6 flex-1 overflow-y-auto"
         onScroll={(event) => {
           const el = event.currentTarget;
           stickToBottom.current = isNearScrollBottom(
@@ -154,31 +178,34 @@ export function DiscussionPage() {
           if (stickToBottom.current) setHasNewBelow(false);
         }}
       >
-        <div className="flex flex-col gap-6 pb-4">
-          {page.nested.map((root) => (
-            <div key={root.id}>
-              <DiscussionMessageItem
-                orgSlug={page.organization.slug}
-                message={root}
-                canReply={root.deletedAt == null}
-                canRemove={page.canRemoveMessage(root.authorId)}
-                onReply={() => page.setReplyTo(root)}
-                onRemove={() => setRemoveMessageId(root.id)}
-                isReply={false}
-              />
-              {root.replies.map((reply) => (
-                <DiscussionMessageItem
-                  key={reply.id}
-                  orgSlug={page.organization.slug}
-                  message={reply}
-                  canReply={false}
-                  canRemove={page.canRemoveMessage(reply.authorId)}
-                  onReply={() => undefined}
-                  onRemove={() => setRemoveMessageId(reply.id)}
-                  isReply
-                />
-              ))}
-            </div>
+        <div className="flex flex-col gap-3 pb-4">
+          {page.messages.map((message) => (
+            <DiscussionMessageItem
+              key={message.id}
+              orgSlug={page.organization.slug}
+              discussionId={page.discussion!.id}
+              message={message}
+              isOwn={message.authorId === page.userId}
+              canEdit={page.canEditMessage(message)}
+              canQuote={message.deletedAt == null}
+              canRemove={page.canRemoveMessage(message.authorId)}
+              isEditing={page.editingMessageId === message.id}
+              editMode={page.editMode}
+              onEditMode={page.setEditMode}
+              editBody={page.editBody}
+              onEditBody={page.setEditBody}
+              editLexical={page.editLexical}
+              onEditLexical={page.setEditLexical}
+              editComposeKey={page.editComposeKey}
+              editCanSave={page.editCanSave}
+              editSaving={page.editSaving}
+              editError={page.editError}
+              onStartEdit={() => page.startEdit(message)}
+              onCancelEdit={page.cancelEdit}
+              onSaveEdit={page.saveEdit}
+              onQuote={() => page.quoteMessage(message)}
+              onRemove={() => setRemoveMessageId(message.id)}
+            />
           ))}
         </div>
         {hasNewBelow ? (
@@ -199,33 +226,23 @@ export function DiscussionPage() {
         ) : null}
       </div>
 
-      <div className="mt-4 max-w-2xl">
-        {page.replyTo ? (
-          <p className="mb-2 text-[13px] text-[var(--ink-soft)]">
-            Replying to {page.replyTo.authorName}.{" "}
-            <button
-              type="button"
-              className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-              onClick={() => page.setReplyTo(null)}
-            >
-              Cancel reply
-            </button>
-          </p>
-        ) : null}
+      <div className="mt-4 w-full">
         <MessageComposer
+          mode={page.mode}
+          onMode={page.setMode}
           body={page.body}
           onBody={page.setBody}
+          lexical={page.lexical}
+          onLexical={page.setLexical}
+          composeKey={page.composeKey}
           attachments={page.attachments}
           onAttachments={page.setAttachments}
           materials={page.materials}
           canSubmit={page.canSubmit}
           submitting={page.posting}
-          submitLabel={page.replyTo ? "Reply" : "Post"}
-          placeholder={
-            page.replyTo
-              ? "Write a reply, or add a file, material, or link."
-              : "Write a message, or add a file, material, or link."
-          }
+          submitLabel="Post"
+          busyLabel="Posting…"
+          placeholder="Write a message, or add a file, material, or link."
           error={page.formError}
           onSubmit={page.post}
         />
@@ -233,9 +250,9 @@ export function DiscussionPage() {
 
       <ConfirmDialog
         open={confirmRemove}
-        title="Remove this discussion?"
+        title="Delete this discussion?"
         body="Families won’t see it anymore. You can start a new one later if you need it again."
-        confirmLabel={page.removeDiscussion.isPending ? "Removing…" : "Remove"}
+        confirmLabel={page.removeDiscussion.isPending ? "Deleting…" : "Delete"}
         cancelLabel="Keep it"
         onCancel={() => setConfirmRemove(false)}
         onConfirm={() => {
@@ -250,7 +267,7 @@ export function DiscussionPage() {
       <ConfirmDialog
         open={removeMessageId != null}
         title="Remove this message?"
-        body="People will see that the message was removed. Replies stay in place."
+        body="People will see that the message was removed. Quotes of it stay on later posts."
         confirmLabel={page.removeMessage.isPending ? "Removing…" : "Remove"}
         cancelLabel="Keep it"
         onCancel={() => setRemoveMessageId(null)}
@@ -260,6 +277,13 @@ export function DiscussionPage() {
           setRemoveMessageId(null);
           page.removeMessage.mutate(id);
         }}
+      />
+      <DiscussionMembersModal
+        open={page.membersOpen}
+        members={page.members}
+        loading={page.membersLoading}
+        error={page.membersError}
+        onClose={() => page.setMembersOpen(false)}
       />
     </div>
   );

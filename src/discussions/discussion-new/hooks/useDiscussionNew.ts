@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import type { SerializedEditorState } from "lexical";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
@@ -18,14 +19,21 @@ import {
 import { discussionPath, discussionsPath } from "@/discussions/model/paths";
 import type { DiscussionAudience } from "@/discussions/model/audience";
 import {
-  discussionDraftCanStart,
+  emptyLexicalState,
+  serializeDiscussionBody,
+} from "@/discussions/model/messageBody";
+import {
   draftFromSearchParams,
   emptyDiscussionDraft,
-  validateDiscussionDraft,
+  messageBodyHasContent,
+  validateUrlAttachment,
   type AttachmentContent,
   type DiscussionDraft,
 } from "@/discussions/model/validate";
-import type { PendingAttachment } from "@/discussions/discussion/components/MessageComposer";
+import type {
+  ComposerMode,
+  PendingAttachment,
+} from "@/discussions/discussion/components/MessageComposer";
 
 export const DISCUSSION_FORM_ID = "discussion-form";
 
@@ -47,6 +55,8 @@ export function useDiscussionNew() {
     ...emptyDiscussionDraft(),
     ...prefill,
   }));
+  const [mode, setMode] = useState<ComposerMode>("plain");
+  const [lexical, setLexical] = useState<SerializedEditorState>(emptyLexicalState);
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -142,6 +152,16 @@ export function useDiscussionNew() {
           },
   );
 
+  const openingBody =
+    mode === "plain"
+      ? ({ v: 1 as const, format: "plain" as const, text: draft.body })
+      : ({ v: 1 as const, format: "lexical" as const, lexical });
+
+  const draftForSave: DiscussionDraft = {
+    ...draft,
+    body: serializeDiscussionBody(openingBody),
+  };
+
   const initial: DiscussionDraft = { ...emptyDiscussionDraft(), ...prefill };
   const hasChanges =
     draft.audience !== initial.audience ||
@@ -149,9 +169,19 @@ export function useDiscussionNew() {
     draft.classId !== initial.classId ||
     draft.title !== initial.title ||
     draft.body !== initial.body ||
+    mode === "lexical" ||
     attachments.length > 0;
 
-  const canSave = discussionDraftCanStart(draft, attachmentContent);
+  const canSave =
+    Boolean(draft.audience) &&
+    (draft.audience !== "course" || draft.courseId != null) &&
+    (draft.audience !== "class" || draft.classId != null) &&
+    Boolean(draft.title.trim()) &&
+    messageBodyHasContent(openingBody, attachmentContent) &&
+    attachmentContent.every(
+      (attachment) =>
+        attachment.kind !== "url" || validateUrlAttachment(attachment.url) == null,
+    );
 
   function setAudience(audience: DiscussionAudience) {
     setDraft((current) => ({
@@ -164,10 +194,39 @@ export function useDiscussionNew() {
 
   const save = useMutation({
     mutationFn: async () => {
-      const message = validateDiscussionDraft(draft, attachmentContent);
-      if (message) {
+      if (!draft.audience) {
+        const message = "Choose a course or a class.";
         setFormError(message);
         throw new Error(message);
+      }
+      if (draft.audience === "course" && draft.courseId == null) {
+        const message = "Choose a course.";
+        setFormError(message);
+        throw new Error(message);
+      }
+      if (draft.audience === "class" && draft.classId == null) {
+        const message = "Choose a class.";
+        setFormError(message);
+        throw new Error(message);
+      }
+      if (!draft.title.trim()) {
+        const message = "Add a title so people know what this is about.";
+        setFormError(message);
+        throw new Error(message);
+      }
+      if (!messageBodyHasContent(openingBody, attachmentContent)) {
+        const message = "Write a first post, or add a file, material, or link.";
+        setFormError(message);
+        throw new Error(message);
+      }
+      for (const attachment of attachmentContent) {
+        if (attachment.kind === "url") {
+          const urlMessage = validateUrlAttachment(attachment.url);
+          if (urlMessage) {
+            setFormError(urlMessage);
+            throw new Error(urlMessage);
+          }
+        }
       }
       setFormError(null);
       const uploaded = await Promise.all(
@@ -201,7 +260,7 @@ export function useDiscussionNew() {
       return createDiscussion({
         organizationId: organization.id,
         createdBy: user.id,
-        draft,
+        draft: draftForSave,
         attachments: uploaded,
       });
     },
@@ -217,6 +276,10 @@ export function useDiscussionNew() {
     organization,
     title: draft.title,
     body: draft.body,
+    mode,
+    setMode,
+    lexical,
+    setLexical,
     audience: draft.audience,
     courseId: draft.courseId,
     classId: draft.classId,

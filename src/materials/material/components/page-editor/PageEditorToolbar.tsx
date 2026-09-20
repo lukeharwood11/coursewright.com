@@ -235,11 +235,13 @@ export function PageEditorToolbar() {
           label="Video"
           onClick={actions.openVideoDialog}
         />
-        <DropdownItem
-          icon={<QuestionMarkCircleIcon className="h-4 w-4" />}
-          label="Quiz"
-          onClick={actions.insertQuiz}
-        />
+        {actions.features.quiz ? (
+          <DropdownItem
+            icon={<QuestionMarkCircleIcon className="h-4 w-4" />}
+            label="Quiz"
+            onClick={actions.insertQuiz}
+          />
+        ) : null}
         {actions.canAttachFile ? (
           <DropdownItem
             icon={<PaperClipIcon className="h-4 w-4" />}

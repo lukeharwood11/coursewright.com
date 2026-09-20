@@ -6,7 +6,7 @@
 -- the new tuple. Evaluate parent visibility from audience columns instead.
 -- Enrollment / class-membership gates are unchanged.
 --
--- Apply this file if 20260922000000_discussions.sql is already on the linked
+-- Apply this file if 20260922000001_discussions.sql is already on the linked
 -- database. A fresh migrate / nuke applies both; this migration is idempotent.
 
 create or replace function private.parent_can_view_discussion(

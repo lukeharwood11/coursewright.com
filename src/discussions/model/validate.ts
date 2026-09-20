@@ -2,6 +2,10 @@ import {
   parseDiscussionAudience,
   type DiscussionAudience,
 } from "./audience";
+import {
+  discussionBodyHasText,
+  type DiscussionMessageBody,
+} from "./messageBody";
 
 export type DiscussionDraft = {
   audience: DiscussionAudience | null;
@@ -81,6 +85,13 @@ export function messageHasContent(
   return Boolean(body.trim()) || attachments.length > 0;
 }
 
+export function messageBodyHasContent(
+  body: DiscussionMessageBody,
+  attachments: AttachmentContent[],
+): boolean {
+  return discussionBodyHasText(body) || attachments.length > 0;
+}
+
 export function validateUrlAttachment(url: string): string | null {
   if (!url.trim()) return "Add a link.";
   if (!isHttpUrl(url)) return "Use a web address that starts with http:// or https://.";
@@ -119,10 +130,10 @@ export function discussionDraftCanStart(
 }
 
 export function validatePost(
-  body: string,
+  body: DiscussionMessageBody,
   attachments: AttachmentContent[],
 ): string | null {
-  if (!messageHasContent(body, attachments)) {
+  if (!messageBodyHasContent(body, attachments)) {
     return "Write a message, or add a file, material, or link.";
   }
   for (const attachment of attachments) {
@@ -152,4 +163,12 @@ export function canRemoveMessage(args: {
   isStaffTeacherView: boolean;
 }): boolean {
   return args.isStaffTeacherView || args.userId === args.authorId;
+}
+
+export function canEditMessage(args: {
+  userId: string;
+  authorId: string;
+  deletedAt: string | null;
+}): boolean {
+  return args.deletedAt == null && args.userId === args.authorId;
 }

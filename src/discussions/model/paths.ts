@@ -6,6 +6,18 @@ export function discussionPath(orgSlug: string, discussionId: number): string {
   return `${discussionsPath(orgSlug)}/${discussionId}`;
 }
 
+export function discussionMessagePath(
+  orgSlug: string,
+  discussionId: number,
+  messageId: number,
+): string {
+  return `${discussionPath(orgSlug, discussionId)}#message-${messageId}`;
+}
+
+export function discussionMessageElementId(messageId: number): string {
+  return `message-${messageId}`;
+}
+
 export type NewDiscussionParams = {
   audience?: "course" | "class";
   courseId?: number;
