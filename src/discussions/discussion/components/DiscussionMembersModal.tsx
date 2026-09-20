@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Button } from "@/ui/Button";
 import { UserCard } from "@/organizations/user-card/UserCard";
 import type { DiscussionMemberRecord } from "@/discussions/databridge/discussions";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 export function DiscussionMembersModal({
   orgSlug,
@@ -21,6 +22,7 @@ export function DiscussionMembersModal({
 }) {
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
+  useToastOnError(open ? error : null);
 
   useEffect(() => {
     if (!open) return;
@@ -63,11 +65,6 @@ export function DiscussionMembersModal({
         <div className="mt-4 min-h-0 flex-1 overflow-y-auto">
           {loading ? (
             <p className="text-[14px] text-[var(--ink-soft)]">Loading…</p>
-          ) : null}
-          {error ? (
-            <p className="text-[13px] text-[var(--amber-deep)]" role="alert">
-              {error}
-            </p>
           ) : null}
           {!loading && !error && members.length === 0 ? (
             <p className="text-[14px] text-[var(--ink-soft)]">

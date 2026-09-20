@@ -15,9 +15,9 @@ Course builder home — structure units/materials for this offering; jump to ros
 ## Behavior
 
 - Loads one course instance; instructor chrome for builders, simpler read chrome for parents (including staff **Parent view**).
-- Browse **top-level materials** (no unit) **above** ordered units; materials may also nest under units.
+- Browse **top-level materials** (no unit) **above** ordered units when any exist. **Add material** is on the unit (not at course top level).
 - Optional **outline** panel (file-tree of top-level materials + units with nested materials); open by default on large screens (`lg`+), closed on smaller screens; **Show outline** / hide so it is not always open.
-- Add unit / add material (top-level or into a unit) when permitted.
+- Add unit / add material **into a unit** when permitted.
 - **Lesson plans:** staff list weekly plans on this course; **Add lesson plan** → [LESSON_PLAN](./LESSON_PLAN.md) new. Opening a row goes to the plan. Families see **published** plans only. An info icon next to the heading explains what a lesson plan is.
 - **Create Announcement:** staff toolbar on this page posts a one-way [ANNOUNCEMENT](./ANNOUNCEMENT.md) to this course (`…/announcements/new?audience=course&courseId=`). On small screens this action lives under the header **More** menu.
 - **Start a discussion** (**P1**): same course as the audience (`…/discussions/new?audience=course&courseId=`). Families on the parent variant can start one when their child is enrolled (active + published). On small screens this action lives under **More**.
@@ -40,15 +40,15 @@ Course builder home — structure units/materials for this offering; jump to ros
 
 ## Contents
 
-- Course title; badges for status, published (green check) / unpublished, dates, subject / area, grade metadata ([STYLE_GUIDE.md](../STYLE_GUIDE.md) instructor course pattern)
+- Course title; badges for status, published (green check) / unpublished, dates, subject / area, **grade metadata in one pill** (comma-separated, org scheme order)
 - Optional description and location under the title
 - Unpublished warning + Publish (instructors); published courses have no visibility banner here
 - Collapsible **outline** (left on large screens): tree of top-level materials and units → materials; links open [UNIT](./UNIT.md) / [MATERIAL](./MATERIAL.md)
-- Top-level materials list (above units) with **title**, **description**, kind, **Print**; add material here or into a unit
+- Top-level materials list (above units) with **title**, **description**, kind, **Print** when any exist; add material into a unit
 - Units list (ordered) → [UNIT](./UNIT.md); add unit
 - Materials under units: **title**, **description**, kind/badge, dates, print affordance
 - Sidebar / secondary: teachers, link to [COURSE_ROSTER](./COURSE_ROSTER.md)
-- Actions: Add material (page · link · file), **Add lesson plan**, Create Announcement / **Start a discussion** (**P1**) / Settings (header on `md+`; those three also under **More** on small screens), **More** menu (Share / Duplicate), Print entry points; **Create course from this course** (copy → new independent course)
+- Actions: Add unit then **Add material** (page · link · file) on the unit, **Add lesson plan**, Create Announcement / **Start a discussion** (**P1**) / Settings (header on `md+`; those three also under **More** on small screens), **More** menu (Share / Duplicate), Print entry points; **Create course from this course** (copy → new independent course)
 - Versioning / soft-delete awareness for dangerous actions (TBD exact UX)
 
 ## Primary actions

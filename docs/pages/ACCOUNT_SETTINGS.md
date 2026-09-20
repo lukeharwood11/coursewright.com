@@ -47,6 +47,7 @@ Cross-org account controls — not scoped to a single organization (contrast [OR
 - [USER_PROFILE](./USER_PROFILE.md) — how others in an org see you
 - [ORG_PICKER](./ORG_PICKER.md) — back to org list
 - [ORG_HOME](./ORG_HOME.md) — return to last org (when known)
+- [FEEDBACK](./FEEDBACK.md) — Send feedback (account menu)
 - [LOGIN](./LOGIN.md) — after sign-out
 
 ## Notes

@@ -36,7 +36,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 ## Contents
 
 - Member list → [STUDENT_PROFILE](./STUDENT_PROFILE.md)
-- **Teachers** (add/remove for owners and admins)
+- **Teachers** (add/remove for owners and admins). An info icon next to the heading explains that they are optional class leads and are notified in Activity when someone posts in a discussion for this class.
 - **Add students** panel (batch existing + batch new)
 - Remove from class on each row
 - Empty state: add students when ready

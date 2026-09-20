@@ -10,12 +10,12 @@ Instructors/editors on the course (**P0**) or template (**P1**). Parents: read +
 
 ## Purpose
 
-One **unit** — optional ordered group of materials; optional dates. Materials may also sit at **course top level** (no unit) — see [COURSE](./COURSE.md).
+Materials may also sit at **course top level** (no unit) from older data — see [COURSE](./COURSE.md). New materials are added on a unit.
 
 
 ## Behavior
 
-- Edit unit title / dates when permitted; **Save unit** / **Cancel** in the page header (Save disabled when unchanged; Cancel goes back, confirms if dirty).
+- Edit unit title / dates when permitted; **Edit** opens the form; **Save unit** / **Cancel** in the page header (Save disabled when unchanged; Cancel leaves edit view on this unit, confirms if dirty).
 - Show one unit in a **course** context (**P0**). Template URL tree is **P1**.
 - List materials in this unit; add material (**page** / **link** / **file**) / reorder when permitted. Parents (and staff **Parent view**) only see **published** materials.
 - Course-level materials (no unit) appear on [COURSE](./COURSE.md) **above** the units list — not on this page.

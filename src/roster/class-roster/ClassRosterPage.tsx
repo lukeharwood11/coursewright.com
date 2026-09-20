@@ -1,15 +1,19 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { ChatBubbleLeftRightIcon, MegaphoneIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 import { Button, ButtonLink } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
 import { ClassLeadsSection } from "./components/ClassLeadsSection";
 import { useClassRoster } from "./hooks/useClassRoster";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 export function ClassRosterPage() {
   const roster = useClassRoster();
+  useToastOnError(roster.error);
 
   useEffect(() => {
     document.title = roster.classGroup
@@ -19,9 +23,7 @@ export function ClassRosterPage() {
 
   if (roster.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading class…</p>
-      </div>
+      <PageLoading label="Loading class…" />
     );
   }
 
@@ -37,9 +39,6 @@ export function ClassRosterPage() {
         <p className="mt-2 text-[14.5px] text-[var(--ink-soft)]">
           It may have been removed, or you may not have access.
         </p>
-        {roster.error ? (
-          <p className="mt-2 text-[13px] text-[var(--amber-deep)]">{roster.error}</p>
-        ) : null}
         <p className="mt-4 text-[13px]">
           <Link
             to={`/my/${roster.organization.slug}/roster`}
@@ -65,10 +64,6 @@ export function ClassRosterPage() {
       >
         {roster.classGroup.title}
       </h1>
-      <p className="mt-1 max-w-xl text-[14px] text-[var(--ink-soft)]">
-        A class is a group of students — not a course. Adding someone here does
-        not enroll them in a course.
-      </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <ButtonLink
           variant="secondary"
@@ -77,6 +72,7 @@ export function ClassRosterPage() {
             classId: roster.classGroup.id,
           })}
         >
+          <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
           Start a discussion
         </ButtonLink>
         <ButtonLink
@@ -86,6 +82,7 @@ export function ClassRosterPage() {
             classId: roster.classGroup.id,
           })}
         >
+          <MegaphoneIcon className="h-5 w-5" aria-hidden />
           Create Announcement
         </ButtonLink>
       </div>
@@ -110,6 +107,7 @@ export function ClassRosterPage() {
           </h2>
           {!roster.panelOpen ? (
             <Button type="button" onClick={roster.openPanel}>
+              <UserPlusIcon className="h-5 w-5" aria-hidden />
               Add students
             </Button>
           ) : null}

@@ -2,6 +2,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import type { StaffDashboard } from "@/organizations/model/staffDashboard";
 import { newCoursePath } from "@/courses/model/paths";
 import { ButtonLink } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import {
   StaffAttentionList,
   StaffCoursesPreview,
@@ -15,7 +16,7 @@ export function StaffHome({
   orgSlug,
   dashboard,
   loading,
-  error,
+  error: _error,
 }: {
   orgName: string;
   orgSlug: string;
@@ -44,13 +45,7 @@ export function StaffHome({
       </div>
 
       {loading ? (
-        <p className="mt-6 text-[14px] text-[var(--ink-soft)]">Loading overview…</p>
-      ) : null}
-
-      {error ? (
-        <p className="mt-6 text-[13.5px] text-[var(--amber-deep)]" role="alert">
-          {error}
-        </p>
+        <PageLoading embedded label="Loading overview…" />
       ) : null}
 
       {dashboard && !loading ? (

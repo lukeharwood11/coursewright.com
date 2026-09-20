@@ -1,5 +1,6 @@
 import { UserCard } from "@/organizations/user-card/UserCard";
 import { Button } from "@/ui/Button";
+import { InfoHint } from "@/ui/InfoHint";
 import type { ClassLeader } from "@/roster/databridge/classes";
 
 const controlClass = [
@@ -32,11 +33,14 @@ export function ClassLeadsSection({
 }) {
   return (
     <section className="mt-8 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-      <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Teachers</h2>
-      <p className="mt-1 max-w-xl text-[13.5px] text-[var(--ink-soft)]">
-        Optional class leads. They’re notified in Activity when someone posts in
-        a discussion for this class. A class can have more than one, or none.
-      </p>
+      <div className="flex items-center gap-1.5">
+        <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Teachers</h2>
+        <InfoHint label="What is a class lead?">
+          Optional class leads. They’re notified in Activity when someone posts
+          in a discussion for this class. A class can have more than one, or
+          none.
+        </InfoHint>
+      </div>
       {leads.length === 0 ? (
         <p className="mt-3 text-[13.5px] text-[var(--ink-faint)]">
           No teachers assigned yet.

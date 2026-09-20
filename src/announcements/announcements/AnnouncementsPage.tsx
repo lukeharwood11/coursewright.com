@@ -1,7 +1,10 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { MegaphoneIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
+import { PageLoading } from "@/ui/PageLoading";
 import { ButtonLink } from "@/ui/Button";
+import { useToastOnError } from "@/ui/useToastOnError";
 import {
   announcementAudienceLabel,
   announcementTargetNames,
@@ -25,6 +28,7 @@ const GROUP_ORDER = ["available", "upcoming", "ended"] as const;
 
 export function AnnouncementsPage() {
   const page = useAnnouncements();
+  useToastOnError(page.error);
 
   useEffect(() => {
     document.title = "Announcements · Course Wright";
@@ -32,9 +36,7 @@ export function AnnouncementsPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading announcements…</p>
-      </div>
+      <PageLoading label="Loading announcements…" />
     );
   }
 
@@ -50,11 +52,6 @@ export function AnnouncementsPage() {
         <p className="mt-1 max-w-xl text-[14px] leading-relaxed text-[var(--ink-soft)]">
           Notes from your teachers. Opening one marks it as seen.
         </p>
-        {page.error ? (
-          <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-            {page.error}
-          </p>
-        ) : null}
         <ParentAnnouncementsList
           orgSlug={page.organization.slug}
           items={page.parentAnnouncements}
@@ -78,15 +75,10 @@ export function AnnouncementsPage() {
           </h1>
         </div>
         <ButtonLink to={newAnnouncementPath(page.organization.slug)}>
+          <MegaphoneIcon className="h-5 w-5" aria-hidden />
           New announcement
         </ButtonLink>
       </div>
-
-      {page.error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {page.error}
-        </p>
-      ) : null}
 
       {page.announcements.length === 0 ? (
         <p className="mt-6 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">

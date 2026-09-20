@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
   addCourseInstructor,
@@ -12,9 +13,10 @@ import {
   listOrgStaffForPicker,
   removeCourseInstructor,
 } from "@/courses/databridge/courses";
+import { staffCanManageCourse } from "@/courses/model/access";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import { getOrganization } from "@/organizations/databridge/organizations";
-import { canManageOrgSettings, isStaffRole } from "@/organizations/model/role";
+import { canManageOrgSettings } from "@/organizations/model/role";
 import {
   classQueryKeys,
   listClasses,
@@ -44,21 +46,32 @@ import {
 export function useCourseRoster() {
   const { courseId: courseIdParam } = useParams();
   const courseId = courseIdParam ? Number(courseIdParam) : NaN;
-  const { organization, role } = useOrgShell();
+  const { organization, role, parentPresentation } = useOrgShell();
+  const user = useAuthedUser();
   const queryClient = useQueryClient();
-  const canEdit = isStaffRole(role);
-  const canManageInstructors = canManageOrgSettings(role);
   const courseReady = Number.isFinite(courseId);
   const [addUserId, setAddUserId] = useState("");
+  const canManageInstructors = canManageOrgSettings(role);
 
   const courseQuery = useQuery({
     queryKey: courseQueryKeys.detail(courseId),
     queryFn: () => getCourse(courseId),
     enabled: courseReady,
   });
+  const instructorsQuery = useQuery({
+    queryKey: courseQueryKeys.instructors(courseId),
+    queryFn: () => listCourseInstructors(courseId),
+    enabled: courseReady,
+  });
 
   const course = courseQuery.data ?? null;
   const belongsHere = course?.organizationId === organization.id;
+  const canEdit = staffCanManageCourse({
+    role,
+    parentPresentation,
+    userId: user.id,
+    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+  });
 
   const enrollmentsQuery = useQuery({
     queryKey: enrollmentQueryKeys.course(courseId),
@@ -81,12 +94,6 @@ export function useCourseRoster() {
   const organizationQuery = useQuery({
     queryKey: orgQueryKeys.detail(organization.id),
     queryFn: () => getOrganization(organization.id),
-  });
-
-  const instructorsQuery = useQuery({
-    queryKey: courseQueryKeys.instructors(courseId),
-    queryFn: () => listCourseInstructors(courseId),
-    enabled: courseReady && belongsHere && canEdit,
   });
 
   const staffQuery = useQuery({
@@ -270,7 +277,10 @@ export function useCourseRoster() {
     availableStudents,
     classes: classesQuery.data ?? [],
     gradeLabels: organizationQuery.data?.gradeLabels ?? [],
-    loading: courseQuery.isLoading || enrollmentsQuery.isLoading,
+    loading:
+      courseQuery.isLoading ||
+      instructorsQuery.isLoading ||
+      enrollmentsQuery.isLoading,
     error: courseQuery.error
       ? courseQuery.error.message
       : enrollmentsQuery.error

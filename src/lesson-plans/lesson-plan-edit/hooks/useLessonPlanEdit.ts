@@ -25,7 +25,8 @@ import {
 } from "@/lesson-plans/model/validate";
 import { toggleMaterialId } from "@/lesson-plans/model/materials";
 import type { LessonPlanVisibility } from "@/lesson-plans/model/visibility";
-import { getCourse } from "@/courses/databridge/courses";
+import { getCourse, courseQueryKeys, listCourseInstructors } from "@/courses/databridge/courses";
+import { staffCanManageCourse } from "@/courses/model/access";
 import { coursePath } from "@/courses/model/paths";
 import {
   listMaterialsForCourse,
@@ -46,13 +47,18 @@ export function useLessonPlanEdit() {
   const user = useAuthedUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const canEdit = staffCanEdit(role, parentPresentation);
+  const staffEdit = staffCanEdit(role, parentPresentation);
   const requestedWeek = useMemo(() => weekFromParam(search.get("week")), [search]);
 
   const courseQuery = useQuery({
     queryKey: ["courses", "detail", courseId],
     queryFn: () => getCourse(courseId),
     enabled: Number.isFinite(courseId),
+  });
+  const instructorsQuery = useQuery({
+    queryKey: courseQueryKeys.instructors(courseId),
+    queryFn: () => listCourseInstructors(courseId),
+    enabled: Number.isFinite(courseId) && staffEdit,
   });
   const existingWeekQuery = useQuery({
     queryKey: [...lessonPlanQueryKeys.course(courseId), requestedWeek.start],
@@ -76,6 +82,12 @@ export function useLessonPlanEdit() {
   });
 
   const course = courseQuery.data ?? null;
+  const canEdit = staffCanManageCourse({
+    role,
+    parentPresentation,
+    userId: user.id,
+    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+  });
   const loaded = isNew ? null : (planQuery.data ?? null);
   const newTitleDefault = course ? defaultLessonPlanTitle(course.title) : "";
   const [title, setTitle] = useState("");
@@ -215,6 +227,7 @@ export function useLessonPlanEdit() {
     setVisibility,
     loading:
       courseQuery.isLoading ||
+      instructorsQuery.isLoading ||
       materialsQuery.isLoading ||
       unitsQuery.isLoading ||
       (!isNew && planQuery.isLoading) ||

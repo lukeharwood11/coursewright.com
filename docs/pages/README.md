@@ -20,6 +20,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [INVITE_CLAIM](./INVITE_CLAIM.md) | `/invite/<token>` |
 | [ORG_PICKER](./ORG_PICKER.md) | `/my` |
 | [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) | `/my/settings` |
+| [FEEDBACK](./FEEDBACK.md) | `/my/feedback` · `/my/<org-slug>/feedback` |
 | [ORG_HOME](./ORG_HOME.md) | `/my/<org-slug>` |
 | [CALENDAR](./CALENDAR.md) | `/my/<org-slug>/calendar` |
 | [USER_PROFILE](./USER_PROFILE.md) | `/my/<org-slug>/people/<user_id>` |
@@ -89,6 +90,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Parent summary layer / Progress tab | **P1** |
 | Discussions | **P1** — [DISCUSSIONS](./DISCUSSIONS.md), [DISCUSSION](./DISCUSSION.md) |
 | Activity / notifications | **P1** — [ACTIVITY](./ACTIVITY.md) |
+| Product feedback | **P1** — [FEEDBACK](./FEEDBACK.md) |
 | Billing UI | **P1** (marketing on [PRICING](./PRICING.md); stub on [ORG_SETTINGS](./ORG_SETTINGS.md)) |
 | Print whole course | Explicitly out of scope for initial release |
 | Student accounts / cross-org families | **P2** |

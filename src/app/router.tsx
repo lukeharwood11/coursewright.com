@@ -9,6 +9,7 @@ import { PrintLayout } from "@/app/layouts/PrintLayout";
 import { StubPage } from "@/app/StubPage";
 import { CourseListPage, CoursePage, CourseRosterPage, CourseSettingsPage } from "@/courses";
 import { CalendarPage } from "@/calendar";
+import { FeedbackPage } from "@/feedback";
 import {
   AnnouncementEditPage,
   AnnouncementPage,
@@ -93,10 +94,12 @@ export function AppRoutes() {
         <Route element={<AccountLayout />}>
           <Route path="/my" element={<OrgPickerPage />} />
           <Route path="/my/settings" element={<AccountSettingsPage />} />
+          <Route path="/my/feedback" element={<FeedbackPage />} />
         </Route>
         <Route path="/my/:orgSlug" element={<OrgLayout />}>
           <Route element={<OrgChrome />}>
             <Route index element={<OrgHomePage />} />
+            <Route path="feedback" element={<FeedbackPage />} />
             <Route
               path="settings"
               element={

@@ -26,7 +26,7 @@ View (and edit) a single material placement — the thing parents open from this
 - View URL is the material path without `/edit`; edit appends `/edit`.
 - Print → [PRINT](./PRINT.md) (`…/print`) → generated PDF in-app preview → Download / Print; no export wizard.
 - Instance content promote to template is **P1** (opt-in); overridden copies do not receive template sync for that resource.
-- File replace keeps prior blobs (versioning); audio uses a shared custom in-app player (play/pause, scrub, time, 1×/1.5×); video uses native `<video>`.
+- File replace keeps prior blobs (versioning); audio uses a shared custom in-app player (play/pause, scrub, time, 1×/1.5×); video uses native `<video>`. Instructors can record a microphone clip (under 5 minutes) when adding or replacing a file material.
 - **file** materials always offer **Download** (signed URL with attachment disposition). **PDF** materials are a compact file card with **Preview** (fullscreen) — no inline preview by default. Images still show an inline preview with **Expand**. Audio plays inline; parents can keep reading a **page** material while an in-page audio attachment plays.
 
 ## Data shown
@@ -68,7 +68,7 @@ View (and edit) a single material placement — the thing parents open from this
 
 - **page** — Lexical editor: playground-style icon toolbar, `/` slash commands, insert popups for table size / link / video; headings, lists, quotes, tables, links, **video** URL embeds, in-page file attachments (paste image uploads; images show as clean pictures without filename chrome; PDFs are a compact card with **Preview** fullscreen), **quizzes** (correct answers on the block; staff see the key, parents see questions only); printable block layout
 - **link** — external URL; print → title + URL/QR
-- **file** — org File; versioned blobs; **Download**; PDF → compact card + **Preview**; image → preview + **Expand**; audio → shared custom player (same as in-page file attachments)
+- **file** — org File; versioned blobs; **Download**; PDF → compact card + **Preview**; image → preview + **Expand**; audio → shared custom player (same as in-page file attachments). On add/replace, instructors may **record a clip** (under 5 minutes) with the device microphone instead of picking a file
 - Quiz author + print is a **page block** (not a separate material kind)
 - Forms — **not P0**
 
@@ -80,7 +80,7 @@ View (and edit) a single material placement — the thing parents open from this
 ### Edit
 
 - **Edit URL:** `…/materials/<material_id>/edit` (locked — [URLS.md](../URLS.md))
-- Placement fields + page content: **Save** / **Cancel** in the page header; Save disabled when unchanged; Cancel goes back (confirms if dirty)
+- Placement fields + page content: **Save** / **Cancel** in the page header; Save disabled when unchanged; Cancel returns to the material view (confirms if dirty)
 - **page:** [Lexical](https://lexical.dev/) WYSIWYG with a playground-style **icon** toolbar (not word buttons). Headings, lists, quotes, tables, links, video URL embeds, in-page files, **quizzes** with marked correct answers. Type `/` to insert a block. Table insert asks for rows and columns. A version is stored only when the instructor saves and something changed — not per keystroke.
 - **link / file:** edit URL or replace file (file replace → new FileVersion)
 - Versioning / who changed what / revert dangerous actions

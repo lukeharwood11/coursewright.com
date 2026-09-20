@@ -6,8 +6,10 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
+import { PageLoading } from "@/ui/PageLoading";
 import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
+import { useToastOnError } from "@/ui/useToastOnError";
 import {
   discussionAudienceLabel,
   discussionStatusLabel,
@@ -28,6 +30,7 @@ import { useDiscussion } from "./hooks/useDiscussion";
 export function DiscussionPage() {
   const page = useDiscussion();
   const navigate = useNavigate();
+  useToastOnError(page.error);
   const { hash: locationHash } = useLocation();
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [removeMessageId, setRemoveMessageId] = useState<number | null>(null);
@@ -67,9 +70,7 @@ export function DiscussionPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading discussion…</p>
-      </div>
+      <PageLoading label="Loading discussion…" />
     );
   }
 
@@ -159,12 +160,6 @@ export function DiscussionPage() {
           <DiscussionThreadMenu onMembers={() => page.setMembersOpen(true)} />
         </div>
       </div>
-
-      {page.error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {page.error}
-        </p>
-      ) : null}
 
       <div
         ref={scrollerRef}

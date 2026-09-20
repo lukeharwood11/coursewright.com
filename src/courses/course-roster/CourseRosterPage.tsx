@@ -1,15 +1,19 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { coursePath, coursesPath } from "@/courses/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
 import { InstructorsSection } from "@/courses/instructors/InstructorsSection";
 import { useCourseRoster } from "./hooks/useCourseRoster";
 import { useCourseParentInvites } from "./hooks/useCourseParentInvites";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 export function CourseRosterPage() {
   const roster = useCourseRoster();
+  useToastOnError(roster.error);
   const students = roster.enrollments.map((enrollment) => enrollment.student);
   const parentInvites = useCourseParentInvites(students);
 
@@ -21,9 +25,7 @@ export function CourseRosterPage() {
 
   if (roster.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading roster…</p>
-      </div>
+      <PageLoading label="Loading roster…" />
     );
   }
 
@@ -39,9 +41,6 @@ export function CourseRosterPage() {
         <p className="mt-2 text-[14.5px] text-[var(--ink-soft)]">
           This roster isn’t available.
         </p>
-        {roster.error ? (
-          <p className="mt-2 text-[13px] text-[var(--amber-deep)]">{roster.error}</p>
-        ) : null}
         <p className="mt-4 text-[13px]">
           <Link
             to={coursesPath(roster.organization.slug)}
@@ -71,10 +70,6 @@ export function CourseRosterPage() {
         Roster
       </h1>
       <p className="mt-1 text-[14px] text-[var(--ink-soft)]">{roster.course.title}</p>
-      <p className="mt-3 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-        Students in this course. You can print materials without anyone on this
-        list.
-      </p>
       <p className="mt-2 text-[13px]">
         <Link
           to={coursePath(roster.organization.slug, roster.course.id)}
@@ -113,6 +108,7 @@ export function CourseRosterPage() {
           </h2>
           {!roster.panelOpen ? (
             <Button type="button" onClick={roster.openPanel}>
+              <UserPlusIcon className="h-5 w-5" aria-hidden />
               Enroll students
             </Button>
           ) : null}

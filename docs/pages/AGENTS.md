@@ -59,6 +59,7 @@ Org pages share a **collapsible sidebar** (overlay drawer on small screens). Whe
 - [ORG_SETTINGS](./ORG_SETTINGS.md)
 - [ORG_PICKER](./ORG_PICKER.md) — switch org
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
+- [FEEDBACK](./FEEDBACK.md) — **Send feedback** in the account menu
 - Search — staff chrome overlay (pages / courses / materials); dedicated route still TBD
 
 [TEMPLATE_LIST](./TEMPLATE_LIST.md) is **P1** — do not put templates in P0 org chrome.

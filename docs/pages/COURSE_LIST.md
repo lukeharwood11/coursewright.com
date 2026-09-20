@@ -14,7 +14,7 @@ Browse and create **course instances** (runnable offerings with optional dates a
 
 ## Behavior
 
-- Requires org membership with access to courses (instructors/admins; parent visibility TBD).
+- Requires org membership with access to courses (owners/admins: all courses; instructors: courses they teach, plus courses they parent in as read-only).
 - Lists course instances; open row → course builder home.
 - Create course **from scratch** or **from another course** (copies units/materials; independent — no live sync). New courses start **unpublished**. **Templates are P1** — not offered here in P0.
 - Supports findability on this page: text search + subject filter by default; grade filters under **Advanced search**; pagination (12 per page). Product-wide advanced search remains separate in staff chrome.
@@ -27,14 +27,14 @@ Per course row (TBD density):
 - Optional **description**, **location**, **subject / area**
 - **Status** (e.g. active) and **unpublished** badge when hidden from families
 - Optional **start/end dates**
-- **Grade metadata** (grades/ranges per org scheme)
+- **Grade metadata** in one pill (comma-separated, org scheme order)
 - **Instructors** (avatars + names on catalog cards)
 - **Active enrollment count** (students enrolled in the course)
 - Optional “created from …” origin indicator when copied from another course (TBD density)
 
 ## Contents
 
-- List of courses in the org (title, description, location, subject, status, unpublished badge, dates, grade metadata, instructors — TBD density)
+- List of courses in the org (title, description, location, subject, status, unpublished badge, dates, **grade metadata in one pill**, instructors — TBD density)
 - Find toolbar: search + subject by default; **Advanced search** expands grade chips; clear filters; Previous / Next pagination
 - Create course:
   - **From scratch** — blank course (starts unpublished)

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
+import { PageLoading } from "@/ui/PageLoading";
 import { Button, ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PublishedBadge } from "@/ui/PublishedBadge";
@@ -14,10 +16,12 @@ import {
 } from "@/materials/material/components/VisibilityBanner";
 import { LessonPlanMaterialList } from "./components/LessonPlanMaterialList";
 import { useLessonPlan } from "./hooks/useLessonPlan";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 export function LessonPlanPage() {
   const page = useLessonPlan();
   const [confirmRemove, setConfirmRemove] = useState(false);
+  useToastOnError(page.error);
 
   useEffect(() => {
     document.title = page.plan
@@ -27,9 +31,7 @@ export function LessonPlanPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading lesson plan…</p>
-      </div>
+      <PageLoading label="Loading lesson plan…" />
     );
   }
 
@@ -128,6 +130,7 @@ export function LessonPlanPage() {
                 page.plan.id,
               )}
             >
+              <PencilSquareIcon className="h-5 w-5" aria-hidden />
               Edit
             </ButtonLink>
             <Button
@@ -183,12 +186,6 @@ export function LessonPlanPage() {
             </section>
           ))}
         </div>
-      ) : null}
-
-      {page.error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {page.error}
-        </p>
       ) : null}
 
       <UnpublishControl

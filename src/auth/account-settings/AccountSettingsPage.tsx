@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Button } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { AccountProfileForm } from "./components/AccountProfileForm";
 import { useAccountSettings } from "./hooks/useAccountSettings";
 
@@ -12,9 +13,7 @@ export function AccountSettingsPage() {
 
   if (account.loading) {
     return (
-      <div className="max-w-lg px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading account…</p>
-      </div>
+      <PageLoading label="Loading account…" />
     );
   }
 

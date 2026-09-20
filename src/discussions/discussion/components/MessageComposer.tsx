@@ -8,6 +8,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
+import { useToastOnError } from "@/ui/useToastOnError";
 import type { AttachableMaterial } from "@/discussions/databridge/discussions";
 import { plainTextFromLexical } from "@/discussions/model/messageBody";
 import type { MentionPerson } from "@/discussions/model/mentions";
@@ -92,6 +93,7 @@ export function MessageComposer({
   const fileInputId = useId();
   const fileRef = useRef<HTMLInputElement>(null);
   const [attachOpen, setAttachOpen] = useState(false);
+  useToastOnError(error);
 
   function addFile(file: File) {
     onAttachments([
@@ -279,11 +281,6 @@ export function MessageComposer({
           ) : null}
         </div>
       </div>
-      {error ? (
-        <p className="mt-3 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {error}
-        </p>
-      ) : null}
 
       {showAttachmentControls ? (
         <ComposerAttachModal

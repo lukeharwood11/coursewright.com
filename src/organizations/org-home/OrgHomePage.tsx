@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { ParentHome } from "./components/ParentHome";
 import { StaffHome } from "./components/StaffHome";
 import { useOrgHome } from "./hooks/useOrgHome";
@@ -7,6 +8,8 @@ import { useOrgHome } from "./hooks/useOrgHome";
 export function OrgHomePage() {
   const shell = useOrgShell();
   const home = useOrgHome();
+  useToastOnError(home.dashboardError);
+  useToastOnError(home.staffDashboardError);
 
   useEffect(() => {
     const name = shell.organization.name;

@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { familyVisibleMaterials, staffCanEdit } from "@/app/layouts/model/viewMode";
+import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
+import { staffCanManageCourse } from "@/courses/model/access";
 import {
   courseQueryKeys,
   getCourse,
@@ -33,18 +35,26 @@ import {
 } from "@/units/databridge/units";
 import { swapPositions } from "@/units/model/order";
 import type { CourseVisibility } from "@/courses/model/visibility";
+import {
+  getOrganization,
+  orgQueryKeys,
+} from "@/organizations/databridge/organizations";
 
 export function useCourse() {
   const { courseId: courseIdParam } = useParams();
   const courseId = courseIdParam ? Number(courseIdParam) : NaN;
   const { organization, role, parentPresentation } = useOrgShell();
+  const user = useAuthedUser();
   const queryClient = useQueryClient();
-  const canEdit = staffCanEdit(role, parentPresentation);
 
   const courseQuery = useQuery({
     queryKey: courseQueryKeys.detail(courseId),
     queryFn: () => getCourse(courseId),
     enabled: Number.isFinite(courseId),
+  });
+  const organizationQuery = useQuery({
+    queryKey: orgQueryKeys.detail(organization.id),
+    queryFn: () => getOrganization(organization.id),
   });
   const unitsQuery = useQuery({
     queryKey: unitQueryKeys.list(courseId),
@@ -84,6 +94,12 @@ export function useCourse() {
 
   const course = courseQuery.data ?? null;
   const belongsHere = course?.organizationId === organization.id;
+  const canEdit = staffCanManageCourse({
+    role,
+    parentPresentation,
+    userId: user.id,
+    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+  });
   const familyCourseHidden =
     parentPresentation &&
     course != null &&
@@ -146,6 +162,7 @@ export function useCourse() {
 
   return {
     organization,
+    gradeLabels: organizationQuery.data?.gradeLabels ?? [],
     canEdit,
     isParent: parentPresentation,
     course: belongsHere ? course : null,
@@ -168,7 +185,8 @@ export function useCourse() {
     loading:
       courseQuery.isLoading ||
       unitsQuery.isLoading ||
-      materialsQuery.isLoading,
+      materialsQuery.isLoading ||
+      instructorsQuery.isLoading,
     error: courseQuery.error
       ? courseQuery.error.message
       : unitsQuery.error

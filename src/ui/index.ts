@@ -4,9 +4,12 @@ export { Badge } from "./Badge";
 export { PublishedBadge } from "./PublishedBadge";
 export { Button, ButtonLink } from "./Button";
 export { ConfirmDialog } from "./ConfirmDialog";
+export { InfoHint } from "./InfoHint";
 export { Input } from "./Input";
 export { PageFormActions } from "./PageFormActions";
-export { toastNotImplemented } from "./toast";
+export { PageLoading } from "./PageLoading";
+export { toastNotImplemented, toastSomethingWentWrong } from "./toast";
+export { useToastOnError } from "./useToastOnError";
 export { Mark, Wordmark } from "./Wordmark";
 export {
   ConceptAFull,

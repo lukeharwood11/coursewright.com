@@ -7,6 +7,7 @@ import {
   studentEnrollmentLabel,
 } from "@/courses/model/catalogCard";
 import { formatDateRange } from "@/courses/model/dates";
+import { formatGradeLevels } from "@/courses/model/gradeLevels";
 import { coursePath } from "@/courses/model/paths";
 import { courseStatusLabel } from "@/courses/model/status";
 import { isCoursePublished } from "@/courses/model/visibility";
@@ -21,10 +22,12 @@ const emptyCatalogMeta: CourseCatalogMeta = {
 export function CourseCard({
   course,
   orgSlug,
+  gradeLabels = [],
   catalogMeta = emptyCatalogMeta,
 }: {
   course: CourseSummary;
   orgSlug: string;
+  gradeLabels?: string[];
   catalogMeta?: CourseCatalogMeta;
 }) {
   const dates = formatDateRange(course.startDate, course.endDate);
@@ -45,7 +48,9 @@ export function CourseCard({
         </Badge>
         {course.subject ? <Badge variant="slate">{course.subject}</Badge> : null}
         {course.gradeLevels.length > 0 ? (
-          <Badge variant="neutral">{course.gradeLevels.join(", ")}</Badge>
+          <Badge variant="neutral">
+            {formatGradeLevels(course.gradeLevels, gradeLabels)}
+          </Badge>
         ) : null}
       </div>
 

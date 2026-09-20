@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import { resourceShareMessage } from "@/sharing/model/copyLink";
 import { Button } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
-import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
 import { CourseHeader } from "./components/CourseHeader";
 import { CourseVisibilityBanner } from "./components/CourseVisibilityBanner";
@@ -21,6 +23,7 @@ import { coursesPath } from "@/courses/model/paths";
 export function CoursePage() {
   const {
     organization,
+    gradeLabels,
     canEdit,
     isParent,
     course,
@@ -39,6 +42,7 @@ export function CoursePage() {
     reorderUnit,
     setVisibility,
   } = useCourse();
+  useToastOnError(error);
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
   const [addingUnit, setAddingUnit] = useState(false);
   const [unitTitle, setUnitTitle] = useState("");
@@ -63,9 +67,7 @@ export function CoursePage() {
 
   if (loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading course…</p>
-      </div>
+      <PageLoading label="Loading course…" />
     );
   }
 
@@ -81,9 +83,6 @@ export function CoursePage() {
         <p className="mt-2 text-[14.5px] text-[var(--ink-soft)]">
           It may have been removed, or you may not have access.
         </p>
-        {error ? (
-          <p className="mt-2 text-[13px] text-[var(--amber-deep)]">{error}</p>
-        ) : null}
         <p className="mt-4 text-[13px]">
           <Link
             to={isParent ? `/my/${organization.slug}` : coursesPath(organization.slug)}
@@ -110,6 +109,7 @@ export function CoursePage() {
         startDate={course.startDate}
         endDate={course.endDate}
         gradeLevels={course.gradeLevels}
+        gradeLabels={gradeLabels}
         copiedFromTitle={copiedFromTitle}
         canEdit={canEdit}
         isParent={isParent}
@@ -176,18 +176,13 @@ export function CoursePage() {
                   />
                 ))}
               </ul>
-            ) : null}
-            {canEdit ? (
-              <div className="mt-3">
-                <AddMaterialForm
-                  organizationId={organization.id}
-                  orgSlug={organization.slug}
-                  courseId={course.id}
-                  unitId={null}
-                  label="Add material"
-                />
-              </div>
-            ) : null}
+            ) : (
+              <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">
+                {canEdit
+                  ? "Add a unit, then add materials there."
+                  : "Materials in this course live in units."}
+              </p>
+            )}
           </section>
 
           <section className="mt-8">
@@ -259,6 +254,7 @@ export function CoursePage() {
               ) : (
                 <div className="mt-3">
                   <Button variant="ghost" fullWidth onClick={() => setAddingUnit(true)}>
+                    <PlusIcon className="h-5 w-5" aria-hidden />
                     Add unit
                   </Button>
                 </div>
@@ -274,9 +270,6 @@ export function CoursePage() {
           canEdit={canEdit}
         />
       </div>
-      {error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]">{error}</p>
-      ) : null}
     </div>
   );
 }

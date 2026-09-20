@@ -1,5 +1,8 @@
 import { useEffect } from "react";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import { ButtonLink } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { DiscussionFilterChips } from "./components/DiscussionFilterChips";
 import { DiscussionList } from "./components/DiscussionList";
@@ -8,6 +11,7 @@ import type { DiscussionFilter } from "@/discussions/model/audience";
 
 export function DiscussionsPage() {
   const page = useDiscussions();
+  useToastOnError(page.error);
 
   useEffect(() => {
     document.title = "Discussions · Course Wright";
@@ -15,9 +19,7 @@ export function DiscussionsPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading discussions…</p>
-      </div>
+      <PageLoading label="Loading discussions…" />
     );
   }
 
@@ -39,16 +41,11 @@ export function DiscussionsPage() {
         </div>
         {page.canCompose ? (
           <ButtonLink to={newDiscussionPath(page.organization.slug)}>
+            <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
             New discussion
           </ButtonLink>
         ) : null}
       </div>
-
-      {page.error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {page.error}
-        </p>
-      ) : null}
 
       <div className="mt-5">
         <DiscussionFilterChips

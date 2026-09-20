@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { coursePath } from "@/courses/model/paths";
@@ -17,6 +18,7 @@ import {
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { Badge } from "@/ui/Badge";
 import { isCoursePublished } from "@/courses/model/visibility";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -25,6 +27,7 @@ const controlClass = [
 
 export function CourseSettingsPage() {
   const settings = useCourseSettings();
+  useToastOnError(settings.addInstructor.error?.message ?? null);
 
   useEffect(() => {
     document.title = settings.course
@@ -34,9 +37,7 @@ export function CourseSettingsPage() {
 
   if (settings.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading settings…</p>
-      </div>
+      <PageLoading label="Loading settings…" />
     );
   }
 
@@ -150,7 +151,7 @@ export function CourseSettingsPage() {
               Schedule & status
             </h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <label className="flex flex-col gap-1">
+              <label className="flex min-w-0 flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
                   Start date
                 </span>
@@ -161,7 +162,7 @@ export function CourseSettingsPage() {
                   onChange={(event) => settings.setStartDate(event.target.value)}
                 />
               </label>
-              <label className="flex flex-col gap-1">
+              <label className="flex min-w-0 flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
                   End date
                 </span>
@@ -226,7 +227,7 @@ export function CourseSettingsPage() {
               />
             </div>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <label className="flex flex-col gap-1">
+              <label className="flex min-w-0 flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
                   Subject
                 </span>
@@ -237,7 +238,7 @@ export function CourseSettingsPage() {
                   placeholder="Math, nature study…"
                 />
               </label>
-              <label className="flex flex-col gap-1">
+              <label className="flex min-w-0 flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
                   Location
                 </span>
@@ -283,11 +284,7 @@ export function CourseSettingsPage() {
             onAdd={() => settings.addInstructor.mutate()}
             onRemove={(userId) => settings.removeInstructor.mutate(userId)}
             adding={settings.addInstructor.isPending}
-            addError={
-              settings.addInstructor.error
-                ? settings.addInstructor.error.message
-                : null
-            }
+            addError={null}
           />
         </div>
       </form>

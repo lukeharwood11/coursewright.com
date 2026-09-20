@@ -226,7 +226,7 @@ export function AnnouncementFormFields({
         />
       </label>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <label className="flex flex-col gap-1">
+        <label className="flex min-w-0 flex-col gap-1">
           <span className="text-[13px] font-bold text-[var(--ink-soft)]">
             Start date (optional)
           </span>
@@ -237,7 +237,7 @@ export function AnnouncementFormFields({
             onChange={(event) => onStartDate(event.target.value)}
           />
         </label>
-        <label className="flex flex-col gap-1">
+        <label className="flex min-w-0 flex-col gap-1">
           <span className="text-[13px] font-bold text-[var(--ink-soft)]">
             End date (optional)
           </span>

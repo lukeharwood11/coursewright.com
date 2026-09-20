@@ -1,9 +1,12 @@
+import { PageLoading } from "@/ui/PageLoading";
 import { useEffect } from "react";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { ActivityList } from "./components/ActivityList";
 import { useActivity } from "./hooks/useActivity";
 
 export function ActivityPage() {
   const page = useActivity();
+  useToastOnError(page.error);
 
   useEffect(() => {
     document.title = "Activity · Course Wright";
@@ -11,9 +14,7 @@ export function ActivityPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading activity…</p>
-      </div>
+      <PageLoading label="Loading activity…" />
     );
   }
 
@@ -25,11 +26,6 @@ export function ActivityPage() {
       >
         Activity
       </h1>
-      {page.error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {page.error}
-        </p>
-      ) : null}
       <ActivityList
         items={page.items}
         openingId={page.openingId}

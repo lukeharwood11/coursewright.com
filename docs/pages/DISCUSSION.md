@@ -35,7 +35,7 @@ One two-way **discussion**: title, who it is for, flat posts (plain or Lexical),
 - Families only see courses their linked student is enrolled in (active + published) and classes that student is in. Instructors see courses they teach and classes they can manage. Owners and admins see any course or class in the org.
 - Title required. Opening post required (text and/or attachment); same plain / **T** Lexical composer. Typing **@** mentions someone who would be on the thread (after a course or class is chosen).
 - **Start discussion** stays disabled until there is a title, one audience target, and an opening post.
-- Staff Teacher view: **Notify everyone** (off by default). When on, the opening post also notifies everyone who can see the thread in [ACTIVITY](./ACTIVITY.md). Course instructors or class leads are always notified of posts (except the author). **@mentions** also notify that person.
+- Staff Teacher view: **Notify everyone** (off by default). When on, the opening post also notifies everyone who can see the thread in [ACTIVITY](./ACTIVITY.md). Course instructors or class leads are always notified of posts (except the author), as are people who started the thread or posted in it. One new-post Activity item per discussion. **@mentions** also notify that person.
 - Cancel returns to the list.
 - Staff **Parent view** without linked students cannot open `/new` (redirect to org home). Parent-only users without a matching course or class see an empty picker and cannot post.
 

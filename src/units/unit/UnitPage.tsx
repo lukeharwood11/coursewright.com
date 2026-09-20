@@ -2,22 +2,27 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowDownIcon, ArrowUpIcon, PrinterIcon } from "@heroicons/react/24/outline";
 import { Button, ButtonLink } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { PageFormActions } from "@/ui/PageFormActions";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { formatDateRange } from "@/courses/model/dates";
 import { coursePath } from "@/courses/model/paths";
 import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
-import { unitPrintPath } from "@/units/model/paths";
+import { unitPath, unitPrintPath } from "@/units/model/paths";
 import { useUnit } from "./hooks/useUnit";
 
 const UNIT_SETTINGS_FORM_ID = "unit-settings-form";
 
 export function UnitPage() {
   const page = useUnit();
+  const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+  useToastOnError(page.error);
 
   useEffect(() => {
     if (!page.unit) return;
@@ -34,9 +39,7 @@ export function UnitPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading unit…</p>
-      </div>
+      <PageLoading label="Loading unit…" />
     );
   }
 
@@ -73,12 +76,25 @@ export function UnitPage() {
     course.id,
     unit.id,
   );
+  const viewHref = unitPath(page.organization.slug, course.id, unit.id);
   const hasChanges =
     page.canEdit &&
+    editing &&
     !unit.deletedAt &&
     (title !== unit.title ||
       startDate !== (unit.startDate ?? "") ||
       endDate !== (unit.endDate ?? ""));
+
+  function resetUnitFields() {
+    setTitle(unit.title);
+    setStartDate(unit.startDate ?? "");
+    setEndDate(unit.endDate ?? "");
+  }
+
+  function leaveEdit() {
+    resetUnitFields();
+    setEditing(false);
+  }
 
   return (
     <div className="px-5 py-8 md:px-8">
@@ -104,14 +120,20 @@ export function UnitPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {page.canEdit && !unit.deletedAt ? (
+          {page.canEdit && !unit.deletedAt && editing ? (
             <PageFormActions
               formId={UNIT_SETTINGS_FORM_ID}
               saving={page.saveUnit.isPending}
               hasChanges={hasChanges}
-              cancelTo={coursePath(page.organization.slug, course.id)}
+              cancelTo={viewHref}
+              onCancel={leaveEdit}
               saveLabel="Save unit"
             />
+          ) : null}
+          {page.canEdit && !unit.deletedAt && !editing ? (
+            <Button type="button" onClick={() => setEditing(true)}>
+              Edit
+            </Button>
           ) : null}
           <ButtonLink variant="secondary" to={printHref}>
             <PrinterIcon className="h-5 w-5" aria-hidden />
@@ -133,18 +155,21 @@ export function UnitPage() {
         </div>
       ) : null}
 
-      {page.canEdit && !unit.deletedAt ? (
+      {page.canEdit && !unit.deletedAt && editing ? (
         <form
           id={UNIT_SETTINGS_FORM_ID}
           className="mt-6 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
           onSubmit={(event) => {
             event.preventDefault();
             if (!hasChanges) return;
-            page.saveUnit.mutate({
-              title: title.trim() || page.unit!.title,
-              startDate: startDate || null,
-              endDate: endDate || null,
-            });
+            page.saveUnit.mutate(
+              {
+                title: title.trim() || page.unit!.title,
+                startDate: startDate || null,
+                endDate: endDate || null,
+              },
+              { onSuccess: () => setEditing(false) },
+            );
           }}
         >
           <div className="grid gap-3 md:grid-cols-3">
@@ -156,7 +181,7 @@ export function UnitPage() {
                 onChange={(event) => setTitle(event.target.value)}
               />
             </label>
-            <label className="flex flex-col gap-1">
+            <label className="flex min-w-0 flex-col gap-1">
               <span className="text-[13px] font-bold text-[var(--ink-soft)]">Start</span>
               <Input
                 className="w-full"
@@ -165,7 +190,7 @@ export function UnitPage() {
                 onChange={(event) => setStartDate(event.target.value)}
               />
             </label>
-            <label className="flex flex-col gap-1">
+            <label className="flex min-w-0 flex-col gap-1">
               <span className="text-[13px] font-bold text-[var(--ink-soft)]">End</span>
               <Input
                 className="w-full"
@@ -262,10 +287,6 @@ export function UnitPage() {
           </div>
         ) : null}
       </section>
-
-      {page.error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]">{page.error}</p>
-      ) : null}
     </div>
   );
 }

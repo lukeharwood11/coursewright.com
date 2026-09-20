@@ -11,13 +11,12 @@ Repo-root utility scripts (not app runtime).
 | `tf-plan.sh <tier>` | `terraform init` + `plan -out=tf.plan` for `testing` \| `production` |
 | `tf-apply.sh <tier>` | Apply saved `infra/terraform/tf.plan` for that tier |
 | `build-spa.sh <tier>` | Write gitignored `.env.production` from Terraform outputs (incl. `VITE_PUBLIC_HOST` from `site_domain`; testing refuses parent/main) + `npm run build` |
-| `deploy-spa.sh <tier>` | `aws s3 sync dist/` + upload legal HTML keys (`privacy` / `terms` / `cookies` as `text/html`) + CloudFront invalidate |
+| `deploy-spa.sh <tier>` | `aws s3 sync dist/` + CloudFront invalidate |
 | `deploy-supabase.sh <tier>` | `db push` + Edge Functions to tier’s Supabase ref (testing = branch, production = main) |
 | `deploy.sh <tier>` | Local one-shot: plan → apply → supabase → build → SPA (production requires `--yes`) |
 | `gha-resolve-plan-run.sh` | Actions helper: matching plan artifact run id + git SHA |
 | `lib/terraform-env.sh` | Shared helpers (sourced by the scripts above) |
-| `vite-seo-assets.ts` | Vite plugin: emit/serve `robots.txt` + `sitemap.xml`; prerender legal HTML (`privacy` / `terms` / `cookies`); inject SEO placeholders in `index.html` |
-| `prerender-legal-html.ts` | Builds static legal HTML from marketing policy models (same copy as React pages) |
+| `vite-seo-assets.ts` | Vite plugin: emit/serve `robots.txt` + `sitemap.xml`; inject SEO placeholders in `index.html` |
 
 ## Rules
 
