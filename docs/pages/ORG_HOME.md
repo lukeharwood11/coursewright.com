@@ -18,14 +18,15 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 ### Parent
 
 - Usability bar: understand child, course, and what’s needed immediately — no LMS jargon.
+- **Current announcements** sit above the week calendar when any apply. Unread cards show a notification icon; opening one marks it read.
 - Main body is the **current Sunday–Saturday week** (same chips, colors, and week notes as [CALENDAR](./CALENDAR.md)): days with work are **cards** that wrap (about two or three across). Empty days are omitted. One card per day: each class’s plan text and its linked materials stay together inside that card (after a divider), assigned = outline / due = filled, course colors.
 - **Focus** column on the right (stacks below on small screens): **Important now** and **Coming up** (**Assigned next** + **Due next**).
-- When the parent has more than one student, **tags** at the top toggle who is active. Deselecting a student hides their work (calendar, Focus). One student skips the tags.
+- When the parent has more than one student, **tags** at the top toggle who is active. Deselecting a student hides their work (calendar, Focus, announcements). One student skips the tags.
 - Week notes for published lesson plans sit as a colored bar per course above the grid.
 - **Print this week** prints only **active** students’ **full** week (published lesson plans first, then due and assigned materials, plus important now for their courses), **one student at a time** with a page break before the next student. Per-material **Print** stays first-class — both land on [PRINT](./PRINT.md).
 - Parent org access requires linked student enrolled in a course with `status = active` **and** `visibility = published` (dates informational only).
 - Progress tab is P1 (dim/inactive until then). Parent summary layer (B) is **P1**, not P0.
-- Empty: no dated work and no published lesson plan this week, or not yet on an active enrollment — plain-language next step.
+- Empty: no dated work and no published lesson plan this week, or not yet on an active enrollment — plain-language next step. Class/student announcements can still show without an enrollment.
 
 ### Instructor / owner / admin
 
@@ -47,6 +48,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 - Org **name**
 - Week range label (Sun–Sat dates)
 - **Student tags** when more than one linked student (active / inactive)
+- **Announcements:** current one-way notices (title, optional note excerpt, audience name, dates when set). Unread items show a **notification icon**. Courses of active students, classes the child is in, or that student. Student tags filter which notices show. Class/student announcements can still appear when the child has no course enrollment.
 - Week calendar: **cards** for days that have a plan or assigned/due work (empty days omitted; cards wrap instead of a squeezed seven-column row). Per visible course — day plan text; divider; that class’s lesson-plan materials and assigned/due materials (title; **Assigned** outline / **Due** filled; course color)
 - Published lesson-plan **week notes** as course-colored bars above the grid
 - **Focus:** Important now (material title, description when set, course/student context); Coming up Assigned next / Due next
@@ -71,6 +73,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Desktop: simpler collapsible sidebar (This week, Calendar, their courses, Progress). Body uses remaining width — not a centered narrow column.
 - Greeting + **current calendar week** (Sunday–Saturday) + **Print this week**
 - **Student tags** (multi-student parents only) — tap to include/exclude a student
+- **Announcements** — current one-way notices (when any). Unread cards show a notification icon; opening [ANNOUNCEMENT](./ANNOUNCEMENT.md) marks it read. Above the week calendar.
 - Two columns on large screens: **week cards** | **Focus** (Important now + Coming up). Stacks on small screens (calendar first). Day cards wrap so two or three fit across instead of seven skinny columns.
 - Course legend on the week calendar (same as [CALENDAR](./CALENDAR.md)) so families can hide a class
 - Bottom tabs concept: This week | Progress (Progress **P1** — dim/inactive until then)
@@ -104,6 +107,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Filter courses on the week calendar legend
 - Open / print a material
 - Open a lesson plan from the week calendar
+- Open an announcement (marks it read)
 - Open assigned-next / due-next / important-now items
 
 ### Instructor / owner / admin
@@ -119,6 +123,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 ### Parent
 
 - [MATERIAL](./MATERIAL.md) — open a this-week / important-now item
+- [ANNOUNCEMENT](./ANNOUNCEMENT.md) — open a current announcement
 - [LESSON_PLAN](./LESSON_PLAN.md) — open a published lesson plan
 - [CALENDAR](./CALENDAR.md) — month/week calendar in the sidebar
 - [UNIT](./UNIT.md) — open a unit when linked from materials
@@ -133,6 +138,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - [CALENDAR](./CALENDAR.md) — month/week calendar
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — from “no enrollments” attention
 - [COURSE_LIST](./COURSE_LIST.md) — view all / create course
+- [ANNOUNCEMENTS](./ANNOUNCEMENTS.md) — via org chrome
 - [MATERIAL](./MATERIAL.md) — important-now item
 - [ORG_ROSTER](./ORG_ROSTER.md) — people / students
 - [ORG_SETTINGS](./ORG_SETTINGS.md) — via chrome / account menu
@@ -143,4 +149,4 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Parent experience, units/dating, important now, **lesson plans**, calendar, print grain, RBAC, advanced search. Parent summary layer is **P1**, not P0. Homework in P0 = dated materials on the week calendar (no separate assignment object). Staff home is an operational dashboard (attention + course previews + this week + people), not a nav tile grid.
+[FEATURES.md](../FEATURES.md) — Parent experience, units/dating, important now, **announcements**, **lesson plans**, calendar, print grain, RBAC, advanced search. Parent summary layer is **P1**, not P0. Homework in P0 = dated materials on the week calendar (no separate assignment object). Staff home is an operational dashboard (attention + course previews + this week + people), not a nav tile grid.

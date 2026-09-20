@@ -185,6 +185,7 @@ Other drafts kept for reference (not in use):
 | Extra org admin | **Admin invite** | email, claimable |
 | Instructor priority flag | **Important now** | pinned, highlight, urgent |
 | Dated weekly course plan | **Lesson plan** | one Sunday–Saturday week; published / unpublished; optional week note + per-day notes and materials; not an assignment object; not email |
+| One-way notice (course, class, or student) | **Announcement** | optional start/end on home; unread notification until opened; not a lesson plan; no reply thread |
 | Course context blurb | **Summary** | **P1** — auto-drafted “what’s going on this week”; not the course **Description** |
 | Parent view (with account) | **Progress** | grades, notes, checklists, homework |
 | Person being taught | **Student** (profile) | student_profile, learner |

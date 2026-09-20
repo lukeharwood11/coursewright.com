@@ -7,6 +7,7 @@ import {
   type ParentDashboard,
 } from "@/parent/model/dashboard";
 import { parentWeekCalendar } from "@/parent/model/weekCalendar";
+import { ParentAnnouncementList } from "./ParentAnnouncementList";
 import { ParentFocusRail } from "./ParentFocusRail";
 import { ParentStudentTags } from "./ParentStudentTags";
 
@@ -28,7 +29,7 @@ export function ParentDashboardBody({
   const [hidden, setHidden] = useState<number[]>([]);
   const hiddenCourseIds = useMemo(() => new Set(hidden), [hidden]);
 
-  if (!full.hasActiveEnrollment) {
+  if (!full.hasActiveEnrollment && full.announcements.length === 0) {
     if (preview) {
       return (
         <p className="mt-4 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
@@ -75,6 +76,14 @@ export function ParentDashboardBody({
           students={full.students}
           selectedIds={selectedIds}
           onToggle={onToggleStudent}
+        />
+      ) : null}
+
+      {visible.announcements.length > 0 ? (
+        <ParentAnnouncementList
+          orgSlug={orgSlug}
+          items={visible.announcements}
+          showStudent={showStudentHeaders}
         />
       ) : null}
 

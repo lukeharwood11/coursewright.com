@@ -8,6 +8,7 @@ App chrome: collapsible sidebar + top bar for signed-in `/my` pages.
 - **Org shell** (`/my/<org-slug>/…`) — staff vs parent nav (role decides chrome, not a second app). Staff get a **Teacher / Parent view** toggle in the header.
 - Collapse on desktop; overlay drawer on small screens
 - Nested course / class links from domain databridge lists (org shell only)
+- Staff nav includes **Calendar** and **Announcements**
 
 ## Rules
 

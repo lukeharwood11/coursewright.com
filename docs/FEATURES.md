@@ -90,11 +90,12 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Parent access (link or account)** | Parent clicks invite link **or** signs up / logs in with the **same email** | shipped | Unsigned `/invite/<token>` shows the invited address; signup/login prefills it (HN-016). Course access still requires enrollment |
 | **Parent org membership** | Parent becomes a parent in the org when they claim an invite | shipped | Membership created on claim; materials still gated on enrollment + published course |
 | **Share resources with parents** | Share course content and files with enrolled families | shipped | Copy material URL (account required). Dedicated share-entry path still TBD |
-| **Parent dashboard** | This week’s **calendar** (lesson plans + assigned/due chips), **Focus** (Important now + Coming up), student tags, **Print this week** | shipped | Parent/student home; staff **Parent view** uses the same chrome. Main body is the current Sunday–Saturday week as **wrapping day cards** (empty days omitted). Focus rail (right on desktop, below on small screens) holds **Important now** and **Coming up**. Student tags still filter who is shown. **Print this week** prints published lesson plans first, then important now + dated materials, one student at a time |
+| **Parent dashboard** | This week’s **calendar** (lesson plans + assigned/due chips), **Focus** (Important now + Coming up), **announcements**, student tags, **Print this week** | shipped | Parent/student home; staff **Parent view** uses the same chrome. Current **announcements** (unread first, notification icon until opened) sit above the week cards. Main body is the current Sunday–Saturday week as **wrapping day cards** (empty days omitted). Focus rail (right on desktop, below on small screens) holds **Important now** and **Coming up**. Student tags still filter who is shown. **Print this week** prints published lesson plans first, then important now + dated materials, one student at a time |
 | **Resource links** | Send a parent a link that opens a **specific resource** (after they log in) | shipped | Copy signed-in material URL; `share_links` row recorded. Public entry path still TBD |
 | **Instructor "important now"** | Flag items needing immediate parent attention | shipped | Toggle on material; parent home surfaces it |
 | **Lesson plans** | Weekly course plan: optional week note, per-day notes, optional materials per day; **published / unpublished** | shipped | One plan per course per Sunday–Saturday week. Default title `This week in <course title>`. New plans start unpublished. Families only see published plans. Replaces **bulletins** (no data migration). Course-from-course does **not** copy lesson plans. Apply migration on testing (**HN-014**) |
 | **Calendar** | Month and week view of assigned/due work and lesson plans, color-coded by course | shipped | Sidebar **Calendar** for staff and parents. Assigned = outline chip; due = filled chip. Course colors from a small palette (`courses.color_key`) with a filterable legend. Week view shows lesson-plan text in seven columns; This week uses wrapping day cards and hides empty days |
+| **Announcements** | One-way notice to a **course**, a **class**, or a **student**. Optional start/end dates control homepage visibility. Opening it marks it read and clears the notification icon. No reply thread | in progress | Distinct from **lesson plans** (those attach this week’s materials) and from later **discussions**. Org owners/admins can post any audience. Instructors can post for a course they teach, and for a class or student they can already manage on roster. Families see current announcements on home. SPA + migration (**HN-017**) |
 | **Staff parent view** | Owners, admins, and instructors switch most org pages to parent presentation | in progress | Header **Teacher** / **Parent view**. Real this-week if they have linked students; otherwise a preview. Hidden for parent-only users. SPA + unit tests in; browser E2E against testing Auth blocked by email send rate limit |
 
 ### Roster management (P0)
@@ -251,7 +252,7 @@ Parents appear on a family **only** via existing `parent_student_links` to those
 **Creating a course (P0):**
 
 1. **From scratch** — blank course; add units and materials manually.
-2. **From another course** — copy that course’s **units and materials** into a **new independent course**. Does **not** copy roster, enrollments, important-now flags, share links, or **lesson plans**. **No live sync** between source and copy (template-style sync is **P1**).
+2. **From another course** — copy that course’s **units and materials** into a **new independent course**. Does **not** copy roster, enrollments, important-now flags, share links, **lesson plans**, or **announcements**. **No live sync** between source and copy (template-style sync is **P1**).
 
 **P1 (templates) — deferred:**
 
@@ -384,6 +385,7 @@ Do **not** ship a separate “Export” product name in P0. Print *is* the path 
 | **Up next** | P0 | **Assigned next** (soonest assignment date on or after today) and **Due next** (soonest due date on or after today) among active students |
 | **(C) Important now** | P0 | Instructor-flagged items needing attention (courses of active students) |
 | **Lesson plans** | P0 | Teacher-composed weekly plan for a course (week note + optional per-day notes and materials). **Published / unpublished** like other content. Shown on This week’s calendar and the Calendar page. A published plan with only a week note is a whole-week note. **Print this week** includes each student’s published lesson-plan content first |
+| **Announcements** | P0 | One-way notice to a course, class, or student. Optional start/end for homepage visibility. Unread notification until opened. No reply thread |
 | **(A) This week** | P0 | Current Sunday–Saturday week as **wrapping day cards** (empty days omitted): lesson-plan text in each day, materials after a divider with that class, assigned = outline / due = filled. **Focus** rail: Important now + Coming up |
 | **Calendar** | P0 | Sidebar month/week view of assigned and due work (and lesson plans on week view), color-coded by course with a filter legend |
 | **(B) Summary** | P1 | System-drafted overview; instructor can edit |
@@ -397,7 +399,7 @@ Do **not** ship a separate “Export” product name in P0. Print *is* the path 
 
 | Link | What happens (P0) |
 |------|-------------------|
-| **Invite / dashboard** | Sign up or log in → parent home (this week’s calendar + Focus). Empty if not yet enrolled. |
+| **Invite / dashboard** | Sign up or log in → parent home (this week’s calendar + Focus + current announcements). Empty if not yet enrolled (class/student announcements can still show). |
 | **Resource link** | Sign up or log in → **that specific material/file** — **Print** is obvious on that page |
 
 Deep links still require an account in P0. Magic links (no account) may come later.
@@ -420,6 +422,8 @@ Content on **courses** may use **units** for grouping (templates are **P1**). Ma
 **P0 homework:** dated materials (with `scheduled_date`, or in a dated unit). A material belongs on the parent week calendar when its effective date(s) fall in the current Sunday–Saturday week. Assigned work is an **outline** chip; due work is a **filled** chip. **Print this week** includes the full dated week **and each student’s published lesson plans first**. There is **no separate assignment object in P0** — that's the next conversation.
 
 **P0 lesson plans:** a course **Lesson plan** covers one Sunday–Saturday week. Instructors write an optional **week note**, optional notes for each day, and may **select materials** for each day (same course). New plans start **unpublished**; families only see **published** plans (same publish controls as materials). A published plan with only a week note is a whole-week note for families. Attaching a material to a day does **not** change that material’s assignment or due date. Soft-delete to take it down. Unpublished materials attached to a plan are omitted for families (same as elsewhere). Course-from-course copy does **not** copy lesson plans (instance communication, like important now). This is **in-app**, not email. **Bulletins** are removed.
+
+**P0 announcements:** an **Announcement** is a **one-way** notice (title + optional body) aimed at exactly one audience: a **course**, a **class**, or a **student**. It is **not** a lesson plan (no attached materials) and **not** a discussion (no reply thread — that is later). Optional **start date** and **end date**: if set, families see it on home while today is in that window (inclusive); if omitted, it stays on home until staff remove it. Opening the notice marks it **read** for that person and removes the **notification icon**. Parents of a matching student (and that student, when they sign in on the parent claim path) see it. **Who can post:** org **owners and admins** (any audience in the org); **instructors** for a course they teach, or for a class / student they can already manage on the roster. Soft-delete to take it down. Course-from-course copy does **not** copy announcements. In-app only — not email (P1 Notifications).
 
 ### Materials & content creation
 
@@ -540,6 +544,8 @@ Page materials use a **Lexical** WYSIWYG editor ([lexical.dev](https://lexical.d
 - As an **instructor**, I want to **send a parent a link to a specific resource** so that **they don't have to hunt for it on the dashboard**.
 - As an **instructor**, I want to **write a lesson plan for a school week and attach materials to each day** so that **families see this week’s plan in one place**.
 - As a **parent or student**, I want to **see this week’s calendar with the teacher’s plan and the materials underneath** so that **I know what to open without searching the course**.
+- As an **org owner or instructor**, I want to **post an announcement to a course, a class, or a student** so that **the right families see a one-way notice without a discussion thread**.
+- As a **parent or student**, I want **current announcements on home, with a notification until I open one** so that **I know there is something new without hunting**.
 - As a **parent**, I want to **open my dashboard and see this week's calendar (and what’s due) first** so that **I know exactly what my child needs**.
 - As a **parent with more than one student**, I want **tags to hide a child** so that **I don’t mix up their courses**.
 - As a **parent creating materials**, I want to **print a worksheet or unit in one tap** so that **I can use it at the table without more software**.
@@ -576,7 +582,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | **Quizzes (take online + autograde)** | Take quizzes in-app; score from P0-stored correct answers | planned | Authoring + print already P0 |
 | **Forms** | Structured response collection | in design | Purpose + respondents TBD — see materials workshop |
 | **Course Wright billing (orgs)** | We charge organizations so they can serve parents | planned | `billing/` SPA stub + owner-only placeholder on org settings. Packaging: per teacher or per course — **hypothesis**. Provider: **Stripe** *(hypothesis)* |
-| **Notifications** | <!-- TBD --> | planned | Email likely. In-app **lesson plans** are P0 and are not this row |
+| **Notifications** | <!-- TBD --> | planned | Email likely. In-app **lesson plans** and **announcements** are P0 and are not this row |
 | **Reporting** | <!-- TBD --> | planned | |
 | **Designed PDF packets** | Richer branded PDF layouts beyond the P0 ink packet | planned | P0 already generates + previews a PDF; P1 = stronger brand / layout polish |
 
@@ -680,6 +686,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, and **course temp
 | Auth: email + Google | **Decided** | Supabase Auth + Google Cloud OAuth — STACK.md |
 | P0 homework = dated materials in a unit | **Decided** | Parent "this week"; assignments next |
 | P0 lesson plan = weekly course plan with publish controls | **Decided** | One per course per Sunday–Saturday week; week note + per-day notes/materials; unpublished until published; replaces bulletins; not email; not an assignment object |
+| P0 announcement = one-way notice to a course, class, or student | **Decided** | Optional start/end for homepage visibility; unread notification until opened; no reply thread (discussions later); not a lesson plan; not email |
 | Course calendar color | **Decided** | `courses.color_key` from a small muted palette; auto-assigned on create; staff can change in course settings; legend filters the calendar |
 | Course Wright bills orgs (not parents) | **Decided** | SaaS; parent-pay is future |
 | SaaS packaging per teacher or per course | **Hypothesis** | Not decided |

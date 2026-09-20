@@ -1,4 +1,5 @@
 import { supabase } from "@/infrastructure/supabase/client";
+import { parseAnnouncementAudience } from "@/announcements/model/audience";
 import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
 import { listLessonPlansInRange } from "@/lesson-plans/databridge/lessonPlans";
 import { isPublished } from "@/materials/model/visibility";
@@ -50,10 +51,13 @@ export async function loadParentDashboard(
       materials: [],
       importantNow: [],
       lessonPlans: [],
+      classMemberships: [],
+      announcements: [],
     });
   }
 
-  const [studentsResult, enrollmentsResult, importantResult] = await Promise.all([
+  const [studentsResult, enrollmentsResult, importantResult, membersResult, announcementsResult] =
+    await Promise.all([
     db
       .from("student_profiles")
       .select("id, name, grade_level")
@@ -73,11 +77,32 @@ export async function loadParentDashboard(
         "id, material_id, course_id, material:materials(title, description, unit_id), course:courses(title)",
       )
       .eq("organization_id", organizationId),
+    db
+      .from("class_members")
+      .select("class_id, student_profile_id")
+      .in("student_profile_id", studentIds),
+    db
+      .from("announcements")
+      .select(
+        "id, title, body, start_date, end_date, audience, course_id, class_id, student_profile_id, course:courses!announcements_course_id_fkey(title), class_group:classes!announcements_class_id_fkey(title), student:student_profiles!announcements_student_profile_id_fkey(name), announcement_reads(user_id)",
+      )
+      .eq("organization_id", organizationId)
+      .is("deleted_at", null)
+      .eq("announcement_reads.user_id", userId),
   ]);
 
   if (studentsResult.error) throw new Error(studentsResult.error.message);
   if (enrollmentsResult.error) throw new Error(enrollmentsResult.error.message);
   if (importantResult.error) throw new Error(importantResult.error.message);
+  if (membersResult.error) throw new Error(membersResult.error.message);
+  // HN-017: the testing database may not have `announcements` yet. Skip rather
+  // than failing the whole parent home.
+  if (
+    announcementsResult.error &&
+    announcementsResult.error.code !== "PGRST205"
+  ) {
+    throw new Error(announcementsResult.error.message);
+  }
 
   const enrollments = (enrollmentsResult.data ?? []).flatMap((row) => {
     const course = one(row.course);
@@ -174,6 +199,36 @@ export async function loadParentDashboard(
       })),
     }));
 
+  const classMemberships = (membersResult.data ?? []).map((row) => ({
+    classId: row.class_id,
+    studentId: row.student_profile_id,
+  }));
+
+  const announcements = (announcementsResult.data ?? []).flatMap((row) => {
+    const audience = parseAnnouncementAudience(row.audience);
+    if (!audience) return [];
+    const reads = Array.isArray(row.announcement_reads)
+      ? row.announcement_reads
+      : [];
+    return [
+      {
+        id: row.id,
+        title: row.title,
+        body: row.body,
+        startDate: row.start_date,
+        endDate: row.end_date,
+        audience,
+        courseId: row.course_id,
+        classId: row.class_id,
+        studentId: row.student_profile_id,
+        courseTitle: one(row.course)?.title ?? null,
+        classTitle: one(row.class_group)?.title ?? null,
+        studentName: one(row.student)?.name ?? null,
+        read: reads.some((entry) => entry.user_id === userId),
+      },
+    ];
+  });
+
   return buildParentDashboard({
     week,
     today,
@@ -186,5 +241,7 @@ export async function loadParentDashboard(
     materials,
     importantNow,
     lessonPlans,
+    classMemberships,
+    announcements,
   });
 }

@@ -103,7 +103,8 @@ Aligned with P0 in [FEATURES.md](./FEATURES.md):
 | `search/` | Advanced / cross-facet find (“where is this resource?”) | Admin, instructor (parent TBD) |
 | `sharing/` | Resource links, share-with-parents | Instructor → parent |
 | `print/` | Print material / unit / this week | Creator + parent |
-| `parent/` | This week calendar + Focus dashboard | Parent role |
+| `parent/` | This week calendar + Focus + **announcements** | Parent role |
+| `announcements/` | One-way notices (course / class / student) | Instructor, admin; parent views |
 | `lesson-plans/` | Weekly course plans with per-day materials | Instructor; parent views |
 | `calendar/` | Month/week calendar of assigned, due, lesson plans | Instructor; parent |
 | `billing/` | Org SaaS (P1) | Admin |

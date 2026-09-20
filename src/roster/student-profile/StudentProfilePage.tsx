@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/ui/Badge";
+import { ButtonLink } from "@/ui/Button";
 import { PageFormActions } from "@/ui/PageFormActions";
+import { newAnnouncementPath } from "@/announcements/model/paths";
 import { enrollmentStatusLabel } from "@/roster/model/enrollment";
 import { StudentProfileFields } from "./components/StudentProfileFields";
 import { ParentInvitePanel } from "./components/ParentInvitePanel";
@@ -71,6 +73,17 @@ export function StudentProfilePage() {
           <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
             Org-level student profile. Parents (and an optional student email)
             sign in with an invite to see this student’s work.
+          </p>
+          <p className="mt-3">
+            <ButtonLink
+              variant="secondary"
+              to={newAnnouncementPath(profile.organization.slug, {
+                audience: "student",
+                studentId: profile.student.id,
+              })}
+            >
+              Announce to this student
+            </ButtonLink>
           </p>
         </div>
         <PageFormActions

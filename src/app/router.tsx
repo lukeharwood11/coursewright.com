@@ -9,6 +9,11 @@ import { PrintLayout } from "@/app/layouts/PrintLayout";
 import { StubPage } from "@/app/StubPage";
 import { CourseListPage, CoursePage, CourseRosterPage, CourseSettingsPage } from "@/courses";
 import { CalendarPage } from "@/calendar";
+import {
+  AnnouncementEditPage,
+  AnnouncementPage,
+  AnnouncementsPage,
+} from "@/announcements";
 import { LessonPlanEditPage, LessonPlanPage } from "@/lesson-plans";
 import { MaterialEditPage, MaterialPage } from "@/materials";
 import {
@@ -121,6 +126,34 @@ export function AppRoutes() {
             <Route
               path="calendar"
               element={<CalendarPage />}
+            />
+            <Route
+              path="announcements"
+              element={
+                <RequireStaff>
+                  <AnnouncementsPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="announcements/new"
+              element={
+                <RequireStaff>
+                  <AnnouncementEditPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="announcements/:announcementId"
+              element={<AnnouncementPage />}
+            />
+            <Route
+              path="announcements/:announcementId/edit"
+              element={
+                <RequireStaff>
+                  <AnnouncementEditPage />
+                </RequireStaff>
+              }
             />
             <Route
               path="courses/:courseId/lesson-plans/new"

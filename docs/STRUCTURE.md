@@ -81,7 +81,8 @@ src/
 ├── search/                   # P0 advanced / cross-facet search (when implemented)
 ├── sharing/                  # resource links, share with parents
 ├── print/                    # print material / unit / this week
-├── parent/                   # this week calendar + Focus dashboard
+├── parent/                   # this week calendar + Focus + announcements
+├── announcements/            # one-way notices (course / class / student)
 ├── lesson-plans/             # weekly course plans + per-day materials
 ├── calendar/                 # month/week calendar of assigned, due, lesson plans
 ├── auth/                     # login, signup, invite entry, session helpers

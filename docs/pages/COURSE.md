@@ -19,6 +19,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Optional **outline** panel (file-tree of top-level materials + units with nested materials); open by default on large screens (`lg`+), closed on smaller screens; **Show outline** / hide so it is not always open.
 - Add unit / add material (top-level or into a unit) when permitted.
 - **Lesson plans:** staff list weekly plans on this course; **Add lesson plan** → [LESSON_PLAN](./LESSON_PLAN.md) new. Opening a row goes to the plan. Families see **published** plans only.
+- **Announce:** staff can post a one-way [ANNOUNCEMENT](./ANNOUNCEMENT.md) to this course (`…/announcements/new?audience=course&courseId=`).
 - Print and share controls stay visible (not in overflow-only menus).
 - Instructors can **publish / unpublish** the course (distinct from archive). Unpublished courses show an amber warning + Publish on this page. Published courses show a green **Published** badge by the title; **Unpublish** lives in [COURSE_SETTINGS](./COURSE_SETTINGS.md).
 - Soft-delete / versioning entry points for dangerous actions (UX TBD).
@@ -46,13 +47,14 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Units list (ordered) → [UNIT](./UNIT.md); add unit
 - Materials under units: **title**, **description**, kind/badge, dates, print affordance
 - Sidebar / secondary: instructors, link to [COURSE_ROSTER](./COURSE_ROSTER.md)
-- Actions: Add material (page · link · file), **Add lesson plan**, Share (resource links), Print entry points; **Create course from this course** (copy → new independent course)
+- Actions: Add material (page · link · file), **Add lesson plan**, **Announce**, Share (resource links), Print entry points; **Create course from this course** (copy → new independent course)
 - Versioning / soft-delete awareness for dangerous actions (TBD exact UX)
 
 ## Primary actions
 
 - Add / open unit or material
 - Add / open a lesson plan
+- Announce to this course
 - Open roster / settings
 - Publish / unpublish the course (instructors)
 - Print unit or material (never buried)
@@ -71,6 +73,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - [UNIT](./UNIT.md) — open / add unit
 - [MATERIAL](./MATERIAL.md) — open material from unit rows
 - [LESSON_PLAN](./LESSON_PLAN.md) — open / add lesson plan
+- [ANNOUNCEMENT](./ANNOUNCEMENT.md) — announce to this course
 - [CALENDAR](./CALENDAR.md) — via org chrome
 - [PRINT](./PRINT.md) — **Print** on materials / **Print unit** entry points
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — course roster

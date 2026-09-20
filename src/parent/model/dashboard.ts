@@ -1,6 +1,8 @@
 import type { CourseColorKey } from "@/courses/model/courseColor";
 import { parseCourseColorKey } from "@/courses/model/courseColor";
 import { lessonPlanIsPublished } from "@/lesson-plans/model/visibility";
+import { isAnnouncementAvailable } from "@/announcements/model/availability";
+import type { AnnouncementAudience } from "@/announcements/model/audience";
 import type { CalendarWeek } from "./thisWeek";
 import { isDueInCalendarWeek, isInCalendarWeek, localIsoDate } from "./thisWeek";
 
@@ -62,6 +64,28 @@ export type ParentDashboardCourseMeta = {
   colorKey: CourseColorKey;
 };
 
+export type ParentAnnouncementStudent = {
+  id: number;
+  name: string;
+};
+
+export type ParentAnnouncementItem = {
+  id: number;
+  title: string;
+  body: string;
+  startDate: string | null;
+  endDate: string | null;
+  audience: AnnouncementAudience;
+  courseId: number | null;
+  classId: number | null;
+  studentId: number | null;
+  courseTitle: string | null;
+  classTitle: string | null;
+  studentName: string | null;
+  read: boolean;
+  students: ParentAnnouncementStudent[];
+};
+
 export type ParentDashboardNextItem = {
   studentId: number;
   studentName: string;
@@ -75,6 +99,7 @@ export type ParentDashboardNextItem = {
 export type ParentDashboard = {
   week: CalendarWeek;
   importantNow: ParentImportantNowItem[];
+  announcements: ParentAnnouncementItem[];
   lessonPlans: ParentLessonPlanItem[];
   courses: ParentDashboardCourseMeta[];
   students: ParentDashboardStudent[];
@@ -131,6 +156,22 @@ export type ParentDashboardSource = {
       body: string;
       materials: Array<{ id: number; title: string; unitId: number | null }>;
     }>;
+  }>;
+  classMemberships?: Array<{ classId: number; studentId: number }>;
+  announcements?: Array<{
+    id: number;
+    title: string;
+    body: string;
+    startDate: string | null;
+    endDate: string | null;
+    audience: AnnouncementAudience;
+    courseId: number | null;
+    classId: number | null;
+    studentId: number | null;
+    courseTitle: string | null;
+    classTitle: string | null;
+    studentName: string | null;
+    read: boolean;
   }>;
 };
 
@@ -245,12 +286,35 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
       return a.title.localeCompare(b.title);
     });
 
+  const seenAnnouncements = new Set<number>();
+  const announcements = (source.announcements ?? [])
+    .filter((item) => {
+      if (!isAnnouncementAvailable(source.today, item.startDate, item.endDate)) {
+        return false;
+      }
+      if (seenAnnouncements.has(item.id)) return false;
+      seenAnnouncements.add(item.id);
+      return studentsForAnnouncement(source, item).length > 0;
+    })
+    .map((item) => ({
+      ...item,
+      students: studentsForAnnouncement(source, item),
+    }))
+    .sort((a, b) => {
+      if (a.read !== b.read) return a.read ? 1 : -1;
+      const aStart = a.startDate ?? "";
+      const bStart = b.startDate ?? "";
+      if (aStart !== bStart) return aStart.localeCompare(bStart);
+      return a.title.localeCompare(b.title);
+    });
+
   const nextAssigned = collectNextByDate(source, "assigned");
   const nextDue = collectNextByDate(source, "due");
 
   return {
     week: source.week,
     importantNow,
+    announcements,
     lessonPlans,
     courses: coursesFromStudents(students),
     students,
@@ -277,6 +341,12 @@ export function filterParentDashboard(
   const lessonPlans = dashboard.lessonPlans.filter((item) =>
     courseIds.has(item.courseId),
   );
+  const announcements = dashboard.announcements
+    .map((item) => ({
+      ...item,
+      students: item.students.filter((student) => allowed.has(student.id)),
+    }))
+    .filter((item) => item.students.length > 0);
   const nextAssigned = dashboard.nextAssigned.filter((item) =>
     allowed.has(item.studentId),
   );
@@ -286,6 +356,7 @@ export function filterParentDashboard(
     students,
     courses: coursesFromStudents(students),
     importantNow,
+    announcements,
     lessonPlans,
     nextAssigned,
     nextDue,
@@ -349,6 +420,58 @@ export function isMaterialDueInWeek(
   material: ParentDashboardMaterial,
 ): boolean {
   return isDueInCalendarWeek(week, material.dueDate);
+}
+
+/** Multi-student parent home: which children an announcement is for. */
+export function bulletinForStudentsLabel(
+  students: ParentAnnouncementStudent[],
+): string | null {
+  if (students.length === 0) return null;
+  const names = students.map((student) => student.name);
+  if (names.length === 1) return `For ${names[0]}`;
+  if (names.length === 2) return `For ${names[0]} and ${names[1]}`;
+  return `For ${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+}
+
+function studentsForCourse(
+  source: ParentDashboardSource,
+  courseId: number,
+): ParentAnnouncementStudent[] {
+  const ids = new Set(
+    source.enrollments
+      .filter((row) => row.courseId === courseId && row.courseStatus === "active")
+      .map((row) => row.studentId),
+  );
+  return source.students
+    .filter((student) => ids.has(student.id))
+    .map((student) => ({ id: student.id, name: student.name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function studentsForAnnouncement(
+  source: ParentDashboardSource,
+  item: NonNullable<ParentDashboardSource["announcements"]>[number],
+): ParentAnnouncementStudent[] {
+  if (item.audience === "course" && item.courseId != null) {
+    return studentsForCourse(source, item.courseId);
+  }
+  if (item.audience === "class" && item.classId != null) {
+    const ids = new Set(
+      (source.classMemberships ?? [])
+        .filter((row) => row.classId === item.classId)
+        .map((row) => row.studentId),
+    );
+    return source.students
+      .filter((student) => ids.has(student.id))
+      .map((student) => ({ id: student.id, name: student.name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+  if (item.audience === "student" && item.studentId != null) {
+    return source.students
+      .filter((student) => student.id === item.studentId)
+      .map((student) => ({ id: student.id, name: student.name }));
+  }
+  return [];
 }
 
 function compareWeekMaterials(

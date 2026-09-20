@@ -153,6 +153,11 @@ export const helpDocTopics: HelpDocTopic[] = [
         type: "p",
         text: "Calendar in the sidebar shows assigned and due work as chips, color-coded by course. Outlined chips are assigned; filled chips are due. Tap a class in the legend to hide it.",
       },
+      { type: "h2", text: "Announcements" },
+      {
+        type: "p",
+        text: "An announcement is a one-way note to a course, a class, or a student. Families see it on home while it is current. Opening it marks it read. There is no reply thread — that is later.",
+      },
       { type: "h2", text: "Print and share" },
       {
         type: "ul",
@@ -304,6 +309,7 @@ export const helpDocTopics: HelpDocTopic[] = [
         items: [
           "This week — this week’s calendar (lesson plans and assigned/due work)",
           "Focus — Important now plus what’s assigned or due next",
+          "Announcements — one-way notes for a course, class, or student, with a notification until you open them",
           "Calendar — month or week view of the same work",
           "Print this week — print the week’s packet when you want it on paper",
         ],

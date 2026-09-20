@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   buildParentDashboard,
+  bulletinForStudentsLabel,
   datedMaterialCount,
   filterParentDashboard,
   parentWeekHasContent,
@@ -475,6 +476,116 @@ test("this week calendar still lists assigned and due work without a lesson plan
   assert.deepEqual(
     calendar.chips.map((chip) => `${chip.kind}:${chip.title}`).sort(),
     ["assigned:Lab write-up", "assigned:Reading pages", "due:Lab write-up"],
+  );
+});
+
+test("bulletinForStudentsLabel names one, two, or many students", () => {
+  assert.equal(bulletinForStudentsLabel([]), null);
+  assert.equal(
+    bulletinForStudentsLabel([{ id: 1, name: "Maya" }]),
+    "For Maya",
+  );
+  assert.equal(
+    bulletinForStudentsLabel([
+      { id: 2, name: "Eli" },
+      { id: 1, name: "Maya" },
+    ]),
+    "For Eli and Maya",
+  );
+  assert.equal(
+    bulletinForStudentsLabel([
+      { id: 2, name: "Eli" },
+      { id: 1, name: "Maya" },
+      { id: 3, name: "Sam" },
+    ]),
+    "For Eli, Maya, and Sam",
+  );
+});
+
+test("dashboard surfaces current announcements for matching students", () => {
+  const dashboard = buildParentDashboard(
+    source({
+      students: [
+        { id: 1, name: "Maya", gradeLevel: "4" },
+        { id: 2, name: "Eli", gradeLevel: "2" },
+      ],
+      enrollments: [
+        {
+          studentId: 1,
+          courseId: 10,
+          courseTitle: "Science",
+          courseStatus: "active",
+        },
+      ],
+      classMemberships: [{ classId: 5, studentId: 2 }],
+      announcements: [
+        {
+          id: 1,
+          title: "Lab cancelled",
+          body: "Stay home.",
+          startDate: "2026-09-13",
+          endDate: "2026-09-19",
+          audience: "course",
+          courseId: 10,
+          classId: null,
+          studentId: null,
+          courseTitle: "Science",
+          classTitle: null,
+          studentName: null,
+          read: false,
+        },
+        {
+          id: 2,
+          title: "Wednesday cohort",
+          body: "",
+          startDate: null,
+          endDate: null,
+          audience: "class",
+          courseId: null,
+          classId: 5,
+          studentId: null,
+          courseTitle: null,
+          classTitle: "Wednesday cohort",
+          studentName: null,
+          read: true,
+        },
+        {
+          id: 3,
+          title: "Next week only",
+          body: "",
+          startDate: "2026-09-20",
+          endDate: "2026-09-26",
+          audience: "student",
+          courseId: null,
+          classId: null,
+          studentId: 1,
+          courseTitle: null,
+          classTitle: null,
+          studentName: "Maya",
+          read: false,
+        },
+      ],
+    }),
+  );
+
+  assert.deepEqual(
+    dashboard.announcements.map((row) => row.title),
+    ["Lab cancelled", "Wednesday cohort"],
+  );
+  assert.equal(dashboard.announcements[0]?.read, false);
+  assert.deepEqual(
+    dashboard.announcements[0]?.students.map((student) => student.name),
+    ["Maya"],
+  );
+  assert.deepEqual(
+    dashboard.announcements[1]?.students.map((student) => student.name),
+    ["Eli"],
+  );
+
+  const filtered = filterParentDashboard(dashboard, [2]);
+  assert.deepEqual(
+    filtered.announcements.map((row) => row.title),
+    ["Wednesday cohort"],
   );
 });
 
