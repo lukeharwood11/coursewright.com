@@ -60,7 +60,7 @@ export type Database = {
           invited_by: string
           membership_id?: number | null
           organization_id: number
-          role: string
+          role?: string
           student_profile_id?: number | null
           token?: string
         }
@@ -147,8 +147,8 @@ export type Database = {
         Row: {
           audience: string
           body: string
-          class_id: number | null
-          course_id: number | null
+          class_ids: number[]
+          course_ids: number[]
           created_at: string
           created_by: string
           deleted_at: string | null
@@ -157,15 +157,15 @@ export type Database = {
           id: number
           organization_id: number
           start_date: string | null
-          student_profile_id: number | null
+          student_profile_ids: number[]
           title: string
           updated_at: string
         }
         Insert: {
           audience: string
           body?: string
-          class_id?: number | null
-          course_id?: number | null
+          class_ids?: number[]
+          course_ids?: number[]
           created_at?: string
           created_by: string
           deleted_at?: string | null
@@ -174,15 +174,15 @@ export type Database = {
           id?: number
           organization_id: number
           start_date?: string | null
-          student_profile_id?: number | null
+          student_profile_ids?: number[]
           title: string
           updated_at?: string
         }
         Update: {
           audience?: string
           body?: string
-          class_id?: number | null
-          course_id?: number | null
+          class_ids?: number[]
+          course_ids?: number[]
           created_at?: string
           created_by?: string
           deleted_at?: string | null
@@ -191,25 +191,11 @@ export type Database = {
           id?: number
           organization_id?: number
           start_date?: string | null
-          student_profile_id?: number | null
+          student_profile_ids?: number[]
           title?: string
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "announcements_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "classes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "announcements_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "announcements_created_by_fkey"
             columns: ["created_by"]
@@ -229,13 +215,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "announcements_student_profile_id_fkey"
-            columns: ["student_profile_id"]
-            isOneToOne: false
-            referencedRelation: "student_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -467,6 +446,7 @@ export type Database = {
       }
       courses: {
         Row: {
+          color_key: string
           copied_from_course_id: number | null
           created_at: string
           description: string
@@ -484,9 +464,9 @@ export type Database = {
           title: string
           updated_at: string
           visibility: string
-          color_key: string
         }
         Insert: {
+          color_key?: string
           copied_from_course_id?: number | null
           created_at?: string
           description?: string
@@ -504,9 +484,9 @@ export type Database = {
           title: string
           updated_at?: string
           visibility?: string
-          color_key?: string
         }
         Update: {
+          color_key?: string
           copied_from_course_id?: number | null
           created_at?: string
           description?: string
@@ -524,7 +504,6 @@ export type Database = {
           title?: string
           updated_at?: string
           visibility?: string
-          color_key?: string
         }
         Relationships: [
           {
@@ -1608,7 +1587,7 @@ export type Database = {
       get_invite: {
         Args: { p_token: string }
         Returns: {
-          accepted_at: string | null
+          accepted_at: string
           email: string
           email_matches: boolean
           id: number
@@ -1616,14 +1595,14 @@ export type Database = {
           organization_name: string
           organization_slug: string
           role: string
-          student_name: string | null
-          student_profile_id: number | null
+          student_name: string
+          student_profile_id: number
         }[]
       }
       get_staff_invite: {
         Args: { p_token: string }
         Returns: {
-          accepted_at: string | null
+          accepted_at: string
           email: string
           email_matches: boolean
           id: number
@@ -1631,16 +1610,12 @@ export type Database = {
           organization_name: string
           organization_slug: string
           role: string
-          student_name: string | null
-          student_profile_id: number | null
+          student_name: string
+          student_profile_id: number
         }[]
       }
       save_material_page: {
-        Args: {
-          p_material_id: number
-          p_placement?: Json | null
-          p_blocks?: Json | null
-        }
+        Args: { p_blocks?: Json; p_material_id: number; p_placement?: Json }
         Returns: number
       }
     }

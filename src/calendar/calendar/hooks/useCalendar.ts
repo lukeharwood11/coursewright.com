@@ -15,7 +15,7 @@ export function useCalendar() {
   const { organization, role, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
   const [search, setSearch] = useSearchParams();
-  const view = search.get("view") === "week" ? "week" : "month";
+  const view: "month" | "week" = search.get("view") === "week" ? "week" : "month";
   const dateParam = search.get("date");
   const focusDate = dateParam || localIsoDate();
   const week = calendarWeekContaining(new Date(`${focusDate}T12:00:00`));
