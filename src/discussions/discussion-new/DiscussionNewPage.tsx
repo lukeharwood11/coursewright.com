@@ -75,6 +75,9 @@ export function DiscussionNewPage() {
             onCourseId={page.setCourseId}
             onClassId={page.setClassId}
             onTitle={page.setTitle}
+            showNotifyAll={page.showNotifyAll}
+            notifyAll={page.notifyAll}
+            onNotifyAll={page.setNotifyAll}
           />
         </div>
         <div className="mt-4">

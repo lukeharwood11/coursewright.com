@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   CheckCircleIcon,
   ArrowUturnLeftIcon,
@@ -28,6 +28,7 @@ import { useDiscussion } from "./hooks/useDiscussion";
 export function DiscussionPage() {
   const page = useDiscussion();
   const navigate = useNavigate();
+  const { hash: locationHash } = useLocation();
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [removeMessageId, setRemoveMessageId] = useState<number | null>(null);
   const [hasNewBelow, setHasNewBelow] = useState(false);
@@ -56,13 +57,13 @@ export function DiscussionPage() {
 
   useEffect(() => {
     if (page.loading || page.messages.length === 0) return;
-    const hash = window.location.hash.replace(/^#/, "");
+    const hash = locationHash.replace(/^#/, "");
     if (!hash.startsWith("message-")) return;
     const target = document.getElementById(hash);
     if (!target) return;
     stickToBottom.current = false;
     target.scrollIntoView({ block: "center" });
-  }, [page.loading, page.messages.length, page.discussion?.id]);
+  }, [page.loading, page.messages.length, page.discussion?.id, locationHash]);
 
   if (page.loading) {
     return (

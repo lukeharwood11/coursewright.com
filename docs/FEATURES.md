@@ -63,7 +63,7 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Org grade scheme** | Org chooses how grades work (exact / range / custom; presets K–12, Custom) | shipped | Defaults on create; owners/admins edit in org settings |
 | **Admin invites** | Add other admins by email; those emails can be **claimed** by accounts | shipped | Invite owner/admin/instructor; **email via Resend** `organization-invite` (HN-015) plus copyable `/invite/<token>`; unsigned claim page names the invited email and prefills signup/login (HN-016) |
 | **Student profiles** | Org-level student records — no dedicated student role required | shipped | Org roster create/edit + profile page; **multiple parent invites** (one pending token per email; siblings share it) + optional **student email** (same claim path). Parent invite email + copy-link on profile and course roster. Created when first added to a course or class; dedicated student role later (P2) |
-| **Classes** | Org-scoped **group of students** — separate from a Course | shipped | Create class + batch add/remove members. Class is a **batch preset** into course enroll (not a live link) |
+| **Classes** | Org-scoped **group of students** — separate from a Course | shipped | Create class + batch add/remove members. Class is a **batch preset** into course enroll (not a live link). Owners/admins assign optional **class leads** (zero or more owners/admins/instructors) |
 | **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | shipped | List-first org / class / course roster with **batch select** enroll/add; multiple parent invites + optional student email; parent invite emails via Resend `organization-invite` (HN-015) plus copyable claim link |
 | **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches parent vs staff home. **P0 roles:** owner, admin, instructor, parent. Owner vs admin = billing. Staff change/remove is **membership-only** — materials/roster stay enrollment-gated. **Staff parent view** in progress (header toggle) |
 | **Admin account management** | Admins invite, **change roles**, and **remove** admins/instructors | shipped | Org settings updates `memberships` only (owners can promote to owner; admins change admin ↔ instructor ↔ **parent**; remove admin/instructor when they have no linked student). **Promote parent → staff** is a direct role change (no new invite). **Demote staff → parent** only when they have a `parent_student_links` row for a student in the org. Last owner/admin blocked in DB + UI. Does **not** add a staff-role gate on materials/roster RLS. Invite emails via Resend; copy-link remains |
@@ -112,7 +112,7 @@ Roster exists at **three** levels: **organization** (student profiles, staff), *
 | **Course roster** | **Instructor** (their courses) | Enroll **individuals** (multi-select); optional **Class preset** checks that class’s members once |
 | **Parent linkage** | Admin, instructor | Associate **one or more** parent emails with each student profile |
 | **Parent invites** | Admin, instructor | Email a claim link from roster or student profile (Resend `organization-invite`; copy-link remains) |
-| **Staff / instructor assignment** | Owner, admin | Assign instructors to courses |
+| **Staff / instructor assignment** | Owner, admin | Assign instructors to courses; assign **class leads** |
 | **Admins** | Owner, admin | Multiple admins; invite by email (claimable) |
 | **Billing (P1)** | Owner | Course Wright bills the org — admins cannot manage payment |
 
@@ -125,7 +125,7 @@ A **Class** is an org-scoped **group of students**. It is **not** a Course.
 | **Purpose** | Group students (e.g. “Wednesday cohort”, “Room A”) | Plan and share materials for an offering |
 | **Materials / units** | None | Yes |
 | **Members** | Student profiles | **Enrollment** → `student_profile` (individuals) |
-| **Dates / grade metadata** | Name + members only (P0) | Optional start/end; optional grade levels |
+| **Dates / grade metadata** | Name + members + optional **leads** | Optional start/end; optional grade levels |
 
 **Decided:** Class and Course are separate concepts. Class list lives on the org roster; class roster is `/my/<org-slug>/classes/<class_id>`. Admins and instructors manage classes (same as the roster capability table).
 
@@ -134,7 +134,7 @@ A **Class** is an org-scoped **group of students**. It is **not** a Course.
 1. A course enrolls **individuals** (`enrollment → student_profile`). A Class may be used as a **batch preset** when enrolling (one-shot copy of members into enrollments — **not** a live link).
 2. Students may be in **multiple classes** and **multiple courses**.
 3. Parent “this week” / access keys off **course enrollment** only; Class never grants materials, this-week, or print.
-4. Class fields in P0: **name** + members.
+4. Class fields in P0: **name** + members + optional **leads** (owners/admins assign zero or more owners, admins, or instructors). Leads are notified in **Activity** when someone posts in a discussion for that class.
 
 Keep **Course.enrollment → student_profile** as the access gate for parents.
 ### Org creation & admins (P0)
@@ -584,7 +584,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 | **Forms** | Structured response collection | in design | Purpose + respondents TBD — see materials workshop |
 | **Course Wright billing (orgs)** | We charge organizations so they can serve parents | planned | `billing/` SPA stub + owner-only placeholder on org settings. Packaging: per teacher or per course — **hypothesis**. Provider: **Stripe** *(hypothesis)* |
 | **Discussions** | Two-way thread for **one course** or **one class**. Title + who it is for. Staff and families in that group can start a thread and everyone on it can post. Flat conversation with optional **Quote** (Teams-style block in the message body). Composer is **plain text** by default; **T** turns on **Lexical** rich text. The person who started it, or staff who can see it, can mark it **resolved**. Posts can attach **files**, **links to course materials**, and **URLs**. While the app is open, new posts and resolved state appear without a refresh (**Supabase Realtime**). Distinct from **announcements** | in progress | Flat thread + quote-in-body + plain/Lexical composer (`20260922000003_discussion_quotes.sql`). Families start a discussion only for a **course their child is enrolled in** (active + published) or a **class their child is in**. Staff: owners/admins any course/class in the org; instructors for courses they teach and classes they can already manage on the roster. Invited student emails use the parent claim path. No email in this slice. Ad-hoc student-group audience later. |
-| **Notifications** | <!-- TBD --> | planned | Broader email/in-app alerts. Announcement opt-in email is P0 (**Send notification**). In-app **lesson plans** stay P0 and are not this row. **Discussions** use in-app Realtime + an unread badge, not this email row |
+| **Notifications** | In-app **Activity** list of events that need a person’s attention. Discussion posts notify the **course instructors** or **class leads**. Staff starting a discussion can opt in to **Notify everyone** on the thread. Clicking a row marks it read and opens the activity | shipped | Stored `notifications` rows (ack = `read_at`). Sidebar **Activity** with unread badge. Not email or push in this slice. Announcement opt-in email stays P0 (**Send notification**). Discussion thread unread badge is separate |
 | **Reporting** | <!-- TBD --> | planned | |
 | **Designed PDF packets** | Richer branded PDF layouts beyond the P0 ink packet | planned | P0 already generates + previews a PDF; P1 = stronger brand / layout polish |
 
@@ -602,6 +602,9 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 - As a **parent or instructor**, I want to **quote a message and attach a file, a material, or a link** so that **we can share the worksheet or page we are talking about**.
 - As the **person who started a discussion**, or as **staff**, I want to **mark it resolved** so that **families can see the question is settled**.
 - As anyone **looking at discussions in the app**, I want **new posts to show up without refreshing** so that **I don't miss a message that is happening now**.
+- As an **owner or admin**, I want to **assign one or more class leads** so that **those teachers are notified when someone posts in that class’s discussions**.
+- As a **course instructor or class lead**, I want **Activity** so that **I can open a discussion post without hunting**.
+- As a **teacher starting a discussion**, I want to **notify everyone on the thread** so that **families see it in Activity**.
 
 ### Discussions (P1)
 
@@ -633,11 +636,24 @@ Staff **Parent view** uses the family rules (create only if they have linked stu
 
 **Unread:** per signed-in person (`DiscussionRead.last_read_at`). Opening the thread (and staying on it as live posts arrive) marks it read for that person. Sidebar **Discussions** shows a red count of unread threads. Unread is **not** shown as a stack of cards on This week home — keep home for the week calendar + announcements.
 
-**Realtime:** while the SPA is open, **Supabase Realtime** (Postgres changes, RLS still applies) updates the open thread (posts, quotes, attachments, answered, removes), the open list (new threads, last activity, answered), and the sidebar unread count. No typing indicators in this slice. Closed tab / email / push is **not** this feature (see P1 Notifications).
+**Activity notifications:** a new post writes `Notification` rows. **Course** threads notify that course’s **instructors**. **Class** threads notify that class’s **leads**. The author is never notified of their own post. When **staff** (Teacher view) start a discussion, **Notify everyone** (off by default) also notifies everyone who can currently see the thread (org staff + qualifying parents). Clicking an Activity row marks it **read** and opens the post. Opening the thread also acks matching discussion notifications for that person.
+
+**Realtime:** while the SPA is open, **Supabase Realtime** (Postgres changes, RLS still applies) updates the open thread (posts, quotes, attachments, answered, removes), the open list (new threads, last activity, answered), the sidebar unread count, and **Activity**. No typing indicators in this slice. Closed tab / email / push is **not** this feature.
 
 **Copy / search:** course-from-course does **not** copy discussions. Discussion titles are not in P0 chrome search in this slice.
 
-**Usability:** parent chrome stays simpler than staff. Sentence case. No “forum” / LMS jargon. **New discussion**, **Quote**, **Mark as resolved**.
+**Usability:** parent chrome stays simpler than staff. Sentence case. No “forum” / LMS jargon. **New discussion**, **Quote**, **Mark as resolved**. **Notify everyone** only on staff compose.
+
+### Activity / notifications (P1)
+
+**Activity** is the org sidebar list of stored notifications for the signed-in person. Distinct from announcement unread icons and from the Discussions unread-thread badge.
+
+| Rule | Detail |
+|------|--------|
+| **Who is notified of a discussion post** | **Course instructors** for a course thread; **class leads** for a class thread. Never the author. |
+| **Notify everyone** | Staff Teacher view, on **create** only, off by default. Opening post also notifies everyone who can see the thread. |
+| **Ack** | Clicking the Activity row sets `read_at`. Opening the linked discussion also marks matching discussion notifications read for that person. |
+| **Not this slice** | Email, push, and alerts for other object types |
 
 ---
 
@@ -717,6 +733,8 @@ Staff **Parent view** uses the family rules (create only if they have linked stu
 | App entity PKs use **bigserial** / **bigint** (auto-increment) | **Decided** | FKs to app entities are `bigint`; `profiles` / auth stay `uuid` |
 | Material dating: optional unit dates, optional material `scheduled_date` (assignment), optional `due_date` | **Decided** | Assignment date wins for assignment-week membership when set; else unit range if material has a unit; top-level needs `scheduled_date` for assignment-week. Materials also appear on This week when `due_date` falls in the week. UI labels Assigned vs Due |
 | Multiple instructors per course | **Decided** | CourseInstructor |
+| Class leads (zero or more staff) | **Decided** | Owners/admins assign owner/admin/instructor as `ClassLeader`. Optional. Notified of class discussion posts. |
+| In-app Activity notifications | **Decided** | Stored per user. Discussion posts → instructors or class leads; staff **Notify everyone** on create. Click acks. Not email/push in this slice. |
 | Calendar week = Sunday–Saturday | **Decided** | Parent This week and Calendar. Assigned = outline; due = filled. Print is the full dated week **plus each student’s published lesson plans first** |
 | Parent must have an account to view (P0) | **Decided** | Invite → signup/login; magic links later |
 | Parent profile stays active if enrollment ends (P0) | **Decided** | Defer visibility rules |

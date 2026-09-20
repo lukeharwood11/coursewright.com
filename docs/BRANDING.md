@@ -187,6 +187,8 @@ Other drafts kept for reference (not in use):
 | Dated weekly course plan | **Lesson plan** | one Sunday–Saturday week; published / unpublished; optional week note + per-day notes and materials; not an assignment object; not email |
 | One-way notice (course, class, or student) | **Announcement** | optional start/end on home; unread notification until opened; not a lesson plan; no reply thread |
 | Two-way thread (one course or one class) | **Discussion** | **P1** — title + audience; everyone on the thread can post; flat timeline + optional **Quote** in body; plain or Lexical (**T**); **Resolved** / **Open**; not an announcement |
+| In-app notice that something happened | **Activity** | **P1** — stored notifications; click marks read and opens the item |
+| Staff assigned to a class | **Lead** | Optional; zero or more owners/admins/instructors; notified of class discussion posts |
 | Course context blurb | **Summary** | **P1** — auto-drafted “what’s going on this week”; not the course **Description** |
 | Parent view (with account) | **Progress** | grades, notes, checklists, homework |
 | Person being taught | **Student** (profile) | student_profile, learner |

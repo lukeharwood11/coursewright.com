@@ -6,11 +6,16 @@ import { toast } from "sonner";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import { getOrganization } from "@/organizations/databridge/organizations";
+import { canManageOrgSettings } from "@/organizations/model/role";
 import {
+  addClassLeader,
   addClassMembers,
   classQueryKeys,
   getClass,
+  listClassLeaders,
   listClassMembers,
+  listOrgStaffForPicker,
+  removeClassLeader,
   removeClassMember,
 } from "@/roster/databridge/classes";
 import {
@@ -31,9 +36,10 @@ import {
 export function useClassRoster() {
   const { classId: classIdParam } = useParams();
   const classId = classIdParam ? Number(classIdParam) : NaN;
-  const { organization } = useOrgShell();
+  const { organization, role } = useOrgShell();
   const queryClient = useQueryClient();
   const classReady = Number.isFinite(classId);
+  const canManageLeads = canManageOrgSettings(role);
 
   const classQuery = useQuery({
     queryKey: classQueryKeys.detail(classId),
@@ -48,6 +54,18 @@ export function useClassRoster() {
     queryKey: classQueryKeys.members(classId),
     queryFn: () => listClassMembers(classId),
     enabled: classReady && belongsHere,
+  });
+
+  const leadersQuery = useQuery({
+    queryKey: classQueryKeys.leaders(classId),
+    queryFn: () => listClassLeaders(classId),
+    enabled: classReady && belongsHere,
+  });
+
+  const staffQuery = useQuery({
+    queryKey: ["classes", "org-staff-picker", organization.id],
+    queryFn: () => listOrgStaffForPicker(organization.id),
+    enabled: canManageLeads,
   });
 
   const studentsQuery = useQuery({
@@ -73,6 +91,7 @@ export function useClassRoster() {
   const [drafts, setDrafts] = useState<NewStudentDraft[]>([emptyStudentDraft()]);
   const [pasteText, setPasteText] = useState("");
   const [newError, setNewError] = useState<string | null>(null);
+  const [addLeadUserId, setAddLeadUserId] = useState("");
 
   const addExistingMutation = useMutation({
     mutationFn: async () => {
@@ -134,6 +153,30 @@ export function useClassRoster() {
     },
   });
 
+  const addLeadMutation = useMutation({
+    mutationFn: () => addClassLeader(classId, addLeadUserId),
+    onSuccess: async () => {
+      setAddLeadUserId("");
+      await queryClient.invalidateQueries({
+        queryKey: classQueryKeys.leaders(classId),
+      });
+      toast("Lead added.");
+    },
+  });
+
+  const removeLeadMutation = useMutation({
+    mutationFn: (userId: string) => removeClassLeader(classId, userId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: classQueryKeys.leaders(classId),
+      });
+      toast("Lead removed.");
+    },
+    onError: (error: Error) => {
+      toast(error.message);
+    },
+  });
+
   function onSubmitNew(event: FormEvent) {
     event.preventDefault();
     setNewError(null);
@@ -161,10 +204,21 @@ export function useClassRoster() {
     setNewError(null);
   }
 
+  const leaderIds = new Set((leadersQuery.data ?? []).map((row) => row.userId));
+
   return {
     organization,
     classGroup: belongsHere ? classGroup : null,
     members,
+    leads: leadersQuery.data ?? [],
+    staff: (staffQuery.data ?? []).filter((row) => !leaderIds.has(row.userId)),
+    canManageLeads,
+    addLeadUserId,
+    setAddLeadUserId,
+    addLead: () => addLeadMutation.mutate(),
+    addingLead: addLeadMutation.isPending,
+    addLeadError: addLeadMutation.error ? addLeadMutation.error.message : null,
+    onRemoveLead: (userId: string) => removeLeadMutation.mutate(userId),
     availableStudents,
     gradeLabels: organizationQuery.data?.gradeLabels ?? [],
     loading: classQuery.isLoading || membersQuery.isLoading,

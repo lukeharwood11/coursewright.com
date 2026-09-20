@@ -19,6 +19,7 @@ import {
   DiscussionPage,
   DiscussionsPage,
 } from "@/discussions";
+import { ActivityPage } from "@/notifications";
 import { LessonPlanEditPage, LessonPlanPage } from "@/lesson-plans";
 import { MaterialEditPage, MaterialPage } from "@/materials";
 import {
@@ -159,6 +160,7 @@ export function AppRoutes() {
               path="discussions/:discussionId"
               element={<DiscussionPage />}
             />
+            <Route path="activity" element={<ActivityPage />} />
             <Route
               path="courses/:courseId/lesson-plans/new"
               element={

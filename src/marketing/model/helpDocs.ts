@@ -93,6 +93,10 @@ export const helpDocTopics: HelpDocTopic[] = [
         type: "ul",
         items: [
           "Home — organization dashboard",
+          "Calendar — month or week view of assigned and due work",
+          "Announcements — one-way notes to a course, class, or student",
+          "Discussions — two-way threads for one course or one class",
+          "Activity — notices when someone posts in a discussion you lead or teach (clicking marks them read)",
           "Courses — list and open course offerings",
           "Roster — students and classes",
           "Settings — name, permalink, grade scheme, and staff (owners and admins manage; instructors may view)",
@@ -208,7 +212,7 @@ export const helpDocTopics: HelpDocTopic[] = [
       { type: "h2", text: "Classes" },
       {
         type: "p",
-        text: "Create a class from the roster, then add members from the class page or by selecting students on the org roster and choosing Add to class.",
+        text: "Create a class from the roster, then add members from the class page or by selecting students on the org roster and choosing Add to class. Owners and admins can assign optional class leads (one or more owners, admins, or instructors). Leads are notified in Activity when someone posts in a discussion for that class.",
       },
       { type: "h2", text: "Course enrollments" },
       {
@@ -310,6 +314,8 @@ export const helpDocTopics: HelpDocTopic[] = [
           "This week — this week’s calendar (lesson plans and assigned/due work)",
           "Focus — Important now plus what’s assigned or due next",
           "Announcements — one-way notes for a course, class, or student, with a notification until you open them",
+          "Discussions — two-way threads for a course or class your child is in",
+          "Activity — notices when a teacher wants everyone to see a discussion post; clicking marks them read",
           "Calendar — month or week view of the same work",
           "Print this week — print the week’s packet when you want it on paper",
         ],

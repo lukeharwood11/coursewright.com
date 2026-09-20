@@ -2,11 +2,20 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildParentNav, buildStaffNav } from "./nav.ts";
 
-test("staff and parent nav include announcements and discussions", () => {
+test("staff and parent nav include announcements, discussions, and activity", () => {
   const staff = buildStaffNav("coop", { courses: [], classes: [] });
   assert.deepEqual(
     staff.map((section) => section.id),
-    ["home", "calendar", "announcements", "discussions", "courses", "roster", "settings"],
+    [
+      "home",
+      "calendar",
+      "announcements",
+      "discussions",
+      "activity",
+      "courses",
+      "roster",
+      "settings",
+    ],
   );
   assert.equal(
     staff.find((section) => section.id === "announcements")?.href,
@@ -16,11 +25,15 @@ test("staff and parent nav include announcements and discussions", () => {
     staff.find((section) => section.id === "discussions")?.href,
     "/my/coop/discussions",
   );
+  assert.equal(
+    staff.find((section) => section.id === "activity")?.href,
+    "/my/coop/activity",
+  );
 
   const parent = buildParentNav("coop", { courses: [], classes: [] });
   assert.deepEqual(
     parent.map((section) => section.id),
-    ["home", "calendar", "announcements", "discussions", "progress"],
+    ["home", "calendar", "announcements", "discussions", "activity", "progress"],
   );
   assert.equal(
     parent.find((section) => section.id === "announcements")?.href,
@@ -29,6 +42,10 @@ test("staff and parent nav include announcements and discussions", () => {
   assert.equal(
     parent.find((section) => section.id === "discussions")?.href,
     "/my/coop/discussions",
+  );
+  assert.equal(
+    parent.find((section) => section.id === "activity")?.href,
+    "/my/coop/activity",
   );
   assert.equal(
     parent.find((section) => section.id === "announcements")?.badgeCount,
@@ -54,6 +71,38 @@ test("parent announcements nav shows unread badge count", () => {
   );
   assert.equal(
     none.find((section) => section.id === "announcements")?.badgeCount,
+    undefined,
+  );
+});
+
+test("activity nav shows unread badge count for staff and parents", () => {
+  const staff = buildStaffNav(
+    "coop",
+    { courses: [], classes: [] },
+    { unreadActivity: 2 },
+  );
+  assert.equal(
+    staff.find((section) => section.id === "activity")?.badgeCount,
+    2,
+  );
+
+  const parent = buildParentNav(
+    "coop",
+    { courses: [], classes: [] },
+    { unreadActivity: 5 },
+  );
+  assert.equal(
+    parent.find((section) => section.id === "activity")?.badgeCount,
+    5,
+  );
+
+  const none = buildStaffNav(
+    "coop",
+    { courses: [], classes: [] },
+    { unreadActivity: 0 },
+  );
+  assert.equal(
+    none.find((section) => section.id === "activity")?.badgeCount,
     undefined,
   );
 });

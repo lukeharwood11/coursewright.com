@@ -9,7 +9,7 @@ Student profiles, **classes** (student groups), **families** (parent directory â
 - **Family** â€” org-scoped household in the parent directory (not a course; no materials). Schema + `databridge/families` + `model/family` remain; `families/` and `family/` page folders are **not currently routed**.
 - Org roster (`org-roster/`), class roster (`class-roster/`), course roster (`course-roster/`), student profile
 - Parent email linkage + invites (Resend email + copyable `/invite/<token>`; same claim path as staff)
-- Staff assignment UI that belongs with roster (course instructors may live with `courses/`)
+- Staff assignment UI that belongs with roster (course instructors may live with `courses/`; **class leads** live on the class page)
 
 ## Rules
 

@@ -106,6 +106,7 @@ Aligned with P0 in [FEATURES.md](./FEATURES.md):
 | `parent/` | This week calendar + Focus + **announcements** | Parent role |
 | `announcements/` | One-way notices (course / class / student) | Instructor, admin; parent views |
 | `discussions/` | **P1** — two-way threads (one course or one class) | Instructor, admin; parent views |
+| `notifications/` | **P1** — in-app Activity (stored notifications) | Instructor, admin; parent views |
 | `lesson-plans/` | Weekly course plans with per-day materials | Instructor; parent views |
 | `calendar/` | Month/week calendar of assigned, due, lesson plans | Instructor; parent |
 | `billing/` | Org SaaS (P1) | Admin |

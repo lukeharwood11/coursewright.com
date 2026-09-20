@@ -5,6 +5,7 @@ import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
+import { ClassLeadsSection } from "./components/ClassLeadsSection";
 import { useClassRoster } from "./hooks/useClassRoster";
 
 export function ClassRosterPage() {
@@ -88,6 +89,18 @@ export function ClassRosterPage() {
           Create Announcement
         </ButtonLink>
       </div>
+
+      <ClassLeadsSection
+        leads={roster.leads}
+        staff={roster.staff}
+        canManage={roster.canManageLeads}
+        addUserId={roster.addLeadUserId}
+        onAddUserId={roster.setAddLeadUserId}
+        onAdd={roster.addLead}
+        onRemove={roster.onRemoveLead}
+        adding={roster.addingLead}
+        addError={roster.addLeadError}
+      />
 
       <section className="mt-8">
         <div className="flex flex-wrap items-end justify-between gap-3">

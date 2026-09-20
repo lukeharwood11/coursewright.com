@@ -19,6 +19,7 @@ export const classQueryKeys = {
   list: (orgId: number) => ["classes", "list", orgId] as const,
   detail: (id: number) => ["classes", "detail", id] as const,
   members: (id: number) => ["classes", "members", id] as const,
+  leaders: (id: number) => ["classes", "leaders", id] as const,
   forStudent: (studentId: number) => ["classes", "student", studentId] as const,
 };
 
@@ -196,3 +197,99 @@ export async function removeClassMember(memberId: number): Promise<void> {
     throw new Error("You don’t have permission to remove this student.");
   }
 }
+
+export type ClassLeader = {
+  userId: string;
+  name: string;
+  email: string;
+};
+
+export type OrgStaffPickerPerson = {
+  userId: string;
+  name: string;
+  email: string;
+  role: string;
+};
+
+function mapStaffProfileRows(
+  rows: Array<{
+    user_id: string | null;
+    role?: string;
+    profile: { name: string; email: string } | { name: string; email: string }[] | null;
+  }>,
+): Array<{ userId: string; name: string; email: string; role: string }> {
+  return rows.flatMap((row) => {
+    const profile = unwrapOne(row.profile);
+    if (!profile || !row.user_id) return [];
+    return [
+      {
+        userId: row.user_id,
+        name: profile.name || profile.email,
+        email: profile.email,
+        role: row.role ?? "",
+      },
+    ];
+  });
+}
+
+export async function listClassLeaders(classId: number): Promise<ClassLeader[]> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("class_leaders")
+    .select("user_id, profile:profiles(name, email)")
+    .eq("class_id", classId);
+
+  if (error) throw new Error(error.message);
+  return mapStaffProfileRows(data ?? []).map((row) => ({
+    userId: row.userId,
+    name: row.name,
+    email: row.email,
+  }));
+}
+
+export async function addClassLeader(
+  classId: number,
+  userId: string,
+): Promise<void> {
+  const db = requireSupabase();
+  const { error } = await db.from("class_leaders").insert({
+    class_id: classId,
+    user_id: userId,
+  });
+  if (error) throw new Error(rosterWriteErrorMessage(error));
+}
+
+export async function removeClassLeader(
+  classId: number,
+  userId: string,
+): Promise<void> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("class_leaders")
+    .delete()
+    .eq("class_id", classId)
+    .eq("user_id", userId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) throw new Error(rosterWriteErrorMessage(error));
+  if (!data) {
+    throw new Error("You don’t have permission to change class leads.");
+  }
+}
+
+export async function listOrgStaffForPicker(
+  organizationId: number,
+): Promise<OrgStaffPickerPerson[]> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("memberships")
+    .select("user_id, role, profile:profiles(name, email)")
+    .eq("organization_id", organizationId)
+    .eq("status", "active")
+    .in("role", ["owner", "admin", "instructor"]);
+
+  if (error) throw new Error(error.message);
+  return mapStaffProfileRows(data ?? []);
+}
+
