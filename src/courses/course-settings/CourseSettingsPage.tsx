@@ -151,7 +151,7 @@ export function CourseSettingsPage() {
               Schedule & status
             </h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <label className="flex flex-col gap-1">
+              <label className="flex min-w-0 flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
                   Start date
                 </span>
@@ -162,7 +162,7 @@ export function CourseSettingsPage() {
                   onChange={(event) => settings.setStartDate(event.target.value)}
                 />
               </label>
-              <label className="flex flex-col gap-1">
+              <label className="flex min-w-0 flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
                   End date
                 </span>
@@ -227,7 +227,7 @@ export function CourseSettingsPage() {
               />
             </div>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <label className="flex flex-col gap-1">
+              <label className="flex min-w-0 flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
                   Subject
                 </span>
@@ -238,7 +238,7 @@ export function CourseSettingsPage() {
                   placeholder="Math, nature study…"
                 />
               </label>
-              <label className="flex flex-col gap-1">
+              <label className="flex min-w-0 flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">
                   Location
                 </span>

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { MegaphoneIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { ButtonLink } from "@/ui/Button";
 import {
@@ -78,6 +79,7 @@ export function AnnouncementsPage() {
           </h1>
         </div>
         <ButtonLink to={newAnnouncementPath(page.organization.slug)}>
+          <MegaphoneIcon className="h-5 w-5" aria-hidden />
           New announcement
         </ButtonLink>
       </div>

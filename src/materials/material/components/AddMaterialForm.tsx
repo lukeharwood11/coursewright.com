@@ -1,5 +1,6 @@
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import { MATERIAL_KINDS, materialKindLabel, type MaterialKind } from "@/materials/model/kind";
 import { useAddMaterial } from "../hooks/useAddMaterial";
 import { OptionalDueDateField } from "./OptionalDueDateField";
@@ -27,6 +28,7 @@ export function AddMaterialForm({
   if (!add.open) {
     return (
       <Button variant="ghost" fullWidth onClick={() => add.setOpen(true)}>
+        <PlusIcon className="h-5 w-5" aria-hidden />
         {label}
       </Button>
     );
@@ -89,7 +91,7 @@ export function AddMaterialForm({
           </span>
         </label>
       ) : null}
-      <label className="mt-3 flex flex-col gap-1">
+      <label className="mt-3 flex min-w-0 flex-col gap-1">
         <span className="text-[13px] font-bold text-[var(--ink-soft)]">
           Assignment date (optional)
         </span>

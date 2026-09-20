@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { ButtonLink } from "@/ui/Button";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { DiscussionFilterChips } from "./components/DiscussionFilterChips";
 import { DiscussionList } from "./components/DiscussionList";
@@ -39,6 +40,7 @@ export function DiscussionsPage() {
         </div>
         {page.canCompose ? (
           <ButtonLink to={newDiscussionPath(page.organization.slug)}>
+            <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
             New discussion
           </ButtonLink>
         ) : null}

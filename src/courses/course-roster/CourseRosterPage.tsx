@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { coursePath, coursesPath } from "@/courses/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
@@ -70,10 +71,6 @@ export function CourseRosterPage() {
         Roster
       </h1>
       <p className="mt-1 text-[14px] text-[var(--ink-soft)]">{roster.course.title}</p>
-      <p className="mt-3 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-        Students in this course. You can print materials without anyone on this
-        list.
-      </p>
       <p className="mt-2 text-[13px]">
         <Link
           to={coursePath(roster.organization.slug, roster.course.id)}
@@ -97,6 +94,7 @@ export function CourseRosterPage() {
           </h2>
           {!roster.panelOpen ? (
             <Button type="button" onClick={roster.openPanel}>
+              <UserPlusIcon className="h-5 w-5" aria-hidden />
               Enroll students
             </Button>
           ) : null}

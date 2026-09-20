@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AppErrorBoundary } from "@/app/error/AppErrorBoundary";
 import { AppRoutes } from "@/app/router";
+import { ScrollToTop } from "@/app/ScrollToTop";
 import { initPostHog } from "@/infrastructure/posthog/client";
 import { queryClient } from "@/infrastructure/query-client";
 
@@ -13,6 +14,7 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <ScrollToTop />
         <AppErrorBoundary>
           <AppRoutes />
         </AppErrorBoundary>

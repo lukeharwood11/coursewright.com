@@ -48,10 +48,10 @@ export function LessonPlanFormFields({
           placeholder="This week in Biology"
         />
       </label>
-      <label className="mt-4 flex flex-col gap-1">
+      <label className="mt-4 flex min-w-0 flex-col gap-1">
         <span className="text-[13px] font-bold text-[var(--ink-soft)]">Week</span>
         <Input
-          className="w-full max-w-xs"
+          className="w-full"
           type="date"
           required
           value={weekStart}
