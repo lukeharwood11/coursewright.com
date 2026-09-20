@@ -1,34 +1,14 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { BellIcon } from "@heroicons/react/24/outline";
+import { AnchoredPopup } from "@/ui/AnchoredPopup";
 import { ActivityMenuPanel } from "./components/ActivityMenuPanel";
 import { useActivityMenu } from "./hooks/useActivityMenu";
 
 export function ActivityMenu() {
   const menu = useActivityMenu();
   const menuId = useId();
-  const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-
-    function onPointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
 
   if (!menu.visible) return null;
 
@@ -40,8 +20,9 @@ export function ActivityMenu() {
       : "Activity";
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
+    <>
       <button
+        ref={buttonRef}
         type="button"
         className="relative cursor-pointer rounded-[6px] p-1.5 text-[var(--ink-soft)] hover:bg-[var(--green-tint)] hover:text-[var(--green)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
         aria-label={ariaLabel}
@@ -61,28 +42,28 @@ export function ActivityMenu() {
         ) : null}
       </button>
 
-      {open ? (
-        <div
-          id={menuId}
-          role="menu"
-          aria-label="Activity"
-          className="absolute right-0 z-20 mt-2 w-[20rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[var(--r-md)] border border-[var(--line-soft)] bg-[var(--surface)] shadow-[var(--shadow)]"
-        >
-          <ActivityMenuPanel
-            preview={menu.preview}
-            remainingUnread={menu.remainingUnread}
-            loading={menu.loading}
-            error={menu.error}
-            openingId={menu.openingId}
-            activityHref={menu.activityHref}
-            onOpen={(item) => {
-              setOpen(false);
-              menu.onOpen(item);
-            }}
-            onViewAll={() => setOpen(false)}
-          />
-        </div>
-      ) : null}
-    </div>
+      <AnchoredPopup
+        open={open}
+        onClose={() => setOpen(false)}
+        anchorRef={buttonRef}
+        id={menuId}
+        label="Activity"
+        className="w-[20rem]"
+      >
+        <ActivityMenuPanel
+          preview={menu.preview}
+          remainingUnread={menu.remainingUnread}
+          loading={menu.loading}
+          error={menu.error}
+          openingId={menu.openingId}
+          activityHref={menu.activityHref}
+          onOpen={(item) => {
+            setOpen(false);
+            menu.onOpen(item);
+          }}
+          onViewAll={() => setOpen(false)}
+        />
+      </AnchoredPopup>
+    </>
   );
 }

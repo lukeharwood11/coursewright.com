@@ -1,3 +1,4 @@
+export { AnchoredPopup, TypeaheadPopup } from "./AnchoredPopup";
 export { Avatar } from "./Avatar";
 export { Badge } from "./Badge";
 export { PublishedBadge } from "./PublishedBadge";

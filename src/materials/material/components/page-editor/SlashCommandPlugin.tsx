@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState, type JSX } from "react";
-import { createPortal } from "react-dom";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   LexicalTypeaheadMenuPlugin,
@@ -15,6 +14,7 @@ import {
   TableCellsIcon,
   VideoCameraIcon,
 } from "@heroicons/react/24/outline";
+import { TypeaheadPopup } from "@/ui/AnchoredPopup";
 import {
   filterSlashOptions,
   slashTableChoices,
@@ -137,8 +137,12 @@ export function SlashCommandPlugin() {
       menuRenderFn={(anchorRef, { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }) => {
         const anchor = anchorRef.current;
         if (!anchor || options.length === 0) return null;
-        return createPortal(
-          <div className="cw-slash-menu" role="listbox" aria-label="Insert a block">
+        return (
+          <TypeaheadPopup
+            anchor={anchor}
+            className="cw-slash-menu"
+            label="Insert a block"
+          >
             {options.map((option, index) => (
               <button
                 key={option.key}
@@ -157,8 +161,7 @@ export function SlashCommandPlugin() {
                 <span>{option.title}</span>
               </button>
             ))}
-          </div>,
-          anchor,
+          </TypeaheadPopup>
         );
       }}
     />

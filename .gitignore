@@ -61,3 +61,6 @@ backups/
 # Misc
 *.pem
 .cache/
+
+*storybook.log
+storybook-static

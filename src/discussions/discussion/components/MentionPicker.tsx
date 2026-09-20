@@ -16,7 +16,7 @@ export function MentionPicker({
   onSelect: (person: MentionPerson) => void;
 }) {
   return (
-    <div className="cw-slash-menu" role="listbox" aria-label="Mention someone">
+    <div role="presentation">
       {loading ? (
         <p className="cw-mention-empty">Loading…</p>
       ) : null}

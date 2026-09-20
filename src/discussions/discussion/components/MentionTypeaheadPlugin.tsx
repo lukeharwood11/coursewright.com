@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   LexicalTypeaheadMenuPlugin,
@@ -15,6 +14,7 @@ import {
   filterMentionPeople,
   type MentionPerson,
 } from "@/discussions/model/mentions";
+import { TypeaheadPopup } from "@/ui/AnchoredPopup";
 import { $createMentionNode } from "./MentionNode";
 import { MentionPicker } from "./MentionPicker";
 
@@ -90,20 +90,25 @@ export function MentionTypeaheadPlugin({
       ) => {
         const anchor = anchorRef.current;
         if (!anchor) return null;
-        return createPortal(
-          <MentionPicker
-            people={filtered}
-            selectedIndex={selectedIndex ?? 0}
-            loading={loading}
-            onHover={setHighlightedIndex}
-            onSelect={(person) => {
-              const option = options.find(
-                (item) => item.person.userId === person.userId,
-              );
-              if (option) selectOptionAndCleanUp(option);
-            }}
-          />,
-          anchor,
+        return (
+          <TypeaheadPopup
+            anchor={anchor}
+            className="cw-slash-menu"
+            label="Mention someone"
+          >
+            <MentionPicker
+              people={filtered}
+              selectedIndex={selectedIndex ?? 0}
+              loading={loading}
+              onHover={setHighlightedIndex}
+              onSelect={(person) => {
+                const option = options.find(
+                  (item) => item.person.userId === person.userId,
+                );
+                if (option) selectOptionAndCleanUp(option);
+              }}
+            />
+          </TypeaheadPopup>
         );
       }}
     />
