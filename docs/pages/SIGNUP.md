@@ -9,15 +9,16 @@ New users — including anyone creating an org, and parents/staff claiming invit
 
 ## Purpose
 
-Create an account with **email + password** or **Google**. On success, the person is **signed in** (no extra trip to [LOGIN](./LOGIN.md)). Password-enabled accounts can also sign in later on login.
+Create an account with **email + password** or **Google**. When Auth returns a session, the person is **signed in** (no extra trip to [LOGIN](./LOGIN.md)). When email confirmation is required, show a check-your-mailbox success state first. Password-enabled accounts can also sign in later on login.
 
 
 ## Behavior
 
 - Unauthenticated account creation (email + password or Google).
-- Password sign-up calls Supabase `signUp` and **keeps the session** when Auth returns one (email confirmation is off in `supabase/config.toml`).
+- Password sign-up calls Supabase `signUp` and **keeps the session** when Auth returns one (email confirmation is off in local `supabase/config.toml`; remote projects may require confirmation).
+- When Auth requires email confirmation (no session yet), replace the form with a calm success state: **Account created!** — check your mailbox to verify, then continue. Do not show “email not confirmed” as an error.
 - If that email already has an account, tell them to sign in — do not send them to login automatically after a successful create.
-- On success: [INVITE_CLAIM](./INVITE_CLAIM.md) when `next=/invite/<token>`, else `/my` to pick/create org (`RedirectIfAuthed`; pending staff requests also show there).
+- On success with a session: [INVITE_CLAIM](./INVITE_CLAIM.md) when `next=/invite/<token>`, else `/my` to pick/create org (`RedirectIfAuthed`; pending staff requests also show there). Confirmation email links use the same destination via `emailRedirectTo`.
 - Anyone may create an org after signup (creator = first owner) via org picker.
 - When arriving from an invite (`next` + `email=`), name and **prefill** the invited address. Google copy warns to pick that same account.
 
@@ -45,8 +46,8 @@ Create an account with **email + password** or **Google**. On success, the perso
 
 ## After success
 
-- Stay signed in
-- [INVITE_CLAIM](./INVITE_CLAIM.md) when token present
+- Session returned → stay signed in → [INVITE_CLAIM](./INVITE_CLAIM.md) when token present, else `/my`
+- Confirmation required → “Account created!” check-your-email panel (same card); link in the email then lands on invite or `/my`
 - Else → `/my` to pick or create org (pending requests on [ORG_PICKER](./ORG_PICKER.md))
 
 ## Links to

@@ -1,5 +1,10 @@
 import { isSupabaseConfigured, supabase } from "@/infrastructure/supabase/client";
-import { signInWithPassword } from "./signInWithPassword";
+
+export type SignUpResult = {
+  error: string | null;
+  /** Account created; Auth requires email confirmation before a session exists. */
+  needsEmailVerification?: boolean;
+};
 
 function friendlySignUpError(message: string): string {
   const lower = message.toLowerCase();
@@ -19,7 +24,11 @@ function friendlySignUpError(message: string): string {
 }
 
 /** Email + password sign-up. Signs the user in when Auth returns a session. */
-export async function signUpWithPassword(email: string, password: string) {
+export async function signUpWithPassword(
+  email: string,
+  password: string,
+  nextPath = "/my",
+): Promise<SignUpResult> {
   if (!isSupabaseConfigured || !supabase) {
     return {
       error:
@@ -27,7 +36,15 @@ export async function signUpWithPassword(email: string, password: string) {
     };
   }
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      // Confirmation emails (when enabled) land here. Default `/my`; invite
+      // flows pass `/invite/<token>` via `next` so that takes priority.
+      emailRedirectTo: `${window.location.origin}${nextPath}`,
+    },
+  });
   if (error) {
     return { error: friendlySignUpError(error.message) };
   }
@@ -41,9 +58,6 @@ export async function signUpWithPassword(email: string, password: string) {
     return { error: null };
   }
 
-  const signedIn = await signInWithPassword(email, password);
-  if (signedIn.error) {
-    return { error: friendlySignUpError(signedIn.error) };
-  }
-  return { error: null };
+  // Confirmations on: account exists, no session until they open the email link.
+  return { error: null, needsEmailVerification: true };
 }

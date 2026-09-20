@@ -10,15 +10,17 @@ locals {
   is_testing    = var.environment == "testing"
   is_production = var.environment == "production"
 
-  supabase_site_url = "https://${var.domain_name}"
+  # Origin for allow-list; Site URL defaults auth emails (no emailRedirectTo) to /my.
+  supabase_origin  = "https://${var.domain_name}"
+  supabase_site_url = "${local.supabase_origin}/my"
 
   supabase_auth_settings = jsonencode({
     site_url = local.supabase_site_url
     uri_allow_list = join(",", [
       "http://localhost:5173",
       "http://localhost:5173/**",
-      local.supabase_site_url,
-      "${local.supabase_site_url}/**",
+      local.supabase_origin,
+      "${local.supabase_origin}/**",
     ])
   })
 

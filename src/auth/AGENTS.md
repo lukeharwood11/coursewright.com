@@ -17,7 +17,7 @@ Auth APIs call the browser Supabase client (`infrastructure/supabase/client.ts`)
 - Supabase Auth only — Google via Google Cloud OAuth wired into Supabase.
 - Parents must have an account in P0 to view.
 - Keep the screen calm and obvious.
-- Signup is **email + password** or Google. On success, keep the session (`RedirectIfAuthed` → `/my`). Magic-link stays on login for returning users.
+- Signup is **email + password** or Google. On success with a session, keep it (`RedirectIfAuthed` → `/my`, or `next` when present). When confirmation is required, show an “Account created — check your email” success state (not an error). Password signup passes `emailRedirectTo` so confirmation links land on `/my` (or the invite `next` path). Magic-link stays on login for returning users.
 
 ## Don’t
 
