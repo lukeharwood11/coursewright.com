@@ -27,6 +27,8 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [COURSE_ROSTER](./COURSE_ROSTER.md) | `/my/<org-slug>/courses/<course_id>/roster` |
 | [COURSE_SETTINGS](./COURSE_SETTINGS.md) | `/my/<org-slug>/courses/<course_id>/settings` |
 | [BULLETIN](./BULLETIN.md) | `/my/<org-slug>/courses/<course_id>/bulletins/<bulletin_id>` (new `…/bulletins/new`; edit `…/edit`) |
+| [ANNOUNCEMENTS](./ANNOUNCEMENTS.md) | `/my/<org-slug>/announcements` |
+| [ANNOUNCEMENT](./ANNOUNCEMENT.md) | `/my/<org-slug>/announcements/<announcement_id>` (new `…/announcements/new`; edit `…/edit`) |
 | [TEMPLATE_LIST](./TEMPLATE_LIST.md) | `/my/<org-slug>/templates` | **P1** |
 | [TEMPLATE](./TEMPLATE.md) | `/my/<org-slug>/templates/<template_id>` | **P1** |
 | [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) | `/my/<org-slug>/templates/<template_id>/settings` | **P1** |
@@ -63,7 +65,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Rich materials — Add: page / link / file; pages use blocks | [MATERIAL](./MATERIAL.md) |
 | Classes (student groups) | [ORG_ROSTER](./ORG_ROSTER.md) (list/create), [CLASS](./CLASS.md) |
 | File / content versioning, soft deletes | [MATERIAL](./MATERIAL.md), [COURSE](./COURSE.md) |
-| Homework = dated materials; Important now; **Bulletins** | [ORG_HOME](./ORG_HOME.md), [MATERIAL](./MATERIAL.md), [BULLETIN](./BULLETIN.md), [COURSE](./COURSE.md) |
+| Homework = dated materials; Important now; **Announcements**; **Bulletins** | [ORG_HOME](./ORG_HOME.md), [MATERIAL](./MATERIAL.md), [ANNOUNCEMENT](./ANNOUNCEMENT.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [BULLETIN](./BULLETIN.md), [COURSE](./COURSE.md) |
 | Parent dashboard / access rules | [ORG_HOME](./ORG_HOME.md); claim via [INVITE_CLAIM](./INVITE_CLAIM.md) / [LOGIN](./LOGIN.md) / [SIGNUP](./SIGNUP.md) |
 | Print (material / unit / this week) | [PRINT](./PRINT.md); entry from [MATERIAL](./MATERIAL.md), [UNIT](./UNIT.md), [ORG_HOME](./ORG_HOME.md) |
 | Resource links / share with parents | [MATERIAL](./MATERIAL.md) (entry URL TBD) |

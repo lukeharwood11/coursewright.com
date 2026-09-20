@@ -1,6 +1,8 @@
 import type { CalendarWeek } from "./thisWeek";
 import { isDueInCalendarWeek, isInCalendarWeek, localIsoDate } from "./thisWeek";
 import { isBulletinAvailable } from "@/bulletins/model/availability";
+import { isAnnouncementAvailable } from "@/announcements/model/availability";
+import type { AnnouncementAudience } from "@/announcements/model/audience";
 
 export type ParentDashboardMaterial = {
   id: number;
@@ -52,6 +54,23 @@ export type ParentBulletinItem = {
   students: ParentBulletinStudent[];
 };
 
+export type ParentAnnouncementItem = {
+  id: number;
+  title: string;
+  body: string;
+  startDate: string | null;
+  endDate: string | null;
+  audience: AnnouncementAudience;
+  courseId: number | null;
+  classId: number | null;
+  studentId: number | null;
+  courseTitle: string | null;
+  classTitle: string | null;
+  studentName: string | null;
+  read: boolean;
+  students: ParentBulletinStudent[];
+};
+
 export type ParentDashboardNextItem = {
   studentId: number;
   studentName: string;
@@ -65,6 +84,7 @@ export type ParentDashboardNextItem = {
 export type ParentDashboard = {
   week: CalendarWeek;
   importantNow: ParentImportantNowItem[];
+  announcements: ParentAnnouncementItem[];
   bulletins: ParentBulletinItem[];
   students: ParentDashboardStudent[];
   /** Soonest assigned materials on or after today. */
@@ -114,6 +134,22 @@ export type ParentDashboardSource = {
     courseId: number;
     courseTitle: string;
     materialCount: number;
+  }>;
+  classMemberships?: Array<{ classId: number; studentId: number }>;
+  announcements?: Array<{
+    id: number;
+    title: string;
+    body: string;
+    startDate: string | null;
+    endDate: string | null;
+    audience: AnnouncementAudience;
+    courseId: number | null;
+    classId: number | null;
+    studentId: number | null;
+    courseTitle: string | null;
+    classTitle: string | null;
+    studentName: string | null;
+    read: boolean;
   }>;
 };
 
@@ -210,12 +246,35 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
       return a.title.localeCompare(b.title);
     });
 
+  const seenAnnouncements = new Set<number>();
+  const announcements = (source.announcements ?? [])
+    .filter((item) => {
+      if (!isAnnouncementAvailable(source.today, item.startDate, item.endDate)) {
+        return false;
+      }
+      if (seenAnnouncements.has(item.id)) return false;
+      seenAnnouncements.add(item.id);
+      return studentsForAnnouncement(source, item).length > 0;
+    })
+    .map((item) => ({
+      ...item,
+      students: studentsForAnnouncement(source, item),
+    }))
+    .sort((a, b) => {
+      if (a.read !== b.read) return a.read ? 1 : -1;
+      const aStart = a.startDate ?? "";
+      const bStart = b.startDate ?? "";
+      if (aStart !== bStart) return aStart.localeCompare(bStart);
+      return a.title.localeCompare(b.title);
+    });
+
   const nextAssigned = collectNextByDate(source, "assigned");
   const nextDue = collectNextByDate(source, "due");
 
   return {
     week: source.week,
     importantNow,
+    announcements,
     bulletins,
     students,
     nextAssigned,
@@ -244,6 +303,12 @@ export function filterParentDashboard(
       students: item.students.filter((student) => allowed.has(student.id)),
     }))
     .filter((item) => item.students.length > 0);
+  const announcements = dashboard.announcements
+    .map((item) => ({
+      ...item,
+      students: item.students.filter((student) => allowed.has(student.id)),
+    }))
+    .filter((item) => item.students.length > 0);
   const nextAssigned = dashboard.nextAssigned.filter((item) =>
     allowed.has(item.studentId),
   );
@@ -252,6 +317,7 @@ export function filterParentDashboard(
     ...dashboard,
     students,
     importantNow,
+    announcements,
     bulletins,
     nextAssigned,
     nextDue,
@@ -351,24 +417,36 @@ export function bulletinsForStudent(
   );
 }
 
+export function announcementsForStudent(
+  announcements: ParentAnnouncementItem[],
+  studentId: number,
+): ParentAnnouncementItem[] {
+  return announcements.filter((item) =>
+    item.students.some((student) => student.id === studentId),
+  );
+}
+
 export type ParentHomeStudentSection = {
   student: ParentDashboardStudent;
   weekStudent: ParentDashboardStudent | null;
+  announcements: ParentAnnouncementItem[];
   bulletins: ParentBulletinItem[];
 };
 
-/** Visible students in name order, with that child's bulletins ahead of this-week work. */
+/** Visible students in name order, with that child's announcements then bulletins ahead of this-week work. */
 export function parentHomeStudentSections(
   students: ParentDashboardStudent[],
   weekStudents: ParentDashboardStudent[],
   bulletins: ParentBulletinItem[],
+  announcements: ParentAnnouncementItem[] = [],
 ): ParentHomeStudentSection[] {
   const weekById = new Map(weekStudents.map((student) => [student.id, student]));
   return students.flatMap((student) => {
     const notes = bulletinsForStudent(bulletins, student.id);
+    const notices = announcementsForStudent(announcements, student.id);
     const weekStudent = weekById.get(student.id) ?? null;
-    if (notes.length === 0 && !weekStudent) return [];
-    return [{ student, weekStudent, bulletins: notes }];
+    if (notes.length === 0 && notices.length === 0 && !weekStudent) return [];
+    return [{ student, weekStudent, announcements: notices, bulletins: notes }];
   });
 }
 
@@ -396,6 +474,32 @@ function studentsForCourse(
     .filter((student) => ids.has(student.id))
     .map((student) => ({ id: student.id, name: student.name }))
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function studentsForAnnouncement(
+  source: ParentDashboardSource,
+  item: NonNullable<ParentDashboardSource["announcements"]>[number],
+): ParentBulletinStudent[] {
+  if (item.audience === "course" && item.courseId != null) {
+    return studentsForCourse(source, item.courseId);
+  }
+  if (item.audience === "class" && item.classId != null) {
+    const ids = new Set(
+      (source.classMemberships ?? [])
+        .filter((row) => row.classId === item.classId)
+        .map((row) => row.studentId),
+    );
+    return source.students
+      .filter((student) => ids.has(student.id))
+      .map((student) => ({ id: student.id, name: student.name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+  if (item.audience === "student" && item.studentId != null) {
+    return source.students
+      .filter((student) => student.id === item.studentId)
+      .map((student) => ({ id: student.id, name: student.name }));
+  }
+  return [];
 }
 
 function compareWeekMaterials(

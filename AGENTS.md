@@ -64,6 +64,7 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | [src/search/AGENTS.md](./src/search/AGENTS.md) | Cross-facet / chrome search |
 | [src/print/AGENTS.md](./src/print/AGENTS.md) | Print material / unit / this week |
 | [src/parent/AGENTS.md](./src/parent/AGENTS.md) | Parent dashboard |
+| [src/announcements/AGENTS.md](./src/announcements/AGENTS.md) | One-way notices (course / class / student) |
 | [src/bulletins/AGENTS.md](./src/bulletins/AGENTS.md) | Dated course notices + attached materials |
 | [src/auth/AGENTS.md](./src/auth/AGENTS.md) | Login, signup, invites, session |
 | [src/marketing/AGENTS.md](./src/marketing/AGENTS.md) | Public home, about, pricing, contact, privacy, cookies |

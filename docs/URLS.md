@@ -90,6 +90,19 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 
 ---
 
+## Announcements
+
+One-way notices (course, class, or student). Org-scoped because the audience is not always a course.
+
+| Page | URL | Notes |
+|------|-----|-------|
+| [ANNOUNCEMENTS](./pages/ANNOUNCEMENTS.md) | `/my/<org-slug>/announcements` | Staff list |
+| [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md) (view) | `/my/<org-slug>/announcements/<announcement_id>` | Families open from home; staff open from the list |
+| [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md) (new) | `/my/<org-slug>/announcements/new` | Staff compose. Optional `?audience=course\|class\|student` plus `courseId` / `classId` / `studentId` |
+| [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md) (edit) | `/my/<org-slug>/announcements/<announcement_id>/edit` | Staff edit |
+
+---
+
 ## Course templates (**P1**)
 
 | Page | URL | Notes |
@@ -150,7 +163,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 
 ## Parent experience
 
-Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / unit / material tree. **Bulletins** open [BULLETIN](./pages/BULLETIN.md). No separate `/home` path in P0. Staff can switch to that presentation with **Parent view** in org chrome.
+Covered by [ORG_HOME](./pages/ORG_HOME.md) + read-focused use of the course / unit / material tree. **Announcements** open [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md). **Bulletins** open [BULLETIN](./pages/BULLETIN.md). No separate `/home` path in P0. Staff can switch to that presentation with **Parent view** in org chrome.
 
 ---
 

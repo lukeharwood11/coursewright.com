@@ -40,6 +40,13 @@ export function buildStaffNav(orgSlug: string, lists: NavLists): NavSection[] {
   return [
     { id: "home", label: "Home", href: base, match: "exact", children: [] },
     {
+      id: "announcements",
+      label: "Announcements",
+      href: `${base}/announcements`,
+      match: "prefix",
+      children: [],
+    },
+    {
       id: "courses",
       label: "Courses",
       href: `${base}/courses`,

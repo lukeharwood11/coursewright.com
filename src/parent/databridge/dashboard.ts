@@ -1,4 +1,5 @@
 import { supabase } from "@/infrastructure/supabase/client";
+import { parseAnnouncementAudience } from "@/announcements/model/audience";
 import { calendarWeekContaining, localIsoDate } from "@/parent/model/thisWeek";
 import { buildParentDashboard } from "@/parent/model/dashboard";
 import type { ParentDashboard, ParentDashboardSource } from "@/parent/model/dashboard";
@@ -47,10 +48,12 @@ export async function loadParentDashboard(
       materials: [],
       importantNow: [],
       bulletins: [],
+      classMemberships: [],
+      announcements: [],
     });
   }
 
-  const [studentsResult, enrollmentsResult, importantResult, bulletinsResult] =
+  const [studentsResult, enrollmentsResult, importantResult, bulletinsResult, membersResult, announcementsResult] =
     await Promise.all([
     db
       .from("student_profiles")
@@ -78,12 +81,26 @@ export async function loadParentDashboard(
       )
       .eq("organization_id", organizationId)
       .is("deleted_at", null),
+    db
+      .from("class_members")
+      .select("class_id, student_profile_id")
+      .in("student_profile_id", studentIds),
+    db
+      .from("announcements")
+      .select(
+        "id, title, body, start_date, end_date, audience, course_id, class_id, student_profile_id, course:courses!announcements_course_id_fkey(title), class_group:classes!announcements_class_id_fkey(title), student:student_profiles!announcements_student_profile_id_fkey(name), announcement_reads(user_id)",
+      )
+      .eq("organization_id", organizationId)
+      .is("deleted_at", null)
+      .eq("announcement_reads.user_id", userId),
   ]);
 
   if (studentsResult.error) throw new Error(studentsResult.error.message);
   if (enrollmentsResult.error) throw new Error(enrollmentsResult.error.message);
   if (importantResult.error) throw new Error(importantResult.error.message);
   if (bulletinsResult.error) throw new Error(bulletinsResult.error.message);
+  if (membersResult.error) throw new Error(membersResult.error.message);
+  if (announcementsResult.error) throw new Error(announcementsResult.error.message);
 
   const enrollments = (enrollmentsResult.data ?? []).flatMap((row) => {
     const course = one(row.course);
@@ -171,6 +188,36 @@ export async function loadParentDashboard(
     ];
   });
 
+  const classMemberships = (membersResult.data ?? []).map((row) => ({
+    classId: row.class_id,
+    studentId: row.student_profile_id,
+  }));
+
+  const announcements = (announcementsResult.data ?? []).flatMap((row) => {
+    const audience = parseAnnouncementAudience(row.audience);
+    if (!audience) return [];
+    const reads = Array.isArray(row.announcement_reads)
+      ? row.announcement_reads
+      : [];
+    return [
+      {
+        id: row.id,
+        title: row.title,
+        body: row.body,
+        startDate: row.start_date,
+        endDate: row.end_date,
+        audience,
+        courseId: row.course_id,
+        classId: row.class_id,
+        studentId: row.student_profile_id,
+        courseTitle: one(row.course)?.title ?? null,
+        classTitle: one(row.class_group)?.title ?? null,
+        studentName: one(row.student)?.name ?? null,
+        read: reads.some((entry) => entry.user_id === userId),
+      },
+    ];
+  });
+
   return buildParentDashboard({
     week,
     today,
@@ -183,5 +230,7 @@ export async function loadParentDashboard(
     materials,
     importantNow,
     bulletins,
+    classMemberships,
+    announcements,
   });
 }

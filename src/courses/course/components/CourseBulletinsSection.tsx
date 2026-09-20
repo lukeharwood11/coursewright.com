@@ -8,6 +8,7 @@ import {
 } from "@/bulletins/model/availability";
 import { groupCourseBulletins } from "@/bulletins/model/grouping";
 import { bulletinPath, newBulletinPath } from "@/bulletins/model/paths";
+import { newAnnouncementPath } from "@/announcements/model/paths";
 import { formatDateRange } from "@/courses/model/dates";
 import { localIsoDate } from "@/parent/model/thisWeek";
 
@@ -130,9 +131,19 @@ export function CourseBulletinsSection({
       )}
 
       {canEdit ? (
-        <div className="mt-3">
+        <div className="mt-3 flex flex-col gap-2">
           <ButtonLink variant="ghost" fullWidth to={newBulletinPath(orgSlug, courseId)}>
             Add bulletin
+          </ButtonLink>
+          <ButtonLink
+            variant="ghost"
+            fullWidth
+            to={newAnnouncementPath(orgSlug, {
+              audience: "course",
+              courseId,
+            })}
+          >
+            Announce to this course
           </ButtonLink>
         </div>
       ) : null}

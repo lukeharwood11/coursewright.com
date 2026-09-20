@@ -184,6 +184,7 @@ Other drafts kept for reference (not in use):
 | Extra org admin | **Admin invite** | email, claimable |
 | Instructor priority flag | **Important now** | pinned, highlight, urgent |
 | Dated course notice with materials | **Bulletin** | available between start and end dates; not an assignment object; not email |
+| One-way notice (course, class, or student) | **Announcement** | optional start/end on home; unread notification until opened; not a bulletin; no reply thread |
 | Course context blurb | **Summary** | **P1** — auto-drafted “what’s going on this week”; not the course **Description** |
 | Parent view (with account) | **Progress** | grades, notes, checklists, homework |
 | Person being taught | **Student** (profile) | student_profile, learner |

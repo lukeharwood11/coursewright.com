@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/ui/Button";
+import { Button, ButtonLink } from "@/ui/Button";
+import { newAnnouncementPath } from "@/announcements/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
 import { useClassRoster } from "./hooks/useClassRoster";
@@ -66,6 +67,17 @@ export function ClassRosterPage() {
         A class is a group of students — not a course. Adding someone here does
         not enroll them in a course.
       </p>
+      <div className="mt-4">
+        <ButtonLink
+          variant="secondary"
+          to={newAnnouncementPath(roster.organization.slug, {
+            audience: "class",
+            classId: roster.classGroup.id,
+          })}
+        >
+          Announce to this class
+        </ButtonLink>
+      </div>
 
       <section className="mt-8">
         <div className="flex flex-wrap items-end justify-between gap-3">

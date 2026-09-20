@@ -50,6 +50,7 @@ Rules:
 Org pages share a **collapsible sidebar** (overlay drawer on small screens). When a page says **via org chrome**, expand Links to with at least:
 
 - [ORG_HOME](./ORG_HOME.md)
+- [ANNOUNCEMENTS](./ANNOUNCEMENTS.md)
 - [COURSE_LIST](./COURSE_LIST.md)
 - [ORG_ROSTER](./ORG_ROSTER.md)
 - [ORG_SETTINGS](./ORG_SETTINGS.md)

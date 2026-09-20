@@ -6,6 +6,12 @@ export function staffSearchPages(orgSlug: string): SearchResult[] {
   return [
     { id: "page:home", type: "page", title: "Home", href: base },
     {
+      id: "page:announcements",
+      type: "page",
+      title: "Announcements",
+      href: `${base}/announcements`,
+    },
+    {
       id: "page:courses",
       type: "page",
       title: "Courses",

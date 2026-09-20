@@ -9,6 +9,11 @@ import { PrintLayout } from "@/app/layouts/PrintLayout";
 import { StubPage } from "@/app/StubPage";
 import { CourseListPage, CoursePage, CourseRosterPage, CourseSettingsPage } from "@/courses";
 import { BulletinEditPage, BulletinPage } from "@/bulletins";
+import {
+  AnnouncementEditPage,
+  AnnouncementPage,
+  AnnouncementsPage,
+} from "@/announcements";
 import { MaterialEditPage, MaterialPage } from "@/materials";
 import {
   AboutPage,
@@ -114,6 +119,34 @@ export function AppRoutes() {
               element={
                 <RequireStaff>
                   <CourseRosterPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="announcements"
+              element={
+                <RequireStaff>
+                  <AnnouncementsPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="announcements/new"
+              element={
+                <RequireStaff>
+                  <AnnouncementEditPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="announcements/:announcementId"
+              element={<AnnouncementPage />}
+            />
+            <Route
+              path="announcements/:announcementId/edit"
+              element={
+                <RequireStaff>
+                  <AnnouncementEditPage />
                 </RequireStaff>
               }
             />

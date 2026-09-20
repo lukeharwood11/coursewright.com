@@ -36,6 +36,8 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | ImportantNow | `important_now` | |
 | Bulletin | `bulletins` | Dated course notice; start/end availability |
 | BulletinMaterial | `bulletin_materials` | Materials attached under a bulletin |
+| Announcement | `announcements` | One-way notice to a course, class, or student |
+| AnnouncementRead | `announcement_reads` | Per-user read receipt (clears the notification icon) |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates (Sunday–Saturday). |
 | Page / Block / Quiz / Form | `blocks` (quiz is a Lexical node on a page) | Material **kind** page\|link\|file; blocks on pages only; **no** quiz table |
 
@@ -60,7 +62,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 
 | Phase | Entities in focus |
 |-------|-------------------|
-| **P0** | Organization, User, Membership, **AdminInvite**, **StudentProfile**, **Class**, **ClassMember**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **Bulletin**, **BulletinMaterial**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
+| **P0** | Organization, User, Membership, **AdminInvite**, **StudentProfile**, **Class**, **ClassMember**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **Bulletin**, **BulletinMaterial**, **Announcement**, **AnnouncementRead**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
 | **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs) |
 | **P2** | Cross-org Family management, StudentProfile.user_id, Quiz online, Submission, **ParentPayments** (orgs collect from parents) |
 
@@ -121,7 +123,7 @@ A claimed parent with no enrollment can open the org (empty “this week”) but
 ## Creating a course from another course (P0)
 
 1. Copies **units and materials** (and file **references** — same `file_id`, no blob clone) into a **new course**.
-2. Does **not** copy roster, enrollments, important-now, share links, or **bulletins**.
+2. Does **not** copy roster, enrollments, important-now, share links, **bulletins**, or **announcements**.
 3. New course is **independent** — edits do not sync back to the source (template-style sync is **P1**).
 4. Grade metadata **may** copy and remain editable on the new course.
 5. Description, location, and subject **may** copy from the create form (prefilled from the source). The copy starts **unpublished**.
@@ -649,6 +651,51 @@ Join: materials attached under a bulletin, ordered.
 
 Unique `(bulletin_id, material_id)`. Families only follow links to **published** materials (same material RLS). Soft-deleting a bulletin leaves join rows; the app path does not hard-delete bulletins.
 
+### Announcement
+
+A **one-way** notice to exactly one audience: a **course**, a **class**, or a **student**. Families see it on the parent/student home while it is current. Opening it writes an `AnnouncementRead` and clears the notification icon. **Not** a bulletin (no attached materials) and **not** a discussion thread.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| audience | text | `course` · `class` · `student` |
+| course_id | bigint | FK → Course, **required when audience = course**, else null |
+| class_id | bigint | FK → Class, **required when audience = class**, else null |
+| student_profile_id | bigint | FK → StudentProfile, **required when audience = student**, else null |
+| title | text | required |
+| body | text | optional note (empty string when unset) |
+| start_date | date | nullable — first local calendar day on home (inclusive) |
+| end_date | date | nullable — last local calendar day on home (inclusive); when both dates are set, must be ≥ `start_date` |
+| created_by | uuid | FK → User (`profiles`) |
+| created_at | timestamptz | |
+| updated_at | timestamptz | |
+| deleted_at | timestamptz | soft delete |
+| deleted_by | uuid | FK → User, nullable |
+
+**Audience:** exactly one of `course_id` / `class_id` / `student_profile_id`, matching `audience`.
+
+**Homepage visibility:** app uses the viewer’s **local calendar date**. Current = `(start_date` is null or today ≥ start`)` and `(end_date` is null or today ≤ end`)`. No dates means current until staff remove it. Staff always see non-deleted announcements (including upcoming and ended). Date window **is** homepage availability — no separate publish column.
+
+**Who can post:** org owners and admins (any audience in the org). Instructors for a course they can manage, or for a class / student they can already manage on the roster (`is_org_staff`).
+
+**Who can read:** staff in the org. Parents (and invited student emails on the parent claim path) when the notice applies to a linked student: enrolled in that **course** (active + published), **or** a member of that **class**, **or** that **student**. Class membership can surface a class announcement even without a course enrollment. Materials / this-week / print stay enrollment-gated.
+
+Course-from-course copy does **not** copy announcements.
+
+### AnnouncementRead
+
+Per-user receipt that the person opened the announcement. Unique `(announcement_id, user_id)`.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| announcement_id | bigint | FK → Announcement |
+| user_id | uuid | FK → User (`profiles`) — the reader |
+| read_at | timestamptz | |
+
+Parents and students insert their own row when they open the notice. That clears the notification icon for them only (two parents each have their own unread state). Soft-deleting an announcement leaves read rows; the app path does not hard-delete announcements.
+
 ---
 
 ## Core entities — P1
@@ -686,6 +733,7 @@ Course / CourseTemplate.grade_levels (catalog metadata)
 Course ──< CourseInstructor >── User (instructor)  ← many
 Course ──< ImportantNow
 Course ──< Bulletin ──< BulletinMaterial >── Material
+Organization ──< Announcement (course | class | student) ──< AnnouncementRead >── User
 Course ──< ShareLink
 ```
 

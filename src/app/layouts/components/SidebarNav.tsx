@@ -1,6 +1,7 @@
 import type { ComponentType, SVGProps } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
+  BellAlertIcon,
   BookOpenIcon,
   BuildingOffice2Icon,
   ChartBarIcon,
@@ -10,6 +11,7 @@ import {
   UsersIcon,
 } from "@heroicons/react/24/outline";
 import {
+  BellAlertIcon as BellAlertSolidIcon,
   BookOpenIcon as BookOpenSolidIcon,
   BuildingOffice2Icon as BuildingOffice2SolidIcon,
   ChartBarIcon as ChartBarSolidIcon,
@@ -32,6 +34,7 @@ const sectionIcons: Record<string, { outline: IconComponent; solid: IconComponen
   organizations: { outline: BuildingOffice2Icon, solid: BuildingOffice2SolidIcon },
   account: { outline: UserCircleIcon, solid: UserCircleSolidIcon },
   home: { outline: HomeIcon, solid: HomeSolidIcon },
+  announcements: { outline: BellAlertIcon, solid: BellAlertSolidIcon },
   courses: { outline: BookOpenIcon, solid: BookOpenSolidIcon },
   roster: { outline: UsersIcon, solid: UsersSolidIcon },
   settings: { outline: Cog6ToothIcon, solid: Cog6ToothSolidIcon },

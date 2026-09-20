@@ -148,6 +148,11 @@ export const helpDocTopics: HelpDocTopic[] = [
         type: "p",
         text: "A bulletin is a dated notice with materials attached. While today’s date falls in its start–end window, it appears on the parent home under From your teachers.",
       },
+      { type: "h2", text: "Announcements" },
+      {
+        type: "p",
+        text: "An announcement is a one-way note to a course, a class, or a student. Families see it on home while it is current. Opening it marks it read. There is no reply thread — that is later.",
+      },
       { type: "h2", text: "Print and share" },
       {
         type: "ul",
@@ -299,6 +304,7 @@ export const helpDocTopics: HelpDocTopic[] = [
         items: [
           "This week — work assigned or due this calendar week",
           "Important now — items teachers flagged for attention",
+          "Announcements — one-way notes for a course, class, or student, with a notification until you open them",
           "From your teachers — bulletins that are available today, with links to attached materials",
           "Print this week — print the week’s packet when you want it on paper",
         ],

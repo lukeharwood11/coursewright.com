@@ -81,7 +81,8 @@ src/
 ├── search/                   # P0 advanced / cross-facet search (when implemented)
 ├── sharing/                  # resource links, share with parents
 ├── print/                    # print material / unit / this week
-├── parent/                   # this week + important now + bulletins dashboard
+├── parent/                   # this week + important now + announcements + bulletins dashboard
+├── announcements/            # one-way notices (course / class / student)
 ├── bulletins/                # dated course notices + attached materials
 ├── auth/                     # login, signup, invite entry, session helpers
 ├── marketing/                # public home, about, pricing, privacy, terms, help `/docs`

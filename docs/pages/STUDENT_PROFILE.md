@@ -20,6 +20,7 @@ View/edit one org-level **student profile** (not a dedicated student account in 
 - **Student email:** optional. Invite uses the same claim path so that email can sign in and see this student's work.
 - **Save** / **Cancel** in the page header; Save disabled when nothing changed; Cancel goes back (confirms if dirty).
 - Show course enrollments and class membership.
+- **Announce** to this student → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
 - Creating profiles often happens on first course or class add; this page manages the canonical org record.
 
 ## Data shown
@@ -52,12 +53,14 @@ View/edit one org-level **student profile** (not a dedicated student account in 
 ## Primary actions
 
 - Edit profile fields
+- Announce to this student
 - Create parent (or student-email) invite (email + copy the claim link); **Resend email** or cancel a pending invite; add another parent
 - Open class / course enrollments
 
 ## Links to
 
 - [ORG_ROSTER](./ORG_ROSTER.md) — back to roster
+- [ANNOUNCEMENT](./ANNOUNCEMENT.md) — announce to this student
 - [INVITE_CLAIM](./INVITE_CLAIM.md) — copied parent invite link (recipient)
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — course enrollment contexts
 - [CLASS](./CLASS.md) — class membership

@@ -10,6 +10,7 @@ import {
   type ParentDashboard,
 } from "@/parent/model/dashboard";
 import { Button } from "@/ui/Button";
+import { ParentAnnouncementList } from "./ParentAnnouncementList";
 import { ParentBulletinList } from "./ParentBulletinList";
 import { ParentComingUpSection } from "./ParentComingUpSection";
 import { ParentImportantNowList } from "./ParentImportantNowList";
@@ -32,8 +33,9 @@ export function ParentDashboardBody({
   onToggleStudent: (id: number) => void;
 }) {
   const [showExtraAssigned, setShowExtraAssigned] = useState(false);
+  const hasAnnouncements = visible.announcements.length > 0;
 
-  if (!full.hasActiveEnrollment) {
+  if (!full.hasActiveEnrollment && full.announcements.length === 0) {
     if (preview) {
       return (
         <p className="mt-4 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
@@ -66,6 +68,7 @@ export function ParentDashboardBody({
         visible.students,
         weekStudents,
         visible.bulletins,
+        visible.announcements,
       )
     : [];
   const hasComingUp = Boolean(visible.nextAssignedItem || visible.nextDueItem);
@@ -95,6 +98,14 @@ export function ParentDashboardBody({
           students={full.students}
           selectedIds={selectedIds}
           onToggle={onToggleStudent}
+        />
+      ) : null}
+
+      {hasAnnouncements && !groupByStudent ? (
+        <ParentAnnouncementList
+          orgSlug={orgSlug}
+          items={visible.announcements}
+          showStudent={false}
         />
       ) : null}
 
@@ -141,7 +152,7 @@ export function ParentDashboardBody({
           </p>
         </div>
 
-        {datedCount === 0 && !(groupByStudent && hasBulletins) ? (
+        {datedCount === 0 && !(groupByStudent && (hasBulletins || hasAnnouncements)) ? (
           <p className="text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
             Nothing assigned or due this week. Check back soon, or open a course
             when something’s ready.
@@ -164,12 +175,24 @@ export function ParentDashboardBody({
                     }}
                     showHeader
                     lead={
+                      section.announcements.length > 0 ||
                       section.bulletins.length > 0 ? (
-                        <ParentBulletinList
-                          orgSlug={orgSlug}
-                          items={section.bulletins}
-                          showStudent={false}
-                        />
+                        <div className="flex flex-col gap-3">
+                          {section.announcements.length > 0 ? (
+                            <ParentAnnouncementList
+                              orgSlug={orgSlug}
+                              items={section.announcements}
+                              showStudent={false}
+                            />
+                          ) : null}
+                          {section.bulletins.length > 0 ? (
+                            <ParentBulletinList
+                              orgSlug={orgSlug}
+                              items={section.bulletins}
+                              showStudent={false}
+                            />
+                          ) : null}
+                        </div>
                       ) : null
                     }
                   />
