@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { datesInRange, dayNumber } from "@/calendar/model/dates";
 import { leftoverChips, type CalendarLessonPlanDay, type CalendarMaterialChip } from "@/calendar/model/events";
+import { calendarPath } from "@/calendar/model/paths";
+import { lessonPlanPath } from "@/lesson-plans/model/paths";
 import { materialPath } from "@/materials/model/paths";
 import { courseColorCssVar } from "@/courses/model/courseColor";
 
@@ -45,22 +47,30 @@ export function MonthCalendar({
           return (
             <div
               key={date}
-              className={`min-h-[6.5rem] rounded-[8px] border p-1.5 ${
+              className={`relative min-h-[6.5rem] rounded-[8px] border p-1.5 ${
                 inMonth
                   ? "border-[var(--line-soft)] bg-[var(--surface)]"
                   : "border-transparent bg-transparent text-[var(--ink-faint)]"
               }`}
             >
-              <p className="text-[12px] font-bold text-[var(--ink-soft)]">{dayNumber(date)}</p>
-              <div className="mt-1 flex flex-col gap-0.5">
+              <Link
+                to={calendarPath(orgSlug, { view: "day", date })}
+                className="absolute inset-0 rounded-[8px]"
+                aria-label={`Open ${date}`}
+              />
+              <p className="relative z-10 pointer-events-none text-[12px] font-bold text-[var(--ink-soft)]">
+                {dayNumber(date)}
+              </p>
+              <div className="relative z-10 mt-1 flex flex-col gap-0.5">
                 {dayPlans.map((plan) => (
-                  <span
+                  <Link
                     key={`${plan.planId}-${date}`}
+                    to={lessonPlanPath(orgSlug, plan.courseId, plan.planId)}
                     className="truncate text-[10.5px] font-bold"
                     style={{ color: courseColorCssVar(plan.colorKey) }}
                   >
                     {plan.courseTitle}
-                  </span>
+                  </Link>
                 ))}
                 {extra.slice(0, 4).map((chip) => (
                   <Link
@@ -83,9 +93,12 @@ export function MonthCalendar({
                   </Link>
                 ))}
                 {extra.length > 4 ? (
-                  <span className="text-[10.5px] font-bold text-[var(--ink-faint)]">
+                  <Link
+                    to={calendarPath(orgSlug, { view: "day", date })}
+                    className="text-[10.5px] font-bold text-[var(--ink-faint)]"
+                  >
                     +{extra.length - 4} more
-                  </span>
+                  </Link>
                 ) : null}
               </div>
             </div>

@@ -5,24 +5,26 @@ import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
 import { calendarQueryKeys, loadCalendarSource } from "@/calendar/databridge/calendar";
-import { monthContaining, shiftMonth } from "@/calendar/model/dates";
+import { addIsoDays, monthContaining, shiftMonth, weekdayDateHeading } from "@/calendar/model/dates";
 import { toggleHiddenCourse } from "@/calendar/model/events";
 import { lessonPlansToDays, lessonPlansToWeekNotes, materialsToChips, plansForWeek } from "@/calendar/model/view";
 import { calendarWeekContaining, localIsoDate } from "@/parent/model/thisWeek";
-import { calendarPath } from "@/calendar/model/paths";
+import { calendarPath, parseCalendarView, type CalendarView } from "@/calendar/model/paths";
 
 export function useCalendar() {
   const { organization, role, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
   const [search, setSearch] = useSearchParams();
-  const view: "month" | "week" = search.get("view") === "week" ? "week" : "month";
+  const view = parseCalendarView(search.get("view"));
   const dateParam = search.get("date");
   const focusDate = dateParam || localIsoDate();
   const week = calendarWeekContaining(new Date(`${focusDate}T12:00:00`));
   const month = monthContaining(focusDate);
   const parentMode = parentPresentation || !staffCanEdit(role, parentPresentation);
-  const rangeStart = view === "week" ? week.start : month.gridStart;
-  const rangeEnd = view === "week" ? week.end : month.gridEnd;
+  const rangeStart =
+    view === "day" ? focusDate : view === "week" ? week.start : month.gridStart;
+  const rangeEnd =
+    view === "day" ? focusDate : view === "week" ? week.end : month.gridEnd;
 
   const query = useQuery({
     queryKey: calendarQueryKeys.range(
@@ -46,8 +48,14 @@ export function useCalendar() {
   const hiddenCourseIds = useMemo(() => new Set(hidden), [hidden]);
   const source = query.data;
   const weekPlans = plansForWeek(source?.lessonPlans ?? [], week.start);
+  const periodLabel =
+    view === "day"
+      ? weekdayDateHeading(focusDate)
+      : view === "week"
+        ? week.label
+        : month.label;
 
-  function setView(next: "month" | "week") {
+  function setView(next: CalendarView) {
     const params = new URLSearchParams(search);
     if (next === "month") params.delete("view");
     else params.set("view", next);
@@ -67,6 +75,7 @@ export function useCalendar() {
     focusDate,
     week,
     month,
+    periodLabel,
     parentMode,
     courses: source?.courses ?? [],
     weekNotes: lessonPlansToWeekNotes(weekPlans),
@@ -77,23 +86,15 @@ export function useCalendar() {
     loading: query.isLoading,
     error: query.error?.message ?? null,
     goPrev: () => {
-      if (view === "week") setDate(shiftIsoWeek(week.start, -1));
+      if (view === "day") setDate(addIsoDays(focusDate, -1));
+      else if (view === "week") setDate(addIsoDays(week.start, -7));
       else setDate(shiftMonth(focusDate, -1));
     },
     goNext: () => {
-      if (view === "week") setDate(shiftIsoWeek(week.start, 1));
+      if (view === "day") setDate(addIsoDays(focusDate, 1));
+      else if (view === "week") setDate(addIsoDays(week.start, 7));
       else setDate(shiftMonth(focusDate, 1));
     },
     calendarHref: calendarPath(organization.slug, { view, date: focusDate }),
   };
-}
-
-function shiftIsoWeek(weekStart: string, delta: number): string {
-  const [year, month, day] = weekStart.split("-").map(Number);
-  const date = new Date(year ?? 1970, (month ?? 1) - 1, day ?? 1);
-  date.setDate(date.getDate() + delta * 7);
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
 }

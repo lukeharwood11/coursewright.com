@@ -1,10 +1,9 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { PageFormActions } from "@/ui/PageFormActions";
-import { Avatar } from "@/ui/Avatar";
 import { coursePath } from "@/courses/model/paths";
+import { InstructorsSection } from "@/courses/instructors/InstructorsSection";
 import { CourseIconPicker } from "@/courses/components/CourseIconPicker";
 import { CourseColorPicker } from "@/courses/components/CourseColorPicker";
 import {
@@ -274,68 +273,22 @@ export function CourseSettingsPage() {
             ) : null}
           </section>
 
-          <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-            <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">
-              Instructors
-            </h2>
-            <ul className="mt-3 flex flex-col gap-2">
-              {settings.instructors.map((person) => (
-                <li
-                  key={person.userId}
-                  className="flex items-center justify-between gap-2"
-                >
-                  <span className="flex min-w-0 items-center gap-2">
-                    <Avatar name={person.name} size={28} />
-                    <span className="truncate text-[13.5px] font-semibold">
-                      {person.name}
-                    </span>
-                  </span>
-                  {settings.canManageInstructors ? (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="px-2.5 py-1.5 text-[12px]"
-                      onClick={() => settings.removeInstructor.mutate(person.userId)}
-                    >
-                      Remove
-                    </Button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-            {settings.canManageInstructors ? (
-              <div className="mt-4 flex flex-wrap gap-2">
-                <select
-                  className={`${controlClass} min-w-0 flex-1`}
-                  value={settings.addUserId}
-                  onChange={(event) => settings.setAddUserId(event.target.value)}
-                >
-                  <option value="">Add a co-teacher</option>
-                  {settings.staff.map((person) => (
-                    <option key={person.userId} value={person.userId}>
-                      {person.name}
-                    </option>
-                  ))}
-                </select>
-                <Button
-                  type="button"
-                  disabled={!settings.addUserId}
-                  onClick={() => settings.addInstructor.mutate()}
-                >
-                  Add
-                </Button>
-              </div>
-            ) : (
-              <p className="mt-3 text-[13px] text-[var(--ink-faint)]">
-                Owners and admins can add co-teachers.
-              </p>
-            )}
-            {settings.addInstructor.error ? (
-              <p className="mt-2 text-[13px] text-[var(--amber-deep)]">
-                {settings.addInstructor.error.message}
-              </p>
-            ) : null}
-          </section>
+          <InstructorsSection
+            orgSlug={settings.organization.slug}
+            instructors={settings.instructors}
+            staff={settings.staff}
+            canManage={settings.canManageInstructors}
+            addUserId={settings.addUserId}
+            onAddUserId={settings.setAddUserId}
+            onAdd={() => settings.addInstructor.mutate()}
+            onRemove={(userId) => settings.removeInstructor.mutate(userId)}
+            adding={settings.addInstructor.isPending}
+            addError={
+              settings.addInstructor.error
+                ? settings.addInstructor.error.message
+                : null
+            }
+          />
         </div>
       </form>
     </div>

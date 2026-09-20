@@ -6,6 +6,7 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 
 - Org picker (`/my`) and org home (`/my/<org-slug>`)
 - Create organization; org settings (`/my/<org-slug>/settings`)
+- Org-visible **user profiles** (`/my/<org-slug>/people/<user_id>`) + reusable `user-card/`
 - **Permalink `slug`** — generated on create; changing it must warn that existing links break
 - Grade scheme (K–12 / Custom) and organization type (co-op / school / family)
 - Admin invites (email via Resend `organization-invite` + copyable claim link)
@@ -15,7 +16,7 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 
 ## Rules
 
-- Page folders per screen (`org-picker/`, `org-home/`, `org-settings/`, `claim-invite/`). Shared `model/` and `databridge/`.
+- Page folders per screen (`org-picker/`, `org-home/`, `org-settings/`, `claim-invite/`, `user-profile/`). Shared `model/` and `databridge/`. User cards live in `user-card/`.
 - PostgREST + RLS for normal org CRUD; Functions only if invite claim needs privileged writes.
 - Anyone can create an org ([FEATURES.md](../../docs/FEATURES.md)).
 - Slug uniqueness is enforced in the DB; never invent redirects for old slugs unless FEATURES says so.

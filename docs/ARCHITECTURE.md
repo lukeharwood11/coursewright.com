@@ -94,7 +94,7 @@ Aligned with P0 in [FEATURES.md](./FEATURES.md):
 |--------|---------|----------------|
 | `auth/` | Sign-in, sign-up, invite entry | Everyone |
 | `marketing/` | Public home, about, pricing, footer placeholders | Unauthenticated |
-| `organizations/` | Org create, settings, grade scheme, admin invites | Admin |
+| `organizations/` | Org create, settings, grade scheme, admin invites, **user profiles** | Admin |
 | `roster/` | Student profiles, **classes**, enrollments, parent links/invites, **families / parent directory** | Admin, instructor |
 | `courses/` | Offerings, dates, status, instructors, **grade levels**, create from course | Instructor, admin |
 | `course-templates/` | **P1** — blueprints, view/edit/owner access, **grade levels** | Instructor, admin |
@@ -108,7 +108,7 @@ Aligned with P0 in [FEATURES.md](./FEATURES.md):
 | `discussions/` | **P1** — two-way threads (one course or one class) | Instructor, admin; parent views |
 | `notifications/` | **P1** — in-app Activity (stored notifications) | Instructor, admin; parent views |
 | `lesson-plans/` | Weekly course plans with per-day materials | Instructor; parent views |
-| `calendar/` | Month/week calendar of assigned, due, lesson plans | Instructor; parent |
+| `calendar/` | Month/week/day calendar of assigned, due, lesson plans | Instructor; parent |
 | `billing/` | Org SaaS (P1) | Admin |
 
 Cross-cutting usability (tech-averse parents, print in the open) is a **constraint on every domain**, not a separate `usability/` package.

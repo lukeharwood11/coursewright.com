@@ -3,7 +3,6 @@ import {
   ChatBubbleLeftRightIcon,
   Cog6ToothIcon,
   MegaphoneIcon,
-  PrinterIcon,
 } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { ButtonLink } from "@/ui/Button";
@@ -123,6 +122,7 @@ export function CourseHeader({
         {canEdit || isParent ? (
           <ButtonLink
             variant="secondary"
+            className="hidden md:inline-flex"
             to={newDiscussionPath(orgSlug, {
               audience: "course",
               courseId,
@@ -135,6 +135,7 @@ export function CourseHeader({
         {canEdit ? (
           <ButtonLink
             variant="secondary"
+            className="hidden md:inline-flex"
             to={newAnnouncementPath(orgSlug, {
               audience: "course",
               courseId,
@@ -145,7 +146,11 @@ export function CourseHeader({
           </ButtonLink>
         ) : null}
         {canEdit ? (
-          <ButtonLink variant="secondary" to={courseSettingsPath(orgSlug, courseId)}>
+          <ButtonLink
+            variant="secondary"
+            className="hidden md:inline-flex"
+            to={courseSettingsPath(orgSlug, courseId)}
+          >
             <Cog6ToothIcon className="h-5 w-5" aria-hidden />
             Settings
           </ButtonLink>
@@ -153,19 +158,11 @@ export function CourseHeader({
         <CourseActionsMenu
           orgSlug={orgSlug}
           courseId={courseId}
-          canDuplicate={canEdit}
+          canEdit={canEdit}
+          isParent={isParent}
           onShare={onShare}
         />
       </div>
     </div>
-  );
-}
-
-export function PrintHint() {
-  return (
-    <p className="mt-1 flex items-center gap-1 text-[12.5px] text-[var(--ink-faint)]">
-      <PrinterIcon className="h-4 w-4" aria-hidden />
-      Print sits on each material and unit — not the whole course.
-    </p>
   );
 }

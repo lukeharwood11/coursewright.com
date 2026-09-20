@@ -72,7 +72,7 @@ Domain folders sit at the **top** of `src/`. Framework wiring sits in `app/`, `u
 src/
 ├── main.tsx
 │
-├── organizations/            # org create, settings, grade scheme, admin invites
+├── organizations/            # org create, settings, grade scheme, admin invites, user profiles
 ├── roster/                   # student profiles, enrollments, parent invites/links, families
 ├── course-templates/         # P1 — blueprints + view/edit/owner
 ├── courses/                  # offerings, create-from-course, instructors, dates, grade levels, status

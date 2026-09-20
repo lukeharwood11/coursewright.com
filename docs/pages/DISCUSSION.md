@@ -24,7 +24,7 @@ One two-way **discussion**: title, who it is for, flat posts (plain or Lexical),
 - **⋯** on a message: **Edit** (own messages — in-place editor + Save; **@mentions** added on save notify in [ACTIVITY](./ACTIVITY.md)), **Quote message** (inserts a Lexical quote into the composer), and **Copy link** (deep link to that message).
 - Composer at the bottom: text field; toolbar with **T** (same Lexical chrome as page materials — icon toolbar, `/`, floating format; no quiz), **file**, and **+** (material or link via modal). Typing **@** opens a picker of people on the thread; choosing a name (click or Enter) replaces the query with a mention pill and notifies them in [ACTIVITY](./ACTIVITY.md). Post stays disabled until there is text and/or at least one attachment. Default composer: **Enter** posts, **Shift+Enter** new line (Enter selects from the @ picker when it is open). Rich text (**T**): **⌘/Ctrl+Enter** posts.
 - **Mark as answered** / **Mark as open** for the person who started the thread, and for staff who can see it. Answered does not lock posting. Both actions sit in the thread toolbar with icons.
-- Thread toolbar **⋯**: **Members** opens a modal listing everyone who can currently see the thread (org staff + parents linked to the audience course or class).
+- Thread toolbar **⋯**: **Members** opens a modal listing everyone who can currently see the thread (org staff + parents linked to the audience course or class). Each person is a **user card** that opens [USER_PROFILE](./USER_PROFILE.md).
 - Staff Teacher view: **Delete** the discussion (soft-delete, confirm). A poster may remove their own post; staff may remove any post. Removed posts show “This message was removed.”
 - Attachments: files open/play in place (same players as materials); materials and URLs show as separate link cards with a link icon.
 - While this page is open, **Realtime** inserts new posts, attachments, answered state, and removes without a refresh. If the reader is not at the bottom, do not yank scroll — show a short “New messages” control instead. Live posts also advance `last_read_at` for the person staying on the thread.
@@ -62,7 +62,7 @@ Writeable on view: new post / quote, edit own post (body + @mentions), answered 
 - Message list (flat)
 - Composer (text + toolbar: **T** / file / **+** for material or link modals)
 - Back to discussions
-- Members modal (people with access)
+- Members modal (people with access → [USER_PROFILE](./USER_PROFILE.md))
 
 ### New
 
@@ -84,6 +84,7 @@ Writeable on view: new post / quote, edit own post (body + @mentions), answered 
 
 ## Links to
 
+- [USER_PROFILE](./USER_PROFILE.md) — member cards and message authors
 - [DISCUSSIONS](./DISCUSSIONS.md) — list; cancel from new; back from view
 - [COURSE](./COURSE.md) — compose entry from a course (`?audience=course&courseId=`); attached material may return to the course tree
 - [CLASS](./CLASS.md) — compose entry from a class (`?audience=class&classId=`)

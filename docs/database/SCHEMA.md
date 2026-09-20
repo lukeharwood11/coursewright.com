@@ -327,7 +327,7 @@ UI map: [URLS.md](../URLS.md), [PRINT](../pages/PRINT.md).
 
 ### User
 
-Authenticated users only: admins, instructors, parents. **Not students** (P0/P1). Table: `profiles`; PK is `auth.users.id`.
+Authenticated users only: admins, instructors, parents. **Not students** (P0/P1). Table: `profiles`; PK is `auth.users.id`. Org members may view another member’s **directory profile** (name, role, courses they teach/lead/are on) via `get_org_person_profile`. Email is not part of that directory. People still edit their own name on account settings.
 
 | Field | Type | Notes |
 |-------|------|-------|

@@ -4,10 +4,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { courseQueryKeys, getCourse } from "@/courses/databridge/courses";
+import {
+  addCourseInstructor,
+  courseQueryKeys,
+  getCourse,
+  listCourseInstructors,
+  listOrgStaffForPicker,
+  removeCourseInstructor,
+} from "@/courses/databridge/courses";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import { getOrganization } from "@/organizations/databridge/organizations";
-import { isStaffRole } from "@/organizations/model/role";
+import { canManageOrgSettings, isStaffRole } from "@/organizations/model/role";
 import {
   classQueryKeys,
   listClasses,
@@ -40,7 +47,9 @@ export function useCourseRoster() {
   const { organization, role } = useOrgShell();
   const queryClient = useQueryClient();
   const canEdit = isStaffRole(role);
+  const canManageInstructors = canManageOrgSettings(role);
   const courseReady = Number.isFinite(courseId);
+  const [addUserId, setAddUserId] = useState("");
 
   const courseQuery = useQuery({
     queryKey: courseQueryKeys.detail(courseId),
@@ -72,6 +81,18 @@ export function useCourseRoster() {
   const organizationQuery = useQuery({
     queryKey: orgQueryKeys.detail(organization.id),
     queryFn: () => getOrganization(organization.id),
+  });
+
+  const instructorsQuery = useQuery({
+    queryKey: courseQueryKeys.instructors(courseId),
+    queryFn: () => listCourseInstructors(courseId),
+    enabled: courseReady && belongsHere && canEdit,
+  });
+
+  const staffQuery = useQuery({
+    queryKey: ["courses", "org-staff-picker", organization.id],
+    queryFn: () => listOrgStaffForPicker(organization.id),
+    enabled: canManageInstructors,
   });
 
   const enrollments = enrollmentsQuery.data ?? [];
@@ -154,6 +175,30 @@ export function useCourseRoster() {
     },
   });
 
+  const addInstructorMutation = useMutation({
+    mutationFn: () => addCourseInstructor(courseId, addUserId),
+    onSuccess: async () => {
+      setAddUserId("");
+      await queryClient.invalidateQueries({
+        queryKey: courseQueryKeys.instructors(courseId),
+      });
+      toast("Teacher added.");
+    },
+  });
+
+  const removeInstructorMutation = useMutation({
+    mutationFn: (userId: string) => removeCourseInstructor(courseId, userId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: courseQueryKeys.instructors(courseId),
+      });
+      toast("Teacher removed.");
+    },
+    onError: (error: Error) => {
+      toast(error.message);
+    },
+  });
+
   async function onSelectClass(classIdValue: string) {
     setSelectedClassId(classIdValue);
     setExistingError(null);
@@ -201,11 +246,27 @@ export function useCourseRoster() {
     setNewError(null);
   }
 
+  const instructorIds = new Set(
+    (instructorsQuery.data ?? []).map((row) => row.userId),
+  );
+
   return {
     organization,
     canEdit,
+    canManageInstructors,
     course: belongsHere ? course : null,
     enrollments,
+    instructors: instructorsQuery.data ?? [],
+    staff: (staffQuery.data ?? []).filter((row) => !instructorIds.has(row.userId)),
+    addUserId,
+    setAddUserId,
+    addInstructor: () => addInstructorMutation.mutate(),
+    addingInstructor: addInstructorMutation.isPending,
+    addInstructorError: addInstructorMutation.error
+      ? addInstructorMutation.error.message
+      : null,
+    onRemoveInstructor: (userId: string) =>
+      removeInstructorMutation.mutate(userId),
     availableStudents,
     classes: classesQuery.data ?? [],
     gradeLabels: organizationQuery.data?.gradeLabels ?? [],

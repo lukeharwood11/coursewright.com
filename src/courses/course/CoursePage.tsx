@@ -6,7 +6,7 @@ import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
-import { CourseHeader, PrintHint } from "./components/CourseHeader";
+import { CourseHeader } from "./components/CourseHeader";
 import { CourseVisibilityBanner } from "./components/CourseVisibilityBanner";
 import {
   CourseOutline,
@@ -124,8 +124,6 @@ export function CoursePage() {
         pending={setVisibility.isPending}
         onPublish={() => setVisibility.mutate("published")}
       />
-      <PrintHint />
-
       {!outlineOpen ? (
         <div className="mt-6">
           <CourseOutlineToggle onOpen={() => setOutlineOpen(true)} />
@@ -178,11 +176,7 @@ export function CoursePage() {
                   />
                 ))}
               </ul>
-            ) : (
-              <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">
-                Materials without a unit show up here, above the units.
-              </p>
-            )}
+            ) : null}
             {canEdit ? (
               <div className="mt-3">
                 <AddMaterialForm

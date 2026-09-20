@@ -22,6 +22,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) | `/my/settings` |
 | [ORG_HOME](./ORG_HOME.md) | `/my/<org-slug>` |
 | [CALENDAR](./CALENDAR.md) | `/my/<org-slug>/calendar` |
+| [USER_PROFILE](./USER_PROFILE.md) | `/my/<org-slug>/people/<user_id>` |
 | [ACTIVITY](./ACTIVITY.md) | `/my/<org-slug>/activity` | **P1** |
 | [ORG_SETTINGS](./ORG_SETTINGS.md) | `/my/<org-slug>/settings` |
 | [COURSE_LIST](./COURSE_LIST.md) | `/my/<org-slug>/courses` |
@@ -60,6 +61,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Admin invites / staff roles / last-admin guard | [ORG_SETTINGS](./ORG_SETTINGS.md), [INVITE_CLAIM](./INVITE_CLAIM.md), [ORG_PICKER](./ORG_PICKER.md) (pending requests) |
 | Org grade scheme | [ORG_SETTINGS](./ORG_SETTINGS.md) |
 | Authentication (email password / magic link + Google) | [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md) |
+| Account / org-visible people | [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md), [USER_PROFILE](./USER_PROFILE.md) |
 | RBAC (owner / admin / instructor / parent) | Role splits on [ORG_HOME](./ORG_HOME.md) + gated pages; staff **Parent view** in org chrome |
 | Student profiles | [ORG_ROSTER](./ORG_ROSTER.md), [STUDENT_PROFILE](./STUDENT_PROFILE.md), [COURSE_ROSTER](./COURSE_ROSTER.md), [CLASS](./CLASS.md) |
 | Roster / enrollments / parent linkage & invites | [ORG_ROSTER](./ORG_ROSTER.md), [COURSE_ROSTER](./COURSE_ROSTER.md), [STUDENT_PROFILE](./STUDENT_PROFILE.md), [CLASS](./CLASS.md) |

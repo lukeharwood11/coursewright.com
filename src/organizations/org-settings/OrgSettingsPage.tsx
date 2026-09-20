@@ -96,6 +96,7 @@ export function OrgSettingsPage() {
 
       <div className="mt-4">
         <StaffSection
+          orgSlug={settings.organization.slug}
           canInvite={staff.canInvite}
           canManage={staff.canManage}
           loading={staff.loading}

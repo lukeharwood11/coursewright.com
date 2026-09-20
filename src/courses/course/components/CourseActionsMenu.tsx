@@ -1,13 +1,18 @@
 import { useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  ChatBubbleLeftRightIcon,
+  Cog6ToothIcon,
   DocumentDuplicateIcon,
   EllipsisHorizontalIcon,
+  MegaphoneIcon,
   ShareIcon,
 } from "@heroicons/react/24/outline";
 import { AnchoredPopup } from "@/ui/AnchoredPopup";
 import { Button } from "@/ui/Button";
-import { newCourseFromPath } from "@/courses/model/paths";
+import { newAnnouncementPath } from "@/announcements/model/paths";
+import { newDiscussionPath } from "@/discussions/model/paths";
+import { courseSettingsPath, newCourseFromPath } from "@/courses/model/paths";
 
 const itemClassName =
   "flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[13px] font-bold text-[var(--ink)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:bg-[var(--green-tint)] focus-visible:outline-none";
@@ -15,17 +20,20 @@ const itemClassName =
 export function CourseActionsMenu({
   orgSlug,
   courseId,
-  canDuplicate,
+  canEdit,
+  isParent,
   onShare,
 }: {
   orgSlug: string;
   courseId: number;
-  canDuplicate: boolean;
+  canEdit: boolean;
+  isParent: boolean;
   onShare: () => void;
 }) {
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
+  const showDiscussion = canEdit || isParent;
 
   return (
     <>
@@ -51,6 +59,45 @@ export function CourseActionsMenu({
         className="min-w-[11rem]"
       >
         <div className="py-1">
+          {showDiscussion ? (
+            <Link
+              role="menuitem"
+              to={newDiscussionPath(orgSlug, {
+                audience: "course",
+                courseId,
+              })}
+              className={`${itemClassName} md:hidden`}
+              onClick={() => setOpen(false)}
+            >
+              <ChatBubbleLeftRightIcon className="h-4 w-4 shrink-0" aria-hidden />
+              Start a discussion
+            </Link>
+          ) : null}
+          {canEdit ? (
+            <Link
+              role="menuitem"
+              to={newAnnouncementPath(orgSlug, {
+                audience: "course",
+                courseId,
+              })}
+              className={`${itemClassName} md:hidden`}
+              onClick={() => setOpen(false)}
+            >
+              <MegaphoneIcon className="h-4 w-4 shrink-0" aria-hidden />
+              Create Announcement
+            </Link>
+          ) : null}
+          {canEdit ? (
+            <Link
+              role="menuitem"
+              to={courseSettingsPath(orgSlug, courseId)}
+              className={`${itemClassName} md:hidden`}
+              onClick={() => setOpen(false)}
+            >
+              <Cog6ToothIcon className="h-4 w-4 shrink-0" aria-hidden />
+              Settings
+            </Link>
+          ) : null}
           <button
             type="button"
             role="menuitem"
@@ -63,7 +110,7 @@ export function CourseActionsMenu({
             <ShareIcon className="h-4 w-4 shrink-0" aria-hidden />
             Share
           </button>
-          {canDuplicate ? (
+          {canEdit ? (
             <Link
               role="menuitem"
               to={newCourseFromPath(orgSlug, courseId)}

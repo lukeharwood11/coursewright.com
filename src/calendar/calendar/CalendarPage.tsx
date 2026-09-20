@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { CourseLegend } from "@/calendar/components/CourseLegend";
+import { DayCalendar } from "@/calendar/components/DayCalendar";
 import { MonthCalendar } from "@/calendar/components/MonthCalendar";
 import { WeekCalendar } from "@/calendar/components/WeekCalendar";
 import { CalendarToolbar } from "./components/CalendarToolbar";
@@ -23,7 +24,7 @@ export function CalendarPage() {
             Calendar
           </h1>
           <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
-            {page.view === "week" ? page.week.label : page.month.label}
+            {page.periodLabel}
           </p>
         </div>
         <CalendarToolbar
@@ -36,6 +37,7 @@ export function CalendarPage() {
 
       <p className="mt-3 text-[13px] text-[var(--ink-faint)]">
         Filled chips are due. Outlined chips are assigned. Tap a class in the legend to hide it.
+        Tap a day to open that day.
       </p>
 
       <div className="mt-4">
@@ -59,6 +61,14 @@ export function CalendarPage() {
               orgSlug={page.organization.slug}
               weekStart={page.week.start}
               weekNotes={page.weekNotes}
+              lessonDays={page.lessonDays}
+              chips={page.chips}
+              hiddenCourseIds={page.hiddenCourseIds}
+            />
+          ) : page.view === "day" ? (
+            <DayCalendar
+              orgSlug={page.organization.slug}
+              date={page.focusDate}
               lessonDays={page.lessonDays}
               chips={page.chips}
               hiddenCourseIds={page.hiddenCourseIds}
