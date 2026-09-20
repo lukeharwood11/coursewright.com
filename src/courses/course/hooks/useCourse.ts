@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { familyVisibleMaterials, staffCanEdit } from "@/app/layouts/model/viewMode";
+import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
+import { staffCanManageCourse } from "@/courses/model/access";
 import {
   courseQueryKeys,
   getCourse,
@@ -38,8 +40,8 @@ export function useCourse() {
   const { courseId: courseIdParam } = useParams();
   const courseId = courseIdParam ? Number(courseIdParam) : NaN;
   const { organization, role, parentPresentation } = useOrgShell();
+  const user = useAuthedUser();
   const queryClient = useQueryClient();
-  const canEdit = staffCanEdit(role, parentPresentation);
 
   const courseQuery = useQuery({
     queryKey: courseQueryKeys.detail(courseId),
@@ -84,6 +86,12 @@ export function useCourse() {
 
   const course = courseQuery.data ?? null;
   const belongsHere = course?.organizationId === organization.id;
+  const canEdit = staffCanManageCourse({
+    role,
+    parentPresentation,
+    userId: user.id,
+    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+  });
   const familyCourseHidden =
     parentPresentation &&
     course != null &&
@@ -168,7 +176,8 @@ export function useCourse() {
     loading:
       courseQuery.isLoading ||
       unitsQuery.isLoading ||
-      materialsQuery.isLoading,
+      materialsQuery.isLoading ||
+      instructorsQuery.isLoading,
     error: courseQuery.error
       ? courseQuery.error.message
       : unitsQuery.error

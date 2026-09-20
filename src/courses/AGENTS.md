@@ -13,7 +13,7 @@ Course **instances**: offerings with optional dates, roster, instructors, catalo
 
 ## Rules
 
-- Builder chrome: Print / Share / Add material / **Add lesson plan** visible ([STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md)).
+- Builder chrome: Print / Share / **Add lesson plan** visible ([STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md)). Add material lives on a **unit**. Instructors only edit courses they teach; parent-linked courses are view-only.
 - Units & materials are sibling domains — compose them; don’t duplicate.
 - **P1 discussions** are a sibling domain — course page may link to compose (`?audience=course&courseId=`), not own the thread UI.
 - **P0:** no template UI. Course-from-course is an independent copy — **no live sync**. Copies start unpublished.

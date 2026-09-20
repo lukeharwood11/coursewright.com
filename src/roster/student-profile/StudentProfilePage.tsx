@@ -12,9 +12,11 @@ import {
   STUDENT_PROFILE_FORM_ID,
   useStudentProfile,
 } from "./hooks/useStudentProfile";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 export function StudentProfilePage() {
   const profile = useStudentProfile();
+  useToastOnError(profile.error);
   const parentInvite = useParentInvite(profile.student?.id ?? null);
 
   useEffect(() => {
@@ -43,9 +45,6 @@ export function StudentProfilePage() {
         <p className="mt-2 text-[14.5px] text-[var(--ink-soft)]">
           They may have been removed, or you may not have access.
         </p>
-        {profile.error ? (
-          <p className="mt-2 text-[13px] text-[var(--amber-deep)]">{profile.error}</p>
-        ) : null}
         <p className="mt-4 text-[13px]">
           <Link
             to={`/my/${profile.organization.slug}/roster`}

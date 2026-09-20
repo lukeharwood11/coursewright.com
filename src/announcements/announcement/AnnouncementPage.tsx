@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/ui/Badge";
 import { Button, ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { formatDateRange } from "@/courses/model/dates";
 import {
   announcementAudienceLabel,
@@ -22,6 +23,7 @@ import { useAnnouncement } from "./hooks/useAnnouncement";
 
 export function AnnouncementPage() {
   const page = useAnnouncement();
+  useToastOnError(page.error);
   const navigate = useNavigate();
   const [confirmRemove, setConfirmRemove] = useState(false);
 
@@ -157,12 +159,6 @@ export function AnnouncementPage() {
       {page.announcement.body ? (
         <p className="mt-6 max-w-2xl whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--ink)]">
           {page.announcement.body}
-        </p>
-      ) : null}
-
-      {page.error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {page.error}
         </p>
       ) : null}
 

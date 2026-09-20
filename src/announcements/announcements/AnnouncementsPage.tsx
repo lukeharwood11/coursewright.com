@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/ui/Badge";
 import { ButtonLink } from "@/ui/Button";
+import { useToastOnError } from "@/ui/useToastOnError";
 import {
   announcementAudienceLabel,
   announcementTargetNames,
@@ -25,6 +26,7 @@ const GROUP_ORDER = ["available", "upcoming", "ended"] as const;
 
 export function AnnouncementsPage() {
   const page = useAnnouncements();
+  useToastOnError(page.error);
 
   useEffect(() => {
     document.title = "Announcements · Course Wright";
@@ -50,11 +52,6 @@ export function AnnouncementsPage() {
         <p className="mt-1 max-w-xl text-[14px] leading-relaxed text-[var(--ink-soft)]">
           Notes from your teachers. Opening one marks it as seen.
         </p>
-        {page.error ? (
-          <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-            {page.error}
-          </p>
-        ) : null}
         <ParentAnnouncementsList
           orgSlug={page.organization.slug}
           items={page.parentAnnouncements}
@@ -81,12 +78,6 @@ export function AnnouncementsPage() {
           New announcement
         </ButtonLink>
       </div>
-
-      {page.error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {page.error}
-        </p>
-      ) : null}
 
       {page.announcements.length === 0 ? (
         <p className="mt-6 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">

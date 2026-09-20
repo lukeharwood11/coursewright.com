@@ -6,7 +6,7 @@ Design-system primitives from [STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md).
 
 - Button, ButtonLink, Input, Select, Wordmark, Badge, PublishedBadge, Avatar, PageFormActions, ConfirmDialog
 - `AnchoredPopup` — viewport-aware menus / tooltips (flip and stay in frame)
-- `toastNotImplemented` (sonner) for screens that are not built yet
+- `toastNotImplemented` / `toastSomethingWentWrong` (sonner); `useToastOnError` for load/mutation failures instead of page error copy
 - Storybook stories colocated as `*.stories.tsx`
 - No product flows
 

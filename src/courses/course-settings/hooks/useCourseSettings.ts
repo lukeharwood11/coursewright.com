@@ -2,7 +2,9 @@ import type { FormEvent } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { staffCanManageCourse } from "@/courses/model/access";
 import {
   addCourseInstructor,
   courseQueryKeys,
@@ -19,7 +21,7 @@ import {
 } from "@/courses/model/createCourse";
 import { allowedGradeLevels, toggleGradeLevel } from "@/courses/model/gradeLevels";
 import { getOrganization, orgQueryKeys } from "@/organizations/databridge/organizations";
-import { canManageOrgSettings, isStaffRole } from "@/organizations/model/role";
+import { canManageOrgSettings } from "@/organizations/model/role";
 import type { CourseIconValue } from "@/courses/model/courseIcon";
 import type { CourseColorKey } from "@/courses/model/courseColor";
 import { parseCourseColorKey } from "@/courses/model/courseColor";
@@ -30,9 +32,9 @@ export const COURSE_SETTINGS_FORM_ID = "course-settings-form";
 export function useCourseSettings() {
   const { courseId: courseIdParam } = useParams();
   const courseId = courseIdParam ? Number(courseIdParam) : NaN;
-  const { organization, role } = useOrgShell();
+  const { organization, role, parentPresentation } = useOrgShell();
+  const user = useAuthedUser();
   const queryClient = useQueryClient();
-  const canEdit = isStaffRole(role);
   const canManageInstructors = canManageOrgSettings(role);
 
   const courseQuery = useQuery({
@@ -58,6 +60,12 @@ export function useCourseSettings() {
 
   const course = courseQuery.data ?? null;
   const belongsHere = course?.organizationId === organization.id;
+  const canEdit = staffCanManageCourse({
+    role,
+    parentPresentation,
+    userId: user.id,
+    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+  });
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -194,7 +202,7 @@ export function useCourseSettings() {
     canEdit,
     canManageInstructors,
     course: belongsHere ? course : null,
-    loading: courseQuery.isLoading,
+    loading: courseQuery.isLoading || instructorsQuery.isLoading,
     notFound: !courseQuery.isLoading && (!course || !belongsHere),
     title,
     setTitle,

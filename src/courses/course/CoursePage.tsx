@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { resourceShareMessage } from "@/sharing/model/copyLink";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
-import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
 import { CourseHeader, PrintHint } from "./components/CourseHeader";
 import { CourseVisibilityBanner } from "./components/CourseVisibilityBanner";
@@ -39,6 +39,7 @@ export function CoursePage() {
     reorderUnit,
     setVisibility,
   } = useCourse();
+  useToastOnError(error);
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
   const [addingUnit, setAddingUnit] = useState(false);
   const [unitTitle, setUnitTitle] = useState("");
@@ -81,9 +82,6 @@ export function CoursePage() {
         <p className="mt-2 text-[14.5px] text-[var(--ink-soft)]">
           It may have been removed, or you may not have access.
         </p>
-        {error ? (
-          <p className="mt-2 text-[13px] text-[var(--amber-deep)]">{error}</p>
-        ) : null}
         <p className="mt-4 text-[13px]">
           <Link
             to={isParent ? `/my/${organization.slug}` : coursesPath(organization.slug)}
@@ -180,20 +178,11 @@ export function CoursePage() {
               </ul>
             ) : (
               <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">
-                Materials without a unit show up here, above the units.
+                {canEdit
+                  ? "Add a unit, then add materials there."
+                  : "Materials in this course live in units."}
               </p>
             )}
-            {canEdit ? (
-              <div className="mt-3">
-                <AddMaterialForm
-                  organizationId={organization.id}
-                  orgSlug={organization.slug}
-                  courseId={course.id}
-                  unitId={null}
-                  label="Add material"
-                />
-              </div>
-            ) : null}
           </section>
 
           <section className="mt-8">
@@ -280,9 +269,6 @@ export function CoursePage() {
           canEdit={canEdit}
         />
       </div>
-      {error ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]">{error}</p>
-      ) : null}
     </div>
   );
 }

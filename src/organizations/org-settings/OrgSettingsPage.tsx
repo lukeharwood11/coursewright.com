@@ -10,12 +10,14 @@ import {
 import { StaffSection } from "./components/StaffSection";
 import { useOrgSettings } from "./hooks/useOrgSettings";
 import { useOrgStaff } from "./hooks/useOrgStaff";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 export function OrgSettingsPage() {
   const { orgSlug } = useParams();
   const shell = useOrgShell();
   const settings = useOrgSettings(orgSlug);
   const staff = useOrgStaff(settings.organization?.id, settings.role);
+  useToastOnError(settings.error);
 
   useEffect(() => {
     const name = shell.organization.name;
@@ -40,9 +42,6 @@ export function OrgSettingsPage() {
         <p className="text-[14.5px] text-[var(--ink-soft)]">
           Settings aren’t available right now.
         </p>
-        {settings.error ? (
-          <p className="mt-2 text-[13px] text-[var(--amber-deep)]">{settings.error}</p>
-        ) : null}
       </div>
     );
   }

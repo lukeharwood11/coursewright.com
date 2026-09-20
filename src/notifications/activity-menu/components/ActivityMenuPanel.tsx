@@ -12,6 +12,7 @@ import {
   type ActivityKind,
 } from "@/notifications/model/activity";
 import { ButtonLink } from "@/ui/Button";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 function ActivityTypeIcon({ kind }: { kind: ActivityKind }) {
   const className = "mt-0.5 h-4 w-4 shrink-0 text-[var(--green)]";
@@ -41,17 +42,14 @@ export function ActivityMenuPanel({
   onViewAll: () => void;
 }) {
   const remaining = remainingUnreadLabel(remainingUnread);
+  useToastOnError(error);
 
   return (
     <div className="flex flex-col">
       <div className="px-3.5 pb-2 pt-3">
         <p className="text-[11px] font-bold text-[var(--ink-faint)]">Activity</p>
       </div>
-      {error ? (
-        <p className="px-3.5 pb-3 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {error}
-        </p>
-      ) : loading ? (
+      {loading ? (
         <p className="px-3.5 pb-3 text-[13px] text-[var(--ink-soft)]">
           Loading activity…
         </p>

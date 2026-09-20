@@ -6,9 +6,11 @@ import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudent
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
 import { useCourseRoster } from "./hooks/useCourseRoster";
 import { useCourseParentInvites } from "./hooks/useCourseParentInvites";
+import { useToastOnError } from "@/ui/useToastOnError";
 
 export function CourseRosterPage() {
   const roster = useCourseRoster();
+  useToastOnError(roster.error);
   const students = roster.enrollments.map((enrollment) => enrollment.student);
   const parentInvites = useCourseParentInvites(students);
 
@@ -38,9 +40,6 @@ export function CourseRosterPage() {
         <p className="mt-2 text-[14.5px] text-[var(--ink-soft)]">
           This roster isn’t available.
         </p>
-        {roster.error ? (
-          <p className="mt-2 text-[13px] text-[var(--amber-deep)]">{roster.error}</p>
-        ) : null}
         <p className="mt-4 text-[13px]">
           <Link
             to={coursesPath(roster.organization.slug)}

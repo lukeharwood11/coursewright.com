@@ -2,8 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { getCourse } from "@/courses/databridge/courses";
+import {
+  courseQueryKeys,
+  getCourse,
+  listCourseInstructors,
+} from "@/courses/databridge/courses";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
+import { staffCanManageCourse } from "@/courses/model/access";
 import { listBlocks } from "@/materials/databridge/blocks";
 import { fileSignedUrl, getFile } from "@/materials/databridge/files";
 import {
@@ -31,7 +36,7 @@ export function useMaterial() {
   const { organization, role, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
   const queryClient = useQueryClient();
-  const canEdit = staffCanEdit(role, parentPresentation);
+  const staffEdit = staffCanEdit(role, parentPresentation);
 
   const materialQuery = useQuery({
     queryKey: materialQueryKeys.detail(materialId),
@@ -81,10 +86,21 @@ export function useMaterial() {
     queryFn: () => listImportantNowForCourse(courseId),
     enabled: Number.isFinite(courseId),
   });
+  const instructorsQuery = useQuery({
+    queryKey: courseQueryKeys.instructors(courseId),
+    queryFn: () => listCourseInstructors(courseId),
+    enabled: Number.isFinite(courseId) && staffEdit,
+  });
+  const canManage = staffCanManageCourse({
+    role,
+    parentPresentation,
+    userId: user.id,
+    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+  });
   const versionsQuery = useQuery({
     queryKey: materialQueryKeys.versions(materialId),
     queryFn: () => listMaterialVersions(materialId),
-    enabled: canEdit && Number.isFinite(materialId),
+    enabled: canManage && Number.isFinite(materialId),
   });
 
   const material = materialQuery.data ?? null;
@@ -158,7 +174,7 @@ export function useMaterial() {
 
   return {
     organization,
-    canEdit,
+    canEdit: canManage,
     isParent: parentPresentation,
     courseId,
     unitId: unitId && Number.isFinite(unitId) ? unitId : material?.unitId ?? null,
@@ -177,7 +193,10 @@ export function useMaterial() {
     },
     importantNow,
     versions: versionsQuery.data ?? [],
-    loading: materialQuery.isLoading || courseQuery.isLoading,
+    loading:
+      materialQuery.isLoading ||
+      courseQuery.isLoading ||
+      instructorsQuery.isLoading,
     blocksLoading: blocksQuery.isLoading,
     error: materialQuery.error?.message ?? courseQuery.error?.message ?? null,
     notFound:

@@ -2,6 +2,7 @@ import { useId, useRef } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { AnchoredPopup } from "@/ui/AnchoredPopup";
 import { Input } from "@/ui/Input";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { useOrgSearch } from "@/search/hooks/useOrgSearch";
 import { SearchResultCard } from "./SearchResultCard";
 
@@ -27,6 +28,7 @@ export function OrgSearchBar({ organizationId, orgSlug }: Props) {
     orgSlug,
     enabled: true,
   });
+  useToastOnError(error);
 
   return (
     <div className="w-full max-w-md">
@@ -70,17 +72,12 @@ export function OrgSearchBar({ organizationId, orgSlug }: Props) {
             Searching…
           </p>
         ) : null}
-        {!loading && error ? (
-          <p className="px-2 py-3 text-[13px] text-[var(--amber-deep)]">
-            {error}
-          </p>
-        ) : null}
-        {!loading && !error && results.length === 0 ? (
+        {!loading && results.length === 0 ? (
           <p className="px-2 py-3 text-[13px] text-[var(--ink-soft)]">
             No matches.
           </p>
         ) : null}
-        {!loading && !error && results.length > 0 ? (
+        {!loading && results.length > 0 ? (
           <ul className="flex flex-col gap-1.5">
             {results.map((result) => (
               <li key={result.id} role="option">

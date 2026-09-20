@@ -3,7 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { familyVisibleMaterials, staffCanEdit } from "@/app/layouts/model/viewMode";
-import { getCourse } from "@/courses/databridge/courses";
+import {
+  courseQueryKeys,
+  getCourse,
+  listCourseInstructors,
+} from "@/courses/databridge/courses";
+import { staffCanManageCourse } from "@/courses/model/access";
 import {
   getLessonPlan,
   lessonPlanQueryKeys,
@@ -23,12 +28,17 @@ export function useLessonPlan() {
   const user = useAuthedUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const canEdit = staffCanEdit(role, parentPresentation);
+  const staffEdit = staffCanEdit(role, parentPresentation);
 
   const courseQuery = useQuery({
     queryKey: ["courses", "detail", courseId],
     queryFn: () => getCourse(courseId),
     enabled: Number.isFinite(courseId),
+  });
+  const instructorsQuery = useQuery({
+    queryKey: courseQueryKeys.instructors(courseId),
+    queryFn: () => listCourseInstructors(courseId),
+    enabled: Number.isFinite(courseId) && staffEdit,
   });
   const planQuery = useQuery({
     queryKey: lessonPlanQueryKeys.detail(lessonPlanId),
@@ -38,6 +48,12 @@ export function useLessonPlan() {
 
   const course = courseQuery.data ?? null;
   const plan = planQuery.data ?? null;
+  const canEdit = staffCanManageCourse({
+    role,
+    parentPresentation,
+    userId: user.id,
+    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+  });
   const belongsHere =
     plan != null &&
     course != null &&
@@ -92,7 +108,10 @@ export function useLessonPlan() {
     course: belongsHere ? course : null,
     plan: belongsHere && !familyHidden ? plan : null,
     days: belongsHere && !familyHidden ? days : [],
-    loading: courseQuery.isLoading || planQuery.isLoading,
+    loading:
+      courseQuery.isLoading ||
+      planQuery.isLoading ||
+      instructorsQuery.isLoading,
     error: courseQuery.error
       ? courseQuery.error.message
       : planQuery.error

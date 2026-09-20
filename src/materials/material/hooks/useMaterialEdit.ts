@@ -87,8 +87,8 @@ export function useMaterialEdit() {
       });
       if (contentDraft) setContentBaseline(contentDraft);
       await page.invalidate();
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Couldn’t save.");
+    } catch {
+      setError("Something went wrong.");
     } finally {
       setSaving(false);
     }

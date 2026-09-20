@@ -6,7 +6,8 @@ export { Button, ButtonLink } from "./Button";
 export { ConfirmDialog } from "./ConfirmDialog";
 export { Input } from "./Input";
 export { PageFormActions } from "./PageFormActions";
-export { toastNotImplemented } from "./toast";
+export { toastNotImplemented, toastSomethingWentWrong } from "./toast";
+export { useToastOnError } from "./useToastOnError";
 export { Mark, Wordmark } from "./Wordmark";
 export {
   ConceptAFull,

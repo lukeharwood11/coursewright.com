@@ -5,7 +5,7 @@ Lesson materials: **page** / **link** / **file**, plus ordered **blocks** on pag
 ## Scope
 
 - Material placement (title, **description**, kind, optional `unit_id`, dates, **visibility**, important now, sync/override)
-- **v1 Add material:** `page` · `link` · `file` (into a unit or top-level)
+- **v1 Add material:** `page` · `link` · `file` (into a unit in the UI; `unit_id` may still be null in the database)
 - **page** → ordered **blocks** (`rich_text`, `video`, …); rich text is authored in [Lexical](https://lexical.dev/) and stored as editor JSON (tables, quotes, links, in-page file nodes, **quiz** nodes)
 - **link** → `url`; **file** → `file_id` (org File + versions)
 - Soft delete, versions, revert UX
@@ -14,7 +14,7 @@ Lesson materials: **page** / **link** / **file**, plus ordered **blocks** on pag
 
 ## Rules
 
-- `unit_id` is **nullable** — null = top-level on the course (shown above units).
+- `unit_id` is **nullable** — null = leftover top-level on the course (shown above units). The UI adds new materials on a unit.
 - Do **not** invent a quiz **material kind** or parallel quiz table — quiz is a **block on a page**.
 - Page content lives in `blocks` rows — do not dump the whole page into `materials.body`. Rich-text `body.lexical` is the Lexical editor state (including quiz nodes); keep video URLs as `video` blocks.
 - Generous file types/sizes for `kind = file` — keep open.
@@ -25,7 +25,7 @@ Lesson materials: **page** / **link** / **file**, plus ordered **blocks** on pag
 
 ## Don’t
 
-- Require a unit to create a material.
+- Require a unit in the database to store a material.
 - Build a separate org-wide file drive in P0.
 - Skip Print control on material rows.
 - Version files as metadata-only — blobs must be retained for revert.

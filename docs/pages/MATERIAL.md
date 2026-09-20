@@ -80,7 +80,7 @@ View (and edit) a single material placement — the thing parents open from this
 ### Edit
 
 - **Edit URL:** `…/materials/<material_id>/edit` (locked — [URLS.md](../URLS.md))
-- Placement fields + page content: **Save** / **Cancel** in the page header; Save disabled when unchanged; Cancel goes back (confirms if dirty)
+- Placement fields + page content: **Save** / **Cancel** in the page header; Save disabled when unchanged; Cancel returns to the material view (confirms if dirty)
 - **page:** [Lexical](https://lexical.dev/) WYSIWYG with a playground-style **icon** toolbar (not word buttons). Headings, lists, quotes, tables, links, video URL embeds, in-page files, **quizzes** with marked correct answers. Type `/` to insert a block. Table insert asks for rows and columns. A version is stored only when the instructor saves and something changed — not per keystroke.
 - **link / file:** edit URL or replace file (file replace → new FileVersion)
 - Versioning / who changed what / revert dangerous actions

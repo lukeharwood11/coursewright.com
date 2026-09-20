@@ -17,7 +17,7 @@ Publish the privacy policy for Course Wright.
 - Static copy only — no product CRUD.
 - Highlights product analytics via **PostHog** when enabled (page views / leaves, client error reporting), plus standard account, org content, and hosting practices (Supabase, AWS, Google sign-in).
 - Opens with **App data collection and usage**, then dedicated Google headings (access / use / store / share / retain-delete / Limited Use) for OAuth branding verification.
-- Homepage is also prerendered with app description + privacy/terms links (Google requires the privacy policy to be linked from the homepage for non-JS crawlers).
+- Homepage and this policy render in the SPA (Google still expects the privacy policy linked from the homepage).
 - Site hostname in the policy body comes from `VITE_PUBLIC_HOST` (`coursewright.com` or `beta.coursewright.com`).
 
 ## Data shown
@@ -51,5 +51,4 @@ Publish the privacy policy for Course Wright.
 - Hostname in copy: `VITE_PUBLIC_HOST` (set in `.env.testing` / `build-spa.sh` from Terraform `site_domain`).
 - Align disclosures with [STACK.md](../STACK.md). Do not claim PostHog session replay until enabled. Policy body should not mention other deploy tiers.
 - This is product-facing policy copy for the pilot; a lawyer review can refine it later if needed.
-- Build prerenders static HTML for this path (and terms/cookies) so crawlers/verifiers that do not execute JavaScript still see the policy body. SPA JS still mounts for interactive visits after deploy.
 - Google Cloud OAuth branding verification looks for explicit **Google user data** disclosures (not only a generic privacy policy). Keep section `google-user-data` in `privacyPolicy.ts` aligned with actual Sign in with Google scopes (basic profile/email via Supabase Auth).

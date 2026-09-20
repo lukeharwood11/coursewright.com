@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { PageFormActions } from "@/ui/PageFormActions";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { useQuery } from "@tanstack/react-query";
 import { replaceFile, revertFileToVersion, listFileVersions } from "@/materials/databridge/files";
 import { materialPath } from "@/materials/model/paths";
@@ -28,6 +29,7 @@ const controlClass = [
 export function MaterialEditPage() {
   const edit = useMaterialEdit();
   const page = edit.page;
+  useToastOnError(edit.error ?? page.error);
 
   useEffect(() => {
     document.title = page.material
@@ -201,10 +203,6 @@ export function MaterialEditPage() {
               </Suspense>
             </div>
           </section>
-        ) : null}
-
-        {edit.error ? (
-          <p className="mt-3 text-[13px] text-[var(--amber-deep)]">{edit.error}</p>
         ) : null}
       </form>
 

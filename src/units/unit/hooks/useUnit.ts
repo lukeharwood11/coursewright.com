@@ -1,8 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { getCourse } from "@/courses/databridge/courses";
+import {
+  courseQueryKeys,
+  getCourse,
+  listCourseInstructors,
+} from "@/courses/databridge/courses";
 import { familyVisibleMaterials, staffCanEdit } from "@/app/layouts/model/viewMode";
+import { staffCanManageCourse } from "@/courses/model/access";
 import {
   importantNowQueryKeys,
   listImportantNowForCourse,
@@ -26,8 +32,9 @@ export function useUnit() {
   const courseId = courseIdParam ? Number(courseIdParam) : NaN;
   const unitId = unitIdParam ? Number(unitIdParam) : NaN;
   const { organization, role, parentPresentation } = useOrgShell();
+  const user = useAuthedUser();
   const queryClient = useQueryClient();
-  const canEdit = staffCanEdit(role, parentPresentation);
+  const staffEdit = staffCanEdit(role, parentPresentation);
 
   const unitQuery = useQuery({
     queryKey: unitQueryKeys.detail(unitId),
@@ -49,11 +56,22 @@ export function useUnit() {
     queryFn: () => listImportantNowForCourse(courseId),
     enabled: Number.isFinite(courseId),
   });
+  const instructorsQuery = useQuery({
+    queryKey: courseQueryKeys.instructors(courseId),
+    queryFn: () => listCourseInstructors(courseId),
+    enabled: Number.isFinite(courseId) && staffEdit,
+  });
 
   const unit = unitQuery.data ?? null;
   const course = courseQuery.data ?? null;
   const belongsHere =
     unit?.courseId === courseId && course?.organizationId === organization.id;
+  const canEdit = staffCanManageCourse({
+    role,
+    parentPresentation,
+    userId: user.id,
+    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+  });
   const familyCourseHidden =
     parentPresentation &&
     course != null &&
@@ -110,7 +128,10 @@ export function useUnit() {
     course: belongsHere ? course : null,
     materials,
     importantIds: new Set((importantQuery.data ?? []).map((row) => row.materialId)),
-    loading: unitQuery.isLoading || courseQuery.isLoading,
+    loading:
+      unitQuery.isLoading ||
+      courseQuery.isLoading ||
+      instructorsQuery.isLoading,
     error: unitQuery.error
       ? unitQuery.error.message
       : courseQuery.error
