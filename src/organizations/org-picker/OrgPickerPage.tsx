@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { PageLoading } from "@/ui/PageLoading";
 import { CreateOrganizationForm } from "./components/CreateOrganizationForm";
 import { OrgList } from "./components/OrgList";
 import { PendingInvites } from "./components/PendingInvites";
@@ -31,9 +32,7 @@ export function OrgPickerPage() {
       </div>
 
       {picker.loading ? (
-        <p className="mt-6 text-[14px] text-[var(--ink-soft)]">
-          Loading organizations…
-        </p>
+        <PageLoading embedded label="Loading organizations…" />
       ) : null}
 
       {picker.loadError ? (

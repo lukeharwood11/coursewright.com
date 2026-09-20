@@ -159,6 +159,9 @@ function buildLegalDocument(slug: LegalPageSlug, host: string, indexHtml: string
     <meta name="description" content="${escapeHtml(description)}" />
     <meta name="robots" content="${robots}" />
     <meta name="theme-color" content="#33604D" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Course Wright" />
     <link rel="canonical" href="${escapeHtml(canonical)}" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="${escapeHtml(SITE_NAME)}" />
@@ -269,6 +272,9 @@ function buildHomeDocument(host: string, indexHtml: string): string {
     <meta name="description" content="${escapeHtml(description)}" />
     <meta name="robots" content="${robots}" />
     <meta name="theme-color" content="#33604D" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Course Wright" />
     <link rel="canonical" href="${escapeHtml(canonical)}" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="${escapeHtml(SITE_NAME)}" />

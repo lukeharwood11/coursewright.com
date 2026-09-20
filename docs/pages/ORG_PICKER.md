@@ -47,6 +47,7 @@ Choose an organization or create a new one. Cross-org entry before `<org-slug>` 
 
 - [ORG_HOME](./ORG_HOME.md) — open an organization or after accepting an invite
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — account settings
+- [FEEDBACK](./FEEDBACK.md) — Send feedback (account menu)
 - [INVITE_CLAIM](./INVITE_CLAIM.md) — same accept flow via copied link
 
 ## Notes

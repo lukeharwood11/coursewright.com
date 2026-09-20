@@ -135,6 +135,7 @@ Body ~1.45–1.6. Headings ~1.3.
 | Borders | `1px solid var(--line)` or `--line-soft` |
 | Focus | `2px solid var(--green)`, offset 2px; inputs also `0 0 0 3px var(--green-tint)` |
 | Reduced motion | Honor `prefers-reduced-motion: reduce` — no transitions |
+| Page loading | Shared `PageLoading` — animated **CW** mark + optional “what’s loading” label |
 
 Prefer **borders and dividers** over shadows for structure. Cards: white surface + soft line, not floating dark chrome.
 

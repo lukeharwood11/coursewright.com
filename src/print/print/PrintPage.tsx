@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { PdfPreview } from "./components/PdfPreview";
 import { PrintActionBar } from "./components/PrintActionBar";
 import { PrintStatus } from "./components/PrintStatus";
+import { PageLoading } from "@/ui/PageLoading";
 import { usePrint } from "./hooks/usePrint";
 
 function emptyCopy(grain: "material" | "unit" | "thisWeek" | null): {
@@ -43,9 +44,7 @@ export function PrintPage() {
           blob={null}
           disabled
         />
-        <p className="px-5 py-10 text-[14.5px] text-[var(--ink-soft)]">
-          Making your PDF…
-        </p>
+        <PageLoading embedded label="Making your PDF…" />
       </div>
     );
   }

@@ -46,6 +46,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | DiscussionMessageAttachment | `discussion_message_attachments` | **P1** — file / material / url on a message |
 | DiscussionRead | `discussion_reads` | **P1** — per-user last read (unread badge) |
 | Notification | `notifications` | **P1** — per-user Activity item; ack via `read_at` |
+| Feedback | `feedback` | Signed-in product notes; identity copied from the session |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates + published lesson plans (Sunday–Saturday). |
 | Page / Block / Quiz / Form | `blocks` (quiz is a Lexical node on a page) | Material **kind** page\|link\|file; blocks on pages only; **no** quiz table |
 
@@ -71,7 +72,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | Phase | Entities in focus |
 |-------|-------------------|
 | **P0** | Organization, User, Membership, **AdminInvite**, **AdminInviteStudents**, **StudentProfile**, **Class**, **ClassMember**, **ClassLeader**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **LessonPlan**, **LessonPlanDay**, **LessonPlanDayMaterial**, **Announcement**, **AnnouncementRead**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
-| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification** |
+| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification**, **Feedback** |
 | **P2** | Cross-org Family management, StudentProfile.user_id, Quiz online, Submission, **ParentPayments** (orgs collect from parents) |
 
 ---
@@ -900,6 +901,27 @@ Per-user **Activity** row. Written by a trigger on `discussion_messages` insert 
 
 **Realtime:** publish `notifications`. RLS still applies to change payloads.
 
+### Feedback
+
+Signed-in **Send feedback** notes. The SPA inserts a row; Edge Function `send-product-feedback` emails `hi@coursewright.com`. Not a support ticket queue in the product UI.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| user_id | uuid | FK → User (`profiles`) — author |
+| organization_id | bigint | nullable FK → Organization (when submitted from org chrome) |
+| name | text | Copied from profile at submit |
+| email | text | Copied from profile/session |
+| org_name | text | nullable snapshot |
+| org_slug | text | nullable snapshot |
+| role | text | nullable snapshot of membership role label |
+| page_path | text | path when they opened the form |
+| message | text | required, max 8000 |
+| user_agent | text | optional |
+| created_at | timestamptz | |
+
+**Who can insert:** `user_id = auth.uid()`; `organization_id` null or an org they belong to. **SELECT** own rows. No client update/delete.
+
 **P2:** parent-pay / tuition — stub only.
 
 ---
@@ -945,6 +967,7 @@ DiscussionMessage ──< DiscussionMessageAttachment >── File | Material | 
 DiscussionMessage ──< DiscussionMessageMention >── User
 Discussion ──< DiscussionRead >── User
 Organization ──< Notification >── User
+User ──< Feedback >── Organization?
 ```
 
 **Open:** Course ↔ Class link (enroll class, enroll individuals, or both).

@@ -6,6 +6,7 @@ Framework and client **details**. Keep quiet — domains scream.
 
 - Supabase browser client, storage helpers
 - PostHog analytics client
+- PWA service-worker registration (production)
 - TanStack Query client
 - Tiny shared utils (no business rules)
 

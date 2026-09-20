@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { coursePath, coursesPath } from "@/courses/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
@@ -21,9 +22,7 @@ export function CourseRosterPage() {
 
   if (roster.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading roster…</p>
-      </div>
+      <PageLoading label="Loading roster…" />
     );
   }
 

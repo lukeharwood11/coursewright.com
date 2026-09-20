@@ -66,6 +66,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | Page | URL | Notes |
 |------|-----|-------|
 | [ACCOUNT_SETTINGS](./pages/ACCOUNT_SETTINGS.md) | `/my/settings` | Cross-org |
+| [FEEDBACK](./pages/FEEDBACK.md) | `/my/feedback` · `/my/<org-slug>/feedback` | Profile menu **Send feedback**; org/name/email filled in |
 
 ---
 

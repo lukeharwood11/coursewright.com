@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PageFormActions } from "@/ui/PageFormActions";
+import { PageLoading } from "@/ui/PageLoading";
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { coursePath } from "@/courses/model/paths";
 import {
@@ -23,9 +24,7 @@ export function LessonPlanEditPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading…</p>
-      </div>
+      <PageLoading label="Loading…" />
     );
   }
 

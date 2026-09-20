@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MegaphoneIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
+import { PageLoading } from "@/ui/PageLoading";
 import { ButtonLink } from "@/ui/Button";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { newAnnouncementPath } from "@/announcements/model/paths";
@@ -26,9 +27,7 @@ export function StudentProfilePage() {
 
   if (profile.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading student…</p>
-      </div>
+      <PageLoading label="Loading student…" />
     );
   }
 

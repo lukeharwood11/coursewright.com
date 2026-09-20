@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PlusIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { BatchCreateStudentsForm } from "@/roster/student-profile/components/BatchCreateStudentsForm";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
@@ -25,7 +26,7 @@ export function OrgRosterPage() {
       </h1>
 
       {roster.loading ? (
-        <p className="mt-6 text-[14px] text-[var(--ink-soft)]">Loading roster…</p>
+        <PageLoading embedded label="Loading roster…" />
       ) : null}
 
       {roster.error ? (

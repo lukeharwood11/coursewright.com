@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PageFormActions } from "@/ui/PageFormActions";
+import { PageLoading } from "@/ui/PageLoading";
 import { announcementsPath } from "@/announcements/model/paths";
 import { AnnouncementFormFields } from "./components/AnnouncementFormFields";
 import {
@@ -21,9 +22,7 @@ export function AnnouncementEditPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading…</p>
-      </div>
+      <PageLoading label="Loading…" />
     );
   }
 

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
 import { CourseCard } from "./components/CourseCard";
 import { CourseListFilters } from "./components/CourseListFilters";
 import { CourseListPagination } from "./components/CourseListPagination";
@@ -68,7 +69,7 @@ export function CourseListPage() {
       ) : null}
 
       {list.loading ? (
-        <p className="mt-6 text-[14px] text-[var(--ink-soft)]">Loading courses…</p>
+        <PageLoading embedded label="Loading courses…" />
       ) : null}
 
       {list.error ? (

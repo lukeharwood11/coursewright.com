@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MegaphoneIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
+import { PageLoading } from "@/ui/PageLoading";
 import { ButtonLink } from "@/ui/Button";
 import {
   announcementAudienceLabel,
@@ -33,9 +34,7 @@ export function AnnouncementsPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading announcements…</p>
-      </div>
+      <PageLoading label="Loading announcements…" />
     );
   }
 

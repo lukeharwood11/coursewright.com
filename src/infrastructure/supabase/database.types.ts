@@ -1019,6 +1019,66 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+          message: string
+          name: string
+          org_name: string | null
+          org_slug: string | null
+          organization_id: number | null
+          page_path: string | null
+          role: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: number
+          message: string
+          name: string
+          org_name?: string | null
+          org_slug?: string | null
+          organization_id?: number | null
+          page_path?: string | null
+          role?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: number
+          message?: string
+          name?: string
+          org_name?: string | null
+          org_slug?: string | null
+          organization_id?: number | null
+          page_path?: string | null
+          role?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       file_versions: {
         Row: {
           change_type: string

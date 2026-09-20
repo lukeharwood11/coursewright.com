@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { PencilSquareIcon, PrinterIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import { Badge } from "@/ui/Badge";
+import { PageLoading } from "@/ui/PageLoading";
 import { Button, ButtonLink } from "@/ui/Button";
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { formatIsoDate } from "@/courses/model/dates";
@@ -38,9 +39,7 @@ export function MaterialPage() {
 
   if (page.loading) {
     return (
-      <div className="px-5 py-8 md:px-8">
-        <p className="text-[14px] text-[var(--ink-soft)]">Loading material…</p>
-      </div>
+      <PageLoading label="Loading material…" />
     );
   }
 
@@ -299,7 +298,7 @@ function MaterialBody({
 
   return (
     <Suspense
-      fallback={<p className="text-[14px] text-[var(--ink-soft)]">Loading page…</p>}
+      fallback={<PageLoading embedded label="Loading page…" />}
     >
       <PageContentView
         blocks={page.blocks}

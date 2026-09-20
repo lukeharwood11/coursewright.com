@@ -4,9 +4,11 @@ import {
   ArrowRightStartOnRectangleIcon,
   ArrowsRightLeftIcon,
   BuildingOffice2Icon,
+  ChatBubbleLeftEllipsisIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import { signOut } from "@/auth/api/session";
+import { feedbackPath } from "@/feedback/model/paths";
 import { AnchoredPopup } from "@/ui/AnchoredPopup";
 import { Avatar } from "@/ui/Avatar";
 import { Badge } from "@/ui/Badge";
@@ -105,6 +107,15 @@ export function AccountMenu({
             >
               <Cog6ToothIcon className="h-4 w-4 shrink-0" aria-hidden />
               Settings
+            </Link>
+            <Link
+              role="menuitem"
+              to={feedbackPath(orgSlug)}
+              className={itemClassName}
+              onClick={() => setOpen(false)}
+            >
+              <ChatBubbleLeftEllipsisIcon className="h-4 w-4 shrink-0" aria-hidden />
+              Send feedback
             </Link>
             <button
               type="button"

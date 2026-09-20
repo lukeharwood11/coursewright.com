@@ -76,6 +76,36 @@ body {
   box-shadow: var(--shadow) !important;
 }
 
+.cw-loading-mark {
+  animation: cw-loading-breathe 1.8s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.cw-loading-mark > span {
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--amber) 55%, transparent);
+  animation: cw-loading-ring 1.8s ease-in-out infinite;
+}
+
+@keyframes cw-loading-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.05);
+  }
+}
+
+@keyframes cw-loading-ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--amber) 45%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--amber) 0%, transparent);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
