@@ -39,13 +39,15 @@ if [[ -z "$DIST_ID" ]]; then
 fi
 
 aws s3 sync "${DIST_DIR}/" "s3://${BUCKET}" --delete \
-  --exclude "privacy" --exclude "terms" --exclude "cookies"
+  --exclude "privacy" --exclude "terms" --exclude "cookies" \
+  --exclude "about" --exclude "pricing" --exclude "contact" \
+  --exclude "login" --exclude "signup"
 
-# Extensionless legal HTML (built by vite-seo-assets) must be text/html so
-# verifiers/crawlers that do not run JS still see the policy body at /privacy etc.
-for page in privacy terms cookies; do
+# Extensionless public HTML must be text/html. Soft-404 → index.html made
+# /login identical to /, which Google OAuth flags as “homepage behind login.”
+for page in privacy terms cookies about pricing contact login signup; do
   if [[ ! -f "${DIST_DIR}/${page}" ]]; then
-    red "Missing ${DIST_DIR}/${page} — rebuild the SPA (legal prerender)."
+    red "Missing ${DIST_DIR}/${page} — rebuild the SPA (public prerender)."
     exit 1
   fi
   aws s3 cp "${DIST_DIR}/${page}" "s3://${BUCKET}/${page}" \
