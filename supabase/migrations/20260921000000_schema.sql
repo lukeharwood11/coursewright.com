@@ -560,12 +560,20 @@ security definer
 set search_path = ''
 as $$
 begin
-  if (select auth.uid()) is null then
-    return new;
+  -- Instructors who create a course teach it. Owners/admins assign teachers
+  -- manually (they already see every course via is_org_admin).
+  if exists (
+    select 1
+    from public.memberships m
+    where m.organization_id = new.organization_id
+      and m.user_id = (select auth.uid())
+      and m.role = 'instructor'
+      and m.status = 'active'
+  ) then
+    insert into public.course_instructors (course_id, user_id)
+    values (new.id, (select auth.uid()))
+    on conflict (course_id, user_id) do nothing;
   end if;
-  insert into public.course_instructors (course_id, user_id)
-  values (new.id, (select auth.uid()))
-  on conflict (course_id, user_id) do nothing;
   return new;
 end;
 $$;

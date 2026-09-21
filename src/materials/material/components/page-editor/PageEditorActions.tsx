@@ -36,6 +36,7 @@ import {
   normalizeHttpUrl,
   type PageBlockType,
 } from "@/materials/model/pageEditor";
+import { AudioSnippetRecorder } from "../AudioSnippetRecorder";
 import { $createFileNode } from "../FileNode";
 import { usePageEditorMedia } from "../PageEditorMediaContext";
 import { $createQuizNode } from "../QuizNode";
@@ -43,7 +44,7 @@ import { $createVideoNode } from "../VideoNode";
 import { insertDecoratorBlock } from "./insertBlock";
 import { EditorDialog, FieldLabel } from "./toolbarUi";
 
-type DialogKind = "table" | "link" | "video" | null;
+type DialogKind = "table" | "link" | "video" | "audio" | null;
 
 /** Which insert tools appear in the toolbar / slash menu. */
 export type PageEditorFeatures = {
@@ -66,10 +67,11 @@ type PageEditorActions = {
   insertDivider: () => void;
   insertTable: (rows: number, columns: number) => void;
   attachFile: () => void;
-  uploadAndInsertFile: (file: File) => Promise<void>;
+  uploadAndInsertFile: (file: File) => Promise<boolean>;
   openTableDialog: () => void;
   openLinkDialog: (initialUrl?: string) => void;
   openVideoDialog: () => void;
+  openAudioDialog: () => void;
 };
 
 const PageEditorActionsContext = createContext<PageEditorActions | null>(null);
@@ -98,6 +100,7 @@ export function PageEditorActionsProvider({
   const [tableColumns, setTableColumns] = useState(String(TABLE_DEFAULT_COLUMNS));
   const [urlValue, setUrlValue] = useState("");
   const [linkCanRemove, setLinkCanRemove] = useState(false);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadingFilename, setUploadingFilename] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -109,6 +112,8 @@ export function PageEditorActionsProvider({
 
   const closeDialog = useCallback(() => {
     setDialog(null);
+    setAudioFile(null);
+    setUploadError(null);
     editor.focus();
   }, [editor]);
 
@@ -144,8 +149,8 @@ export function PageEditorActionsProvider({
   }, []);
 
   const uploadAndInsertFile = useCallback(
-    async (file: File) => {
-      if (!media || uploadingRef.current) return;
+    async (file: File): Promise<boolean> => {
+      if (!media || uploadingRef.current) return false;
       uploadingRef.current = true;
       setUploading(true);
       setUploadingFilename(file.name);
@@ -165,10 +170,12 @@ export function PageEditorActionsProvider({
             }),
           );
         });
+        return true;
       } catch (caught) {
         setUploadError(
           caught instanceof Error ? caught.message : "Couldn’t attach that file.",
         );
+        return false;
       } finally {
         uploadingRef.current = false;
         setUploading(false);
@@ -196,6 +203,13 @@ export function PageEditorActionsProvider({
     setDialog("video");
   }, []);
 
+  const openAudioDialog = useCallback(() => {
+    if (!media || uploadingRef.current) return;
+    setAudioFile(null);
+    setUploadError(null);
+    setDialog("audio");
+  }, [media]);
+
   const tableSize = parseTableDimensions(tableRows, tableColumns);
   const normalizedUrl = normalizeHttpUrl(urlValue);
 
@@ -215,6 +229,7 @@ export function PageEditorActionsProvider({
       openTableDialog,
       openLinkDialog,
       openVideoDialog,
+      openAudioDialog,
     }),
     [
       attachFile,
@@ -223,6 +238,7 @@ export function PageEditorActionsProvider({
       insertQuiz,
       insertTable,
       media,
+      openAudioDialog,
       openLinkDialog,
       openTableDialog,
       openVideoDialog,
@@ -358,6 +374,51 @@ export function PageEditorActionsProvider({
             }}
           />
         </FieldLabel>
+      </EditorDialog>
+      <EditorDialog
+        open={dialog === "audio"}
+        title="Insert audio"
+        confirmLabel={uploading ? "Adding…" : "Add"}
+        confirmDisabled={audioFile == null || uploading}
+        wide
+        onClose={() => {
+          if (uploading) return;
+          closeDialog();
+        }}
+        onConfirm={() => {
+          if (!audioFile || uploading) return;
+          void (async () => {
+            const ok = await uploadAndInsertFile(audioFile);
+            if (ok) closeDialog();
+          })();
+        }}
+      >
+        <div className="flex flex-col gap-3">
+          <FieldLabel label="Audio file">
+            <input
+              type="file"
+              accept="audio/*"
+              className="block w-full text-[13.5px] text-[var(--ink-soft)]"
+              onChange={(event) => {
+                setAudioFile(event.target.files?.[0] ?? null);
+                setUploadError(null);
+              }}
+            />
+            {audioFile ? (
+              <p className="mt-1 text-[12px] text-[var(--ink-soft)]">{audioFile.name}</p>
+            ) : null}
+            <p className="mt-1 text-[12px] text-[var(--ink-faint)]">
+              Audio: MP3 or M4A works best on phones. You can also record a clip
+              below.
+            </p>
+          </FieldLabel>
+          <AudioSnippetRecorder file={audioFile} onFile={setAudioFile} />
+          {uploadError ? (
+            <p className="text-[13px] text-[var(--amber-deep)]" role="alert">
+              {uploadError}
+            </p>
+          ) : null}
+        </div>
       </EditorDialog>
     </PageEditorActionsContext.Provider>
   );

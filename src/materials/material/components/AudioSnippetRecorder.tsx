@@ -14,7 +14,7 @@ type Props = {
 };
 
 export function AudioSnippetRecorder({ file, onFile }: Props) {
-  const recorder = useAudioSnippetRecorder(onFile);
+  const recorder = useAudioSnippetRecorder(file, onFile);
   const previewUrl =
     file && file.type.startsWith("audio/") ? recorder.previewUrl : null;
 

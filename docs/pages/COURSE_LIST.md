@@ -16,7 +16,7 @@ Browse and create **course instances** (runnable offerings with optional dates a
 
 - Requires org membership with access to courses (owners/admins: all courses; instructors: courses they teach, plus courses they parent in as read-only).
 - Lists course instances; open row → course builder home.
-- Create course **from scratch** or **from another course** (copies units/materials; independent — no live sync). New courses start **unpublished**. **Templates are P1** — not offered here in P0.
+- Create course **from scratch** or **from another course** (copies units/materials; independent — no live sync). New courses start **unpublished**. Instructors who create a course are added as its teacher automatically; owners/admins assign teachers manually. **Templates are P1** — not offered here in P0.
 - Supports findability on this page: text search + subject filter by default; grade filters under **Advanced search**; pagination (12 per page). Product-wide advanced search remains separate in staff chrome.
 
 ## Data shown

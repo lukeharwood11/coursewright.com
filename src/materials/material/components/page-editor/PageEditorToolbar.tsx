@@ -29,6 +29,7 @@ import {
   ArrowUturnLeftIcon,
   ArrowUturnRightIcon,
   LinkIcon,
+  MicrophoneIcon,
   MinusCircleIcon,
   MinusIcon,
   PaperClipIcon,
@@ -243,12 +244,20 @@ export function PageEditorToolbar() {
           />
         ) : null}
         {actions.canAttachFile ? (
-          <DropdownItem
-            icon={<PaperClipIcon className="h-4 w-4" />}
-            label={actions.uploading ? "Uploading…" : "File"}
-            hint="MP3/M4A"
-            onClick={actions.attachFile}
-          />
+          <>
+            <DropdownItem
+              icon={<PaperClipIcon className="h-4 w-4" />}
+              label={actions.uploading ? "Uploading…" : "File"}
+              hint="PDF/image"
+              onClick={actions.attachFile}
+            />
+            <DropdownItem
+              icon={<MicrophoneIcon className="h-4 w-4" />}
+              label="Audio"
+              hint="Record"
+              onClick={actions.openAudioDialog}
+            />
+          </>
         ) : null}
         <DropdownItem
           icon={<MinusIcon className="h-4 w-4" />}

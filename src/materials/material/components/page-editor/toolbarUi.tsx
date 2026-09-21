@@ -158,6 +158,7 @@ export function EditorDialog({
   confirmLabel,
   confirmDisabled,
   extraAction,
+  wide,
   onConfirm,
   onClose,
 }: {
@@ -167,6 +168,8 @@ export function EditorDialog({
   confirmLabel: string;
   confirmDisabled?: boolean;
   extraAction?: ReactNode;
+  /** Wider panel for recorder / player chrome. */
+  wide?: boolean;
   onConfirm: () => void;
   onClose: () => void;
 }) {
@@ -202,7 +205,10 @@ export function EditorDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative w-full max-w-sm rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow)]"
+        className={[
+          "relative w-full rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow)]",
+          wide ? "max-w-md" : "max-w-sm",
+        ].join(" ")}
       >
         <h2 id={titleId} className="text-[15.5px] font-extrabold text-[var(--ink)]">
           {title}

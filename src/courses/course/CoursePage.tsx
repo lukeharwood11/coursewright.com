@@ -7,7 +7,6 @@ import { Button } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { useToastOnError } from "@/ui/useToastOnError";
-import { MaterialRow } from "@/materials/material/components/MaterialRow";
 import { CourseHeader } from "./components/CourseHeader";
 import { CourseVisibilityBanner } from "./components/CourseVisibilityBanner";
 import {
@@ -152,38 +151,6 @@ export function CoursePage() {
             canEdit={canEdit}
             isParent={isParent}
           />
-
-          <section className="mt-8">
-            <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">
-              Materials
-            </h2>
-            {topLevelMaterials.length > 0 ? (
-              <ul className="mt-2 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]">
-                {topLevelMaterials.map((material) => (
-                  <MaterialRow
-                    key={material.id}
-                    orgSlug={organization.slug}
-                    courseId={course.id}
-                    unitId={null}
-                    materialId={material.id}
-                    title={material.title}
-                    description={material.description}
-                    kind={material.kind}
-                    scheduledDate={material.scheduledDate}
-                    dueDate={material.dueDate}
-                    importantNow={importantIds.has(material.id)}
-                    visibility={material.visibility}
-                  />
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">
-                {canEdit
-                  ? "Add a unit, then add materials there."
-                  : "Materials in this course live in units."}
-              </p>
-            )}
-          </section>
 
           <section className="mt-8">
             <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Units</h2>

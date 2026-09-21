@@ -42,10 +42,42 @@ as $$
       or private.parent_can_view_course(p_course_id);
 $$;
 
+-- Evaluate staff access without can_view_course(id) / can_manage_course(id):
+-- those re-read public.courses by id, which breaks INSERT … RETURNING (same
+-- bug as discussions_parent_insert_returning). is_course_instructor alone is
+-- also insufficient on RETURNING (after-insert instructor row not visible in
+-- the same command). Staff may see a course when no other instructor exists
+-- (creator / orphan); see private.course_has_other_instructors.
+create or replace function private.course_has_other_instructors(p_course_id bigint)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.course_instructors ci
+    where ci.course_id = p_course_id
+      and ci.user_id is distinct from (select auth.uid())
+  );
+$$;
+
+grant execute on function private.course_has_other_instructors(bigint)
+  to authenticated, service_role;
+
 drop policy if exists courses_select on public.courses;
 create policy courses_select on public.courses
 for select to authenticated
-using ((select private.can_view_course(id)));
+using (
+  (select private.is_org_admin(organization_id))
+  or (select private.is_course_instructor(id))
+  or (select private.parent_can_view_course(id))
+  or (
+    (select private.is_org_staff(organization_id))
+    and not (select private.course_has_other_instructors(id))
+  )
+);
 
 drop policy if exists course_instructors_select on public.course_instructors;
 create policy course_instructors_select on public.course_instructors

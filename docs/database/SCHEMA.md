@@ -245,6 +245,8 @@ Multiple instructors per course (co-teaching). **P0.**
 | user_id | uuid | FK → User (`profiles`) — instructor |
 | unique | (course_id, user_id) | Co-teaching; no extra course-role in P0 |
 
+**On create:** membership role `instructor` is auto-inserted as a teacher for the new course (so they can see and manage it). Org **owner / admin** creators are **not** auto-added — they assign teachers (including themselves) from course settings / roster. Owners/admins already SELECT every course via org admin RLS.
+
 ---
 
 ## File sharing (P0 minimum)
@@ -512,7 +514,7 @@ Leads are notified in **Activity** when someone posts in a discussion for that c
 | status | text | **active** · archived — offering is running vs archived |
 | visibility | text | **unpublished** (owners/admins, and instructors who teach the course) · **published** (those staff, plus enrolled parents; students when that role exists). New courses default unpublished |
 
-**Who can SELECT:** `can_view_course` = `can_manage_course` (org owner/admin, or `course_instructors` for this course) **or** `parent_can_view_course` (linked student enrolled in an **active + published** course). Membership **role need not be `parent`** — an instructor who parents a student still sees that published course, read-only in the app. Instructors do **not** see other instructors’ courses they neither teach nor parent in.
+**Who can SELECT:** org owner/admin (`is_org_admin` on `organization_id`), or `course_instructors` for this course, or `parent_can_view_course` (linked student enrolled in an **active + published** course), or org staff when the course has no other instructors (covers create `INSERT … RETURNING` / orphans). Same intent as `can_view_course`, but the `courses` SELECT policy must not re-read `courses` by id. Membership **role need not be `parent`** — an instructor who parents a student still sees that published course, read-only in the app. Instructors do **not** see other instructors’ courses they neither teach nor parent in.
 
 **Grade levels:** `text[]` of scheme values (exact grades and/or range labels). Same model on `CourseTemplate`.
 

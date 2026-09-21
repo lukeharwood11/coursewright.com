@@ -8,6 +8,7 @@ import {
 import type { TextNode } from "lexical";
 import {
   LinkIcon,
+  MicrophoneIcon,
   MinusIcon,
   PaperClipIcon,
   QuestionMarkCircleIcon,
@@ -82,11 +83,20 @@ export function SlashCommandPlugin() {
     }
     if (actions.canAttachFile) {
       const fileIndex = actions.features.quiz ? 4 : 3;
-      extra.splice(fileIndex, 0, {
-        id: "file",
-        title: "File",
-        keywords: ["attach", "upload", "image"],
-      });
+      extra.splice(
+        fileIndex,
+        0,
+        {
+          id: "file",
+          title: "File",
+          keywords: ["attach", "upload", "image", "pdf"],
+        },
+        {
+          id: "audio",
+          title: "Audio",
+          keywords: ["audio", "mp3", "m4a", "record", "microphone", "clip"],
+        },
+      );
     }
     return [...blocks, ...extra];
   }, [actions.canAttachFile, actions.features.quiz]);
@@ -212,9 +222,18 @@ function toSlashOption(
     return new SlashOption({
       id,
       title: "File",
-      keywords: ["file", "audio", "mp3", "m4a", "pdf", "attach"],
+      keywords: ["file", "pdf", "attach"],
       glyph: <PaperClipIcon className="h-4 w-4" />,
       onSelect: actions.attachFile,
+    });
+  }
+  if (id === "audio") {
+    return new SlashOption({
+      id,
+      title: "Audio",
+      keywords: ["audio", "mp3", "m4a", "record"],
+      glyph: <MicrophoneIcon className="h-4 w-4" />,
+      onSelect: actions.openAudioDialog,
     });
   }
   if (id === "divider") {

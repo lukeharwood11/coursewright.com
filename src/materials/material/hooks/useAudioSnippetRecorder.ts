@@ -5,7 +5,14 @@ import {
   snippetReachedMax,
 } from "@/materials/model/audioSnippet";
 
-export function useAudioSnippetRecorder(onFile: (file: File | null) => void) {
+function isAudioFile(file: File | null): file is File {
+  return file != null && file.type.startsWith("audio/");
+}
+
+export function useAudioSnippetRecorder(
+  file: File | null,
+  onFile: (file: File | null) => void,
+) {
   const [status, setStatus] = useState<"idle" | "starting" | "recording">("idle");
   const [elapsedMs, setElapsedMs] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -16,6 +23,25 @@ export function useAudioSnippetRecorder(onFile: (file: File | null) => void) {
   const startedAtRef = useRef(0);
   const tickRef = useRef<number | null>(null);
   const previewUrlRef = useRef<string | null>(null);
+  const previewForFileRef = useRef<File | null>(null);
+
+  function replacePreview(next: string | null, forFile: File | null = null) {
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    previewUrlRef.current = next;
+    previewForFileRef.current = forFile;
+    setPreviewUrl(next);
+  }
+
+  // Keep a playable preview for whatever audio File the parent still holds
+  // (e.g. after remounting when switching material kinds).
+  useEffect(() => {
+    if (!isAudioFile(file)) {
+      if (previewForFileRef.current != null) replacePreview(null);
+      return;
+    }
+    if (previewForFileRef.current === file && previewUrlRef.current) return;
+    replacePreview(URL.createObjectURL(file), file);
+  }, [file]);
 
   useEffect(() => {
     return () => {
@@ -25,19 +51,13 @@ export function useAudioSnippetRecorder(onFile: (file: File | null) => void) {
     };
   }, []);
 
-  function replacePreview(next: string | null) {
-    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
-    previewUrlRef.current = next;
-    setPreviewUrl(next);
-  }
-
   function finish(blobs: Blob[], mimeType: string) {
     const type = mimeType || blobs[0]?.type || "audio/webm";
-    const file = new File([new Blob(blobs, { type })], audioSnippetFilename(type), {
+    const next = new File([new Blob(blobs, { type })], audioSnippetFilename(type), {
       type,
     });
-    replacePreview(URL.createObjectURL(file));
-    onFile(file);
+    replacePreview(URL.createObjectURL(next), next);
+    onFile(next);
   }
 
   async function start() {

@@ -101,12 +101,16 @@ Deno.serve(async (request) => {
       .eq("id", created.id);
     if (colorError) throw colorError;
 
-    const { error: instructorError } = await db
-      .from("course_instructors")
-      .insert({ course_id: created.id, user_id: user.id })
-      .select("id");
-    if (instructorError && !instructorError.message.toLowerCase().includes("duplicate")) {
-      throw instructorError;
+    // Service-role insert skips private.on_course_created (no auth.uid). Mirror
+    // that trigger: instructors teach what they create; owners/admins assign.
+    if (membership.role === "instructor") {
+      const { error: instructorError } = await db
+        .from("course_instructors")
+        .insert({ course_id: created.id, user_id: user.id })
+        .select("id");
+      if (instructorError && !instructorError.message.toLowerCase().includes("duplicate")) {
+        throw instructorError;
+      }
     }
 
     const { data: units, error: unitsError } = await db
