@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import type { SerializedEditorState } from "lexical";
 import { formatDiscussionMessageTime } from "@/discussions/model/time";
@@ -7,9 +6,9 @@ import {
   discussionMessageElementId,
   discussionMessagePath,
 } from "@/discussions/model/paths";
-import { userProfilePath } from "@/organizations/model/paths";
 import type { DiscussionMessageRecord } from "@/discussions/databridge/discussions";
 import type { MentionPerson } from "@/discussions/model/mentions";
+import { Avatar } from "@/ui/Avatar";
 import { DiscussionAttachments } from "./DiscussionAttachments";
 import { DiscussionLexicalEditor } from "./DiscussionLexicalEditor";
 import { MessageActionsMenu } from "./MessageActionsMenu";
@@ -25,6 +24,7 @@ export function DiscussionMessageItem({
   discussionId,
   message,
   isOwn,
+  showGroupMeta,
   canEdit,
   canQuote,
   canRemove,
@@ -44,6 +44,7 @@ export function DiscussionMessageItem({
   onSaveEdit,
   onQuote,
   onRemove,
+  onOpenProfile,
   mentionPeople,
   mentionExcludeUserId,
   mentionsLoading,
@@ -52,6 +53,8 @@ export function DiscussionMessageItem({
   discussionId: number;
   message: DiscussionMessageRecord;
   isOwn: boolean;
+  /** Name + time above the first bubble in a consecutive run from this author. */
+  showGroupMeta: boolean;
   canEdit: boolean;
   canQuote: boolean;
   canRemove: boolean;
@@ -71,6 +74,7 @@ export function DiscussionMessageItem({
   onSaveEdit: () => void;
   onQuote: () => void;
   onRemove: () => void;
+  onOpenProfile: (userId: string) => void;
   mentionPeople: MentionPerson[];
   mentionExcludeUserId: string;
   mentionsLoading: boolean;
@@ -79,6 +83,14 @@ export function DiscussionMessageItem({
   const body = parseDiscussionBody(message.body);
   const elementId = discussionMessageElementId(message.id);
   const emptyAttachments: PendingAttachment[] = [];
+  const timeLabel = showGroupMeta
+    ? formatDiscussionMessageTime({
+        createdAt: message.createdAt,
+        updatedAt: message.updatedAt,
+        deletedAt: message.deletedAt,
+      })
+    : "";
+  const showAuthor = showGroupMeta && !isOwn;
 
   async function copyLink() {
     const path = discussionMessagePath(orgSlug, discussionId, message.id);
@@ -94,64 +106,85 @@ export function DiscussionMessageItem({
       id={elementId}
       className={
         isOwn
-          ? "flex scroll-mt-4 justify-end"
-          : "flex scroll-mt-4 justify-start"
+          ? "flex scroll-mt-4 flex-col items-end"
+          : "flex scroll-mt-4 flex-col items-start"
       }
     >
-      <article
-        className={
-          isOwn
-            ? "w-full max-w-[85%] rounded-[10px] border border-[var(--line-soft)] bg-[var(--green-tint)] p-4 shadow-[var(--shadow)]"
-            : "w-full max-w-[85%] rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow)]"
-        }
-      >
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <p className="text-[13.5px] font-extrabold text-[var(--ink)]">
-            <Link
-              to={userProfilePath(orgSlug, message.authorId)}
-              className="hover:text-[var(--green-deep)]"
-            >
-              {message.authorName}
-            </Link>
-            <span className="ml-2 font-semibold text-[var(--ink-faint)]">
-              {formatDiscussionMessageTime({
-                createdAt: message.createdAt,
-                updatedAt: message.updatedAt,
-                deletedAt: message.deletedAt,
-              })}
-            </span>
-          </p>
-          <div className="flex items-center gap-0.5">
-            {!removed && !isEditing ? (
-              <MessageActionsMenu
-                canEdit={canEdit}
-                canQuote={canQuote}
-                onEdit={onStartEdit}
-                onQuote={onQuote}
-                onCopyLink={() => {
-                  void copyLink();
-                }}
-              />
-            ) : null}
-            {canRemove && !removed && !isEditing ? (
+      {showGroupMeta ? (
+        <div
+          className={
+            isOwn
+              ? "mb-0.5 flex w-fit max-w-[min(85%,36rem)] flex-wrap items-center justify-end gap-x-1.5 px-1"
+              : "mb-0.5 flex w-fit max-w-[min(85%,36rem)] flex-wrap items-center gap-x-1.5 px-1"
+          }
+        >
+          {showAuthor ? (
+            <>
               <button
                 type="button"
-                className="rounded-[6px] p-1.5 text-[var(--ink-faint)] transition-colors hover:bg-[var(--amber-tint)] hover:text-[var(--amber-deep)]"
+                className="shrink-0 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+                aria-label={`View ${message.authorName}'s profile`}
+                onClick={() => onOpenProfile(message.authorId)}
+              >
+                <Avatar name={message.authorName} size={24} />
+              </button>
+              <button
+                type="button"
+                className="text-[12px] font-bold text-[var(--ink)] hover:text-[var(--green-deep)]"
+                onClick={() => onOpenProfile(message.authorId)}
+              >
+                {message.authorName}
+              </button>
+            </>
+          ) : null}
+          {timeLabel ? (
+            <span className="text-[11.5px] font-semibold text-[var(--ink-faint)]">
+              {timeLabel}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      <article
+        className={[
+          "relative max-w-[min(85%,36rem)] rounded-[8px] border border-[var(--line-soft)] px-3 py-2",
+          isEditing ? "w-full" : "w-fit",
+          isOwn
+            ? "bg-[var(--green-tint)]"
+            : "bg-[var(--surface)]",
+        ].join(" ")}
+      >
+        {!removed && !isEditing && (canEdit || canQuote || canRemove) ? (
+          <div className="absolute right-1 top-1 flex items-center gap-0.5">
+            <MessageActionsMenu
+              canEdit={canEdit}
+              canQuote={canQuote}
+              onEdit={onStartEdit}
+              onQuote={onQuote}
+              onCopyLink={() => {
+                void copyLink();
+              }}
+            />
+            {canRemove ? (
+              <button
+                type="button"
+                className="rounded-[6px] p-1 text-[var(--ink-faint)] transition-colors hover:bg-[var(--amber-tint)] hover:text-[var(--amber-deep)]"
                 aria-label="Remove message"
                 title="Remove"
                 onClick={onRemove}
               >
-                <TrashIcon className="h-4 w-4" aria-hidden />
+                <TrashIcon className="h-3.5 w-3.5" aria-hidden />
               </button>
             ) : null}
           </div>
-        </div>
+        ) : null}
+
         {removed ? (
-          <p className="mt-2 text-[14px] italic text-[var(--ink-faint)]">
+          <p className="pr-8 text-[13.5px] italic text-[var(--ink-faint)]">
             This message was removed.
           </p>
         ) : isEditing ? (
-          <div className="mt-2">
+          <div>
             <MessageComposer
               variant="plain"
               showAttachmentControls={false}
@@ -185,25 +218,23 @@ export function DiscussionMessageItem({
             ) : null}
           </div>
         ) : (
-          <>
+          <div className="pr-8">
             {body.format === "plain" && body.text.trim() ? (
               <MentionedPlainText text={body.text} people={mentionPeople} />
             ) : null}
             {body.format === "lexical" ? (
-              <div className="mt-2">
-                <DiscussionLexicalEditor
-                  editorKey={`msg-${message.id}`}
-                  initialLexical={body.lexical}
-                  editable={false}
-                  placeholder=""
-                />
-              </div>
+              <DiscussionLexicalEditor
+                editorKey={`msg-${message.id}`}
+                initialLexical={body.lexical}
+                editable={false}
+                placeholder=""
+              />
             ) : null}
             <DiscussionAttachments
               orgSlug={orgSlug}
               attachments={message.attachments}
             />
-          </>
+          </div>
         )}
       </article>
     </div>

@@ -1,21 +1,45 @@
 import { useId, useRef, useState } from "react";
 import {
+  ArrowUturnLeftIcon,
+  CheckCircleIcon,
   EllipsisHorizontalIcon,
+  TrashIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { AnchoredPopup } from "@/ui/AnchoredPopup";
+import { UserCard } from "@/organizations/user-card/UserCard";
 
 const itemClassName =
   "flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[13px] font-bold text-[var(--ink)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:bg-[var(--green-tint)] focus-visible:outline-none";
 
 export function DiscussionThreadMenu({
+  orgSlug,
+  starterUserId,
+  starterName,
+  startedLabel,
   onMembers,
+  answered,
+  onMarkAnswered,
+  markAnsweredPending = false,
+  onDelete,
 }: {
+  orgSlug: string;
+  starterUserId: string;
+  starterName: string;
+  /** e.g. "Started Mar 5" — plain note, not a link. */
+  startedLabel: string;
   onMembers: () => void;
+  /** When set, Mark as answered/open appears in the menu on small screens. */
+  answered?: boolean;
+  onMarkAnswered?: () => void;
+  markAnsweredPending?: boolean;
+  /** When set, Delete appears in the menu on small screens. */
+  onDelete?: () => void;
 }) {
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
+  const showMobileActions = onMarkAnswered != null || onDelete != null;
 
   return (
     <>
@@ -38,8 +62,63 @@ export function DiscussionThreadMenu({
         anchorRef={buttonRef}
         id={menuId}
         label="Discussion actions"
-        className="min-w-[11rem]"
+        className="min-w-[15rem]"
       >
+        <div className="border-b border-[var(--line-soft)] px-3.5 py-2.5">
+          <p className="text-[11.5px] font-bold text-[var(--ink-faint)]">
+            Started by
+          </p>
+          <div className="mt-1.5">
+            <UserCard
+              orgSlug={orgSlug}
+              userId={starterUserId}
+              name={starterName}
+              compact
+            />
+          </div>
+          {startedLabel ? (
+            <p className="mt-1.5 text-[12px] font-semibold text-[var(--ink-faint)]">
+              {startedLabel}
+            </p>
+          ) : null}
+        </div>
+        {showMobileActions ? (
+          <div className="border-b border-[var(--line-soft)] py-1 md:hidden">
+            {onMarkAnswered ? (
+              <button
+                type="button"
+                role="menuitem"
+                className={itemClassName}
+                disabled={markAnsweredPending}
+                onClick={() => {
+                  setOpen(false);
+                  onMarkAnswered();
+                }}
+              >
+                {answered ? (
+                  <ArrowUturnLeftIcon className="h-4 w-4 shrink-0" aria-hidden />
+                ) : (
+                  <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden />
+                )}
+                {answered ? "Mark as open" : "Mark as answered"}
+              </button>
+            ) : null}
+            {onDelete ? (
+              <button
+                type="button"
+                role="menuitem"
+                className={itemClassName}
+                onClick={() => {
+                  setOpen(false);
+                  onDelete();
+                }}
+              >
+                <TrashIcon className="h-4 w-4 shrink-0" aria-hidden />
+                Delete
+              </button>
+            ) : null}
+          </div>
+        ) : null}
         <div className="py-1">
           <button
             type="button"

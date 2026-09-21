@@ -9,9 +9,10 @@ import {
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export function useUserProfile() {
+/** Load an org-visible person profile. Pass `userId` for modals; omit to read the route param. */
+export function useUserProfile(userIdOverride?: string | null) {
   const { userId: userIdParam } = useParams();
-  const userId = userIdParam ?? "";
+  const userId = userIdOverride ?? userIdParam ?? "";
   const { organization, role } = useOrgShell();
   const validId = UUID_RE.test(userId);
 

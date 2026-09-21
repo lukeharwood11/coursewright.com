@@ -6,14 +6,16 @@ export function ProfileLinkList({
   empty,
   items,
   hrefFor,
+  compact = false,
 }: {
   heading: string;
   empty: string;
   items: OrgPersonLink[];
   hrefFor?: (item: OrgPersonLink) => string | null;
+  compact?: boolean;
 }) {
   return (
-    <section className="mt-8">
+    <section className={compact ? "mt-5" : "mt-8"}>
       <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">{heading}</h2>
       {items.length === 0 ? (
         <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">{empty}</p>

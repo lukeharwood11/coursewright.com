@@ -10,7 +10,7 @@ export function MentionedPlainText({
   const parts = splitMentionText(text, people);
   if (parts.length === 0) return null;
   return (
-    <p className="mt-2 whitespace-pre-wrap text-[14.5px] leading-relaxed text-[var(--ink)]">
+    <p className="whitespace-pre-wrap break-words text-[14px] leading-snug text-[var(--ink)]">
       {parts.map((part, index) =>
         part.kind === "mention" ? (
           <span key={`${part.userId}-${index}`} className="cw-mention">

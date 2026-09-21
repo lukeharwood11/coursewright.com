@@ -2,11 +2,9 @@ export function formatDiscussionActivityAt(isoTimestamp: string): string {
   const date = new Date(isoTimestamp);
   if (Number.isNaN(date.getTime())) return "";
   const now = new Date();
-  const sameDay =
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate();
-  if (sameDay) {
+  const ageMs = now.getTime() - date.getTime();
+  const within24Hours = ageMs < 24 * 60 * 60 * 1000;
+  if (within24Hours) {
     return date.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
@@ -15,7 +13,9 @@ export function formatDiscussionActivityAt(isoTimestamp: string): string {
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-    year: "numeric",
+    ...(date.getFullYear() === now.getFullYear()
+      ? {}
+      : { year: "numeric" as const }),
   });
 }
 

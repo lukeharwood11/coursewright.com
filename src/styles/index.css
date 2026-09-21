@@ -298,23 +298,50 @@ body {
 }
 
 .cw-editor-input-discussion {
-  min-height: 5.5rem;
-}
-
-.cw-editor-shell-simple .cw-editor-input-discussion {
+  min-height: calc(1.6em + 22px);
+  max-height: 12rem;
+  overflow-y: auto;
   padding: 11px 13px;
   font-size: 14.5px;
 }
 
-.cw-editor-shell-simple .cw-editor-placeholder {
+.cw-editor-shell-embedded .cw-editor-placeholder {
   top: 11px;
   left: 13px;
+  right: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 14.5px;
 }
 
-.cw-editor-shell-embedded.cw-editor-shell-simple:focus-within {
+.cw-editor-shell-embedded:focus-within {
   border-color: var(--green);
   box-shadow: 0 0 0 3px var(--green-tint);
+}
+
+@media (max-width: 767px) {
+  .cw-editor-input-discussion {
+    font-size: 13px;
+    padding: 10px 12px;
+    min-height: calc(1.5em + 20px);
+  }
+
+  .cw-editor-shell-embedded .cw-editor-placeholder {
+    top: 10px;
+    left: 12px;
+    right: 12px;
+    font-size: 13px;
+  }
+
+  .cw-discussion-composer-bar .cw-editor-shell-embedded {
+    border: none;
+    border-radius: 0;
+  }
+
+  .cw-discussion-composer-bar .cw-editor-shell-embedded:focus-within {
+    box-shadow: none;
+  }
 }
 
 .cw-editor-input-view {

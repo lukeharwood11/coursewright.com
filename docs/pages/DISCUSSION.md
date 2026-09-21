@@ -21,11 +21,12 @@ One two-way **discussion**: title, who it is for, flat posts (plain or Lexical),
 - Load one non-deleted discussion the actor can see (RLS). Missing or removed: plain-language “this discussion isn’t available,” with a way back to [DISCUSSIONS](./DISCUSSIONS.md).
 - Opening the page **marks it read** for the signed-in person (`last_read_at`). Two parents each have their own unread state.
 - Posts in conversation order (oldest first). Flat list — no nested replies. Your posts align right (green tint); other people’s align left.
+- Author rows for other people’s posts show a **profile circle** left of the display name. Clicking the circle (or name) opens a **user profile modal** with the same content as [USER_PROFILE](./USER_PROFILE.md), plus a **View profile** link to the full page. Your own posts omit the author row.
 - **⋯** on a message: **Edit** (own messages — in-place editor + Save; **@mentions** added on save notify in [ACTIVITY](./ACTIVITY.md)), **Quote message** (inserts a Lexical quote into the composer), and **Copy link** (deep link to that message).
 - Composer at the bottom: text field; toolbar with **T** (same Lexical chrome as page materials — icon toolbar, `/`, floating format; no quiz), **file**, and **+** (material or link via modal). Typing **@** opens a picker of people on the thread; choosing a name (click or Enter) replaces the query with a mention pill and notifies them in [ACTIVITY](./ACTIVITY.md). Post stays disabled until there is text and/or at least one attachment. Default composer: **Enter** posts, **Shift+Enter** new line (Enter selects from the @ picker when it is open). Rich text (**T**): **⌘/Ctrl+Enter** posts.
-- **Mark as answered** / **Mark as open** for the person who started the thread, and for staff who can see it. Answered does not lock posting. Both actions sit in the thread toolbar with icons.
-- Thread toolbar **⋯**: **Members** opens a modal listing everyone who can currently see the thread (org staff + parents linked to the audience course or class). Each person is a **user card** that opens [USER_PROFILE](./USER_PROFILE.md).
-- Staff Teacher view: **Delete** the discussion (soft-delete, confirm). A poster may remove their own post; staff may remove any post. Removed posts show “This message was removed.”
+- **Mark as answered** / **Mark as open** for the person who started the thread, and for staff who can see it. Answered does not lock posting. Inline in the thread toolbar from `md` up; under **⋯** on small screens.
+- Thread toolbar **⋯**: **Started by** note (plain label + started date) with a **user card** for the starter (opens [USER_PROFILE](./USER_PROFILE.md)); on small screens also **Mark as answered** / **Mark as open** and **Delete** when allowed; **Members** opens a modal listing everyone who can currently see the thread (org staff + parents linked to the audience course or class). Each person is a **user card** that opens [USER_PROFILE](./USER_PROFILE.md).
+- Staff Teacher view: **Delete** the discussion (soft-delete, confirm) — inline from `md` up; under **⋯** on small screens. A poster may remove their own post; staff may remove any post. Removed posts show “This message was removed.”
 - Attachments: files open/play in place (same players as materials); materials and URLs show as separate link cards with a link icon.
 - While this page is open, **Realtime** inserts new posts, attachments, answered state, and removes without a refresh. If the reader is not at the bottom, do not yank scroll — show a short “New messages” control instead. Live posts also advance `last_read_at` for the person staying on the thread.
 
@@ -43,11 +44,11 @@ No `/edit` route — title and audience are not edited after create in this slic
 
 ## Data shown
 
-- **Title**
+- **Title** (compact, with back control)
 - **Open** / **Answered** badge
 - **Audience** kind + course title or class name
-- **Started by** + started date
-- Posts: author display name, time (with “(edited)” after an edit), optional quote block, plain or rich body, attachments
+- **Started by** (⋯ menu note + starter user card) and started date
+- Posts: author **profile circle** + display name (omitted on your own posts) and time/date only above the first message in a consecutive run from that person — time if within 24 hours, otherwise the date (with “(edited)” after an edit on that first message); optional quote block; plain or rich body; attachments. Bubbles shrink to content width.
 - Unread vs read is shown on the **list**, not as a badge on this page
 
 Writeable on new: audience, one target, title, opening post (body + attachments), **Notify everyone** (staff Teacher view).  
@@ -57,12 +58,12 @@ Writeable on view: new post / quote, edit own post (body + @mentions), answered 
 
 ### View
 
-- Title (display type) + Open/Answered + audience + started by
-- Thread toolbar: **Mark as answered** / **Mark as open** when allowed; **Delete** for staff Teacher view; **⋯** → Members
-- Message list (flat)
+- Compact title with **←** back to discussions; Open/Answered + audience under the title
+- Thread toolbar: **Mark as answered** / **Mark as open** when allowed; **Delete** for staff Teacher view (inline from `md` up; under **⋯** on small screens); **⋯** → Started by (note + user card) + Members
+- Message list (flat) with author profile circles → profile modal
 - Composer (text + toolbar: **T** / file / **+** for material or link modals)
-- Back to discussions
 - Members modal (people with access → [USER_PROFILE](./USER_PROFILE.md))
+- User profile modal (same content as [USER_PROFILE](./USER_PROFILE.md))
 
 ### New
 
@@ -76,6 +77,7 @@ Writeable on view: new post / quote, edit own post (body + @mentions), answered 
 
 - Read and post on the thread (marks read)
 - Quote a message / copy message link / edit own message (⋯ menu)
+- Open an author’s profile modal (profile circle or name)
 - Attach a file, material, or link
 - Mark as answered / open (starter or staff)
 - View members with access (⋯ → Members)
@@ -84,7 +86,7 @@ Writeable on view: new post / quote, edit own post (body + @mentions), answered 
 
 ## Links to
 
-- [USER_PROFILE](./USER_PROFILE.md) — member cards and message authors
+- [USER_PROFILE](./USER_PROFILE.md) — member cards and message author profile modal
 - [DISCUSSIONS](./DISCUSSIONS.md) — list; cancel from new; back from view
 - [COURSE](./COURSE.md) — compose entry from a course (`?audience=course&courseId=`); attached material may return to the course tree
 - [CLASS](./CLASS.md) — compose entry from a class (`?audience=class&classId=`)

@@ -22,7 +22,7 @@ Org-visible directory page for a person with an account: who they are here, what
 - **Courses** lists active courses their linked students are enrolled in (published for families).
 - Opening a course goes to [COURSE](./COURSE.md). Opening a class (staff) goes to [CLASS](./CLASS.md). Families see class names without a staff-only link.
 - Missing person or no membership in this org: plain-language not found.
-- Reached from user cards (discussion members, teachers, collaborators, class leads, discussion authors).
+- Reached from user cards (discussion members, teachers, collaborators, class leads) and from discussion author profile circles / names (modal on the thread; full page elsewhere).
 
 ## Data shown
 

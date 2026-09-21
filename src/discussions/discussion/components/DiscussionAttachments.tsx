@@ -19,7 +19,7 @@ export function DiscussionAttachments({
   );
 
   return (
-    <div className="mt-3 flex flex-col gap-3">
+    <div className="mt-2 flex flex-col gap-2">
       {files.map((attachment) =>
         attachment.file ? (
           <div key={attachment.id}>

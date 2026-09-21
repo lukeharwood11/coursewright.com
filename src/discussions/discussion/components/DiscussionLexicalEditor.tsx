@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -132,6 +132,7 @@ export function DiscussionLexicalEditor({
   mentionExcludeUserId,
   mentionsLoading = false,
   chrome = "full",
+  endSlot,
 }: {
   editorKey: string;
   initialLexical?: SerializedEditorState | null;
@@ -147,6 +148,8 @@ export function DiscussionLexicalEditor({
   mentionsLoading?: boolean;
   /** `simple` is the default composer: no toolbar, Enter posts, @mentions become pills. */
   chrome?: "simple" | "full";
+  /** Actions rendered inside the field, right of the text (T, attach, Post). */
+  endSlot?: ReactNode;
 }) {
   const hasInitial = initialLexical != null;
   const initial = hasInitial ? initialLexical : emptyLexicalState();
@@ -180,20 +183,27 @@ export function DiscussionLexicalEditor({
         {editable ? (
           <PageEditorActionsProvider features={DISCUSSION_EDITOR_FEATURES}>
             {simple ? null : <PageEditorToolbar />}
-            <div className="relative">
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable
-                    className="cw-editor-input cw-editor-input-discussion"
-                    aria-placeholder={placeholder}
-                    placeholder={
-                      <p className="cw-editor-placeholder">{placeholder}</p>
-                    }
-                  />
-                }
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              {simple ? null : <FloatingFormatToolbar />}
+            <div className={endSlot ? "flex items-end gap-0.5" : "relative"}>
+              <div className={endSlot ? "relative min-w-0 flex-1" : undefined}>
+                <RichTextPlugin
+                  contentEditable={
+                    <ContentEditable
+                      className="cw-editor-input cw-editor-input-discussion"
+                      aria-placeholder={placeholder}
+                      placeholder={
+                        <p className="cw-editor-placeholder">{placeholder}</p>
+                      }
+                    />
+                  }
+                  ErrorBoundary={LexicalErrorBoundary}
+                />
+                {simple ? null : <FloatingFormatToolbar />}
+              </div>
+              {endSlot ? (
+                <div className="flex shrink-0 items-center gap-0.5 self-end p-1.5">
+                  {endSlot}
+                </div>
+              ) : null}
             </div>
             {simple ? null : <SlashCommandPlugin />}
             <MentionTypeaheadPlugin

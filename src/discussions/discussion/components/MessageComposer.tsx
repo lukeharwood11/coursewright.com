@@ -1,8 +1,9 @@
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { SerializedEditorState } from "lexical";
 import {
   BookOpenIcon,
   LinkIcon,
+  PaperAirplaneIcon,
   PaperClipIcon,
   PlusIcon,
   XMarkIcon,
@@ -23,11 +24,22 @@ export type PendingAttachment =
 export type ComposerMode = "plain" | "lexical";
 
 const iconBtn = [
-  "inline-flex h-9 w-9 items-center justify-center rounded-[6px] border border-[var(--line)] bg-[var(--surface)] text-[var(--ink-soft)]",
-  "transition-colors hover:border-[var(--green)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]",
+  "inline-flex h-8 w-8 items-center justify-center rounded-[6px] text-[var(--ink-soft)]",
+  "transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]",
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]",
-  "aria-pressed:border-[var(--green)] aria-pressed:bg-[var(--green-tint)] aria-pressed:text-[var(--green-deep)]",
+  "aria-pressed:bg-[var(--green-tint)] aria-pressed:text-[var(--green-deep)]",
 ].join(" ");
+
+const sendBtn = [
+  "inline-flex h-8 w-8 items-center justify-center rounded-[6px]",
+  "border border-[var(--green)] bg-[var(--green)] text-white",
+  "transition-colors hover:border-[var(--green-deep)] hover:bg-[var(--green-deep)]",
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]",
+  "disabled:pointer-events-none disabled:opacity-60",
+  "motion-reduce:transition-none",
+].join(" ");
+
+const compactBtn = "!h-8 !px-2.5 !py-0 text-[12.5px]";
 
 function newKey(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -93,7 +105,23 @@ export function MessageComposer({
   const fileInputId = useId();
   const fileRef = useRef<HTMLInputElement>(null);
   const [attachOpen, setAttachOpen] = useState(false);
+  const [isNarrow, setIsNarrow] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 767px)").matches,
+  );
   useToastOnError(error);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    function sync() {
+      setIsNarrow(mq.matches);
+      if (mq.matches && mode === "lexical") onMode("plain");
+    }
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, [mode, onMode]);
 
   function addFile(file: File) {
     onAttachments([
@@ -118,6 +146,102 @@ export function MessageComposer({
 
   const lexicalEmpty = plainTextFromLexical(lexical).trim() === "";
   const seedText = lexicalEmpty && body.trim() ? body : undefined;
+  const useSendIcon = submitLabel === "Post";
+  const richTextAllowed = !isNarrow;
+  const chrome = richTextAllowed && mode === "lexical" ? "full" : "simple";
+
+  const richTextToggle = richTextAllowed ? (
+    <button
+      type="button"
+      className={iconBtn}
+      aria-pressed={mode === "lexical"}
+      aria-label={
+        mode === "lexical" ? "Turn off rich text" : "Turn on rich text"
+      }
+      title={mode === "lexical" ? "Plain text" : "Rich text"}
+      onClick={() => {
+        if (mode === "lexical") enablePlainText();
+        else enableRichText();
+      }}
+    >
+      <span className="font-serif text-[15px] font-bold leading-none">T</span>
+    </button>
+  ) : null;
+
+  const endSlot = (
+    <>
+      {showAttachmentControls ? (
+        <>
+          <input
+            id={fileInputId}
+            ref={fileRef}
+            type="file"
+            className="sr-only"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (file) addFile(file);
+            }}
+          />
+          {richTextToggle}
+          <button
+            type="button"
+            className={iconBtn}
+            aria-label="Add file"
+            title="Add file"
+            onClick={() => fileRef.current?.click()}
+          >
+            <PaperClipIcon className="h-4 w-4" aria-hidden />
+          </button>
+          <button
+            type="button"
+            className={iconBtn}
+            aria-label="Add material or link"
+            title="Add material or link"
+            onClick={() => setAttachOpen(true)}
+          >
+            <PlusIcon className="h-4 w-4" aria-hidden />
+          </button>
+        </>
+      ) : (
+        richTextToggle
+      )}
+      {onCancel ? (
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={submitting}
+          className={compactBtn}
+          onClick={onCancel}
+        >
+          {cancelLabel}
+        </Button>
+      ) : null}
+      {showSubmit ? (
+        useSendIcon ? (
+          <button
+            type="button"
+            className={sendBtn}
+            disabled={!canSubmit || submitting}
+            aria-label={submitting ? (busyLabel ?? "Posting…") : "Post"}
+            title={submitting ? (busyLabel ?? "Posting…") : "Post"}
+            onClick={onSubmit}
+          >
+            <PaperAirplaneIcon className="h-4 w-4" aria-hidden />
+          </button>
+        ) : (
+          <Button
+            type="button"
+            disabled={!canSubmit || submitting}
+            className={compactBtn}
+            onClick={onSubmit}
+          >
+            {submitting ? (busyLabel ?? "Working…") : submitLabel}
+          </Button>
+        )
+      ) : null}
+    </>
+  );
 
   return (
     <div
@@ -134,10 +258,11 @@ export function MessageComposer({
         mentionPeople={mentionPeople}
         mentionExcludeUserId={mentionExcludeUserId}
         mentionsLoading={mentionsLoading}
-        chrome={mode === "lexical" ? "full" : "simple"}
+        chrome={chrome}
         editable
         embedded
         placeholder={placeholder}
+        endSlot={endSlot}
         onChange={(state) => {
           onLexical(state);
           onBody(plainTextFromLexical(state));
@@ -146,7 +271,7 @@ export function MessageComposer({
       />
 
       {showAttachmentControls && attachments.length > 0 ? (
-        <ul className="mt-3 flex flex-col gap-1.5">
+        <ul className="mt-2 flex flex-col gap-1.5 px-3 md:mt-3 md:px-0">
           {attachments.map((attachment) => (
             <li
               key={attachment.key}
@@ -193,94 +318,6 @@ export function MessageComposer({
           ))}
         </ul>
       ) : null}
-
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        {showAttachmentControls ? (
-          <>
-            <input
-              id={fileInputId}
-              ref={fileRef}
-              type="file"
-              className="sr-only"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                event.target.value = "";
-                if (file) addFile(file);
-              }}
-            />
-            <button
-              type="button"
-              className={iconBtn}
-              aria-pressed={mode === "lexical"}
-              aria-label={
-                mode === "lexical" ? "Turn off rich text" : "Turn on rich text"
-              }
-              title={mode === "lexical" ? "Plain text" : "Rich text"}
-              onClick={() => {
-                if (mode === "lexical") enablePlainText();
-                else enableRichText();
-              }}
-            >
-              <span className="font-serif text-[15px] font-bold leading-none">T</span>
-            </button>
-            <button
-              type="button"
-              className={iconBtn}
-              aria-label="Add file"
-              title="Add file"
-              onClick={() => fileRef.current?.click()}
-            >
-              <PaperClipIcon className="h-4 w-4" aria-hidden />
-            </button>
-            <button
-              type="button"
-              className={iconBtn}
-              aria-label="Add material or link"
-              title="Add material or link"
-              onClick={() => setAttachOpen(true)}
-            >
-              <PlusIcon className="h-4 w-4" aria-hidden />
-            </button>
-          </>
-        ) : (
-          <button
-            type="button"
-            className={iconBtn}
-            aria-pressed={mode === "lexical"}
-            aria-label={
-              mode === "lexical" ? "Turn off rich text" : "Turn on rich text"
-            }
-            title={mode === "lexical" ? "Plain text" : "Rich text"}
-            onClick={() => {
-              if (mode === "lexical") enablePlainText();
-              else enableRichText();
-            }}
-          >
-            <span className="font-serif text-[15px] font-bold leading-none">T</span>
-          </button>
-        )}
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          {onCancel ? (
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={submitting}
-              onClick={onCancel}
-            >
-              {cancelLabel}
-            </Button>
-          ) : null}
-          {showSubmit ? (
-            <Button
-              type="button"
-              disabled={!canSubmit || submitting}
-              onClick={onSubmit}
-            >
-              {submitting ? (busyLabel ?? "Working…") : submitLabel}
-            </Button>
-          ) : null}
-        </div>
-      </div>
 
       {showAttachmentControls ? (
         <ComposerAttachModal

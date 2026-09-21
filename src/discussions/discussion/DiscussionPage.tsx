@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   CheckCircleIcon,
   ArrowUturnLeftIcon,
+  ChevronLeftIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
@@ -16,11 +17,9 @@ import {
   discussionTargetName,
 } from "@/discussions/model/audience";
 import { discussionsPath } from "@/discussions/model/paths";
-import {
-  discussionAuthorLabel,
-  discussionStartedLabel,
-} from "@/discussions/model/time";
+import { discussionStartedLabel } from "@/discussions/model/time";
 import { isNearScrollBottom } from "@/discussions/model/thread";
+import { UserProfileModal } from "@/organizations/user-profile/UserProfileModal";
 import { DiscussionMembersModal } from "./components/DiscussionMembersModal";
 import { DiscussionMessageItem } from "./components/DiscussionMessageItem";
 import { DiscussionThreadMenu } from "./components/DiscussionThreadMenu";
@@ -34,6 +33,7 @@ export function DiscussionPage() {
   const { hash: locationHash } = useLocation();
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [removeMessageId, setRemoveMessageId] = useState<number | null>(null);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const [hasNewBelow, setHasNewBelow] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
@@ -98,17 +98,29 @@ export function DiscussionPage() {
     );
   }
 
+  const discussionsHref = discussionsPath(page.organization.slug);
+
   return (
-    <div className="flex min-h-[calc(100vh-6rem)] flex-col px-3 py-8 md:px-6 lg:px-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1
-            className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {page.discussion.title}
-          </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+    <div className="flex h-[calc(100dvh-6rem)] max-h-[calc(100dvh-6rem)] flex-col overflow-hidden bg-[var(--paper)]">
+      <div className="flex shrink-0 flex-wrap items-start justify-between gap-3 border-b border-[var(--line-soft)] bg-[var(--surface)] px-3 py-3 md:px-6 lg:px-8">
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-center gap-1.5">
+            <Link
+              to={discussionsHref}
+              className="inline-flex shrink-0 items-center justify-center rounded-[6px] p-1 text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+              aria-label="Back to discussions"
+              title="Back to discussions"
+            >
+              <ChevronLeftIcon className="h-5 w-5" aria-hidden />
+            </Link>
+            <h1
+              className="min-w-0 truncate text-[18px] font-semibold text-[var(--ink)] md:text-[20px]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {page.discussion.title}
+            </h1>
+          </div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5 pl-7">
             <Badge variant={page.discussion.answeredAt ? "green" : "neutral"}>
               {discussionStatusLabel(page.discussion.answeredAt)}
             </Badge>
@@ -119,51 +131,61 @@ export function DiscussionPage() {
               {discussionTargetName(page.discussion)}
             </span>
           </div>
-          <p className="mt-2 text-[12.5px] text-[var(--ink-faint)]">
-            {[
-              discussionAuthorLabel(page.discussion.authorName),
-              discussionStartedLabel(page.discussion.createdAt),
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-          <p className="mt-3 text-[13px]">
-            <Link
-              to={discussionsPath(page.organization.slug)}
-              className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-            >
-              Back to discussions
-            </Link>
-          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {page.canMarkAnswered ? (
-            <Button
-              variant="secondary"
-              disabled={page.answered.isPending}
-              onClick={() => page.answered.mutate(!page.discussion?.answeredAt)}
-            >
-              {page.discussion.answeredAt ? (
-                <ArrowUturnLeftIcon className="h-4 w-4" aria-hidden />
-              ) : (
-                <CheckCircleIcon className="h-4 w-4" aria-hidden />
-              )}
-              {page.discussion.answeredAt ? "Mark as open" : "Mark as answered"}
-            </Button>
-          ) : null}
-          {page.canRemoveThread ? (
-            <Button variant="secondary" onClick={() => setConfirmRemove(true)}>
-              <TrashIcon className="h-4 w-4" aria-hidden />
-              Delete
-            </Button>
-          ) : null}
-          <DiscussionThreadMenu onMembers={() => page.setMembersOpen(true)} />
+          <div className="hidden flex-wrap items-center gap-2 md:flex">
+            {page.canMarkAnswered ? (
+              <Button
+                variant="secondary"
+                disabled={page.answered.isPending}
+                onClick={() =>
+                  page.answered.mutate(!page.discussion?.answeredAt)
+                }
+              >
+                {page.discussion.answeredAt ? (
+                  <ArrowUturnLeftIcon className="h-4 w-4" aria-hidden />
+                ) : (
+                  <CheckCircleIcon className="h-4 w-4" aria-hidden />
+                )}
+                {page.discussion.answeredAt
+                  ? "Mark as open"
+                  : "Mark as answered"}
+              </Button>
+            ) : null}
+            {page.canRemoveThread ? (
+              <Button
+                variant="secondary"
+                onClick={() => setConfirmRemove(true)}
+              >
+                <TrashIcon className="h-4 w-4" aria-hidden />
+                Delete
+              </Button>
+            ) : null}
+          </div>
+          <DiscussionThreadMenu
+            orgSlug={page.organization.slug}
+            starterUserId={page.discussion.createdBy}
+            starterName={page.discussion.authorName}
+            startedLabel={discussionStartedLabel(page.discussion.createdAt)}
+            onMembers={() => page.setMembersOpen(true)}
+            answered={page.discussion.answeredAt != null}
+            onMarkAnswered={
+              page.canMarkAnswered
+                ? () => page.answered.mutate(!page.discussion?.answeredAt)
+                : undefined
+            }
+            markAnsweredPending={page.answered.isPending}
+            onDelete={
+              page.canRemoveThread ? () => setConfirmRemove(true) : undefined
+            }
+          />
         </div>
       </div>
 
+      <div className="flex min-h-0 flex-1 flex-col">
       <div
         ref={scrollerRef}
-        className="relative mt-6 flex-1 overflow-y-auto"
+        className="relative min-h-0 flex-1 overflow-y-auto px-3 pt-4 md:px-6 lg:px-8"
         onScroll={(event) => {
           const el = event.currentTarget;
           stickToBottom.current = isNearScrollBottom(
@@ -174,38 +196,46 @@ export function DiscussionPage() {
           if (stickToBottom.current) setHasNewBelow(false);
         }}
       >
-        <div className="flex flex-col gap-3 pb-4">
-          {page.messages.map((message) => (
-            <DiscussionMessageItem
-              key={message.id}
-              orgSlug={page.organization.slug}
-              discussionId={page.discussion!.id}
-              message={message}
-              isOwn={message.authorId === page.userId}
-              canEdit={page.canEditMessage(message)}
-              canQuote={message.deletedAt == null}
-              canRemove={page.canRemoveMessage(message.authorId)}
-              isEditing={page.editingMessageId === message.id}
-              editMode={page.editMode}
-              onEditMode={page.setEditMode}
-              editBody={page.editBody}
-              onEditBody={page.setEditBody}
-              editLexical={page.editLexical}
-              onEditLexical={page.setEditLexical}
-              editComposeKey={page.editComposeKey}
-              editCanSave={page.editCanSave}
-              editSaving={page.editSaving}
-              editError={page.editError}
-              onStartEdit={() => page.startEdit(message)}
-              onCancelEdit={page.cancelEdit}
-              onSaveEdit={page.saveEdit}
-              onQuote={() => page.quoteMessage(message)}
-              onRemove={() => setRemoveMessageId(message.id)}
-              mentionPeople={page.members}
-              mentionExcludeUserId={page.userId}
-              mentionsLoading={page.membersLoading}
-            />
-          ))}
+        <div className="flex flex-col gap-1.5 pb-4">
+          {page.messages.map((message, index) => {
+            const isOwn = message.authorId === page.userId;
+            const previous = page.messages[index - 1];
+            const showGroupMeta =
+              previous == null || previous.authorId !== message.authorId;
+            return (
+              <DiscussionMessageItem
+                key={message.id}
+                orgSlug={page.organization.slug}
+                discussionId={page.discussion!.id}
+                message={message}
+                isOwn={isOwn}
+                showGroupMeta={showGroupMeta}
+                canEdit={page.canEditMessage(message)}
+                canQuote={message.deletedAt == null}
+                canRemove={page.canRemoveMessage(message.authorId)}
+                isEditing={page.editingMessageId === message.id}
+                editMode={page.editMode}
+                onEditMode={page.setEditMode}
+                editBody={page.editBody}
+                onEditBody={page.setEditBody}
+                editLexical={page.editLexical}
+                onEditLexical={page.setEditLexical}
+                editComposeKey={page.editComposeKey}
+                editCanSave={page.editCanSave}
+                editSaving={page.editSaving}
+                editError={page.editError}
+                onStartEdit={() => page.startEdit(message)}
+                onCancelEdit={page.cancelEdit}
+                onSaveEdit={page.saveEdit}
+                onQuote={() => page.quoteMessage(message)}
+                onRemove={() => setRemoveMessageId(message.id)}
+                onOpenProfile={setProfileUserId}
+                mentionPeople={page.members}
+                mentionExcludeUserId={page.userId}
+                mentionsLoading={page.membersLoading}
+              />
+            );
+          })}
         </div>
         {hasNewBelow ? (
           <div className="sticky bottom-3 flex justify-center">
@@ -225,29 +255,33 @@ export function DiscussionPage() {
         ) : null}
       </div>
 
-      <div className="mt-4 w-full">
-        <MessageComposer
-          mode={page.mode}
-          onMode={page.setMode}
-          body={page.body}
-          onBody={page.setBody}
-          lexical={page.lexical}
-          onLexical={page.setLexical}
-          composeKey={page.composeKey}
-          attachments={page.attachments}
-          onAttachments={page.setAttachments}
-          materials={page.materials}
-          canSubmit={page.canSubmit}
-          submitting={page.posting}
-          submitLabel="Post"
-          busyLabel="Posting…"
-          placeholder="Write a message, or add a file, material, or link."
-          error={page.formError}
-          onSubmit={page.post}
-          mentionPeople={page.members}
-          mentionExcludeUserId={page.userId}
-          mentionsLoading={page.membersLoading}
-        />
+      <div className="cw-discussion-composer-bar shrink-0 border-t border-[var(--line-soft)] bg-[var(--surface)] max-md:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:border-t-0 md:bg-transparent md:px-6 md:pb-4 md:pt-3 lg:px-8">
+        <div className="md:mx-auto md:w-full md:max-w-2xl">
+          <MessageComposer
+            variant="plain"
+            mode={page.mode}
+            onMode={page.setMode}
+            body={page.body}
+            onBody={page.setBody}
+            lexical={page.lexical}
+            onLexical={page.setLexical}
+            composeKey={page.composeKey}
+            attachments={page.attachments}
+            onAttachments={page.setAttachments}
+            materials={page.materials}
+            canSubmit={page.canSubmit}
+            submitting={page.posting}
+            submitLabel="Post"
+            busyLabel="Posting…"
+            placeholder="Write a message…"
+            error={page.formError}
+            onSubmit={page.post}
+            mentionPeople={page.members}
+            mentionExcludeUserId={page.userId}
+            mentionsLoading={page.membersLoading}
+          />
+        </div>
+      </div>
       </div>
 
       <ConfirmDialog
@@ -287,6 +321,11 @@ export function DiscussionPage() {
         loading={page.membersLoading}
         error={page.membersError}
         onClose={() => page.setMembersOpen(false)}
+      />
+      <UserProfileModal
+        userId={profileUserId}
+        open={profileUserId != null}
+        onClose={() => setProfileUserId(null)}
       />
     </div>
   );
