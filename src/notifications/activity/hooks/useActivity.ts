@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { discussionMessagePath, discussionPath } from "@/discussions/model/paths";
 import {
   listNotifications,
   markNotificationRead,
@@ -12,6 +11,7 @@ import {
   sortActivityForList,
   type ActivityItem,
 } from "@/notifications/model/activity";
+import { activityItemPath } from "@/notifications/model/paths";
 
 export function useActivity() {
   const { organization } = useOrgShell();
@@ -35,17 +35,8 @@ export function useActivity() {
       void queryClient.invalidateQueries({
         queryKey: notificationQueryKeys.org(organization.id, user.id),
       });
-      if (item.discussionId != null) {
-        const href =
-          item.discussionMessageId != null
-            ? discussionMessagePath(
-                organization.slug,
-                item.discussionId,
-                item.discussionMessageId,
-              )
-            : discussionPath(organization.slug, item.discussionId);
-        navigate(href);
-      }
+      const href = activityItemPath(organization.slug, item);
+      if (href) navigate(href);
     },
   });
 

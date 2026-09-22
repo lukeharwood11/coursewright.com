@@ -3,7 +3,7 @@ import {
   plainTextFromDiscussionBody,
 } from "@/discussions/model/messageBody";
 
-export type ActivityKind = "discussion_message" | "discussion_mention";
+export type ActivityKind = "discussion_message" | "discussion_mention" | "announcement";
 
 export type ActivityItem = {
   id: number;
@@ -11,6 +11,7 @@ export type ActivityItem = {
   kind: ActivityKind;
   discussionId: number | null;
   discussionMessageId: number | null;
+  announcementId: number | null;
   actorId: string | null;
   actorName: string;
   title: string;
@@ -21,7 +22,11 @@ export type ActivityItem = {
 };
 
 export function parseActivityKind(value: string): ActivityKind | null {
-  if (value === "discussion_message" || value === "discussion_mention") {
+  if (
+    value === "discussion_message" ||
+    value === "discussion_mention" ||
+    value === "announcement"
+  ) {
     return value;
   }
   return null;
@@ -107,6 +112,10 @@ export function activityHeadline(args: {
   const inAudience = audience ? ` in ${audience}` : "";
   if (args.kind === "discussion_mention") {
     return `Mentioned in ${title}${inAudience}`;
+  }
+  if (args.kind === "announcement") {
+    const name = args.title.trim() || "Announcement";
+    return audience ? `Announcement: ${name} in ${audience}` : `Announcement: ${name}`;
   }
   return `New discussion: ${title}${inAudience}`;
 }

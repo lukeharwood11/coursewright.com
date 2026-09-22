@@ -1641,6 +1641,7 @@ export type Database = {
       notifications: {
         Row: {
           actor_id: string | null
+          announcement_id: number | null
           audience_label: string
           created_at: string
           discussion_id: number | null
@@ -1655,6 +1656,7 @@ export type Database = {
         }
         Insert: {
           actor_id?: string | null
+          announcement_id?: number | null
           audience_label?: string
           created_at?: string
           discussion_id?: number | null
@@ -1669,6 +1671,7 @@ export type Database = {
         }
         Update: {
           actor_id?: string | null
+          announcement_id?: number | null
           audience_label?: string
           created_at?: string
           discussion_id?: number | null
@@ -1682,6 +1685,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notifications_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notifications_actor_id_fkey"
             columns: ["actor_id"]

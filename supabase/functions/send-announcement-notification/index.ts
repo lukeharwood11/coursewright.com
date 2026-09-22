@@ -60,22 +60,6 @@ Deno.serve(async (request) => {
       return jsonResponse({ error: "Pick an announcement to email." }, 400);
     }
 
-    const apiKey = Deno.env.get("RESEND_API_KEY")?.trim();
-    if (!apiKey) {
-      return jsonResponse(
-        { error: "Notification email isn’t set up yet. Families can still see it in the app." },
-        503,
-      );
-    }
-
-    const origin = publicAppOrigin(request);
-    if (!origin) {
-      return jsonResponse(
-        { error: "Couldn’t build the announcement link." },
-        500,
-      );
-    }
-
     const db = serviceClient();
     const { data: announcement, error: announcementError } = await db
       .from("announcements")
@@ -114,6 +98,28 @@ Deno.serve(async (request) => {
     });
     if (!allowed) {
       return jsonResponse({ error: "You can’t email that announcement." }, 403);
+    }
+
+    const { error: notifyError } = await db.rpc("notify_announcement", {
+      p_announcement_id: typed.id,
+      p_actor_id: user.id,
+    });
+    if (notifyError) throw notifyError;
+
+    const apiKey = Deno.env.get("RESEND_API_KEY")?.trim();
+    if (!apiKey) {
+      return jsonResponse(
+        { error: "Notification email isn’t set up yet. Families can still see it in Activity." },
+        503,
+      );
+    }
+
+    const origin = publicAppOrigin(request);
+    if (!origin) {
+      return jsonResponse(
+        { error: "Couldn’t build the announcement link." },
+        500,
+      );
     }
 
     const { data: organization, error: organizationError } = await db

@@ -1,6 +1,6 @@
 # AGENTS — `send-announcement-notification`
 
-Send a Resend **`announcement-notification`** event to each parent/student email the announcement applies to.
+Send a Resend **`announcement-notification`** event to each parent email the announcement applies to, and write one Activity row per claimed family account (`notify_announcement`) before mail is attempted.
 
 ## Rules
 

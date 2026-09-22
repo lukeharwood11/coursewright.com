@@ -32,7 +32,7 @@ A **one-way** notice to one or more courses, classes, or students (same kind). F
 - Instructors pick **courses they teach**, or **classes / students** they can already see on the roster. Owners and admins can pick any audience in the org.
 - Title required. Optional note. Optional **start date** and **end date**; if both are set, end must be on or after start. Blank dates mean the notice stays on home until removed.
 - **Post announcement** stays disabled until there is a title and at least one audience target.
-- Optional **Send notification** (off by default). When on at save, email families who already have an account for this notice. Pending invites are not mailed. The announcement still saves if email fails.
+- Optional **Send notification** (off by default). When on at save, email families who already have an account and add one Activity row for each of them. A later send updates that row. Pending invites are not mailed. The announcement still saves if email fails. Sidebar unread still applies even when this is off.
 - Date window **is** homepage availability — no extra publish control.
 - Cancel returns to the list (new) or the announcement (edit).
 - Staff **Parent view** and parent-only users cannot open `/new` or `/edit` (redirect to org home).

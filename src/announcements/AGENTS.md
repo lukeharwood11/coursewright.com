@@ -18,7 +18,7 @@ One-way **announcements**: a notice to one or more courses, classes, or students
 - Page folders: `announcements/` (staff + parent list), `announcement/` (view), `announcement-edit/` (new + edit). Shared `model/` + `databridge/`.
 - Parent home and the parent list compose this domain via `parent/` dashboard data; do not put announcement CRUD in `parent/`.
 - Parent chrome shows a red unread count on **Announcements** for notices not yet opened.
-- Optional **Send notification** emails `send-announcement-notification` (Resend `announcement-notification`). Recipients are claimed family accounts only (not pending invites). The announcement still saves if mail fails.
+- Optional **Send notification** emails `send-announcement-notification` (Resend `announcement-notification`) and writes one Activity row per claimed family account. A later send updates that row. Recipients are claimed family accounts only (not pending invites). The announcement still saves if mail fails. Sidebar unread is separate.
 
 ## Don’t
 

@@ -10,6 +10,10 @@ import {
   markAnnouncementRead,
   softDeleteAnnouncement,
 } from "@/announcements/databridge/announcements";
+import {
+  markAnnouncementNotificationsRead,
+  notificationQueryKeys,
+} from "@/notifications/databridge/notifications";
 import { isAnnouncementAvailable } from "@/announcements/model/availability";
 import { parentQueryKeys } from "@/parent/databridge/dashboard";
 import { localIsoDate } from "@/parent/model/thisWeek";
@@ -39,6 +43,15 @@ export function useAnnouncement() {
     announcement != null &&
     (!isAnnouncementAvailable(today, announcement.startDate, announcement.endDate) ||
       announcement.deletedAt != null);
+
+  useEffect(() => {
+    if (!belongsHere || familyHidden || !announcement) return;
+    void markAnnouncementNotificationsRead(announcement.id).then(() => {
+      void queryClient.invalidateQueries({
+        queryKey: notificationQueryKeys.org(organization.id, user.id),
+      });
+    });
+  }, [belongsHere, familyHidden, announcement, organization.id, user.id, queryClient]);
 
   useEffect(() => {
     if (!parentPresentation || !belongsHere || familyHidden || !announcement) return;

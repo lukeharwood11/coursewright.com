@@ -17,10 +17,11 @@ test("activityPath nests under the org", () => {
   assert.equal(activityPath("coop"), "/my/coop/activity");
 });
 
-test("parseActivityKind accepts discussion kinds", () => {
+test("parseActivityKind accepts activity kinds", () => {
   assert.equal(parseActivityKind("discussion_message"), "discussion_message");
   assert.equal(parseActivityKind("discussion_mention"), "discussion_mention");
-  assert.equal(parseActivityKind("announcement"), null);
+  assert.equal(parseActivityKind("announcement"), "announcement");
+  assert.equal(parseActivityKind("other"), null);
 });
 
 test("unread first then newest", () => {
@@ -123,6 +124,22 @@ test("activityHeadline names the activity and place", () => {
       audienceLabel: "",
     }),
     "New discussion: Discussion",
+  );
+  assert.equal(
+    activityHeadline({
+      kind: "announcement",
+      title: "No school Friday",
+      audienceLabel: "Homeroom",
+    }),
+    "Announcement: No school Friday in Homeroom",
+  );
+  assert.equal(
+    activityHeadline({
+      kind: "announcement",
+      title: "No school Friday",
+      audienceLabel: "",
+    }),
+    "Announcement: No school Friday",
   );
 });
 

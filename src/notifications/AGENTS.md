@@ -1,6 +1,6 @@
 # AGENTS — `src/notifications/`
 
-In-app **Activity**: stored notifications for the signed-in person. Discussion posts notify course instructors or class leads, people who started or posted on the thread (one row per discussion), **@mentions**, and staff **Notify everyone** on create.
+In-app **Activity**: stored notifications for the signed-in person. Discussion posts notify course instructors or class leads, people who started or posted on the thread (one row per discussion — further posts update that row), **@mentions**, and staff **Notify everyone** on create. Announcement **Send notification** writes one Activity row per claimed family (a later send updates it). Sidebar announcement unread (`announcement_reads`) stays separate.
 
 ## Scope
 
@@ -12,7 +12,7 @@ In-app **Activity**: stored notifications for the signed-in person. Discussion p
 ## Rules
 
 - Recipients are written by a Postgres trigger — the SPA only **selects** and **acks** own rows.
-- Clicking a row marks it read and opens the activity (discussion post).
+- Clicking a row marks it read and opens the activity (discussion post or announcement).
 - Page folder: `activity/`. Header chrome: `activity-menu/`. Shared `model/` + `databridge/`.
 - Distinct from announcement unread icons and the Discussions unread-thread badge.
 - No email or push in this slice.

@@ -265,7 +265,7 @@ export function AnnouncementFormFields({
             Send notification
           </span>
           <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
-            Email families who already have an account for this notice.
+            Email families who already have an account, and show it in their Activity.
           </span>
         </span>
       </label>

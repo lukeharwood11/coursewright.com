@@ -15,6 +15,7 @@ type NotificationRow = {
   kind: string;
   discussion_id: number | null;
   discussion_message_id: number | null;
+  announcement_id: number | null;
   actor_id: string | null;
   title: string;
   preview: string;
@@ -40,6 +41,7 @@ function toActivityItem(row: NotificationRow): ActivityItem | null {
     kind,
     discussionId: row.discussion_id,
     discussionMessageId: row.discussion_message_id,
+    announcementId: row.announcement_id,
     actorId: row.actor_id,
     actorName,
     title: row.title,
@@ -57,7 +59,7 @@ export async function listNotifications(
   const { data, error } = await db
     .from("notifications")
     .select(
-      "id, organization_id, kind, discussion_id, discussion_message_id, actor_id, title, preview, audience_label, created_at, read_at, actor:profiles!notifications_actor_id_fkey(name)",
+      "id, organization_id, kind, discussion_id, discussion_message_id, announcement_id, actor_id, title, preview, audience_label, created_at, read_at, actor:profiles!notifications_actor_id_fkey(name)",
     )
     .eq("organization_id", organizationId)
     .order("created_at", { ascending: false });
@@ -89,6 +91,20 @@ export async function markDiscussionNotificationsRead(
     .update({ read_at: new Date().toISOString() })
     .eq("discussion_id", discussionId)
     .eq("kind", "discussion_message")
+    .is("read_at", null);
+
+  if (error) throw new Error(error.message);
+}
+
+export async function markAnnouncementNotificationsRead(
+  announcementId: number,
+): Promise<void> {
+  const db = requireSupabase();
+  const { error } = await db
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("announcement_id", announcementId)
+    .eq("kind", "announcement")
     .is("read_at", null);
 
   if (error) throw new Error(error.message);

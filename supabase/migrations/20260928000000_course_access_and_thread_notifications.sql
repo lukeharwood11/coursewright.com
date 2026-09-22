@@ -374,14 +374,24 @@ begin
 
     union
 
-    select members.user_id
-    from public.list_discussion_members(disc.id) as members
+    -- Prefer audience people over list_discussion_members: that RPC checks
+    -- can_see_discussion(auth.uid()) and would abort the whole insert if it
+    -- raised. Predicate on ON CONFLICT must match the partial unique index.
+    select people.user_id
+    from private.discussion_audience_people(
+      disc.organization_id,
+      disc.audience,
+      disc.course_id,
+      disc.class_id
+    ) as people
     where notify_everyone
-      and members.user_id is distinct from new.author_id
+      and people.user_id is distinct from new.author_id
   ) as recipient
-  on conflict (user_id, discussion_id) where (kind = 'discussion_message')
+  on conflict (user_id, discussion_id)
+    where (kind = 'discussion_message' and discussion_id is not null)
   do update
   set
+    discussion_message_id = excluded.discussion_message_id,
     actor_id = excluded.actor_id,
     title = excluded.title,
     preview = excluded.preview,

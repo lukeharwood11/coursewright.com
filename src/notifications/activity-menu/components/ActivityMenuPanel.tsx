@@ -1,6 +1,7 @@
 import {
   AtSymbolIcon,
   ChatBubbleLeftRightIcon,
+  MegaphoneIcon,
 } from "@heroicons/react/24/solid";
 import { formatDiscussionActivityAt } from "@/discussions/model/time";
 import {
@@ -18,6 +19,9 @@ function ActivityTypeIcon({ kind }: { kind: ActivityKind }) {
   const className = "mt-0.5 h-4 w-4 shrink-0 text-[var(--green)]";
   if (kind === "discussion_mention") {
     return <AtSymbolIcon className={className} aria-hidden />;
+  }
+  if (kind === "announcement") {
+    return <MegaphoneIcon className={className} aria-hidden />;
   }
   return <ChatBubbleLeftRightIcon className={className} aria-hidden />;
 }

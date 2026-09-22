@@ -839,7 +839,7 @@ A **one-way** notice to one or more targets of a single audience kind: **course(
 
 **Who can read:** staff in the org. Parents (and invited student emails on the parent claim path) when the notice applies to a linked student: enrolled in **any** of the **courses** (active + published), **or** a member of **any** of the **classes**, **or** listed as **any** of the **students**. Class membership can surface a class announcement even without a course enrollment. Materials / this-week / print stay enrollment-gated.
 
-**Email:** not stored on the row. Staff may opt in to **Send notification** on save; Edge Function `send-announcement-notification` emails claimed family accounts only (`parent_student_links` → `profiles.email` with an active org membership) for affected students — one Resend `announcement-notification` event per unique address. Pending invites and `student_email` contact fields are not mailed. Payload includes a truncated audience preview (`audience_summary`) and the full target list (`audience_list`).
+**Email and Activity:** not stored on the announcement row. Staff may opt in to **Send notification** on save; Edge Function `send-announcement-notification` emails claimed family accounts only (`parent_student_links` → `profiles.email` with an active org membership) for affected students — one Resend `announcement-notification` event per unique address — and calls `notify_announcement` so those same accounts (except the sender) get one Activity row. A later send updates that row. Pending invites and `student_email` contact fields are not mailed or pinged. Payload includes a truncated audience preview (`audience_summary`) and the full target list (`audience_list`).
 
 Course-from-course copy does **not** copy announcements.
 
@@ -983,25 +983,26 @@ Unread = discussion is visible, not deleted, and (`last_read_at` is null or `las
 
 ### Notification
 
-Per-user **Activity** row. Written by a trigger on `discussion_messages` insert (SECURITY DEFINER). Clients **SELECT** their own rows and **UPDATE** `read_at` to ack. No client INSERT.
+Per-user **Activity** row. Discussion rows are written by a trigger on `discussion_messages` insert (SECURITY DEFINER). Announcement rows are written by `notify_announcement` (service role) when staff **Send notification**. Clients **SELECT** their own rows and **UPDATE** `read_at` to ack. No client INSERT.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
 | user_id | uuid | FK → User (`profiles`) — the recipient |
-| kind | text | `discussion_message` or `discussion_mention` in this slice |
+| kind | text | `discussion_message`, `discussion_mention`, or `announcement` |
 | discussion_id | bigint | FK → Discussion when kind is discussion |
 | discussion_message_id | bigint | FK → DiscussionMessage |
-| actor_id | uuid | FK → User — who posted |
-| title | text | Discussion title |
-| preview | text | Truncated post text (or a short fallback) |
-| audience_label | text | Course title or class name |
+| announcement_id | bigint | FK → Announcement when kind is `announcement` |
+| actor_id | uuid | FK → User — who posted or sent |
+| title | text | Discussion or announcement title |
+| preview | text | Truncated post or announcement text (or a short fallback) |
+| audience_label | text | Course title, class name, or announcement targets |
 | created_at | timestamptz | |
-| read_at | timestamptz | nullable — set when the person acks (click Activity). Opening the thread acks `discussion_message` only |
-| unique | (user_id, discussion_message_id); plus one `discussion_message` row per (user_id, discussion_id) | |
+| read_at | timestamptz | nullable — set when the person acks (click Activity). Opening the thread acks `discussion_message` only. Opening the announcement acks `announcement` |
+| unique | (user_id, discussion_message_id); one `discussion_message` row per (user_id, discussion_id); one `announcement` row per (user_id, announcement_id) | |
 
-**Who is notified:** course **instructors** for a course thread; class **leads** for a class thread; the person who **started** the thread; anyone who **already posted** in it; **@mentioned** people who can currently see the thread; never the author. One `discussion_message` Activity row per person per discussion (later posts update that row). If `discussions.notify_all` is true on the opening post and the starter is staff, also notify everyone `list_discussion_members` returns. An **@mention** on a post or edit writes (or upgrades) a `discussion_mention` row for that person when they are on the thread.
+**Who is notified:** course **instructors** for a course thread; class **leads** for a class thread; the person who **started** the thread; anyone who **already posted** in it; **@mentioned** people who can currently see the thread; never the author. One `discussion_message` Activity row per person per discussion (later posts update that row, including `discussion_message_id` → latest post, and clear `read_at`). If `discussions.notify_all` is true on the opening post and the starter is staff, also notify everyone `discussion_audience_people` returns (org staff + qualifying parents). An **@mention** on a post or edit writes (or upgrades) a `discussion_mention` row for that person when they are on the thread. **Send notification** on an announcement writes one `announcement` row per claimed family account for the affected students (active org membership; not the sender). A later send updates that row.
 
 **Who can read/update:** `user_id = auth.uid()`. Client update may only change `read_at`. A mention trigger may upgrade `kind` from `discussion_message` to `discussion_mention` and clear `read_at` so the mention is unread.
 
