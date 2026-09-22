@@ -3,6 +3,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { printBackPath, parsePrintStudentIds, type PrintGrainKind } from "@/print/model/paths";
+import { parseResourcePrintItemIds } from "@/resources/model/paths";
 import {
   loadMaterialPrintPacket,
   loadResourcePrintPacket,
@@ -17,7 +18,7 @@ function grainFromPath(
   materialId: number,
   unitId: number,
 ): PrintGrainKind {
-  if (pathname.includes("/resources/items/")) return "resource";
+  if (pathname.includes("/resources/") && pathname.endsWith("/print")) return "resource";
   if (pathname.includes("print-this-week")) return "thisWeek";
   if (Number.isFinite(materialId)) return "material";
   if (Number.isFinite(unitId)) return "unit";
@@ -54,7 +55,11 @@ export function usePrint() {
               studentIds,
             })
           : grain === "resource"
-            ? await loadResourcePrintPacket(itemId)
+            ? await loadResourcePrintPacket(
+                Number.isFinite(itemId)
+                  ? itemId
+                  : parseResourcePrintItemIds(location.search),
+              )
           : grain === "material"
             ? await loadMaterialPrintPacket(materialId)
             : await loadUnitPrintPacket(unitId);

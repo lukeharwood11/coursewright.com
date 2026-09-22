@@ -585,7 +585,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 | **Progress — completion checklists** | Track what's done vs. outstanding | planned | |
 | **Assignment objects** | Separate from dated unit materials | planned | **Next conversation** — not spec'd |
 | **Quizzes (take online + autograde)** | Take quizzes in-app; score from P0-stored correct answers | planned | Authoring + print already P0 |
-| **Resources** | Org-scoped nested folders + document / link / file (Lexical + print). Folder and item ACL presets or per-person read/write (including a specific parent). Publish/unpublish. Bulk drag-drop upload with progress. Independent of course enrollment | shipped | P1a. Forms (P1b) stay a later item type. Not `materials` rows. `src/resources/` |
+| **Resources** | Org-scoped nested folders + document / link / file (Lexical + print). Folder and item ACL presets or per-person read/write (including a specific parent). Publish/unpublish. Bulk drag-drop upload with progress. Multi-select to publish, move, remove, print together, or download files (zip when more than one). Independent of course enrollment | shipped | P1a. Forms (P1b) stay a later item type. Not `materials` rows. `src/resources/` |
 | **Forms** | Structured response collection | in design | P1b inside Resources — not a second nav |
 | **Course Wright billing (orgs)** | We charge organizations so they can serve parents | planned | `billing/` SPA stub + owner-only placeholder on org settings. Packaging: per teacher or per course — **hypothesis**. Provider: **Stripe** *(hypothesis)* |
 | **Discussions** | Two-way thread for **one course** or **one class**. Title + who it is for. Staff and families in that group can start a thread and everyone on it can post. Flat conversation with optional **Quote** (Teams-style block in the message body). Composer is **plain text** by default; **T** turns on **Lexical** rich text. The person who started it, or staff who can see it, can mark it **resolved**. Posts can attach **files**, **links to course materials**, and **URLs**. While the app is open, new posts and resolved state appear without a refresh (**Supabase Realtime**). Distinct from **announcements** | in progress | Flat thread + quote-in-body + plain/Lexical composer (`20260922000003_discussion_quotes.sql`). Families start a discussion only for a **course their child is enrolled in** (active + published) or a **class their child is in**. Staff: owners/admins any course/class in the org; instructors for courses they teach and classes they can already manage on the roster. Invited student emails use the parent claim path. No email in this slice. Ad-hoc student-group audience later. |
@@ -629,7 +629,9 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 
 **Publish:** unpublished items are editors-only. Published items follow effective ACL (folder inherit walk, then item override).
 
-**Presets** (`staff` / `parents` / `members` / `restricted`) or **specific people** (read or can edit). Student profiles are not grantees.
+**Browse:** check rows to publish, unpublish, move, remove, print (one packet), or download. One file downloads directly; several files download as a zip. Folders in the selection move or remove with the rest — publish, print, and download apply to selected items only.
+
+**Presets** (`staff` / `parents` / `members` / `restricted`) set who can **view**. Org staff can always edit. **Specific people** can be **Can view** or **Can edit**, and that permission can be changed later. Student profiles are not grantees.
 
 **Nav:** staff always see **Resources** (between Courses and Roster). Parents see it when they can open at least one item.
 

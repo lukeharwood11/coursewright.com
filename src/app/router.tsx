@@ -261,6 +261,7 @@ export function AppRoutes() {
               path="courses/:courseId/units/:unitId/materials/:materialId/print"
               element={<PrintPage />}
             />
+            <Route path="resources/print" element={<PrintPage />} />
             <Route
               path="resources/items/:itemId/print"
               element={<PrintPage />}

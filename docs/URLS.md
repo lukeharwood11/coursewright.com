@@ -132,6 +132,7 @@ Org-scoped library — not course materials. Nested folders; document / link / f
 | [RESOURCE](./pages/RESOURCE.md) (view) | `/my/<org-slug>/resources/items/<item_id>` | Document / link / file |
 | [RESOURCE](./pages/RESOURCE.md) (edit) | `…/items/<item_id>/edit` | Editors |
 | [PRINT](./pages/PRINT.md) (resource) | `…/items/<item_id>/print` | Same print preview as materials |
+| [PRINT](./pages/PRINT.md) (resources) | `/my/<org-slug>/resources/print?items=<id>,<id>` | One packet for selected documents and files |
 
 ---
 
@@ -177,6 +178,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 | [PRINT](./pages/PRINT.md) (unit) | `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print` | Packet in material order |
 | [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Parent dashboard grain; Sun–Sat + important now. Optional `?students=` limits to active students |
 | [PRINT](./pages/PRINT.md) (resource) | `/my/<org-slug>/resources/items/<item_id>/print` | Document or file |
+| [PRINT](./pages/PRINT.md) (resources) | `/my/<org-slug>/resources/print?items=<id>,<id>` | Selected documents and files |
 
 **Do not use** `?print=1` on the source page — print is its own chrome-free screen with a real PDF viewer.
 

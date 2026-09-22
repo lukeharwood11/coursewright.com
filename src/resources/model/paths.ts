@@ -22,6 +22,19 @@ export function resourceItemPrintPath(orgSlug: string, itemId: number): string {
   return `${resourceItemPath(orgSlug, itemId)}/print`;
 }
 
+export function resourceItemsPrintPath(orgSlug: string, itemIds: number[]): string {
+  return `${resourcesPath(orgSlug)}/print?items=${itemIds.join(",")}`;
+}
+
+export function parseResourcePrintItemIds(search: string): number[] {
+  const raw = new URLSearchParams(search).get("items");
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((value) => Number(value.trim()))
+    .filter((value) => Number.isFinite(value) && value > 0);
+}
+
 export type ResourceTypeFilter = "all" | "document" | "file" | "link";
 
 export function parseResourceTypeFilter(value: string | null): ResourceTypeFilter {

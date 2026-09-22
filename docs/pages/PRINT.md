@@ -7,6 +7,7 @@
 **URL (unit, course):** `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print`  
 **URL (this week):** `/my/<org-slug>/print-this-week` (optional `?students=<id>,<id>` for active students on the parent home)  
 **URL (resource):** `/my/<org-slug>/resources/items/<item_id>/print`  
+**URL (resources, several):** `/my/<org-slug>/resources/print?items=<id>,<id>`  
 **URL (material / unit, template, P1):** same `/print` suffix on the template URL tree  
 **URL map:** [URLS.md](../URLS.md)
 
@@ -35,7 +36,7 @@ One composition: **generate a PDF** of the grain, **preview that PDF** in the pa
 | **Material** | One material by kind — **page:** blocks in order (quizzes print on the whole page: **parents** and staff **Parent view** see questions only; **staff Teacher view** see the answer key from block data; multiple-choice choices use drawn checkbox squares, not bracket text); **link:** title + URL/QR; **file:** if the attached file is already a PDF/image, prefer previewing **that file**; otherwise a cover sheet (title, description). Video blocks → title + URL/QR, not a player frame. No quiz-block-only print in P0. |
 | **Unit** | Materials in `position` order as one packet; page breaks **between** materials. |
 | **This week** | Current Sunday–Saturday dated materials (+ important now, if any) **and published lesson plans** for **active** students on parent home, grouped like [ORG_HOME](./ORG_HOME.md) **by student**. Each student: **lesson plans first** (week note + day notes), then materials. Includes assigned and due work for the week. One student at a time; **page break before the next student**. Pack that student’s items onto a page when they fit, separated by a rule; if there isn’t enough room to start the next assignment cleanly, it starts on the next page. Optional `?students=` filters the packet. |
-| **Resource** | One org resource by type — **document:** Lexical blocks (same page layout as a page material; no quizzes in P1a); **file:** same as a file material; **link:** not printed from this screen. |
+| **Resource** | One org resource by type — **document:** Lexical blocks (same page layout as a page material; no quizzes in P1a); **file:** same as a file material; **link:** not printed from this screen. Several selected documents and files use `?items=` as one packet (links skipped). |
 
 **Not on this page:** print whole course (out of scope).
 
@@ -62,7 +63,8 @@ One composition: **generate a PDF** of the grain, **preview that PDF** in the pa
 - [MATERIAL](./MATERIAL.md) — Back from material print; source of **Print**
 - [UNIT](./UNIT.md) — Back from unit print; source of **Print unit**
 - [ORG_HOME](./ORG_HOME.md) — Back from this-week print; source of **Print this week**
-- [RESOURCE](./RESOURCE.md) — Back from resource print; source of **Print** on a document or file
+- [RESOURCE](./RESOURCE.md) — Back from a single resource print; source of **Print** on a document or file
+- [RESOURCES](./RESOURCES.md) / [RESOURCE_FOLDER](./RESOURCE_FOLDER.md) — Back from a multi-item resource print; source of **Print** on a selection
 - [COURSE](./COURSE.md) — context when linked from course builder print entry points
 - **P1:** template tree uses the same `/print` suffix under [TEMPLATE](./TEMPLATE.md) / [UNIT](./UNIT.md) / [MATERIAL](./MATERIAL.md)
 

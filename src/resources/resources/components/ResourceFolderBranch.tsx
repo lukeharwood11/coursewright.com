@@ -32,6 +32,9 @@ export function ResourceFolderBranch({
   onRowContextMenu,
   buildFolderMenu,
   buildItemMenu,
+  isSelected,
+  onToggleFolder,
+  onToggleItem,
 }: {
   orgSlug: string;
   organizationId: number;
@@ -55,6 +58,9 @@ export function ResourceFolderBranch({
   ) => void;
   buildFolderMenu: (folder: ResourceFolderRecord) => ResourceMenuEntry[];
   buildItemMenu: (item: ResourceItemRecord) => ResourceMenuEntry[];
+  isSelected: (kind: "folder" | "item", id: number) => boolean;
+  onToggleFolder: (folder: ResourceFolderRecord, canEdit: boolean) => void;
+  onToggleItem: (item: ResourceItemRecord, canEdit: boolean) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const contents = useExpandedResourceFolder({
@@ -80,6 +86,8 @@ export function ResourceFolderBranch({
         canEdit={canEdit}
         renaming={renaming?.kind === "folder" && renaming.id === folder.id}
         renamePending={renamePending}
+        selected={isSelected("folder", folder.id)}
+        onToggleSelected={() => onToggleFolder(folder, canEdit)}
         onToggle={() => setExpanded((open) => !open)}
         onRename={(name) => onRenameFolder(folder.id, name)}
         onCancelRename={onCancelRename}
@@ -122,6 +130,9 @@ export function ResourceFolderBranch({
                   onRowContextMenu={onRowContextMenu}
                   buildFolderMenu={buildFolderMenu}
                   buildItemMenu={buildItemMenu}
+                  isSelected={isSelected}
+                  onToggleFolder={onToggleFolder}
+                  onToggleItem={onToggleItem}
                 />
               ))}
               {contents.items.map(({ item, canEdit: itemCanEdit }) => (
@@ -132,6 +143,8 @@ export function ResourceFolderBranch({
                     canEdit={itemCanEdit}
                     renaming={renaming?.kind === "item" && renaming.id === item.id}
                     renamePending={renamePending}
+                    selected={isSelected("item", item.id)}
+                    onToggleSelected={() => onToggleItem(item, itemCanEdit)}
                     onRename={(title) => onRenameItem(item.id, title)}
                     onCancelRename={onCancelRename}
                     onOpenMenu={(element) =>

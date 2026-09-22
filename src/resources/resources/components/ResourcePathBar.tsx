@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import { ChevronRightIcon, HomeIcon } from "@heroicons/react/24/outline";
 import type { ResourceFolderRecord } from "@/resources/databridge/folders";
 import { resourceBrowsePath } from "@/resources/model/paths";
 
 const crumbLink =
-  "font-bold text-[var(--green)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]";
+  "inline-flex items-center font-bold text-[var(--green)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]";
+
+const rootIconClass = "h-4 w-4";
 
 export function ResourcePathBar({
   orgSlug,
@@ -23,11 +25,23 @@ export function ResourcePathBar({
   return (
     <nav className="flex min-w-0 flex-wrap items-center gap-1 text-[13px] text-[var(--ink-soft)]" aria-label="Folder path">
         {current ? (
-          <Link to={resourceBrowsePath(orgSlug, null)} className={crumbLink}>
-            Resources
+          <Link
+            to={resourceBrowsePath(orgSlug, null)}
+            className={crumbLink}
+            aria-label="Resources"
+            title="Resources"
+          >
+            <HomeIcon className={rootIconClass} aria-hidden />
           </Link>
         ) : (
-          <span className="font-bold text-[var(--ink)]">Resources</span>
+          <span
+            className="inline-flex items-center font-bold text-[var(--ink)]"
+            aria-current="page"
+            aria-label="Resources"
+            title="Resources"
+          >
+            <HomeIcon className={rootIconClass} aria-hidden />
+          </span>
         )}
         {parents.map((folder) => (
           <span key={folder.id} className="inline-flex min-w-0 items-center gap-1">

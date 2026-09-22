@@ -43,7 +43,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) | `/my/<org-slug>/templates/<template_id>/settings` | **P1** |
 | [UNIT](./UNIT.md) | `/my/<org-slug>/courses/…/units/<unit_id>` (template tree **P1**) |
 | [MATERIAL](./MATERIAL.md) | view `…/materials/<id>`; edit `…/materials/<id>/edit` (top-level or under unit) |
-| [PRINT](./PRINT.md) | `…/materials/<id>/print`; `…/units/<id>/print`; `/my/<org-slug>/print-this-week`; `…/resources/items/<id>/print` |
+| [PRINT](./PRINT.md) | `…/materials/<id>/print`; `…/units/<id>/print`; `/my/<org-slug>/print-this-week`; `…/resources/items/<id>/print`; `…/resources/print?items=` |
 | [ORG_ROSTER](./ORG_ROSTER.md) | `/my/<org-slug>/roster` |
 | [STUDENT_PROFILE](./STUDENT_PROFILE.md) | `/my/<org-slug>/roster/<student_id>` |
 | [CLASS](./CLASS.md) | `/my/<org-slug>/classes/<class_id>` |

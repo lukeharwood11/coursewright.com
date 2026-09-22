@@ -6,6 +6,8 @@ import {
   resourceItemEditPath,
   resourceItemPath,
   resourceItemPrintPath,
+  resourceItemsPrintPath,
+  parseResourcePrintItemIds,
   resourcesPath,
   resourcesPathWithType,
 } from "./paths.ts";
@@ -18,6 +20,11 @@ test("resource paths nest under /resources", () => {
   assert.equal(resourceItemPath("coop", 9), "/my/coop/resources/items/9");
   assert.equal(resourceItemEditPath("coop", 9), "/my/coop/resources/items/9/edit");
   assert.equal(resourceItemPrintPath("coop", 9), "/my/coop/resources/items/9/print");
+  assert.equal(
+    resourceItemsPrintPath("coop", [2, 9]),
+    "/my/coop/resources/print?items=2,9",
+  );
+  assert.deepEqual(parseResourcePrintItemIds("?items=2,9,no"), [2, 9]);
   assert.equal(
     resourcesPathWithType("coop", null, "file"),
     "/my/coop/resources?type=file",

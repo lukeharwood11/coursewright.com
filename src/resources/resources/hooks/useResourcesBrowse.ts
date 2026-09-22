@@ -40,6 +40,14 @@ import {
   validateNewResource,
   validateResourceTitle,
 } from "@/resources/model/validate";
+import {
+  buildResourceFilesZip,
+  resourceFileDownloadUrl,
+} from "@/resources/databridge/download";
+import type {
+  SelectedResourceFolder,
+  SelectedResourceItem,
+} from "@/resources/model/selection";
 import { useResourceUploadStore } from "@/resources/stores/uploadQueue";
 
 export function useResourcesBrowse() {
@@ -219,6 +227,62 @@ export function useResourcesBrowse() {
     onError: (caught: Error) => setError(caught.message),
   });
 
+  const batchMove = useMutation({
+    mutationFn: async (input: {
+      folders: SelectedResourceFolder[];
+      items: SelectedResourceItem[];
+      parentId: number | null;
+    }) => {
+      for (const folder of input.folders) {
+        if (folder.id === input.parentId) continue;
+        await updateResourceFolder(folder.id, {
+          parentId: input.parentId,
+          aclInherit: input.parentId == null ? false : folder.aclInherit,
+        });
+      }
+      for (const item of input.items) {
+        await updateResourceItem(item.id, { folderId: input.parentId });
+      }
+    },
+    onSuccess: invalidateBrowse,
+    onError: (caught: Error) => setError(caught.message),
+  });
+
+  const batchArchive = useMutation({
+    mutationFn: async (input: { folderIds: number[]; itemIds: number[] }) => {
+      for (const id of input.folderIds) await archiveResourceFolder(id);
+      for (const id of input.itemIds) await archiveResourceItem(id);
+    },
+    onSuccess: invalidateBrowse,
+    onError: (caught: Error) => setError(caught.message),
+  });
+
+  const batchVisibility = useMutation({
+    mutationFn: async (input: { ids: number[]; visibility: ResourceVisibility }) => {
+      for (const id of input.ids) {
+        await updateResourceItem(id, { visibility: input.visibility });
+      }
+    },
+    onSuccess: invalidateBrowse,
+    onError: (caught: Error) => setError(caught.message),
+  });
+
+  const downloadFiles = useMutation({
+    mutationFn: async (files: { title: string; fileId: number }[]) => {
+      if (files.length === 0) throw new Error("Nothing to download.");
+      if (files.length === 1) {
+        const only = files[0];
+        if (!only) throw new Error("Nothing to download.");
+        const url = await resourceFileDownloadUrl(only.fileId);
+        triggerDownload(url);
+        return;
+      }
+      const zip = await buildResourceFilesZip(files);
+      triggerDownloadBytes(zip.filename, zip.bytes);
+    },
+    onError: (caught: Error) => setError(caught.message),
+  });
+
   const createDocument = useMutation({
     mutationFn: async (title: string) => {
       const message = validateNewResource({ type: "document", title });
@@ -314,7 +378,35 @@ export function useResourcesBrowse() {
     archiveFolder,
     archiveItem,
     setItemVisibility,
+    batchMove,
+    batchArchive,
+    batchVisibility,
+    downloadFiles,
     enqueueFiles,
     invalidateBrowse,
   };
+}
+
+function triggerDownload(url: string) {
+  const link = document.createElement("a");
+  link.href = url;
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+function triggerDownloadBytes(filename: string, bytes: Uint8Array) {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  const blob = new Blob([copy], { type: "application/zip" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }

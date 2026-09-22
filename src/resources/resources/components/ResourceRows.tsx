@@ -147,6 +147,8 @@ export function ResourceFolderRow({
   canEdit,
   renaming,
   renamePending,
+  selected,
+  onToggleSelected,
   onToggle,
   onRename,
   onCancelRename,
@@ -162,6 +164,8 @@ export function ResourceFolderRow({
   canEdit: boolean;
   renaming: boolean;
   renamePending: boolean;
+  selected: boolean;
+  onToggleSelected: () => void;
   onToggle: () => void;
   onRename: (name: string) => Promise<void>;
   onCancelRename: () => void;
@@ -171,6 +175,11 @@ export function ResourceFolderRow({
   const Folder = expanded ? FolderOpenIcon : FolderIcon;
   return (
     <div data-resource-row="" className="flex min-w-0 items-center px-2" onContextMenu={onContextMenu}>
+      <RowCheckbox
+        checked={selected}
+        label={`Select ${name}`}
+        onChange={onToggleSelected}
+      />
       {renaming ? (
         <InlineRename
           initial={name}
@@ -209,6 +218,27 @@ export function ResourceFolderRow({
   );
 }
 
+function RowCheckbox({
+  checked,
+  label,
+  onChange,
+}: {
+  checked: boolean;
+  label: string;
+  onChange: () => void;
+}) {
+  return (
+    <input
+      type="checkbox"
+      className="ml-1 h-4 w-4 shrink-0 accent-[var(--green)]"
+      checked={checked}
+      aria-label={label}
+      onChange={onChange}
+      onClick={(event) => event.stopPropagation()}
+    />
+  );
+}
+
 function ItemKindIcon({ type }: { type: ResourceItemRecord["type"] }) {
   const Icon =
     type === "document" ? DocumentTextIcon : type === "link" ? LinkIcon : PaperClipIcon;
@@ -221,6 +251,8 @@ export function ResourceItemRow({
   canEdit,
   renaming,
   renamePending,
+  selected,
+  onToggleSelected,
   onRename,
   onCancelRename,
   onOpenMenu,
@@ -231,6 +263,8 @@ export function ResourceItemRow({
   canEdit: boolean;
   renaming: boolean;
   renamePending: boolean;
+  selected: boolean;
+  onToggleSelected: () => void;
   onRename: (title: string) => Promise<void>;
   onCancelRename: () => void;
   onOpenMenu: (element: HTMLElement) => void;
@@ -238,6 +272,11 @@ export function ResourceItemRow({
 }) {
   return (
     <div data-resource-row="" className="flex min-w-0 items-center px-2" onContextMenu={onContextMenu}>
+      <RowCheckbox
+        checked={selected}
+        label={`Select ${item.title}`}
+        onChange={onToggleSelected}
+      />
       {renaming ? (
         <InlineRename
           initial={item.title}

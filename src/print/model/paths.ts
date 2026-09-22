@@ -24,8 +24,11 @@ export function printBackPath(input: {
   materialId: number | null;
   itemId?: number | null;
 }): string {
-  if (input.grain === "resource" && input.itemId) {
-    return `/my/${input.orgSlug}/resources/items/${input.itemId}`;
+  if (input.grain === "resource") {
+    if (input.itemId) {
+      return `/my/${input.orgSlug}/resources/items/${input.itemId}`;
+    }
+    return `/my/${input.orgSlug}/resources`;
   }
   if (input.grain === "material" && input.courseId && input.materialId) {
     const nested = input.unitId

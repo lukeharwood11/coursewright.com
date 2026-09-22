@@ -1,13 +1,16 @@
-import { useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  ArrowDownTrayIcon,
   ArrowRightIcon,
   ArrowUpTrayIcon,
   Cog6ToothIcon,
   DocumentPlusIcon,
   DocumentTextIcon,
+  EyeSlashIcon,
   FolderOpenIcon,
   FolderPlusIcon,
+  GlobeAltIcon,
   LinkIcon,
   PencilSquareIcon,
   PrinterIcon,
@@ -17,11 +20,8 @@ import type { ResourceFolderRecord } from "@/resources/databridge/folders";
 import type { ResourceItemRecord } from "@/resources/databridge/items";
 import { isPublishedResource } from "@/resources/model/kinds";
 import type { ResourceTypeFilter } from "@/resources/model/paths";
-import {
-  resourceBrowsePath,
-  resourceItemPath,
-  resourceItemPrintPath,
-} from "@/resources/model/paths";
+import { resourceBrowsePath, resourceItemPath, resourceItemPrintPath } from "@/resources/model/paths";
+import { selectionKey } from "@/resources/model/selection";
 import type {
   FolderAclSource,
   ResourceActor,
@@ -78,10 +78,15 @@ export function ResourceBrowser({
   onRemoveItem,
   onPublish,
   onUnpublish,
+  onDownload,
   onCreateFolder,
   onCreateDocument,
   onCreateLink,
   onUpload,
+  selectedKeys,
+  onToggleFolder,
+  onToggleItem,
+  onToggleAll,
 }: {
   orgSlug: string;
   organizationId: number;
@@ -104,10 +109,15 @@ export function ResourceBrowser({
   onRemoveItem: (item: ResourceItemRecord) => void;
   onPublish: (item: ResourceItemRecord) => void;
   onUnpublish: (item: ResourceItemRecord) => void;
+  onDownload: (item: ResourceItemRecord) => void;
   onCreateFolder: () => void;
   onCreateDocument: () => void;
   onCreateLink: () => void;
   onUpload: () => void;
+  selectedKeys: Set<string>;
+  onToggleFolder: (folder: ResourceFolderRecord, canEdit: boolean) => void;
+  onToggleItem: (item: ResourceItemRecord, canEdit: boolean) => void;
+  onToggleAll: () => void;
 }) {
   const navigate = useNavigate();
   const anchorRef = useRef<HTMLElement | null>(null);
@@ -233,6 +243,11 @@ export function ResourceBrowser({
     entries.push({
       id: "visibility",
       label: isPublishedResource(item.visibility) ? "Unpublish" : "Publish",
+      icon: isPublishedResource(item.visibility) ? (
+        <EyeSlashIcon className={iconClass} />
+      ) : (
+        <GlobeAltIcon className={iconClass} />
+      ),
       onSelect: () =>
         isPublishedResource(item.visibility) ? onUnpublish(item) : onPublish(item),
     });
@@ -242,6 +257,14 @@ export function ResourceBrowser({
         label: "Print",
         icon: <PrinterIcon className={iconClass} />,
         onSelect: () => navigate(resourceItemPrintPath(orgSlug, item.id)),
+      });
+    }
+    if (item.type === "file" && item.fileId != null) {
+      entries.push({
+        id: "download",
+        label: "Download",
+        icon: <ArrowDownTrayIcon className={iconClass} />,
+        onSelect: () => onDownload(item),
       });
     }
     entries.push({
@@ -274,6 +297,14 @@ export function ResourceBrowser({
     openMenu({ rect: pointRect(event.clientX, event.clientY) }, "Create", createEntries());
   }
 
+  const topKeys = [
+    ...folders.map(({ folder }) => selectionKey({ kind: "folder", id: folder.id })),
+    ...items.map(({ item }) => selectionKey({ kind: "item", id: item.id })),
+  ];
+  const selectedTop = topKeys.filter((key) => selectedKeys.has(key)).length;
+  const allSelected = topKeys.length > 0 && selectedTop === topKeys.length;
+  const someSelected = selectedTop > 0 && !allSelected;
+
   return (
     <div
       className="flex min-h-[24rem] flex-1 flex-col overflow-hidden rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]"
@@ -289,6 +320,14 @@ export function ResourceBrowser({
         </p>
       ) : (
         <ul className="divide-y divide-[var(--line-soft)]">
+          <li className="flex items-center gap-2 px-2 py-2">
+            <SelectAllCheckbox
+              checked={allSelected}
+              indeterminate={someSelected}
+              onChange={onToggleAll}
+            />
+            <span className="text-[13px] font-bold text-[var(--ink-soft)]">Select all</span>
+          </li>
           {folders.map(({ folder, canEdit }) => (
             <ResourceFolderBranch
               key={`folder-${folder.id}`}
@@ -313,6 +352,9 @@ export function ResourceBrowser({
               onRowContextMenu={onRowContextMenu}
               buildFolderMenu={folderEntries}
               buildItemMenu={itemEntries}
+              isSelected={(kind, id) => selectedKeys.has(selectionKey({ kind, id }))}
+              onToggleFolder={onToggleFolder}
+              onToggleItem={onToggleItem}
             />
           ))}
           {items.map(({ item, canEdit }) => (
@@ -323,6 +365,8 @@ export function ResourceBrowser({
                 canEdit={canEdit}
                 renaming={renaming?.kind === "item" && renaming.id === item.id}
                 renamePending={renamePending}
+                selected={selectedKeys.has(selectionKey({ kind: "item", id: item.id }))}
+                onToggleSelected={() => onToggleItem(item, canEdit)}
                 onRename={(title) =>
                   onRenameItem(item.id, title).then(() => setRenaming(null))
                 }
@@ -353,5 +397,30 @@ export function ResourceBrowser({
         onClose={closeMenu}
       />
     </div>
+  );
+}
+
+function SelectAllCheckbox({
+  checked,
+  indeterminate,
+  onChange,
+}: {
+  checked: boolean;
+  indeterminate: boolean;
+  onChange: () => void;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (ref.current) ref.current.indeterminate = indeterminate;
+  }, [indeterminate]);
+  return (
+    <input
+      ref={ref}
+      type="checkbox"
+      className="ml-1 h-4 w-4 shrink-0 accent-[var(--green)]"
+      checked={checked}
+      aria-label="Select all"
+      onChange={onChange}
+    />
   );
 }

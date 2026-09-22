@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRightIcon,
@@ -16,7 +16,16 @@ import type { ResourceAccessMode } from "@/resources/model/kinds";
 import {
   resourceBrowsePath,
   resourceItemEditPath,
+  resourceItemPrintPath,
+  resourceItemsPrintPath,
 } from "@/resources/model/paths";
+import {
+  mergeSelection,
+  selectionActions,
+  selectionKey,
+  toggleSelection,
+  type SelectedResource,
+} from "@/resources/model/selection";
 import { AccessSettingsDialog } from "./components/AccessSettingsDialog";
 import { MoveResourceDialog } from "./components/MoveResourceDialog";
 import { ResourceBrowser } from "./components/ResourceBrowser";
@@ -27,6 +36,7 @@ import {
 } from "./components/ResourceCreateDialogs";
 import { ResourceDropzone } from "./components/ResourceDropzone";
 import { ResourcePathBar } from "./components/ResourcePathBar";
+import { ResourceSelectionBar } from "./components/ResourceSelectionBar";
 import { ResourceToolbar } from "./components/ResourceToolbar";
 import { useResourcesBrowse } from "./hooks/useResourcesBrowse";
 
@@ -59,7 +69,18 @@ export function ResourcesPage() {
   const [move, setMove] = useState<MoveTarget | null>(null);
   const [access, setAccess] = useState<AccessTarget | null>(null);
   const [remove, setRemove] = useState<RemoveTarget | null>(null);
+  const [selected, setSelected] = useState<SelectedResource[]>([]);
+  const [batchMoveOpen, setBatchMoveOpen] = useState(false);
+  const [batchRemoveOpen, setBatchRemoveOpen] = useState(false);
+  const selectedKeys = useMemo(
+    () => new Set(selected.map(selectionKey)),
+    [selected],
+  );
   useToastOnError(page.error);
+
+  useEffect(() => {
+    setSelected([]);
+  }, [page.folderId, page.typeFilter]);
 
   useEffect(() => {
     document.title = page.currentFolder
@@ -150,6 +171,68 @@ export function ResourcesPage() {
     move?.kind === "item"
       ? (page.moveItem.error?.message ?? null)
       : (page.moveFolder.error?.message ?? null);
+  const actions = selectionActions(selected);
+  const batchPending =
+    page.batchMove.isPending ||
+    page.batchArchive.isPending ||
+    page.batchVisibility.isPending;
+
+  function toggleFolder(folder: ResourceFolderRecord, canEdit: boolean) {
+    setSelected((rows) =>
+      toggleSelection(rows, {
+        kind: "folder",
+        id: folder.id,
+        parentId: folder.parentId,
+        aclInherit: folder.aclInherit,
+        canEdit,
+      }),
+    );
+  }
+
+  function toggleItem(item: ResourceItemRecord, canEdit: boolean) {
+    setSelected((rows) =>
+      toggleSelection(rows, {
+        kind: "item",
+        id: item.id,
+        folderId: item.folderId,
+        type: item.type,
+        fileId: item.fileId,
+        title: item.title,
+        canEdit,
+      }),
+    );
+  }
+
+  function toggleAllVisible() {
+    const incoming: SelectedResource[] = [
+      ...page.folders.map(({ folder, canEdit }) => ({
+        kind: "folder" as const,
+        id: folder.id,
+        parentId: folder.parentId,
+        aclInherit: folder.aclInherit,
+        canEdit,
+      })),
+      ...page.items.map(({ item, canEdit }) => ({
+        kind: "item" as const,
+        id: item.id,
+        folderId: item.folderId,
+        type: item.type,
+        fileId: item.fileId,
+        title: item.title,
+        canEdit,
+      })),
+    ];
+    const allOn =
+      incoming.length > 0 &&
+      incoming.every((row) =>
+        selected.some((item) => selectionKey(item) === selectionKey(row)),
+      );
+    setSelected((rows) => mergeSelection(rows, incoming, !allOn));
+  }
+
+  function downloadSelection(files: { title: string; fileId: number }[]) {
+    page.downloadFiles.mutate(files);
+  }
 
   return (
     <div className="flex min-h-[calc(100dvh-4.5rem)] flex-col px-5 py-6 md:px-8">
@@ -215,7 +298,12 @@ export function ResourcesPage() {
       />
 
       <ResourceDropzone
-        className="mt-4 flex min-h-0 flex-1 flex-col"
+        className={[
+          "mt-4 flex min-h-0 flex-1 flex-col",
+          actions.count > 0 ? "pb-24" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
         disabled={!page.canEditHere}
         onFiles={page.enqueueFiles}
       >
@@ -253,12 +341,56 @@ export function ResourcesPage() {
           onUnpublish={(item) =>
             page.setItemVisibility.mutate({ id: item.id, visibility: "unpublished" })
           }
+          onDownload={(item) => {
+            if (item.fileId == null) return;
+            downloadSelection([{ title: item.title, fileId: item.fileId }]);
+          }}
           onCreateFolder={() => setFolderDialog(true)}
           onCreateDocument={createDocument}
           onCreateLink={() => setLinkDialog(true)}
           onUpload={openFilePicker}
+          selectedKeys={selectedKeys}
+          onToggleFolder={toggleFolder}
+          onToggleItem={toggleItem}
+          onToggleAll={toggleAllVisible}
         />
       </ResourceDropzone>
+
+      <ResourceSelectionBar
+        count={actions.count}
+        canMove={actions.canMove}
+        canRemove={actions.canRemove}
+        canPublish={actions.canPublish}
+        canPrint={actions.printableIds.length > 0}
+        canDownload={actions.files.length > 0}
+        pending={batchPending}
+        downloadPending={page.downloadFiles.isPending}
+        onClear={() => setSelected([])}
+        onMove={() => setBatchMoveOpen(true)}
+        onRemove={() => setBatchRemoveOpen(true)}
+        onPublish={() =>
+          page.batchVisibility.mutate({
+            ids: actions.editableItems.map((item) => item.id),
+            visibility: "published",
+          })
+        }
+        onUnpublish={() =>
+          page.batchVisibility.mutate({
+            ids: actions.editableItems.map((item) => item.id),
+            visibility: "unpublished",
+          })
+        }
+        onPrint={() => {
+          const ids = actions.printableIds;
+          if (ids.length === 1) {
+            const only = ids[0];
+            if (only) navigate(resourceItemPrintPath(page.organization.slug, only));
+            return;
+          }
+          navigate(resourceItemsPrintPath(page.organization.slug, ids));
+        }}
+        onDownload={() => downloadSelection(actions.files)}
+      />
 
       <FolderNameDialog
         open={folderDialog}
@@ -310,6 +442,32 @@ export function ResourcesPage() {
         />
       ) : null}
 
+      {batchMoveOpen ? (
+        <MoveResourceDialog
+          open
+          organizationId={page.organization.id}
+          currentFolderId={null}
+          excludeFolderIds={actions.folders.map((folder) => folder.id)}
+          requireDifferentDestination={false}
+          pending={page.batchMove.isPending}
+          error={page.batchMove.error?.message ?? null}
+          onClose={() => setBatchMoveOpen(false)}
+          onMove={(parentId) => {
+            void page.batchMove
+              .mutateAsync({
+                folders: actions.folders,
+                items: actions.editableItems,
+                parentId,
+              })
+              .then(() => {
+                setBatchMoveOpen(false);
+                setSelected([]);
+              })
+              .catch(() => undefined);
+          }}
+        />
+      ) : null}
+
       <AccessSettingsDialog
         open={access != null}
         target={
@@ -345,6 +503,25 @@ export function ResourcesPage() {
           setRemove(null);
           if (target.kind === "folder") page.archiveFolder.mutate(target.id);
           else page.archiveItem.mutate(target.id);
+        }}
+      />
+
+      <ConfirmDialog
+        open={batchRemoveOpen}
+        title={actions.count === 1 ? "Remove this?" : `Remove ${actions.count} items?`}
+        body="They will be hidden from Resources. You can still ask an admin if you need them back."
+        confirmLabel="Remove"
+        cancelLabel="Keep"
+        onCancel={() => setBatchRemoveOpen(false)}
+        onConfirm={() => {
+          setBatchRemoveOpen(false);
+          void page.batchArchive
+            .mutateAsync({
+              folderIds: actions.folders.map((folder) => folder.id),
+              itemIds: actions.editableItems.map((item) => item.id),
+            })
+            .then(() => setSelected([]))
+            .catch(() => undefined);
         }}
       />
     </div>

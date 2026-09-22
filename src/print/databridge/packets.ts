@@ -65,9 +65,9 @@ export async function loadMaterialPrintPacket(
   };
 }
 
-export async function loadResourcePrintPacket(
+async function resourceItemPrintMaterial(
   itemId: number,
-): Promise<PrintPacket | null> {
+): Promise<PrintMaterial | null> {
   const item = await getResourceItem(itemId);
   if (!item || item.archivedAt) return null;
   const kind =
@@ -89,26 +89,42 @@ export async function loadResourcePrintPacket(
     }
   }
   return {
+    id: item.id,
     title: item.title,
+    description: item.description,
+    kind,
+    url: item.url,
+    scheduledDate: null,
+    blocks,
+    file: file
+      ? {
+          filename: file.filename,
+          mimeType: file.mimeType,
+          bytes,
+        }
+      : null,
+  };
+}
+
+export async function loadResourcePrintPacket(
+  itemIdOrIds: number | number[],
+): Promise<PrintPacket | null> {
+  const ids = Array.isArray(itemIdOrIds) ? itemIdOrIds : [itemIdOrIds];
+  const materials: PrintMaterial[] = [];
+  let found = false;
+  for (const id of ids) {
+    const material = await resourceItemPrintMaterial(id);
+    if (!material) continue;
+    found = true;
+    if (material.kind === "link" && ids.length > 1) continue;
+    materials.push(material);
+  }
+  if (!found) return null;
+  const only = materials[0];
+  return {
+    title: materials.length === 1 && only ? only.title : "Resources",
     subtitle: "Resources",
-    materials: [
-      {
-        id: item.id,
-        title: item.title,
-        description: item.description,
-        kind,
-        url: item.url,
-        scheduledDate: null,
-        blocks,
-        file: file
-          ? {
-              filename: file.filename,
-              mimeType: file.mimeType,
-              bytes,
-            }
-          : null,
-      },
-    ],
+    materials,
   };
 }
 
