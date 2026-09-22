@@ -12,6 +12,18 @@ export function eventAudienceLabel(audience: EventAudience): string {
   return audience === "course" ? "Course" : "Class";
 }
 
+/** Parent view keeps an event when a linked student is in any target course or class. */
+export function eventAppliesToFamily(
+  event: { audience: EventAudience; courseIds: number[]; classIds: number[] },
+  courseIds: ReadonlySet<number>,
+  classIds: ReadonlySet<number>,
+): boolean {
+  if (event.audience === "course") {
+    return event.courseIds.some((id) => courseIds.has(id));
+  }
+  return event.classIds.some((id) => classIds.has(id));
+}
+
 export function eventTargetSummary(names: string[], fallback = "Audience"): string {
   const cleaned = names.map((name) => name.trim()).filter(Boolean);
   if (cleaned.length === 0) return fallback;

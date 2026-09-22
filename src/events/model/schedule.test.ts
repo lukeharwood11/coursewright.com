@@ -6,6 +6,7 @@ import {
   formatEventTime,
   formatEventWhen,
 } from "./schedule.ts";
+import { eventAppliesToFamily } from "./audience.ts";
 import { validateEventDraft, type EventDraft } from "./validate.ts";
 
 function draft(patch: Partial<EventDraft> = {}): EventDraft {
@@ -42,6 +43,23 @@ test("times format for day view and stay blank when unset", () => {
     startTime: "09:00",
     endTime: "14:00",
   }), /9:00 AM – 2:00 PM/);
+});
+
+test("a family sees an event only when a linked student is in a target", () => {
+  const courseEvent = {
+    audience: "course" as const,
+    courseIds: [2, 9],
+    classIds: [] as number[],
+  };
+  const classEvent = {
+    audience: "class" as const,
+    courseIds: [] as number[],
+    classIds: [4],
+  };
+  assert.equal(eventAppliesToFamily(courseEvent, new Set([9]), new Set()), true);
+  assert.equal(eventAppliesToFamily(courseEvent, new Set([3]), new Set([4])), false);
+  assert.equal(eventAppliesToFamily(classEvent, new Set([2]), new Set([4])), true);
+  assert.equal(eventAppliesToFamily(classEvent, new Set([2]), new Set([8])), false);
 });
 
 test("location and a coherent schedule are required", () => {

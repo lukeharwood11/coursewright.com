@@ -1,6 +1,7 @@
 import { requireSupabase } from "./client";
 import { parseCourseColorKey, type CourseColorKey } from "@/courses/model/courseColor";
 import { listEventsOverlapping, type EventSummary } from "@/events/databridge/events";
+import { eventAppliesToFamily } from "@/events/model/audience";
 import { listLessonPlansInRange, type LessonPlanDetail } from "@/lesson-plans/databridge/lessonPlans";
 import { isPublished } from "@/materials/model/visibility";
 import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
@@ -55,9 +56,42 @@ export async function loadCalendarSource(args: {
   ]);
 
   if (args.parentMode) {
-    return { ...(await loadParentCalendar(db, args, lessonPlans)), events };
+    const parent = await loadParentCalendar(db, args, lessonPlans);
+    const classIds = await linkedClassIds(db, parent.studentIds, args.organizationId);
+    const courseIds = new Set(parent.courses.map((course) => course.id));
+    return {
+      courses: parent.courses,
+      materials: parent.materials,
+      lessonPlans: parent.lessonPlans,
+      events: events.filter((event) => eventAppliesToFamily(event, courseIds, classIds)),
+    };
   }
   return { ...(await loadStaffCalendar(db, args, lessonPlans)), events };
+}
+
+async function linkedClassIds(
+  db: ReturnType<typeof requireSupabase>,
+  studentIds: number[],
+  organizationId: number,
+): Promise<Set<number>> {
+  if (studentIds.length === 0) return new Set();
+
+  const { data: members, error: membersError } = await db
+    .from("class_members")
+    .select("class_id")
+    .in("student_profile_id", studentIds);
+  if (membersError) throw new Error(membersError.message);
+  const classIds = [...new Set((members ?? []).map((row) => row.class_id))];
+  if (classIds.length === 0) return new Set();
+
+  const { data: classes, error: classError } = await db
+    .from("classes")
+    .select("id")
+    .in("id", classIds)
+    .eq("organization_id", organizationId)
+    .is("deleted_at", null);
+  if (classError) throw new Error(classError.message);
+  return new Set((classes ?? []).map((row) => row.id));
 }
 
 async function loadStaffCalendar(
@@ -127,7 +161,7 @@ async function loadParentCalendar(
     rangeEnd: string;
   },
   lessonPlans: LessonPlanDetail[],
-): Promise<CalendarSource> {
+): Promise<CalendarSource & { studentIds: number[] }> {
   const { data: links, error: linksError } = await db
     .from("parent_student_links")
     .select("student_profile_id")
@@ -135,7 +169,7 @@ async function loadParentCalendar(
   if (linksError) throw new Error(linksError.message);
   const studentIds = (links ?? []).map((row) => row.student_profile_id);
   if (studentIds.length === 0) {
-    return { courses: [], materials: [], lessonPlans: [], events: [] };
+    return { courses: [], materials: [], lessonPlans: [], events: [], studentIds: [] };
   }
 
   const { data: enrollmentRows, error: enrollmentError } = await db
@@ -206,5 +240,11 @@ async function loadParentCalendar(
       })),
     }));
 
-  return { courses: uniqueCourses, materials, lessonPlans: publishedPlans, events: [] };
+  return {
+    courses: uniqueCourses,
+    materials,
+    lessonPlans: publishedPlans,
+    events: [],
+    studentIds,
+  };
 }
