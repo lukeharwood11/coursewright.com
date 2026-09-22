@@ -1,4 +1,6 @@
 import { getCourse } from "@/courses/databridge/courses";
+import { getEvent } from "@/events/databridge/events";
+import { formatEventWhen } from "@/events/model/schedule";
 import { downloadFileBytes, getFile } from "@/materials/databridge/files";
 import { listBlocks } from "@/materials/databridge/blocks";
 import { listResourceBlocks } from "@/resources/databridge/blocks";
@@ -142,6 +144,32 @@ export async function loadUnitPrintPacket(unitId: number): Promise<PrintPacket |
     title: unit.title,
     subtitle: course?.title ?? null,
     materials: printed,
+  };
+}
+
+export async function loadEventPrintPacket(eventId: number): Promise<PrintPacket | null> {
+  const event = await getEvent(eventId);
+  if (!event) return null;
+  const linked =
+    event.materials.length > 0
+      ? `Materials: ${event.materials.map((material) => material.title).join(", ")}`
+      : "";
+  const description = [formatEventWhen(event), event.location, linked].filter(Boolean).join("\n");
+  return {
+    title: event.title,
+    subtitle: event.location,
+    materials: [
+      {
+        id: event.id,
+        title: event.title,
+        description,
+        kind: "page",
+        url: null,
+        scheduledDate: event.startsOn,
+        blocks: event.blocks.map((block) => ({ kind: block.kind, body: block.body })),
+        file: null,
+      },
+    ],
   };
 }
 

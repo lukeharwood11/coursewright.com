@@ -87,7 +87,8 @@ src/
 ├── discussions/              # P1 — two-way threads (one course or one class)
 ├── notifications/            # P1 — in-app Activity
 ├── lesson-plans/             # weekly course plans + per-day materials
-├── calendar/                 # month/week calendar of assigned, due, lesson plans
+├── calendar/                 # month/week calendar of assigned, due, lesson plans, events
+├── events/                   # shared course or class events + write-up
 ├── auth/                     # login, signup, invite entry, session helpers
 ├── marketing/                # public home, about, pricing, privacy, terms, help `/docs`
 ├── billing/                  # P1 stub — Stripe later

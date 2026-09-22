@@ -8,12 +8,18 @@ import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
+import { ClassEventsSection } from "./components/ClassEventsSection";
 import { ClassLeadsSection } from "./components/ClassLeadsSection";
+import { useClassEvents } from "./hooks/useClassEvents";
 import { useClassRoster } from "./hooks/useClassRoster";
 import { useToastOnError } from "@/ui/useToastOnError";
 
 export function ClassRosterPage() {
   const roster = useClassRoster();
+  const eventsQuery = useClassEvents(
+    roster.classGroup?.id ?? NaN,
+    Boolean(roster.classGroup),
+  );
   useToastOnError(roster.error);
 
   useEffect(() => {
@@ -89,6 +95,12 @@ export function ClassRosterPage() {
         }
       />
       <div className="space-y-6 px-5 pt-4 pb-6 md:px-8">
+      <ClassEventsSection
+        orgSlug={roster.organization.slug}
+        classId={roster.classGroup.id}
+        events={eventsQuery.data ?? []}
+        canEdit
+      />
       <ClassLeadsSection
         orgSlug={roster.organization.slug}
         leads={roster.leads}

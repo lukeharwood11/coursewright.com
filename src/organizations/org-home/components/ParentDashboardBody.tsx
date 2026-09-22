@@ -116,6 +116,7 @@ export function ParentDashboardBody({
                 weekNotes={calendar.weekNotes}
                 lessonDays={calendar.lessonDays}
                 chips={calendar.chips}
+                events={calendar.events}
                 hiddenCourseIds={hiddenCourseIds}
                 layout="cards"
                 schoolDays={schoolDays}

@@ -4,12 +4,15 @@ import { lessonPlanPath } from "@/lesson-plans/model/paths";
 import { weekdayDateHeading, weekdayShort } from "@/calendar/model/dates";
 import { calendarPath } from "@/calendar/model/paths";
 import {
+  visibleEvents,
   weekClassCards,
   weekDatesToShow,
+  type CalendarEventChip,
   type CalendarLessonPlanDay,
   type CalendarMaterialChip,
   type CalendarWeekNote,
 } from "@/calendar/model/events";
+import { EventChip } from "./EventChip";
 import { weekDates } from "@/lesson-plans/model/validate";
 import {
   DEFAULT_SCHOOL_DAYS,
@@ -27,6 +30,7 @@ export function WeekCalendar({
   weekNotes,
   lessonDays,
   chips,
+  events = [],
   hiddenCourseIds,
   layout = "week",
   schoolDays = DEFAULT_SCHOOL_DAYS,
@@ -36,6 +40,7 @@ export function WeekCalendar({
   weekNotes: CalendarWeekNote[];
   lessonDays: CalendarLessonPlanDay[];
   chips: CalendarMaterialChip[];
+  events?: CalendarEventChip[];
   hiddenCourseIds: Set<number>;
   /** `cards` (This week): skip empty days and wrap. `week` (Calendar): all seven columns. */
   layout?: "week" | "cards";
@@ -44,11 +49,13 @@ export function WeekCalendar({
   const notes = weekNotes.filter((note) => !hiddenCourseIds.has(note.courseId));
   const visibleDays = lessonDays.filter((day) => !hiddenCourseIds.has(day.courseId));
   const visibleChips = chips.filter((chip) => !hiddenCourseIds.has(chip.courseId));
+  const dayEvents = visibleEvents(events, hiddenCourseIds);
   const dates = weekDatesToShow(
     weekDates(weekStart),
     visibleDays,
     visibleChips,
     layout === "cards",
+    dayEvents,
   );
   const cards = layout === "cards";
 
@@ -123,6 +130,21 @@ export function WeekCalendar({
                 )}
               </h3>
               <div className="relative z-10 mt-2 flex flex-col gap-2">
+                {dayEvents
+                  .filter((event) => event.date === date)
+                  .map((event) => (
+                    <EventChip
+                      key={event.eventId}
+                      orgSlug={orgSlug}
+                      eventId={event.eventId}
+                      title={event.title}
+                      location={event.location}
+                      startTime={event.startTime}
+                      endTime={event.endTime}
+                      colorKey={event.colorKey}
+                      showDetails={false}
+                    />
+                  ))}
                 {weekClassCards([date], visibleDays, visibleChips).map((card) => (
                   <CalendarClassBlock
                     key={`${card.date}-${card.courseId}-${card.planId ?? "chips"}`}

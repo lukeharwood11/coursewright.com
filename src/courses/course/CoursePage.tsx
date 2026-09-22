@@ -14,7 +14,9 @@ import {
   CourseOutlineToggle,
 } from "./components/CourseOutline";
 import { CourseSidebar } from "./components/CourseSidebar";
+import { CourseEventsSection } from "./components/CourseEventsSection";
 import { CourseLessonPlansSection } from "./components/CourseLessonPlansSection";
+import { useCourseEvents } from "./hooks/useCourseEvents";
 import { UnitCard } from "./components/UnitCard";
 import { useCourse } from "./hooks/useCourse";
 import { coursesPath } from "@/courses/model/paths";
@@ -40,6 +42,7 @@ export function CoursePage() {
     reorderUnit,
     setVisibility,
   } = useCourse();
+  const eventsQuery = useCourseEvents(course?.id ?? NaN, Boolean(course));
   useToastOnError(error);
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
   const [addingUnit, setAddingUnit] = useState(false);
@@ -151,6 +154,12 @@ export function CoursePage() {
             plans={lessonPlans}
             canEdit={canEdit}
             isParent={isParent}
+          />
+          <CourseEventsSection
+            orgSlug={organization.slug}
+            courseId={course.id}
+            events={eventsQuery.data ?? []}
+            canEdit={canEdit}
           />
 
           <section className="mt-8">

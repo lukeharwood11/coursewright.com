@@ -1,5 +1,6 @@
 import type { CourseColorKey } from "@/courses/model/courseColor";
 import { parseCourseColorKey } from "@/courses/model/courseColor";
+import type { EventAudience } from "@/events/model/audience";
 import { lessonPlanIsPublished } from "@/lesson-plans/model/visibility";
 import { isAnnouncementAvailable } from "@/announcements/model/availability";
 import type { AnnouncementAudience } from "@/announcements/model/audience";
@@ -98,11 +99,26 @@ export type ParentDashboardNextItem = {
   sortDate: string;
 };
 
+export type ParentDashboardEvent = {
+  id: number;
+  title: string;
+  location: string;
+  startsOn: string;
+  endsOn: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  audience: EventAudience;
+  courseIds: number[];
+  colorKey: CourseColorKey | null;
+  studentIds: number[];
+};
+
 export type ParentDashboard = {
   week: CalendarWeek;
   importantNow: ParentImportantNowItem[];
   announcements: ParentAnnouncementItem[];
   lessonPlans: ParentLessonPlanItem[];
+  events: ParentDashboardEvent[];
   courses: ParentDashboardCourseMeta[];
   students: ParentDashboardStudent[];
   /** Soonest assigned materials on or after today. */
@@ -160,6 +176,18 @@ export type ParentDashboardSource = {
     }>;
   }>;
   classMemberships?: Array<{ classId: number; studentId: number }>;
+  events?: Array<{
+    id: number;
+    title: string;
+    location: string;
+    startsOn: string;
+    endsOn: string | null;
+    startTime: string | null;
+    endTime: string | null;
+    audience: EventAudience;
+    courseIds: number[];
+    classIds: number[];
+  }>;
   announcements?: Array<{
     id: number;
     title: string;
@@ -312,6 +340,32 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
       return a.title.localeCompare(b.title);
     });
 
+  const events = (source.events ?? []).flatMap((item) => {
+    const studentIds = studentIdsForEvent(source, item);
+    if (studentIds.length === 0) return [];
+    const colorKey =
+      item.audience === "course" && item.courseIds.length === 1
+        ? parseCourseColorKey(
+            source.enrollments.find((row) => row.courseId === item.courseIds[0])?.colorKey,
+          )
+        : null;
+    return [
+      {
+        id: item.id,
+        title: item.title,
+        location: item.location,
+        startsOn: item.startsOn,
+        endsOn: item.endsOn,
+        startTime: item.startTime,
+        endTime: item.endTime,
+        audience: item.audience,
+        courseIds: item.courseIds,
+        colorKey: item.audience === "course" && item.courseIds.length === 1 ? colorKey : null,
+        studentIds,
+      },
+    ];
+  });
+
   const nextAssigned = collectNextByDate(source, "assigned");
   const nextDue = collectNextByDate(source, "due");
 
@@ -320,6 +374,7 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
     importantNow,
     announcements,
     lessonPlans,
+    events,
     courses: coursesFromStudents(students),
     students,
     nextAssigned,
@@ -345,6 +400,9 @@ export function filterParentDashboard(
   const lessonPlans = dashboard.lessonPlans.filter((item) =>
     courseIds.has(item.courseId),
   );
+  const events = (dashboard.events ?? []).filter((event) =>
+    event.studentIds.some((id) => allowed.has(id)),
+  );
   const announcements = dashboard.announcements
     .map((item) => ({
       ...item,
@@ -362,6 +420,7 @@ export function filterParentDashboard(
     importantNow,
     announcements,
     lessonPlans,
+    events,
     nextAssigned,
     nextDue,
     nextAssignedItem: nextAssigned[0] ?? null,
@@ -384,7 +443,35 @@ export function datedMaterialCount(students: ParentDashboardStudent[]): number {
 }
 
 export function parentWeekHasContent(dashboard: ParentDashboard): boolean {
-  return dashboard.lessonPlans.length > 0 || datedMaterialCount(dashboard.students) > 0;
+  return (
+    dashboard.lessonPlans.length > 0 ||
+    datedMaterialCount(dashboard.students) > 0 ||
+    (dashboard.events ?? []).length > 0
+  );
+}
+
+function studentIdsForEvent(
+  source: ParentDashboardSource,
+  item: NonNullable<ParentDashboardSource["events"]>[number],
+): number[] {
+  if (item.audience === "course") {
+    const courseIds = new Set(item.courseIds);
+    return [
+      ...new Set(
+        source.enrollments
+          .filter((row) => courseIds.has(row.courseId) && row.courseStatus === "active")
+          .map((row) => row.studentId),
+      ),
+    ];
+  }
+  const classIds = new Set(item.classIds);
+  return [
+    ...new Set(
+      (source.classMemberships ?? [])
+        .filter((row) => classIds.has(row.classId))
+        .map((row) => row.studentId),
+    ),
+  ];
 }
 
 function coursesFromStudents(

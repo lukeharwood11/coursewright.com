@@ -1,5 +1,8 @@
-import { PageLoading } from "@/ui/PageLoading";
 import { useEffect } from "react";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { ButtonLink } from "@/ui/Button";
+import { PageLoading } from "@/ui/PageLoading";
+import { newEventPath } from "@/events/model/paths";
 import { CourseLegend } from "@/calendar/components/CourseLegend";
 import { DayCalendar } from "@/calendar/components/DayCalendar";
 import { MonthCalendar } from "@/calendar/components/MonthCalendar";
@@ -30,17 +33,28 @@ export function CalendarPage() {
             {page.periodLabel}
           </p>
         </div>
-        <CalendarToolbar
-          view={page.view}
-          onPrev={page.goPrev}
-          onNext={page.goNext}
-          onViewChange={page.setView}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          {page.parentMode ? null : (
+            <ButtonLink
+              to={newEventPath(page.organization.slug, { date: page.focusDate })}
+            >
+              <PlusIcon className="h-5 w-5" aria-hidden />
+              Add event
+            </ButtonLink>
+          )}
+          <CalendarToolbar
+            view={page.view}
+            onPrev={page.goPrev}
+            onNext={page.goNext}
+            onViewChange={page.setView}
+          />
+        </div>
       </div>
 
       <p className="mt-3 text-[13px] text-[var(--ink-faint)]">
-        Filled chips are due. Outlined chips are assigned. Tap a class in the legend to hide it.
-        Tap a day to open that day.
+        Filled chips are due. Outlined chips are assigned. Events show the title here, and the
+        time and location when you open the day. Tap a class in the legend to hide it. Tap a day
+        to open that day.
       </p>
 
       <div className="mt-4">
@@ -62,6 +76,7 @@ export function CalendarPage() {
               weekNotes={page.weekNotes}
               lessonDays={page.lessonDays}
               chips={page.chips}
+              events={page.events}
               hiddenCourseIds={page.hiddenCourseIds}
               schoolDays={page.organization.schoolDays}
             />
@@ -71,6 +86,7 @@ export function CalendarPage() {
               date={page.focusDate}
               lessonDays={page.lessonDays}
               chips={page.chips}
+              events={page.events}
               hiddenCourseIds={page.hiddenCourseIds}
               schoolDays={page.organization.schoolDays}
             />
@@ -83,6 +99,7 @@ export function CalendarPage() {
               monthEnd={page.month.end}
               lessonDays={page.lessonDays}
               chips={page.chips}
+              events={page.events}
               hiddenCourseIds={page.hiddenCourseIds}
               schoolDays={page.organization.schoolDays}
             />

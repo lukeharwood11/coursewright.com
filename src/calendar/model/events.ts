@@ -1,4 +1,6 @@
 import type { CourseColorKey } from "@/courses/model/courseColor";
+import { datesForEvent } from "@/events/model/schedule";
+import type { EventAudience } from "@/events/model/audience";
 
 export type CalendarChipKind = "assigned" | "due";
 
@@ -46,6 +48,75 @@ export type CalendarCourse = {
   title: string;
   colorKey: CourseColorKey;
 };
+
+export type CalendarEventInput = {
+  id: number;
+  title: string;
+  location: string;
+  startsOn: string;
+  endsOn: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  audience: EventAudience;
+  courseIds: number[];
+  colorKey?: CourseColorKey | null;
+};
+
+export type CalendarEventChip = {
+  eventId: number;
+  title: string;
+  location: string;
+  date: string;
+  startTime: string | null;
+  endTime: string | null;
+  audience: EventAudience;
+  courseIds: number[];
+  colorKey: CourseColorKey | null;
+};
+
+export function expandEventsInRange(
+  events: CalendarEventInput[],
+  rangeStart: string,
+  rangeEnd: string,
+  courses: Array<{ id: number; colorKey: CourseColorKey }> = [],
+): CalendarEventChip[] {
+  const colorByCourse = new Map(courses.map((course) => [course.id, course.colorKey]));
+  const chips: CalendarEventChip[] = [];
+  for (const event of events) {
+    const colorKey =
+      event.colorKey !== undefined
+        ? event.colorKey
+        : event.audience === "course" && event.courseIds.length === 1
+          ? (colorByCourse.get(event.courseIds[0]!) ?? null)
+          : null;
+    for (const date of datesForEvent(event.startsOn, event.endsOn, rangeStart, rangeEnd)) {
+      chips.push({
+        eventId: event.id,
+        title: event.title,
+        location: event.location,
+        date,
+        startTime: event.startTime,
+        endTime: event.endTime,
+        audience: event.audience,
+        courseIds: event.courseIds,
+        colorKey,
+      });
+    }
+  }
+  return chips;
+}
+
+/** Hide a course event only when every one of its courses is hidden. Class events stay. */
+export function visibleEvents(
+  events: CalendarEventChip[],
+  hiddenCourseIds: Set<number>,
+): CalendarEventChip[] {
+  if (hiddenCourseIds.size === 0) return events;
+  return events.filter((event) => {
+    if (event.audience === "class" || event.courseIds.length === 0) return true;
+    return event.courseIds.some((id) => !hiddenCourseIds.has(id));
+  });
+}
 
 export type CalendarDayCell = {
   date: string;
@@ -280,13 +351,15 @@ export function dayHasCalendarContent(
   date: string,
   lessonDays: CalendarLessonPlanDay[],
   chips: CalendarMaterialChip[],
+  events: CalendarEventChip[] = [],
 ): boolean {
   for (const day of lessonDays) {
     if (day.date !== date) continue;
     if (day.body.trim()) return true;
     if (day.materials.length > 0) return true;
   }
-  return chips.some((chip) => chip.date === date);
+  if (chips.some((chip) => chip.date === date)) return true;
+  return events.some((event) => event.date === date);
 }
 
 export function weekDatesToShow(
@@ -294,7 +367,8 @@ export function weekDatesToShow(
   lessonDays: CalendarLessonPlanDay[],
   chips: CalendarMaterialChip[],
   omitEmpty: boolean,
+  events: CalendarEventChip[] = [],
 ): string[] {
   if (!omitEmpty) return dates;
-  return dates.filter((date) => dayHasCalendarContent(date, lessonDays, chips));
+  return dates.filter((date) => dayHasCalendarContent(date, lessonDays, chips, events));
 }

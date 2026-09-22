@@ -6,6 +6,7 @@
 **URL (material, course, in unit):** `/my/<org-slug>/courses/<course_id>/units/<unit_id>/materials/<material_id>/print`  
 **URL (unit, course):** `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print`  
 **URL (this week):** `/my/<org-slug>/print-this-week` (optional `?students=<id>,<id>` for active students on the parent home)  
+**URL (event):** `/my/<org-slug>/events/<event_id>/print`  
 **URL (resource):** `/my/<org-slug>/resources/items/<item_id>/print`  
 **URL (resources, several):** `/my/<org-slug>/resources/print?items=<id>,<id>`  
 **URL (material / unit, template, P1):** same `/print` suffix on the template URL tree  
@@ -37,6 +38,7 @@ One composition: **generate a PDF** of the grain, **preview that PDF** in the pa
 | **Unit** | Materials in `position` order as one packet; page breaks **between** materials. |
 | **This week** | Current Sunday–Saturday dated materials (+ important now, if any) **and published lesson plans** for **active** students on parent home, grouped like [ORG_HOME](./ORG_HOME.md) **by student**. Each student: **lesson plans first** (week note + day notes), then materials. Includes assigned and due work for the week. One student at a time; **page break before the next student**. Pack that student’s items onto a page when they fit, separated by a rule; if there isn’t enough room to start the next assignment cleanly, it starts on the next page. Optional `?students=` filters the packet. |
 | **Resource** | One org resource by type — **document:** Lexical blocks (same page layout as a page material; no quizzes in P1a); **file:** same as a file material; **link:** not printed from this screen. Several selected documents and files use `?items=` as one packet (links skipped). |
+| **Event** | The event write-up (same page layout as a page material), with when, location, and linked material titles |
 
 **Not on this page:** print whole course (out of scope).
 
@@ -63,6 +65,7 @@ One composition: **generate a PDF** of the grain, **preview that PDF** in the pa
 - [MATERIAL](./MATERIAL.md) — Back from material print; source of **Print**
 - [UNIT](./UNIT.md) — Back from unit print; source of **Print unit**
 - [ORG_HOME](./ORG_HOME.md) — Back from this-week print; source of **Print this week**
+- [EVENT](./EVENT.md) — Back from an event print; source of **Print** on the event
 - [RESOURCE](./RESOURCE.md) — Back from a single resource print; source of **Print** on a document or file
 - [RESOURCES](./RESOURCES.md) / [RESOURCE_FOLDER](./RESOURCE_FOLDER.md) — Back from a multi-item resource print; source of **Print** on a selection
 - [COURSE](./COURSE.md) — context when linked from course builder print entry points

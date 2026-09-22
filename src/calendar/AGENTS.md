@@ -1,6 +1,6 @@
 # AGENTS — `src/calendar/`
 
-Month and week **calendar** of assigned/due materials and lesson plans. Course-colored chips; legend filters classes.
+Month and week **calendar** of assigned/due materials, lesson plans, and shared **events**. Course-colored chips; legend filters classes. Events are a separate chip (time and location on day view).
 
 ## Scope
 

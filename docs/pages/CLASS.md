@@ -9,7 +9,7 @@ Admins and instructors.
 
 ## Purpose
 
-Manage one org-scoped **Class** — a named group of student profiles. A class is **not** a course and has no materials.
+Manage one org-scoped **Class** — a named group of student profiles. A class is **not** a course and has no materials. It can have **events** shared with this class (and other classes).
 
 
 ## Behavior
@@ -21,6 +21,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - Removing a student from the class does **not** unenroll them from courses.
 - Empty class is allowed.
 - Owners and admins **assign teachers** (class leads — zero or more owners, admins, or instructors). Instructors can see the list. Leads are notified in [ACTIVITY](./ACTIVITY.md) when someone posts in a discussion for this class. **Add teacher** opens a search modal of eligible staff.
+- **Events** for this class: title, when, location. **Add event** starts a class event with this class selected; staff can check other classes. Opening a row goes to [EVENT](./EVENT.md).
 - **Announce** to this class → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
 - **Start a discussion** (**P1**) → [DISCUSSION](./DISCUSSION.md) new with this class prefilled.
 - Disclaimer: membership here does not enroll in a course — use [COURSE_ROSTER](./COURSE_ROSTER.md) (Class may be a batch preset there).
@@ -47,6 +48,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - Add / remove class members (batch add preferred)
 - Assign / remove teachers (owners and admins)
 - Open a student profile
+- Add / open an event
 - Create Announcement
 - Start a discussion (**P1**)
 
@@ -55,6 +57,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - [ORG_ROSTER](./ORG_ROSTER.md) — class list and org students
 - [USER_PROFILE](./USER_PROFILE.md) — teacher cards
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — open a member
+- [EVENT](./EVENT.md) — add or open an event for this class
 - [ANNOUNCEMENT](./ANNOUNCEMENT.md) — Create Announcement for this class
 - [DISCUSSION](./DISCUSSION.md) — Start a discussion for this class (**P1**)
 - [ACTIVITY](./ACTIVITY.md) — leads are notified here when someone posts

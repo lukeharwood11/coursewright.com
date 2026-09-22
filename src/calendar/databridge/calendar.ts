@@ -1,5 +1,6 @@
 import { requireSupabase } from "./client";
 import { parseCourseColorKey, type CourseColorKey } from "@/courses/model/courseColor";
+import { listEventsOverlapping, type EventSummary } from "@/events/databridge/events";
 import { listLessonPlansInRange, type LessonPlanDetail } from "@/lesson-plans/databridge/lessonPlans";
 import { isPublished } from "@/materials/model/visibility";
 import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
@@ -22,6 +23,7 @@ export type CalendarSource = {
   courses: Array<{ id: number; title: string; colorKey: CourseColorKey }>;
   materials: CalendarSourceMaterial[];
   lessonPlans: LessonPlanDetail[];
+  events: EventSummary[];
 };
 
 function one<T>(value: T | T[] | null | undefined): T | null {
@@ -47,16 +49,15 @@ export async function loadCalendarSource(args: {
   parentMode: boolean;
 }): Promise<CalendarSource> {
   const db = requireSupabase();
-  const lessonPlans = await listLessonPlansInRange(
-    args.organizationId,
-    args.rangeStart,
-    args.rangeEnd,
-  );
+  const [lessonPlans, events] = await Promise.all([
+    listLessonPlansInRange(args.organizationId, args.rangeStart, args.rangeEnd),
+    listEventsOverlapping(args.organizationId, args.rangeStart, args.rangeEnd),
+  ]);
 
   if (args.parentMode) {
-    return loadParentCalendar(db, args, lessonPlans);
+    return { ...(await loadParentCalendar(db, args, lessonPlans)), events };
   }
-  return loadStaffCalendar(db, args, lessonPlans);
+  return { ...(await loadStaffCalendar(db, args, lessonPlans)), events };
 }
 
 async function loadStaffCalendar(
@@ -114,7 +115,7 @@ async function loadStaffCalendar(
     });
   }
 
-  return { courses, materials, lessonPlans };
+  return { courses, materials, lessonPlans, events: [] };
 }
 
 async function loadParentCalendar(
@@ -134,7 +135,7 @@ async function loadParentCalendar(
   if (linksError) throw new Error(linksError.message);
   const studentIds = (links ?? []).map((row) => row.student_profile_id);
   if (studentIds.length === 0) {
-    return { courses: [], materials: [], lessonPlans: [] };
+    return { courses: [], materials: [], lessonPlans: [], events: [] };
   }
 
   const { data: enrollmentRows, error: enrollmentError } = await db
@@ -205,5 +206,5 @@ async function loadParentCalendar(
       })),
     }));
 
-  return { courses: uniqueCourses, materials, lessonPlans: publishedPlans };
+  return { courses: uniqueCourses, materials, lessonPlans: publishedPlans, events: [] };
 }

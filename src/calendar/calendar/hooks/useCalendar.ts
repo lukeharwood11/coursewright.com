@@ -6,7 +6,7 @@ import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
 import { calendarQueryKeys, loadCalendarSource } from "@/calendar/databridge/calendar";
 import { addIsoDays, monthContaining, shiftMonth, weekdayDateHeading } from "@/calendar/model/dates";
-import { toggleHiddenCourse } from "@/calendar/model/events";
+import { expandEventsInRange, toggleHiddenCourse } from "@/calendar/model/events";
 import { lessonPlansToDays, lessonPlansToWeekNotes, materialsToChips, plansForWeek } from "@/calendar/model/view";
 import { calendarWeekContaining, localIsoDate } from "@/parent/model/thisWeek";
 import { calendarPath, parseCalendarView, type CalendarView } from "@/calendar/model/paths";
@@ -81,6 +81,22 @@ export function useCalendar() {
     weekNotes: lessonPlansToWeekNotes(weekPlans),
     lessonDays: lessonPlansToDays(source?.lessonPlans ?? []),
     chips: materialsToChips(source?.materials ?? []),
+    events: expandEventsInRange(
+      (source?.events ?? []).map((event) => ({
+        id: event.id,
+        title: event.title,
+        location: event.location,
+        startsOn: event.startsOn,
+        endsOn: event.endsOn,
+        startTime: event.startTime,
+        endTime: event.endTime,
+        audience: event.audience,
+        courseIds: event.courseIds,
+      })),
+      rangeStart,
+      rangeEnd,
+      source?.courses ?? [],
+    ),
     hiddenCourseIds,
     toggleCourse: (id: number) => setHidden((current) => toggleHiddenCourse(current, id)),
     loading: query.isLoading,

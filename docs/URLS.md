@@ -57,6 +57,10 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | [ORG_PICKER](./pages/ORG_PICKER.md) | `/my` | Org picker + create org |
 | [ORG_HOME](./pages/ORG_HOME.md) | `/my/<org-slug>` | Role-aware dashboard (parent “this week” calendar lives here) |
 | [CALENDAR](./pages/CALENDAR.md) | `/my/<org-slug>/calendar` | Month/week/day calendar (`?view=month\|week\|day`, `?date=YYYY-MM-DD`) |
+| [EVENT](./pages/EVENT.md) (view) | `/my/<org-slug>/events/<event_id>` | Shared course or class event |
+| [EVENT](./pages/EVENT.md) (new) | `/my/<org-slug>/events/new` | Staff compose. Optional `?audience=course\|class`, `courseId` / `classId`, `date` |
+| [EVENT](./pages/EVENT.md) (edit) | `/my/<org-slug>/events/<event_id>/edit` | Staff edit |
+| [EVENT](./pages/EVENT.md) (print) | `/my/<org-slug>/events/<event_id>/print` | Print the write-up |
 | [ACTIVITY](./pages/ACTIVITY.md) | `/my/<org-slug>/activity` | In-app notifications (unread first; click acks and opens the activity) |
 
 ---
@@ -177,6 +181,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 | [PRINT](./pages/PRINT.md) (material, in unit) | `…/units/<unit_id>/materials/<material_id>/print` | |
 | [PRINT](./pages/PRINT.md) (unit) | `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print` | Packet in material order |
 | [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Parent dashboard grain; Sun–Sat + important now. Optional `?students=` limits to active students |
+| [PRINT](./pages/PRINT.md) (event) | `/my/<org-slug>/events/<event_id>/print` | Event write-up |
 | [PRINT](./pages/PRINT.md) (resource) | `/my/<org-slug>/resources/items/<item_id>/print` | Document or file |
 | [PRINT](./pages/PRINT.md) (resources) | `/my/<org-slug>/resources/print?items=<id>,<id>` | Selected documents and files |
 
