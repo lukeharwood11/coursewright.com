@@ -20,17 +20,20 @@ Cross-org account controls — not scoped to a single organization (contrast [OR
 - **Save** is disabled when the name is unchanged. Sign out stays on this page (and in chrome) and returns the user to login.
 - Does not edit org slug, grade scheme, or staff (those are [ORG_SETTINGS](./ORG_SETTINGS.md)).
 - Other people in an organization see a **read-only** [USER_PROFILE](./USER_PROFILE.md) (`/my/<org-slug>/people/<user_id>`), not this page.
+- **Notifications** — this device. In a browser tab, a short note to install Course Wright on the home screen. In the installed app, **Turn on notifications** or **Turn off notifications**. If the device blocked permission, explain how to allow Course Wright in settings. The control stays hidden until push is set up on the server (**HN-018**), except that install note.
 - Avatar upload, Google connection actions, and other preferences are **TBD** — not on this screen in P0.
 
 ## Data shown
 
 - **Name** — editable display name from `profiles.name`
 - **Email** — read-only (`profiles.email`, falling back to the auth session email)
+- **Notifications** — install note, or on/off for this installed app
 - Sign-out control
 
 ## Contents
 
 - Profile form: name (edit) + email (read-only, with a short note that email follows sign-in)
+- Notifications
 - Save (disabled until the name changes)
 - Sign out
 - Same collapsible **account sidebar** as [ORG_PICKER](./ORG_PICKER.md): Organizations and Account
@@ -39,6 +42,7 @@ Cross-org account controls — not scoped to a single organization (contrast [OR
 ## Primary actions
 
 - Save display name
+- Turn device notifications on or off (installed app)
 - Sign out
 - Return to org picker
 
@@ -52,4 +56,4 @@ Cross-org account controls — not scoped to a single organization (contrast [OR
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Auth account only. Org staff, slug, and grade scheme live under **org** settings, not here. P0 fields are display name + read-only email + sign-out. Avatar, Google link management, and preference fields remain TBD.
+[FEATURES.md](../FEATURES.md) — Auth account only. Org staff, slug, and grade scheme live under **org** settings, not here. P0 fields are display name + read-only email + sign-out. Installed-app Activity notifications are on this page. Avatar, Google link management, and other preference fields remain TBD.

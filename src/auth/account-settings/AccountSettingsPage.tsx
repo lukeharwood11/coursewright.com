@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Button } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
+import { PushNotificationSetting } from "@/notifications";
 import { AccountProfileForm } from "./components/AccountProfileForm";
 import { useAccountSettings } from "./hooks/useAccountSettings";
 
@@ -44,6 +45,8 @@ export function AccountSettingsPage() {
         onNameChange={account.onNameChange}
         onSubmit={account.onSubmit}
       />
+
+      <PushNotificationSetting />
 
       {account.signOutError ? (
         <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">

@@ -20,6 +20,7 @@ App chrome: collapsible sidebar + top bar for signed-in `/my` pages.
 - Hide chrome on print routes (`PrintLayout` — no org sidebar). HTML `@media print` also hides `.cw-org-chrome`.
 - Pass through auth `Outlet` context so `useAuthedUser` keeps working.
 - Families are **not** in staff nav while the directory SPA UI is unrouted.
+- Org shell mounts the Activity push prompt (`notifications/` `ActivityPushChrome`). Account shell does not. Both shells share the push provider so Account settings can turn notifications on.
 
 ## Don’t
 

@@ -46,6 +46,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | DiscussionMessageAttachment | `discussion_message_attachments` | **P1** — file / material / url on a message |
 | DiscussionRead | `discussion_reads` | **P1** — per-user last read (unread badge) |
 | Notification | `notifications` | **P1** — per-user Activity item; ack via `read_at` |
+| PushSubscription | `push_subscriptions` | **P1** — Web Push endpoint for an installed app |
 | Feedback | `feedback` | Signed-in product notes; identity copied from the session |
 | OrgResourceFolder | `org_resource_folders` | **P1a** — nested org folders; ACL presets + inherit |
 | OrgResourceItem | `org_resource_items` | **P1a** — document · link · file; not a course material |
@@ -76,7 +77,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | Phase | Entities in focus |
 |-------|-------------------|
 | **P0** | Organization, User, Membership, **AdminInvite**, **AdminInviteStudents**, **StudentProfile**, **Class**, **ClassMember**, **ClassLeader**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **LessonPlan**, **LessonPlanDay**, **LessonPlanDayMaterial**, **Announcement**, **AnnouncementRead**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
-| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification**, **Feedback**, **OrgResourceFolder**, **OrgResourceItem**, **OrgResourceBlock**, **OrgResourceGrant** |
+| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification**, **PushSubscription**, **Feedback**, **OrgResourceFolder**, **OrgResourceItem**, **OrgResourceBlock**, **OrgResourceGrant** |
 | **P2** | Cross-org Family management, StudentProfile.user_id, Quiz online, Submission, **ParentPayments** (orgs collect from parents) |
 
 ---
@@ -1008,6 +1009,24 @@ Per-user **Activity** row. Discussion rows are written by a trigger on `discussi
 
 **Realtime:** publish `notifications`. RLS still applies to change payloads.
 
+**Device notification:** an insert, or an update that leaves the row unread and changes what the person would see, queues `send-activity-push` (best-effort). Acks do not. Delivery needs Vault secrets (**HN-018**); without them the Activity write still commits.
+
+### PushSubscription
+
+One Web Push endpoint for an installed app. The signed-in person saves their own row. `claim_push_subscription` moves an endpoint to the current person when someone else signs in on that device.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| user_id | uuid | FK → User (`profiles`) |
+| endpoint | text | Push service URL. Unique |
+| p256dh | text | Client public key |
+| auth | text | Auth secret |
+| created_at | timestamptz | |
+| updated_at | timestamptz | |
+
+**Who can read/write:** `user_id = auth.uid()` for select, insert, update, and delete. The service role reads them to send. Not in Realtime.
+
 ### Feedback
 
 Signed-in **Send feedback** notes. The SPA inserts a row via PostgREST. Not a support ticket queue in the product UI.
@@ -1074,6 +1093,7 @@ DiscussionMessage ──< DiscussionMessageAttachment >── File | Material | 
 DiscussionMessage ──< DiscussionMessageMention >── User
 Discussion ──< DiscussionRead >── User
 Organization ──< Notification >── User
+User ──< PushSubscription
 User ──< Feedback >── Organization?
 ```
 

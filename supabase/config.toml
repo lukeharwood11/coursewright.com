@@ -78,3 +78,9 @@ verify_jwt = true
 
 [functions.send-announcement-notification]
 verify_jwt = true
+
+[functions.send-activity-push]
+verify_jwt = false
+
+[functions.web-push-public-key]
+verify_jwt = true

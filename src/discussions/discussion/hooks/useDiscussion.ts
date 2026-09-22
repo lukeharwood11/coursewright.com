@@ -20,6 +20,7 @@ import {
   uploadDiscussionFile,
   type DiscussionMessageRecord,
 } from "@/discussions/databridge/discussions";
+import { useAckNotificationFromSearch } from "@/notifications/activity/hooks/useAckNotificationFromSearch";
 import {
   markDiscussionNotificationsRead,
   notificationQueryKeys,
@@ -53,6 +54,7 @@ export function useDiscussion() {
   const { organization, role, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
   const queryClient = useQueryClient();
+  useAckNotificationFromSearch();
   const canEdit = staffCanEdit(role, parentPresentation);
   const isStaff = role ? isStaffRole(role) : false;
 

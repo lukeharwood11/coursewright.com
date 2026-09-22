@@ -17,7 +17,7 @@ List stored **Activity** notifications — events that need this person’s atte
 - Reached from the org header **bell** → **View all activity** (the bell itself previews unread only).
 - Unread first, then newest.
 - Each row shows a **type icon** (discussion post, @mention, or announcement) and a headline that names the activity. Unread rows use a stronger card; the icon does **not** switch to a read-receipt checkmark.
-- Clicking a row **acks** it (`read_at`) and opens the activity (a discussion post or an announcement). Opening the discussion another way acks matching **new post** notifications for that person. Opening the announcement acks matching **announcement** notifications. **@mentions** stay unread until clicked.
+- Clicking a row **acks** it (`read_at`) and opens the activity (a discussion post or an announcement). Opening the discussion another way acks matching **new post** notifications for that person. Opening the announcement acks matching **announcement** notifications. **@mentions** stay unread until clicked. A device-notification tap marks that one row read, including an @mention.
 - While this page is open, **Realtime** adds new rows without a full reload.
 - Empty: **Nothing here yet.**
 - Staff Teacher view and parent chrome share the same list; recipients differ by who was notified (instructors / class leads, people who started or posted on the thread, families when a teacher chose **Notify everyone**, anyone @mentioned, families when staff chose **Send notification** on an announcement). One new-post Activity item per discussion. One announcement Activity item per notice.
@@ -52,4 +52,4 @@ Read-only list (ack is the write).
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Notifications (**P1**). Header bell (right of the avatar) shows a red unread count and previews the three newest unread, or **You're all caught up!** Distinct from announcement sidebar unread and the Discussions unread-thread badge. Announcement **Send notification** also writes an Activity row. No push in this slice.
+[FEATURES.md](../FEATURES.md) — Notifications (**P1**). Header bell (right of the avatar) shows a red unread count and previews the three newest unread, or **You're all caught up!** Distinct from announcement sidebar unread and the Discussions unread-thread badge. Announcement **Send notification** also writes an Activity row. The installed app can turn on a device notification for the same rows ([ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)). A browser tab does not.
