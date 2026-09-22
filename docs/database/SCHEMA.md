@@ -12,6 +12,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 |---------------|-------|--------|
 | User | `profiles` | PK = `auth.users.id`. Email + Google live in Supabase Auth; `profiles` is the PostgREST-facing row. |
 | Organization | `organizations` | |
+| OrganizationBranding | `organization_branding` | Owner-only icon and accent for org chrome. One row per org. |
 | Membership | `memberships` | |
 | AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `parent`. Claimed via emailed `/invite/<token>` (Resend `organization-invite`) or pending-request inbox after login. Copy-link remains. Membership is created on claim. |
 | StudentProfile | `student_profiles` | |
@@ -346,6 +347,19 @@ UI map: [URLS.md](../URLS.md), [PRINT](../pages/PRINT.md).
 **School days:** owners and admins set which weekdays school operates. Instructors see the setting read-only. Calendar week view and parent This week stay Sunday–Saturday; empty days still omit on This week.
 
 **Profile:** optional about / address / website / contact email / phone. Owners and admins edit in org settings. When any field is set, org home (staff and parent) shows a compact About this organization card.
+
+### OrganizationBranding
+
+One optional row per organization. **Owners** set it. Admins, instructors, and parents can read it and see it in chrome; they cannot write it. Separate from `organizations` because org updates are allowed for any admin.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| organization_id | bigint | PK, FK → Organization, cascade delete |
+| accent_color | text | Optional `#rrggbb`. Empty means Wright Green. The app rejects colors that fail WCAG AA contrast for white text, and derives a darker hover and a light tint. |
+| icon_path | text | Optional Storage path `{organization_id}/icon.{png\|jpg\|webp}` in the public `org-brand` bucket (256 KB). Empty means the CW mark. |
+| updated_at | timestamptz | Cache-busts the public icon URL |
+
+**Chrome only.** The accent restyles the org sidebar and header controls. It does not recolor page content, emails, or print. The icon also appears beside the org name on the account org list.
 
 ### User
 

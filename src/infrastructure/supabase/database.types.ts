@@ -2159,6 +2159,35 @@ export type Database = {
           },
         ]
       }
+      organization_branding: {
+        Row: {
+          accent_color: string | null
+          icon_path: string | null
+          organization_id: number
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string | null
+          icon_path?: string | null
+          organization_id: number
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string | null
+          icon_path?: string | null
+          organization_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_branding_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           about: string | null
@@ -2211,7 +2240,15 @@ export type Database = {
           updated_at?: string
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "organization_branding_organization_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "organization_branding"
+            referencedColumns: ["organization_id"]
+          },
+        ]
       }
       parent_student_links: {
         Row: {
