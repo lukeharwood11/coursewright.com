@@ -5,7 +5,6 @@ import {
   BookOpenIcon,
   BuildingOffice2Icon,
   CalendarDaysIcon,
-  ChartBarIcon,
   ChatBubbleLeftRightIcon,
   Cog6ToothIcon,
   FolderOpenIcon,
@@ -18,7 +17,6 @@ import {
   BookOpenIcon as BookOpenSolidIcon,
   BuildingOffice2Icon as BuildingOffice2SolidIcon,
   CalendarDaysIcon as CalendarDaysSolidIcon,
-  ChartBarIcon as ChartBarSolidIcon,
   ChatBubbleLeftRightIcon as ChatBubbleLeftRightSolidIcon,
   Cog6ToothIcon as Cog6ToothSolidIcon,
   FolderOpenIcon as FolderOpenSolidIcon,
@@ -48,7 +46,6 @@ const sectionIcons: Record<string, { outline: IconComponent; solid: IconComponen
   resources: { outline: FolderOpenIcon, solid: FolderOpenSolidIcon },
   roster: { outline: UsersIcon, solid: UsersSolidIcon },
   settings: { outline: Cog6ToothIcon, solid: Cog6ToothSolidIcon },
-  progress: { outline: ChartBarIcon, solid: ChartBarSolidIcon },
 };
 
 const itemClass =

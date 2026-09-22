@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { PrinterIcon } from "@heroicons/react/24/outline";
 import { ButtonLink } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
-import { toastNotImplemented } from "@/ui/toast";
 import {
   filterParentDashboard,
   toggleStudentId,
@@ -46,7 +45,7 @@ export function ParentHome({
       : printThisWeekPath(orgSlug);
 
   return (
-    <div className="px-5 pb-24 pt-6 md:px-8 md:py-8">
+    <div className="px-5 py-6 md:px-8 md:py-8">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1
@@ -103,24 +102,6 @@ export function ParentHome({
           }
         />
       ) : null}
-
-      <nav
-        className="cw-org-chrome fixed inset-x-0 bottom-0 border-t border-[var(--line-soft)] bg-[var(--surface)] md:hidden"
-        aria-label="Parent"
-      >
-        <div className="mx-auto grid max-w-lg grid-cols-2">
-          <span className="py-3 text-center text-[11.5px] font-bold text-[var(--green)]">
-            This week
-          </span>
-          <button
-            type="button"
-            className="py-3 text-center text-[11.5px] font-bold text-[var(--ink-faint)]"
-            onClick={() => toastNotImplemented("Progress")}
-          >
-            Progress
-          </button>
-        </div>
-      </nav>
     </div>
   );
 }

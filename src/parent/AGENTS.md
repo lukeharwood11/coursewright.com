@@ -17,12 +17,12 @@ Parent dashboard: usability anchor. This week’s **calendar** plus a **Focus** 
 - Tech-averse parent must understand the screen **immediately**.
 - Label **Assigned** vs **Due** — never show a bare date without saying which kind it is.
 - This week includes materials assigned in the week **and/or** due in the week, plus published lesson plans. Print stays the full week.
-- Phone-first; bottom tabs: This week | Progress (Progress dim until P1). Sidebar also has Calendar, Announcements, and **Discussions** (**P1**) — discussions are **not** cards on this home.
+- Phone-first. Sidebar: This week, Calendar, Announcements, and **Discussions** (**P1**) — discussions are **not** cards on this home.
 - Plain language — no LMS jargon ([STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md)).
 
 ## Don’t
 
 - Crowd the home with instructor/builder complexity.
 - Make print hard to find.
-- Implement P1 progress here beyond a disabled tab unless FEATURES says so.
+- Ship a Progress tab until FEATURES marks Progress in progress.
 - Bring back bulletins or a due-only list / “From your teachers” rail.

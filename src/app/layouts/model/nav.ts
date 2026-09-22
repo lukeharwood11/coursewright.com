@@ -199,15 +199,6 @@ export function buildParentNav(
     });
   }
 
-  sections.push({
-    id: "progress",
-    label: "Progress",
-    href: null,
-    match: "exact",
-    soon: true,
-    children: [],
-  });
-
   if (options?.showResources) {
     sections.push({
       id: "resources",

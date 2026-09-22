@@ -220,12 +220,11 @@ Paper canvas. Centered card, max-width ~320px. Wordmark → Lora heading → one
 
 ### Parent dashboard (phone — usability anchor)
 
-1. Top bar: **CW** or tiny wordmark + **org name** (700) + avatar + **Activity bell**. On desktop, a simpler collapsible sidebar (This week, Calendar, Announcements, Discussions, their courses, Progress) sits beside the page. Content uses the remaining width — do not center a narrow column on large screens.
+1. Top bar: **CW** or tiny wordmark + **org name** (700) + avatar + **Activity bell**. On desktop, a simpler collapsible sidebar (This week, Calendar, Announcements, Discussions, their courses) sits beside the page. Content uses the remaining width — do not center a narrow column on large screens.
 2. Greeting (Lora) + week range (“Week of Sep 1 – Sep 7”, Sunday–Saturday) + **Print this week**
 3. **Student tags** when more than one child — tap to include or hide that student’s work
 4. Two columns on large screens: **this week’s calendar** | **Focus** (**Important now** + **Coming up** — Assigned next / Due next). Course-colored week notes sit above the grid. Stacks on small screens (calendar first).
 5. Week calendar cells show lesson-plan text, then a divider, then materials. **Assigned** chips are outlined in the course color; **Due** chips are filled. A course legend filters classes.
-6. Bottom tabs on phone: **This week** | **Progress** (Progress may be P1 — dim/inactive until then). On desktop, those destinations live in the sidebar instead (plus **Calendar**).
 
 Keep parent chrome minimal. One job on the home tab.
 

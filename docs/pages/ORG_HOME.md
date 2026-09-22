@@ -25,7 +25,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 - Week notes for published lesson plans sit as a colored bar per course above the grid.
 - **Print this week** prints only **active** students’ **full** week (published lesson plans first, then due and assigned materials, plus important now for their courses), **one student at a time** with a page break before the next student. Per-material **Print** stays first-class — both land on [PRINT](./PRINT.md).
 - Parent org access requires linked student enrolled in a course with `status = active` **and** `visibility = published` (dates informational only).
-- Progress tab is P1 (dim/inactive until then). Parent summary layer (B) is **P1**, not P0.
+- Parent summary layer / Progress (B) is **P1**, not P0 — not in chrome until then.
 - Empty: no dated work and no published lesson plan this week, or not yet on an active enrollment — plain-language next step. Class/student announcements can still show without an enrollment.
 
 ### Instructor / owner / admin
@@ -72,14 +72,13 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 Tech-averse parents must understand what’s going on immediately — which child, what materials, what’s due.
 
 - Top: org context + account affordance ([STYLE_GUIDE.md](../STYLE_GUIDE.md) parent pattern) → [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); **Activity** bell to the right of the avatar → [ACTIVITY](./ACTIVITY.md)
-- Desktop: simpler collapsible sidebar (This week, Calendar, Announcements, Discussions (**P1**), their courses, Progress). Body uses remaining width — not a centered narrow column.
+- Desktop: simpler collapsible sidebar (This week, Calendar, Announcements, Discussions (**P1**), their courses). Body uses remaining width — not a centered narrow column.
 - Greeting + **current calendar week** (Sunday–Saturday) + **Print this week**
 - **About this organization** (when profile fields are set on [ORG_SETTINGS](./ORG_SETTINGS.md))
 - **Student tags** (multi-student parents only) — tap to include/exclude a student
 - **Announcements** — current one-way notices (when any). Unread cards show a notification icon; opening [ANNOUNCEMENT](./ANNOUNCEMENT.md) marks it read. Above the week calendar.
 - Two columns on large screens: **week cards** | **Focus** (Important now + Coming up). Stacks on small screens (calendar first). Day cards wrap so two or three fit across instead of seven skinny columns.
 - Course legend on the week calendar (same as [CALENDAR](./CALENDAR.md)) so families can hide a class
-- Bottom tabs concept: This week | Progress (Progress **P1** — dim/inactive until then)
 - Links into material / lesson plan / course in the same URL tree (simpler chrome)
 
 **Empty states**

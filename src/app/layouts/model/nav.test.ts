@@ -33,7 +33,7 @@ test("staff and parent nav include announcements and discussions, not activity",
   const parent = buildParentNav("coop", { courses: [], classes: [] });
   assert.deepEqual(
     parent.map((section) => section.id),
-    ["home", "calendar", "announcements", "discussions", "progress"],
+    ["home", "calendar", "announcements", "discussions"],
   );
   assert.equal(
     parent.find((section) => section.id === "announcements")?.href,
