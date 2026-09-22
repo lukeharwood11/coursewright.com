@@ -7,6 +7,7 @@ import {
   chromeAccentFromHex,
   contrastRatio,
   parseAccentHex,
+  primaryColorVars,
   validateAccentInput,
   validateBrandIcon,
 } from "./brand.ts";
@@ -38,8 +39,14 @@ test("chrome accent rejects colors that are too light for white text", () => {
   const rejected = validateAccentInput("#ffcc00");
   assert.equal(rejected.ok, false);
   if (!rejected.ok) {
-    assert.equal(rejected.error, "Choose a darker color so white text stays readable.");
+    assert.equal(rejected.error, "Choose a darker color so text stays readable.");
   }
+  assert.equal(chromeAccentFromHex("#3b82f6"), null);
+  const blue = chromeAccentFromHex("#1d4ed8");
+  assert.ok(blue);
+  assert.equal(primaryColorVars("#1d4ed8")?.["--green"], blue.accent);
+  assert.equal(primaryColorVars("#3b82f6"), undefined);
+  assert.equal(primaryColorVars(null), undefined);
 });
 
 test("validateAccentInput treats a blank field as clearing the color", () => {

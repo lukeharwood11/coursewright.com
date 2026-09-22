@@ -12,6 +12,9 @@ export function BrandingPreview({
   chrome: ChromeAccent;
 }) {
   const style = {
+    "--green": chrome.accent,
+    "--green-deep": chrome.deep,
+    "--green-tint": chrome.tint,
     "--chrome-accent": chrome.accent,
     "--chrome-accent-deep": chrome.deep,
     "--chrome-accent-tint": chrome.tint,
@@ -36,9 +39,12 @@ export function BrandingPreview({
           {orgName}
         </span>
       </div>
-      <div className="p-2">
+      <div className="flex flex-col gap-2 p-2">
         <div className="rounded-[6px] bg-[var(--chrome-accent-tint)] px-2.5 py-2 text-[13px] font-bold text-[var(--chrome-accent-deep)]">
           Home
+        </div>
+        <div className="inline-flex w-fit rounded-[6px] bg-[var(--green)] px-3 py-[11px] text-[13px] font-bold text-white">
+          Continue
         </div>
       </div>
     </div>

@@ -25,7 +25,7 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 - Parent “this week” on org home uses `parent/` model + databridge and the shared `calendar/` week view. Staff **Parent view** renders that same home.
 - **Owners and admins** can update org settings. Instructors/parents cannot (RLS + UI).
 - **Billing is owner-only** — do not show billing controls to admins. Billing UI lives in `billing/`.
-- **Branding is owner-only** — icon and one accent color for org chrome. Admins see it read-only. Do not recolor page content, emails, or print. The icon file and `organization_icons` path are public (future invites). The accent is not.
+- **Branding is owner-only** — icon and one accent color. Inside the org it replaces the primary color (buttons, links, sidebar). Admins see it read-only. Login, marketing, and the account home stay Wright Green. The icon file and `organization_icons` path are public (future invites). The accent color is not.
 
 ## Don’t
 

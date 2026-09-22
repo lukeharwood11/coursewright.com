@@ -6,7 +6,9 @@ export const DEFAULT_CHROME = {
   tint: "#e6ede7",
 } as const;
 
-const ACCENT_ON_WHITE_MIN = 4.5;
+const ACCENT_CONTRAST_MIN = 4.5;
+/** Page background. Accent text (links) has to stay readable here, not only on pure white. */
+const PAPER = "#f7f5ee";
 
 export type ChromeAccent = {
   accent: string;
@@ -18,6 +20,13 @@ export type ChromeAccentVars = {
   "--chrome-accent": string;
   "--chrome-accent-deep": string;
   "--chrome-accent-tint": string;
+};
+
+/** Overrides Wright Green for the whole org, including buttons and links. */
+export type PrimaryColorVars = {
+  "--green": string;
+  "--green-deep": string;
+  "--green-tint": string;
 };
 
 type Rgb = { r: number; g: number; b: number };
@@ -46,12 +55,12 @@ export function chromeAccentFromHex(value: string): ChromeAccent | null {
   if (!accent) return null;
   const rgb = rgbFromHex(accent);
   if (!rgb) return null;
-  if (contrastRatio(accent, "#ffffff")! < ACCENT_ON_WHITE_MIN) return null;
+  if (!accentIsDarkEnough(accent)) return null;
 
   const tint = mix(rgb, WHITE, 0.88);
   let deep = rgb;
   let towardBlack = 0;
-  while (contrastRatio(hexFromRgb(deep), hexFromRgb(tint))! < ACCENT_ON_WHITE_MIN && towardBlack < 0.85) {
+  while (contrastRatio(hexFromRgb(deep), hexFromRgb(tint))! < ACCENT_CONTRAST_MIN && towardBlack < 0.85) {
     towardBlack += 0.08;
     deep = mix(rgb, BLACK, towardBlack);
   }
@@ -66,14 +75,36 @@ export function chromeAccentFromHex(value: string): ChromeAccent | null {
 export function chromeAccentVars(
   accentColor: string | null | undefined,
 ): ChromeAccentVars | undefined {
-  if (!accentColor) return undefined;
-  const chrome = chromeAccentFromHex(accentColor);
+  const chrome = accentColor ? chromeAccentFromHex(accentColor) : null;
   if (!chrome) return undefined;
   return {
     "--chrome-accent": chrome.accent,
     "--chrome-accent-deep": chrome.deep,
     "--chrome-accent-tint": chrome.tint,
   };
+}
+
+export function primaryColorVars(
+  accentColor: string | null | undefined,
+): PrimaryColorVars | undefined {
+  const chrome = accentColor ? chromeAccentFromHex(accentColor) : null;
+  if (!chrome) return undefined;
+  return {
+    "--green": chrome.accent,
+    "--green-deep": chrome.deep,
+    "--green-tint": chrome.tint,
+  };
+}
+
+function accentIsDarkEnough(accent: string): boolean {
+  const button = contrastRatio("#ffffff", accent);
+  const link = contrastRatio(accent, PAPER);
+  return (
+    button != null &&
+    button >= ACCENT_CONTRAST_MIN &&
+    link != null &&
+    link >= ACCENT_CONTRAST_MIN
+  );
 }
 
 export function validateAccentInput(
@@ -84,7 +115,7 @@ export function validateAccentInput(
   const parsed = parseAccentHex(trimmed);
   if (!parsed) return { ok: false, error: "Enter a color like #33604D." };
   if (!chromeAccentFromHex(parsed)) {
-    return { ok: false, error: "Choose a darker color so white text stays readable." };
+    return { ok: false, error: "Choose a darker color so text stays readable." };
   }
   return { ok: true, value: parsed };
 }

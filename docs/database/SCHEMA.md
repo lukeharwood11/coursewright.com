@@ -357,7 +357,7 @@ One optional row per organization. **Owners** set it. Admins, instructors, and p
 | Field | Type | Notes |
 |-------|------|-------|
 | organization_id | bigint | PK, FK → Organization, cascade delete |
-| accent_color | text | Optional `#rrggbb`. Empty means Wright Green. The app rejects colors that fail WCAG AA contrast for white text, and derives a darker hover and a light tint. |
+| accent_color | text | Optional `#rrggbb`. Empty means Wright Green. Inside the org this replaces the primary color. The app rejects colors that fail WCAG AA (4.5:1) for white text on the color and for the color as text on paper, and derives a darker hover and a light tint. |
 | icon_path | text | Optional Storage path `{organization_id}/icon.{png\|jpg\|webp}` in the public `org-brand` bucket (256 KB). Empty means the CW mark. The object and this path (via `organization_icons`) are readable without a membership. |
 | updated_at | timestamptz | Cache-busts the public icon URL |
 
