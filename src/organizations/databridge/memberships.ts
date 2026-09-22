@@ -1,3 +1,7 @@
+import {
+  brandIconPublicUrl,
+  chromeAccentFromHex,
+} from "@/organizations/model/brand";
 import type { AssignableMembershipRole, OrgRole } from "@/organizations/model/role";
 import { EDITABLE_MEMBERSHIP_ROLES, EDITABLE_STAFF_ROLES, parseOrgRole } from "@/organizations/model/role";
 import { DEFAULT_SCHOOL_DAYS, parseSchoolDays, type SchoolDay } from "@/organizations/model/schoolDays";
@@ -5,7 +9,7 @@ import { staffMembershipWriteErrorMessage } from "@/organizations/model/staffAcc
 import { requireSupabase } from "./client";
 
 export const ORG_SUMMARY_SELECT =
-  "id, name, slug, school_days, about, address, website, contact_email, phone" as const;
+  "id, name, slug, school_days, about, address, website, contact_email, phone, branding:organization_branding(accent_color, icon_path, updated_at)" as const;
 
 export type OrganizationSummary = {
   id: number;
@@ -17,6 +21,14 @@ export type OrganizationSummary = {
   website: string | null;
   contactEmail: string | null;
   phone: string | null;
+  accentColor: string | null;
+  iconUrl: string | null;
+};
+
+type BrandingEmbed = {
+  accent_color: string | null;
+  icon_path: string | null;
+  updated_at: string;
 };
 
 export type OrganizationSummaryRow = {
@@ -29,9 +41,11 @@ export type OrganizationSummaryRow = {
   website?: string | null;
   contact_email?: string | null;
   phone?: string | null;
+  branding?: BrandingEmbed | BrandingEmbed[] | null;
 };
 
 export function toOrganizationSummary(row: OrganizationSummaryRow): OrganizationSummary {
+  const branding = unwrapBranding(row.branding);
   return {
     id: row.id,
     name: row.name,
@@ -42,7 +56,27 @@ export function toOrganizationSummary(row: OrganizationSummaryRow): Organization
     website: row.website ?? null,
     contactEmail: row.contact_email ?? null,
     phone: row.phone ?? null,
+    accentColor: brandingAccent(branding),
+    iconUrl: brandingIconUrl(branding),
   };
+}
+
+function unwrapBranding(
+  value: OrganizationSummaryRow["branding"],
+): BrandingEmbed | null {
+  if (!value) return null;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
+}
+
+function brandingAccent(branding: BrandingEmbed | null): string | null {
+  if (!branding?.accent_color) return null;
+  return chromeAccentFromHex(branding.accent_color)?.accent ?? null;
+}
+
+function brandingIconUrl(branding: BrandingEmbed | null): string | null {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+  if (!branding?.icon_path || !branding.updated_at || !supabaseUrl) return null;
+  return brandIconPublicUrl(supabaseUrl, branding.icon_path, branding.updated_at);
 }
 
 export type OrgMembership = {
@@ -89,6 +123,7 @@ export const orgQueryKeys = {
     ["organizations", "slug", slug, userId] as const,
   detail: (id: number) => ["organizations", "detail", id] as const,
   people: (orgId: number) => ["organizations", "people", orgId] as const,
+  branding: (orgId: number) => ["organizations", "branding", orgId] as const,
 };
 
 export async function listMyMemberships(userId: string): Promise<OrgMembership[]> {

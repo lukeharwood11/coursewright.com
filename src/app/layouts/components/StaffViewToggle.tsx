@@ -50,11 +50,11 @@ function ViewOption({
       onClick={onSelect}
       className={[
         "rounded-[4px] px-2.5 py-1 text-[12px] font-bold md:text-[12.5px]",
-        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]",
+        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--chrome-accent)]",
         "motion-reduce:transition-none",
         selected
-          ? "bg-[var(--green)] text-white"
-          : "text-[var(--ink-soft)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]",
+          ? "bg-[var(--chrome-accent)] text-white"
+          : "text-[var(--ink-soft)] hover:bg-[var(--chrome-accent-tint)] hover:text-[var(--chrome-accent-deep)]",
       ].join(" ")}
     >
       {children}

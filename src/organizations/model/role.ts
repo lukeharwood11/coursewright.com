@@ -49,6 +49,11 @@ export function canManageBilling(role: OrgRole): boolean {
   return role === "owner";
 }
 
+/** White labelling is owner-only. Admins still edit the rest of org settings. */
+export function canManageBranding(role: OrgRole): boolean {
+  return role === "owner";
+}
+
 /** Owners and admins invite collaborators. Instructors cannot. */
 export function canInviteStaff(role: OrgRole): boolean {
   return role === "owner" || role === "admin";

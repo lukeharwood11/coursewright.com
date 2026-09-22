@@ -48,6 +48,8 @@ Named as on the brand sheet. Use CSS variables below.
 
 Amber is **sparing** for product chrome (Important now, due dates). Green does the work. Slate means “system/info,” not a second brand color.
 
+**Org chrome accent.** An organization owner may set one accent color. Inside that org, the sidebar and header use `--chrome-accent`, `--chrome-accent-deep`, and `--chrome-accent-tint` (derived from the accent; default is Wright Green). Page buttons, links, search, and the account menu keep `--green`. Login, marketing, email, and print stay Course Wright.
+
 **Course calendar colors** are a separate small palette used only to tell courses apart on This week / Calendar (chips, legend, week-note bars). They are not brand colors and must stay muted on `--paper`.
 
 | Key | Token | Hex | Role |

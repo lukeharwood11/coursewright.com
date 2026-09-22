@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { chromeAccentVars } from "@/organizations/model/brand";
 import { Mark, WordmarkText } from "@/ui/Wordmark";
 import { useAppShell } from "../OrgShellContext";
 import { useSidebarStore } from "../stores/sidebar";
@@ -16,6 +17,8 @@ export function OrgSidebar() {
   const toggleCollapsed = useSidebarStore((state) => state.toggleCollapsed);
   const setMobileOpen = useSidebarStore((state) => state.setMobileOpen);
   const { pathname } = useLocation();
+  const { organization } = useAppShell();
+  const chromeStyle = chromeAccentVars(organization?.accentColor) as CSSProperties | undefined;
 
   useEffect(() => {
     setMobileOpen(false);
@@ -36,6 +39,7 @@ export function OrgSidebar() {
         className={`cw-org-chrome hidden h-screen shrink-0 border-r border-[var(--line-soft)] bg-[var(--surface)] md:sticky md:top-0 md:block motion-reduce:transition-none ${
           collapsed ? "w-[4.25rem]" : "w-[16.5rem]"
         } transition-[width] duration-200`}
+        style={chromeStyle}
       >
         <SidebarPanel
           collapsed={collapsed}
@@ -44,7 +48,7 @@ export function OrgSidebar() {
       </aside>
 
       {mobileOpen ? (
-        <div className="cw-org-chrome fixed inset-0 z-30 md:hidden">
+        <div className="cw-org-chrome fixed inset-0 z-30 md:hidden" style={chromeStyle}>
           <button
             type="button"
             className="absolute inset-0 bg-[var(--ink)]/30"
@@ -83,10 +87,18 @@ function SidebarPanel({
       >
         <Link
           to={brandHref}
-          className="flex min-w-0 items-center gap-2.5 rounded-[6px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+          className="flex min-w-0 items-center gap-2.5 rounded-[6px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--chrome-accent)]"
           onClick={onClose}
         >
-          <Mark px={28} />
+          {organization?.iconUrl ? (
+            <img
+              src={organization.iconUrl}
+              alt=""
+              className="h-7 w-7 shrink-0 rounded-[24%] object-cover"
+            />
+          ) : (
+            <Mark px={28} backgroundColor="var(--chrome-accent)" />
+          )}
           {collapsed ? (
             <span className="sr-only">{brandLabel}</span>
           ) : organization ? (
@@ -105,7 +117,7 @@ function SidebarPanel({
         {onClose ? (
           <button
             type="button"
-            className="ml-auto rounded-[6px] p-1.5 text-[var(--ink-soft)] hover:bg-[var(--green-tint)] hover:text-[var(--green)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+            className="ml-auto rounded-[6px] p-1.5 text-[var(--ink-soft)] hover:bg-[var(--chrome-accent-tint)] hover:text-[var(--chrome-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--chrome-accent)]"
             aria-label="Close navigation"
             onClick={onClose}
           >
@@ -122,7 +134,7 @@ function SidebarPanel({
         <div className="border-t border-[var(--line-soft)] p-2">
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-[6px] px-2.5 py-2 text-[13px] font-bold text-[var(--ink-soft)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+            className="flex w-full items-center justify-center gap-2 rounded-[6px] px-2.5 py-2 text-[13px] font-bold text-[var(--ink-soft)] hover:bg-[var(--chrome-accent-tint)] hover:text-[var(--chrome-accent-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--chrome-accent)]"
             onClick={onCollapseToggle}
             aria-pressed={collapsed}
             aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}

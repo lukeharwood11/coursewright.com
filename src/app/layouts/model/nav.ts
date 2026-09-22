@@ -5,6 +5,7 @@ export type NavLinkItem = {
   label: string;
   href: string;
   match: NavMatch;
+  iconUrl?: string | null;
 };
 
 export type NavSection = {
@@ -226,7 +227,7 @@ export function collapsedHref(section: NavSection): string | null {
 }
 
 export function buildAccountNav(
-  organizations: Array<{ id: number; name: string; slug: string }>,
+  organizations: Array<{ id: number; name: string; slug: string; iconUrl?: string | null }>,
 ): NavSection[] {
   return [
     {
@@ -239,6 +240,7 @@ export function buildAccountNav(
         label: organization.name,
         href: `/my/${organization.slug}`,
         match: "exact",
+        iconUrl: organization.iconUrl,
       })),
     },
     {

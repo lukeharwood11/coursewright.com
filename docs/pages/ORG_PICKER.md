@@ -22,7 +22,7 @@ Choose an organization or create a new one. Cross-org entry before `<org-slug>` 
 
 ## Data shown
 
-- For each membership: organization **name**, **slug**, role badge (owner / admin / instructor / parent)
+- For each membership: organization **name**, **slug**, role badge (owner / admin / instructor / parent). When the org has a branding icon, it shows beside the name. The account sidebar lists the same icon beside the org name. Accent color is not applied on this page.
 - Pending invites: organization **name**, invited **role**, **Accept**
 - Create-org form fields: name (required); slug preview/generated (editable TBD on create)
 - Link affordance to account settings

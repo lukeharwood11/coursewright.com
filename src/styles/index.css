@@ -67,6 +67,13 @@ body {
   max-width: 100%;
 }
 
+/* Org chrome accent. Custom branding overrides these on the sidebar and header only. */
+.cw-org-chrome {
+  --chrome-accent: var(--green);
+  --chrome-accent-deep: var(--green-deep);
+  --chrome-accent-tint: var(--green-tint);
+}
+
 @media print {
   .cw-org-chrome {
     display: none !important;

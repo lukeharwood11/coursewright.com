@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { BillingPlaceholder } from "@/billing";
+import { canManageBranding } from "@/organizations/model/role";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { PageLoading } from "@/ui/PageLoading";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
@@ -8,6 +9,7 @@ import {
   ORG_SETTINGS_FORM_ID,
   OrgSettingsForm,
 } from "./components/OrgSettingsForm";
+import { BrandingSection } from "./components/BrandingSection";
 import { StaffSection } from "./components/StaffSection";
 import { useOrgSettings } from "./hooks/useOrgSettings";
 import { useOrgStaff } from "./hooks/useOrgStaff";
@@ -101,6 +103,14 @@ export function OrgSettingsPage() {
           onPhoneChange={settings.onPhoneChange}
           onConfirmPermalinkChange={settings.onConfirmPermalinkChange}
           onSubmit={settings.onSubmit}
+        />
+      </div>
+
+      <div className="mt-4">
+        <BrandingSection
+          organizationId={settings.organization.id}
+          orgName={settings.organization.name}
+          canManage={canManageBranding(settings.role)}
         />
       </div>
 
