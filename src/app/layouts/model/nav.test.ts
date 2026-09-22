@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildParentNav, buildStaffNav } from "./nav.ts";
+import { buildAccountNav, buildParentNav, buildStaffNav } from "./nav.ts";
 
 test("staff and parent nav include announcements and discussions, not activity", () => {
   const staff = buildStaffNav("coop", { courses: [], classes: [] });
@@ -140,6 +140,16 @@ test("staff nav shows all children when five or fewer", () => {
     staff.find((section) => section.id === "roster")?.children.map((c) => c.label),
     ["Cohort A"],
   );
+});
+
+test("account nav keeps an org icon beside the name", () => {
+  const nav = buildAccountNav([
+    { id: 4, name: "Oak Co-op", slug: "oak", iconUrl: "https://example.com/icon.png" },
+    { id: 5, name: "Pine School", slug: "pine" },
+  ]);
+  const orgs = nav[0]?.children ?? [];
+  assert.equal(orgs[0]?.iconUrl, "https://example.com/icon.png");
+  assert.equal(orgs[1]?.iconUrl, undefined);
 });
 
 test("parent nav includes resources when the parent can see any", () => {

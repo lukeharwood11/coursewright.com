@@ -49,7 +49,7 @@ const sectionIcons: Record<string, { outline: IconComponent; solid: IconComponen
 };
 
 const itemClass =
-  "flex w-full items-center gap-2.5 rounded-[6px] px-2.5 py-2 text-left text-[13px] font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]";
+  "flex w-full items-center gap-2.5 rounded-[6px] px-2.5 py-2 text-left text-[13px] font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--chrome-accent)]";
 
 export function SidebarNav({
   collapsed,
@@ -147,10 +147,17 @@ function SidebarSection({
                 onClick={onNavigate}
                 className={`${itemClass} ${
                   navItemIsActive(pathname, child)
-                    ? "bg-[var(--green-tint)] text-[var(--green-deep)]"
-                    : "text-[var(--ink-soft)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]"
+                    ? "bg-[var(--chrome-accent-tint)] text-[var(--chrome-accent-deep)]"
+                    : "text-[var(--ink-soft)] hover:bg-[var(--chrome-accent-tint)] hover:text-[var(--chrome-accent-deep)]"
                 }`}
               >
+                {child.iconUrl ? (
+                  <img
+                    src={child.iconUrl}
+                    alt=""
+                    className="h-4 w-4 shrink-0 rounded-[4px] object-cover"
+                  />
+                ) : null}
                 <span className="truncate">{child.label}</span>
               </NavLink>
             </li>
@@ -208,10 +215,10 @@ function SidebarRow({
   const showBadge = badgeCount != null && badgeCount > 0;
   const className = `${itemClass} ${collapsed ? "relative justify-center px-0" : ""} ${
     active
-      ? "bg-[var(--green-tint)] text-[var(--green-deep)]"
+      ? "bg-[var(--chrome-accent-tint)] text-[var(--chrome-accent-deep)]"
       : soon
-        ? "text-[var(--ink-faint)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]"
-        : "text-[var(--ink)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]"
+        ? "text-[var(--ink-faint)] hover:bg-[var(--chrome-accent-tint)] hover:text-[var(--chrome-accent-deep)]"
+        : "text-[var(--ink)] hover:bg-[var(--chrome-accent-tint)] hover:text-[var(--chrome-accent-deep)]"
   }`;
 
   const title = showBadge

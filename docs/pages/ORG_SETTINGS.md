@@ -5,11 +5,11 @@
 
 ## Audience
 
-Org **owners** and **admins** (can edit). Instructors may view read-only. Parents cannot change settings. Billing is **owner-only**.
+Org **owners** and **admins** (can edit). Instructors may view read-only. Parents cannot change settings. Billing and **branding** are **owner-only**.
 
 ## Purpose
 
-Configure the organization: identity, permalink, organization type, **profile** (about, address, website, contact), **school days**, grade scheme, and **collaborators** (section on this page — not a separate top-level route).
+Configure the organization: identity, permalink, organization type, **profile** (about, address, website, contact), **school days**, grade scheme, **branding**, and **collaborators** (section on this page — not a separate top-level route).
 
 
 ## Behavior
@@ -22,6 +22,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 - Set **organization type** (co-op / school / family), optional **profile** (about, location, website, contact email, phone), **school days** (which weekdays the org operates; default Mon–Fri), and **grade scheme** (K–12 / custom labels). Family is for parents making materials at home. At least one school day must stay selected.
 - Collaborators section on this page: invite owner / admin / instructor by email (Resend `organization-invite`) and **copy a claim link**, list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). The list includes **parents** already in the org so owners/admins can **promote** them to instructor/admin/owner **without a new invite**. Owners and admins **change roles** (including demote to **parent** when the person has a linked student) and **remove** admins/instructors who have no linked student; the last remaining owner or admin cannot be removed or demoted. Those writes update **org membership** (who can run settings and invites). They do **not** change who can see course content — materials and roster stay **enrollment-gated** (and `parent_student_links` where applicable).
 - Billing section shows Free plan, **owners only**.
+- **Branding** (owners only): optional small icon and one accent color for the sidebar and header. Admins and instructors see a preview and “Only owners can change branding.” Blank color keeps Wright Green. Light colors that fail contrast for white text are rejected. Remove branding restores the CW mark and Wright Green. Page buttons, search, emails, and print stay Course Wright.
 
 ## Data shown
 
@@ -33,6 +34,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 - Last owner/admin rows explain why they can’t be removed or demoted
 - Pending collaborator invites: **email**, **role**, copyable `/invite/<token>` link, **Resend email**, cancel
 - Billing status — Free plan (owners only)
+- Branding preview: icon (or CW mark) and accent, **owners only** to edit
 
 ## Contents
 
@@ -64,6 +66,13 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 - Guard: cannot remove or demote the **last remaining owner or admin**
 - Existing **owner** rows stay badge-only (promote others to owner; don’t demote owners from this list)
 
+### Branding (owners only)
+
+- Small icon upload (PNG, JPEG, or WebP, under 256 KB) and remove icon
+- One accent color (`#RRGGBB`) or blank for Wright Green
+- Preview of the sidebar mark and an active nav chip
+- **Save branding** and **Remove branding** — separate from the header Save for the rest of this page
+
 ### Billing (P1)
 
 - Shows **You’re on the Free plan.** (owners only). Paid plans later.
@@ -75,6 +84,7 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 - Set profile fields
 - Set school days
 - Set grade scheme
+- Save branding or remove branding (owners only)
 - Invite collaborators (email + copy the claim link); cancel a pending invite; resend the email
 - Change roles for existing collaborators (including promote parent → staff and demote staff → parent when linked to a student)
 - Remove an admin or instructor with no linked student (blocked when they are the last owner/admin)

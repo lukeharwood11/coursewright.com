@@ -23,6 +23,13 @@ function OrgCard({ membership }: { membership: OrgMembership }) {
       to={`/my/${organization.slug}`}
       className="flex items-center gap-3 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 hover:border-[var(--green)] hover:bg-[var(--green-tint)] motion-reduce:transition-none"
     >
+      {organization.iconUrl ? (
+        <img
+          src={organization.iconUrl}
+          alt=""
+          className="h-8 w-8 shrink-0 rounded-[8px] object-cover"
+        />
+      ) : null}
       <div className="min-w-0 flex-1">
         <p className="truncate text-[15.5px] font-extrabold text-[var(--ink)]">
           {organization.name}

@@ -20,16 +20,27 @@ const display = { fontFamily: "var(--font-display)" } as const;
  * Concept A short mark — green rounded tile with paper CW.
  * Promoted from LogoConcepts; keep exploration marks on /logos.
  */
-export function Mark({ px = 28, className = "" }: { px?: number; className?: string }) {
+export function Mark({
+  px = 28,
+  className = "",
+  backgroundColor,
+}: {
+  px?: number;
+  className?: string;
+  backgroundColor?: string;
+}) {
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-[24%] bg-[var(--green)] font-semibold text-[var(--paper)] ${className}`}
+      className={`inline-flex items-center justify-center rounded-[24%] font-semibold text-[var(--paper)] ${
+        backgroundColor ? "" : "bg-[var(--green)]"
+      } ${className}`}
       style={{
         ...display,
         width: px,
         height: px,
         fontSize: px * 0.42,
         letterSpacing: "-0.02em",
+        ...(backgroundColor ? { backgroundColor } : {}),
       }}
       aria-hidden
     >
