@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/ui/Badge";
+import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { Button, ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
@@ -99,16 +100,13 @@ export function AnnouncementPage() {
   );
 
   return (
-    <div className="px-5 py-8 md:px-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1
-            className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {page.announcement.title}
-          </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+    <div>
+      <DetailPageHeader
+        backTo={announcementsPath(page.organization.slug)}
+        backLabel="Back to announcements"
+        title={page.announcement.title}
+        meta={
+          <>
             {page.canEdit ? (
               <Badge variant={status === "available" ? "green" : "neutral"}>
                 {announcementAvailabilityLabel(status)}
@@ -123,43 +121,38 @@ export function AnnouncementPage() {
             {author ? <Badge variant="neutral">{author}</Badge> : null}
             {posted ? <Badge variant="neutral">{posted}</Badge> : null}
             {dates ? <Badge variant="neutral">{dates}</Badge> : null}
-          </div>
-          <p className="mt-3 text-[13px]">
-            <Link
-              to={announcementsPath(page.organization.slug)}
-              className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-            >
-              Back to announcements
-            </Link>
-          </p>
-        </div>
-        {page.canEdit ? (
-          <div className="flex flex-wrap gap-2">
-            <ButtonLink
-              variant="secondary"
-              to={announcementEditPath(
-                page.organization.slug,
-                page.announcement.id,
-              )}
-            >
-              Edit
-            </ButtonLink>
-            <Button
-              variant="secondary"
-              onClick={() => setConfirmRemove(true)}
-              disabled={page.remove.isPending}
-            >
-              Remove
-            </Button>
-          </div>
-        ) : null}
-      </div>
-
+          </>
+        }
+        actions={
+          page.canEdit ? (
+            <>
+              <ButtonLink
+                variant="secondary"
+                to={announcementEditPath(
+                  page.organization.slug,
+                  page.announcement.id,
+                )}
+              >
+                Edit
+              </ButtonLink>
+              <Button
+                variant="secondary"
+                onClick={() => setConfirmRemove(true)}
+                disabled={page.remove.isPending}
+              >
+                Remove
+              </Button>
+            </>
+          ) : null
+        }
+      />
+      <div className="px-5 py-6 md:px-8">
       {page.announcement.body ? (
-        <p className="mt-6 max-w-2xl whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--ink)]">
+        <p className="max-w-2xl whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--ink)]">
           {page.announcement.body}
         </p>
       ) : null}
+      </div>
 
       <ConfirmDialog
         open={confirmRemove}

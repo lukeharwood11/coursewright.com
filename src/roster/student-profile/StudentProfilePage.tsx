@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MegaphoneIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
+import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { ButtonLink } from "@/ui/Button";
 import { PageFormActions } from "@/ui/PageFormActions";
@@ -60,16 +61,13 @@ export function StudentProfilePage() {
   const base = `/my/${profile.organization.slug}`;
 
   return (
-    <div className="px-5 py-8 md:px-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1
-            className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {profile.student.name}
-          </h1>
-          <p className="mt-3">
+    <div>
+      <DetailPageHeader
+        backTo={`/my/${profile.organization.slug}/roster`}
+        backLabel="Back to roster"
+        title={profile.student.name}
+        actions={
+          <>
             <ButtonLink
               variant="secondary"
               to={newAnnouncementPath(profile.organization.slug, {
@@ -80,19 +78,19 @@ export function StudentProfilePage() {
               <MegaphoneIcon className="h-5 w-5" aria-hidden />
               Create Announcement
             </ButtonLink>
-          </p>
-        </div>
-        <PageFormActions
-          formId={STUDENT_PROFILE_FORM_ID}
-          saving={profile.saving}
-          hasChanges={profile.hasChanges}
-          cancelTo={`/my/${profile.organization.slug}/roster`}
-        />
-      </div>
-
+            <PageFormActions
+              formId={STUDENT_PROFILE_FORM_ID}
+              saving={profile.saving}
+              hasChanges={profile.hasChanges}
+              cancelTo={`/my/${profile.organization.slug}/roster`}
+            />
+          </>
+        }
+      />
+      <div className="space-y-6 px-5 pt-4 pb-6 md:px-8">
       <form
         id={STUDENT_PROFILE_FORM_ID}
-        className="mt-6 max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5"
+        className="max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5"
         onSubmit={profile.onSubmit}
       >
         <StudentProfileFields
@@ -136,7 +134,7 @@ export function StudentProfilePage() {
         onCancel={parentInvite.onCancel}
       />
 
-      <div className="mt-6 grid items-start gap-4 lg:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
           <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Courses</h2>
           {profile.enrollments.length === 0 ? (
@@ -186,15 +184,7 @@ export function StudentProfilePage() {
           )}
         </section>
       </div>
-
-      <p className="mt-6 text-[13px]">
-        <Link
-          to={`${base}/roster`}
-          className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-        >
-          Back to roster
-        </Link>
-      </p>
+      </div>
     </div>
   );
 }

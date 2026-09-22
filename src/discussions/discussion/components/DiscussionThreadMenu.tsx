@@ -12,6 +12,9 @@ import { UserCard } from "@/organizations/user-card/UserCard";
 const itemClassName =
   "flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[13px] font-bold text-[var(--ink)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:bg-[var(--green-tint)] focus-visible:outline-none";
 
+const triggerClassName =
+  "inline-flex shrink-0 items-center justify-center rounded-[6px] border border-[var(--line)] bg-[var(--surface)] p-[11px] text-[var(--ink)] transition-colors hover:border-[var(--green)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]";
+
 export function DiscussionThreadMenu({
   orgSlug,
   starterUserId,
@@ -22,6 +25,7 @@ export function DiscussionThreadMenu({
   onMarkAnswered,
   markAnsweredPending = false,
   onDelete,
+  className,
 }: {
   orgSlug: string;
   starterUserId: string;
@@ -35,6 +39,7 @@ export function DiscussionThreadMenu({
   markAnsweredPending?: boolean;
   /** When set, Delete appears in the menu on small screens. */
   onDelete?: () => void;
+  className?: string;
 }) {
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -46,7 +51,7 @@ export function DiscussionThreadMenu({
       <button
         ref={buttonRef}
         type="button"
-        className="inline-flex items-center justify-center rounded-[6px] border border-[var(--line)] bg-[var(--surface)] p-[11px] text-[var(--ink)] transition-colors hover:border-[var(--green)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+        className={[triggerClassName, className ?? ""].filter(Boolean).join(" ")}
         aria-label="Discussion actions"
         aria-haspopup="menu"
         aria-expanded={open}

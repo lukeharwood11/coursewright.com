@@ -3,10 +3,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   CheckCircleIcon,
   ArrowUturnLeftIcon,
-  ChevronLeftIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
+import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
@@ -100,27 +100,30 @@ export function DiscussionPage() {
 
   const discussionsHref = discussionsPath(page.organization.slug);
 
+  const threadMenuProps = {
+    orgSlug: page.organization.slug,
+    starterUserId: page.discussion.createdBy,
+    starterName: page.discussion.authorName,
+    startedLabel: discussionStartedLabel(page.discussion.createdAt),
+    onMembers: () => page.setMembersOpen(true),
+    answered: page.discussion.answeredAt != null,
+    onMarkAnswered:
+      page.canMarkAnswered
+        ? () => page.answered.mutate(!page.discussion?.answeredAt)
+        : undefined,
+    markAnsweredPending: page.answered.isPending,
+    onDelete:
+      page.canRemoveThread ? () => setConfirmRemove(true) : undefined,
+  };
+
   return (
     <div className="flex h-[calc(100dvh-6rem)] max-h-[calc(100dvh-6rem)] flex-col overflow-hidden bg-[var(--paper)]">
-      <div className="flex shrink-0 flex-wrap items-start justify-between gap-3 border-b border-[var(--line-soft)] bg-[var(--surface)] px-3 py-3 md:px-6 lg:px-8">
-        <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 items-center gap-1.5">
-            <Link
-              to={discussionsHref}
-              className="inline-flex shrink-0 items-center justify-center rounded-[6px] p-1 text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
-              aria-label="Back to discussions"
-              title="Back to discussions"
-            >
-              <ChevronLeftIcon className="h-5 w-5" aria-hidden />
-            </Link>
-            <h1
-              className="min-w-0 truncate text-[18px] font-semibold text-[var(--ink)] md:text-[20px]"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {page.discussion.title}
-            </h1>
-          </div>
-          <div className="mt-1.5 flex flex-wrap items-center gap-1.5 pl-7">
+      <DetailPageHeader
+        backTo={discussionsHref}
+        backLabel="Back to discussions"
+        title={page.discussion.title}
+        meta={
+          <>
             <Badge variant={page.discussion.answeredAt ? "green" : "neutral"}>
               {discussionStatusLabel(page.discussion.answeredAt)}
             </Badge>
@@ -130,57 +133,47 @@ export function DiscussionPage() {
             <span className="text-[13px] font-bold text-[var(--green-deep)]">
               {discussionTargetName(page.discussion)}
             </span>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="hidden flex-wrap items-center gap-2 md:flex">
-            {page.canMarkAnswered ? (
-              <Button
-                variant="secondary"
-                disabled={page.answered.isPending}
-                onClick={() =>
-                  page.answered.mutate(!page.discussion?.answeredAt)
-                }
-              >
-                {page.discussion.answeredAt ? (
-                  <ArrowUturnLeftIcon className="h-4 w-4" aria-hidden />
-                ) : (
-                  <CheckCircleIcon className="h-4 w-4" aria-hidden />
-                )}
-                {page.discussion.answeredAt
-                  ? "Mark as open"
-                  : "Mark as answered"}
-              </Button>
-            ) : null}
-            {page.canRemoveThread ? (
-              <Button
-                variant="secondary"
-                onClick={() => setConfirmRemove(true)}
-              >
-                <TrashIcon className="h-4 w-4" aria-hidden />
-                Delete
-              </Button>
-            ) : null}
-          </div>
-          <DiscussionThreadMenu
-            orgSlug={page.organization.slug}
-            starterUserId={page.discussion.createdBy}
-            starterName={page.discussion.authorName}
-            startedLabel={discussionStartedLabel(page.discussion.createdAt)}
-            onMembers={() => page.setMembersOpen(true)}
-            answered={page.discussion.answeredAt != null}
-            onMarkAnswered={
-              page.canMarkAnswered
-                ? () => page.answered.mutate(!page.discussion?.answeredAt)
-                : undefined
-            }
-            markAnsweredPending={page.answered.isPending}
-            onDelete={
-              page.canRemoveThread ? () => setConfirmRemove(true) : undefined
-            }
-          />
-        </div>
-      </div>
+          </>
+        }
+        titleTrailing={
+          <DiscussionThreadMenu {...threadMenuProps} className="md:hidden" />
+        }
+        actionsClassName="max-md:hidden"
+        actions={
+          <>
+            <div className="hidden flex-wrap items-center gap-2 md:flex">
+              {page.canMarkAnswered ? (
+                <Button
+                  variant="secondary"
+                  disabled={page.answered.isPending}
+                  onClick={() =>
+                    page.answered.mutate(!page.discussion?.answeredAt)
+                  }
+                >
+                  {page.discussion.answeredAt ? (
+                    <ArrowUturnLeftIcon className="h-4 w-4" aria-hidden />
+                  ) : (
+                    <CheckCircleIcon className="h-4 w-4" aria-hidden />
+                  )}
+                  {page.discussion.answeredAt
+                    ? "Mark as open"
+                    : "Mark as answered"}
+                </Button>
+              ) : null}
+              {page.canRemoveThread ? (
+                <Button
+                  variant="secondary"
+                  onClick={() => setConfirmRemove(true)}
+                >
+                  <TrashIcon className="h-4 w-4" aria-hidden />
+                  Delete
+                </Button>
+              ) : null}
+            </div>
+            <DiscussionThreadMenu {...threadMenuProps} />
+          </>
+        }
+      />
 
       <div className="flex min-h-0 flex-1 flex-col">
       <div
@@ -196,7 +189,7 @@ export function DiscussionPage() {
           if (stickToBottom.current) setHasNewBelow(false);
         }}
       >
-        <div className="flex flex-col gap-1.5 pb-4">
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-1.5 pb-4">
           {page.messages.map((message, index) => {
             const isOwn = message.authorId === page.userId;
             const previous = page.messages[index - 1];
@@ -256,7 +249,7 @@ export function DiscussionPage() {
       </div>
 
       <div className="cw-discussion-composer-bar shrink-0 border-t border-[var(--line-soft)] bg-[var(--surface)] max-md:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:border-t-0 md:bg-transparent md:px-6 md:pb-4 md:pt-3 lg:px-8">
-        <div className="md:mx-auto md:w-full md:max-w-2xl">
+        <div className="mx-auto w-full max-w-2xl">
           <MessageComposer
             variant="plain"
             mode={page.mode}

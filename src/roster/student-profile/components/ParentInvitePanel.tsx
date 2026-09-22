@@ -59,7 +59,7 @@ export function ParentInvitePanel({
   const hasParents = linked.length > 0 || pending.length > 0 || Boolean(parentEmail);
 
   return (
-    <section className="mt-6 max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
+    <section className="max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
       <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Parents</h2>
 
       {loading ? (

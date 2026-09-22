@@ -84,11 +84,7 @@ export function InstructorsSection({
             {adding ? "Adding…" : "Add"}
           </Button>
         </div>
-      ) : (
-        <p className="mt-3 text-[13px] text-[var(--ink-faint)]">
-          Owners and admins can add teachers.
-        </p>
-      )}
+      ) : null}
       {addError ? (
         <p className="mt-2 text-[13px] text-[var(--amber-deep)]">{addError}</p>
       ) : null}

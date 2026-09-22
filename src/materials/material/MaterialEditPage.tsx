@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
@@ -7,6 +7,7 @@ import { PageFormActions } from "@/ui/PageFormActions";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { useQuery } from "@tanstack/react-query";
 import { replaceFile, revertFileToVersion, listFileVersions } from "@/materials/databridge/files";
+import { materialLocationState, materialOpenedFromUnit } from "@/materials/model/navigation";
 import { materialPath } from "@/materials/model/paths";
 import { useMaterialEdit } from "./hooks/useMaterialEdit";
 import {
@@ -31,6 +32,8 @@ const controlClass = [
 export function MaterialEditPage() {
   const edit = useMaterialEdit();
   const page = edit.page;
+  const location = useLocation();
+  const navigate = useNavigate();
   useToastOnError(edit.error ?? page.error);
 
   useEffect(() => {
@@ -38,6 +41,10 @@ export function MaterialEditPage() {
       ? `Edit ${page.material.title} · Course Wright`
       : "Edit material · Course Wright";
   }, [page.material]);
+
+  const materialNavState = materialLocationState(
+    materialOpenedFromUnit(location.state),
+  );
 
   if (!page.canEdit && !page.loading && page.material && page.course) {
     return (
@@ -48,6 +55,7 @@ export function MaterialEditPage() {
           unitId: page.material.unitId,
           materialId: page.material.id,
         })}
+        state={materialNavState}
         replace
       />
     );
@@ -89,6 +97,7 @@ export function MaterialEditPage() {
           <p className="mt-2 text-[13px]">
             <Link
               to={viewHref}
+              state={materialNavState}
               className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
             >
               Back to material
@@ -100,6 +109,9 @@ export function MaterialEditPage() {
           saving={edit.saving}
           hasChanges={edit.hasChanges}
           cancelTo={viewHref}
+          onCancel={() =>
+            navigate(viewHref, materialNavState ? { state: materialNavState } : undefined)
+          }
         />
       </div>
 

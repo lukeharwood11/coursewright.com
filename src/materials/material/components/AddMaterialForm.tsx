@@ -17,14 +17,22 @@ export function AddMaterialForm({
   courseId,
   unitId,
   label,
+  fromUnitPage = false,
 }: {
   organizationId: number;
   orgSlug: string;
   courseId: number;
   unitId: number | null;
   label: string;
+  fromUnitPage?: boolean;
 }) {
-  const add = useAddMaterial({ organizationId, orgSlug, courseId, unitId });
+  const add = useAddMaterial({
+    organizationId,
+    orgSlug,
+    courseId,
+    unitId,
+    fromUnitPage,
+  });
 
   if (!add.open) {
     return (

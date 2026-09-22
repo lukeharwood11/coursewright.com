@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowDownIcon, ArrowUpIcon, PrinterIcon } from "@heroicons/react/24/outline";
 import { Button, ButtonLink } from "@/ui/Button";
+import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { PageFormActions } from "@/ui/PageFormActions";
@@ -97,51 +98,42 @@ export function UnitPage() {
   }
 
   return (
-    <div className="px-5 py-8 md:px-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1
-            className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {unit.title}
-          </h1>
-          <p className="mt-1 text-[13.5px] text-[var(--ink-soft)]">
+    <div>
+      <DetailPageHeader
+        backTo={coursePath(page.organization.slug, course.id)}
+        backLabel={`Back to ${course.title}`}
+        title={unit.title}
+        meta={
+          <span className="text-[13px] font-bold text-[var(--ink-soft)]">
             {course.title}
             {dates ? ` · ${dates}` : ""}
-          </p>
-          <p className="mt-3 text-[13px]">
-            <Link
-              to={coursePath(page.organization.slug, course.id)}
-              className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-            >
-              Back to {course.title}
-            </Link>
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {page.canEdit && !unit.deletedAt && editing ? (
-            <PageFormActions
-              formId={UNIT_SETTINGS_FORM_ID}
-              saving={page.saveUnit.isPending}
-              hasChanges={hasChanges}
-              cancelTo={viewHref}
-              onCancel={leaveEdit}
-              saveLabel="Save unit"
-            />
-          ) : null}
-          {page.canEdit && !unit.deletedAt && !editing ? (
-            <Button type="button" onClick={() => setEditing(true)}>
-              Edit
-            </Button>
-          ) : null}
-          <ButtonLink variant="secondary" to={printHref}>
-            <PrinterIcon className="h-5 w-5" aria-hidden />
-            Print unit
-          </ButtonLink>
-        </div>
-      </div>
-
+          </span>
+        }
+        actions={
+          <>
+            {page.canEdit && !unit.deletedAt && editing ? (
+              <PageFormActions
+                formId={UNIT_SETTINGS_FORM_ID}
+                saving={page.saveUnit.isPending}
+                hasChanges={hasChanges}
+                cancelTo={viewHref}
+                onCancel={leaveEdit}
+                saveLabel="Save unit"
+              />
+            ) : null}
+            {page.canEdit && !unit.deletedAt && !editing ? (
+              <Button type="button" onClick={() => setEditing(true)}>
+                Edit
+              </Button>
+            ) : null}
+            <ButtonLink variant="secondary" to={printHref}>
+              <PrinterIcon className="h-5 w-5" aria-hidden />
+              Print unit
+            </ButtonLink>
+          </>
+        }
+      />
+      <div className="px-5 py-6 md:px-8">
       {unit.deletedAt ? (
         <div className="mt-4 rounded-[10px] border border-[var(--amber)] bg-[var(--amber-tint)] p-4">
           <p className="text-[14px] text-[var(--amber-deep)]">
@@ -257,6 +249,7 @@ export function UnitPage() {
                     orgSlug={page.organization.slug}
                     courseId={course.id}
                     unitId={unit.id}
+                    fromUnitPage
                     materialId={material.id}
                     title={material.title}
                     description={material.description}
@@ -282,11 +275,13 @@ export function UnitPage() {
               orgSlug={page.organization.slug}
               courseId={course.id}
               unitId={unit.id}
+              fromUnitPage
               label="Add material to this unit"
             />
           </div>
         ) : null}
       </section>
+      </div>
     </div>
   );
 }

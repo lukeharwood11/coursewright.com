@@ -58,15 +58,21 @@ export function ButtonLink({
   children,
   className,
   to,
+  state,
 }: {
   variant?: Variant;
   fullWidth?: boolean;
   children: ReactNode;
   className?: string;
   to: string;
+  state?: unknown;
 }) {
   return (
-    <Link to={to} className={buttonClassName(variant, fullWidth, className)}>
+    <Link
+      to={to}
+      state={state}
+      className={buttonClassName(variant, fullWidth, className)}
+    >
       {children}
     </Link>
   );

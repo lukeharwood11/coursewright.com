@@ -19,47 +19,40 @@ export function OrgRosterPage() {
   }, [roster.organization.name]);
 
   return (
-    <div className="px-5 py-8 md:px-8">
-      <h1
-        className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        Roster
-      </h1>
+    <div className="space-y-6 px-5 pt-6 pb-8 md:px-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1
+          className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          Roster
+        </h1>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-3 sm:max-w-xl">
+          <Input
+            className="min-w-[12rem] flex-1 sm:max-w-xs"
+            value={roster.query}
+            onChange={(event) => roster.setQuery(event.target.value)}
+            placeholder="Find a student"
+            aria-label="Find a student"
+          />
+          {!roster.panelOpen ? (
+            <Button type="button" onClick={roster.openPanel}>
+              <UserPlusIcon className="h-5 w-5" aria-hidden />
+              Add students
+            </Button>
+          ) : null}
+        </div>
+      </div>
 
       {roster.loading ? (
         <PageLoading embedded label="Loading roster…" />
       ) : null}
 
-      <section className="mt-8">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">
-            Students
-          </h2>
-          <div className="flex min-w-[12rem] flex-1 flex-wrap items-end justify-end gap-3 sm:max-w-xl">
-            <label className="flex min-w-[12rem] flex-1 flex-col gap-1 sm:max-w-xs">
-              <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-                Find a student
-              </span>
-              <Input
-                value={roster.query}
-                onChange={(event) => roster.setQuery(event.target.value)}
-                placeholder="Name, grade, or email"
-              />
-            </label>
-            {!roster.panelOpen ? (
-              <Button type="button" onClick={roster.openPanel}>
-                <UserPlusIcon className="h-5 w-5" aria-hidden />
-                Add students
-              </Button>
-            ) : null}
-          </div>
-        </div>
-
+      <section>
         {!roster.loading && roster.students.length === 0 && !roster.query ? (
-          <p className="mt-4 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-            No students yet. Add them here, or when you enroll someone in a
-            course or class. You can still print courses without a roster.
+          <p className="max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
+            No students yet. Add them here, or when you enroll someone in a course
+            or class.
           </p>
         ) : (
           <StudentRosterList
@@ -90,7 +83,7 @@ export function OrgRosterPage() {
       </section>
 
       {roster.panelOpen ? (
-        <section className="mt-6 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
+        <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">
@@ -126,7 +119,7 @@ export function OrgRosterPage() {
         </section>
       ) : null}
 
-      <section className="mt-10">
+      <section>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">

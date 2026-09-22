@@ -5,6 +5,7 @@ import { Badge } from "@/ui/Badge";
 import { ButtonLink } from "@/ui/Button";
 import { formatIsoDate } from "@/courses/model/dates";
 import { materialKindLabel, type MaterialKind } from "@/materials/model/kind";
+import { materialLocationState } from "@/materials/model/navigation";
 import { materialPath, materialPrintPath } from "@/materials/model/paths";
 import { isPublished, type MaterialVisibility } from "@/materials/model/visibility";
 
@@ -20,10 +21,12 @@ export function MaterialRow({
   dueDate,
   importantNow,
   visibility,
+  fromUnitPage = false,
 }: {
   orgSlug: string;
   courseId: number;
   unitId: number | null;
+  fromUnitPage?: boolean;
   materialId: number;
   title: string;
   description: string;
@@ -41,7 +44,11 @@ export function MaterialRow({
   return (
     <li className="flex items-center gap-2 border-t border-[var(--line-soft)] px-4 py-2.5 first:border-t-0">
       <Icon className="h-5 w-5 shrink-0 text-[var(--ink-faint)]" aria-hidden />
-      <Link to={href} className="min-w-0 flex-1">
+      <Link
+        to={href}
+        state={materialLocationState(fromUnitPage)}
+        className="min-w-0 flex-1"
+      >
         <span className="block truncate text-[14px] font-semibold text-[var(--ink)]">
           {title}
         </span>

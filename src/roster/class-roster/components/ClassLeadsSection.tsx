@@ -32,7 +32,7 @@ export function ClassLeadsSection({
   addError: string | null;
 }) {
   return (
-    <section className="mt-8 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
+    <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
       <div className="flex items-center gap-1.5">
         <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Teachers</h2>
         <InfoHint label="What is a class lead?">
@@ -89,11 +89,7 @@ export function ClassLeadsSection({
             {adding ? "Adding…" : "Add"}
           </Button>
         </div>
-      ) : (
-        <p className="mt-3 text-[13px] text-[var(--ink-faint)]">
-          Owners and admins can assign teachers.
-        </p>
-      )}
+      ) : null}
       {addError ? (
         <p className="mt-2 text-[13px] text-[var(--amber-deep)]">{addError}</p>
       ) : null}

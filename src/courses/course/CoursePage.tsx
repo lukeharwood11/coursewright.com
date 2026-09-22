@@ -26,7 +26,6 @@ export function CoursePage() {
     canEdit,
     isParent,
     course,
-    copiedFromTitle,
     units,
     topLevelMaterials,
     materialsByUnitId,
@@ -47,7 +46,7 @@ export function CoursePage() {
   const [unitTitle, setUnitTitle] = useState("");
   const [outlineOpen, setOutlineOpen] = useState(() =>
     typeof window !== "undefined" &&
-    window.matchMedia("(min-width: 1024px)").matches,
+    window.matchMedia("(min-width: 1280px)").matches,
   );
 
   useEffect(() => {
@@ -95,7 +94,7 @@ export function CoursePage() {
   }
 
   return (
-    <div className="px-5 py-8 md:px-8">
+    <div>
       <CourseHeader
         orgSlug={organization.slug}
         courseId={course.id}
@@ -109,7 +108,6 @@ export function CoursePage() {
         endDate={course.endDate}
         gradeLevels={course.gradeLevels}
         gradeLabels={gradeLabels}
-        copiedFromTitle={copiedFromTitle}
         canEdit={canEdit}
         isParent={isParent}
         onShare={() => {
@@ -117,6 +115,7 @@ export function CoursePage() {
           toast(resourceShareMessage(course.visibility));
         }}
       />
+      <div className="px-5 py-6 md:px-8">
       <CourseVisibilityBanner
         visibility={course.visibility}
         canEdit={canEdit}
@@ -131,7 +130,9 @@ export function CoursePage() {
 
       <div
         className={`grid gap-6 ${
-          outlineOpen ? "mt-6 lg:grid-cols-[14rem_minmax(0,1fr)_16rem]" : "mt-4 lg:grid-cols-[minmax(0,1fr)_16rem]"
+          outlineOpen
+            ? "mt-6 xl:grid-cols-[14rem_minmax(0,1fr)_16rem]"
+            : "mt-4 lg:grid-cols-[minmax(0,1fr)_16rem]"
         }`}
       >
         <CourseOutline
@@ -236,6 +237,7 @@ export function CoursePage() {
           students={students}
           canEdit={canEdit}
         />
+      </div>
       </div>
     </div>
   );

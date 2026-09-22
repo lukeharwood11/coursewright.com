@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
+import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { Button, ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
@@ -89,61 +90,54 @@ export function LessonPlanPage() {
   const course = page.course;
 
   return (
-    <div className="px-5 py-8 md:px-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1
-            className="flex flex-wrap items-center gap-2 text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {page.plan.title}
+    <div>
+      <DetailPageHeader
+        backTo={
+          page.isParent
+            ? `/my/${page.organization.slug}`
+            : coursePath(page.organization.slug, page.course.id)
+        }
+        backLabel={
+          page.isParent ? "Back to this week" : `Back to ${page.course.title}`
+        }
+        title={page.plan.title}
+        meta={
+          <>
             {page.canEdit && lessonPlanIsPublished(page.plan.visibility) ? (
               <PublishedBadge />
             ) : null}
-          </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
             <Badge variant="neutral">
               Week of {weekdayDateLabel(page.plan.weekStart)}
             </Badge>
             <Badge variant="slate">{page.course.title}</Badge>
-          </div>
-          <p className="mt-3 text-[13px]">
-            <Link
-              to={
-                page.isParent
-                  ? `/my/${page.organization.slug}`
-                  : coursePath(page.organization.slug, page.course.id)
-              }
-              className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-            >
-              {page.isParent ? "Back to this week" : `Back to ${page.course.title}`}
-            </Link>
-          </p>
-        </div>
-        {page.canEdit ? (
-          <div className="flex flex-wrap gap-2">
-            <ButtonLink
-              variant="secondary"
-              to={lessonPlanEditPath(
-                page.organization.slug,
-                page.course.id,
-                page.plan.id,
-              )}
-            >
-              <PencilSquareIcon className="h-5 w-5" aria-hidden />
-              Edit
-            </ButtonLink>
-            <Button
-              variant="secondary"
-              onClick={() => setConfirmRemove(true)}
-              disabled={page.remove.isPending}
-            >
-              Remove
-            </Button>
-          </div>
-        ) : null}
-      </div>
-
+          </>
+        }
+        actions={
+          page.canEdit ? (
+            <>
+              <ButtonLink
+                variant="secondary"
+                to={lessonPlanEditPath(
+                  page.organization.slug,
+                  page.course.id,
+                  page.plan.id,
+                )}
+              >
+                <PencilSquareIcon className="h-5 w-5" aria-hidden />
+                Edit
+              </ButtonLink>
+              <Button
+                variant="secondary"
+                onClick={() => setConfirmRemove(true)}
+                disabled={page.remove.isPending}
+              >
+                Remove
+              </Button>
+            </>
+          ) : null
+        }
+      />
+      <div className="px-5 py-6 md:px-8">
       <VisibilityBanner
         visibility={page.plan.visibility}
         canEdit={page.canEdit}
@@ -194,6 +188,7 @@ export function LessonPlanPage() {
         pending={page.setVisibility.isPending}
         onUnpublish={() => page.setVisibility.mutate("unpublished")}
       />
+      </div>
 
       <ConfirmDialog
         open={confirmRemove}

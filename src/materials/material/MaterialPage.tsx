@@ -1,8 +1,9 @@
 import { useEffect, lazy, Suspense } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { PencilSquareIcon, PrinterIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import { Badge } from "@/ui/Badge";
+import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { Button, ButtonLink } from "@/ui/Button";
 import { PublishedBadge } from "@/ui/PublishedBadge";
@@ -10,12 +11,16 @@ import { useToastOnError } from "@/ui/useToastOnError";
 import { formatIsoDate } from "@/courses/model/dates";
 import { coursePath } from "@/courses/model/paths";
 import { materialKindLabel } from "@/materials/model/kind";
+import {
+  materialBackDestination,
+  materialLocationState,
+  materialOpenedFromUnit,
+} from "@/materials/model/navigation";
 import { materialEditPath, materialPrintPath } from "@/materials/model/paths";
 import { isPublished } from "@/materials/model/visibility";
 import { pageHasContent } from "@/materials/model/pageContent";
 import { resourceShareMessage } from "@/sharing/model/copyLink";
 import { createResourceShareLink } from "@/sharing/databridge/shareLinks";
-import { unitPath } from "@/units/model/paths";
 import { useMaterial } from "./hooks/useMaterial";
 import { FileMaterialBody } from "./components/FileMaterialBody";
 import {
@@ -30,6 +35,7 @@ const PageContentView = lazy(async () => {
 
 export function MaterialPage() {
   const page = useMaterial();
+  const location = useLocation();
   const navigate = useNavigate();
   useToastOnError(page.error);
 
@@ -82,18 +88,24 @@ export function MaterialPage() {
     unitId: page.material.unitId,
     materialId: page.material.id,
   });
+  const fromUnit = materialOpenedFromUnit(location.state);
+  const materialNavState = materialLocationState(fromUnit);
+  const back = materialBackDestination({
+    fromUnit,
+    orgSlug: page.organization.slug,
+    courseId: page.course.id,
+    courseTitle: page.course.title,
+    unit: page.unit,
+  });
 
   return (
-    <div className="px-5 py-8 md:px-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1
-            className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {page.material.title}
-          </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+    <div>
+      <DetailPageHeader
+        backTo={back.to}
+        backLabel={back.label}
+        title={page.material.title}
+        meta={
+          <>
             <Badge variant="slate">{materialKindLabel(page.material.kind)}</Badge>
             {page.importantNow ? (
               <Badge variant="amberSolid">Important now</Badge>
@@ -113,64 +125,51 @@ export function MaterialPage() {
                 Due {formatIsoDate(page.material.dueDate)}
               </span>
             ) : null}
-          </div>
-          <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">
+          </>
+        }
+        description={
+          <p className="text-[13.5px] text-[var(--ink-soft)]">
             {page.course.title}
             {page.unit ? ` · ${page.unit.title}` : ""}
           </p>
-          <p className="mt-3 text-[13px]">
-            {page.unit ? (
-              <Link
-                to={unitPath(page.organization.slug, page.course.id, page.unit.id)}
-                className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-              >
-                Back to {page.unit.title}
-              </Link>
-            ) : (
-              <Link
-                to={coursePath(page.organization.slug, page.course.id)}
-                className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-              >
-                Back to {page.course.title}
-              </Link>
-            )}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="secondary"
-            onClick={async () => {
-              try {
-                await createResourceShareLink({
-                  organizationId: page.organization.id,
-                  courseId: page.course!.id,
-                  materialId: page.material!.id,
-                });
-              } catch {
-                /* Copying the signed-in URL still works if the row fails. */
-              }
-              await navigator.clipboard.writeText(window.location.href);
-              toast(resourceShareMessage(page.material!.visibility));
-            }}
-          >
-            <ShareIcon className="h-5 w-5" aria-hidden />
-            Share
-          </Button>
-          <ButtonLink variant="secondary" to={printHref}>
-            <PrinterIcon className="h-5 w-5" aria-hidden />
-            Print
-          </ButtonLink>
-          {page.canEdit && !page.material.deletedAt ? (
-            <ButtonLink to={editHref}>
-              <PencilSquareIcon className="h-5 w-5" aria-hidden />
-              Edit
+        }
+        actions={
+          <>
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                try {
+                  await createResourceShareLink({
+                    organizationId: page.organization.id,
+                    courseId: page.course!.id,
+                    materialId: page.material!.id,
+                  });
+                } catch {
+                  /* Copying the signed-in URL still works if the row fails. */
+                }
+                await navigator.clipboard.writeText(window.location.href);
+                toast(resourceShareMessage(page.material!.visibility));
+              }}
+            >
+              <ShareIcon className="h-5 w-5" aria-hidden />
+              Share
+            </Button>
+            <ButtonLink variant="secondary" to={printHref}>
+              <PrinterIcon className="h-5 w-5" aria-hidden />
+              Print
             </ButtonLink>
-          ) : null}
-        </div>
-      </div>
-
+            {page.canEdit && !page.material.deletedAt ? (
+              <ButtonLink to={editHref} state={materialNavState}>
+                <PencilSquareIcon className="h-5 w-5" aria-hidden />
+                Edit
+              </ButtonLink>
+            ) : null}
+          </>
+        }
+      />
+      <div className="px-5 py-6 md:px-8">
       {page.material.description ? (
-        <p className="mt-4 max-w-2xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
+        <p className="max-w-2xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
           {page.material.description}
         </p>
       ) : null}
@@ -217,16 +216,7 @@ export function MaterialPage() {
                   return;
                 }
                 page.remove.mutate(undefined, {
-                  onSuccess: () =>
-                    navigate(
-                      page.unit
-                        ? unitPath(
-                            page.organization.slug,
-                            page.course!.id,
-                            page.unit.id,
-                          )
-                        : coursePath(page.organization.slug, page.course!.id),
-                    ),
+                  onSuccess: () => navigate(back.to),
                 });
               }}
             >
@@ -244,6 +234,7 @@ export function MaterialPage() {
           onUnpublish={() => page.setVisibility.mutate("unpublished")}
         />
       ) : null}
+      </div>
     </div>
   );
 }

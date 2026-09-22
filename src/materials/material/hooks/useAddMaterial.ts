@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { createMaterial, materialQueryKeys } from "@/materials/databridge/materials";
 import { uploadNewFile } from "@/materials/databridge/files";
+import { materialLocationState } from "@/materials/model/navigation";
 import { materialEditPath, materialPath } from "@/materials/model/paths";
 import { validateMaterialFields } from "@/materials/model/validate";
 import type { MaterialKind } from "@/materials/model/kind";
@@ -14,6 +15,7 @@ export function useAddMaterial(args: {
   orgSlug: string;
   courseId: number;
   unitId: number | null;
+  fromUnitPage?: boolean;
 }) {
   const user = useAuthedUser();
   const navigate = useNavigate();
@@ -76,10 +78,12 @@ export function useAddMaterial(args: {
         unitId: args.unitId,
         materialId: material.id,
       };
+      const navState = materialLocationState(Boolean(args.fromUnitPage));
       navigate(
         material.kind === "page"
           ? materialEditPath(pathArgs)
           : materialPath(pathArgs),
+        navState ? { state: navState } : undefined,
       );
     },
     onError: (error: Error) => setFormError(error.message),

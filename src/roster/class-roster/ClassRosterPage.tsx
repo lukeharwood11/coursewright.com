@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChatBubbleLeftRightIcon, MegaphoneIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 import { Button, ButtonLink } from "@/ui/Button";
+import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
@@ -57,36 +58,37 @@ export function ClassRosterPage() {
   );
 
   return (
-    <div className="px-5 py-8 md:px-8">
-      <h1
-        className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        {roster.classGroup.title}
-      </h1>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <ButtonLink
-          variant="secondary"
-          to={newDiscussionPath(roster.organization.slug, {
-            audience: "class",
-            classId: roster.classGroup.id,
-          })}
-        >
-          <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
-          Start a discussion
-        </ButtonLink>
-        <ButtonLink
-          variant="secondary"
-          to={newAnnouncementPath(roster.organization.slug, {
-            audience: "class",
-            classId: roster.classGroup.id,
-          })}
-        >
-          <MegaphoneIcon className="h-5 w-5" aria-hidden />
-          Create Announcement
-        </ButtonLink>
-      </div>
-
+    <div>
+      <DetailPageHeader
+        backTo={`/my/${roster.organization.slug}/roster`}
+        backLabel="Back to roster"
+        title={roster.classGroup.title}
+        actions={
+          <>
+            <ButtonLink
+              variant="secondary"
+              to={newDiscussionPath(roster.organization.slug, {
+                audience: "class",
+                classId: roster.classGroup.id,
+              })}
+            >
+              <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
+              Start a discussion
+            </ButtonLink>
+            <ButtonLink
+              variant="secondary"
+              to={newAnnouncementPath(roster.organization.slug, {
+                audience: "class",
+                classId: roster.classGroup.id,
+              })}
+            >
+              <MegaphoneIcon className="h-5 w-5" aria-hidden />
+              Create Announcement
+            </ButtonLink>
+          </>
+        }
+      />
+      <div className="space-y-6 px-5 pt-4 pb-6 md:px-8">
       <ClassLeadsSection
         orgSlug={roster.organization.slug}
         leads={roster.leads}
@@ -100,7 +102,7 @@ export function ClassRosterPage() {
         addError={roster.addLeadError}
       />
 
-      <section className="mt-8">
+      <section>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">
             Students
@@ -172,15 +174,7 @@ export function ClassRosterPage() {
         onApplyPaste={roster.onApplyPaste}
         onSubmitNew={roster.onSubmitNew}
       />
-
-      <p className="mt-6 text-[13px]">
-        <Link
-          to={`/my/${roster.organization.slug}/roster`}
-          className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-        >
-          Back to roster
-        </Link>
-      </p>
+      </div>
     </div>
   );
 }

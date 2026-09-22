@@ -1,20 +1,29 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import {
   ChatBubbleLeftRightIcon,
   Cog6ToothIcon,
+  InformationCircleIcon,
   MegaphoneIcon,
 } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { ButtonLink } from "@/ui/Button";
+import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { formatDateRange } from "@/courses/model/dates";
 import { formatGradeLevels } from "@/courses/model/gradeLevels";
-import { courseRosterPath, courseSettingsPath, coursesPath } from "@/courses/model/paths";
+import {
+  courseSettingsPath,
+  coursesPath,
+} from "@/courses/model/paths";
 import { courseStatusLabel, type CourseStatus } from "@/courses/model/status";
-import { isCoursePublished, type CourseVisibility } from "@/courses/model/visibility";
+import {
+  isCoursePublished,
+  type CourseVisibility,
+} from "@/courses/model/visibility";
 import { CourseActionsMenu } from "./CourseActionsMenu";
+import { CourseDetailsModal } from "./CourseDetailsModal";
 
 export function CourseHeader({
   orgSlug,
@@ -29,7 +38,6 @@ export function CourseHeader({
   endDate,
   gradeLevels,
   gradeLabels,
-  copiedFromTitle,
   canEdit,
   isParent,
   onShare,
@@ -46,126 +54,117 @@ export function CourseHeader({
   endDate: string | null;
   gradeLevels: string[];
   gradeLabels: string[];
-  copiedFromTitle: string | null;
   canEdit: boolean;
   isParent: boolean;
   onShare: () => void;
 }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const dates = formatDateRange(startDate, endDate);
+  const backTo = isParent ? `/my/${orgSlug}` : coursesPath(orgSlug);
+  const backLabel = isParent ? "Back to this week" : "Back to courses";
+
+  const openDetails = () => setDetailsOpen(true);
+
+  const courseActionsMenuProps = {
+    orgSlug,
+    courseId,
+    canEdit,
+    isParent,
+    onShare,
+    onShowDetails: openDetails,
+  };
 
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4">
-      <div>
-        <h1
-          className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          {title}
-        </h1>
-        <div className="mt-2 flex flex-wrap items-center gap-1.5">
-          <Badge variant={status === "active" ? "green" : "neutral"}>
-            {courseStatusLabel(status)}
-          </Badge>
-          {isCoursePublished(visibility) ? (
-            canEdit ? <PublishedBadge /> : null
-          ) : (
-            <Badge variant="amber">Unpublished</Badge>
-          )}
-          {dates ? <Badge variant="neutral">{dates}</Badge> : null}
-          {subject ? <Badge variant="slate">{subject}</Badge> : null}
-          {gradeLevels.length > 0 ? (
-            <Badge variant="neutral">
-              {formatGradeLevels(gradeLevels, gradeLabels)}
+    <>
+      <DetailPageHeader
+        backTo={backTo}
+        backLabel={backLabel}
+        title={title}
+        titleAccessory={
+          <button
+            type="button"
+            className="inline-flex rounded-full text-[var(--ink-faint)] hover:text-[var(--ink-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+            aria-label="Course details"
+            onClick={openDetails}
+          >
+            <InformationCircleIcon className="h-5 w-5" aria-hidden />
+          </button>
+        }
+        titleTrailing={
+          <CourseActionsMenu
+            {...courseActionsMenuProps}
+            className="min-[675px]:hidden"
+          />
+        }
+        actionsClassName="max-[674px]:hidden"
+        meta={
+          <>
+            <Badge variant={status === "active" ? "green" : "neutral"}>
+              {courseStatusLabel(status)}
             </Badge>
-          ) : null}
-        </div>
-        {description ? (
-          <p className="mt-3 max-w-2xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-            {description}
-          </p>
-        ) : null}
-        {location ? (
-          <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">
-            {location}
-          </p>
-        ) : null}
-        {copiedFromTitle ? (
-          <p className="mt-2 text-[12.5px] text-[var(--ink-faint)]">
-            Created from {copiedFromTitle}. This copy doesn’t stay in sync.
-          </p>
-        ) : null}
-        <p className="mt-3 text-[13px]">
-          <Link
-            to={isParent ? `/my/${orgSlug}` : coursesPath(orgSlug)}
-            className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-          >
-            {isParent ? "Back to this week" : "Back to courses"}
-          </Link>
-          {canEdit ? (
-            <>
-              <span className="text-[var(--ink-faint)]"> · </span>
-              <Link
+            {isCoursePublished(visibility) ? (
+              canEdit ? <PublishedBadge /> : null
+            ) : (
+              <Badge variant="amber">Unpublished</Badge>
+            )}
+            {dates ? <Badge variant="neutral">{dates}</Badge> : null}
+            {gradeLevels.length > 0 ? (
+              <Badge variant="neutral">
+                {formatGradeLevels(gradeLevels, gradeLabels)}
+              </Badge>
+            ) : null}
+          </>
+        }
+        actions={
+          <>
+            {canEdit || isParent ? (
+              <ButtonLink
+                variant="secondary"
+                className="max-[674px]:hidden"
+                to={newDiscussionPath(orgSlug, {
+                  audience: "course",
+                  courseId,
+                })}
+              >
+                <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
+                Start a discussion
+              </ButtonLink>
+            ) : null}
+            {canEdit ? (
+              <ButtonLink
+                variant="secondary"
+                className="max-[674px]:hidden"
+                to={newAnnouncementPath(orgSlug, {
+                  audience: "course",
+                  courseId,
+                })}
+              >
+                <MegaphoneIcon className="h-5 w-5" aria-hidden />
+                Create Announcement
+              </ButtonLink>
+            ) : null}
+            {canEdit ? (
+              <ButtonLink
+                variant="secondary"
+                className="max-xl:hidden"
                 to={courseSettingsPath(orgSlug, courseId)}
-                className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
               >
+                <Cog6ToothIcon className="h-5 w-5" aria-hidden />
                 Settings
-              </Link>
-              <span className="text-[var(--ink-faint)]"> · </span>
-              <Link
-                to={courseRosterPath(orgSlug, courseId)}
-                className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-              >
-                Roster
-              </Link>
-            </>
-          ) : null}
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {canEdit || isParent ? (
-          <ButtonLink
-            variant="secondary"
-            className="hidden md:inline-flex"
-            to={newDiscussionPath(orgSlug, {
-              audience: "course",
-              courseId,
-            })}
-          >
-            <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
-            Start a discussion
-          </ButtonLink>
-        ) : null}
-        {canEdit ? (
-          <ButtonLink
-            variant="secondary"
-            className="hidden md:inline-flex"
-            to={newAnnouncementPath(orgSlug, {
-              audience: "course",
-              courseId,
-            })}
-          >
-            <MegaphoneIcon className="h-5 w-5" aria-hidden />
-            Create Announcement
-          </ButtonLink>
-        ) : null}
-        {canEdit ? (
-          <ButtonLink
-            variant="secondary"
-            className="hidden md:inline-flex"
-            to={courseSettingsPath(orgSlug, courseId)}
-          >
-            <Cog6ToothIcon className="h-5 w-5" aria-hidden />
-            Settings
-          </ButtonLink>
-        ) : null}
-        <CourseActionsMenu
-          orgSlug={orgSlug}
-          courseId={courseId}
-          canEdit={canEdit}
-          isParent={isParent}
-          onShare={onShare}
-        />
-      </div>
-    </div>
+              </ButtonLink>
+            ) : null}
+            <CourseActionsMenu {...courseActionsMenuProps} />
+          </>
+        }
+      />
+      <CourseDetailsModal
+        open={detailsOpen}
+        courseTitle={title}
+        description={description}
+        subject={subject}
+        location={location}
+        onClose={() => setDetailsOpen(false)}
+      />
+    </>
   );
 }

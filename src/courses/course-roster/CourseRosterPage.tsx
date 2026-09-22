@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
+import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { coursePath, coursesPath } from "@/courses/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
@@ -62,31 +63,28 @@ export function CourseRosterPage() {
   const base = `/my/${roster.organization.slug}`;
 
   return (
-    <div className="px-5 py-8 md:px-8">
-      <h1
-        className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        Roster
-      </h1>
-      <p className="mt-1 text-[14px] text-[var(--ink-soft)]">{roster.course.title}</p>
-      <p className="mt-2 text-[13px]">
-        <Link
-          to={coursePath(roster.organization.slug, roster.course.id)}
-          className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-        >
-          Back to course
-        </Link>
-        <span className="text-[var(--ink-faint)]"> · </span>
-        <Link
-          to={`${base}/roster`}
-          className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-        >
-          Org roster
-        </Link>
-      </p>
-
-      <div className="mt-8">
+    <div>
+      <DetailPageHeader
+        backTo={coursePath(roster.organization.slug, roster.course.id)}
+        backLabel="Back to course"
+        title="Roster"
+        meta={
+          <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+            {roster.course.title}
+          </span>
+        }
+        description={
+          <p className="text-[13px]">
+            <Link
+              to={`${base}/roster`}
+              className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+            >
+              Org roster
+            </Link>
+          </p>
+        }
+      />
+      <div className="space-y-6 px-5 pt-4 pb-6 md:px-8">
         <InstructorsSection
           orgSlug={roster.organization.slug}
           instructors={roster.instructors}
@@ -99,9 +97,8 @@ export function CourseRosterPage() {
           adding={roster.addingInstructor}
           addError={roster.addInstructorError}
         />
-      </div>
 
-      <section className="mt-8">
+      <section>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">
             Enrolled
@@ -212,6 +209,7 @@ export function CourseRosterPage() {
         onApplyPaste={roster.onApplyPaste}
         onSubmitNew={roster.onSubmitNew}
       />
+      </div>
     </div>
   );
 }

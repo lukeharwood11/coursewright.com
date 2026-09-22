@@ -114,8 +114,8 @@ export function DiscussionMessageItem({
         <div
           className={
             isOwn
-              ? "mb-0.5 flex w-fit max-w-[min(85%,36rem)] flex-wrap items-center justify-end gap-x-1.5 px-1"
-              : "mb-0.5 flex w-fit max-w-[min(85%,36rem)] flex-wrap items-center gap-x-1.5 px-1"
+              ? "mb-0.5 flex w-fit max-w-[85%] flex-wrap items-center justify-end gap-x-1.5 px-1"
+              : "mb-0.5 flex w-fit max-w-[85%] flex-wrap items-center gap-x-1.5 px-1"
           }
         >
           {showAuthor ? (
@@ -147,7 +147,7 @@ export function DiscussionMessageItem({
 
       <article
         className={[
-          "relative max-w-[min(85%,36rem)] rounded-[8px] border border-[var(--line-soft)] px-3 py-2",
+          "relative max-w-[85%] rounded-[8px] border border-[var(--line-soft)] px-3 py-2",
           isEditing ? "w-full" : "w-fit",
           isOwn
             ? "bg-[var(--green-tint)]"
