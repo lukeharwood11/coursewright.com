@@ -5,7 +5,7 @@ Sign-up / sign-in: email (password or magic link) + Google via Supabase Auth. Si
 ## Scope
 
 - Login (`/login`) and signup (`/signup`) screens (STYLE_GUIDE)
-- Account settings (`/my/settings`) — cross-org; display name on `profiles`; sign out. Email is auth-owned (read-only). No avatar upload / Google link UI in P0
+- Account settings (`/my/settings`) — cross-org; display name on `profiles`; sign out. Email is auth-owned (read-only). Installed-app Activity notifications (on/off or install note). No avatar upload / Google link UI in P0
 - Account menu chrome (`AccountMenu`) — User (Settings, **Send feedback**, Sign out) + Organization (Org settings, Switch)
 - Invite link entry → `/invite/<token>` loads unsigned, then sign up / log in with **that invited email** (prefilled + named in copy)
 - Session helpers used by `app/` gates

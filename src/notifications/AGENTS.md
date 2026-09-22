@@ -15,7 +15,7 @@ In-app **Activity**: stored notifications for the signed-in person. Discussion p
 - Clicking a row marks it read and opens the activity (discussion post or announcement).
 - Page folder: `activity/`. Header chrome: `activity-menu/`. Shared `model/` + `databridge/`.
 - Distinct from announcement unread icons and the Discussions unread-thread badge.
-- No email or push in this slice.
+- Installed PWA may turn on a device notification for the same rows. Browser tabs do not subscribe. Prompt and account control live in `push/`.
 
 ## Don’t
 

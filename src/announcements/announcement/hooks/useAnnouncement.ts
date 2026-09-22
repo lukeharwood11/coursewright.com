@@ -10,6 +10,7 @@ import {
   markAnnouncementRead,
   softDeleteAnnouncement,
 } from "@/announcements/databridge/announcements";
+import { useAckNotificationFromSearch } from "@/notifications/activity/hooks/useAckNotificationFromSearch";
 import {
   markAnnouncementNotificationsRead,
   notificationQueryKeys,
@@ -24,6 +25,7 @@ export function useAnnouncement() {
   const { organization, role, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
   const queryClient = useQueryClient();
+  useAckNotificationFromSearch();
   const canEdit = staffCanEdit(role, parentPresentation);
   const today = localIsoDate();
 

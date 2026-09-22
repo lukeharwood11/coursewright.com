@@ -6,3 +6,4 @@ Shared helpers for Edge Functions (CORS, admin client, errors).
 
 - No use-case business flow that belongs in a named function folder.
 - Safe shared utilities only; keep secrets via Deno env.
+- `vapid.ts` loads Activity push keys (**HN-018**). No send loop here.

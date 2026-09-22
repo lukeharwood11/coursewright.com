@@ -22,6 +22,38 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ## Open
 
+### HN-018 — VAPID keys and Activity push webhook secret
+
+| | |
+|--|--|
+| **Why** | Installed PWAs subscribe with a VAPID public key and `send-activity-push` signs each Web Push. The database trigger calls that function with a shared secret. Without the secrets, Activity still saves and the prompt stays hidden. |
+| **Where** | Supabase Edge Function secrets + Vault, on testing (`yplmaauelutcosqqvnya`) and production. **Not** git, `.env.testing`, or any `VITE_*` variable. |
+| **Placeholder** | `supabase/functions/_shared/vapid.ts` and `private.enqueue_activity_push` in `supabase/migrations/20260930000004_activity_push.sql` (`HN-018`) |
+
+**Steps (repeat per tier):**
+
+1. Generate a key pair (the function accepts this base64url pair):
+   `npx --yes web-push generate-vapid-keys`
+   Copy the public key and the private key with no labels or quotes.
+2. Generate a webhook secret: `openssl rand -base64 32`
+3. Set function secrets:
+   `supabase secrets set VAPID_PUBLIC_KEY='<public>' VAPID_PRIVATE_KEY='<private>' ACTIVITY_PUSH_WEBHOOK_SECRET='<webhook>' --project-ref <ref>`
+   Testing ref: `yplmaauelutcosqqvnya`. Production ref: the production project (today `hlecttkgrfhtzvwnxtyb`, or HN-007’s project when that exists).
+4. Store the same webhook secret and the function URL in Vault (SQL editor or `supabase db query --linked`):
+   ```sql
+   select vault.create_secret('<webhook>', 'activity_push_webhook_secret', 'send-activity-push');
+   select vault.create_secret(
+     'https://<ref>.supabase.co/functions/v1/send-activity-push',
+     'activity_push_function_url',
+     'send-activity-push URL'
+   );
+   ```
+   The webhook value must match `ACTIVITY_PUSH_WEBHOOK_SECRET` exactly.
+5. Deploy so the migration and functions are on that project: `./scripts/deploy-supabase.sh testing` (and production when that tier should send).
+6. On the matching site, install Course Wright (home screen or installed window), open it, choose **Turn on notifications**, then cause an Activity row (a discussion post or **Send notification** on an announcement). The device should show the same headline as Activity.
+
+**Done when:** an installed app that turned notifications on receives a device notification for a new unread Activity row, and the private key is only in Supabase secrets.
+
 ### HN-015 — Set Resend API key for organization invite emails
 
 | | |

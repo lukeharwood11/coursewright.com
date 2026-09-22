@@ -6,6 +6,7 @@ Cross-org account page (`/my/settings`).
 
 - Display name — persist to `profiles.name`
 - Email — read-only (Auth-owned)
+- **Notifications** — installed app only; on/off for this device, or a note to install
 - Sign out
 
 Page UI in `AccountSettingsPage.tsx` + `components/`; React wiring in `hooks/`; Supabase in `../api/profiles.ts`; validation in `../model/profile.ts`.

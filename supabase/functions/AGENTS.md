@@ -4,7 +4,7 @@ Edge Functions for **complex / privileged** jobs only.
 
 ## Scope
 
-- One folder per use case, e.g. `create-course-from-course/` (**P0**), `send-organization-invite/` (Resend), `send-announcement-notification/` (Resend), `create-course-from-template/` (**P1**)
+- One folder per use case, e.g. `create-course-from-course/` (**P0**), `send-organization-invite/` (Resend), `send-announcement-notification/` (Resend), `send-activity-push/` (Web Push), `web-push-public-key/` (VAPID public key), `create-course-from-template/` (**P1**)
 - `_shared/` for cors, admin client, helpers
 - P1: `stripe-webhook/`, template sync / promote
 
