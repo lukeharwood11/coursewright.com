@@ -33,18 +33,16 @@ export function DiscussionThreadMenu({
   /** e.g. "Started Mar 5" — plain note, not a link. */
   startedLabel: string;
   onMembers: () => void;
-  /** When set, Mark as answered/open appears in the menu on small screens. */
   answered?: boolean;
   onMarkAnswered?: () => void;
   markAnsweredPending?: boolean;
-  /** When set, Delete appears in the menu on small screens. */
   onDelete?: () => void;
   className?: string;
 }) {
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const showMobileActions = onMarkAnswered != null || onDelete != null;
+  const showOverflowActions = onMarkAnswered != null || onDelete != null;
 
   return (
     <>
@@ -87,13 +85,13 @@ export function DiscussionThreadMenu({
             </p>
           ) : null}
         </div>
-        {showMobileActions ? (
-          <div className="border-b border-[var(--line-soft)] py-1 md:hidden">
+        {showOverflowActions ? (
+          <div className="border-b border-[var(--line-soft)] py-1">
             {onMarkAnswered ? (
               <button
                 type="button"
                 role="menuitem"
-                className={itemClassName}
+                className={`${itemClassName} xl:hidden`}
                 disabled={markAnsweredPending}
                 onClick={() => {
                   setOpen(false);

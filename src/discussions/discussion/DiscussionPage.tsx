@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   CheckCircleIcon,
   ArrowUturnLeftIcon,
-  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
@@ -136,42 +135,28 @@ export function DiscussionPage() {
           </>
         }
         titleTrailing={
-          <DiscussionThreadMenu {...threadMenuProps} className="md:hidden" />
-        }
-        actionsClassName="max-md:hidden"
-        actions={
-          <>
-            <div className="hidden flex-wrap items-center gap-2 md:flex">
-              {page.canMarkAnswered ? (
-                <Button
-                  variant="secondary"
-                  disabled={page.answered.isPending}
-                  onClick={() =>
-                    page.answered.mutate(!page.discussion?.answeredAt)
-                  }
-                >
-                  {page.discussion.answeredAt ? (
-                    <ArrowUturnLeftIcon className="h-4 w-4" aria-hidden />
-                  ) : (
-                    <CheckCircleIcon className="h-4 w-4" aria-hidden />
-                  )}
-                  {page.discussion.answeredAt
-                    ? "Mark as open"
-                    : "Mark as answered"}
-                </Button>
-              ) : null}
-              {page.canRemoveThread ? (
-                <Button
-                  variant="secondary"
-                  onClick={() => setConfirmRemove(true)}
-                >
-                  <TrashIcon className="h-4 w-4" aria-hidden />
-                  Delete
-                </Button>
-              ) : null}
-            </div>
+          <div className="flex shrink-0 flex-nowrap items-center gap-2">
+            {page.canMarkAnswered ? (
+              <Button
+                variant="secondary"
+                className="max-xl:hidden shrink-0"
+                disabled={page.answered.isPending}
+                onClick={() =>
+                  page.answered.mutate(!page.discussion?.answeredAt)
+                }
+              >
+                {page.discussion.answeredAt ? (
+                  <ArrowUturnLeftIcon className="h-4 w-4" aria-hidden />
+                ) : (
+                  <CheckCircleIcon className="h-4 w-4" aria-hidden />
+                )}
+                {page.discussion.answeredAt
+                  ? "Mark as open"
+                  : "Mark as answered"}
+              </Button>
+            ) : null}
             <DiscussionThreadMenu {...threadMenuProps} />
-          </>
+          </div>
         }
       />
 
