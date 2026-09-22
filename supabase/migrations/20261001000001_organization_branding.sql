@@ -77,9 +77,29 @@ set public = excluded.public,
     file_size_limit = excluded.file_size_limit,
     allowed_mime_types = excluded.allowed_mime_types;
 
+-- Anyone can read the picture, including signed-out invite visitors.
+-- Writes stay owner-only below.
 create policy org_brand_select on storage.objects
-for select to anon, authenticated
+for select to public
 using (bucket_id = 'org-brand');
+
+-- Icon path only. Accent stays on organization_branding (members only).
+-- security_invoker false: the view owner reads the table, so non-members can
+-- learn the public URL without a membership.
+create view public.organization_icons
+with (security_invoker = false) as
+select
+  organization_id,
+  icon_path,
+  updated_at
+from public.organization_branding
+where icon_path is not null;
+
+comment on view public.organization_icons is
+  'Public org icon path for chrome and future invite previews. No accent color.';
+
+revoke all on table public.organization_icons from public, anon, authenticated;
+grant select on table public.organization_icons to anon, authenticated, service_role;
 
 create policy org_brand_insert on storage.objects
 for insert to authenticated

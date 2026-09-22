@@ -2617,7 +2617,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      organization_icons: {
+        Row: {
+          icon_path: string
+          organization_id: number
+          updated_at: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_branding_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       claim_invite: { Args: { p_token: string }; Returns: string }

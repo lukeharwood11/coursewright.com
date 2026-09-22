@@ -12,7 +12,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 |---------------|-------|--------|
 | User | `profiles` | PK = `auth.users.id`. Email + Google live in Supabase Auth; `profiles` is the PostgREST-facing row. |
 | Organization | `organizations` | |
-| OrganizationBranding | `organization_branding` | Owner-only icon and accent for org chrome. One row per org. |
+| OrganizationBranding | `organization_branding` | Owner-only writes. Members read the row. Icon file and path are public via `organization_icons`. |
 | Membership | `memberships` | |
 | AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `parent`. Claimed via emailed `/invite/<token>` (Resend `organization-invite`) or pending-request inbox after login. Copy-link remains. Membership is created on claim. |
 | StudentProfile | `student_profiles` | |
@@ -350,13 +350,15 @@ UI map: [URLS.md](../URLS.md), [PRINT](../pages/PRINT.md).
 
 ### OrganizationBranding
 
-One optional row per organization. **Owners** set it. Admins, instructors, and parents can read it and see it in chrome; they cannot write it. Separate from `organizations` because org updates are allowed for any admin.
+One optional row per organization. **Owners** set it. Admins, instructors, and parents can read the row and see it in chrome; they cannot write it. Separate from `organizations` because org updates are allowed for any admin.
+
+**The icon is public.** Storage bucket `org-brand` allows `select` for `public`, so anyone with the URL can load the picture — including someone who is not a member (a future invite page). View `organization_icons` exposes only `organization_id`, `icon_path`, and `updated_at` to `anon` and `authenticated`. `accent_color` stays on this table and is not on that view.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | organization_id | bigint | PK, FK → Organization, cascade delete |
 | accent_color | text | Optional `#rrggbb`. Empty means Wright Green. The app rejects colors that fail WCAG AA contrast for white text, and derives a darker hover and a light tint. |
-| icon_path | text | Optional Storage path `{organization_id}/icon.{png\|jpg\|webp}` in the public `org-brand` bucket (256 KB). Empty means the CW mark. |
+| icon_path | text | Optional Storage path `{organization_id}/icon.{png\|jpg\|webp}` in the public `org-brand` bucket (256 KB). Empty means the CW mark. The object and this path (via `organization_icons`) are readable without a membership. |
 | updated_at | timestamptz | Cache-busts the public icon URL |
 
 **Chrome only.** The accent restyles the org sidebar and header controls. It does not recolor page content, emails, or print. The icon also appears beside the org name on the account org list.
