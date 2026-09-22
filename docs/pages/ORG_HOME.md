@@ -19,7 +19,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 
 - Usability bar: understand child, course, and what’s needed immediately — no LMS jargon.
 - **Current announcements** sit above the week calendar when any apply. Unread cards show a notification icon; opening one marks it read.
-- Main body is the **current Sunday–Saturday week** (same chips, colors, and week notes as [CALENDAR](./CALENDAR.md)): days with work are **cards** that wrap (about two or three across). Empty days are omitted. One card per day: each class’s plan text and its linked materials stay together inside that card (after a divider), assigned = outline / due = filled, course colors.
+- Main body is the **current Sunday–Saturday week** (same chips, colors, and week notes as [CALENDAR](./CALENDAR.md)): days with work are **cards** that wrap (about two or three across). Empty days are omitted. One card per day: **events** for the active students, including organization events (title chip), then each class’s plan text and its linked materials stay together inside that card (after a divider), assigned = outline / due = filled, course colors. An event-only day still shows.
 - **Focus** column on the right (stacks below on small screens): **Important now** and **Coming up** (**Assigned next** + **Due next**).
 - When the parent has more than one student, **tags** at the top toggle who is active. Deselecting a student hides their work (calendar, Focus, announcements). One student skips the tags.
 - Week notes for published lesson plans sit as a colored bar per course above the grid.

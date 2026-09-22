@@ -5,6 +5,7 @@ import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { printBackPath, parsePrintStudentIds, type PrintGrainKind } from "@/print/model/paths";
 import { parseResourcePrintItemIds } from "@/resources/model/paths";
 import {
+  loadEventPrintPacket,
   loadMaterialPrintPacket,
   loadResourcePrintPacket,
   loadUnitPrintPacket,
@@ -18,6 +19,7 @@ function grainFromPath(
   materialId: number,
   unitId: number,
 ): PrintGrainKind {
+  if (pathname.includes("/events/") && pathname.endsWith("/print")) return "event";
   if (pathname.includes("/resources/") && pathname.endsWith("/print")) return "resource";
   if (pathname.includes("print-this-week")) return "thisWeek";
   if (Number.isFinite(materialId)) return "material";
@@ -35,6 +37,7 @@ export function usePrint() {
   const unitId = params.unitId ? Number(params.unitId) : NaN;
   const materialId = params.materialId ? Number(params.materialId) : NaN;
   const itemId = params.itemId ? Number(params.itemId) : NaN;
+  const eventId = params.eventId ? Number(params.eventId) : NaN;
   const grain = grainFromPath(location.pathname, materialId, unitId);
   const studentIds = parsePrintStudentIds(location.search);
 
@@ -48,7 +51,9 @@ export function usePrint() {
     ],
     queryFn: async () => {
       const loaded =
-        grain === "thisWeek"
+        grain === "event"
+          ? await loadEventPrintPacket(eventId)
+          : grain === "thisWeek"
           ? await loadWeekPrintPacket({
               organizationId: organization.id,
               userId: user.id,
@@ -96,6 +101,7 @@ export function usePrint() {
       unitId: Number.isFinite(unitId) ? unitId : null,
       materialId: Number.isFinite(materialId) ? materialId : null,
       itemId: Number.isFinite(itemId) ? itemId : null,
+      eventId: Number.isFinite(eventId) ? eventId : null,
     }),
     retry: () => {
       void query.refetch();

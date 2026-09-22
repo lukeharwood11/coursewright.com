@@ -9,6 +9,7 @@ import { PrintLayout } from "@/app/layouts/PrintLayout";
 import { StubPage } from "@/app/StubPage";
 import { CourseListPage, CoursePage, CourseRosterPage, CourseSettingsPage } from "@/courses";
 import { CalendarPage } from "@/calendar";
+import { EventEditPage, EventPage } from "@/events";
 import { FeedbackPage } from "@/feedback";
 import {
   AnnouncementEditPage,
@@ -141,6 +142,23 @@ export function AppRoutes() {
               }
             />
             <Route path="calendar" element={<CalendarPage />} />
+            <Route
+              path="events/new"
+              element={
+                <RequireStaff>
+                  <EventEditPage />
+                </RequireStaff>
+              }
+            />
+            <Route path="events/:eventId" element={<EventPage />} />
+            <Route
+              path="events/:eventId/edit"
+              element={
+                <RequireStaff>
+                  <EventEditPage />
+                </RequireStaff>
+              }
+            />
             <Route element={<ResourcesLayout />}>
               <Route path="resources" element={<ResourcesPage />} />
               <Route
@@ -249,6 +267,7 @@ export function AppRoutes() {
           </Route>
           <Route element={<PrintLayout />}>
             <Route path="print-this-week" element={<PrintPage />} />
+            <Route path="events/:eventId/print" element={<PrintPage />} />
             <Route
               path="courses/:courseId/materials/:materialId/print"
               element={<PrintPage />}

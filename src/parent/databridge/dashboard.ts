@@ -4,6 +4,7 @@ import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
 import { listLessonPlansInRange } from "@/lesson-plans/databridge/lessonPlans";
 import { isPublished } from "@/materials/model/visibility";
 import { calendarWeekContaining, localIsoDate } from "@/parent/model/thisWeek";
+import { listEventsOverlapping } from "@/events/databridge/events";
 import { buildParentDashboard } from "@/parent/model/dashboard";
 import type { ParentDashboard, ParentDashboardSource } from "@/parent/model/dashboard";
 
@@ -280,6 +281,8 @@ export async function loadParentDashboard(
     studentNames: row.studentIds.map((id) => studentNameById.get(id) ?? "Student"),
   }));
 
+  const eventRows = await listEventsOverlapping(organizationId, week.start, week.end);
+
   return buildParentDashboard({
     week,
     today,
@@ -294,5 +297,17 @@ export async function loadParentDashboard(
     lessonPlans,
     classMemberships,
     announcements,
+    events: eventRows.map((event) => ({
+      id: event.id,
+      title: event.title,
+      location: event.location,
+      startsOn: event.startsOn,
+      endsOn: event.endsOn,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      audience: event.audience,
+      courseIds: event.courseIds,
+      classIds: event.classIds,
+    })),
   });
 }

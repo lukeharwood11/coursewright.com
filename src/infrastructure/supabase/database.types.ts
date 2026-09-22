@@ -932,6 +932,175 @@ export type Database = {
           },
         ]
       }
+      event_blocks: {
+        Row: {
+          body: Json
+          created_at: string
+          deleted_at: string | null
+          event_id: number
+          file_id: number | null
+          id: number
+          kind: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          body?: Json
+          created_at?: string
+          deleted_at?: string | null
+          event_id: number
+          file_id?: number | null
+          id?: number
+          kind: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          body?: Json
+          created_at?: string
+          deleted_at?: string | null
+          event_id?: number
+          file_id?: number | null
+          id?: number
+          kind?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_blocks_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_blocks_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_materials: {
+        Row: {
+          created_at: string
+          event_id: number
+          id: number
+          material_id: number
+          position: number
+        }
+        Insert: {
+          created_at?: string
+          event_id: number
+          id?: number
+          material_id: number
+          position?: number
+        }
+        Update: {
+          created_at?: string
+          event_id?: number
+          id?: number
+          material_id?: number
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_materials_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_materials_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          audience: string
+          class_ids: number[]
+          course_ids: number[]
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          deleted_by: string | null
+          end_time: string | null
+          ends_on: string | null
+          id: number
+          location: string
+          organization_id: number
+          start_time: string | null
+          starts_on: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience: string
+          class_ids?: number[]
+          course_ids?: number[]
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          end_time?: string | null
+          ends_on?: string | null
+          id?: number
+          location: string
+          organization_id: number
+          start_time?: string | null
+          starts_on: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          class_ids?: number[]
+          course_ids?: number[]
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          end_time?: string | null
+          ends_on?: string | null
+          id?: number
+          location?: string
+          organization_id?: number
+          start_time?: string | null
+          starts_on?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       families: {
         Row: {
           created_at: string

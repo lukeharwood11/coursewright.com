@@ -1,6 +1,6 @@
 # AGENTS — `src/calendar/`
 
-Month and week **calendar** of assigned/due materials and lesson plans. Course-colored chips; legend filters classes.
+Month and week **calendar** of assigned/due materials, lesson plans, and shared **events**. Course-colored chips; legend filters classes. Events are a separate chip (time and location on day view).
 
 ## Scope
 
@@ -12,7 +12,7 @@ Month and week **calendar** of assigned/due materials and lesson plans. Course-c
 ## Rules
 
 - Week is Sunday–Saturday ([FEATURES.md](../../docs/FEATURES.md)).
-- Parent mode: published materials and published lesson plans for enrolled courses.
+- Parent mode: published materials and published lesson plans for enrolled courses. Course and class events only when a linked student is in a target. Organization events always show — including staff Parent view.
 - Staff Teacher view: courses they can manage, including unpublished (draft cue).
 - Databridge loads the visible range; model builds chips. Page hook owns React.
 

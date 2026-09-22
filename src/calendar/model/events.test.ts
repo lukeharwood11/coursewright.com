@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  expandEventsInRange,
+  visibleEvents,
   chipsForMaterials,
   chipsOutsideLessonPlans,
   dayHasCalendarContent,
@@ -238,4 +240,57 @@ test("This week omits empty days and keeps days with notes or chips", () => {
     "2026-09-17",
   ]);
   assert.equal(weekDatesToShow(week, lessonDays, chips, false).length, 7);
+});
+
+test("events expand onto each day and follow the course legend", () => {
+  const chips = expandEventsInRange(
+    [
+      {
+        id: 4,
+        title: "Museum",
+        location: "City museum",
+        startsOn: "2026-09-22",
+        endsOn: "2026-09-23",
+        startTime: "09:00",
+        endTime: "14:00",
+        audience: "course",
+        courseIds: [10],
+      },
+      {
+        id: 5,
+        title: "Picnic",
+        location: "Park",
+        startsOn: "2026-09-22",
+        endsOn: null,
+        startTime: null,
+        endTime: null,
+        audience: "class",
+        courseIds: [],
+      },
+      {
+        id: 6,
+        title: "Picture day",
+        location: "Gym",
+        startsOn: "2026-09-22",
+        endsOn: null,
+        startTime: "08:00",
+        endTime: null,
+        audience: "organization",
+        courseIds: [],
+      },
+    ],
+    "2026-09-22",
+    "2026-09-23",
+    [{ id: 10, colorKey: "sea" }],
+  );
+  assert.equal(chips.length, 4);
+  assert.equal(chips[0]?.colorKey, "sea");
+  assert.equal(chips.find((chip) => chip.eventId === 5)?.colorKey, null);
+  assert.equal(chips.find((chip) => chip.eventId === 6)?.colorKey, null);
+  const hidden = visibleEvents(chips, new Set([10]));
+  assert.deepEqual(
+    hidden.map((chip) => chip.eventId),
+    [5, 6],
+  );
+  assert.equal(dayHasCalendarContent("2026-09-22", [], [], chips), true);
 });

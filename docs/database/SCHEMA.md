@@ -39,6 +39,9 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | LessonPlan | `lesson_plans` | Weekly course plan; published / unpublished |
 | LessonPlanDay | `lesson_plan_days` | Optional note for one day in that week |
 | LessonPlanDayMaterial | `lesson_plan_day_materials` | Materials listed under a day |
+| Event | `events` | One course, several classes, or the whole organization. Required location |
+| EventBlock | `event_blocks` | Lexical write-up on an event (`rich_text` · `video`). Not a course material |
+| EventMaterial | `event_materials` | Existing course materials linked from an event |
 | Announcement | `announcements` | One-way notice to one or more courses, classes, or students (same kind) |
 | AnnouncementRead | `announcement_reads` | Per-user read receipt (clears the notification icon) |
 | Discussion | `discussions` | **P1** — two-way thread for one course or one class |
@@ -809,6 +812,64 @@ Join: materials listed under a lesson-plan day, ordered.
 | created_at | timestamptz | |
 
 Unique `(lesson_plan_day_id, material_id)`. Families only follow links to **published** materials (same material RLS). Attaching a material does **not** change `scheduled_date` or `due_date`. Soft-deleting a plan leaves join rows; the app path does not hard-delete lesson plans.
+
+### Event
+
+A calendar item for **one course**, **one or more classes**, or the **whole organization** (no course and no class). Not a course material. One row is the event everywhere it appears. **Location** is required. Optional end date (inclusive) and optional start/end times. No repeat.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| audience | text | `course` · `class` · `organization` |
+| course_ids | bigint[] | The one course when `audience = course` (cardinality = 1); else `{}` |
+| class_ids | bigint[] | Class targets when `audience = class` (cardinality ≥ 1); else `{}` |
+| title | text | required |
+| location | text | required, trimmed, at most 200 characters |
+| starts_on | date | required — first calendar day (inclusive) |
+| ends_on | date | nullable — last day (inclusive); null means `starts_on` only; must be ≥ `starts_on` |
+| start_time | time | nullable — local clock time, no time zone |
+| end_time | time | nullable — requires `start_time`. On a single day, must be ≥ `start_time` |
+| created_by | uuid | FK → User |
+| created_at | timestamptz | |
+| updated_at | timestamptz | |
+| deleted_at | timestamptz | soft delete |
+| deleted_by | uuid | FK → User, nullable |
+
+**Who can add or edit:** org owners and admins (any course or class in the org, and organization events). An instructor for a course they can manage, any class in the org, or an organization event (`is_org_staff`).
+
+**Who can read:** owners and admins. Instructors for a course event on a course they manage, class events in the org, and organization events. Parents when a linked student is enrolled in the course (active + published) or is a member of a target class. Organization events are visible to every active member of the organization. Saving shows the event on those calendars. No separate publish flag. No email or Activity.
+
+**Calendar:** the event occupies each date from `starts_on` through `ends_on`. Month and week show a title chip. Day view shows start/end time when set, and the location. A course event uses that course color and follows the legend. Class events and organization events are not hidden by the course legend.
+
+### EventBlock
+
+Ordered write-up on an event. Same block kinds as a page material (`rich_text` · `video`). Quiz and in-page files live in Lexical JSON. Soft-delete only.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| event_id | bigint | FK → Event |
+| position | int | |
+| kind | text | `rich_text` · `video` |
+| body | jsonb | Lexical JSON in `lexical` for rich text; URL for video |
+| file_id | bigint | nullable FK → File |
+| deleted_at | timestamptz | |
+| created_at / updated_at | timestamptz | |
+
+### EventMaterial
+
+Join: existing course materials linked from an event. A course event may only link materials from that course. Class and organization events may link materials in the same organization that the editor can manage. Families only open materials they can already see.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| event_id | bigint | FK → Event |
+| material_id | bigint | FK → Material |
+| position | int | |
+| created_at | timestamptz | |
+
+Unique `(event_id, material_id)`. Replacing the list deletes join rows. Soft-deleting the event leaves them; the app does not hard-delete events.
 
 ### Announcement
 

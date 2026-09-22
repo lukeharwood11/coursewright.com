@@ -1,6 +1,8 @@
 import {
   chipsForMaterials,
+  expandEventsInRange,
   type CalendarCourse,
+  type CalendarEventChip,
   type CalendarLessonPlanDay,
   type CalendarMaterialChip,
   type CalendarWeekNote,
@@ -12,6 +14,7 @@ export type ParentWeekCalendar = {
   weekNotes: CalendarWeekNote[];
   lessonDays: CalendarLessonPlanDay[];
   chips: CalendarMaterialChip[];
+  events: CalendarEventChip[];
 };
 
 export function parentWeekCalendar(dashboard: ParentDashboard): ParentWeekCalendar {
@@ -76,5 +79,21 @@ export function parentWeekCalendar(dashboard: ParentDashboard): ParentWeekCalend
     weekNotes,
     lessonDays,
     chips: chipsForMaterials(materials),
+    events: expandEventsInRange(
+      (dashboard.events ?? []).map((event) => ({
+        id: event.id,
+        title: event.title,
+        location: event.location,
+        startsOn: event.startsOn,
+        endsOn: event.endsOn,
+        startTime: event.startTime,
+        endTime: event.endTime,
+        audience: event.audience,
+        courseIds: event.courseIds,
+        colorKey: event.colorKey,
+      })),
+      dashboard.week.start,
+      dashboard.week.end,
+    ),
   };
 }

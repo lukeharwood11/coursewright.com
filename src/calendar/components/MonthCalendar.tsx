@@ -1,6 +1,13 @@
 import { Link } from "react-router-dom";
 import { datesInRange, dayNumber } from "@/calendar/model/dates";
-import { leftoverChips, type CalendarLessonPlanDay, type CalendarMaterialChip } from "@/calendar/model/events";
+import {
+  leftoverChips,
+  visibleEvents,
+  type CalendarEventChip,
+  type CalendarLessonPlanDay,
+  type CalendarMaterialChip,
+} from "@/calendar/model/events";
+import { EventChip } from "./EventChip";
 import { calendarPath } from "@/calendar/model/paths";
 import { lessonPlanPath } from "@/lesson-plans/model/paths";
 import { materialPath } from "@/materials/model/paths";
@@ -19,6 +26,7 @@ export function MonthCalendar({
   monthEnd,
   lessonDays,
   chips,
+  events = [],
   hiddenCourseIds,
   schoolDays = DEFAULT_SCHOOL_DAYS,
 }: {
@@ -29,12 +37,14 @@ export function MonthCalendar({
   monthEnd: string;
   lessonDays: CalendarLessonPlanDay[];
   chips: CalendarMaterialChip[];
+  events?: CalendarEventChip[];
   hiddenCourseIds: Set<number>;
   schoolDays?: readonly SchoolDay[];
 }) {
   const dates = datesInRange(gridStart, gridEnd);
   const visibleDays = lessonDays.filter((day) => !hiddenCourseIds.has(day.courseId));
   const visibleChips = chips.filter((chip) => !hiddenCourseIds.has(chip.courseId));
+  const dayEvents = visibleEvents(events, hiddenCourseIds);
   const headings = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
@@ -72,6 +82,22 @@ export function MonthCalendar({
                 {dayNumber(date)}
               </p>
               <div className="relative z-10 mt-1 flex flex-col gap-0.5">
+                {dayEvents
+                  .filter((event) => event.date === date)
+                  .slice(0, 2)
+                  .map((event) => (
+                    <EventChip
+                      key={event.eventId}
+                      orgSlug={orgSlug}
+                      eventId={event.eventId}
+                      title={event.title}
+                      location={event.location}
+                      startTime={event.startTime}
+                      endTime={event.endTime}
+                      colorKey={event.colorKey}
+                      showDetails={false}
+                    />
+                  ))}
                 {dayPlans.map((plan) => (
                   <Link
                     key={`${plan.planId}-${date}`}
