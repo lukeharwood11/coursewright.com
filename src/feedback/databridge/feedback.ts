@@ -15,7 +15,7 @@ export type SubmitFeedbackInput = {
 
 export async function submitFeedback(
   input: SubmitFeedbackInput,
-): Promise<{ id: number; emailed: boolean }> {
+): Promise<{ id: number }> {
   const db = requireSupabase();
   const { data, error } = await db
     .from("feedback")
@@ -37,16 +37,5 @@ export async function submitFeedback(
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Your note was saved but we couldn’t confirm it.");
 
-  const emailed = await notifyFeedbackEmail(data.id);
-  return { id: data.id, emailed };
-}
-
-async function notifyFeedbackEmail(feedbackId: number): Promise<boolean> {
-  const db = requireSupabase();
-  const { data, error } = await db.functions.invoke("send-product-feedback", {
-    body: { feedbackId },
-  });
-  if (error) return false;
-  if (data && typeof data === "object" && "error" in data) return false;
-  return true;
+  return { id: data.id };
 }

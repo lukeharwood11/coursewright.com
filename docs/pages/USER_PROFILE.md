@@ -50,7 +50,7 @@ Org-visible directory page for a person with an account: who they are here, what
 - [CLASS](./CLASS.md) — class leads (staff)
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — own display name is edited there, not on this page
 - [ORG_HOME](./ORG_HOME.md) — back when the person isn’t found
-- Via org chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
+- Via org chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
 
 ## Notes
 

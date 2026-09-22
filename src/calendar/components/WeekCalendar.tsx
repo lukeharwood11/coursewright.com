@@ -11,6 +11,11 @@ import {
   type CalendarWeekNote,
 } from "@/calendar/model/events";
 import { weekDates } from "@/lesson-plans/model/validate";
+import {
+  DEFAULT_SCHOOL_DAYS,
+  isOrgSchoolDay,
+  type SchoolDay,
+} from "@/organizations/model/schoolDays";
 import { CalendarClassBlock } from "./CalendarClassBlock";
 
 const wrappingCardGridClass =
@@ -24,6 +29,7 @@ export function WeekCalendar({
   chips,
   hiddenCourseIds,
   layout = "week",
+  schoolDays = DEFAULT_SCHOOL_DAYS,
 }: {
   orgSlug: string;
   weekStart: string;
@@ -33,6 +39,7 @@ export function WeekCalendar({
   hiddenCourseIds: Set<number>;
   /** `cards` (This week): skip empty days and wrap. `week` (Calendar): all seven columns. */
   layout?: "week" | "cards";
+  schoolDays?: readonly SchoolDay[];
 }) {
   const notes = weekNotes.filter((note) => !hiddenCourseIds.has(note.courseId));
   const visibleDays = lessonDays.filter((day) => !hiddenCourseIds.has(day.courseId));
@@ -80,13 +87,18 @@ export function WeekCalendar({
 
       {dates.length > 0 ? (
         <div className={cards ? wrappingCardGridClass : "grid gap-2 md:grid-cols-7"}>
-          {dates.map((date) => (
+          {dates.map((date) => {
+            const schoolDay = isOrgSchoolDay(date, schoolDays);
+            const surfaceClass = schoolDay
+              ? "cw-calendar-school-day"
+              : "bg-[var(--surface)]";
+            return (
             <section
               key={date}
               className={
                 cards
-                  ? "relative rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
-                  : "relative min-h-[9rem] rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-2"
+                  ? `relative rounded-[10px] border border-[var(--line-soft)] ${surfaceClass} p-4`
+                  : `relative min-h-[9rem] rounded-[10px] border border-[var(--line-soft)] ${surfaceClass} p-2`
               }
             >
               <Link
@@ -120,7 +132,8 @@ export function WeekCalendar({
                 ))}
               </div>
             </section>
-          ))}
+            );
+          })}
         </div>
       ) : null}
     </div>

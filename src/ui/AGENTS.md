@@ -22,6 +22,7 @@ Design-system primitives from [STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md).
 
 ## Don’t
 
+- Use `window.alert`, `window.confirm`, or `window.prompt` — use **ConfirmDialog** (and toasts for one-way messages).
 - Put course builder screens here.
 - Invent purple / terracotta / Inter looks.
 - Use Lora in buttons or form labels.

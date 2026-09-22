@@ -5,6 +5,7 @@ import { Button, ButtonLink } from "@/ui/Button";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
+import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { formatDateRange } from "@/courses/model/dates";
@@ -19,6 +20,7 @@ const UNIT_SETTINGS_FORM_ID = "unit-settings-form";
 export function UnitPage() {
   const page = useUnit();
   const [editing, setEditing] = useState(false);
+  const [confirmRemoveUnit, setConfirmRemoveUnit] = useState(false);
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -196,12 +198,8 @@ export function UnitPage() {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => {
-                if (!window.confirm("Remove this unit? You can restore it later.")) {
-                  return;
-                }
-                page.removeUnit.mutate();
-              }}
+              onClick={() => setConfirmRemoveUnit(true)}
+              disabled={page.removeUnit.isPending}
             >
               Remove unit
             </Button>
@@ -281,6 +279,19 @@ export function UnitPage() {
           </div>
         ) : null}
       </section>
+
+      <ConfirmDialog
+        open={confirmRemoveUnit}
+        title="Remove this unit?"
+        body="You can restore it later if you need it again."
+        confirmLabel={page.removeUnit.isPending ? "Removing…" : "Remove unit"}
+        cancelLabel="Keep it"
+        onCancel={() => setConfirmRemoveUnit(false)}
+        onConfirm={() => {
+          setConfirmRemoveUnit(false);
+          page.removeUnit.mutate();
+        }}
+      />
       </div>
     </div>
   );

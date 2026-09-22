@@ -1,6 +1,8 @@
 import { getCourse } from "@/courses/databridge/courses";
 import { downloadFileBytes, getFile } from "@/materials/databridge/files";
 import { listBlocks } from "@/materials/databridge/blocks";
+import { listResourceBlocks } from "@/resources/databridge/blocks";
+import { getResourceItem } from "@/resources/databridge/items";
 import {
   getMaterial,
   listMaterialsForUnit,
@@ -60,6 +62,53 @@ export async function loadMaterialPrintPacket(
     title: printed.title,
     subtitle: course?.title ?? null,
     materials: [printed],
+  };
+}
+
+export async function loadResourcePrintPacket(
+  itemId: number,
+): Promise<PrintPacket | null> {
+  const item = await getResourceItem(itemId);
+  if (!item || item.archivedAt) return null;
+  const kind =
+    item.type === "document" ? "page" : item.type === "link" ? "link" : "file";
+  const blocks =
+    item.type === "document"
+      ? (await listResourceBlocks(item.id)).map((block) => ({
+          kind: block.kind,
+          body: block.body,
+        }))
+      : [];
+  const file = item.fileId ? await getFile(item.fileId) : null;
+  let bytes: Uint8Array | null = null;
+  if (file) {
+    try {
+      bytes = await downloadFileBytes(file.storageRef);
+    } catch {
+      bytes = null;
+    }
+  }
+  return {
+    title: item.title,
+    subtitle: "Resources",
+    materials: [
+      {
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        kind,
+        url: item.url,
+        scheduledDate: null,
+        blocks,
+        file: file
+          ? {
+              filename: file.filename,
+              mimeType: file.mimeType,
+              bytes,
+            }
+          : null,
+      },
+    ],
   };
 }
 

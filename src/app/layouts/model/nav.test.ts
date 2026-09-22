@@ -13,6 +13,7 @@ test("staff and parent nav include announcements and discussions, not activity",
       "discussions",
       "courses",
       "roster",
+      "resources",
       "settings",
     ],
   );
@@ -139,4 +140,22 @@ test("staff nav shows all children when five or fewer", () => {
     staff.find((section) => section.id === "roster")?.children.map((c) => c.label),
     ["Cohort A"],
   );
+});
+
+test("parent nav includes resources when the parent can see any", () => {
+  const hidden = buildParentNav("coop", { courses: [], classes: [] });
+  assert.equal(
+    hidden.find((section) => section.id === "resources"),
+    undefined,
+  );
+  const shown = buildParentNav(
+    "coop",
+    { courses: [], classes: [] },
+    { showResources: true },
+  );
+  assert.equal(
+    shown.find((section) => section.id === "resources")?.href,
+    "/my/coop/resources",
+  );
+  assert.equal(shown.at(-1)?.id, "resources");
 });

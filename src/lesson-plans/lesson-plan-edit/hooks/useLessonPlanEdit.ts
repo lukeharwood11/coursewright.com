@@ -16,10 +16,11 @@ import {
 import { lessonPlanEditPath, lessonPlanPath } from "@/lesson-plans/model/paths";
 import {
   defaultLessonPlanTitle,
-  emptyDaysForWeek,
+  extraDatesFromDays,
   remapDaysToWeek,
   sundayOnOrBefore,
   validateLessonPlanDraft,
+  visibleDaysForWeek,
   weekFromParam,
   type LessonPlanDayDraft,
 } from "@/lesson-plans/model/validate";
@@ -44,6 +45,7 @@ export function useLessonPlanEdit() {
   const lessonPlanId = params.lessonPlanId ? Number(params.lessonPlanId) : NaN;
   const isNew = !Number.isFinite(lessonPlanId);
   const { organization, role, parentPresentation } = useOrgShell();
+  const schoolDays = organization.schoolDays;
   const user = useAuthedUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -94,7 +96,7 @@ export function useLessonPlanEdit() {
   const [weekNote, setWeekNote] = useState("");
   const [weekStart, setWeekStart] = useState(requestedWeek.start);
   const [days, setDays] = useState<LessonPlanDayDraft[]>(() =>
-    emptyDaysForWeek(requestedWeek.start),
+    visibleDaysForWeek(requestedWeek.start, schoolDays),
   );
   const [hydratedId, setHydratedId] = useState<number | null>(null);
   const [newTitleApplied, setNewTitleApplied] = useState(false);
@@ -110,13 +112,13 @@ export function useLessonPlanEdit() {
 
   useEffect(() => {
     if (!loaded || hydratedId === loaded.id) return;
-    const draft = draftFromDetail(loaded);
+    const draft = draftFromDetail(loaded, schoolDays);
     setTitle(draft.title);
     setWeekNote(draft.weekNote);
     setWeekStart(draft.weekStart);
     setDays(draft.days);
     setHydratedId(loaded.id);
-  }, [loaded, hydratedId]);
+  }, [loaded, hydratedId, schoolDays]);
 
   useEffect(() => {
     if (!isNew || !newTitleDefault || newTitleApplied) return;
@@ -126,12 +128,12 @@ export function useLessonPlanEdit() {
 
   const draft = { title, weekNote, weekStart, days };
   const initial = loaded
-    ? draftFromDetail(loaded)
+    ? draftFromDetail(loaded, schoolDays)
     : {
         title: newTitleDefault,
         weekNote: "",
         weekStart: requestedWeek.start,
-        days: emptyDaysForWeek(requestedWeek.start),
+        days: visibleDaysForWeek(requestedWeek.start, schoolDays),
       };
   const hasChanges = JSON.stringify(draft) !== JSON.stringify(initial);
 
@@ -201,9 +203,23 @@ export function useLessonPlanEdit() {
     setWeekStart: (next: string) => {
       const sunday = sundayOnOrBefore(next);
       setWeekStart(sunday);
-      setDays((current) => remapDaysToWeek(current, sunday));
+      setDays((current) => {
+        const remapped = remapDaysToWeek(current, sunday);
+        return visibleDaysForWeek(sunday, schoolDays, {
+          extraDates: extraDatesFromDays(current, sunday, schoolDays),
+          existingDays: remapped,
+        });
+      });
     },
     days,
+    addDay: (date: string) => {
+      setDays((current) =>
+        visibleDaysForWeek(weekStart, schoolDays, {
+          extraDates: [...current.map((day) => day.date), date],
+          existingDays: current,
+        }),
+      );
+    },
     setDayBody: (date: string, body: string) => {
       setDays((current) =>
         current.map((day) => (day.date === date ? { ...day, body } : day)),

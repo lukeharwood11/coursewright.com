@@ -18,6 +18,7 @@ export type LessonPlanPickerMaterial = {
   title: string;
   unitId: number | null;
   visibility: string;
+  kind?: string;
 };
 
 export type LessonPlanPickerUnit = {
@@ -52,4 +53,26 @@ export function groupMaterialsForPicker(
   }
 
   return groups;
+}
+
+/** Narrow picker groups by material title or unit title (case-insensitive). */
+export function filterPickerGroups(
+  groups: LessonPlanPickerGroup[],
+  query: string,
+): LessonPlanPickerGroup[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return groups;
+
+  return groups
+    .map((group) => {
+      const unitMatch = group.unitTitle?.toLowerCase().includes(needle) ?? false;
+      if (unitMatch) return group;
+      return {
+        ...group,
+        materials: group.materials.filter((material) =>
+          material.title.toLowerCase().includes(needle),
+        ),
+      };
+    })
+    .filter((group) => group.materials.length > 0);
 }

@@ -83,7 +83,7 @@ export function CourseActionsMenu({
                 audience: "course",
                 courseId,
               })}
-              className={`${itemClassName} hidden max-[674px]:flex`}
+              className={`${itemClassName} xl:hidden`}
               onClick={() => setOpen(false)}
             >
               <ChatBubbleLeftRightIcon className="h-4 w-4 shrink-0" aria-hidden />
@@ -97,7 +97,7 @@ export function CourseActionsMenu({
                 audience: "course",
                 courseId,
               })}
-              className={`${itemClassName} hidden max-[674px]:flex`}
+              className={`${itemClassName} xl:hidden`}
               onClick={() => setOpen(false)}
             >
               <MegaphoneIcon className="h-4 w-4 shrink-0" aria-hidden />

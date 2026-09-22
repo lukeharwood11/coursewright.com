@@ -10,9 +10,12 @@ import {
 } from "@/parent/model/dashboard";
 import { printThisWeekPath } from "@/print/model/paths";
 import { ParentDashboardBody } from "./ParentDashboardBody";
+import { OrgAboutCard } from "./OrgAboutCard";
+import type { OrganizationSummary } from "@/organizations/databridge/memberships";
 
 export function ParentHome({
   firstName,
+  organization,
   orgSlug,
   dashboard,
   loading,
@@ -20,6 +23,7 @@ export function ParentHome({
   preview = false,
 }: {
   firstName: string;
+  organization: OrganizationSummary;
   orgSlug: string;
   dashboard: ParentDashboard | null;
   loading: boolean;
@@ -66,6 +70,14 @@ export function ParentHome({
         )}
       </header>
 
+      <OrgAboutCard
+        about={organization.about}
+        address={organization.address}
+        website={organization.website}
+        contactEmail={organization.contactEmail}
+        phone={organization.phone}
+      />
+
       {preview ? (
         <p className="mt-4 rounded-[10px] border border-[var(--slate)] bg-[var(--slate-tint)] px-3.5 py-3 text-[13.5px] leading-relaxed text-[var(--ink)]">
           This is a preview of the parent home. Families with enrolled students
@@ -85,6 +97,7 @@ export function ParentHome({
           visible={visible}
           selectedIds={selectedIds}
           preview={preview}
+          schoolDays={organization.schoolDays}
           onToggleStudent={(id) =>
             setActiveIds(toggleStudentId(selectedIds, id))
           }

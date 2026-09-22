@@ -1,6 +1,7 @@
 import { useEffect, lazy, Suspense, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/ui/Button";
+import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { PageFormActions } from "@/ui/PageFormActions";
@@ -34,6 +35,7 @@ export function MaterialEditPage() {
   const page = edit.page;
   const location = useLocation();
   const navigate = useNavigate();
+  const [restoreSnapshot, setRestoreSnapshot] = useState<unknown | null>(null);
   useToastOnError(edit.error ?? page.error);
 
   useEffect(() => {
@@ -238,12 +240,7 @@ export function MaterialEditPage() {
               <Button
                 variant="secondary"
                 className="px-2.5 py-1.5 text-[12px]"
-                onClick={() => {
-                  if (!window.confirm("Restore this version?")) return;
-                  page.revert.mutate(version.snapshot, {
-                    onSuccess: edit.afterRestore,
-                  });
-                }}
+                onClick={() => setRestoreSnapshot(version.snapshot)}
               >
                 Restore
               </Button>
@@ -260,6 +257,23 @@ export function MaterialEditPage() {
           onUnpublish={() => page.setVisibility.mutate("unpublished")}
         />
       ) : null}
+
+      <ConfirmDialog
+        open={restoreSnapshot != null}
+        title="Restore this version?"
+        body="Your current edits will be replaced with this older version. You can save again or pick another version afterward."
+        confirmLabel={page.revert.isPending ? "Restoring…" : "Restore"}
+        cancelLabel="Keep current"
+        onCancel={() => setRestoreSnapshot(null)}
+        onConfirm={() => {
+          if (restoreSnapshot == null) return;
+          const snapshot = restoreSnapshot;
+          setRestoreSnapshot(null);
+          page.revert.mutate(snapshot, {
+            onSuccess: edit.afterRestore,
+          });
+        }}
+      />
     </div>
   );
 }
@@ -280,6 +294,10 @@ function FileEditor({
     queryFn: () => listFileVersions(fileId),
   });
   const [recorded, setRecorded] = useState<File | null>(null);
+  const [restoreVersion, setRestoreVersion] = useState<
+    Awaited<ReturnType<typeof listFileVersions>>[number] | null
+  >(null);
+  const [restoringFile, setRestoringFile] = useState(false);
 
   async function applyReplacement(next: File | null) {
     setRecorded(next);
@@ -323,23 +341,40 @@ function FileEditor({
             <Button
               variant="secondary"
               className="px-2.5 py-1.5 text-[12px]"
-              onClick={async () => {
-                if (!window.confirm("Restore this file version?")) return;
-                await revertFileToVersion({
-                  fileId,
-                  storageRef: version.storageRef,
-                  filename: version.filename,
-                  mimeType: version.mimeType,
-                  sizeBytes: version.sizeBytes,
-                });
-                onChange();
-              }}
+              onClick={() => setRestoreVersion(version)}
             >
               Restore
             </Button>
           </li>
         ))}
       </ul>
+
+      <ConfirmDialog
+        open={restoreVersion != null}
+        title="Restore this file version?"
+        body="The file families see will switch to this older copy. You can replace or restore again afterward."
+        confirmLabel={restoringFile ? "Restoring…" : "Restore"}
+        cancelLabel="Keep current file"
+        onCancel={() => setRestoreVersion(null)}
+        onConfirm={async () => {
+          if (restoreVersion == null) return;
+          const version = restoreVersion;
+          setRestoreVersion(null);
+          setRestoringFile(true);
+          try {
+            await revertFileToVersion({
+              fileId,
+              storageRef: version.storageRef,
+              filename: version.filename,
+              mimeType: version.mimeType,
+              sizeBytes: version.sizeBytes,
+            });
+            onChange();
+          } finally {
+            setRestoringFile(false);
+          }
+        }}
+      />
     </section>
   );
 }

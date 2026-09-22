@@ -1,4 +1,5 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
+import type { OrganizationSummary } from "@/organizations/databridge/memberships";
 import type { StaffDashboard } from "@/organizations/model/staffDashboard";
 import { newCoursePath } from "@/courses/model/paths";
 import { ButtonLink } from "@/ui/Button";
@@ -10,15 +11,16 @@ import {
   StaffPeopleSnapshot,
   StaffWeekSummary,
 } from "./StaffDashboardSections";
+import { OrgAboutCard } from "./OrgAboutCard";
 
 export function StaffHome({
-  orgName,
+  organization,
   orgSlug,
   dashboard,
   loading,
   error: _error,
 }: {
-  orgName: string;
+  organization: OrganizationSummary;
   orgSlug: string;
   dashboard: StaffDashboard | null;
   loading: boolean;
@@ -32,7 +34,7 @@ export function StaffHome({
             className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            {orgName}
+            {organization.name}
           </h1>
           <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
             {dashboard?.week.label ?? "Organization overview"}
@@ -43,6 +45,14 @@ export function StaffHome({
           Create course
         </ButtonLink>
       </div>
+
+      <OrgAboutCard
+        about={organization.about}
+        address={organization.address}
+        website={organization.website}
+        contactEmail={organization.contactEmail}
+        phone={organization.phone}
+      />
 
       {loading ? (
         <PageLoading embedded label="Loading overview…" />

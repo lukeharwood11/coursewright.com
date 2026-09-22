@@ -20,7 +20,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - First-time add creates the org `student_profile` when they are new.
 - Removing a student from the class does **not** unenroll them from courses.
 - Empty class is allowed.
-- Owners and admins **assign teachers** (class leads — zero or more owners, admins, or instructors). Instructors can see the list. Leads are notified in [ACTIVITY](./ACTIVITY.md) when someone posts in a discussion for this class.
+- Owners and admins **assign teachers** (class leads — zero or more owners, admins, or instructors). Instructors can see the list. Leads are notified in [ACTIVITY](./ACTIVITY.md) when someone posts in a discussion for this class. **Add teacher** opens a search modal of eligible staff.
 - **Announce** to this class → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
 - **Start a discussion** (**P1**) → [DISCUSSION](./DISCUSSION.md) new with this class prefilled.
 - Disclaimer: membership here does not enroll in a course — use [COURSE_ROSTER](./COURSE_ROSTER.md) (Class may be a batch preset there).
@@ -36,7 +36,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 ## Contents
 
 - Member list → [STUDENT_PROFILE](./STUDENT_PROFILE.md)
-- **Teachers** (add/remove for owners and admins). An info icon next to the heading explains that they are optional class leads and are notified in Activity when someone posts in a discussion for this class.
+- **Teachers** as compact cards (avatar, name, remove for owners and admins). An info icon next to the heading explains that they are optional class leads and are notified in Activity when someone posts in a discussion for this class. **Add teacher** opens a search modal.
 - **Add students** panel (batch existing + batch new)
 - Remove from class on each row
 - Empty state: add students when ready
@@ -59,7 +59,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - [DISCUSSION](./DISCUSSION.md) — Start a discussion for this class (**P1**)
 - [ACTIVITY](./ACTIVITY.md) — leads are notified here when someone posts
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — enroll in a course (Class as preset)
-- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
+- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
 ## Notes
 

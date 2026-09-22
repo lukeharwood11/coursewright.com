@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { emptyDaysForWeek } from "../../model/validate.ts";
+import { visibleDaysForWeek } from "../../model/validate.ts";
 import { LessonPlanFormFields } from "./LessonPlanFormFields.tsx";
 
 test("lesson plan form wraps day cards instead of seven columns", () => {
@@ -11,7 +11,7 @@ test("lesson plan form wraps day cards instead of seven columns", () => {
       title="This week in Science"
       weekNote=""
       weekStart="2026-09-13"
-      days={emptyDaysForWeek("2026-09-13")}
+      days={visibleDaysForWeek("2026-09-13")}
       materials={[]}
       units={[]}
       onTitle={() => undefined}
@@ -19,9 +19,14 @@ test("lesson plan form wraps day cards instead of seven columns", () => {
       onWeekStart={() => undefined}
       onDayBody={() => undefined}
       onToggleMaterial={() => undefined}
+      onAddDay={() => undefined}
     />,
   );
   assert.match(html, /auto-fill,minmax\(min\(100%,18rem\),1fr\)/);
   assert.equal(html.includes("md:grid-cols-7"), false);
-  assert.equal([...html.matchAll(/<section/g)].length, 7);
+  assert.equal([...html.matchAll(/<section/g)].length, 5);
+  assert.match(html, /Add another day/);
+  assert.match(html, /Link materials/);
+  assert.equal(html.includes("<select"), false);
+  assert.equal(html.includes('type="checkbox"'), false);
 });

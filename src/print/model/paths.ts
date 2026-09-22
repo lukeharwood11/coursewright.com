@@ -14,7 +14,7 @@ export function parsePrintStudentIds(search: string): number[] | null {
   return ids;
 }
 
-export type PrintGrainKind = "material" | "unit" | "thisWeek";
+export type PrintGrainKind = "material" | "unit" | "thisWeek" | "resource";
 
 export function printBackPath(input: {
   grain: PrintGrainKind | null;
@@ -22,7 +22,11 @@ export function printBackPath(input: {
   courseId: number | null;
   unitId: number | null;
   materialId: number | null;
+  itemId?: number | null;
 }): string {
+  if (input.grain === "resource" && input.itemId) {
+    return `/my/${input.orgSlug}/resources/items/${input.itemId}`;
+  }
   if (input.grain === "material" && input.courseId && input.materialId) {
     const nested = input.unitId
       ? `/my/${input.orgSlug}/courses/${input.courseId}/units/${input.unitId}/materials/${input.materialId}`

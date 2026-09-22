@@ -91,7 +91,7 @@ export function useClassRoster() {
   const [drafts, setDrafts] = useState<NewStudentDraft[]>([emptyStudentDraft()]);
   const [pasteText, setPasteText] = useState("");
   const [newError, setNewError] = useState<string | null>(null);
-  const [addLeadUserId, setAddLeadUserId] = useState("");
+  const [addLeadOpen, setAddLeadOpen] = useState(false);
 
   const addExistingMutation = useMutation({
     mutationFn: async () => {
@@ -154,9 +154,8 @@ export function useClassRoster() {
   });
 
   const addLeadMutation = useMutation({
-    mutationFn: () => addClassLeader(classId, addLeadUserId),
+    mutationFn: (userId: string) => addClassLeader(classId, userId),
     onSuccess: async () => {
-      setAddLeadUserId("");
       await queryClient.invalidateQueries({
         queryKey: classQueryKeys.leaders(classId),
       });
@@ -213,9 +212,16 @@ export function useClassRoster() {
     leads: leadersQuery.data ?? [],
     staff: (staffQuery.data ?? []).filter((row) => !leaderIds.has(row.userId)),
     canManageLeads,
-    addLeadUserId,
-    setAddLeadUserId,
-    addLead: () => addLeadMutation.mutate(),
+    addLeadOpen,
+    openAddLead: () => {
+      addLeadMutation.reset();
+      setAddLeadOpen(true);
+    },
+    closeAddLead: () => {
+      setAddLeadOpen(false);
+      addLeadMutation.reset();
+    },
+    addLead: (userId: string) => addLeadMutation.mutate(userId),
     addingLead: addLeadMutation.isPending,
     addLeadError: addLeadMutation.error ? addLeadMutation.error.message : null,
     onRemoveLead: (userId: string) => removeLeadMutation.mutate(userId),

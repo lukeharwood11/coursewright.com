@@ -55,6 +55,7 @@ Org pages share a **collapsible sidebar** (overlay drawer on small screens). Whe
 - [DISCUSSIONS](./DISCUSSIONS.md) — **P1**
 - [ACTIVITY](./ACTIVITY.md) — **P1** (header bell, not a sidebar tab)
 - [COURSE_LIST](./COURSE_LIST.md)
+- [RESOURCES](./RESOURCES.md) — **P1a** (between Courses and Roster)
 - [ORG_ROSTER](./ORG_ROSTER.md)
 - [ORG_SETTINGS](./ORG_SETTINGS.md)
 - [ORG_PICKER](./ORG_PICKER.md) — switch org
@@ -65,4 +66,4 @@ Org pages share a **collapsible sidebar** (overlay drawer on small screens). Whe
 [TEMPLATE_LIST](./TEMPLATE_LIST.md) is **P1** — do not put templates in P0 org chrome.
 [FAMILIES](./FAMILIES.md) / [FAMILY](./FAMILY.md) remain product outlines but are **not currently in org chrome or routes**.
 
-Parent chrome is simpler — see [ORG_HOME](./ORG_HOME.md) parent variant; do not dump instructor nav onto parent screens. Parent sidebar: This week, Calendar, Announcements (red unread count), Discussions (**P1**, red unread count), their courses, Progress. **Activity** is a header bell (right of the avatar) with a red unread count. Staff **Parent view** uses the same parent chrome; the toggle lives in the org header (not on print screens).
+Parent chrome is simpler — see [ORG_HOME](./ORG_HOME.md) parent variant; do not dump instructor nav onto parent screens. Parent sidebar: This week, Calendar, Announcements (red unread count), Discussions (**P1**, red unread count), **Resources** when they can see at least one published item, their courses, Progress. **Activity** is a header bell (right of the avatar) with a red unread count. Staff **Parent view** uses the same parent chrome; the toggle lives in the org header (not on print screens).

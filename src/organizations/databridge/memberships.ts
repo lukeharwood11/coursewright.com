@@ -1,13 +1,49 @@
 import type { AssignableMembershipRole, OrgRole } from "@/organizations/model/role";
 import { EDITABLE_MEMBERSHIP_ROLES, EDITABLE_STAFF_ROLES, parseOrgRole } from "@/organizations/model/role";
+import { DEFAULT_SCHOOL_DAYS, parseSchoolDays, type SchoolDay } from "@/organizations/model/schoolDays";
 import { staffMembershipWriteErrorMessage } from "@/organizations/model/staffAccount";
 import { requireSupabase } from "./client";
+
+export const ORG_SUMMARY_SELECT =
+  "id, name, slug, school_days, about, address, website, contact_email, phone" as const;
 
 export type OrganizationSummary = {
   id: number;
   name: string;
   slug: string;
+  schoolDays: SchoolDay[];
+  about: string | null;
+  address: string | null;
+  website: string | null;
+  contactEmail: string | null;
+  phone: string | null;
 };
+
+export type OrganizationSummaryRow = {
+  id: number;
+  name: string;
+  slug: string;
+  school_days?: number[] | null;
+  about?: string | null;
+  address?: string | null;
+  website?: string | null;
+  contact_email?: string | null;
+  phone?: string | null;
+};
+
+export function toOrganizationSummary(row: OrganizationSummaryRow): OrganizationSummary {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    schoolDays: parseSchoolDays(row.school_days) ?? DEFAULT_SCHOOL_DAYS,
+    about: row.about ?? null,
+    address: row.address ?? null,
+    website: row.website ?? null,
+    contactEmail: row.contact_email ?? null,
+    phone: row.phone ?? null,
+  };
+}
 
 export type OrgMembership = {
   membershipId: number;
@@ -18,14 +54,15 @@ export type OrgMembership = {
 type MembershipRow = {
   id: number;
   role: string;
-  organization: OrganizationSummary | OrganizationSummary[] | null;
+  organization: OrganizationSummaryRow | OrganizationSummaryRow[] | null;
 };
 
 function unwrapOrg(
   value: MembershipRow["organization"],
 ): OrganizationSummary | null {
   if (!value) return null;
-  return Array.isArray(value) ? (value[0] ?? null) : value;
+  const row = Array.isArray(value) ? (value[0] ?? null) : value;
+  return row ? toOrganizationSummary(row) : null;
 }
 
 function toMembership(row: MembershipRow): OrgMembership | null {
@@ -58,7 +95,7 @@ export async function listMyMemberships(userId: string): Promise<OrgMembership[]
   const db = requireSupabase();
   const { data, error } = await db
     .from("memberships")
-    .select("id, role, organization:organizations(id, name, slug)")
+    .select(`id, role, organization:organizations(${ORG_SUMMARY_SELECT})`)
     .eq("user_id", userId)
     .eq("status", "active")
     .order("created_at", { ascending: true });
@@ -77,7 +114,7 @@ export async function getMembershipByOrgSlug(
   const db = requireSupabase();
   const { data: org, error: orgError } = await db
     .from("organizations")
-    .select("id, name, slug")
+    .select(ORG_SUMMARY_SELECT)
     .eq("slug", slug)
     .maybeSingle();
 
@@ -101,7 +138,7 @@ export async function getMembershipByOrgSlug(
   return {
     membershipId: membership.id,
     role,
-    organization: { id: org.id, name: org.name, slug: org.slug },
+    organization: toOrganizationSummary(org),
   };
 }
 

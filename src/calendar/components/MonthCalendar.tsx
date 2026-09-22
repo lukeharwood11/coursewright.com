@@ -5,6 +5,11 @@ import { calendarPath } from "@/calendar/model/paths";
 import { lessonPlanPath } from "@/lesson-plans/model/paths";
 import { materialPath } from "@/materials/model/paths";
 import { courseColorCssVar } from "@/courses/model/courseColor";
+import {
+  DEFAULT_SCHOOL_DAYS,
+  isOrgSchoolDay,
+  type SchoolDay,
+} from "@/organizations/model/schoolDays";
 
 export function MonthCalendar({
   orgSlug,
@@ -15,6 +20,7 @@ export function MonthCalendar({
   lessonDays,
   chips,
   hiddenCourseIds,
+  schoolDays = DEFAULT_SCHOOL_DAYS,
 }: {
   orgSlug: string;
   gridStart: string;
@@ -24,6 +30,7 @@ export function MonthCalendar({
   lessonDays: CalendarLessonPlanDay[];
   chips: CalendarMaterialChip[];
   hiddenCourseIds: Set<number>;
+  schoolDays?: readonly SchoolDay[];
 }) {
   const dates = datesInRange(gridStart, gridEnd);
   const visibleDays = lessonDays.filter((day) => !hiddenCourseIds.has(day.courseId));
@@ -42,6 +49,7 @@ export function MonthCalendar({
       <div className="grid grid-cols-7 gap-1">
         {dates.map((date) => {
           const inMonth = date >= monthStart && date <= monthEnd;
+          const schoolDay = inMonth && isOrgSchoolDay(date, schoolDays);
           const dayPlans = visibleDays.filter((day) => day.date === date);
           const extra = leftoverChips(visibleChips, dayPlans, date);
           return (
@@ -49,7 +57,9 @@ export function MonthCalendar({
               key={date}
               className={`relative min-h-[6.5rem] rounded-[8px] border p-1.5 ${
                 inMonth
-                  ? "border-[var(--line-soft)] bg-[var(--surface)]"
+                  ? schoolDay
+                    ? "cw-calendar-school-day border-[var(--line-soft)]"
+                    : "border-[var(--line-soft)] bg-[var(--surface)]"
                   : "border-transparent bg-transparent text-[var(--ink-faint)]"
               }`}
             >

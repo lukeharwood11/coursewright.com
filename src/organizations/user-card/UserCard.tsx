@@ -16,6 +16,7 @@ export function UserCard({
   role,
   trailing,
   compact = false,
+  fit = false,
 }: {
   orgSlug: string;
   userId: string;
@@ -23,15 +24,21 @@ export function UserCard({
   role?: string | null;
   trailing?: ReactNode;
   compact?: boolean;
+  /** Size to the person instead of stretching across the row. */
+  fit?: boolean;
 }) {
   const parsedRole = role ? parseOrgRole(role) : null;
   const avatarSize = compact ? 28 : 32;
 
   return (
-    <div className="flex min-w-0 items-center gap-2">
+    <div
+      className={`flex min-w-0 items-center gap-2 ${fit ? "w-fit max-w-full" : ""}`}
+    >
       <Link
         to={userProfilePath(orgSlug, userId)}
-        className="flex min-w-0 flex-1 items-center gap-2 rounded-[8px] px-1 py-1 hover:bg-[var(--green-tint)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+        className={`flex min-w-0 items-center gap-2 rounded-[8px] px-1 py-1 hover:bg-[var(--green-tint)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)] ${
+          fit ? "" : "flex-1"
+        }`}
       >
         <Avatar name={name} size={avatarSize} />
         <span

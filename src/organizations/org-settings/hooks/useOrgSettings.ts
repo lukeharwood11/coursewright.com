@@ -17,6 +17,7 @@ import {
   canManageBilling,
   canManageOrgSettings,
 } from "@/organizations/model/role";
+import { DEFAULT_SCHOOL_DAYS, sameSchoolDays, toggleSchoolDay, type SchoolDay } from "@/organizations/model/schoolDays";
 import { formatSlugInput } from "@/organizations/model/slug";
 import {
   orgSettingsHaveChanges,
@@ -53,6 +54,12 @@ export function useOrgSettings(orgSlug: string | undefined) {
   const [orgType, setOrgType] = useState("coop");
   const [gradeScheme, setGradeScheme] = useState("k12");
   const [gradeLabelsText, setGradeLabelsText] = useState("");
+  const [schoolDays, setSchoolDays] = useState<SchoolDay[]>(DEFAULT_SCHOOL_DAYS);
+  const [about, setAbout] = useState("");
+  const [address, setAddress] = useState("");
+  const [website, setWebsite] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [confirmPermalinkChange, setConfirmPermalinkChange] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -63,6 +70,12 @@ export function useOrgSettings(orgSlug: string | undefined) {
     setOrgType(organization.orgType);
     setGradeScheme(organization.gradeScheme);
     setGradeLabelsText(gradeLabelsToText(organization.gradeLabels));
+    setSchoolDays(organization.schoolDays);
+    setAbout(organization.about ?? "");
+    setAddress(organization.address ?? "");
+    setWebsite(organization.website ?? "");
+    setContactEmail(organization.contactEmail ?? "");
+    setPhone(organization.phone ?? "");
     setConfirmPermalinkChange(false);
     setFormError(null);
   }, [organization]);
@@ -82,6 +95,12 @@ export function useOrgSettings(orgSlug: string | undefined) {
         orgType,
         gradeScheme,
         gradeLabels: parseGradeLabels(gradeLabelsText),
+        schoolDays,
+        about,
+        address,
+        website,
+        contactEmail,
+        phone,
         currentSlug: organization.slug,
         confirmPermalinkChange,
       });
@@ -127,10 +146,32 @@ export function useOrgSettings(orgSlug: string | undefined) {
     setFormError(null);
   }
 
+  function onToggleSchoolDay(day: SchoolDay) {
+    const next = toggleSchoolDay(schoolDays, day);
+    if (sameSchoolDays(next, schoolDays) && schoolDays.includes(day)) {
+      setFormError("Choose at least one school day.");
+      return;
+    }
+    setSchoolDays(next);
+    setFormError(null);
+  }
+
   const slugChanged = Boolean(organization && slug !== organization.slug);
   const hasChanges = organization
     ? orgSettingsHaveChanges(
-        { name, slug, orgType, gradeScheme, gradeLabelsText },
+        {
+          name,
+          slug,
+          orgType,
+          gradeScheme,
+          gradeLabelsText,
+          schoolDays,
+          about,
+          address,
+          website,
+          contactEmail,
+          phone,
+        },
         organization,
       )
     : false;
@@ -165,6 +206,12 @@ export function useOrgSettings(orgSlug: string | undefined) {
     orgType,
     gradeScheme,
     gradeLabelsText,
+    schoolDays,
+    about,
+    address,
+    website,
+    contactEmail,
+    phone,
     confirmPermalinkChange,
     slugChanged,
     hasChanges,
@@ -182,6 +229,27 @@ export function useOrgSettings(orgSlug: string | undefined) {
     },
     onGradeLabelsTextChange: (value: string) => {
       setGradeLabelsText(value);
+      setFormError(null);
+    },
+    onToggleSchoolDay,
+    onAboutChange: (value: string) => {
+      setAbout(value);
+      setFormError(null);
+    },
+    onAddressChange: (value: string) => {
+      setAddress(value);
+      setFormError(null);
+    },
+    onWebsiteChange: (value: string) => {
+      setWebsite(value);
+      setFormError(null);
+    },
+    onContactEmailChange: (value: string) => {
+      setContactEmail(value);
+      setFormError(null);
+    },
+    onPhoneChange: (value: string) => {
+      setPhone(value);
       setFormError(null);
     },
     onConfirmPermalinkChange: (value: boolean) => {

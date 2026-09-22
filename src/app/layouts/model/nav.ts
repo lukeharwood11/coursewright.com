@@ -23,6 +23,25 @@ export type NavLists = {
   classes: Array<{ id: string; title: string }>;
 };
 
+/** Pinned to the bottom of the org sidebar, below a divider. */
+export const NAV_FOOTER_SECTION_IDS = new Set(["resources", "settings"]);
+
+export function splitNavSections(sections: NavSection[]): {
+  main: NavSection[];
+  footer: NavSection[];
+} {
+  const main: NavSection[] = [];
+  const footer: NavSection[] = [];
+  for (const section of sections) {
+    if (NAV_FOOTER_SECTION_IDS.has(section.id)) {
+      footer.push(section);
+    } else {
+      main.push(section);
+    }
+  }
+  return { main, footer };
+}
+
 const VISIBLE_CHILD_LIMIT = 5;
 const ACCOUNT_ORG_LIMIT = 12;
 
@@ -103,6 +122,13 @@ export function buildStaffNav(
       ),
     },
     {
+      id: "resources",
+      label: "Resources",
+      href: `${base}/resources`,
+      match: "prefix",
+      children: [],
+    },
+    {
       id: "settings",
       label: "Settings",
       href: `${base}/settings`,
@@ -118,6 +144,7 @@ export function buildParentNav(
   options?: {
     unreadAnnouncements?: number;
     unreadDiscussions?: number;
+    showResources?: boolean;
   },
 ): NavSection[] {
   const base = `/my/${orgSlug}`;
@@ -180,6 +207,16 @@ export function buildParentNav(
     soon: true,
     children: [],
   });
+
+  if (options?.showResources) {
+    sections.push({
+      id: "resources",
+      label: "Resources",
+      href: `${base}/resources`,
+      match: "prefix",
+      children: [],
+    });
+  }
 
   return sections;
 }

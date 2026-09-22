@@ -8,6 +8,7 @@ import {
   ChartBarIcon,
   ChatBubbleLeftRightIcon,
   Cog6ToothIcon,
+  FolderOpenIcon,
   HomeIcon,
   UserCircleIcon,
   UsersIcon,
@@ -20,6 +21,7 @@ import {
   ChartBarIcon as ChartBarSolidIcon,
   ChatBubbleLeftRightIcon as ChatBubbleLeftRightSolidIcon,
   Cog6ToothIcon as Cog6ToothSolidIcon,
+  FolderOpenIcon as FolderOpenSolidIcon,
   HomeIcon as HomeSolidIcon,
   UserCircleIcon as UserCircleSolidIcon,
   UsersIcon as UsersSolidIcon,
@@ -29,6 +31,7 @@ import { useAppShell } from "../OrgShellContext";
 import {
   collapsedHref,
   navItemIsActive,
+  splitNavSections,
   type NavSection,
 } from "../model/nav";
 
@@ -42,6 +45,7 @@ const sectionIcons: Record<string, { outline: IconComponent; solid: IconComponen
   discussions: { outline: ChatBubbleLeftRightIcon, solid: ChatBubbleLeftRightSolidIcon },
   calendar: { outline: CalendarDaysIcon, solid: CalendarDaysSolidIcon },
   courses: { outline: BookOpenIcon, solid: BookOpenSolidIcon },
+  resources: { outline: FolderOpenIcon, solid: FolderOpenSolidIcon },
   roster: { outline: UsersIcon, solid: UsersSolidIcon },
   settings: { outline: Cog6ToothIcon, solid: Cog6ToothSolidIcon },
   progress: { outline: ChartBarIcon, solid: ChartBarSolidIcon },
@@ -59,19 +63,48 @@ export function SidebarNav({
 }) {
   const { navSections, navLabel } = useAppShell();
   const { pathname } = useLocation();
+  const { main, footer } = splitNavSections(navSections);
 
   return (
-    <nav aria-label={navLabel} className="flex flex-col gap-1 px-2 py-3">
-      {navSections.map((section) => (
-        <SidebarSection
-          key={section.id}
-          section={section}
-          collapsed={collapsed}
-          pathname={pathname}
-          onNavigate={onNavigate}
-        />
-      ))}
-    </nav>
+    <div className="flex h-full min-h-0 flex-col">
+      <nav
+        aria-label={navLabel}
+        className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-2 py-3"
+      >
+        {main.map((section) => (
+          <SidebarSection
+            key={section.id}
+            section={section}
+            collapsed={collapsed}
+            pathname={pathname}
+            onNavigate={onNavigate}
+          />
+        ))}
+      </nav>
+      {footer.length > 0 ? (
+        <>
+          <div
+            className="mx-3 border-t border-[var(--line-soft)]"
+            role="separator"
+            aria-hidden
+          />
+          <nav
+            aria-label={`${navLabel} — more`}
+            className="flex shrink-0 flex-col gap-1 px-2 py-3"
+          >
+            {footer.map((section) => (
+              <SidebarSection
+                key={section.id}
+                section={section}
+                collapsed={collapsed}
+                pathname={pathname}
+                onNavigate={onNavigate}
+              />
+            ))}
+          </nav>
+        </>
+      ) : null}
+    </div>
   );
 }
 

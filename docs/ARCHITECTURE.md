@@ -2,7 +2,7 @@
 
 > **Status:** Proposed. Folder layout detail: [STRUCTURE.md](./STRUCTURE.md). Runtime choices: [STACK.md](./STACK.md). Product behavior: [FEATURES.md](./FEATURES.md).
 
-We follow **Screaming Architecture**: the codebase should scream *Course Wright* — organizations, courses, roster, parents, materials, print — not React, Supabase, or “MVC.” (`course-templates/` exists for **P1**.)
+We follow **Screaming Architecture**: the codebase should scream *Course Wright* — organizations, courses, roster, parents, materials, resources, print — not React, Supabase, or “MVC.” (`course-templates/` exists for **P1**.)
 
 ---
 
@@ -25,7 +25,7 @@ We follow **Screaming Architecture**: the codebase should scream *Course Wright*
 2. **Frameworks are plugins** — UI and data adapters live at the edges (`infrastructure/`, `ui/`, `app/`). Domain code depends inward on product concepts; it does not sprawl “React patterns” as the organizing principle.
 3. **Name folders after the product vocabulary** in [BRANDING.md](./BRANDING.md) / [FEATURES.md](./FEATURES.md): Organization, Course, Unit, Material, Roster, Print — not “resources,” “entities,” or “services.” (**Template** = **P1**.)
 4. **One SPA, many screams** — admin, instructor, and parent are **roles** over the same domains, not separate applications that scream “three frontends.”
-5. **Backend screams jobs** — `supabase/functions/create-course-from-course`, `send-organization-invite`, `send-announcement-notification`, and `send-product-feedback` scream a use case; `supabase/functions/api-v2` does not. (**P1:** `create-course-from-template`.)
+5. **Backend screams jobs** — `supabase/functions/create-course-from-course`, `send-organization-invite`, and `send-announcement-notification` scream a use case; `supabase/functions/api-v2` does not. (**P1:** `create-course-from-template`.)
 
 If a new folder is named after a library (`redux/`, `hooks/`, `contexts/`) at the top of `src/`, it fails the scream test — push it under `infrastructure/` or into a domain.
 
@@ -97,12 +97,13 @@ Aligned with P0 in [FEATURES.md](./FEATURES.md):
 | `organizations/` | Org create, settings, grade scheme, admin invites, **user profiles** | Admin |
 | `roster/` | Student profiles, **classes**, enrollments, parent links/invites, **families / parent directory** | Admin, instructor |
 | `courses/` | Offerings, dates, status, instructors, **grade levels**, create from course | Instructor, admin |
+| `resources/` | **P1a** — org Resources: nested folders, document/link/file, ACL, bulk upload | Owner, admin, instructor; parent views when published + ACL |
 | `course-templates/` | **P1** — blueprints, view/edit/owner access, **grade levels** | Instructor, admin |
 | `units/` | Grouping + optional dates | Instructor |
 | `materials/` | **Pages** (materials) + **blocks**, files, versions, important now | Instructor; parent views |
 | `search/` | Advanced / cross-facet find (“where is this resource?”) | Admin, instructor (parent TBD) |
 | `sharing/` | Resource links, share-with-parents | Instructor → parent |
-| `print/` | Print material / unit / this week | Creator + parent |
+| `print/` | Print material / unit / this week / org resource | Creator + parent |
 | `parent/` | This week calendar + Focus + **announcements** | Parent role |
 | `announcements/` | One-way notices (course / class / student) | Instructor, admin; parent views |
 | `discussions/` | **P1** — two-way threads (one course or one class) | Instructor, admin; parent views |
@@ -143,6 +144,10 @@ UI (announcements/)
   → api.invoke('send-announcement-notification')
   → Edge Function (Resend secret)
   → Resend event `announcement-notification` (one send per recipient)
+
+UI (resources/)   # P1a
+  → PostgREST insert/select (RLS)
+  → org files / Storage for file items
 
 UI (discussions/)   # P1
   → PostgREST insert/select (RLS)

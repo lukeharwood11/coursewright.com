@@ -46,6 +46,13 @@ import {
 } from "@/organizations";
 import { PrintPage } from "@/print";
 import {
+  ResourceEditPage,
+  ResourceFolderPage,
+  ResourcePage,
+  ResourcesLayout,
+  ResourcesPage,
+} from "@/resources";
+import {
   ClassRosterPage,
   OrgRosterPage,
   StudentProfilePage,
@@ -134,6 +141,18 @@ export function AppRoutes() {
               }
             />
             <Route path="calendar" element={<CalendarPage />} />
+            <Route element={<ResourcesLayout />}>
+              <Route path="resources" element={<ResourcesPage />} />
+              <Route
+                path="resources/folders/:folderId"
+                element={<ResourceFolderPage />}
+              />
+              <Route path="resources/items/:itemId" element={<ResourcePage />} />
+              <Route
+                path="resources/items/:itemId/edit"
+                element={<ResourceEditPage />}
+              />
+            </Route>
             <Route path="people/:userId" element={<UserProfilePage />} />
             <Route path="announcements" element={<AnnouncementsPage />} />
             <Route
@@ -240,6 +259,10 @@ export function AppRoutes() {
             />
             <Route
               path="courses/:courseId/units/:unitId/materials/:materialId/print"
+              element={<PrintPage />}
+            />
+            <Route
+              path="resources/items/:itemId/print"
               element={<PrintPage />}
             />
           </Route>

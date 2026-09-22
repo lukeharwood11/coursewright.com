@@ -15,3 +15,12 @@ export function validateClass(
   }
   return { ok: true, value: { title } };
 }
+
+export function staffMatchesQuery(
+  person: { name: string },
+  query: string,
+): boolean {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return true;
+  return person.name.toLowerCase().includes(needle);
+}

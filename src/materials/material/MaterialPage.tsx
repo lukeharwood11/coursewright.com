@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { PencilSquareIcon, PrinterIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
@@ -6,6 +6,7 @@ import { Badge } from "@/ui/Badge";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { Button, ButtonLink } from "@/ui/Button";
+import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { formatIsoDate } from "@/courses/model/dates";
@@ -37,6 +38,7 @@ export function MaterialPage() {
   const page = useMaterial();
   const location = useLocation();
   const navigate = useNavigate();
+  const [confirmRemove, setConfirmRemove] = useState(false);
   useToastOnError(page.error);
 
   useEffect(() => {
@@ -211,14 +213,8 @@ export function MaterialPage() {
           {!page.material.deletedAt ? (
             <Button
               variant="secondary"
-              onClick={() => {
-                if (!window.confirm("Remove this material? You can restore it later.")) {
-                  return;
-                }
-                page.remove.mutate(undefined, {
-                  onSuccess: () => navigate(back.to),
-                });
-              }}
+              onClick={() => setConfirmRemove(true)}
+              disabled={page.remove.isPending}
             >
               Remove
             </Button>
@@ -234,6 +230,21 @@ export function MaterialPage() {
           onUnpublish={() => page.setVisibility.mutate("unpublished")}
         />
       ) : null}
+
+      <ConfirmDialog
+        open={confirmRemove}
+        title="Remove this material?"
+        body="It won’t show on the course anymore. You can restore it later if you need it again."
+        confirmLabel={page.remove.isPending ? "Removing…" : "Remove"}
+        cancelLabel="Keep it"
+        onCancel={() => setConfirmRemove(false)}
+        onConfirm={() => {
+          setConfirmRemove(false);
+          page.remove.mutate(undefined, {
+            onSuccess: () => navigate(back.to),
+          });
+        }}
+      />
       </div>
     </div>
   );

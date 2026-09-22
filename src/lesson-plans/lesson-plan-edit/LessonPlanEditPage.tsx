@@ -112,6 +112,7 @@ export function LessonPlanEditPage() {
           onWeekStart={page.setWeekStart}
           onDayBody={page.setDayBody}
           onToggleMaterial={page.toggleDayMaterial}
+          onAddDay={page.addDay}
         />
         {page.formError ? (
           <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">

@@ -45,14 +45,10 @@ export function useFeedback() {
         userAgent: typeof navigator === "undefined" ? "" : navigator.userAgent,
       });
     },
-    onSuccess: (result) => {
+    onSuccess: () => {
       setMessage("");
       setFormError(null);
-      toast(
-        result.emailed
-          ? "Thanks — we got your note."
-          : "Thanks — we saved your note.",
-      );
+      toast("Thanks — we got your note.");
     },
     onError: (error: Error) => setFormError(error.message),
   });

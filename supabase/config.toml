@@ -78,6 +78,3 @@ verify_jwt = true
 
 [functions.send-announcement-notification]
 verify_jwt = true
-
-[functions.send-product-feedback]
-verify_jwt = true

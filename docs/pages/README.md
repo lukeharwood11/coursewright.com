@@ -27,6 +27,9 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [ACTIVITY](./ACTIVITY.md) | `/my/<org-slug>/activity` | **P1** |
 | [ORG_SETTINGS](./ORG_SETTINGS.md) | `/my/<org-slug>/settings` |
 | [COURSE_LIST](./COURSE_LIST.md) | `/my/<org-slug>/courses` |
+| [RESOURCES](./RESOURCES.md) | `/my/<org-slug>/resources` | **P1a** |
+| [RESOURCE_FOLDER](./RESOURCE_FOLDER.md) | `/my/<org-slug>/resources/folders/<folder_id>` | **P1a** |
+| [RESOURCE](./RESOURCE.md) | view `…/resources/items/<id>`; edit `…/edit` | **P1a** |
 | [COURSE](./COURSE.md) | `/my/<org-slug>/courses/<course_id>` |
 | [COURSE_ROSTER](./COURSE_ROSTER.md) | `/my/<org-slug>/courses/<course_id>/roster` |
 | [COURSE_SETTINGS](./COURSE_SETTINGS.md) | `/my/<org-slug>/courses/<course_id>/settings` |
@@ -40,7 +43,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) | `/my/<org-slug>/templates/<template_id>/settings` | **P1** |
 | [UNIT](./UNIT.md) | `/my/<org-slug>/courses/…/units/<unit_id>` (template tree **P1**) |
 | [MATERIAL](./MATERIAL.md) | view `…/materials/<id>`; edit `…/materials/<id>/edit` (top-level or under unit) |
-| [PRINT](./PRINT.md) | `…/materials/<id>/print`; `…/units/<id>/print`; `/my/<org-slug>/print-this-week` |
+| [PRINT](./PRINT.md) | `…/materials/<id>/print`; `…/units/<id>/print`; `/my/<org-slug>/print-this-week`; `…/resources/items/<id>/print` |
 | [ORG_ROSTER](./ORG_ROSTER.md) | `/my/<org-slug>/roster` |
 | [STUDENT_PROFILE](./STUDENT_PROFILE.md) | `/my/<org-slug>/roster/<student_id>` |
 | [CLASS](./CLASS.md) | `/my/<org-slug>/classes/<class_id>` |
@@ -84,11 +87,12 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Concern | Status |
 |---------|--------|
 | Resource share entry URL | Path TBD — recipients land on [MATERIAL](./MATERIAL.md) after login |
-| Forms content kind | FEATURES in design — not P0 on [MATERIAL](./MATERIAL.md) |
+| Forms content kind | FEATURES in design — P1b inside Resources; not on [MATERIAL](./MATERIAL.md) |
 | Course templates + ACL / promote / sync | **P1** — [TEMPLATE_LIST](./TEMPLATE_LIST.md), [TEMPLATE](./TEMPLATE.md), [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) |
 | Quiz online take + autograde | **P1** |
 | Parent summary layer / Progress tab | **P1** |
 | Discussions | **P1** — [DISCUSSIONS](./DISCUSSIONS.md), [DISCUSSION](./DISCUSSION.md) |
+| Resources | **P1a** — [RESOURCES](./RESOURCES.md), [RESOURCE_FOLDER](./RESOURCE_FOLDER.md), [RESOURCE](./RESOURCE.md); print via [PRINT](./PRINT.md) |
 | Activity / notifications | **P1** — [ACTIVITY](./ACTIVITY.md) |
 | Product feedback | **P1** — [FEEDBACK](./FEEDBACK.md) |
 | Billing UI | **P1** (marketing on [PRICING](./PRICING.md); stub on [ORG_SETTINGS](./ORG_SETTINGS.md)) |

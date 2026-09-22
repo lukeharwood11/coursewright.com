@@ -1,6 +1,18 @@
 import { K12_GRADE_LABELS } from "./createDefaults";
 import { parseGradeLabels, parseGradeScheme } from "./gradeScheme";
 import { parseOrgType, type OrgType } from "./orgType";
+import {
+  parseOrgProfile,
+  parseWebsite,
+  sameOptionalText,
+  trimToNull,
+  type OrgProfileFields,
+} from "./orgProfile";
+import {
+  normalizeSchoolDays,
+  sameSchoolDays,
+  type SchoolDay,
+} from "./schoolDays";
 import { isReservedSlug, isValidSlug, slugify } from "./slug";
 
 export type UpdateOrganizationInput = {
@@ -9,6 +21,12 @@ export type UpdateOrganizationInput = {
   orgType: string;
   gradeScheme: string;
   gradeLabels: string[];
+  schoolDays: number[];
+  about: string;
+  address: string;
+  website: string;
+  contactEmail: string;
+  phone: string;
   currentSlug: string;
   confirmPermalinkChange: boolean;
 };
@@ -19,6 +37,12 @@ export type ValidatedUpdateOrganization = {
   orgType: OrgType;
   gradeScheme: "k12" | "custom";
   gradeLabels: string[];
+  schoolDays: SchoolDay[];
+  about: string | null;
+  address: string | null;
+  website: string | null;
+  contactEmail: string | null;
+  phone: string | null;
   slugChanged: boolean;
 };
 
@@ -66,9 +90,32 @@ export function validateUpdateOrganization(
     return { ok: false, error: "Add at least one grade label." };
   }
 
+  const schoolDays = normalizeSchoolDays(input.schoolDays);
+  if (schoolDays.length < 1) {
+    return { ok: false, error: "Choose at least one school day." };
+  }
+
+  const profile = parseOrgProfile({
+    about: input.about,
+    address: input.address,
+    website: input.website,
+    contactEmail: input.contactEmail,
+    phone: input.phone,
+  });
+  if (!profile.ok) return profile;
+
   return {
     ok: true,
-    value: { name, slug, orgType, gradeScheme, gradeLabels, slugChanged },
+    value: {
+      name,
+      slug,
+      orgType,
+      gradeScheme,
+      gradeLabels,
+      schoolDays,
+      ...profile.value,
+      slugChanged,
+    },
   };
 }
 
@@ -78,6 +125,12 @@ export type OrgSettingsDraft = {
   orgType: string;
   gradeScheme: string;
   gradeLabelsText: string;
+  schoolDays: SchoolDay[];
+  about: string;
+  address: string;
+  website: string;
+  contactEmail: string;
+  phone: string;
 };
 
 export type OrgSettingsSaved = {
@@ -86,13 +139,20 @@ export type OrgSettingsSaved = {
   orgType: string;
   gradeScheme: string;
   gradeLabels: string[];
-};
+  schoolDays: SchoolDay[];
+} & OrgProfileFields;
 
 function sameLabels(left: string[], right: string[]): boolean {
   return left.length === right.length && left.every((label, index) => label === right[index]);
 }
 
-/** True when the draft would persist a different identity, type, or grade scheme. */
+function sameWebsite(draft: string, saved: string | null): boolean {
+  const parsed = parseWebsite(draft);
+  if (!parsed.ok) return trimToNull(draft) === saved;
+  return parsed.value === saved;
+}
+
+/** True when the draft would persist a different identity, type, profile, school days, or grade scheme. */
 export function orgSettingsHaveChanges(
   draft: OrgSettingsDraft,
   saved: OrgSettingsSaved,
@@ -101,6 +161,12 @@ export function orgSettingsHaveChanges(
   if (draft.slug !== saved.slug) return true;
   if (draft.orgType !== saved.orgType) return true;
   if (draft.gradeScheme !== saved.gradeScheme) return true;
+  if (!sameSchoolDays(draft.schoolDays, saved.schoolDays)) return true;
+  if (!sameOptionalText(draft.about, saved.about)) return true;
+  if (!sameOptionalText(draft.address, saved.address)) return true;
+  if (!sameWebsite(draft.website, saved.website)) return true;
+  if (!sameOptionalText(draft.contactEmail.toLowerCase(), saved.contactEmail)) return true;
+  if (!sameOptionalText(draft.phone, saved.phone)) return true;
   if (draft.gradeScheme === "custom") {
     return !sameLabels(parseGradeLabels(draft.gradeLabelsText), saved.gradeLabels);
   }

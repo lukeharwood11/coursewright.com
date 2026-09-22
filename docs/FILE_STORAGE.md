@@ -12,7 +12,7 @@
 |------------|--------|
 | **`File` is its own entity** — courses/templates/materials **reference** files; they do not own a private copy of the blob | **Decided** (this doc) |
 | Template → course (**P1**) and **course → course** (**P0**) copies **copy the reference** (`file_id`), not the Storage object | **Decided** (this doc) |
-| Files are used from the course builder — **not** a separate org-wide drive UI in P0 | FEATURES |
+| Files are used from the course builder in P0; **P1a Resources** is the org library (nested folders + document/link/file), not a Microsoft-style drive inside courses | FEATURES |
 | Blobs in **Supabase Storage**; metadata in Postgres (`File` / `FileVersion`) | STACK / SCHEMA |
 | **Replace = new blob**; prior blobs kept for **revert** | FEATURES |
 | Soft deletes only for content | FEATURES |
@@ -35,7 +35,7 @@ Organization
        ▲
        │ file_id reference(s)
        │
-Material / Page block / DiscussionMessageAttachment (P1) / …
+Material / Page block / DiscussionMessageAttachment (P1) / OrgResourceItem (P1a) / …
 ```
 
 | Rule | Detail |

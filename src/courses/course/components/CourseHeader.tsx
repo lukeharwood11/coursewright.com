@@ -91,12 +91,46 @@ export function CourseHeader({
           </button>
         }
         titleTrailing={
-          <CourseActionsMenu
-            {...courseActionsMenuProps}
-            className="min-[675px]:hidden"
-          />
+          <div className="flex shrink-0 flex-nowrap items-center gap-2">
+            {canEdit || isParent ? (
+              <ButtonLink
+                variant="secondary"
+                className="max-xl:hidden shrink-0"
+                to={newDiscussionPath(orgSlug, {
+                  audience: "course",
+                  courseId,
+                })}
+              >
+                <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
+                Start a discussion
+              </ButtonLink>
+            ) : null}
+            {canEdit ? (
+              <ButtonLink
+                variant="secondary"
+                className="max-xl:hidden shrink-0"
+                to={newAnnouncementPath(orgSlug, {
+                  audience: "course",
+                  courseId,
+                })}
+              >
+                <MegaphoneIcon className="h-5 w-5" aria-hidden />
+                Create Announcement
+              </ButtonLink>
+            ) : null}
+            {canEdit ? (
+              <ButtonLink
+                variant="secondary"
+                className="max-xl:hidden shrink-0"
+                to={courseSettingsPath(orgSlug, courseId)}
+              >
+                <Cog6ToothIcon className="h-5 w-5" aria-hidden />
+                Settings
+              </ButtonLink>
+            ) : null}
+            <CourseActionsMenu {...courseActionsMenuProps} />
+          </div>
         }
-        actionsClassName="max-[674px]:hidden"
         meta={
           <>
             <Badge variant={status === "active" ? "green" : "neutral"}>
@@ -113,47 +147,6 @@ export function CourseHeader({
                 {formatGradeLevels(gradeLevels, gradeLabels)}
               </Badge>
             ) : null}
-          </>
-        }
-        actions={
-          <>
-            {canEdit || isParent ? (
-              <ButtonLink
-                variant="secondary"
-                className="max-[674px]:hidden"
-                to={newDiscussionPath(orgSlug, {
-                  audience: "course",
-                  courseId,
-                })}
-              >
-                <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
-                Start a discussion
-              </ButtonLink>
-            ) : null}
-            {canEdit ? (
-              <ButtonLink
-                variant="secondary"
-                className="max-[674px]:hidden"
-                to={newAnnouncementPath(orgSlug, {
-                  audience: "course",
-                  courseId,
-                })}
-              >
-                <MegaphoneIcon className="h-5 w-5" aria-hidden />
-                Create Announcement
-              </ButtonLink>
-            ) : null}
-            {canEdit ? (
-              <ButtonLink
-                variant="secondary"
-                className="max-xl:hidden"
-                to={courseSettingsPath(orgSlug, courseId)}
-              >
-                <Cog6ToothIcon className="h-5 w-5" aria-hidden />
-                Settings
-              </ButtonLink>
-            ) : null}
-            <CourseActionsMenu {...courseActionsMenuProps} />
           </>
         }
       />

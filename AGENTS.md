@@ -58,11 +58,12 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | [src/roster/AGENTS.md](./src/roster/AGENTS.md) | Students, enrollments, parent links |
 | [src/course-templates/AGENTS.md](./src/course-templates/AGENTS.md) | Templates + access |
 | [src/courses/AGENTS.md](./src/courses/AGENTS.md) | Course instances |
+| [src/resources/AGENTS.md](./src/resources/AGENTS.md) | **P1a** org Resources (folders + document/link/file) |
 | [src/units/AGENTS.md](./src/units/AGENTS.md) | Units |
 | [src/materials/AGENTS.md](./src/materials/AGENTS.md) | Materials, files, versions, important now |
 | [src/sharing/AGENTS.md](./src/sharing/AGENTS.md) | Resource links / share with parents |
 | [src/search/AGENTS.md](./src/search/AGENTS.md) | Cross-facet / chrome search |
-| [src/print/AGENTS.md](./src/print/AGENTS.md) | Print material / unit / this week |
+| [src/print/AGENTS.md](./src/print/AGENTS.md) | Print material / unit / this week / resource |
 | [src/parent/AGENTS.md](./src/parent/AGENTS.md) | Parent dashboard |
 | [src/announcements/AGENTS.md](./src/announcements/AGENTS.md) | One-way notices (course / class / student) |
 | [src/discussions/AGENTS.md](./src/discussions/AGENTS.md) | **P1** two-way threads (one course or one class) |

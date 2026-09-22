@@ -4,6 +4,11 @@ import {
   type CalendarLessonPlanDay,
   type CalendarMaterialChip,
 } from "@/calendar/model/events";
+import {
+  DEFAULT_SCHOOL_DAYS,
+  isOrgSchoolDay,
+  type SchoolDay,
+} from "@/organizations/model/schoolDays";
 
 export function DayCalendar({
   orgSlug,
@@ -11,12 +16,14 @@ export function DayCalendar({
   lessonDays,
   chips,
   hiddenCourseIds,
+  schoolDays = DEFAULT_SCHOOL_DAYS,
 }: {
   orgSlug: string;
   date: string;
   lessonDays: CalendarLessonPlanDay[];
   chips: CalendarMaterialChip[];
   hiddenCourseIds: Set<number>;
+  schoolDays?: readonly SchoolDay[];
 }) {
   const visibleDays = lessonDays.filter((day) => !hiddenCourseIds.has(day.courseId));
   const visibleChips = chips.filter((chip) => !hiddenCourseIds.has(chip.courseId));
@@ -30,8 +37,14 @@ export function DayCalendar({
     );
   }
 
+  const surfaceClass = isOrgSchoolDay(date, schoolDays)
+    ? "cw-calendar-school-day"
+    : "bg-[var(--surface)]";
+
   return (
-    <div className="flex flex-col gap-4 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
+    <div
+      className={`flex flex-col gap-4 rounded-[10px] border border-[var(--line-soft)] ${surfaceClass} p-4`}
+    >
       {cards.map((card) => (
         <CalendarClassBlock
           key={`${card.date}-${card.courseId}-${card.planId ?? "chips"}`}

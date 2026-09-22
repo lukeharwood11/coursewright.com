@@ -62,10 +62,12 @@ export async function uploadNewFile(args: {
   organizationId: number;
   uploadedBy: string;
   file: File;
+  onProgress?: (ratio: number) => void;
 }): Promise<FileRecord> {
   const filename = safeFilename(args.file.name);
   const mimeType = args.file.type || "application/octet-stream";
   const db = requireSupabase();
+  args.onProgress?.(0.02);
 
   const { data: inserted, error: insertError } = await db
     .from("files")
@@ -91,7 +93,9 @@ export async function uploadNewFile(args: {
     1,
     filename,
   );
-  await uploadOrgFileObject(storageRef, args.file);
+  await uploadOrgFileObject(storageRef, args.file, (ratio) => {
+    args.onProgress?.(0.05 + ratio * 0.85);
+  });
 
   const { data: updated, error: updateError } = await db
     .from("files")
@@ -108,6 +112,7 @@ export async function uploadNewFile(args: {
     .maybeSingle();
 
   if (updateError) throw new Error(updateError.message);
+  args.onProgress?.(1);
   if (!updated) return toFile({ ...inserted, storage_ref: storageRef });
   return toFile(updated);
 }

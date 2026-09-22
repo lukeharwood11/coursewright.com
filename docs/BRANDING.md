@@ -147,7 +147,10 @@ Other drafts kept for reference (not in use):
 | Page building block | **Block** | rich text, video, **quiz** (**P0** on pages); extensible |
 | Material date | **Scheduled date** | optional; wins over unit dates for "this week" |
 | Calendar week | **Sunday–Saturday** | parent "this week" |
-| Link to one material | **Resource link** | deep link; login required in P0 |
+| Link to one material | **Resource link** | deep link; login required in P0 — **not** an org **Resource** |
+| Org library | **Resources** | **P1a** — nested folders + document / link / file; not course materials |
+| Org library item | **Resource** | document · link · file in Resources |
+| Nested grouping in Resources | **Folder** | create folders inside folders; ACL can inherit |
 | Print materials | **Print** | not Export; preview is a generated PDF |
 | Print preview routes | `…/print`, `/print-this-week` | not `/export`, not `?print=1` |
 | Save the generated file | **Download** | on the print screen only — the `.pdf` |
@@ -163,7 +166,7 @@ Other drafts kept for reference (not in use):
 | Stored content | **Materials** | page / link / file in a unit |
 | Authored lesson page | **Page** (material kind) | composed of **blocks** |
 | Uploaded handout | **File** (material kind) | org File + versions |
-| External URL | **Link** (material kind) | not a course deep link — that’s **Resource link** |
+| External URL | **Link** (material kind **or** Resource type) | not a course deep link — that’s **Resource link** |
 | Uploaded media on a page | **Video** (block) | URL and/or file — **open**; audio TBD |
 | In-product find | **Search** | native, cross-facet — P0 |
 | Assessment | **Quiz** | block on a page; printable blank + staff answer key in P0; autograde when online — **P1** |

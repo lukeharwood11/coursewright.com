@@ -6,7 +6,7 @@ Browser Supabase client (anon key) and Storage helpers.
 
 - `client.ts` — createClient
 - `storage.ts` — upload/download helpers
-- Generated `database.types.ts` (from `supabase gen types`)
+- Generated `database.types.ts` (from `supabase gen types`; keep in sync when adding tables)
 
 ## Rules
 

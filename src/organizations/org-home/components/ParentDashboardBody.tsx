@@ -10,6 +10,7 @@ import { parentWeekCalendar } from "@/parent/model/weekCalendar";
 import { ParentAnnouncementList } from "./ParentAnnouncementList";
 import { ParentFocusRail } from "./ParentFocusRail";
 import { ParentStudentTags } from "./ParentStudentTags";
+import type { SchoolDay } from "@/organizations/model/schoolDays";
 
 export function ParentDashboardBody({
   orgSlug,
@@ -18,6 +19,7 @@ export function ParentDashboardBody({
   selectedIds,
   preview = false,
   onToggleStudent,
+  schoolDays,
 }: {
   orgSlug: string;
   full: ParentDashboard;
@@ -25,6 +27,7 @@ export function ParentDashboardBody({
   selectedIds: number[];
   preview?: boolean;
   onToggleStudent: (id: number) => void;
+  schoolDays: readonly SchoolDay[];
 }) {
   const [hidden, setHidden] = useState<number[]>([]);
   const hiddenCourseIds = useMemo(() => new Set(hidden), [hidden]);
@@ -115,6 +118,7 @@ export function ParentDashboardBody({
                 chips={calendar.chips}
                 hiddenCourseIds={hiddenCourseIds}
                 layout="cards"
+                schoolDays={schoolDays}
               />
             </div>
           )}

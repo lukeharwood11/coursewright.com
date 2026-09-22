@@ -1,7 +1,8 @@
 /**
  * Static seed data for Doxa Christian Academy (DOXA week packets as lesson plans).
  * School / Wednesday / Friday columns map to Tue / Wed / Fri of the current
- * Sunday–Saturday week until org-configurable school days ship (P1).
+ * Sunday–Saturday week (org school days are configurable in settings; this seed
+ * still follows the printed packet columns).
  */
 
 export const ORG = {

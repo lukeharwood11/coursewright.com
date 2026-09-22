@@ -21,6 +21,7 @@ export function OrgHomePage() {
       <ParentHome
         key={shell.organization.slug}
         firstName={home.firstName}
+        organization={shell.organization}
         orgSlug={shell.organization.slug}
         dashboard={home.dashboard}
         loading={home.dashboardLoading}
@@ -32,7 +33,7 @@ export function OrgHomePage() {
 
   return (
     <StaffHome
-      orgName={shell.organization.name}
+      organization={shell.organization}
       orgSlug={shell.organization.slug}
       dashboard={home.staffDashboard}
       loading={home.staffDashboardLoading}

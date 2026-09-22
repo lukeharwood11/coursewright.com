@@ -1,8 +1,16 @@
+import { useState } from "react";
+import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
-import { groupMaterialsForPicker } from "@/lesson-plans/model/materials";
-import { weekdayDateLabel, type LessonPlanDayDraft } from "@/lesson-plans/model/validate";
+import {
+  remainingDaysForWeek,
+  weekdayDateLabel,
+  type LessonPlanDayDraft,
+} from "@/lesson-plans/model/validate";
 import type { MaterialRecord } from "@/materials/databridge/materials";
 import type { UnitRecord } from "@/units/databridge/units";
+import { AddDayModal } from "./AddDayModal";
+import { LinkMaterialsModal } from "./LinkMaterialsModal";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -21,6 +29,7 @@ export function LessonPlanFormFields({
   onWeekStart,
   onDayBody,
   onToggleMaterial,
+  onAddDay,
 }: {
   title: string;
   weekNote: string;
@@ -33,8 +42,16 @@ export function LessonPlanFormFields({
   onWeekStart: (value: string) => void;
   onDayBody: (date: string, body: string) => void;
   onToggleMaterial: (date: string, materialId: number) => void;
+  onAddDay: (date: string) => void;
 }) {
-  const groups = groupMaterialsForPicker(materials, units);
+  const [addDayOpen, setAddDayOpen] = useState(false);
+  const [linkDay, setLinkDay] = useState<string | null>(null);
+  const materialsById = new Map(materials.map((material) => [material.id, material]));
+  const remaining = remainingDaysForWeek(
+    weekStart,
+    days.map((day) => day.date),
+  );
+  const linkDayDraft = days.find((day) => day.date === linkDay) ?? null;
 
   return (
     <>
@@ -75,7 +92,9 @@ export function LessonPlanFormFields({
 
       <div className="mt-6 grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(min(100%,18rem),1fr))]">
         {days.map((day) => {
-          const selected = new Set(day.materialIds);
+          const linked = day.materialIds
+            .map((id) => materialsById.get(id))
+            .filter((material): material is MaterialRecord => material != null);
           return (
             <section
               key={day.date}
@@ -93,42 +112,79 @@ export function LessonPlanFormFields({
               />
               <div className="my-3 border-t border-[var(--line)]" />
               <p className="text-[12px] font-bold text-[var(--ink-soft)]">Materials</p>
-              {groups.length === 0 ? (
-                <p className="mt-1 text-[12px] text-[var(--ink-faint)]">
-                  Add materials to this course first.
-                </p>
-              ) : (
-                <ul className="mt-1 flex max-h-40 flex-col gap-1 overflow-y-auto">
-                  {groups.flatMap((group) =>
-                    group.materials.map((material) => (
-                      <li key={`${day.date}-${material.id}`}>
-                        <label className="flex cursor-pointer items-start gap-1.5 text-[12.5px]">
-                          <input
-                            type="checkbox"
-                            className="mt-0.5"
-                            checked={selected.has(material.id)}
-                            onChange={() => onToggleMaterial(day.date, material.id)}
-                          />
-                          <span>
-                            <span className="block font-semibold text-[var(--ink)]">
-                              {material.title}
-                            </span>
-                            {material.visibility !== "published" ? (
-                              <span className="font-bold text-[var(--amber-deep)]">
-                                Unpublished
-                              </span>
-                            ) : null}
+              {linked.length > 0 ? (
+                <ul className="mt-2 flex flex-col gap-1.5">
+                  {linked.map((material) => (
+                    <li
+                      key={material.id}
+                      className="flex items-start justify-between gap-2 rounded-[6px] border border-[var(--line-soft)] bg-[var(--surface)] px-2.5 py-1.5"
+                    >
+                      <span className="min-w-0">
+                        <span className="block text-[12.5px] font-semibold text-[var(--ink)]">
+                          {material.title}
+                        </span>
+                        {material.visibility !== "published" ? (
+                          <span className="text-[11.5px] font-bold text-[var(--amber-deep)]">
+                            Unpublished
                           </span>
-                        </label>
-                      </li>
-                    )),
-                  )}
+                        ) : null}
+                      </span>
+                      <button
+                        type="button"
+                        className="shrink-0 rounded-[4px] p-0.5 text-[var(--ink-faint)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]"
+                        aria-label={`Remove ${material.title}`}
+                        onClick={() => onToggleMaterial(day.date, material.id)}
+                      >
+                        <XMarkIcon className="h-4 w-4" aria-hidden />
+                      </button>
+                    </li>
+                  ))}
                 </ul>
+              ) : (
+                <p className="mt-1 text-[12px] text-[var(--ink-faint)]">
+                  No materials linked yet.
+                </p>
               )}
+              <Button
+                type="button"
+                variant="ghost"
+                fullWidth
+                className="mt-2"
+                onClick={() => setLinkDay(day.date)}
+              >
+                <PlusIcon className="h-4 w-4" aria-hidden />
+                Link materials
+              </Button>
             </section>
           );
         })}
       </div>
+      {remaining.length > 0 ? (
+        <div className="mt-4">
+          <Button type="button" variant="secondary" onClick={() => setAddDayOpen(true)}>
+            <PlusIcon className="h-5 w-5" aria-hidden />
+            Add another day
+          </Button>
+        </div>
+      ) : null}
+
+      <AddDayModal
+        open={addDayOpen}
+        dates={remaining}
+        onSelect={onAddDay}
+        onClose={() => setAddDayOpen(false)}
+      />
+      <LinkMaterialsModal
+        open={linkDay != null}
+        dayLabel={linkDay ? weekdayDateLabel(linkDay) : ""}
+        materials={materials}
+        units={units}
+        selectedIds={linkDayDraft?.materialIds ?? []}
+        onToggle={(materialId) => {
+          if (linkDay) onToggleMaterial(linkDay, materialId);
+        }}
+        onClose={() => setLinkDay(null)}
+      />
     </>
   );
 }

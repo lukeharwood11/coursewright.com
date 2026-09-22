@@ -2,7 +2,11 @@ import type { OrgRole, StaffInviteRole } from "@/organizations/model/role";
 import { parseOrgRole, parseStaffInviteRole } from "@/organizations/model/role";
 import { inviteWriteErrorMessage } from "@/organizations/model/staffInvite";
 import { requireSupabase } from "./client";
-import type { OrganizationSummary } from "./memberships";
+import {
+  toOrganizationSummary,
+  type OrganizationSummary,
+  type OrganizationSummaryRow,
+} from "./memberships";
 
 export type OrgStaffMember = {
   membershipId: number;
@@ -64,7 +68,7 @@ type PendingInviteRow = {
   token: string;
   created_at: string;
   student_profile_id: number | null;
-  organization: OrganizationSummary | OrganizationSummary[] | null;
+  organization: OrganizationSummaryRow | OrganizationSummaryRow[] | null;
   invite_students?:
     | { student_profile_id: number }[]
     | { student_profile_id: number }
@@ -87,7 +91,7 @@ export const staffInviteQueryKeys = {
 };
 
 const INVITE_COLUMNS =
-  "id, email, role, token, created_at, student_profile_id, organization:organizations(id, name, slug), invite_students:admin_invite_students(student_profile_id)";
+  "id, email, role, token, created_at, student_profile_id, organization:organizations(id, name, slug, school_days, about, address, website, contact_email, phone), invite_students:admin_invite_students(student_profile_id)";
 
 export async function listOrgStaff(organizationId: number): Promise<OrgStaffMember[]> {
   const db = requireSupabase();
@@ -468,8 +472,9 @@ async function insertInvite(input: {
 
 function toPendingInvite(row: PendingInviteRow): PendingOrgInvite | null {
   const role = parseOrgRole(row.role);
-  const organization = unwrapOne(row.organization);
-  if (!role || !organization) return null;
+  const organizationRow = unwrapOne(row.organization);
+  if (!role || !organizationRow) return null;
+  const organization = toOrganizationSummary(organizationRow);
   const fromJunction = Array.isArray(row.invite_students)
     ? row.invite_students.map((entry) => entry.student_profile_id)
     : row.invite_students

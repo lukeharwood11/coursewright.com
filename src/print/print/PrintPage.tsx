@@ -4,8 +4,9 @@ import { PrintActionBar } from "./components/PrintActionBar";
 import { PrintStatus } from "./components/PrintStatus";
 import { PageLoading } from "@/ui/PageLoading";
 import { usePrint } from "./hooks/usePrint";
+import type { PrintGrainKind } from "@/print/model/paths";
 
-function emptyCopy(grain: "material" | "unit" | "thisWeek" | null): {
+function emptyCopy(grain: PrintGrainKind | null): {
   title: string;
   body: string;
 } {
@@ -13,6 +14,12 @@ function emptyCopy(grain: "material" | "unit" | "thisWeek" | null): {
     return {
       title: "Nothing to print",
       body: "This unit doesn’t have any materials to print yet.",
+    };
+  }
+  if (grain === "resource") {
+    return {
+      title: "Nothing to print",
+      body: "This resource doesn’t have anything to put on paper yet.",
     };
   }
   if (grain === "thisWeek") {

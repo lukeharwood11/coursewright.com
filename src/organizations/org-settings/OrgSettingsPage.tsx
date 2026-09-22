@@ -79,6 +79,12 @@ export function OrgSettingsPage() {
           orgType={settings.orgType}
           gradeScheme={settings.gradeScheme}
           gradeLabelsText={settings.gradeLabelsText}
+          schoolDays={settings.schoolDays}
+          about={settings.about}
+          address={settings.address}
+          website={settings.website}
+          contactEmail={settings.contactEmail}
+          phone={settings.phone}
           confirmPermalinkChange={settings.confirmPermalinkChange}
           slugChanged={settings.slugChanged}
           error={settings.formError}
@@ -87,6 +93,12 @@ export function OrgSettingsPage() {
           onOrgTypeChange={settings.onOrgTypeChange}
           onGradeSchemeChange={settings.onGradeSchemeChange}
           onGradeLabelsTextChange={settings.onGradeLabelsTextChange}
+          onToggleSchoolDay={settings.onToggleSchoolDay}
+          onAboutChange={settings.onAboutChange}
+          onAddressChange={settings.onAddressChange}
+          onWebsiteChange={settings.onWebsiteChange}
+          onContactEmailChange={settings.onContactEmailChange}
+          onPhoneChange={settings.onPhoneChange}
           onConfirmPermalinkChange={settings.onConfirmPermalinkChange}
           onSubmit={settings.onSubmit}
         />

@@ -1,3 +1,5 @@
+import { DEFAULT_SCHOOL_DAYS } from "./schoolDays";
+
 export const K12_GRADE_LABELS = [
   "K",
   "1",
@@ -23,4 +25,5 @@ export const CREATE_ORG_DEFAULTS = {
   orgType: "coop" as const,
   gradeScheme: "k12" as const,
   gradeLabels: [...K12_GRADE_LABELS],
+  schoolDays: DEFAULT_SCHOOL_DAYS,
 };

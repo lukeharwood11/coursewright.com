@@ -39,7 +39,7 @@ export function isStaffRole(role: OrgRole): boolean {
   return role === "owner" || role === "admin" || role === "instructor";
 }
 
-/** Owners and admins can change org identity, permalink, and grade scheme. */
+/** Owners and admins can change org identity, permalink, profile, school days, and grade scheme. */
 export function canManageOrgSettings(role: OrgRole): boolean {
   return role === "owner" || role === "admin";
 }

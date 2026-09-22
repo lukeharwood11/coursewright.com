@@ -76,6 +76,7 @@ src/
 ├── roster/                   # student profiles, enrollments, parent invites/links, families
 ├── course-templates/         # P1 — blueprints + view/edit/owner
 ├── courses/                  # offerings, create-from-course, instructors, dates, grade levels, status
+├── resources/                # P1a — org Resources (nested folders + document/link/file)
 ├── units/                    # structure, order, optional dates
 ├── materials/                # content, files (incl. audio/video), versions, important now
 ├── search/                   # P0 advanced / cross-facet search (when implemented)

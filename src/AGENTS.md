@@ -4,7 +4,7 @@ SPA root. **Screaming Architecture:** domain folders at this level scream Course
 
 ## Do
 
-- Put product code in a **domain folder** (`courses/`, `roster/`, `print/`, …).
+- Put product code in a **domain folder** (`courses/`, `resources/`, `roster/`, `print/`, …).
 - Follow the nearest domain `AGENTS.md`.
 - One SPA for admin / instructor / parent — role chrome in `app/layouts/`.
 

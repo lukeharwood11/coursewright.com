@@ -1,4 +1,9 @@
 import { calendarWeekContaining, type CalendarWeek } from "@/parent/model/thisWeek";
+import {
+  DEFAULT_SCHOOL_DAYS,
+  weekdayOfIsoDate,
+  type SchoolDay,
+} from "@/organizations/model/schoolDays";
 import { uniqueMaterialIds } from "./materials";
 
 export type LessonPlanDayDraft = {
@@ -25,6 +30,48 @@ export function emptyDaysForWeek(weekStart: string): LessonPlanDayDraft[] {
     body: "",
     materialIds: [],
   }));
+}
+
+function dayHasContent(day: LessonPlanDayDraft): boolean {
+  return day.body.trim().length > 0 || day.materialIds.length > 0;
+}
+
+/** Compose defaults: org school days, plus extra dates and any day that already has content. */
+export function visibleDaysForWeek(
+  weekStart: string,
+  schoolDays: readonly SchoolDay[] = DEFAULT_SCHOOL_DAYS,
+  extras?: {
+    extraDates?: readonly string[];
+    existingDays?: readonly LessonPlanDayDraft[];
+  },
+): LessonPlanDayDraft[] {
+  const dates = weekDates(weekStart);
+  if (dates.length === 0) return [];
+  const school = new Set(schoolDays);
+  const extra = new Set(extras?.extraDates ?? []);
+  const byDate = new Map((extras?.existingDays ?? []).map((day) => [day.date, day]));
+  const content = new Set(
+    (extras?.existingDays ?? []).filter(dayHasContent).map((day) => day.date),
+  );
+  return dates
+    .filter((date) => {
+      const weekday = weekdayOfIsoDate(date);
+      return school.has(weekday) || extra.has(date) || content.has(date);
+    })
+    .map((date) => {
+      const existing = byDate.get(date);
+      return existing
+        ? { date, body: existing.body, materialIds: [...existing.materialIds] }
+        : { date, body: "", materialIds: [] };
+    });
+}
+
+export function remainingDaysForWeek(
+  weekStart: string,
+  visibleDates: readonly string[],
+): string[] {
+  const shown = new Set(visibleDates);
+  return weekDates(weekStart).filter((date) => !shown.has(date));
 }
 
 export function weekDates(weekStart: string): string[] {
@@ -64,6 +111,26 @@ export function weekFromParam(value: string | null): CalendarWeek {
 function parseIsoDate(isoDate: string): Date {
   const [year, month, day] = isoDate.split("-").map(Number);
   return new Date(year ?? 1970, (month ?? 1) - 1, day ?? 1);
+}
+
+export function extraDatesFromDays(
+  days: readonly LessonPlanDayDraft[],
+  weekStart: string,
+  schoolDays: readonly SchoolDay[],
+): string[] {
+  const school = new Set(schoolDays);
+  const dates = weekDates(weekStart);
+  const extras: string[] = [];
+  const seen = new Set<string>();
+  for (const day of days) {
+    const weekday = weekdayOfIsoDate(day.date);
+    if (school.has(weekday)) continue;
+    const mapped = dates[weekday];
+    if (!mapped || seen.has(mapped)) continue;
+    seen.add(mapped);
+    extras.push(mapped);
+  }
+  return extras;
 }
 
 export function remapDaysToWeek(

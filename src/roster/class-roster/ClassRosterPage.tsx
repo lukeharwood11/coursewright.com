@@ -94,8 +94,9 @@ export function ClassRosterPage() {
         leads={roster.leads}
         staff={roster.staff}
         canManage={roster.canManageLeads}
-        addUserId={roster.addLeadUserId}
-        onAddUserId={roster.setAddLeadUserId}
+        addOpen={roster.addLeadOpen}
+        onOpenAdd={roster.openAddLead}
+        onCloseAdd={roster.closeAddLead}
         onAdd={roster.addLead}
         onRemove={roster.onRemoveLead}
         adding={roster.addingLead}

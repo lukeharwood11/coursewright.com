@@ -1719,39 +1719,318 @@ export type Database = {
           },
         ]
       }
+      org_resource_blocks: {
+        Row: {
+          body: Json
+          created_at: string
+          deleted_at: string | null
+          file_id: number | null
+          id: number
+          item_id: number
+          kind: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          body?: Json
+          created_at?: string
+          deleted_at?: string | null
+          file_id?: number | null
+          id?: number
+          item_id: number
+          kind: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          body?: Json
+          created_at?: string
+          deleted_at?: string | null
+          file_id?: number | null
+          id?: number
+          item_id?: number
+          kind?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_resource_blocks_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_resource_blocks_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "org_resource_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_resource_folders: {
+        Row: {
+          access_mode: string
+          acl_inherit: boolean
+          archived_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: number
+          name: string
+          organization_id: number
+          parent_id: number | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          access_mode?: string
+          acl_inherit?: boolean
+          archived_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: number
+          name: string
+          organization_id: number
+          parent_id?: number | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          access_mode?: string
+          acl_inherit?: boolean
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: number
+          name?: string
+          organization_id?: number
+          parent_id?: number | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_resource_folders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_resource_folders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_resource_folders_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "org_resource_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_resource_grants: {
+        Row: {
+          created_at: string
+          folder_id: number | null
+          grantee_user_id: string
+          id: number
+          item_id: number | null
+          organization_id: number
+          permission: string
+        }
+        Insert: {
+          created_at?: string
+          folder_id?: number | null
+          grantee_user_id: string
+          id?: number
+          item_id?: number | null
+          organization_id: number
+          permission: string
+        }
+        Update: {
+          created_at?: string
+          folder_id?: number | null
+          grantee_user_id?: string
+          id?: number
+          item_id?: number | null
+          organization_id?: number
+          permission?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_resource_grants_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "org_resource_folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_resource_grants_grantee_user_id_fkey"
+            columns: ["grantee_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_resource_grants_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "org_resource_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_resource_grants_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_resource_items: {
+        Row: {
+          access_mode: string
+          acl_inherit: boolean
+          archived_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          file_id: number | null
+          folder_id: number | null
+          id: number
+          organization_id: number
+          search_vector: unknown
+          title: string
+          type: string
+          updated_at: string
+          url: string | null
+          visibility: string
+        }
+        Insert: {
+          access_mode?: string
+          acl_inherit?: boolean
+          archived_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          file_id?: number | null
+          folder_id?: number | null
+          id?: number
+          organization_id: number
+          title: string
+          type: string
+          updated_at?: string
+          url?: string | null
+          visibility?: string
+        }
+        Update: {
+          access_mode?: string
+          acl_inherit?: boolean
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          file_id?: number | null
+          folder_id?: number | null
+          id?: number
+          organization_id?: number
+          title?: string
+          type?: string
+          updated_at?: string
+          url?: string | null
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_resource_items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_resource_items_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_resource_items_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "org_resource_folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_resource_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
+          about: string | null
+          address: string | null
+          contact_email: string | null
           created_at: string
           grade_labels: string[]
           grade_scheme: string
           id: number
           name: string
           org_type: string
+          phone: string | null
+          school_days: number[]
           search_vector: unknown
           slug: string
           updated_at: string
+          website: string | null
         }
         Insert: {
+          about?: string | null
+          address?: string | null
+          contact_email?: string | null
           created_at?: string
           grade_labels: string[]
           grade_scheme: string
           id?: number
           name: string
           org_type: string
+          phone?: string | null
+          school_days?: number[]
           search_vector?: unknown
           slug: string
           updated_at?: string
+          website?: string | null
         }
         Update: {
+          about?: string | null
+          address?: string | null
+          contact_email?: string | null
           created_at?: string
           grade_labels?: string[]
           grade_scheme?: string
           id?: number
           name?: string
           org_type?: string
+          phone?: string | null
+          school_days?: number[]
           search_vector?: unknown
           slug?: string
           updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }

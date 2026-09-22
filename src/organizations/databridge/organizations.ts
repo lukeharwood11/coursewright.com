@@ -10,22 +10,24 @@ import {
   type ValidatedUpdateOrganization,
 } from "@/organizations/model/updateOrganization";
 import { requireSupabase } from "./client";
-import type { OrganizationSummary } from "./memberships";
+import {
+  ORG_SUMMARY_SELECT,
+  toOrganizationSummary,
+  type OrganizationSummary,
+  type OrganizationSummaryRow,
+} from "./memberships";
 export { orgQueryKeys } from "./memberships";
 
-export type OrganizationDetails = {
-  id: number;
-  name: string;
-  slug: string;
+export const ORG_DETAILS_SELECT =
+  "id, name, slug, school_days, about, address, website, contact_email, phone, org_type, grade_scheme, grade_labels" as const;
+
+export type OrganizationDetails = OrganizationSummary & {
   orgType: OrgType;
   gradeScheme: GradeScheme;
   gradeLabels: string[];
 };
 
-type OrganizationRow = {
-  id: number;
-  name: string;
-  slug: string;
+type OrganizationRow = OrganizationSummaryRow & {
   org_type: string;
   grade_scheme: string;
   grade_labels: string[];
@@ -36,9 +38,7 @@ function toOrganizationDetails(row: OrganizationRow): OrganizationDetails | null
   const gradeScheme = parseGradeScheme(row.grade_scheme);
   if (!orgType || !gradeScheme) return null;
   return {
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
+    ...toOrganizationSummary(row),
     orgType,
     gradeScheme,
     gradeLabels: row.grade_labels,
@@ -59,6 +59,7 @@ export async function createOrganization(
     org_type: CREATE_ORG_DEFAULTS.orgType,
     grade_scheme: CREATE_ORG_DEFAULTS.gradeScheme,
     grade_labels: CREATE_ORG_DEFAULTS.gradeLabels,
+    school_days: CREATE_ORG_DEFAULTS.schoolDays,
   });
 
   if (insertError) {
@@ -67,7 +68,7 @@ export async function createOrganization(
 
   const { data, error: fetchError } = await db
     .from("organizations")
-    .select("id, name, slug")
+    .select(ORG_SUMMARY_SELECT)
     .eq("slug", input.slug)
     .maybeSingle();
 
@@ -79,7 +80,7 @@ export async function createOrganization(
       "The organization was created but couldn’t be opened yet. Refresh and try again.",
     );
   }
-  return data;
+  return toOrganizationSummary(data as OrganizationSummaryRow);
 }
 
 export async function getOrganization(
@@ -88,7 +89,7 @@ export async function getOrganization(
   const db = requireSupabase();
   const { data, error } = await db
     .from("organizations")
-    .select("id, name, slug, org_type, grade_scheme, grade_labels")
+    .select(ORG_DETAILS_SELECT)
     .eq("id", id)
     .maybeSingle();
 
@@ -110,9 +111,15 @@ export async function updateOrganization(
       org_type: input.orgType,
       grade_scheme: input.gradeScheme,
       grade_labels: input.gradeLabels,
+      school_days: input.schoolDays,
+      about: input.about,
+      address: input.address,
+      website: input.website,
+      contact_email: input.contactEmail,
+      phone: input.phone,
     })
     .eq("id", id)
-    .select("id, name, slug, org_type, grade_scheme, grade_labels")
+    .select(ORG_DETAILS_SELECT)
     .maybeSingle();
 
   if (error) {

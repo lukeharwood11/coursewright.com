@@ -16,7 +16,7 @@ A simple way to tell Course Wright how to make the product better. Opened from *
 
 - Requires a signed-in account.
 - Name, email, organization (when an org is in context), and role are filled automatically from the session and shown as read-only.
-- The person writes a note and sends it. The note is stored; Course Wright is emailed at `hi@coursewright.com` when Resend is configured (same `RESEND_API_KEY` as invite mail). If email isn’t set up, the note is still saved.
+- The person writes a note and sends it. The note is stored in the `feedback` table (no email).
 - From the account shell (no org), organization shows as **None selected**.
 - From an org, the current organization and role are included.
 
@@ -45,7 +45,7 @@ A simple way to tell Course Wright how to make the product better. Opened from *
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — account menu
 - [ORG_PICKER](./ORG_PICKER.md) — switch organization (account chrome)
 - [ORG_HOME](./ORG_HOME.md) — when opened from an org
-- via org chrome (when on `/my/<org-slug>/feedback`): [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [ACTIVITY](./ACTIVITY.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
+- via org chrome (when on `/my/<org-slug>/feedback`): [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [ACTIVITY](./ACTIVITY.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
 
 ## Notes
 

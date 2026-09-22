@@ -52,7 +52,7 @@ Month, week, and day view of when work is **assigned** and **due**, plus lesson-
 - [MATERIAL](./MATERIAL.md) — assigned/due chip
 - [LESSON_PLAN](./LESSON_PLAN.md) — week plan
 - [COURSE](./COURSE.md) — course from legend (staff / parent-viewable)
-- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
+- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
 
 ## Notes
 

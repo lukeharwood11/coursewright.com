@@ -1,0 +1,406 @@
+import { useEffect, useId, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  ArrowRightIcon,
+  Cog6ToothIcon,
+  EllipsisHorizontalIcon,
+  PencilSquareIcon,
+} from "@heroicons/react/24/outline";
+import { Button } from "@/ui/Button";
+import { ConfirmDialog } from "@/ui/ConfirmDialog";
+import { PageLoading } from "@/ui/PageLoading";
+import { useToastOnError } from "@/ui/useToastOnError";
+import type { ResourceFolderRecord } from "@/resources/databridge/folders";
+import type { ResourceItemRecord } from "@/resources/databridge/items";
+import type { ResourceAccessMode } from "@/resources/model/kinds";
+import {
+  resourceBrowsePath,
+  resourceItemEditPath,
+} from "@/resources/model/paths";
+import { AccessSettingsDialog } from "./components/AccessSettingsDialog";
+import { MoveResourceDialog } from "./components/MoveResourceDialog";
+import { ResourceBrowser } from "./components/ResourceBrowser";
+import { ResourceContextMenu } from "./components/ResourceContextMenu";
+import {
+  FolderNameDialog,
+  LinkResourceDialog,
+} from "./components/ResourceCreateDialogs";
+import { ResourceDropzone } from "./components/ResourceDropzone";
+import { ResourcePathBar } from "./components/ResourcePathBar";
+import { ResourceToolbar } from "./components/ResourceToolbar";
+import { useResourcesBrowse } from "./hooks/useResourcesBrowse";
+
+type MoveTarget =
+  | {
+      kind: "folder";
+      id: number;
+      parentId: number | null;
+      aclInherit: boolean;
+    }
+  | { kind: "item"; id: number; folderId: number | null };
+
+type AccessTarget = {
+  kind: "folder" | "item";
+  id: number;
+  canInherit: boolean;
+  accessMode: ResourceAccessMode;
+  aclInherit: boolean;
+};
+
+type RemoveTarget = { kind: "folder" | "item"; id: number; name: string };
+
+export function ResourcesPage() {
+  const page = useResourcesBrowse();
+  const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [folderDialog, setFolderDialog] = useState(false);
+  const [renameFolderOpen, setRenameFolderOpen] = useState(false);
+  const [linkDialog, setLinkDialog] = useState(false);
+  const [move, setMove] = useState<MoveTarget | null>(null);
+  const [access, setAccess] = useState<AccessTarget | null>(null);
+  const [remove, setRemove] = useState<RemoveTarget | null>(null);
+  useToastOnError(page.error);
+
+  useEffect(() => {
+    document.title = page.currentFolder
+      ? `${page.currentFolder.name} · Resources · Course Wright`
+      : "Resources · Course Wright";
+  }, [page.currentFolder]);
+
+  if (page.loading) {
+    return <PageLoading label="Loading resources…" />;
+  }
+
+  if (page.notFound) {
+    return (
+      <div className="px-5 py-8 md:px-8">
+        <h1
+          className="text-[24px] font-semibold text-[var(--ink)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          We couldn’t find that folder
+        </h1>
+        <p className="mt-4 text-[13px]">
+          <Link
+            to={resourceBrowsePath(page.organization.slug, null)}
+            className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+          >
+            Back to Resources
+          </Link>
+        </p>
+      </div>
+    );
+  }
+
+  const currentFolder = page.currentFolder;
+  const title = currentFolder?.name ?? "Resources";
+
+  function openFilePicker() {
+    fileInputRef.current?.click();
+  }
+
+  function createDocument() {
+    if (page.createDocument.isPending) return;
+    void page.createDocument
+      .mutateAsync("Untitled")
+      .then((item) => {
+        navigate(resourceItemEditPath(page.organization.slug, item.id));
+      })
+      .catch(() => undefined);
+  }
+
+  function openMoveFolder(folder: ResourceFolderRecord) {
+    page.moveFolder.reset();
+    setMove({
+      kind: "folder",
+      id: folder.id,
+      parentId: folder.parentId,
+      aclInherit: folder.aclInherit,
+    });
+  }
+
+  function openMoveItem(item: ResourceItemRecord) {
+    page.moveItem.reset();
+    setMove({ kind: "item", id: item.id, folderId: item.folderId });
+  }
+
+  function openAccessFolder(folder: ResourceFolderRecord) {
+    setAccess({
+      kind: "folder",
+      id: folder.id,
+      canInherit: folder.parentId != null,
+      accessMode: folder.accessMode,
+      aclInherit: folder.aclInherit,
+    });
+  }
+
+  function openAccessItem(item: ResourceItemRecord) {
+    setAccess({
+      kind: "item",
+      id: item.id,
+      canInherit: true,
+      accessMode: item.accessMode,
+      aclInherit: item.aclInherit,
+    });
+  }
+
+  const movePending =
+    move?.kind === "item" ? page.moveItem.isPending : page.moveFolder.isPending;
+  const moveError =
+    move?.kind === "item"
+      ? (page.moveItem.error?.message ?? null)
+      : (page.moveFolder.error?.message ?? null);
+
+  return (
+    <div className="flex min-h-[calc(100dvh-4.5rem)] flex-col px-5 py-6 md:px-8">
+      <ResourcePathBar
+        orgSlug={page.organization.slug}
+        currentFolder={page.currentFolder}
+        ancestors={page.ancestors}
+      />
+
+      <div className="mt-3 flex items-center gap-2">
+        <h1
+          className="min-w-0 flex-1 truncate text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {title}
+        </h1>
+        {page.canEditHere && currentFolder ? (
+          <div className="flex shrink-0 flex-nowrap items-center gap-2">
+            {page.isStaff ? (
+              <Button
+                type="button"
+                variant="secondary"
+                className="shrink-0"
+                onClick={() => openAccessFolder(currentFolder)}
+              >
+                <Cog6ToothIcon className="h-5 w-5" aria-hidden />
+                <span className="max-sm:hidden">Manage access</span>
+              </Button>
+            ) : null}
+            <CurrentFolderMenu
+              onMove={() => openMoveFolder(currentFolder)}
+              onRename={() => setRenameFolderOpen(true)}
+            />
+          </div>
+        ) : null}
+      </div>
+
+      <div className="mt-4">
+        <ResourceToolbar
+          canEdit={page.canEditHere}
+          typeFilter={page.typeFilter}
+          onTypeFilter={page.setTypeFilter}
+          onNewFolder={() => setFolderDialog(true)}
+          onNewDocument={createDocument}
+          onNewLink={() => setLinkDialog(true)}
+          onUpload={openFilePicker}
+          documentPending={page.createDocument.isPending}
+        />
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        className="sr-only"
+        tabIndex={-1}
+        onChange={(event) => {
+          if (event.target.files && event.target.files.length > 0) {
+            page.enqueueFiles(event.target.files);
+            event.target.value = "";
+          }
+        }}
+      />
+
+      <ResourceDropzone
+        className="mt-4 flex min-h-0 flex-1 flex-col"
+        disabled={!page.canEditHere}
+        onFiles={page.enqueueFiles}
+      >
+        <ResourceBrowser
+          orgSlug={page.organization.slug}
+          organizationId={page.organization.id}
+          folders={page.folders}
+          items={page.items}
+          actor={page.actor}
+          grants={page.grants}
+          knownFolders={page.foldersById}
+          typeFilter={page.typeFilter}
+          canEditHere={page.canEditHere}
+          isStaff={page.isStaff}
+          renamePending={page.renameFolder.isPending || page.renameItem.isPending}
+          onRenameFolder={(id, name) =>
+            page.renameFolder.mutateAsync({ id, name }).then(() => undefined)
+          }
+          onRenameItem={(id, title) =>
+            page.renameItem.mutateAsync({ id, title }).then(() => undefined)
+          }
+          onMoveFolder={openMoveFolder}
+          onMoveItem={openMoveItem}
+          onAccessFolder={openAccessFolder}
+          onAccessItem={openAccessItem}
+          onRemoveFolder={(folder) =>
+            setRemove({ kind: "folder", id: folder.id, name: folder.name })
+          }
+          onRemoveItem={(item) =>
+            setRemove({ kind: "item", id: item.id, name: item.title })
+          }
+          onPublish={(item) =>
+            page.setItemVisibility.mutate({ id: item.id, visibility: "published" })
+          }
+          onUnpublish={(item) =>
+            page.setItemVisibility.mutate({ id: item.id, visibility: "unpublished" })
+          }
+          onCreateFolder={() => setFolderDialog(true)}
+          onCreateDocument={createDocument}
+          onCreateLink={() => setLinkDialog(true)}
+          onUpload={openFilePicker}
+        />
+      </ResourceDropzone>
+
+      <FolderNameDialog
+        open={folderDialog}
+        pending={page.createFolder.isPending}
+        onClose={() => setFolderDialog(false)}
+        onSubmit={(name) => page.createFolder.mutateAsync(name)}
+      />
+      {currentFolder ? (
+        <FolderNameDialog
+          open={renameFolderOpen}
+          pending={page.renameFolder.isPending}
+          initialName={currentFolder.name}
+          title="Rename folder"
+          submitLabel="Save"
+          pendingLabel="Saving…"
+          onClose={() => setRenameFolderOpen(false)}
+          onSubmit={(name) =>
+            page.renameFolder.mutateAsync({ id: currentFolder.id, name })
+          }
+        />
+      ) : null}
+      <LinkResourceDialog
+        open={linkDialog}
+        pending={page.createLink.isPending}
+        onClose={() => setLinkDialog(false)}
+        onCreate={(input) => page.createLink.mutateAsync(input)}
+      />
+
+      {move ? (
+        <MoveResourceDialog
+          open
+          organizationId={page.organization.id}
+          currentFolderId={move.kind === "folder" ? move.parentId : move.folderId}
+          excludeFolderId={move.kind === "folder" ? move.id : null}
+          pending={movePending}
+          error={moveError}
+          onClose={() => setMove(null)}
+          onMove={(parentId) => {
+            const done =
+              move.kind === "folder"
+                ? page.moveFolder.mutateAsync({
+                    id: move.id,
+                    parentId,
+                    aclInherit: move.aclInherit,
+                  })
+                : page.moveItem.mutateAsync({ id: move.id, folderId: parentId });
+            void done.then(() => setMove(null)).catch(() => undefined);
+          }}
+        />
+      ) : null}
+
+      <AccessSettingsDialog
+        open={access != null}
+        target={
+          access
+            ? {
+                kind: access.kind,
+                id: access.id,
+                organizationId: page.organization.id,
+                canInherit: access.canInherit,
+              }
+            : null
+        }
+        accessMode={access?.accessMode ?? "staff"}
+        aclInherit={access?.aclInherit ?? false}
+        onClose={() => setAccess(null)}
+        onSaved={page.invalidateBrowse}
+      />
+
+      <ConfirmDialog
+        open={remove != null}
+        title={remove?.kind === "folder" ? "Remove this folder?" : "Remove this resource?"}
+        body={
+          remove?.kind === "folder"
+            ? "This folder will be hidden from Resources. You can still ask an admin if you need it back."
+            : "It will be hidden from Resources. You can still ask an admin if you need it back."
+        }
+        confirmLabel="Remove"
+        cancelLabel="Keep"
+        onCancel={() => setRemove(null)}
+        onConfirm={() => {
+          if (!remove) return;
+          const target = remove;
+          setRemove(null);
+          if (target.kind === "folder") page.archiveFolder.mutate(target.id);
+          else page.archiveItem.mutate(target.id);
+        }}
+      />
+    </div>
+  );
+}
+
+const menuTriggerClassName =
+  "inline-flex shrink-0 items-center justify-center rounded-[6px] border border-[var(--line)] bg-[var(--surface)] p-[11px] text-[var(--ink)] transition-colors hover:border-[var(--green)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]";
+
+function CurrentFolderMenu({
+  onMove,
+  onRename,
+}: {
+  onMove: () => void;
+  onRename: () => void;
+}) {
+  const menuId = useId();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
+  const items = [
+    {
+      id: "rename",
+      label: "Rename",
+      icon: <PencilSquareIcon className="h-4 w-4" />,
+      onSelect: onRename,
+    },
+    {
+      id: "move",
+      label: "Move",
+      icon: <ArrowRightIcon className="h-4 w-4" />,
+      onSelect: onMove,
+    },
+  ];
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        className={menuTriggerClassName}
+        aria-label="Folder actions"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <EllipsisHorizontalIcon className="h-5 w-5" aria-hidden />
+      </button>
+      <ResourceContextMenu
+        id={menuId}
+        open={open}
+        label="Folder actions"
+        items={items}
+        anchorRef={buttonRef}
+        onClose={() => setOpen(false)}
+      />
+    </>
+  );
+}

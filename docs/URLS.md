@@ -121,6 +121,20 @@ No `/edit` route — title and audience are not edited after create in this slic
 
 ---
 
+## Resources (**P1a**)
+
+Org-scoped library — not course materials. Nested folders; document / link / file items.
+
+| Page | URL | Notes |
+|------|-----|-------|
+| [RESOURCES](./pages/RESOURCES.md) | `/my/<org-slug>/resources` | Root browse; `?type=document\|file\|link` |
+| [RESOURCE_FOLDER](./pages/RESOURCE_FOLDER.md) | `/my/<org-slug>/resources/folders/<folder_id>` | Nested folder browse (same screen as root) |
+| [RESOURCE](./pages/RESOURCE.md) (view) | `/my/<org-slug>/resources/items/<item_id>` | Document / link / file |
+| [RESOURCE](./pages/RESOURCE.md) (edit) | `…/items/<item_id>/edit` | Editors |
+| [PRINT](./pages/PRINT.md) (resource) | `…/items/<item_id>/print` | Same print preview as materials |
+
+---
+
 ## Course templates (**P1**)
 
 | Page | URL | Notes |
@@ -162,6 +176,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 | [PRINT](./pages/PRINT.md) (material, in unit) | `…/units/<unit_id>/materials/<material_id>/print` | |
 | [PRINT](./pages/PRINT.md) (unit) | `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print` | Packet in material order |
 | [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Parent dashboard grain; Sun–Sat + important now. Optional `?students=` limits to active students |
+| [PRINT](./pages/PRINT.md) (resource) | `/my/<org-slug>/resources/items/<item_id>/print` | Document or file |
 
 **Do not use** `?print=1` on the source page — print is its own chrome-free screen with a real PDF viewer.
 

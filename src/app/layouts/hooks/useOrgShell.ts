@@ -17,6 +17,8 @@ import {
 } from "@/organizations/databridge/memberships";
 import { isStaffRole } from "@/organizations/model/role";
 import { loadParentDashboard, parentQueryKeys } from "@/parent/databridge/dashboard";
+import { orgHasVisibleResources } from "@/resources/databridge/folders";
+import { resourceItemQueryKeys } from "@/resources/databridge/items";
 import {
   classQueryKeys,
   listClasses,
@@ -116,12 +118,19 @@ export function useOrgShellData(orgSlug: string | undefined) {
   ).length;
   const unreadDiscussions = countUnreadDiscussions(discussionsQuery.data ?? []);
 
+  const visibleResourcesQuery = useQuery({
+    queryKey: resourceItemQueryKeys.visible(organizationId ?? 0),
+    queryFn: () => orgHasVisibleResources(organizationId!),
+    enabled: parentPresentation && Boolean(organizationId),
+  });
+
   const navSections =
     organization && role
       ? parentPresentation
         ? buildParentNav(organization.slug, lists, {
             unreadAnnouncements,
             unreadDiscussions,
+            showResources: Boolean(visibleResourcesQuery.data),
           })
         : buildStaffNav(organization.slug, lists, {
             unreadDiscussions,

@@ -47,6 +47,10 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | DiscussionRead | `discussion_reads` | **P1** — per-user last read (unread badge) |
 | Notification | `notifications` | **P1** — per-user Activity item; ack via `read_at` |
 | Feedback | `feedback` | Signed-in product notes; identity copied from the session |
+| OrgResourceFolder | `org_resource_folders` | **P1a** — nested org folders; ACL presets + inherit |
+| OrgResourceItem | `org_resource_items` | **P1a** — document · link · file; not a course material |
+| OrgResourceBlock | `org_resource_blocks` | **P1a** — Lexical body on document items |
+| OrgResourceGrant | `org_resource_grants` | **P1a** — extra read/write for a person on a folder or item |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates + published lesson plans (Sunday–Saturday). |
 | Page / Block / Quiz / Form | `blocks` (quiz is a Lexical node on a page) | Material **kind** page\|link\|file; blocks on pages only; **no** quiz table |
 
@@ -72,7 +76,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | Phase | Entities in focus |
 |-------|-------------------|
 | **P0** | Organization, User, Membership, **AdminInvite**, **AdminInviteStudents**, **StudentProfile**, **Class**, **ClassMember**, **ClassLeader**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **LessonPlan**, **LessonPlanDay**, **LessonPlanDayMaterial**, **Announcement**, **AnnouncementRead**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
-| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification**, **Feedback** |
+| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification**, **Feedback**, **OrgResourceFolder**, **OrgResourceItem**, **OrgResourceBlock**, **OrgResourceGrant** |
 | **P2** | Cross-org Family management, StudentProfile.user_id, Quiz online, Submission, **ParentPayments** (orgs collect from parents) |
 
 ---
@@ -268,7 +272,7 @@ Multiple instructors per course (co-teaching). **P0.**
 | uploaded_at | timestamptz | |
 | deleted_at | timestamptz | soft delete — warn/block if still referenced (TBD) |
 
-**References:** `Material.file_id` and/or page blocks hold `file_id` → `File`. **P1 discussions** also reference `File` from `DiscussionMessageAttachment`. No `File.material_id` owner FK. No `copied_from_id` on File for template copy — copy shares the same id.
+**References:** `Material.file_id` and/or page blocks hold `file_id` → `File`. **P1 discussions** also reference `File` from `DiscussionMessageAttachment`. **P1a Resources** reference `File` from `OrgResourceItem` (`type = file`) and `OrgResourceBlock`. Parents may SELECT a file when they can view a resource that references it (`parent_can_view_file`). No `File.material_id` owner FK. No `copied_from_id` on File for template copy — copy shares the same id.
 
 Generous types/sizes — keep open. **Audio and video MIME types are first-class** (in-app players in the product). Replacing a file creates a new `FileVersion` + new Storage blob; prior blobs stay for revert. **Replace updates all referrers** unless a fork creates a new `File` (open — FILE_STORAGE).
 
@@ -282,7 +286,7 @@ Search is a product requirement — schema must support **text + facets**, not o
 
 | Concern | Notes |
 |---------|-------|
-| **Searchable surfaces** | Material title/body (as indexed), File filename, Course title + description + subject + location, Template title + description, Unit title, StudentProfile name, Family names, instructor names |
+| **Searchable surfaces** | Material title/body (as indexed), File filename, Course title + description + subject + location, Template title + description, Unit title, StudentProfile name, Family names, instructor names. Org resource title/description has a `search_vector` for later facet work |
 | **Facets (examples)** | course_id, unit_id, material kind, mime_type / media kind, grade levels, important now, date ranges, role-visible org scope |
 | **Access** | Results filtered by same RLS as underlying rows |
 | **Implementation (hypothesis)** | Postgres `tsvector` / GIN indexes + structured `WHERE` facets via PostgREST; escalate later if needed |
@@ -300,6 +304,7 @@ Print is **not a stored entity**. It is a print-friendly view of content the act
 | Material | One `Material` (+ attached `File`s) | `…/materials/<id>/print` |
 | Unit | All materials in a `Unit`, in `position` order | `…/units/<id>/print` |
 | This week | Dated materials (and Important now) whose dates fall in the current Sunday–Saturday week | `/my/<org-slug>/print-this-week` |
+| Resource (**P1a**) | One `OrgResourceItem` (document or file) | `…/resources/items/<id>/print` |
 
 **Not P0:** print whole course.
 
@@ -323,10 +328,20 @@ UI map: [URLS.md](../URLS.md), [PRINT](../pages/PRINT.md).
 | org_type | text | `coop` · `micro_school` · `family` |
 | grade_scheme | text | `k12` · `custom` |
 | grade_labels | text[] | Allowed labels for student `grade_level` and course/template `grade_levels`. K–12 preset includes K, 1–12, and common bands (K-2, 3-5, 6-8, 9-12). Custom is org-defined. |
+| school_days | smallint[] | Weekdays the org operates. Values match JS `Date.getDay()` (`0` Sunday … `6` Saturday). Default `{1,2,3,4,5}` (Mon–Fri). At least one unique value in `0..6`. Lesson-plan compose defaults to these days; the Sunday–Saturday week model is unchanged. |
+| about | text | Optional in-app about blurb (max 4000). Shown on org home when set. Not a public marketing page. |
+| address | text | Optional free-text location / mailing address (max 500). |
+| website | text | Optional external URL (max 200). |
+| contact_email | text | Optional org-facing inbox (max 200) — not a login email. |
+| phone | text | Optional org phone, free text (max 200). |
 
 **Permalink:** created with the org (derived from name, uniquified). Owners and admins may edit `slug`; the product **warns** that existing org URLs will break. P0 does **not** require keeping old slugs as redirects.
 
 **Grade scheme:** the org decides how student **and course** grade levels work. Course Wright provides options (exact grade, range, custom). Student `grade_level` and course/template grade metadata must match the scheme when set.
+
+**School days:** owners and admins set which weekdays school operates. Instructors see the setting read-only. Calendar week view and parent This week stay Sunday–Saturday; empty days still omit on This week.
+
+**Profile:** optional about / address / website / contact email / phone. Owners and admins edit in org settings. When any field is set, org home (staff and parent) shows a compact About this organization card.
 
 ### User
 
@@ -623,6 +638,93 @@ Ordered content piece on a **page** material only (`materials.kind = page`).
 
 **Not v1 material kinds:** quiz (it’s a **page block**), audio. External URLs at the unit level use material `kind = link`, not a link block (unless we later add link blocks inside pages — TBD).
 
+### OrgResourceFolder
+
+Nested folder in an organization’s **Resources** library. Independent of courses — no enrollment gate.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| parent_id | bigint | FK → OrgResourceFolder, **nullable** — null = top-level folder |
+| name | text | required |
+| description | text | optional |
+| access_mode | text | `staff` · `parents` · `members` · `restricted` — used when this folder is the ACL source |
+| acl_inherit | boolean | default true when nested; **false** at root. When true, walk to parent for ACL |
+| sort_order | int | order among siblings |
+| archived_at | timestamptz | soft archive; hidden from default browse |
+| created_by | uuid | FK → User |
+
+**ACL source:** walk `parent_id` while `acl_inherit` until a folder with `acl_inherit = false` (roots are always false). Effective readers/writers = that folder’s `access_mode` plus `OrgResourceGrant` rows on **that** folder.
+
+**Who can edit:** org staff (owner / admin / instructor), **created_by**, or a **write** grant on the ACL-source folder. Staff may create top-level folders.
+
+**Who can view:** editors; or (non-archived) members allowed by the effective preset / read-or-write grant. Folders are not published — only items are.
+
+### OrgResourceItem
+
+A document, link, or file sitting in a folder (or unfiled at org root). **Not** a `materials` row.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| folder_id | bigint | FK → OrgResourceFolder, **nullable** — null = unfiled at org root |
+| type | text | `document` · `link` · `file` |
+| title | text | required; file items default from the upload filename and stay editable |
+| description | text | optional |
+| url | text | required when `type = link` |
+| file_id | bigint | FK → File, required when `type = file` |
+| visibility | text | `unpublished` (editors only) · `published` (readers per ACL). Default unpublished |
+| acl_inherit | boolean | default true → use folder ACL source. False → this row’s `access_mode` + item grants only |
+| access_mode | text | same presets as folders; used when `acl_inherit = false` |
+| archived_at | timestamptz | soft archive |
+| created_by | uuid | FK → User |
+
+Unfiled items that inherit have no folder ACL — only staff (and item-level grants if not inheriting) can see them.
+
+**Who can edit:** org staff, **created_by**, or a **write** grant on the resolved ACL source (item grants when not inheriting; otherwise the folder ACL source).
+
+**Who can view:** editors always (including unpublished). Others only when `visibility = published` **and** the effective preset or a read/write grant allows them. Course enrollment is **not** consulted.
+
+### OrgResourceBlock
+
+Ordered content on a **document** item (`org_resource_items.type = document`). Same Lexical shape as material `blocks` (`rich_text` · `video`; `body.lexical`).
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| item_id | bigint | FK → OrgResourceItem |
+| position | int | order |
+| kind | text | `rich_text` · `video` |
+| body | jsonb | Lexical JSON in `lexical` for rich text; URL for video |
+| file_id | bigint | FK → File, nullable |
+| deleted_at | timestamptz | soft delete |
+
+### OrgResourceGrant
+
+Extra access for one org member on one folder **or** one item (XOR).
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| folder_id | bigint | FK → OrgResourceFolder, nullable |
+| item_id | bigint | FK → OrgResourceItem, nullable |
+| grantee_user_id | uuid | FK → User (active membership required) |
+| permission | text | `read` · `write` (write implies read) |
+
+Staff do **not** need grant rows. Unique `(folder_id, grantee)` / `(item_id, grantee)`. Only staff insert/update/delete grant rows; a grantee may SELECT their own row.
+
+**Access presets** (when published, for non-editors):
+
+| access_mode | Who reads |
+|-------------|-----------|
+| `staff` | Owners, admins, instructors |
+| `parents` | Staff + memberships with `role = parent` |
+| `members` | All active org memberships |
+| `restricted` | Only explicit grants (+ staff editors) |
+
 ### Quiz / Form
 
 - **Quiz:** **P0** author + print. Shape = **block on a page** (Lexical `quiz` node; answers on the node). Not a material kind. Not in v1 “Add material” menu. No parallel quiz table; parent access stays enrollment / `parent_student_links`. Online take + autograde is **P1**.
@@ -907,7 +1009,7 @@ Per-user **Activity** row. Written by a trigger on `discussion_messages` insert 
 
 ### Feedback
 
-Signed-in **Send feedback** notes. The SPA inserts a row; Edge Function `send-product-feedback` emails `hi@coursewright.com`. Not a support ticket queue in the product UI.
+Signed-in **Send feedback** notes. The SPA inserts a row via PostgREST. Not a support ticket queue in the product UI.
 
 | Field | Type | Notes |
 |-------|------|-------|

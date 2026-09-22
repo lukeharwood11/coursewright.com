@@ -5,6 +5,7 @@ import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { printBackPath, parsePrintStudentIds, type PrintGrainKind } from "@/print/model/paths";
 import {
   loadMaterialPrintPacket,
+  loadResourcePrintPacket,
   loadUnitPrintPacket,
   loadWeekPrintPacket,
 } from "@/print/databridge/packets";
@@ -16,6 +17,7 @@ function grainFromPath(
   materialId: number,
   unitId: number,
 ): PrintGrainKind {
+  if (pathname.includes("/resources/items/")) return "resource";
   if (pathname.includes("print-this-week")) return "thisWeek";
   if (Number.isFinite(materialId)) return "material";
   if (Number.isFinite(unitId)) return "unit";
@@ -31,6 +33,7 @@ export function usePrint() {
   const courseId = params.courseId ? Number(params.courseId) : NaN;
   const unitId = params.unitId ? Number(params.unitId) : NaN;
   const materialId = params.materialId ? Number(params.materialId) : NaN;
+  const itemId = params.itemId ? Number(params.itemId) : NaN;
   const grain = grainFromPath(location.pathname, materialId, unitId);
   const studentIds = parsePrintStudentIds(location.search);
 
@@ -50,6 +53,8 @@ export function usePrint() {
               userId: user.id,
               studentIds,
             })
+          : grain === "resource"
+            ? await loadResourcePrintPacket(itemId)
           : grain === "material"
             ? await loadMaterialPrintPacket(materialId)
             : await loadUnitPrintPacket(unitId);
@@ -85,6 +90,7 @@ export function usePrint() {
       courseId: Number.isFinite(courseId) ? courseId : null,
       unitId: Number.isFinite(unitId) ? unitId : null,
       materialId: Number.isFinite(materialId) ? materialId : null,
+      itemId: Number.isFinite(itemId) ? itemId : null,
     }),
     retry: () => {
       void query.refetch();

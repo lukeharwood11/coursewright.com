@@ -7,10 +7,11 @@ import {
 import { parseCourseColorKey, type CourseColorKey } from "@/courses/model/courseColor";
 import {
   daysToPersist,
-  emptyDaysForWeek,
+  visibleDaysForWeek,
   type LessonPlanDayDraft,
   type LessonPlanDraft,
 } from "@/lesson-plans/model/validate";
+import type { SchoolDay } from "@/organizations/model/schoolDays";
 import {
   parseLessonPlanVisibility,
   type LessonPlanVisibility,
@@ -362,20 +363,21 @@ export async function softDeleteLessonPlan(id: number, deletedBy: string): Promi
   if (error) throw new Error(error.message);
 }
 
-export function draftFromDetail(detail: LessonPlanDetail): LessonPlanDraft {
-  const empty = emptyDaysForWeek(detail.weekStart);
-  const byDate = new Map(detail.days.map((day) => [day.date, day]));
+export function draftFromDetail(
+  detail: LessonPlanDetail,
+  schoolDays: readonly SchoolDay[],
+): LessonPlanDraft {
+  const existing: LessonPlanDayDraft[] = detail.days.map((day) => ({
+    date: day.date,
+    body: day.body,
+    materialIds: day.materials.map((material) => material.id),
+  }));
   return {
     title: detail.title,
     weekNote: detail.weekNote,
     weekStart: detail.weekStart,
-    days: empty.map((slot) => {
-      const day = byDate.get(slot.date);
-      return {
-        date: slot.date,
-        body: day?.body ?? "",
-        materialIds: day?.materials.map((material) => material.id) ?? [],
-      };
+    days: visibleDaysForWeek(detail.weekStart, schoolDays, {
+      existingDays: existing,
     }),
   };
 }

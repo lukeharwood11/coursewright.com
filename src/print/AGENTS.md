@@ -8,6 +8,7 @@ One-tap print: material, unit, this week. **Client-generated PDF** with in-app p
   - `…/materials/<id>/print`
   - `…/units/<id>/print`
   - `/my/<org-slug>/print-this-week`
+  - `…/resources/items/<id>/print`
 - Build a PDF from material / unit / this-week data; show it in a **PDF viewer**
 - Actions: **Download** (`.pdf`), **Print** (that PDF), **Back**
 - Ink-friendly layout (white / black) — [STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md)
@@ -20,7 +21,7 @@ One-tap print: material, unit, this week. **Client-generated PDF** with in-app p
 This-week packets print **one student at a time** (page break before the next student). For each student, **published lesson plans** (week note + day notes) print first, then that student’s important-now and dated this-week materials, packed onto a page when they fit, with a rule between them.
 - If `kind = file` and the blob is already PDF, preview that file. JPEG/PNG files are placed on a generated page.
 - No `PrintJob` table — generate on the fly.
-- Entry points: parent home, course, unit, material — labels **Print** / **Print unit** / **Print this week**.
+- Entry points: parent home, course, unit, material, Resources item — labels **Print** / **Print unit** / **Print this week**.
 
 ## Rules
 

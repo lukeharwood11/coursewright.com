@@ -9,23 +9,25 @@ Org **owners** and **admins** (can edit). Instructors may view read-only. Parent
 
 ## Purpose
 
-Configure the organization: identity, permalink, organization type, grade scheme, and **collaborators** (section on this page — not a separate top-level route).
+Configure the organization: identity, permalink, organization type, **profile** (about, address, website, contact), **school days**, grade scheme, and **collaborators** (section on this page — not a separate top-level route).
 
 
 ## Behavior
 
-- Requires org **owner or admin** to save identity / grade scheme / type.
+- Requires org **owner or admin** to save identity / profile / school days / grade scheme / type.
 - Instructors see the same fields, disabled.
 - Parents (and staff **Parent view**) are sent back to [ORG_HOME](./ORG_HOME.md).
 - Save org name/metadata; changing **permalink slug** shows a warning that existing links break (no auto-redirect in P0) and requires an explicit confirmation.
 - **Save** and **Cancel** stay in the page header (upper right). Save is disabled when nothing changed; Cancel goes back (confirms first if there are unsaved changes).
-- Set **organization type** (co-op / school / family) and **grade scheme** (K–12 / custom labels). Family is for parents making materials at home.
+- Set **organization type** (co-op / school / family), optional **profile** (about, location, website, contact email, phone), **school days** (which weekdays the org operates; default Mon–Fri), and **grade scheme** (K–12 / custom labels). Family is for parents making materials at home. At least one school day must stay selected.
 - Collaborators section on this page: invite owner / admin / instructor by email (Resend `organization-invite`) and **copy a claim link**, list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). The list includes **parents** already in the org so owners/admins can **promote** them to instructor/admin/owner **without a new invite**. Owners and admins **change roles** (including demote to **parent** when the person has a linked student) and **remove** admins/instructors who have no linked student; the last remaining owner or admin cannot be removed or demoted. Those writes update **org membership** (who can run settings and invites). They do **not** change who can see course content — materials and roster stay **enrollment-gated** (and `parent_student_links` where applicable).
 - Billing section shows Free plan, **owners only**.
 
 ## Data shown
 
 - Organization **name**, **slug**, **organization type**
+- Profile: **about**, **address**, **website**, **contact email**, **phone** (optional)
+- **School days** (Sun–Sat toggles; default Mon–Fri)
 - Current **grade scheme** and labels (K–12 preset or custom)
 - Collaborators list: person **name** / **email**, **role** (owner | admin | instructor | parent); name opens [USER_PROFILE](./USER_PROFILE.md); owners and admins see change-role (and remove when allowed)
 - Last owner/admin rows explain why they can’t be removed or demoted
@@ -39,12 +41,18 @@ Configure the organization: identity, permalink, organization type, grade scheme
 - Organization name
 - **Permalink slug** — editable; UI **must warn** that changing it breaks existing links (no auto-redirect in P0)
 - Organization type: co-op, school, or family
+- **School days** — circle toggles Sunday–Saturday under web address; info hint: days this organization usually operates. Default Monday–Friday. Lesson-plan compose uses these days; staff can still add another weekday on a plan
+- **Grade scheme** — K–12 or custom labels (same card)
 
-### Grade scheme
+### Profile
 
-- Org chooses how student grade levels work: exact grade, grade range, or custom
-- Shipped presets: **K–12** and **Custom**
-- Affects student profile grade fields and course grade metadata (**P1:** templates too)
+- Optional **about** (who you are / how the co-op works)
+- Optional **location / address** (free text)
+- Optional **website** (external URL)
+- Optional **contact email** (org inbox, not a login)
+- Optional **phone**
+
+Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing page.
 
 ### Collaborators / roles (section)
 
@@ -64,6 +72,8 @@ Configure the organization: identity, permalink, organization type, grade scheme
 
 - Save org settings / slug (with warning) — header Save disabled when unchanged; Cancel leaves (confirm if dirty)
 - Cancel — discard unsaved changes
+- Set profile fields
+- Set school days
 - Set grade scheme
 - Invite collaborators (email + copy the claim link); cancel a pending invite; resend the email
 - Change roles for existing collaborators (including promote parent → staff and demote staff → parent when linked to a student)
@@ -76,7 +86,7 @@ Configure the organization: identity, permalink, organization type, grade scheme
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — cross-org account settings (distinct from this page)
 - [INVITE_CLAIM](./INVITE_CLAIM.md) — copied staff invite link (recipient); parent invites use the same URL from roster
 - [LOGIN](./LOGIN.md) — after sign-out (if sign-out lives in chrome)
-- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
+- Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
 ## Notes
 
