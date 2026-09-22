@@ -454,12 +454,16 @@ function studentIdsForEvent(
   source: ParentDashboardSource,
   item: NonNullable<ParentDashboardSource["events"]>[number],
 ): number[] {
+  if (item.audience === "organization") {
+    return source.students.map((student) => student.id);
+  }
   if (item.audience === "course") {
-    const courseIds = new Set(item.courseIds);
+    const courseId = item.courseIds[0];
+    if (courseId == null) return [];
     return [
       ...new Set(
         source.enrollments
-          .filter((row) => courseIds.has(row.courseId) && row.courseStatus === "active")
+          .filter((row) => row.courseId === courseId && row.courseStatus === "active")
           .map((row) => row.studentId),
       ),
     ];

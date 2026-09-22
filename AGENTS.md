@@ -70,7 +70,7 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | [src/notifications/AGENTS.md](./src/notifications/AGENTS.md) | **P1** in-app Activity notifications |
 | [src/lesson-plans/AGENTS.md](./src/lesson-plans/AGENTS.md) | Weekly course plans + attached materials |
 | [src/calendar/AGENTS.md](./src/calendar/AGENTS.md) | Month/week calendar |
-| [src/events/AGENTS.md](./src/events/AGENTS.md) | Shared course or class events |
+| [src/events/AGENTS.md](./src/events/AGENTS.md) | Course, class, or organization events |
 | [src/auth/AGENTS.md](./src/auth/AGENTS.md) | Login, signup, invites, session |
 | [src/marketing/AGENTS.md](./src/marketing/AGENTS.md) | Public home, about, pricing, contact, privacy, cookies |
 | [src/billing/AGENTS.md](./src/billing/AGENTS.md) | P1 Stripe stub only |

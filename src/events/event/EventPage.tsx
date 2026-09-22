@@ -52,7 +52,16 @@ export function EventPage() {
   }
 
   const event = page.event;
-  const names = event.audience === "course" ? event.courseTitles : event.classTitles;
+  const names =
+    event.audience === "course"
+      ? event.courseTitles
+      : event.audience === "class"
+        ? event.classTitles
+        : [];
+  const audienceLine =
+    event.audience === "organization"
+      ? `Everyone in ${page.organization.name}`
+      : eventTargetSummary(names);
   const when = formatEventWhen(event);
 
   return (
@@ -68,7 +77,7 @@ export function EventPage() {
               <MapPinIcon className="h-4 w-4 shrink-0 text-[var(--ink-faint)]" aria-hidden />
               {event.location}
             </p>
-            <p>{eventTargetSummary(names)}</p>
+            <p>{audienceLine}</p>
           </div>
         }
         actions={

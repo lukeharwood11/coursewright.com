@@ -11,7 +11,7 @@ export function eventPrintPath(orgSlug: string, eventId: number): string {
 }
 
 export type NewEventParams = {
-  audience?: "course" | "class";
+  audience?: "course" | "class" | "organization";
   courseId?: number;
   classId?: number;
   date?: string;

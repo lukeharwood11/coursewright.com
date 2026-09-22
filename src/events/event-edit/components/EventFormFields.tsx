@@ -1,5 +1,5 @@
 import type { ComponentType, SVGProps } from "react";
-import { BookOpenIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import { BookOpenIcon, BuildingOffice2Icon, UserGroupIcon } from "@heroicons/react/24/outline";
 import { Input } from "@/ui/Input";
 import { eventAudienceLabel, type EventAudience } from "@/events/model/audience";
 
@@ -13,6 +13,7 @@ type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 const audienceOptions: Array<{ value: EventAudience; Icon: IconComponent }> = [
   { value: "course", Icon: BookOpenIcon },
   { value: "class", Icon: UserGroupIcon },
+  { value: "organization", Icon: BuildingOffice2Icon },
 ];
 
 const segmentIdle =
@@ -66,6 +67,47 @@ function TargetChecklist({
   );
 }
 
+function CourseChoice({
+  options,
+  selectedId,
+  disabled,
+  onSelect,
+}: {
+  options: Array<{ id: number; name: string }>;
+  selectedId: number | null;
+  disabled: boolean;
+  onSelect: (id: number) => void;
+}) {
+  return (
+    <fieldset className="mt-4">
+      <legend className="text-[13px] font-bold text-[var(--ink-soft)]">Course</legend>
+      {options.length === 0 ? (
+        <p className="mt-2 text-[12.5px] text-[var(--ink-faint)]">
+          No courses you can add this to yet.
+        </p>
+      ) : (
+        <ul className="mt-2 max-h-56 divide-y divide-[var(--line-soft)] overflow-y-auto rounded-[6px] border border-[var(--line)]">
+          {options.map((option) => (
+            <li key={option.id}>
+              <label className="flex cursor-pointer items-center gap-2 px-3 py-2.5">
+                <input
+                  type="radio"
+                  name="event-course"
+                  className="h-4 w-4 shrink-0 accent-[var(--green)]"
+                  checked={selectedId === option.id}
+                  disabled={disabled}
+                  onChange={() => onSelect(option.id)}
+                />
+                <span className="text-[14px] font-semibold text-[var(--ink)]">{option.name}</span>
+              </label>
+            </li>
+          ))}
+        </ul>
+      )}
+    </fieldset>
+  );
+}
+
 export function EventFormFields({
   audience,
   courseIds,
@@ -80,7 +122,7 @@ export function EventFormFields({
   classes,
   disabled,
   onAudience,
-  onToggleCourse,
+  onSelectCourse,
   onToggleClass,
   onTitle,
   onLocation,
@@ -102,7 +144,7 @@ export function EventFormFields({
   classes: Array<{ id: number; name: string }>;
   disabled: boolean;
   onAudience: (audience: EventAudience) => void;
-  onToggleCourse: (id: number) => void;
+  onSelectCourse: (id: number) => void;
   onToggleClass: (id: number) => void;
   onTitle: (value: string) => void;
   onLocation: (value: string) => void;
@@ -158,15 +200,14 @@ export function EventFormFields({
       </fieldset>
 
       {audience === "course" ? (
-        <TargetChecklist
-          label="Courses"
-          emptyHint="No courses you can add this to yet."
+        <CourseChoice
           options={courses}
-          selectedIds={courseIds}
+          selectedId={courseIds[0] ?? null}
           disabled={disabled}
-          onToggle={onToggleCourse}
+          onSelect={onSelectCourse}
         />
-      ) : (
+      ) : null}
+      {audience === "class" ? (
         <TargetChecklist
           label="Classes"
           emptyHint="No classes yet."
@@ -175,7 +216,12 @@ export function EventFormFields({
           disabled={disabled}
           onToggle={onToggleClass}
         />
-      )}
+      ) : null}
+      {audience === "organization" ? (
+        <p className="mt-4 text-[12.5px] text-[var(--ink-faint)]">
+          Everyone in the organization can see this.
+        </p>
+      ) : null}
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="block text-[13px] font-bold text-[var(--ink-soft)]">

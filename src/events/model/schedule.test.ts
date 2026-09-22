@@ -45,10 +45,10 @@ test("times format for day view and stay blank when unset", () => {
   }), /9:00 AM – 2:00 PM/);
 });
 
-test("a family sees an event only when a linked student is in a target", () => {
+test("a family sees a course or class event only for a linked student, and every org event", () => {
   const courseEvent = {
     audience: "course" as const,
-    courseIds: [2, 9],
+    courseIds: [9],
     classIds: [] as number[],
   };
   const classEvent = {
@@ -56,14 +56,26 @@ test("a family sees an event only when a linked student is in a target", () => {
     courseIds: [] as number[],
     classIds: [4],
   };
+  const orgEvent = {
+    audience: "organization" as const,
+    courseIds: [] as number[],
+    classIds: [] as number[],
+  };
   assert.equal(eventAppliesToFamily(courseEvent, new Set([9]), new Set()), true);
   assert.equal(eventAppliesToFamily(courseEvent, new Set([3]), new Set([4])), false);
   assert.equal(eventAppliesToFamily(classEvent, new Set([2]), new Set([4])), true);
   assert.equal(eventAppliesToFamily(classEvent, new Set([2]), new Set([8])), false);
+  assert.equal(eventAppliesToFamily(orgEvent, new Set(), new Set()), true);
 });
 
 test("location and a coherent schedule are required", () => {
   assert.equal(validateEventDraft(draft({ location: "  " })), "Add a location.");
+  assert.equal(validateEventDraft(draft({ courseIds: [] })), "Choose a course.");
+  assert.equal(validateEventDraft(draft({ courseIds: [1, 2] })), "Choose a course.");
+  assert.equal(
+    validateEventDraft(draft({ audience: "organization", courseIds: [], classIds: [] })),
+    null,
+  );
   assert.equal(
     validateEventDraft(draft({ location: "x".repeat(201) })),
     "Keep the location under 200 characters.",

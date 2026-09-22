@@ -63,8 +63,8 @@ export function validateEventDraft(draft: EventDraft): string | null {
   if (!draft.title.trim()) return "Add a title.";
   if (!draft.location.trim()) return "Add a location.";
   if (draft.location.trim().length > 200) return "Keep the location under 200 characters.";
-  if (draft.audience === "course" && draft.courseIds.length === 0) {
-    return "Choose at least one course.";
+  if (draft.audience === "course" && draft.courseIds.length !== 1) {
+    return "Choose a course.";
   }
   if (draft.audience === "class" && draft.classIds.length === 0) {
     return "Choose at least one class.";
@@ -96,8 +96,8 @@ export function canEditEventAudience(args: {
   isStaff: boolean;
 }): boolean {
   if (!args.isStaff) return false;
-  if (args.audience === "class") return true;
+  if (args.audience === "class" || args.audience === "organization") return true;
   if (args.canPickAnyCourse) return true;
-  if (args.courseIds.length === 0) return true;
-  return args.courseIds.every((id) => args.taughtCourseIds.includes(id));
+  if (args.courseIds.length !== 1) return true;
+  return args.taughtCourseIds.includes(args.courseIds[0]!);
 }

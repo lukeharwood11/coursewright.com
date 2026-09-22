@@ -1,6 +1,6 @@
 # AGENTS — `src/events/`
 
-Shared **events** on the calendar: one record for several **courses** or several **classes** (not both). Required **location**. Optional start/end times. A write-up page (Lexical blocks) plus links to existing course materials — not a `materials` row.
+Shared **events** on the calendar: one **course**, several **classes**, or the whole **organization** (no course or class). Required **location**. Optional start/end times. A write-up page (Lexical blocks) plus links to existing course materials — not a `materials` row.
 
 ## Scope
 
@@ -10,8 +10,8 @@ Shared **events** on the calendar: one record for several **courses** or several
 
 ## Rules
 
-- Audience kind is course or class; pick **one or more** targets of that kind.
-- Owners and admins can target any course or class in the org. Instructors must be able to manage **every** selected course. Any org staff member can target classes.
+- Audience is one course, one or more classes, or the organization (nothing attached).
+- Owners and admins can target any course or class in the org. An instructor can target a course they manage. Any org staff member can target classes or make an organization event.
 - Parents and staff **Parent view** can open an event they can see. They cannot add or edit.
 - One shared record. Editing it updates every course or class it is on.
 - Month and week show a title chip. Day view shows **start and end time** and **location**. No hourly grid. No repeat.
@@ -20,5 +20,5 @@ Shared **events** on the calendar: one record for several **courses** or several
 ## Don’t
 
 - Store the write-up as a course material.
-- Mix courses and classes on one event.
+- Put an event on more than one course, or mix a course with classes.
 - Send email or Activity for an event in this slice.

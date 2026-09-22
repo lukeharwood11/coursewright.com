@@ -1,4 +1,4 @@
--- Shared calendar events: one record for several courses or several classes.
+-- Shared calendar events: one course, several classes, or the whole organization.
 -- Write-up lives in event_blocks (not materials). Location is required.
 
 create table public.events (
@@ -18,17 +18,22 @@ create table public.events (
   updated_at timestamptz not null default now(),
   deleted_at timestamptz,
   deleted_by uuid references public.profiles (id) on delete set null,
-  constraint events_audience_chk check (audience in ('course', 'class')),
+  constraint events_audience_chk check (audience in ('course', 'class', 'organization')),
   constraint events_targets_chk check (
     (
       audience = 'course'
-      and cardinality(course_ids) >= 1
+      and cardinality(course_ids) = 1
       and cardinality(class_ids) = 0
     )
     or (
       audience = 'class'
       and cardinality(class_ids) >= 1
       and cardinality(course_ids) = 0
+    )
+    or (
+      audience = 'organization'
+      and cardinality(course_ids) = 0
+      and cardinality(class_ids) = 0
     )
   ),
   constraint events_title_chk check (char_length(btrim(title)) > 0),
@@ -60,7 +65,7 @@ before update on public.events
 for each row execute function private.set_updated_at();
 
 comment on table public.events is
-  'SCHEMA.md Event — shared calendar item for courses or classes, with a required location';
+  'SCHEMA.md Event — one course, several classes, or the whole organization; location required';
 
 create or replace function private.event_targets_in_org()
 returns trigger
@@ -72,6 +77,9 @@ declare
   target_id bigint;
   target_org bigint;
 begin
+  if new.audience = 'organization' then
+    return new;
+  end if;
   if new.audience = 'course' then
     foreach target_id in array new.course_ids loop
       select c.organization_id into target_org
@@ -179,7 +187,7 @@ begin
   if event_audience = 'course' and (
     material_course is null or not (material_course = any(event_courses))
   ) then
-    raise exception 'Link a material from one of this event’s courses.';
+    raise exception 'Link a material from this event’s course.';
   end if;
   return new;
 end;
@@ -204,11 +212,13 @@ as $$
   select
     case p_audience
       when 'course' then
-        cardinality(p_course_ids) >= 1
+        cardinality(p_course_ids) = 1
         and (
           select bool_and(private.can_manage_course(cid))
           from unnest(p_course_ids) as cid
         )
+      when 'organization' then
+        private.is_org_staff(p_org_id)
       when 'class' then
         private.is_org_staff(p_org_id)
         and cardinality(p_class_ids) >= 1
@@ -278,6 +288,10 @@ as $$
             where private.parent_linked_to_class(cid)
           )
         )
+        or (
+          e.audience = 'organization'
+          and private.is_org_member(e.organization_id)
+        )
       )
   );
 $$;
@@ -306,6 +320,10 @@ as $$
         )
         or (
           e.audience = 'class'
+          and private.is_org_staff(e.organization_id)
+        )
+        or (
+          e.audience = 'organization'
           and private.is_org_staff(e.organization_id)
         )
         or private.parent_can_view_event(e.id)

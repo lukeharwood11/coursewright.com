@@ -106,14 +106,14 @@ export function expandEventsInRange(
   return chips;
 }
 
-/** Hide a course event only when every one of its courses is hidden. Class events stay. */
+/** A course event follows that course’s legend toggle. Class and organization events stay. */
 export function visibleEvents(
   events: CalendarEventChip[],
   hiddenCourseIds: Set<number>,
 ): CalendarEventChip[] {
   if (hiddenCourseIds.size === 0) return events;
   return events.filter((event) => {
-    if (event.audience === "class" || event.courseIds.length === 0) return true;
+    if (event.audience !== "course") return true;
     return event.courseIds.some((id) => !hiddenCourseIds.has(id));
   });
 }

@@ -4,25 +4,25 @@
 **URL (new):** `/my/<org-slug>/events/new`  
 **URL (edit):** `/my/<org-slug>/events/<event_id>/edit`  
 **URL (print):** `/my/<org-slug>/events/<event_id>/print`  
-**Query on new:** optional `audience=course|class`, `courseId` or `classId`, and `date=YYYY-MM-DD`  
+**Query on new:** optional `audience=course|class|organization`, `courseId` or `classId`, and `date=YYYY-MM-DD`  
 **URL map:** [URLS.md](../URLS.md)
 
 ## Audience
 
-Staff Teacher view to add and edit (owner, admin, or instructor). Anyone who can already see the event can open it: families when a linked student is in a target course or class, and staff who can manage that audience.
+Staff Teacher view to add and edit (owner, admin, or instructor). Anyone who can already see the event can open it: families when a linked student is in the course or a target class, every member for an organization event, and staff who can manage that audience.
 
 ## Purpose
 
-One shared calendar event for several courses **or** several classes, with a place, a write-up, and optional links to course materials.
+A calendar event for one course, several classes, or the whole organization, with a place, a write-up, and optional links to course materials.
 
 
 ## Behavior
 
-- Audience is **Course** or **Class**, then a multi-select of one or more targets of that kind. Arriving from a course or class starts that target selected. Staff can check more courses or more classes. One event cannot mix courses and classes.
+- Audience is **Course**, **Class**, or **Organization**. A course event picks exactly one course. A class event picks one or more classes. An organization event has no course or class. Arriving from a course or class starts that target selected. One event cannot mix a course with classes, or cover more than one course.
 - **Location** is required. **Starts** is required. **Ends** is optional (blank means that one day). **Start time** and **end time** are optional. On one day, the end time is at or after the start time.
-- Owners and admins can pick any course or class in the org. Instructors must be able to manage every selected course. Any instructor can pick classes in the org.
+- Owners and admins can pick any course or class in the org, and can make an organization event. An instructor can pick a course they manage. Any teacher can pick classes in the org or make an organization event.
 - The write-up uses the same page editor as a lesson (text, files, links, video, quizzes). It is stored with the event, not as a course material.
-- Staff can also link existing course materials. Course events only link materials from the selected courses.
+- Staff can also link existing course materials. A course event only links materials from that course.
 - Saving puts the event on the calendar for people it applies to. Remove is a soft delete and takes it off every course or class it was shared with.
 - Editing from any of those courses or classes edits the same event.
 - Parents and staff **Parent view** can read and print. They cannot add or edit.

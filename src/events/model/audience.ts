@@ -1,15 +1,17 @@
-export const EVENT_AUDIENCES = ["course", "class"] as const;
+export const EVENT_AUDIENCES = ["course", "class", "organization"] as const;
 export type EventAudience = (typeof EVENT_AUDIENCES)[number];
 
 export function parseEventAudience(
   value: string | null | undefined,
 ): EventAudience | null {
-  if (value === "course" || value === "class") return value;
+  if (value === "course" || value === "class" || value === "organization") return value;
   return null;
 }
 
 export function eventAudienceLabel(audience: EventAudience): string {
-  return audience === "course" ? "Course" : "Class";
+  if (audience === "course") return "Course";
+  if (audience === "class") return "Class";
+  return "Organization";
 }
 
 /** Parent view keeps an event when a linked student is in any target course or class. */
@@ -18,6 +20,7 @@ export function eventAppliesToFamily(
   courseIds: ReadonlySet<number>,
   classIds: ReadonlySet<number>,
 ): boolean {
+  if (event.audience === "organization") return true;
   if (event.audience === "course") {
     return event.courseIds.some((id) => courseIds.has(id));
   }

@@ -110,7 +110,7 @@ Aligned with P0 in [FEATURES.md](./FEATURES.md):
 | `notifications/` | **P1** — in-app Activity (stored notifications) | Instructor, admin; parent views |
 | `lesson-plans/` | Weekly course plans with per-day materials | Instructor; parent views |
 | `calendar/` | Month/week/day calendar of assigned, due, lesson plans, events | Instructor; parent |
-| `events/` | Shared course or class events and their write-up | Instructor; parent |
+| `events/` | Course, class, or organization events and their write-up | Instructor; parent |
 | `billing/` | Org SaaS (P1) | Admin |
 
 Cross-cutting usability (tech-averse parents, print in the open) is a **constraint on every domain**, not a separate `usability/` package.

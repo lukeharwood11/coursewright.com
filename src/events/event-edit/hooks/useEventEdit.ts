@@ -217,12 +217,14 @@ export function useEventEdit() {
     pending: save.isPending,
     editorKey: isNew ? "event-new" : `event-${eventId}`,
     setAudience: (audience: EventAudience) =>
-      setDraft((current) => ({ ...current, audience })),
-    toggleCourse: (id: number) =>
       setDraft((current) => ({
         ...current,
-        courseIds: toggleDraftId(current.courseIds, id),
+        audience,
+        courseIds: audience === "course" ? current.courseIds.slice(0, 1) : [],
+        classIds: audience === "class" ? current.classIds : [],
       })),
+    selectCourse: (id: number) =>
+      setDraft((current) => ({ ...current, courseIds: [id] })),
     toggleClass: (id: number) =>
       setDraft((current) => ({
         ...current,

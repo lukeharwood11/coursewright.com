@@ -267,18 +267,30 @@ test("events expand onto each day and follow the course legend", () => {
         audience: "class",
         courseIds: [],
       },
+      {
+        id: 6,
+        title: "Picture day",
+        location: "Gym",
+        startsOn: "2026-09-22",
+        endsOn: null,
+        startTime: "08:00",
+        endTime: null,
+        audience: "organization",
+        courseIds: [],
+      },
     ],
     "2026-09-22",
     "2026-09-23",
     [{ id: 10, colorKey: "sea" }],
   );
-  assert.equal(chips.length, 3);
+  assert.equal(chips.length, 4);
   assert.equal(chips[0]?.colorKey, "sea");
   assert.equal(chips.find((chip) => chip.eventId === 5)?.colorKey, null);
+  assert.equal(chips.find((chip) => chip.eventId === 6)?.colorKey, null);
   const hidden = visibleEvents(chips, new Set([10]));
   assert.deepEqual(
     hidden.map((chip) => chip.eventId),
-    [5],
+    [5, 6],
   );
   assert.equal(dayHasCalendarContent("2026-09-22", [], [], chips), true);
 });

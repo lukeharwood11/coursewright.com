@@ -87,7 +87,7 @@ export function EventEditPage() {
           classes={page.classes}
           disabled={page.pending}
           onAudience={page.setAudience}
-          onToggleCourse={page.toggleCourse}
+          onSelectCourse={page.selectCourse}
           onToggleClass={page.toggleClass}
           onTitle={page.setTitle}
           onLocation={page.setLocation}
