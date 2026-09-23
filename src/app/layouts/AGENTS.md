@@ -18,7 +18,7 @@ App chrome: collapsible sidebar + top bar for signed-in `/my` pages.
 - Account-level chrome must not show org destinations (courses, roster, org settings).
 - Account menu includes **Send feedback** (`/my/feedback` or `/my/<org-slug>/feedback`).
 - Hide chrome on print routes (`PrintLayout` — no org sidebar). HTML `@media print` also hides `.cw-org-chrome`.
-- Org **branding** (owner-set icon and accent) applies only inside `.cw-org-chrome` via `--chrome-accent*`. Do not restyle page content with it. Account chrome may show the org icon beside the org name and keeps Wright Green.
+- Org **branding** overrides `--green` for that organization (buttons, links, sidebar, and portaled dialogs). Account chrome, login, and marketing stay Wright Green. The account list may show the org icon beside the name.
 - Pass through auth `Outlet` context so `useAuthedUser` keeps working.
 - Families are **not** in staff nav while the directory SPA UI is unrouted.
 - Org shell mounts the Activity push prompt (`notifications/` `ActivityPushChrome`). Account shell does not. Both shells share the push provider so Account settings can turn notifications on.

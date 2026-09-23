@@ -22,7 +22,7 @@ export function BrandingSection({
       <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Branding</h2>
       <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
         {canManage
-          ? "A small icon and one color for the sidebar and header. Page buttons stay Course Wright green."
+          ? "A small icon and one color for buttons, links, and the sidebar."
           : "Only owners can change branding."}
       </p>
 
@@ -85,7 +85,7 @@ export function BrandingSection({
                   />
                 </span>
                 <span className="text-[12.5px] text-[var(--ink-faint)]">
-                  Leave blank to keep Wright Green. Light colors aren’t accepted.
+                  Leave blank to keep Wright Green. The color has to be dark enough for white text.
                 </span>
               </label>
 
