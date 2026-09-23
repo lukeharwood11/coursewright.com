@@ -60,6 +60,11 @@ export function canManageBranding(role: OrgRole): boolean {
   return role === "owner";
 }
 
+/** Feature customizations are owner-only. Admins see them read-only. */
+export function canManageCustomizations(role: OrgRole): boolean {
+  return role === "owner";
+}
+
 /** Owners and admins invite collaborators. Instructors cannot. */
 export function canInviteStaff(role: OrgRole): boolean {
   return role === "owner" || role === "admin";

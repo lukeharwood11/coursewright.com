@@ -11,10 +11,12 @@ import { subscribeToOrgDiscussions } from "@/discussions/databridge/realtime";
 import { countUnreadDiscussions } from "@/discussions/model/unread";
 import { notificationQueryKeys } from "@/notifications/databridge/notifications";
 import { subscribeToOrgNotifications } from "@/notifications/databridge/realtime";
+import { getOrganizationFeatures } from "@/organizations/databridge/features";
 import {
   getMembershipByOrgSlug,
   orgQueryKeys,
 } from "@/organizations/databridge/memberships";
+import { DEFAULT_ORG_FEATURES } from "@/organizations/model/features";
 import { isStaffRole } from "@/organizations/model/role";
 import { loadParentDashboard, parentQueryKeys } from "@/parent/databridge/dashboard";
 import { orgHasVisibleResources } from "@/resources/databridge/folders";
@@ -48,10 +50,22 @@ export function useOrgShellData(orgSlug: string | undefined) {
     queryFn: () => getProfile(user.id),
   });
 
-  const organization = membershipQuery.data?.organization ?? null;
+  const baseOrganization = membershipQuery.data?.organization ?? null;
   const role = membershipQuery.data?.role ?? null;
   const isStaff = role ? isStaffRole(role) : false;
-  const organizationId = organization?.id;
+  const organizationId = baseOrganization?.id;
+
+  const featuresQuery = useQuery({
+    queryKey: orgQueryKeys.features(organizationId ?? 0),
+    queryFn: () => getOrganizationFeatures(organizationId!),
+    enabled: Boolean(organizationId),
+  });
+
+  const features = featuresQuery.data ?? DEFAULT_ORG_FEATURES;
+  const organization = baseOrganization
+    ? { ...baseOrganization, features }
+    : null;
+
   const parentPresentation = staffShowsParentPresentation(role, staffViewMode);
   const showStaffViewToggle = canUseStaffViewToggle(role);
 
@@ -76,17 +90,17 @@ export function useOrgShellData(orgSlug: string | undefined) {
   const discussionsQuery = useQuery({
     queryKey: discussionQueryKeys.org(organizationId ?? 0, user.id),
     queryFn: () => listDiscussionsForOrganization(organizationId!, user.id),
-    enabled: Boolean(organizationId),
+    enabled: Boolean(organizationId) && Boolean(organization?.features.discussions),
   });
 
   useEffect(() => {
-    if (!organizationId) return;
+    if (!organizationId || !organization?.features.discussions) return;
     return subscribeToOrgDiscussions(organizationId, () => {
       void queryClient.invalidateQueries({
         queryKey: discussionQueryKeys.org(organizationId, user.id),
       });
     });
-  }, [organizationId, user.id, queryClient]);
+  }, [organizationId, organization?.features.discussions, user.id, queryClient]);
 
   useEffect(() => {
     if (!organizationId) return;
@@ -113,26 +127,42 @@ export function useOrgShellData(orgSlug: string | undefined) {
     })),
   };
 
-  const unreadAnnouncements = (parentDashboardQuery.data?.announcements ?? []).filter(
-    (item) => !item.read,
-  ).length;
-  const unreadDiscussions = countUnreadDiscussions(discussionsQuery.data ?? []);
+  const unreadAnnouncements = organization?.features.announcements
+    ? (parentDashboardQuery.data?.announcements ?? []).filter((item) => !item.read).length
+    : 0;
+  const unreadDiscussions = organization?.features.discussions
+    ? countUnreadDiscussions(discussionsQuery.data ?? [])
+    : 0;
 
   const visibleResourcesQuery = useQuery({
     queryKey: resourceItemQueryKeys.visible(organizationId ?? 0),
     queryFn: () => orgHasVisibleResources(organizationId!),
-    enabled: parentPresentation && Boolean(organizationId),
+    enabled:
+      parentPresentation &&
+      Boolean(organizationId) &&
+      Boolean(organization?.features.resources),
   });
+
+  const featureFlags = organization
+    ? {
+        calendar: organization.features.calendar,
+        announcements: organization.features.announcements,
+        discussions: organization.features.discussions,
+        resources: organization.features.resources,
+      }
+    : undefined;
 
   const navSections =
     organization && role
       ? parentPresentation
         ? buildParentNav(organization.slug, lists, {
+            ...featureFlags,
             unreadAnnouncements,
             unreadDiscussions,
             showResources: Boolean(visibleResourcesQuery.data),
           })
         : buildStaffNav(organization.slug, lists, {
+            ...featureFlags,
             unreadDiscussions,
           })
       : [];

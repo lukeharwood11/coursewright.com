@@ -2340,6 +2340,47 @@ export type Database = {
           },
         ]
       }
+      organization_features: {
+        Row: {
+          announcements_enabled: boolean
+          calendar_enabled: boolean
+          discussions_enabled: boolean
+          events_enabled: boolean
+          lesson_plans_enabled: boolean
+          organization_id: number
+          resources_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          announcements_enabled?: boolean
+          calendar_enabled?: boolean
+          discussions_enabled?: boolean
+          events_enabled?: boolean
+          lesson_plans_enabled?: boolean
+          organization_id: number
+          resources_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          announcements_enabled?: boolean
+          calendar_enabled?: boolean
+          discussions_enabled?: boolean
+          events_enabled?: boolean
+          lesson_plans_enabled?: boolean
+          organization_id?: number
+          resources_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_features_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           about: string | null

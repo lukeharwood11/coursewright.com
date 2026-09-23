@@ -36,7 +36,7 @@ export function CalendarPage() {
             onNext={page.goNext}
             onViewChange={page.setView}
           />
-          {page.parentMode ? null : (
+          {page.parentMode || !page.organization.features.events ? null : (
             <ButtonLink
               to={newEventPath(page.organization.slug, { date: page.focusDate })}
               className="shrink-0"

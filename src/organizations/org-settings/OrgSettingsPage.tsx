@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { BillingPlaceholder } from "@/billing";
-import { canManageBranding } from "@/organizations/model/role";
+import {
+  canManageBranding,
+  canManageCustomizations,
+} from "@/organizations/model/role";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { PageLoading } from "@/ui/PageLoading";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
@@ -10,6 +13,7 @@ import {
   OrgSettingsForm,
 } from "./components/OrgSettingsForm";
 import { BrandingSection } from "./components/BrandingSection";
+import { CustomizationsSection } from "./components/CustomizationsSection";
 import {
   OrgSettingsNav,
   parseOrgSettingsTab,
@@ -167,6 +171,15 @@ export function OrgSettingsPage() {
                 organizationId={settings.organization.id}
                 orgName={settings.organization.name}
                 canManage={canManageBranding(settings.role)}
+              />
+            </div>
+          ) : null}
+
+          {activeTab === "customizations" ? (
+            <div role="tabpanel">
+              <CustomizationsSection
+                organizationId={settings.organization.id}
+                canManage={canManageCustomizations(settings.role)}
               />
             </div>
           ) : null}

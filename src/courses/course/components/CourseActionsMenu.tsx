@@ -10,6 +10,7 @@ import {
   ShareIcon,
 } from "@heroicons/react/24/outline";
 import { AnchoredPopup } from "@/ui/AnchoredPopup";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { courseSettingsPath, newCourseFromPath } from "@/courses/model/paths";
@@ -47,10 +48,13 @@ export function CourseActionsMenu({
   onShowDetails: () => void;
   className?: string;
 }) {
+  const { organization } = useOrgShell();
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const showDiscussion = canEdit || isParent;
+  const showDiscussion =
+    organization.features.discussions && (canEdit || isParent);
+  const showAnnouncement = organization.features.announcements && canEdit;
 
   return (
     <>
@@ -90,7 +94,7 @@ export function CourseActionsMenu({
               Start a discussion
             </Link>
           ) : null}
-          {canEdit ? (
+          {showAnnouncement ? (
             <Link
               role="menuitem"
               to={newAnnouncementPath(orgSlug, {

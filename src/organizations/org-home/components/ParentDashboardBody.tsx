@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { CourseLegend } from "@/calendar/components/CourseLegend";
 import { WeekCalendar } from "@/calendar/components/WeekCalendar";
 import { toggleHiddenCourse } from "@/calendar/model/events";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
   parentWeekHasContent,
   type ParentDashboard,
@@ -33,10 +34,21 @@ export function ParentDashboardBody({
   schoolDays: readonly SchoolDay[];
   orgType: OrgType;
 }) {
+  const { organization } = useOrgShell();
   const [hidden, setHidden] = useState<number[]>([]);
   const hiddenCourseIds = useMemo(() => new Set(hidden), [hidden]);
 
-  if (!full.hasActiveEnrollment && full.announcements.length === 0) {
+  const fullAnnouncements = organization.features.announcements
+    ? full.announcements
+    : [];
+  const visibleForCalendar: ParentDashboard = {
+    ...visible,
+    announcements: organization.features.announcements ? visible.announcements : [],
+    lessonPlans: organization.features.lessonPlans ? visible.lessonPlans : [],
+    events: organization.features.events ? visible.events : [],
+  };
+
+  if (!full.hasActiveEnrollment && fullAnnouncements.length === 0) {
     if (preview) {
       return (
         <p className="mt-4 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
@@ -54,12 +66,12 @@ export function ParentDashboardBody({
   }
 
   const showTags = full.students.length > 1;
-  const showStudentHeaders = visible.students.length > 1;
-  const calendar = parentWeekCalendar(visible);
-  const hasContent = parentWeekHasContent(visible);
+  const showStudentHeaders = visibleForCalendar.students.length > 1;
+  const calendar = parentWeekCalendar(visibleForCalendar);
+  const hasContent = parentWeekHasContent(visibleForCalendar);
   const hasFocus =
-    visible.importantNow.length > 0 ||
-    Boolean(visible.nextAssignedItem || visible.nextDueItem);
+    visibleForCalendar.importantNow.length > 0 ||
+    Boolean(visibleForCalendar.nextAssignedItem || visibleForCalendar.nextDueItem);
 
   if (showTags && selectedIds.length === 0) {
     return (
@@ -86,10 +98,10 @@ export function ParentDashboardBody({
         />
       ) : null}
 
-      {visible.announcements.length > 0 ? (
+      {visibleForCalendar.announcements.length > 0 ? (
         <ParentAnnouncementList
           orgSlug={orgSlug}
-          items={visible.announcements}
+          items={visibleForCalendar.announcements}
           showStudent={showStudentHeaders}
         />
       ) : null}
@@ -116,7 +128,7 @@ export function ParentDashboardBody({
             <div className="mt-4">
               <WeekCalendar
                 orgSlug={orgSlug}
-                weekStart={visible.week.start}
+                weekStart={visibleForCalendar.week.start}
                 weekNotes={calendar.weekNotes}
                 lessonDays={calendar.lessonDays}
                 chips={calendar.chips}
@@ -132,9 +144,9 @@ export function ParentDashboardBody({
         {hasFocus ? (
           <ParentFocusRail
             orgSlug={orgSlug}
-            importantNow={visible.importantNow}
-            nextAssigned={visible.nextAssignedItem}
-            nextDue={visible.nextDueItem}
+            importantNow={visibleForCalendar.importantNow}
+            nextAssigned={visibleForCalendar.nextAssignedItem}
+            nextDue={visibleForCalendar.nextDueItem}
             showStudent={showStudentHeaders}
           />
         ) : null}

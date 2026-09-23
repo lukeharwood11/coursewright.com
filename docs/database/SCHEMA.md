@@ -13,6 +13,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | User | `profiles` | PK = `auth.users.id`. Email + Google live in Supabase Auth; `profiles` is the PostgREST-facing row. |
 | Organization | `organizations` | |
 | OrganizationBranding | `organization_branding` | Owner-only writes. Members read the row. Icon file and path are public via `organization_icons`. |
+| OrganizationFeatures | `organization_features` | Owner-only writes. Members read. Missing row means all features on. |
 | Membership | `memberships` | |
 | AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `parent`. Claimed via emailed `/invite/<token>` (Resend `organization-invite`) or pending-request inbox after login. Copy-link remains. Membership is created on claim. |
 | StudentProfile | `student_profiles` | |
@@ -371,6 +372,23 @@ One optional row per organization. **Owners** set it. Admins, instructors, and p
 | updated_at | timestamptz | Cache-busts the public icon URL |
 
 **Chrome only.** The accent restyles the org sidebar and header controls. It does not recolor page content, emails, or print. The icon also appears beside the org name on the account org list.
+
+### OrganizationFeatures
+
+One optional row per organization. **Owners** set which optional product surfaces are on. Admins and other members can read the row; they cannot write it. Separate from `organizations` because org updates are allowed for any admin. When no row exists, every feature is treated as **on**.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| organization_id | bigint | PK, FK → Organization, cascade delete |
+| discussions_enabled | boolean | Default true. Off hides Discussions nav, routes, and compose entry points. |
+| announcements_enabled | boolean | Default true. Off hides Announcements nav, routes, home cards, and compose entry points. |
+| resources_enabled | boolean | Default true. Off hides Resources nav and routes. |
+| lesson_plans_enabled | boolean | Default true. Off hides lesson-plan authoring, routes, and calendar/this-week plan content. |
+| events_enabled | boolean | Default true. Off hides event authoring, routes, and calendar/this-week event chips. |
+| calendar_enabled | boolean | Default true. Off hides Calendar nav and the calendar page. |
+| updated_at | timestamptz | |
+
+Turning a feature off does **not** delete existing rows. RLS for those tables is unchanged — this is a product-surface gate.
 
 ### User
 

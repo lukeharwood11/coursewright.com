@@ -7,6 +7,7 @@ import { Button } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { useToastOnError } from "@/ui/useToastOnError";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { CourseHeader } from "./components/CourseHeader";
 import { CourseVisibilityBanner } from "./components/CourseVisibilityBanner";
 import {
@@ -44,7 +45,13 @@ export function CoursePage() {
     reorderUnit,
     setVisibility,
   } = useCourse();
-  const eventsQuery = useCourseEvents(course?.id ?? NaN, Boolean(course));
+  const { organization: shellOrg } = useOrgShell();
+  const showLessonPlans = shellOrg.features.lessonPlans;
+  const showEvents = shellOrg.features.events;
+  const eventsQuery = useCourseEvents(
+    course?.id ?? NaN,
+    Boolean(course) && showEvents,
+  );
   useToastOnError(error);
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
   const [addingUnit, setAddingUnit] = useState(false);
@@ -151,19 +158,23 @@ export function CoursePage() {
           onClose={() => setOutlineOpen(false)}
         />
         <div className="min-w-0">
-          <CourseLessonPlansSection
-            orgSlug={organization.slug}
-            courseId={course.id}
-            plans={lessonPlans}
-            canEdit={canEdit}
-            isParent={isParent}
-          />
-          <CourseEventsSection
-            orgSlug={organization.slug}
-            courseId={course.id}
-            events={eventsQuery.data ?? []}
-            canEdit={canEdit}
-          />
+          {showLessonPlans ? (
+            <CourseLessonPlansSection
+              orgSlug={organization.slug}
+              courseId={course.id}
+              plans={lessonPlans}
+              canEdit={canEdit}
+              isParent={isParent}
+            />
+          ) : null}
+          {showEvents ? (
+            <CourseEventsSection
+              orgSlug={organization.slug}
+              courseId={course.id}
+              events={eventsQuery.data ?? []}
+              canEdit={canEdit}
+            />
+          ) : null}
 
           <section className="mt-8">
             <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Units</h2>

@@ -193,3 +193,36 @@ test("parent nav includes resources when the parent can see any", () => {
   );
   assert.equal(shown.at(-1)?.id, "resources");
 });
+
+test("staff and parent nav omit disabled feature sections", () => {
+  const staff = buildStaffNav(
+    "coop",
+    { courses: [], classes: [] },
+    {
+      calendar: false,
+      announcements: false,
+      discussions: false,
+      resources: false,
+    },
+  );
+  assert.deepEqual(
+    staff.map((section) => section.id),
+    ["home", "courses", "roster", "settings"],
+  );
+
+  const parent = buildParentNav(
+    "coop",
+    { courses: [], classes: [] },
+    {
+      calendar: false,
+      announcements: false,
+      discussions: false,
+      resources: false,
+      showResources: true,
+    },
+  );
+  assert.deepEqual(
+    parent.map((section) => section.id),
+    ["home", "courses"],
+  );
+});
