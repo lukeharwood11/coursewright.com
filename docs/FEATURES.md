@@ -587,6 +587,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 | **Progress — instructor notes** | Instructors share notes on student progress | planned | |
 | **Progress — completion checklists** | Track what's done vs. outstanding | planned | |
 | **Assignment objects** | Separate from dated unit materials | planned | **Next conversation** — not spec'd |
+| **Material submissions** | A material can accept files turned in by a family | shipped | Accept submissions, allowed file groups, submissions allowed (1–10, default 2), multiple files per turn-in, "<Parent name> on behalf of <child name>", due time default 11:59 PM. Not an assignment object and not a quiz Submission. `src/submissions/` |
 | **Quizzes (take online + autograde)** | Take quizzes in-app; score from P0-stored correct answers | planned | Authoring + print already P0 |
 | **Resources** | Org-scoped nested folders + document / link / file (Lexical + print). Folder and item ACL presets or per-person read/write (including a specific parent). Publish/unpublish. Bulk drag-drop upload with progress. Multi-select to publish, move, remove, print together, or download files (zip when more than one). Independent of course enrollment | shipped | P1a. Forms (P1b) stay a later item type. Not `materials` rows. `src/resources/` |
 | **Forms** | Structured response collection | in design | P1b inside Resources — not a second nav |
@@ -773,6 +774,7 @@ Staff **Parent view** uses the family rules (create only if they have linked stu
 | Content organized in units; unit dates optional | **Superseded** | Units optional; materials may be top-level |
 | App entity PKs use **bigserial** / **bigint** (auto-increment) | **Decided** | FKs to app entities are `bigint`; `profiles` / auth stay `uuid` |
 | Material dating: optional unit dates, optional material `scheduled_date` (assignment), optional `due_date` | **Decided** | Assignment date wins for assignment-week membership when set; else unit range if material has a unit; top-level needs `scheduled_date` for assignment-week. Materials also appear on This week when `due_date` falls in the week. UI labels Assigned vs Due |
+| Material submissions | **Decided** | Toggle on a course material. One slot per enrolled student. Teacher sets file groups and how many submissions (1–10, default 2). Each submission is one or more files with one timestamp. Due time is an instant (`due_at`, default 11:59 PM in the saver’s timezone); This week still uses calendar `due_date`. Allow past due defaults on |
 | Multiple instructors per course | **Decided** | CourseInstructor |
 | Class leads (zero or more staff) | **Decided** | Owners/admins assign owner/admin/instructor as `ClassLeader`. Optional. Notified of class discussion posts. |
 | In-app Activity notifications | **Decided** | Stored per user. Discussion posts → instructors, class leads, thread starter, and people who posted (one row per discussion). Staff **Notify everyone** on discussion create. Announcement **Send notification** → claimed families (one row per announcement). Click acks. Installed PWA can also send a device notification for each unread Activity row. |

@@ -15,6 +15,12 @@ export type MaterialPagePlacement = {
   url: string | null;
   scheduledDate: string | null;
   dueDate: string | null;
+  dueAt: string | null;
+  dueTimezone: string | null;
+  acceptSubmissions: boolean;
+  allowSubmissionsPastDue: boolean;
+  submissionLimit: number;
+  submissionFileTypes: string[];
 };
 
 type RpcError = { code?: string; message: string; details?: string };
@@ -63,6 +69,12 @@ export async function saveMaterialPage(args: {
                 url: args.placement.url,
                 scheduled_date: args.placement.scheduledDate,
                 due_date: args.placement.dueDate,
+                due_at: args.placement.dueAt,
+                due_timezone: args.placement.dueTimezone,
+                accept_submissions: args.placement.acceptSubmissions,
+                allow_submissions_past_due: args.placement.allowSubmissionsPastDue,
+                submission_limit: args.placement.submissionLimit,
+                submission_file_types: args.placement.submissionFileTypes,
               }
             : null,
           p_blocks:
@@ -154,6 +166,12 @@ async function saveMaterialPageFallback(args: {
       url: args.placement.url,
       scheduledDate: args.placement.scheduledDate,
       dueDate: args.placement.dueDate,
+      dueAt: args.placement.dueAt,
+      dueTimezone: args.placement.dueTimezone,
+      acceptSubmissions: args.placement.acceptSubmissions,
+      allowSubmissionsPastDue: args.placement.allowSubmissionsPastDue,
+      submissionLimit: args.placement.submissionLimit,
+      submissionFileTypes: args.placement.submissionFileTypes,
     });
   }
   if (args.blocks === undefined) return;

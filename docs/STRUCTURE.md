@@ -79,6 +79,7 @@ src/
 ├── resources/                # P1a — org Resources (nested folders + document/link/file)
 ├── units/                    # structure, order, optional dates
 ├── materials/                # content, files (incl. audio/video), versions, important now
+├── submissions/              # families turn in files on a material
 ├── search/                   # P0 advanced / cross-facet search (when implemented)
 ├── sharing/                  # resource links, share with parents
 ├── print/                    # print material / unit / this week

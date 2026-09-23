@@ -1611,6 +1611,140 @@ export type Database = {
           },
         ]
       }
+      material_submission_files: {
+        Row: {
+          file_id: number
+          id: number
+          position: number
+          submission_version_id: number
+        }
+        Insert: {
+          file_id: number
+          id?: number
+          position?: number
+          submission_version_id: number
+        }
+        Update: {
+          file_id?: number
+          id?: number
+          position?: number
+          submission_version_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_submission_files_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: true
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_submission_files_submission_version_id_fkey"
+            columns: ["submission_version_id"]
+            isOneToOne: false
+            referencedRelation: "material_submission_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_submission_versions: {
+        Row: {
+          id: number
+          submission_id: number
+          submitted_at: string
+          submitted_by: string
+          version: number
+        }
+        Insert: {
+          id?: number
+          submission_id: number
+          submitted_at?: string
+          submitted_by: string
+          version: number
+        }
+        Update: {
+          id?: number
+          submission_id?: number
+          submitted_at?: string
+          submitted_by?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_submission_versions_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "material_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_submission_versions_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_submissions: {
+        Row: {
+          course_id: number
+          created_at: string
+          deleted_at: string | null
+          id: number
+          material_id: number
+          organization_id: number
+          student_profile_id: number
+        }
+        Insert: {
+          course_id: number
+          created_at?: string
+          deleted_at?: string | null
+          id?: number
+          material_id: number
+          organization_id: number
+          student_profile_id: number
+        }
+        Update: {
+          course_id?: number
+          created_at?: string
+          deleted_at?: string | null
+          id?: number
+          material_id?: number
+          organization_id?: number
+          student_profile_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_submissions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_submissions_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_submissions_student_profile_id_fkey"
+            columns: ["student_profile_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           copied_from_id: number | null
@@ -1622,7 +1756,9 @@ export type Database = {
           deprecated_at: string | null
           deprecated_by: string | null
           description: string
+          due_at: string | null
           due_date: string | null
+          due_timezone: string | null
           file_id: number | null
           id: number
           is_overridden: boolean
@@ -1633,6 +1769,10 @@ export type Database = {
           scheduled_date: string | null
           search_vector: unknown
           status: string
+          submission_file_types: string[]
+          submission_limit: number
+          accept_submissions: boolean
+          allow_submissions_past_due: boolean
           template_id: number | null
           title: string
           unit_id: number | null
@@ -1650,7 +1790,9 @@ export type Database = {
           deprecated_at?: string | null
           deprecated_by?: string | null
           description?: string
+          due_at?: string | null
           due_date?: string | null
+          due_timezone?: string | null
           file_id?: number | null
           id?: number
           is_overridden?: boolean
@@ -1661,6 +1803,10 @@ export type Database = {
           scheduled_date?: string | null
           search_vector?: unknown
           status?: string
+          submission_file_types?: string[]
+          submission_limit?: number
+          accept_submissions?: boolean
+          allow_submissions_past_due?: boolean
           template_id?: number | null
           title: string
           unit_id?: number | null
@@ -1678,7 +1824,9 @@ export type Database = {
           deprecated_at?: string | null
           deprecated_by?: string | null
           description?: string
+          due_at?: string | null
           due_date?: string | null
+          due_timezone?: string | null
           file_id?: number | null
           id?: number
           is_overridden?: boolean
@@ -1689,6 +1837,10 @@ export type Database = {
           scheduled_date?: string | null
           search_vector?: unknown
           status?: string
+          submission_file_types?: string[]
+          submission_limit?: number
+          accept_submissions?: boolean
+          allow_submissions_past_due?: boolean
           template_id?: number | null
           title?: string
           unit_id?: number | null
@@ -2702,6 +2854,22 @@ export type Database = {
           role: string
           user_id: string
         }[]
+      }
+      begin_material_submission: {
+        Args: {
+          p_files: Json
+          p_material_id: number
+          p_student_profile_id: number
+        }
+        Returns: Json
+      }
+      finish_material_submission: {
+        Args: {
+          p_file_ids: number[]
+          p_material_id: number
+          p_student_profile_id: number
+        }
+        Returns: number
       }
       save_material_page: {
         Args: { p_blocks?: Json; p_material_id: number; p_placement?: Json }

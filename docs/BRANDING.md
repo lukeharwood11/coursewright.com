@@ -185,6 +185,7 @@ Other drafts kept for reference (not in use):
 | Calendar page | **Calendar** | month/week view of assigned (outline) and due (filled) work, color-coded by course |
 | This week's content | **This week** | week calendar of lesson plans + assigned/due chips; Sunday–Saturday |
 | Dated unit material (P0 homework) | **Material** (with dates) | not an assignment object yet |
+| Turned-in work on a material | **Submission** | one or more files, one timestamp; "<Parent name> on behalf of <child name>"; not a quiz attempt |
 | Extra org admin | **Admin invite** | email, claimable |
 | Instructor priority flag | **Important now** | pinned, highlight, urgent |
 | Dated weekly course plan | **Lesson plan** | one Sunday–Saturday week; published / unpublished; optional week note + per-day notes and materials; not an assignment object; not email |
