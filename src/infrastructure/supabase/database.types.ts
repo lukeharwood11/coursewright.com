@@ -2677,8 +2677,122 @@ export type Database = {
           },
         ]
       }
+      quiz_match_keys: {
+        Row: {
+          id: number
+          option_id: number
+          prompt_id: number
+          question_id: number
+        }
+        Insert: {
+          id?: number
+          option_id: number
+          prompt_id: number
+          question_id: number
+        }
+        Update: {
+          id?: number
+          option_id?: number
+          prompt_id?: number
+          question_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_match_keys_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: true
+            referencedRelation: "quiz_match_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_match_keys_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: true
+            referencedRelation: "quiz_match_prompts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_match_keys_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_match_options: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: number
+          position: number
+          question_id: number
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: number
+          position?: number
+          question_id: number
+          text?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: number
+          position?: number
+          question_id?: number
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_match_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_match_prompts: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: number
+          position: number
+          question_id: number
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: number
+          position?: number
+          question_id: number
+          text?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: number
+          position?: number
+          question_id?: number
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_match_prompts_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_questions: {
         Row: {
+          answer_lines: number | null
           created_at: string
           deleted_at: string | null
           id: number
@@ -2689,6 +2803,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          answer_lines?: number | null
           created_at?: string
           deleted_at?: string | null
           id?: number
@@ -2699,6 +2814,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          answer_lines?: number | null
           created_at?: string
           deleted_at?: string | null
           id?: number

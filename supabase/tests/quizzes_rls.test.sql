@@ -1,7 +1,7 @@
 -- Course quizzes: families see published quizzes, students never see the key,
 -- and submit_quiz_attempt enforces the window and attempt limit.
 begin;
-select plan(12);
+select plan(18);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -352,6 +352,162 @@ select ok(
     ) ->> 'score'
   ) is null,
   'an entry stores no score when autograde is off'
+);
+
+reset role;
+insert into quizzes (
+  organization_id, course_id, title, visibility, created_by,
+  accepts_from, accepts_until, autograde_and_show
+)
+select o.id, c.id, 'Number quiz', 'published', 'c1111111-1111-1111-1111-111111111111',
+  now() - interval '1 hour', now() + interval '1 hour', true
+from organizations o
+join courses c on c.organization_id = o.id
+where o.name = 'Quiz Co-op';
+
+insert into quiz_questions (quiz_id, position, prompt, kind)
+select id, 0, 'Half of 7', 'number' from quizzes where title = 'Number quiz';
+insert into quiz_questions (quiz_id, position, prompt, kind, answer_lines)
+select id, 1, 'Explain', 'long_answer', 4 from quizzes where title = 'Number quiz';
+insert into quiz_answer_keys (question_id, answer_text)
+select id, '3.5' from quiz_questions where prompt = 'Half of 7';
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'c2222222-2222-2222-2222-222222222222', true);
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"c2222222-2222-2222-2222-222222222222","role":"authenticated"}',
+  true
+);
+
+select is(
+  (
+    select public.submit_quiz_attempt(
+      (select id from quizzes where title = 'Number quiz'),
+      (select id from student_profiles where name = 'Ava Quiz'),
+      jsonb_build_array(
+        jsonb_build_object(
+          'questionId', (select id from quiz_questions where prompt = 'Half of 7'),
+          'text', '7/2',
+          'choiceIds', '[]'::jsonb,
+          'matches', '[]'::jsonb
+        ),
+        jsonb_build_object(
+          'questionId', (select id from quiz_questions where prompt = 'Explain'),
+          'text', 'Because half of seven is three and a half.',
+          'choiceIds', '[]'::jsonb,
+          'matches', '[]'::jsonb
+        )
+      )
+    ) ->> 'score'
+  ),
+  '1',
+  '7/2 matches a number key of 3.5'
+);
+
+select is(
+  (
+    select score_total::text
+    from quiz_attempts
+    where quiz_id = (select id from quizzes where title = 'Number quiz')
+  ),
+  '1',
+  'a long answer is not part of the score'
+);
+
+reset role;
+insert into quizzes (
+  organization_id, course_id, title, visibility, created_by,
+  accepts_from, accepts_until, autograde_and_show
+)
+select o.id, c.id, 'Match quiz', 'published', 'c1111111-1111-1111-1111-111111111111',
+  now() - interval '1 hour', now() + interval '1 hour', true
+from organizations o
+join courses c on c.organization_id = o.id
+where o.name = 'Quiz Co-op';
+
+insert into quiz_questions (quiz_id, position, prompt, kind)
+select id, 0, 'Animals', 'matching' from quizzes where title = 'Match quiz';
+insert into quiz_match_prompts (question_id, position, text)
+select id, 0, 'Dog' from quiz_questions where prompt = 'Animals';
+insert into quiz_match_prompts (question_id, position, text)
+select id, 1, 'Cat' from quiz_questions where prompt = 'Animals';
+insert into quiz_match_options (question_id, position, text)
+select id, 0, 'canine' from quiz_questions where prompt = 'Animals';
+insert into quiz_match_options (question_id, position, text)
+select id, 1, 'feline' from quiz_questions where prompt = 'Animals';
+insert into quiz_match_keys (question_id, prompt_id, option_id)
+select p.question_id, p.id, o.id
+from quiz_match_prompts p
+join quiz_match_options o
+  on o.question_id = p.question_id
+ and o.position = p.position
+where p.question_id = (select id from quiz_questions where prompt = 'Animals');
+
+select set_config(
+  'quiz.match_payload',
+  (
+    select jsonb_agg(jsonb_build_object('leftId', prompt_id, 'rightId', option_id))::text
+    from quiz_match_keys
+    where question_id = (select id from quiz_questions where prompt = 'Animals')
+  ),
+  true
+);
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'c2222222-2222-2222-2222-222222222222', true);
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"c2222222-2222-2222-2222-222222222222","role":"authenticated"}',
+  true
+);
+
+select is_empty(
+  $$select * from quiz_match_keys$$,
+  'a parent cannot read a matching key'
+);
+
+select is(
+  (
+    select public.submit_quiz_attempt(
+      (select id from quizzes where title = 'Match quiz'),
+      (select id from student_profiles where name = 'Ava Quiz'),
+      jsonb_build_array(
+        jsonb_build_object(
+          'questionId', (select id from quiz_questions where prompt = 'Animals'),
+          'text', '',
+          'choiceIds', '[]'::jsonb,
+          'matches', current_setting('quiz.match_payload')::jsonb
+        )
+      )
+    ) ->> 'score'
+  ),
+  '1',
+  'an exact matching scores one point'
+);
+
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'c3333333-3333-3333-3333-333333333333', true);
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"c3333333-3333-3333-3333-333333333333","role":"authenticated"}',
+  true
+);
+
+select is(
+  (
+    select count(*)::text
+    from quiz_match_prompts
+    where question_id = (select id from quiz_questions where prompt = 'Animals')
+  ),
+  '2',
+  'a student can read matching prompts'
+);
+
+select is_empty(
+  $$select * from quiz_match_keys$$,
+  'a student cannot read a matching key'
 );
 
 select * from finish();
