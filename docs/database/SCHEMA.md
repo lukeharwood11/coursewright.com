@@ -33,6 +33,9 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | Material | `materials` | page · link · file; `unit_id` nullable (top-level) |
 | Block | `blocks` | Ordered content on a page material (`rich_text` · `video`; quiz lives as a Lexical node in rich-text `body.lexical`) |
 | MaterialVersion | `material_versions` | |
+| MaterialSubmission | `material_submissions` | One slot per student per material. Not a quiz Submission |
+| MaterialSubmissionVersion | `material_submission_versions` | One turn-in (one or more files, one timestamp) |
+| MaterialSubmissionFile | `material_submission_files` | Immutable file in a turn-in |
 | File | `files` | |
 | FileVersion | `file_versions` | |
 | ShareLink | `share_links` | |
@@ -81,7 +84,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | Phase | Entities in focus |
 |-------|-------------------|
 | **P0** | Organization, User, Membership, **AdminInvite**, **AdminInviteStudents**, **StudentProfile**, **Class**, **ClassMember**, **ClassLeader**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **LessonPlan**, **LessonPlanDay**, **LessonPlanDayMaterial**, **Announcement**, **AnnouncementRead**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
-| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification**, **PushSubscription**, **Feedback**, **OrgResourceFolder**, **OrgResourceItem**, **OrgResourceBlock**, **OrgResourceGrant** |
+| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification**, **PushSubscription**, **Feedback**, **OrgResourceFolder**, **OrgResourceItem**, **OrgResourceBlock**, **OrgResourceGrant**, **MaterialSubmission**, **MaterialSubmissionVersion**, **MaterialSubmissionFile** |
 | **P2** | Cross-org Family management, StudentProfile.user_id, Quiz online, Submission, **ParentPayments** (orgs collect from parents) |
 
 ---
@@ -612,7 +615,13 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 | url | text | nullable — required when `kind = link` |
 | file_id | bigint | FK → **File**, nullable — required when `kind = file` |
 | scheduled_date | date | **optional** — assignment date; when set, used for calendar-week dashboard (wins over unit dates) |
-| due_date | date | **optional** — due date; materials also appear on parent This week when this date falls in the week |
+| due_date | date | **optional** — calendar due day; materials also appear on parent This week when this date falls in the week |
+| due_at | timestamptz | **optional** — due instant for submissions. Null until the due date is saved with a time. Default wall time is 11:59 PM |
+| due_timezone | text | **optional** — IANA zone captured when the due time is saved. Display the deadline in this zone |
+| accept_submissions | boolean | default false. Linked parents may turn in files for an enrolled student |
+| allow_submissions_past_due | boolean | default true. When false, turn-in stops after `due_at` |
+| submission_limit | int | 1–10, default 2. How many times one student may turn work in |
+| submission_file_types | text[] | `pdf` · `image` · `document` · `audio` · `video`. At least one when accept submissions is on |
 | visibility | text | **`unpublished`** (instructors/admins) · **`published`** (enrolled parents; students when that role exists). New materials default unpublished |
 | position | int | order within the unit, or among top-level materials when `unit_id` is null |
 | copied_from_id | bigint | FK → Material, nullable — source Material when copied (course-from-course **P0**, or template→course **P1**) |
@@ -632,6 +641,31 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 | `file` | `file_id` → org File (+ title + description) |
 
 **Deprecated / migrate away:** opaque whole-page `body` jsonb; old kind values (`document`, `quiz`, …) — replace with v1 kinds + blocks for pages.
+
+### Material submission
+
+A family turns work in on a **course** material with `accept_submissions`. Not a quiz Submission (that stays **P2**: `Course ──< Quiz ──< Submission`). Not a separate assignment object.
+
+One `material_submissions` row per student per material (unique while not deleted). Any parent linked to that student uploads into the same slot.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| course_id | bigint | FK → Course |
+| material_id | bigint | FK → Material |
+| student_profile_id | bigint | FK → StudentProfile |
+| deleted_at | timestamptz | soft delete. The app does not delete turned-in work |
+
+**Version** (`material_submission_versions`): `version` starts at 1. Unique `(submission_id, version)`. `submitted_by` is the parent. `submitted_at` is set when every file in the batch has landed. The count of versions cannot pass `submission_limit` (enforced in the RPC). Lowering the limit does not hide versions already stored.
+
+**Files** (`material_submission_files`): one or more per version, each an immutable `files` row. Unique `file_id`. A later submission does not replace an earlier file.
+
+**Who can read:** course managers (`can_manage_course`) see every student. A parent sees a submission only for a student they are linked to, and only while the material is published and they can view the course. Submission files are **not** readable by every family who can see the material.
+
+**Who can write:** `begin_material_submission` / `finish_material_submission` only. The parent must be linked, the student enrolled and active, the material published and accepting submissions, every file in an allowed group, and the past-due rule must allow it. Parents do not get a general file insert.
+
+An in-progress upload claim (`material_submission_uploads`) holds file ids between begin and finish. It is not a submission. Abandoned claims stay unreferenced.
 
 ### Block
 
@@ -1152,6 +1186,7 @@ Material (page|link|file)
   └── (if page) Block ──> File?
 Material(file) ──> File
 Material ──< MaterialVersion
+Material ──< MaterialSubmission ──< MaterialSubmissionVersion ──< MaterialSubmissionFile ──> File
 Course ──> CourseTemplate (optional; **P1**)
 Course / CourseTemplate.grade_levels (catalog metadata)
 Course ──< CourseInstructor >── User (instructor)  ← many
@@ -1180,7 +1215,7 @@ User ──< Feedback >── Organization?
 
 ```
 StudentProfile.user_id → User (student account linked to existing profile)
-Course ──< Quiz ──< Submission
+Course ──< Quiz ──< Submission (quiz attempt — not a material submission)
 Family cross-org management (extends P0 org Family)
 ```
 

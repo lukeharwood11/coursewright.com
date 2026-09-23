@@ -101,6 +101,7 @@ Aligned with P0 in [FEATURES.md](./FEATURES.md):
 | `course-templates/` | **P1** — blueprints, view/edit/owner access, **grade levels** | Instructor, admin |
 | `units/` | Grouping + optional dates | Instructor |
 | `materials/` | **Pages** (materials) + **blocks**, files, versions, important now | Instructor; parent views |
+| `submissions/` | Turn-in on a material | Parent turns in; instructor reviews |
 | `search/` | Advanced / cross-facet find (“where is this resource?”) | Admin, instructor (parent TBD) |
 | `sharing/` | Resource links, share-with-parents | Instructor → parent |
 | `print/` | Print material / unit / this week / org resource | Creator + parent |

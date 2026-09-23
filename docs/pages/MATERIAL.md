@@ -22,7 +22,9 @@ View (and edit) a single material placement — the thing parents open from this
 - Instructors: edit via `…/edit`, set important now, **publish / unpublish**, share resource link, print, version/revert, soft-delete.
 - **Published:** green **Published** badge (check) next to the title for staff; no “families can see this” banner. **Unpublish** sits at the bottom of the material view/edit.
 - **Unpublished:** amber warning banner + Publish; unpublished badge next to title.
-- Parents: read + print + play media for **published** materials; unpublished is not listed and not openable (RLS); no builder chrome; account required (P0). Staff **Parent view** matches that presentation (quizzes show questions only).
+- Parents: read + print + play media for **published** materials; unpublished is not listed and not openable (RLS); no builder chrome; account required (P0). Staff **Parent view** matches that presentation (quizzes show questions only). When the material **accepts submissions**, a linked parent turns in one or more files for an enrolled student.
+- **Accept submissions** (edit): off by default. When on, the teacher chooses allowed file groups (at least one), how many submissions a student may make (1–10, default 2), and whether submissions are allowed past the due time (on by default).
+- A submission is one turn-in: one or more files, one timestamp, labeled **"<Parent name> on behalf of <child name>"**. The family and the teacher both see every submission. There is no separate submissions URL.
 - View URL is the material path without `/edit`; edit appends `/edit`.
 - Print → [PRINT](./PRINT.md) (`…/print`) → generated PDF in-app preview → Download / Print; no export wizard.
 - Instance content promote to template is **P1** (opt-in); overridden copies do not receive template sync for that resource.
@@ -36,7 +38,9 @@ View (and edit) a single material placement — the thing parents open from this
 - **Title** (all kinds)
 - **Description** (all kinds)
 - Optional **scheduled_date** (assignment date)
-- Optional **due_date**
+- Optional **due_date** (calendar day for This week)
+- Optional **due time** (`due_at` + timezone). Default 11:59 PM when a due date is saved. Shown with the timezone abbreviation. This week still uses the calendar day.
+- **Accept submissions**, allowed file groups, submissions allowed, allow past due date
 - **Important now** flag
 - Course + unit context (names) for orientation (**P1:** or template)
 
@@ -61,7 +65,9 @@ View (and edit) a single material placement — the thing parents open from this
 - Kind badge: page / link / file
 - **Visibility** — unpublished: amber badge + warning banner; published: green Published badge (staff). Unpublish at bottom of page/edit
 - Optional `scheduled_date` (assignment date; wins over unit dates for “this week”; required for top-level materials to appear in “this week”)
-- Optional `due_date` (Add due date on add/edit; display only — does not drive This week)
+- Optional `due_date` (Add due date on add/edit; the calendar day also drives This week)
+- Optional due **time** next to that date, default **11:59 PM**, in the timezone of the person who saves it
+- **Accept submissions** — allowed files, submissions allowed, allow submissions past due date
 - Important now flag (instructor)
 
 ### Content (v1 kinds)
@@ -96,12 +102,18 @@ View (and edit) a single material placement — the thing parents open from this
 - Play audio (custom player) / video (native)
 - **Edit** → `…/edit` (editors)
 - Toggle important now
+- **Accept submissions** (and allowed files, submissions allowed, past-due rule)
 - **Publish / unpublish**
 - Revert version (when exposed)
 
 ## Parent variant
 
 - Immediate clarity; print obvious; no builder chrome; phone-usable
+- When the material accepts submissions: **Turn in** (several files at once). After a turn-in, the line **"<Parent name> on behalf of <child name>"** and the local date and time. **Turn in another version** while submissions remain. If the due instant has passed and late turn-in is off, say so and keep files already turned in.
+
+## Staff submissions
+
+- On the material view, course managers see **Submissions**: each active student, or **Not turned in**, and every version with the same attribution line, timestamp, and files. Students who already turned something in stay listed after they leave the course.
 
 ## Links to
 

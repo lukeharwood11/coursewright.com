@@ -143,7 +143,7 @@ Deno.serve(async (request) => {
     const { data: materials, error: materialsError } = await db
       .from("materials")
       .select(
-        "id, unit_id, title, description, kind, url, file_id, scheduled_date, due_date, position, visibility",
+        "id, unit_id, title, description, kind, url, file_id, scheduled_date, due_date, due_at, due_timezone, accept_submissions, allow_submissions_past_due, submission_limit, submission_file_types, position, visibility",
       )
       .eq("course_id", source.id)
       .is("deleted_at", null)
@@ -168,6 +168,12 @@ Deno.serve(async (request) => {
           file_id: material.file_id,
           scheduled_date: material.scheduled_date,
           due_date: material.due_date,
+          due_at: material.due_at,
+          due_timezone: material.due_timezone,
+          accept_submissions: material.accept_submissions,
+          allow_submissions_past_due: material.allow_submissions_past_due,
+          submission_limit: material.submission_limit,
+          submission_file_types: material.submission_file_types,
           position: material.position,
           visibility: material.visibility,
           copied_from_id: material.id,

@@ -20,6 +20,12 @@ export type MaterialRecord = {
   fileId: number | null;
   scheduledDate: string | null;
   dueDate: string | null;
+  dueAt: string | null;
+  dueTimezone: string | null;
+  acceptSubmissions: boolean;
+  allowSubmissionsPastDue: boolean;
+  submissionLimit: number;
+  submissionFileTypes: string[];
   position: number;
   currentVersion: number;
   visibility: MaterialVisibility;
@@ -35,7 +41,7 @@ export const materialQueryKeys = {
 };
 
 const MATERIAL_COLUMNS =
-  "id, organization_id, course_id, unit_id, title, description, kind, url, file_id, scheduled_date, due_date, position, current_version, visibility, deleted_at";
+  "id, organization_id, course_id, unit_id, title, description, kind, url, file_id, scheduled_date, due_date, due_at, due_timezone, accept_submissions, allow_submissions_past_due, submission_limit, submission_file_types, position, current_version, visibility, deleted_at";
 
 type MaterialRow = {
   id: number;
@@ -49,6 +55,12 @@ type MaterialRow = {
   file_id: number | null;
   scheduled_date: string | null;
   due_date: string | null;
+  due_at: string | null;
+  due_timezone: string | null;
+  accept_submissions: boolean;
+  allow_submissions_past_due: boolean;
+  submission_limit: number;
+  submission_file_types: string[];
   position: number;
   current_version: number;
   visibility: string;
@@ -70,6 +82,12 @@ function toMaterial(row: MaterialRow): MaterialRecord | null {
     fileId: row.file_id,
     scheduledDate: row.scheduled_date,
     dueDate: row.due_date,
+    dueAt: row.due_at,
+    dueTimezone: row.due_timezone,
+    acceptSubmissions: row.accept_submissions,
+    allowSubmissionsPastDue: row.allow_submissions_past_due,
+    submissionLimit: row.submission_limit,
+    submissionFileTypes: row.submission_file_types ?? [],
     position: row.position,
     currentVersion: row.current_version,
     visibility: parseMaterialVisibility(row.visibility),
@@ -132,6 +150,8 @@ export async function createMaterial(args: {
   unitId: number | null;
   input: CreateMaterialInput;
   fileId?: number | null;
+  dueAt?: string | null;
+  dueTimezone?: string | null;
 }): Promise<MaterialRecord> {
   const siblings = args.unitId
     ? await listMaterialsForUnit(args.unitId)
@@ -151,6 +171,8 @@ export async function createMaterial(args: {
       file_id: args.fileId ?? null,
       scheduled_date: args.input.scheduledDate,
       due_date: args.input.dueDate,
+      due_at: args.dueAt ?? null,
+      due_timezone: args.dueTimezone ?? null,
       position: nextPosition(siblings.map((row) => row.position)),
     })
     .select(MATERIAL_COLUMNS)
@@ -171,6 +193,12 @@ export async function updateMaterial(
     fileId?: number | null;
     scheduledDate?: string | null;
     dueDate?: string | null;
+    dueAt?: string | null;
+    dueTimezone?: string | null;
+    acceptSubmissions?: boolean;
+    allowSubmissionsPastDue?: boolean;
+    submissionLimit?: number;
+    submissionFileTypes?: string[];
     position?: number;
     visibility?: MaterialVisibility;
     deletedAt?: string | null;
@@ -187,6 +215,12 @@ export async function updateMaterial(
       file_id: patch.fileId,
       scheduled_date: patch.scheduledDate,
       due_date: patch.dueDate,
+      due_at: patch.dueAt,
+      due_timezone: patch.dueTimezone,
+      accept_submissions: patch.acceptSubmissions,
+      allow_submissions_past_due: patch.allowSubmissionsPastDue,
+      submission_limit: patch.submissionLimit,
+      submission_file_types: patch.submissionFileTypes,
       position: patch.position,
       visibility: patch.visibility,
       deleted_at: patch.deletedAt,
@@ -285,6 +319,31 @@ export async function revertMaterialToVersion(
       scheduled_date:
         typeof material.scheduled_date === "string" ? material.scheduled_date : null,
       due_date: typeof material.due_date === "string" ? material.due_date : null,
+      due_at:
+        material.due_date == null
+          ? null
+          : typeof material.due_at === "string"
+            ? material.due_at
+            : null,
+      due_timezone:
+        material.due_date == null
+          ? null
+          : typeof material.due_timezone === "string"
+            ? material.due_timezone
+            : null,
+      accept_submissions:
+        typeof material.accept_submissions === "boolean"
+          ? material.accept_submissions
+          : undefined,
+      allow_submissions_past_due:
+        typeof material.allow_submissions_past_due === "boolean"
+          ? material.allow_submissions_past_due
+          : undefined,
+      submission_limit:
+        typeof material.submission_limit === "number" ? material.submission_limit : undefined,
+      submission_file_types: Array.isArray(material.submission_file_types)
+        ? material.submission_file_types.filter((value): value is string => typeof value === "string")
+        : undefined,
       deleted_at: null,
       deleted_by: null,
     })

@@ -6,9 +6,10 @@ import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { createMaterial, materialQueryKeys } from "@/materials/databridge/materials";
 import { uploadNewFile } from "@/materials/databridge/files";
 import { materialLocationState } from "@/materials/model/navigation";
+import type { MaterialKind } from "@/materials/model/kind";
 import { materialEditPath, materialPath } from "@/materials/model/paths";
 import { validateMaterialFields } from "@/materials/model/validate";
-import type { MaterialKind } from "@/materials/model/kind";
+import { DEFAULT_DUE_TIME, browserTimeZone, dueInstantIso } from "@/submissions/model/dueInstant";
 
 export function useAddMaterial(args: {
   organizationId: number;
@@ -27,6 +28,7 @@ export function useAddMaterial(args: {
   const [url, setUrl] = useState("");
   const [scheduledDate, setScheduledDate] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [dueTime, setDueTime] = useState(DEFAULT_DUE_TIME);
   const [file, setFile] = useState<File | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -53,12 +55,17 @@ export function useAddMaterial(args: {
         });
         fileId = uploaded.id;
       }
+      const zone = browserTimeZone();
       return createMaterial({
         organizationId: args.organizationId,
         courseId: args.courseId,
         unitId: args.unitId,
         input: parsed.value,
         fileId,
+        dueAt: parsed.value.dueDate
+          ? dueInstantIso(parsed.value.dueDate, dueTime || DEFAULT_DUE_TIME, zone)
+          : null,
+        dueTimezone: parsed.value.dueDate ? zone : null,
       });
     },
     onSuccess: async (material) => {
@@ -96,6 +103,7 @@ export function useAddMaterial(args: {
     setUrl("");
     setScheduledDate("");
     setDueDate("");
+    setDueTime(DEFAULT_DUE_TIME);
     setFile(null);
     setFormError(null);
   }
@@ -120,7 +128,9 @@ export function useAddMaterial(args: {
     scheduledDate,
     setScheduledDate,
     dueDate,
+    dueTime,
     setDueDate,
+    setDueTime,
     file,
     setFile,
     formError,

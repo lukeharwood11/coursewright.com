@@ -10,6 +10,8 @@ import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { formatIsoDate } from "@/courses/model/dates";
+import { formatDueDeadline } from "@/submissions/model/dueInstant";
+import { MaterialSubmissionsSection } from "@/submissions";
 import { coursePath } from "@/courses/model/paths";
 import { materialKindLabel } from "@/materials/model/kind";
 import {
@@ -124,7 +126,10 @@ export function MaterialPage() {
             ) : null}
             {page.material.dueDate ? (
               <span className="text-[12px] font-bold text-[var(--amber-deep)]">
-                Due {formatIsoDate(page.material.dueDate)}
+                Due{" "}
+                {page.material.dueAt && page.material.dueTimezone
+                  ? formatDueDeadline(page.material.dueAt, page.material.dueTimezone)
+                  : formatIsoDate(page.material.dueDate)}
               </span>
             ) : null}
           </>
@@ -201,6 +206,14 @@ export function MaterialPage() {
       <div className="mt-6">
         <MaterialBody page={page} />
       </div>
+
+      {!page.material.deletedAt && page.material.courseId ? (
+        <MaterialSubmissionsSection
+          material={page.material}
+          courseId={page.material.courseId}
+          mode={page.isParent || !page.canEdit ? "family" : "staff"}
+        />
+      ) : null}
 
       {page.canEdit ? (
         <div className="mt-6 flex flex-wrap gap-2">

@@ -16,6 +16,8 @@ import {
   VisibilityBanner,
 } from "./components/VisibilityBanner";
 import { OptionalDueDateField } from "./components/OptionalDueDateField";
+import { SubmissionSettingsFields } from "./components/SubmissionSettingsFields";
+import { timeZoneLabel } from "@/submissions/model/dueInstant";
 import { AudioSnippetRecorder } from "./components/AudioSnippetRecorder";
 import { PageEditorMediaProvider } from "./components/PageEditorMediaContext";
 import { fileQueryKeys } from "@/materials/databridge/files";
@@ -110,6 +112,7 @@ export function MaterialEditPage() {
           formId={edit.formId}
           saving={edit.saving}
           hasChanges={edit.hasChanges}
+          canSave={edit.canSave}
           cancelTo={viewHref}
           onCancel={() =>
             navigate(viewHref, materialNavState ? { state: materialNavState } : undefined)
@@ -181,7 +184,20 @@ export function MaterialEditPage() {
           </label>
           <OptionalDueDateField
             value={edit.dueDate}
+            time={edit.dueTime}
+            timeZoneLabel={timeZoneLabel(edit.dueTimezone)}
             onChange={edit.setDueDate}
+            onTimeChange={edit.setDueTime}
+          />
+          <SubmissionSettingsFields
+            acceptSubmissions={edit.acceptSubmissions}
+            allowPastDue={edit.allowPastDue}
+            submissionLimit={edit.submissionLimit}
+            fileTypes={edit.fileTypes}
+            onAcceptChange={edit.setAcceptSubmissions}
+            onAllowPastDueChange={edit.setAllowPastDue}
+            onLimitChange={edit.setSubmissionLimit}
+            onToggleType={edit.toggleFileType}
           />
         </div>
 
