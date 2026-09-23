@@ -68,6 +68,7 @@ export type QuizQuestionRecord = {
   position: number;
   prompt: string;
   kind: QuizQuestionKind;
+  points: number;
   choices: QuizChoiceRecord[];
   prompts: QuizMatchPromptRecord[];
   options: QuizMatchOptionRecord[];
@@ -87,6 +88,7 @@ export type QuizQuestionDraft = {
   id: number | null;
   prompt: string;
   kind: QuizQuestionKind;
+  points: number;
   choices: QuizChoiceDraft[];
   pairs: QuizMatchPairDraft[];
   answer: string;
@@ -104,6 +106,7 @@ export type QuizAttemptRecord = {
   submitterEmail: string;
   submittedAt: string;
   autograded: boolean;
+  teacherGradedAt: string | null;
   score: number | null;
   scoreTotal: number | null;
 };
@@ -116,8 +119,11 @@ export type QuizAttemptAnswerRecord = {
   answerText: string;
   choiceIds: number[];
   matchPairs: { leftId: number; rightId: number }[];
-  /** Frozen when the attempt was autograded. Null = not scored (short/long answer or no key). */
-  isCorrect: boolean | null;
+  pointsPossible: number | null;
+  /** Autograder first pass. Null when this question was not autograded. */
+  autoPoints: number | null;
+  /** Teacher grade. When set, it replaces autoPoints. */
+  teacherPoints: number | null;
 };
 
 export type LinkedStudent = {
@@ -311,7 +317,7 @@ export async function listQuizQuestions(quizId: number): Promise<QuizQuestionRec
   const db = requireSupabase();
   const { data: questions, error } = await db
     .from("quiz_questions")
-    .select("id, quiz_id, position, prompt, kind, answer_lines")
+    .select("id, quiz_id, position, prompt, kind, answer_lines, points")
     .eq("quiz_id", quizId)
     .is("deleted_at", null)
     .order("position");
@@ -454,6 +460,7 @@ export async function listQuizQuestions(quizId: number): Promise<QuizQuestionRec
         })),
       answer: answerByQuestion.get(question.id) ?? "",
       answerLines: question.answer_lines,
+      points: asPoints(question.points) ?? 1,
     };
   });
 }
@@ -480,6 +487,7 @@ export async function saveQuizQuestions(
           position: index,
           prompt: draft.prompt,
           kind: draft.kind,
+          points: draft.points,
           answer_lines: draft.kind === "long_answer" ? clampAnswerLines(draft.answerLines) : null,
           deleted_at: null,
         })
@@ -494,6 +502,7 @@ export async function saveQuizQuestions(
           position: index,
           prompt: draft.prompt,
           kind: draft.kind,
+          points: draft.points,
           answer_lines: draft.kind === "long_answer" ? clampAnswerLines(draft.answerLines) : null,
         })
         .select("id")
@@ -693,7 +702,7 @@ export type QuizAttemptSummary = {
   autograded: boolean;
   score: number | null;
   scoreTotal: number | null;
-  /** Answers still without Correct / Incorrect (usually short/long answer). */
+  /** Answers still without autograded or teacher points. */
   ungradedAnswerCount: number;
 };
 
@@ -702,7 +711,7 @@ export async function listQuizAttempts(quizId: number): Promise<QuizAttemptRecor
   const { data, error } = await db
     .from("quiz_attempts")
     .select(
-      "id, quiz_id, student_profile_id, submitted_by, submitted_at, autograded, score, score_total, student:student_profiles(name, student_email), submitter:profiles!quiz_attempts_submitted_by_fkey(name, email)",
+      "id, quiz_id, student_profile_id, submitted_by, submitted_at, autograded, teacher_graded_at, score, score_total, student:student_profiles(name, student_email), submitter:profiles!quiz_attempts_submitted_by_fkey(name, email)",
     )
     .eq("quiz_id", quizId)
     .order("submitted_at", { ascending: false });
@@ -721,8 +730,9 @@ export async function listQuizAttempts(quizId: number): Promise<QuizAttemptRecor
       submitterEmail: submitter?.email ?? "",
       submittedAt: row.submitted_at,
       autograded: row.autograded,
-      score: row.score,
-      scoreTotal: row.score_total,
+      teacherGradedAt: row.teacher_graded_at,
+      score: asPoints(row.score),
+      scoreTotal: asPoints(row.score_total),
     };
   });
 }
@@ -750,11 +760,11 @@ export async function listQuizAttemptSummariesForQuizzes(
   if (attemptIds.length > 0) {
     const { data: answers, error: answersError } = await db
       .from("quiz_attempt_answers")
-      .select("attempt_id, is_correct")
+      .select("attempt_id, auto_points, teacher_points")
       .in("attempt_id", attemptIds);
     if (answersError) throw new Error(answersError.message);
     for (const answer of answers ?? []) {
-      if (answer.is_correct !== null) continue;
+      if (asPoints(answer.teacher_points) != null || asPoints(answer.auto_points) != null) continue;
       ungradedByAttempt.set(
         answer.attempt_id,
         (ungradedByAttempt.get(answer.attempt_id) ?? 0) + 1,
@@ -767,22 +777,20 @@ export async function listQuizAttemptSummariesForQuizzes(
     studentProfileId: row.student_profile_id,
     submittedAt: row.submitted_at,
     autograded: row.autograded,
-    score: row.score,
-    scoreTotal: row.score_total,
+    score: asPoints(row.score),
+    scoreTotal: asPoints(row.score_total),
     ungradedAnswerCount: ungradedByAttempt.get(row.id) ?? 0,
   }));
 }
 
-export async function gradeQuizAttemptAnswer(args: {
+export async function gradeQuizAttempt(args: {
   attemptId: number;
-  questionId: number;
-  isCorrect: boolean;
+  points: { questionId: number; points: number }[];
 }): Promise<void> {
   const db = requireSupabase();
-  const { error } = await db.rpc("grade_quiz_attempt_answer", {
+  const { error } = await db.rpc("grade_quiz_attempt", {
     p_attempt_id: args.attemptId,
-    p_question_id: args.questionId,
-    p_is_correct: args.isCorrect,
+    p_points: args.points,
   });
   if (error) throw new Error(error.message);
 }
@@ -795,7 +803,7 @@ export async function listAttemptAnswers(
   const { data, error } = await db
     .from("quiz_attempt_answers")
     .select(
-      "attempt_id, question_id, prompt_snapshot, selected_summary, answer_text, choice_ids, match_pairs, is_correct",
+      "attempt_id, question_id, prompt_snapshot, selected_summary, answer_text, choice_ids, match_pairs, points_possible, auto_points, teacher_points",
     )
     .in("attempt_id", [...attemptIds]);
   if (error) throw new Error(error.message);
@@ -807,8 +815,16 @@ export async function listAttemptAnswers(
     answerText: row.answer_text,
     choiceIds: Array.isArray(row.choice_ids) ? row.choice_ids.map(Number) : [],
     matchPairs: parseMatchPairs(row.match_pairs),
-    isCorrect: typeof row.is_correct === "boolean" ? row.is_correct : null,
+    pointsPossible: asPoints(row.points_possible),
+    autoPoints: asPoints(row.auto_points),
+    teacherPoints: asPoints(row.teacher_points),
   }));
+}
+
+function asPoints(value: number | string | null | undefined): number | null {
+  if (value == null || value === "") return null;
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function parseMatchPairs(value: unknown): { leftId: number; rightId: number }[] {

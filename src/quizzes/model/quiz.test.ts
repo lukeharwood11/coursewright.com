@@ -4,8 +4,12 @@ import { presentCourseQuizPrint } from "./print";
 import {
   accountIsStudentOnCourse,
   canShowAnswerKey,
+  awardedPoints,
+  formatPoints,
   formatQuizScore,
   latestAttemptsByStudent,
+  quizGradeStatus,
+  quizGradingQueue,
   matchKeyLetters,
   matchKeyTexts,
   matchLayout,
@@ -72,17 +76,36 @@ test("multiple choice matches the correct set exactly", () => {
     { score: 1, scoreTotal: 2 },
   );
   assert.equal(formatQuizScore(1, 2), "Score 1/2 (50%)");
-  assert.equal(formatQuizScore(4, 5), "Score 4/5 (80%)");
+  assert.equal(formatQuizScore(4.5, 5), "Score 4.5/5 (90%)");
   assert.equal(formatQuizScore(0, 0), "Score 0/0");
+  assert.equal(formatPoints(4), "4");
+  assert.equal(formatPoints(4.5), "4.5");
+  assert.equal(formatPoints(4.25), "4.25");
 });
 
-test("marked answers show correct or incorrect; otherwise pending", () => {
-  assert.equal(quizAnswerGrade(null), "pending");
-  assert.equal(quizAnswerGrade(true), "correct");
-  assert.equal(quizAnswerGrade(false), "incorrect");
-  assert.equal(quizAnswerGradeLabel("correct"), "Correct");
-  assert.equal(quizAnswerGradeLabel("incorrect"), "Incorrect");
-  assert.equal(quizAnswerGradeLabel("pending"), "Yet to be graded");
+test("multiple correct choices lose a share for each wrong choice", () => {
+  assert.equal(awardedPoints({ points: 4, hits: 3, total: 4, misses: 1 }), 2);
+  assert.equal(awardedPoints({ points: 4, hits: 4, total: 4, misses: 0 }), 4);
+  assert.equal(awardedPoints({ points: 4, hits: 1, total: 4, misses: 4 }), 0);
+  assert.equal(awardedPoints({ points: 1, hits: 1, total: 3, misses: 0 }), 0.33);
+  assert.equal(awardedPoints({ points: 1, hits: 3, total: 3, misses: 0 }), 1);
+});
+
+test("matching awards each correct pair and does not subtract a wrong pair", () => {
+  assert.equal(awardedPoints({ points: 4, hits: 3, total: 4 }), 3);
+  assert.equal(awardedPoints({ points: 5, hits: 1, total: 3 }), 1.67);
+  assert.equal(awardedPoints({ points: 5, hits: 3, total: 3 }), 5);
+  assert.equal(awardedPoints({ points: 4, hits: 0, total: 4 }), 0);
+});
+
+test("points show full, partial, zero, or not yet graded", () => {
+  assert.equal(quizAnswerGrade(null, 4), "pending");
+  assert.equal(quizAnswerGrade(4, 4), "correct");
+  assert.equal(quizAnswerGrade(0, 4), "incorrect");
+  assert.equal(quizAnswerGrade(2, 4), "partial");
+  assert.equal(quizAnswerGrade(4.5, 5), "partial");
+  assert.equal(quizAnswerGradeLabel("partial", 4.5, 5), "4.5 / 5");
+  assert.equal(quizAnswerGradeLabel("pending", null, 5), "Yet to be graded");
 });
 
 test("outline progress waits until every answer is graded", () => {
@@ -111,8 +134,73 @@ test("outline progress waits until every answer is graded", () => {
     }).kind,
     "submitted",
   );
-  assert.equal(attemptIsFullyGraded([{ isCorrect: true }, { isCorrect: false }]), true);
-  assert.equal(attemptIsFullyGraded([{ isCorrect: true }, { isCorrect: null }]), false);
+  assert.equal(
+    attemptIsFullyGraded([
+      { teacherPoints: null, autoPoints: 1 },
+      { teacherPoints: 0, autoPoints: null },
+    ]),
+    true,
+  );
+  assert.equal(
+    attemptIsFullyGraded([
+      { teacherPoints: null, autoPoints: 1 },
+      { teacherPoints: null, autoPoints: null },
+    ]),
+    false,
+  );
+  assert.equal(
+    quizGradeStatus({
+      autograded: true,
+      teacherGradedAt: null,
+      answers: [{ teacherPoints: null, autoPoints: 1 }],
+    }),
+    "autograded",
+  );
+  assert.equal(
+    quizGradeStatus({
+      autograded: true,
+      teacherGradedAt: null,
+      answers: [
+        { teacherPoints: null, autoPoints: 1 },
+        { teacherPoints: null, autoPoints: null },
+      ],
+    }),
+    "needs_grading",
+  );
+  assert.equal(
+    quizGradeStatus({
+      autograded: true,
+      teacherGradedAt: "2026-09-23T15:00:00.000Z",
+      answers: [{ teacherPoints: 4.5, autoPoints: 5 }],
+    }),
+    "graded",
+  );
+  assert.deepEqual(
+    quizGradingQueue([
+      {
+        id: 2,
+        submittedAt: "2026-09-23T12:00:00.000Z",
+        autograded: true,
+        teacherGradedAt: null,
+        answers: [{ teacherPoints: null, autoPoints: 1 }],
+      },
+      {
+        id: 1,
+        submittedAt: "2026-09-23T11:00:00.000Z",
+        autograded: true,
+        teacherGradedAt: null,
+        answers: [{ teacherPoints: null, autoPoints: null }],
+      },
+      {
+        id: 3,
+        submittedAt: "2026-09-23T13:00:00.000Z",
+        autograded: true,
+        teacherGradedAt: "2026-09-23T14:00:00.000Z",
+        answers: [{ teacherPoints: 1, autoPoints: 1 }],
+      },
+    ]).map((attempt) => attempt.id),
+    [1, 2],
+  );
 });
 
 test("saved answers refill the take form fields", () => {

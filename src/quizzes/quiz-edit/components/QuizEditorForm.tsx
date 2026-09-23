@@ -6,8 +6,10 @@ import {
   LONG_ANSWER_LINE_MAX,
   LONG_ANSWER_LINE_MIN,
   MATCH_PAIR_MAX,
+  formatPoints,
   parseCourseQuizKind,
   quizNumberValue,
+  quizPossiblePoints,
 } from "@/quizzes/model/quiz";
 import type { WindowFields } from "@/quizzes/model/window";
 
@@ -21,6 +23,7 @@ function blankQuestion(): QuizQuestionDraft {
     id: null,
     prompt: "",
     kind: "multiple_choice",
+    points: 1,
     answer: "",
     choices: [
       { id: null, text: "", correct: false },
@@ -71,8 +74,21 @@ export function QuizEditorForm({
     onQuestions(questions.map((question, i) => (i === index ? { ...question, ...patch } : question)));
   }
 
+  const possible = quizPossiblePoints(questions);
   return (
     <div className="flex max-w-3xl flex-col gap-4">
+      <div className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3">
+        <p className="text-[13px] font-bold text-[var(--ink-soft)]">Possible points</p>
+        <p
+          className="text-[28px] font-semibold text-[var(--ink)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {formatPoints(possible)}
+        </p>
+        <p className="text-[12.5px] text-[var(--ink-faint)]">
+          Each question starts at 1 point. Change a question to weight it.
+        </p>
+      </div>
       <label className="flex flex-col gap-1">
         <span className="text-[13px] font-bold text-[var(--ink-soft)]">Title</span>
         <Input className="w-full" required value={title} onChange={(event) => onTitle(event.target.value)} />
@@ -135,7 +151,7 @@ export function QuizEditorForm({
             Grade questions automatically and show the score right away
           </span>
           <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
-            Multiple choice, number, and matching. Short answer and long answer are saved for you to read.
+            A correct number answer gets full points. Multiple choice splits points across the correct choices and subtracts a share for each wrong choice. Matching gives an equal share for each correct pair. Short answer and long answer wait for you.
           </span>
         </span>
       </label>
@@ -172,6 +188,21 @@ export function QuizEditorForm({
                 className={`${controlClass} min-h-[4rem] resize-y`}
                 value={question.prompt}
                 onChange={(event) => patchQuestion(index, { prompt: event.target.value })}
+              />
+            </label>
+            <label className="mt-3 flex max-w-[10rem] flex-col gap-1">
+              <span className="text-[13px] font-bold text-[var(--ink-soft)]">Points</span>
+              <Input
+                type="number"
+                min={0.01}
+                step={0.01}
+                required
+                value={Number.isFinite(question.points) ? question.points : ""}
+                onChange={(event) =>
+                  patchQuestion(index, {
+                    points: event.target.value === "" ? Number.NaN : Number(event.target.value),
+                  })
+                }
               />
             </label>
             <label className="mt-3 flex flex-col gap-1">
@@ -265,7 +296,7 @@ function QuestionFields({
             onChange={(event) => onChange({ answer: event.target.value })}
           />
           <span className="text-[12.5px] text-[var(--ink-faint)]">
-            Saved for you to read. It is not part of the automatic score.
+            Saved for you to grade. It is not scored automatically.
           </span>
         </label>
       </div>

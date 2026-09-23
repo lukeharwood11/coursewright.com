@@ -816,11 +816,11 @@ A **course quiz** is an outline item on a unit (or, in the database, with `unit_
 | copied_from_id | bigint | FK → Quiz, nullable |
 | deleted_at | timestamptz | Soft delete |
 
-Questions (`quiz_questions.kind` = `multiple_choice` · `short_answer` · `number` · `matching` · `long_answer`) do not store the correct answer on the question row. `answer_lines` is set only for `long_answer` (1–20 blank lines). Choices (`quiz_choices`) do not store a correct flag. `quiz_answer_keys` holds either a `choice_id` or `answer_text` (short answer, long answer, or the correct number). A matching question stores the left column in `quiz_match_prompts` and the right column in `quiz_match_options`. Both are visible with the quiz. The correct link is `quiz_match_keys`, hidden the same way as `quiz_answer_keys`. The right column is mixed when the quiz is taken or printed.
+Questions (`quiz_questions.kind` = `multiple_choice` · `short_answer` · `number` · `matching` · `long_answer`) do not store the correct answer on the question row. `points` is the possible points (numeric, default 1, must be greater than 0; fractions such as 4.5 are allowed). `answer_lines` is set only for `long_answer` (1–20 blank lines). Choices (`quiz_choices`) do not store a correct flag. `quiz_answer_keys` holds either a `choice_id` or `answer_text` (short answer, long answer, or the correct number). A matching question stores the left column in `quiz_match_prompts` and the right column in `quiz_match_options`. Both are visible with the quiz. The correct link is `quiz_match_keys`, hidden the same way as `quiz_answer_keys`. The right column is mixed when the quiz is taken or printed.
 
-`quiz_attempts` is one submitted entry: `submitted_by`, `student_profile_id`, `autograded`, nullable `score` / `score_total`. The score is frozen at submit. `quiz_attempt_answers` copies the prompt and the selection (`choice_ids`, `answer_text`, `match_pairs`), plus nullable `is_correct` (set by autograde for scored kinds, or by staff via `grade_quiz_attempt_answer` for short/long and anything left pending). An entry is fully graded when every answer has `is_correct` set — families see the frozen score on the outline only then.
+`quiz_attempts` is one submitted entry: `submitted_by`, `student_profile_id`, `autograded`, nullable `score` / `score_total` (numeric), nullable `teacher_graded_at` / `graded_by`. `autograded` stays true after a teacher overwrites the points. `teacher_graded_at` is set only when a teacher saves a grade. The published score is null until every answer has points. `quiz_attempt_answers` copies the prompt and the selection (`choice_ids`, `answer_text`, `match_pairs`), plus `points_possible` (snapshotted from the question), nullable `auto_points` (the autograde first pass), and nullable `teacher_points` (the teacher’s grade, which replaces `auto_points` in the score). `is_correct` is true only when the earned points equal `points_possible`. Families see the score on the outline only when every answer has `auto_points` or `teacher_points`.
 
-Submit is `submit_quiz_attempt`. Clients cannot insert a score. Course-from-course copies questions, choices, keys, and matching prompts, options, and keys, not attempts.
+Submit is `submit_quiz_attempt`. A teacher saves every question’s points with `grade_quiz_attempt`. Clients cannot insert a score. Course-from-course copies questions (including points), choices, keys, and matching prompts, options, and keys, not attempts.
 
 - **Form:** workshop.
 ### ShareLink
@@ -1277,7 +1277,7 @@ Family cross-org management (extends P0 org Family)
 | Rich-text block canonical store | Block.body | **Lexical JSON** (`body.lexical`) |
 | Video block: URL vs uploaded file | Block, File, players | **Open** |
 | Quiz / Form shape | Block on a page vs later material kind | **Page quiz** = Lexical node. **Course quiz** = `quizzes`. Form unused |
-| Autograde answer storage + attempt model | QuizAttempt | **Decided** — `quiz_answer_keys` + `quiz_attempts`. Score frozen at submit |
+| Autograde answer storage + attempt model | QuizAttempt | **Decided** — `quiz_answer_keys` + `quiz_attempts`. Autograde stores `auto_points`. A teacher grade stores `teacher_points` and can replace the score |
 | SaaS packaging (per teacher vs per course) | OrgSubscription | P1 |
 | Assignment object shape | Next conversation | Not P0 |
 | Parent visibility after enrollment ends | Membership stays active; what they still see | Deferred |

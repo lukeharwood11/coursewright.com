@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { PrinterIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { Button, ButtonLink } from "@/ui/Button";
@@ -15,11 +15,18 @@ import {
   quizLocationState,
   quizOpenedFromUnit,
 } from "@/quizzes/model/navigation";
+import type { QuizAttemptAnswerRecord, QuizAttemptRecord } from "@/quizzes/databridge/quizzes";
 import { quizEditPath, quizPrintPath } from "@/quizzes/model/paths";
-import { formatQuizScore } from "@/quizzes/model/quiz";
+import {
+  formatQuizScore,
+  orderedAttemptAnswers,
+  quizGradingQueue,
+} from "@/quizzes/model/quiz";
 import { viewerTimeZone } from "@/quizzes/model/window";
 import { AnswerKeySection } from "./components/AnswerKeySection";
 import { QuizAttemptList } from "./components/QuizAttemptList";
+import { QuizGradeWalkthrough } from "./components/QuizGradeWalkthrough";
+import { QuizSubmissionQueue } from "./components/QuizSubmissionQueue";
 import { QuizTakeForm } from "./components/QuizTakeForm";
 import { useQuiz } from "./hooks/useQuiz";
 
@@ -29,6 +36,7 @@ export function QuizPage() {
   const navigate = useNavigate();
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   useToastOnError(page.error);
 
   useEffect(() => {
@@ -151,15 +159,10 @@ export function QuizPage() {
               setResult(null);
               page.submit.mutate(args, {
                 onSuccess: (submitted) => {
-                  const needsManualGrade = page.questions.some(
-                    (question) =>
-                      question.kind === "short_answer" || question.kind === "long_answer",
-                  );
                   if (
                     submitted.autograded &&
                     submitted.score != null &&
-                    submitted.scoreTotal != null &&
-                    !needsManualGrade
+                    submitted.scoreTotal != null
                   ) {
                     setResult(formatQuizScore(submitted.score, submitted.scoreTotal));
                   } else {
@@ -178,18 +181,31 @@ export function QuizPage() {
         {result ? (
           <p className="mt-4 text-[15px] font-bold text-[var(--ink)]">{result}</p>
         ) : null}
-        <QuizAttemptList
-          attempts={page.canEdit ? page.attempts : familyAttempts}
-          timeZone={zone}
-          showAll={page.canEdit}
-          canGrade={page.canEdit}
-          gradingKey={
-            page.gradeAnswer.isPending && page.gradeAnswer.variables
-              ? `${page.gradeAnswer.variables.attemptId}:${page.gradeAnswer.variables.questionId}`
-              : null
-          }
-          onGrade={(args) => page.gradeAnswer.mutate(args)}
-        />
+        {page.canEdit ? (
+          <TeacherGrading
+            attempts={page.attempts}
+            questionIds={page.questions.map((question) => question.id)}
+            timeZone={zone}
+            gradingId={Number(searchParams.get("grade"))}
+            saving={page.gradeAttempt.isPending}
+            onOpen={(attemptId) => setSearchParams({ grade: String(attemptId) })}
+            onBack={() => setSearchParams({})}
+            onSave={(attemptId, points, thenNext, nextId) =>
+              page.gradeAttempt.mutate(
+                { attemptId, points },
+                {
+                  onSuccess: () => {
+                    if (!thenNext) return;
+                    if (nextId) setSearchParams({ grade: String(nextId) });
+                    else setSearchParams({});
+                  },
+                },
+              )
+            }
+          />
+        ) : (
+          <QuizAttemptList attempts={familyAttempts} timeZone={zone} />
+        )}
         {page.showKey ? <AnswerKeySection questions={page.questions} /> : null}
         {page.canEdit && isPublished(quiz.visibility) ? (
           <div className="mt-10">
@@ -225,5 +241,66 @@ export function QuizPage() {
         }}
       />
     </div>
+  );
+}
+
+function TeacherGrading({
+  attempts,
+  questionIds,
+  timeZone,
+  gradingId,
+  saving,
+  onOpen,
+  onBack,
+  onSave,
+}: {
+  attempts: Array<QuizAttemptRecord & { label: string; answers: QuizAttemptAnswerRecord[] }>;
+  questionIds: number[];
+  timeZone: string;
+  gradingId: number;
+  saving: boolean;
+  onOpen: (attemptId: number) => void;
+  onBack: () => void;
+  onSave: (
+    attemptId: number,
+    points: { questionId: number; points: number }[],
+    thenNext: boolean,
+    nextId: number | null,
+  ) => void;
+}) {
+  const queue = quizGradingQueue(attempts);
+  const selected = attempts.find((attempt) => attempt.id === gradingId);
+  if (!selected || !Number.isFinite(gradingId)) {
+    return (
+      <QuizSubmissionQueue
+        attempts={attempts}
+        timeZone={timeZone}
+        onOpen={onOpen}
+        onGradeNext={() => {
+          const next = queue[0];
+          if (next) onOpen(next.id);
+        }}
+      />
+    );
+  }
+  const index = queue.findIndex((attempt) => attempt.id === selected.id);
+  const nextId = index >= 0 ? (queue[index + 1]?.id ?? null) : (queue[0]?.id ?? null);
+  const ordered = {
+    ...selected,
+    answers: orderedAttemptAnswers(questionIds, selected.answers),
+  };
+  if (ordered.answers.length === 0) {
+    return <p className="mt-8 text-[14px] text-[var(--ink-soft)]">Loading this submission…</p>;
+  }
+  return (
+    <QuizGradeWalkthrough
+      key={ordered.id}
+      attempt={ordered}
+      timeZone={timeZone}
+      saving={saving}
+      hasNext={nextId != null}
+      onBack={onBack}
+      onSave={(points, thenNext) => onSave(ordered.id, points, thenNext, nextId)}
+    />
   );
 }

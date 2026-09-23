@@ -2548,33 +2548,42 @@ export type Database = {
           attempt_id: number
           choice_ids: number[]
           id: number
+          auto_points: number | null
           is_correct: boolean | null
           match_pairs: Json
+          points_possible: number | null
           prompt_snapshot: string
           question_id: number
           selected_summary: string
+          teacher_points: number | null
         }
         Insert: {
           answer_text?: string
           attempt_id: number
+          auto_points?: number | null
           choice_ids?: number[]
           id?: number
           is_correct?: boolean | null
           match_pairs?: Json
+          points_possible?: number | null
           prompt_snapshot?: string
           question_id: number
           selected_summary?: string
+          teacher_points?: number | null
         }
         Update: {
           answer_text?: string
           attempt_id?: number
+          auto_points?: number | null
           choice_ids?: number[]
           id?: number
           is_correct?: boolean | null
           match_pairs?: Json
+          points_possible?: number | null
           prompt_snapshot?: string
           question_id?: number
           selected_summary?: string
+          teacher_points?: number | null
         }
         Relationships: [
           {
@@ -2596,6 +2605,7 @@ export type Database = {
       quiz_attempts: {
         Row: {
           autograded: boolean
+          graded_by: string | null
           id: number
           quiz_id: number
           score: number | null
@@ -2603,9 +2613,11 @@ export type Database = {
           student_profile_id: number
           submitted_at: string
           submitted_by: string
+          teacher_graded_at: string | null
         }
         Insert: {
           autograded?: boolean
+          graded_by?: string | null
           id?: number
           quiz_id: number
           score?: number | null
@@ -2613,9 +2625,11 @@ export type Database = {
           student_profile_id: number
           submitted_at?: string
           submitted_by: string
+          teacher_graded_at?: string | null
         }
         Update: {
           autograded?: boolean
+          graded_by?: string | null
           id?: number
           quiz_id?: number
           score?: number | null
@@ -2623,6 +2637,7 @@ export type Database = {
           student_profile_id?: number
           submitted_at?: string
           submitted_by?: string
+          teacher_graded_at?: string | null
         }
         Relationships: [
           {
@@ -2803,6 +2818,7 @@ export type Database = {
           deleted_at: string | null
           id: number
           kind: string
+          points: number
           position: number
           prompt: string
           quiz_id: number
@@ -2814,6 +2830,7 @@ export type Database = {
           deleted_at?: string | null
           id?: number
           kind: string
+          points?: number
           position?: number
           prompt?: string
           quiz_id: number
@@ -2825,6 +2842,7 @@ export type Database = {
           deleted_at?: string | null
           id?: number
           kind?: string
+          points?: number
           position?: number
           prompt?: string
           quiz_id?: number
@@ -3322,11 +3340,10 @@ export type Database = {
         }
         Returns: Json
       }
-      grade_quiz_attempt_answer: {
+      grade_quiz_attempt: {
         Args: {
           p_attempt_id: number
-          p_question_id: number
-          p_is_correct: boolean
+          p_points: Json
         }
         Returns: undefined
       }
