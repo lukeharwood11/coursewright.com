@@ -13,7 +13,7 @@ import { useToastOnError } from "@/ui/useToastOnError";
 import { isNetworkError } from "@/ui/networkError";
 import type { ResourceFolderRecord } from "@/resources/databridge/folders";
 import type { ResourceItemRecord } from "@/resources/databridge/items";
-import type { ResourceAccessMode } from "@/resources/model/kinds";
+import type { ResourceAudience } from "@/resources/model/access";
 import {
   resourceBrowsePath,
   resourceItemEditPath,
@@ -54,8 +54,11 @@ type AccessTarget = {
   kind: "folder" | "item";
   id: number;
   canInherit: boolean;
-  accessMode: ResourceAccessMode;
+  audience: ResourceAudience;
   aclInherit: boolean;
+  parentId: number | null;
+  folderId: number | null;
+  visibility: "unpublished" | "published" | null;
 };
 
 type RemoveTarget = { kind: "folder" | "item"; id: number; name: string };
@@ -159,8 +162,14 @@ export function ResourcesPage() {
       kind: "folder",
       id: folder.id,
       canInherit: folder.parentId != null,
-      accessMode: folder.accessMode,
+      audience: {
+        parentsCanView: folder.parentsCanView,
+        studentsCanView: folder.studentsCanView,
+      },
       aclInherit: folder.aclInherit,
+      parentId: folder.parentId,
+      folderId: null,
+      visibility: null,
     });
   }
 
@@ -169,8 +178,14 @@ export function ResourcesPage() {
       kind: "item",
       id: item.id,
       canInherit: true,
-      accessMode: item.accessMode,
+      audience: {
+        parentsCanView: item.parentsCanView,
+        studentsCanView: item.studentsCanView,
+      },
       aclInherit: item.aclInherit,
+      parentId: null,
+      folderId: item.folderId,
+      visibility: item.visibility,
     });
   }
 
@@ -494,8 +509,11 @@ export function ResourcesPage() {
               }
             : null
         }
-        accessMode={access?.accessMode ?? "staff"}
+        audience={access?.audience ?? { parentsCanView: false, studentsCanView: false }}
         aclInherit={access?.aclInherit ?? false}
+        parentId={access?.parentId ?? null}
+        folderId={access?.folderId ?? null}
+        unpublished={access?.visibility === "unpublished"}
         onClose={() => setAccess(null)}
         onSaved={page.invalidateBrowse}
       />

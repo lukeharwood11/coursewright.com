@@ -71,7 +71,9 @@ export function ResourcePage() {
     );
   }
 
-  const backTo = resourceBrowsePath(page.organization.slug, page.item.folderId);
+  const backFolderId =
+    page.item.folderId != null && page.folder == null ? null : page.item.folderId;
+  const backTo = resourceBrowsePath(page.organization.slug, backFolderId);
   const backLabel = page.folder?.name ?? "Resources";
 
   return (
@@ -207,8 +209,14 @@ export function ResourcePage() {
           organizationId: page.organization.id,
           canInherit: true,
         }}
-        accessMode={page.item.accessMode}
+        audience={{
+          parentsCanView: page.item.parentsCanView,
+          studentsCanView: page.item.studentsCanView,
+        }}
         aclInherit={page.item.aclInherit}
+        parentId={null}
+        folderId={page.item.folderId}
+        unpublished={page.item.visibility !== "published"}
         onClose={() => setAccessOpen(false)}
         onSaved={page.invalidate}
       />

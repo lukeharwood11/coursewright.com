@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { isFamilyViewerRole, isStaffRole } from "@/organizations/model/role";
+import { isStaffRole } from "@/organizations/model/role";
 import { fileSignedUrl, getFile } from "@/materials/databridge/files";
 import { listResourceBlocks, resourceBlockQueryKeys } from "@/resources/databridge/blocks";
 import {
@@ -76,6 +76,9 @@ export function useResource() {
     queryFn: () => listMyResourceGrants(organization.id, user.id),
   });
 
+  const folderPending =
+    item?.folderId != null && folderQuery.data === undefined && !folderQuery.isError;
+
   const foldersById = new Map<number, FolderAclSource>();
   for (const folder of ancestorsQuery.data ?? []) foldersById.set(folder.id, folder);
   if (folderQuery.data) foldersById.set(folderQuery.data.id, folderQuery.data);
@@ -85,12 +88,16 @@ export function useResource() {
         actor: {
           userId: user.id,
           isStaff,
-          isParentRole: role ? isFamilyViewerRole(role) : false,
+          isParent: role === "parent",
+          isStudent: role === "student",
         },
         visibility: item.visibility,
         archived: Boolean(item.archivedAt),
         aclInherit: item.aclInherit,
-        accessMode: item.accessMode,
+        audience: {
+          parentsCanView: item.parentsCanView,
+          studentsCanView: item.studentsCanView,
+        },
         folderId: item.folderId,
         itemId: item.id,
         foldersById,
@@ -143,10 +150,11 @@ export function useResource() {
     ancestors: ancestorsQuery.data ?? [],
     canEdit: caps.canEdit,
     isStaff,
-    loading: itemQuery.isLoading,
+    loading: itemQuery.isLoading || folderPending,
     notFound: !itemQuery.isLoading && !item,
     error:
       itemQuery.error?.message ??
+      folderQuery.error?.message ??
       visibility.error?.message ??
       archive.error?.message ??
       move.error?.message ??

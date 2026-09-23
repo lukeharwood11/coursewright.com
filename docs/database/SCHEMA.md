@@ -731,17 +731,18 @@ Nested folder in an organization’s **Resources** library. Independent of cours
 | parent_id | bigint | FK → OrgResourceFolder, **nullable** — null = top-level folder |
 | name | text | required |
 | description | text | optional |
-| access_mode | text | `staff` · `parents` · `members` · `restricted` — used when this folder is the ACL source |
+| parents_can_view | boolean | default false. When this folder is the ACL source, every **parent** membership can view |
+| students_can_view | boolean | default false. When this folder is the ACL source, every **student** membership can view. Independent of `parents_can_view` |
 | acl_inherit | boolean | default true when nested; **false** at root. When true, walk to parent for ACL |
 | sort_order | int | order among siblings |
 | archived_at | timestamptz | soft archive; hidden from default browse |
 | created_by | uuid | FK → User |
 
-**ACL source:** walk `parent_id` while `acl_inherit` until a folder with `acl_inherit = false` (roots are always false). Effective readers/writers = that folder’s `access_mode` plus `OrgResourceGrant` rows on **that** folder.
+**ACL source:** walk `parent_id` while `acl_inherit` until a folder with `acl_inherit = false` (roots are always false). Effective readers/writers = that folder’s parent and student flags plus `OrgResourceGrant` rows on **that** folder.
 
 **Who can edit:** org staff (owner / admin / instructor), **created_by**, or a **write** grant on the ACL-source folder. Staff may create top-level folders.
 
-**Who can view:** editors; or (non-archived) members allowed by the effective preset / read-or-write grant. Folders are not published — only items are.
+**Who can view:** editors; or (non-archived) a parent when the effective `parents_can_view` is true, a student when the effective `students_can_view` is true, or a read-or-write grant. Folders are not published — only items are.
 
 ### OrgResourceItem
 
@@ -758,8 +759,9 @@ A document, link, or file sitting in a folder (or unfiled at org root). **Not** 
 | url | text | required when `type = link` |
 | file_id | bigint | FK → File, required when `type = file` |
 | visibility | text | `unpublished` (editors only) · `published` (readers per ACL). Default unpublished |
-| acl_inherit | boolean | default true → use folder ACL source. False → this row’s `access_mode` + item grants only |
-| access_mode | text | same presets as folders; used when `acl_inherit = false` |
+| acl_inherit | boolean | default true → use folder ACL source. False → this row’s parent/student flags + item grants only |
+| parents_can_view | boolean | default false. Used when `acl_inherit = false`. Every parent membership |
+| students_can_view | boolean | default false. Used when `acl_inherit = false`. Every student membership. Independent of parents |
 | archived_at | timestamptz | soft archive |
 | created_by | uuid | FK → User |
 
@@ -798,14 +800,7 @@ Extra access for one org member on one folder **or** one item (XOR).
 
 Staff do **not** need grant rows. Unique `(folder_id, grantee)` / `(item_id, grantee)`. Only staff insert/update/delete grant rows; a grantee may SELECT their own row.
 
-**Access presets** (when published, for non-editors):
-
-| access_mode | Who reads |
-|-------------|-----------|
-| `staff` | Owners, admins, instructors |
-| `parents` | Staff + memberships with `role = parent` |
-| `members` | All active org memberships |
-| `restricted` | Only explicit grants (+ staff editors) |
+**Who can view when published** (non-editors): staff always. Otherwise a **parent** membership when `parents_can_view` is true, a **student** membership when `students_can_view` is true, or an explicit read/write grant. The two flags are independent. Grants can add one parent or one student without turning on the whole audience.
 
 ### Page quiz
 

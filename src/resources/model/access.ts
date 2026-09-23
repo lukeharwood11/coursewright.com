@@ -1,8 +1,10 @@
-import type {
-  ResourceAccessMode,
-  ResourceGrantPermission,
-  ResourceVisibility,
-} from "./kinds";
+import type { ResourceGrantPermission, ResourceVisibility } from "./kinds";
+
+/** Independent audience flags. Staff can always edit; these control who else can view. */
+export type ResourceAudience = {
+  parentsCanView: boolean;
+  studentsCanView: boolean;
+};
 
 export type ResourceGrantRecord = {
   id: number;
@@ -15,7 +17,8 @@ export type ResourceGrantRecord = {
 export type FolderAclSource = {
   id: number;
   parentId: number | null;
-  accessMode: ResourceAccessMode;
+  parentsCanView: boolean;
+  studentsCanView: boolean;
   aclInherit: boolean;
 };
 
@@ -52,22 +55,22 @@ function grantMatches(
   });
 }
 
-function modeAllowsRead(args: {
-  mode: ResourceAccessMode;
-  isStaff: boolean;
-  isParentRole: boolean;
-  isMember: boolean;
+export function audienceAllowsRead(args: {
+  audience: ResourceAudience;
+  isParent: boolean;
+  isStudent: boolean;
 }): boolean {
-  if (args.mode === "staff") return args.isStaff;
-  if (args.mode === "parents") return args.isStaff || args.isParentRole;
-  if (args.mode === "members") return args.isMember;
-  return false;
+  return (
+    (args.audience.parentsCanView && args.isParent) ||
+    (args.audience.studentsCanView && args.isStudent)
+  );
 }
 
 export type ResourceActor = {
   userId: string;
   isStaff: boolean;
-  isParentRole: boolean;
+  isParent: boolean;
+  isStudent: boolean;
 };
 
 export function folderCapabilities(args: {
@@ -85,11 +88,10 @@ export function folderCapabilities(args: {
   if (args.archived) return { canView: false, canEdit: false };
   const canView =
     grantMatches(args.grants, args.actor.userId, source.id, null, false) ||
-    modeAllowsRead({
-      mode: source.accessMode,
-      isStaff: args.actor.isStaff,
-      isParentRole: args.actor.isParentRole,
-      isMember: true,
+    audienceAllowsRead({
+      audience: source,
+      isParent: args.actor.isParent,
+      isStudent: args.actor.isStudent,
     });
   return { canView, canEdit: false };
 }
@@ -99,7 +101,7 @@ export function itemCapabilities(args: {
   visibility: ResourceVisibility;
   archived: boolean;
   aclInherit: boolean;
-  accessMode: ResourceAccessMode;
+  audience: ResourceAudience;
   folderId: number | null;
   itemId: number;
   foldersById: Map<number, FolderAclSource>;
@@ -123,11 +125,10 @@ export function itemCapabilities(args: {
   if (!args.aclInherit) {
     const canView =
       grantMatches(args.grants, args.actor.userId, null, args.itemId, false) ||
-      modeAllowsRead({
-        mode: args.accessMode,
-        isStaff: args.actor.isStaff,
-        isParentRole: args.actor.isParentRole,
-        isMember: true,
+      audienceAllowsRead({
+        audience: args.audience,
+        isParent: args.actor.isParent,
+        isStudent: args.actor.isStudent,
       });
     return { canView, canEdit: false };
   }
@@ -137,11 +138,10 @@ export function itemCapabilities(args: {
   const source = aclSourceFolder(folder, args.foldersById);
   const canView =
     grantMatches(args.grants, args.actor.userId, source.id, null, false) ||
-    modeAllowsRead({
-      mode: source.accessMode,
-      isStaff: args.actor.isStaff,
-      isParentRole: args.actor.isParentRole,
-      isMember: true,
+    audienceAllowsRead({
+      audience: source,
+      isParent: args.actor.isParent,
+      isStudent: args.actor.isStudent,
     });
   return { canView, canEdit: false };
 }
@@ -161,4 +161,120 @@ export function folderBreadcrumb(
     current = current.parentId != null ? (foldersById.get(current.parentId) ?? null) : null;
   }
   return trail;
+}
+
+export type NamedResourceGrant = {
+  name: string;
+  permission: ResourceGrantPermission;
+  audience: "parent" | "student" | "other";
+};
+
+export function previewResourceAudience(args: {
+  kind: "folder" | "item";
+  id: number;
+  parentId: number | null;
+  folderId: number | null;
+  inherit: boolean;
+  draft: ResourceAudience;
+  foldersById: Map<number, FolderAclSource>;
+}): {
+  audience: ResourceAudience;
+  sourceFolderId: number | null;
+  unresolved: boolean;
+} {
+  if (args.kind === "item") {
+    if (!args.inherit) {
+      return { audience: args.draft, sourceFolderId: null, unresolved: false };
+    }
+    if (args.folderId == null) {
+      return {
+        audience: { parentsCanView: false, studentsCanView: false },
+        sourceFolderId: null,
+        unresolved: false,
+      };
+    }
+    const folder = args.foldersById.get(args.folderId);
+    if (!folder) {
+      return { audience: args.draft, sourceFolderId: null, unresolved: true };
+    }
+    const source = aclSourceFolder(folder, args.foldersById);
+    return {
+      audience: {
+        parentsCanView: source.parentsCanView,
+        studentsCanView: source.studentsCanView,
+      },
+      sourceFolderId: source.id,
+      unresolved: false,
+    };
+  }
+
+  if (!args.inherit) {
+    return { audience: args.draft, sourceFolderId: args.id, unresolved: false };
+  }
+  if (args.parentId == null || !args.foldersById.has(args.parentId)) {
+    return { audience: args.draft, sourceFolderId: null, unresolved: true };
+  }
+  const map = new Map(args.foldersById);
+  map.set(args.id, {
+    id: args.id,
+    parentId: args.parentId,
+    parentsCanView: args.draft.parentsCanView,
+    studentsCanView: args.draft.studentsCanView,
+    aclInherit: true,
+  });
+  const source = aclSourceFolder(map.get(args.id)!, map);
+  return {
+    audience: {
+      parentsCanView: source.parentsCanView,
+      studentsCanView: source.studentsCanView,
+    },
+    sourceFolderId: source.id,
+    unresolved: false,
+  };
+}
+
+function personLine(grant: NamedResourceGrant): string {
+  const verb = grant.permission === "write" ? "edit" : "view";
+  return `${grant.name} can ${verb}.`;
+}
+
+function audienceLines(
+  label: "Parents" | "Students",
+  canView: boolean,
+  grants: NamedResourceGrant[],
+): string[] {
+  const extras = grants.filter((grant) => !canView || grant.permission === "write");
+  return [`${label} ${canView ? "can" : "cannot"} see this.`, ...extras.map(personLine)];
+}
+
+/** Plain-language result for the access dialog. Stays the same on either tab. */
+export function resourceAccessSummary(args: {
+  kind: "folder" | "item";
+  followsName: string | null;
+  unresolved: boolean;
+  audience: ResourceAudience;
+  grants: NamedResourceGrant[];
+  unpublished: boolean;
+}): { title: string; lines: string[] } {
+  const title = args.kind === "folder" ? "Access for this folder" : "Access for this resource";
+  if (args.unresolved) {
+    return {
+      title,
+      lines: ["This follows its folder. The folder’s access is still loading."],
+    };
+  }
+  const parents = args.grants.filter((grant) => grant.audience === "parent");
+  const students = args.grants.filter((grant) => grant.audience === "student");
+  const others = args.grants.filter((grant) => grant.audience === "other");
+  const lines = [
+    ...(args.followsName ? [`Follows “${args.followsName}”.`] : []),
+    ...audienceLines("Parents", args.audience.parentsCanView, parents),
+    ...audienceLines("Students", args.audience.studentsCanView, students),
+    ...others.map(personLine),
+    "Staff can always open and edit this.",
+  ];
+  if (args.unpublished) {
+    lines.push("This isn’t published, so only editors can open it until you publish.");
+  }
+  return { title, lines };
 }
