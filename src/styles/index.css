@@ -333,8 +333,30 @@ body {
 }
 
 @media (max-width: 767px) {
+  /*
+    iOS Safari zooms focused fields below 16px — keep inputs readable without zoom.
+    !important overrides Tailwind text-size utilities on form controls.
+  */
+  textarea,
+  select,
+  input:not([type]),
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="time"],
+  input[type="week"] {
+    font-size: 16px !important;
+  }
+
   .cw-editor-input-discussion {
-    font-size: 13px;
+    font-size: 16px;
     padding: 10px 12px;
     min-height: calc(1.5em + 20px);
   }
@@ -343,7 +365,7 @@ body {
     top: 10px;
     left: 12px;
     right: 12px;
-    font-size: 13px;
+    font-size: 16px;
   }
 
   .cw-discussion-composer-bar .cw-editor-shell-embedded {
