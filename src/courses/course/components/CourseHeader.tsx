@@ -60,8 +60,8 @@ export function CourseHeader({
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const dates = formatDateRange(startDate, endDate);
-  const backTo = isParent ? `/my/${orgSlug}` : coursesPath(orgSlug);
-  const backLabel = isParent ? "Back to this week" : "Back to courses";
+  const backTo = coursesPath(orgSlug);
+  const backLabel = "Back to courses";
 
   const openDetails = () => setDetailsOpen(true);
 

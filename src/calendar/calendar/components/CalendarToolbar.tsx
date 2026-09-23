@@ -8,10 +8,10 @@ import {
 import type { CalendarView } from "@/calendar/model/paths";
 
 const segmentIdle =
-  "inline-flex items-center gap-1.5 px-3 py-[9px] text-[13px] font-bold text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)] motion-reduce:transition-none";
+  "inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[13px] font-bold text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)] motion-reduce:transition-none";
 
 const segmentActive =
-  "inline-flex items-center gap-1.5 px-3 py-[9px] text-[13px] font-bold bg-[var(--green-tint)] text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)]";
+  "inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[13px] font-bold bg-[var(--green-tint)] text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)]";
 
 const groupClass =
   "inline-flex overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--surface)]";

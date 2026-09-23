@@ -24,7 +24,7 @@ export function DiscussionsPage() {
   }
 
   return (
-    <div className="px-5 py-8 md:px-8">
+    <div className="px-5 py-4 md:px-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1

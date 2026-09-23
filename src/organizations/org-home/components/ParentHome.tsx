@@ -45,7 +45,7 @@ export function ParentHome({
       : printThisWeekPath(orgSlug);
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8">
+    <div className="px-5 py-4 md:px-8">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1

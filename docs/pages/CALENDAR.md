@@ -36,7 +36,7 @@ Month, week, and day view of when work is **assigned** and **due**, plus lesson-
 
 ## Contents
 
-- Header: Calendar + period label; controls split into **prev/next** (pagination) and a separate **month/week/day** view segment (icons + labels)
+- Header (one compact row): **Calendar** title, period label, then **prev/next** and **month/week/day** view segment (icons + labels); **Add event** on the same row for staff Teacher view
 - Legend
 - Month grid, week calendar, or day list
 - Click a material → [MATERIAL](./MATERIAL.md); click a lesson plan block → [LESSON_PLAN](./LESSON_PLAN.md); click a day → this page with `?view=day`

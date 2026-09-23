@@ -116,14 +116,7 @@ export function AppRoutes() {
                 </RequireStaff>
               }
             />
-            <Route
-              path="courses"
-              element={
-                <RequireStaff>
-                  <CourseListPage />
-                </RequireStaff>
-              }
-            />
+            <Route path="courses" element={<CourseListPage />} />
             <Route path="courses/:courseId" element={<CoursePage />} />
             <Route
               path="courses/:courseId/settings"

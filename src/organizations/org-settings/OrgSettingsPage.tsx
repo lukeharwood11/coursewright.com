@@ -75,7 +75,7 @@ export function OrgSettingsPage() {
 
   if (!settings.organization || !settings.role) {
     return (
-      <div className="px-5 py-8 md:px-8">
+      <div className="px-5 py-4 md:px-8">
         <p className="text-[14.5px] text-[var(--ink-soft)]">
           Settings aren’t available right now.
         </p>
@@ -86,7 +86,7 @@ export function OrgSettingsPage() {
   const formSection = isFormTab(activeTab) ? activeTab : "organization";
 
   return (
-    <div className="px-5 py-8 md:px-8">
+    <div className="px-5 py-4 md:px-8">
       <div>
         <h1
           className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"

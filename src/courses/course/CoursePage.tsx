@@ -86,10 +86,10 @@ export function CoursePage() {
         </p>
         <p className="mt-4 text-[13px]">
           <Link
-            to={isParent ? `/my/${organization.slug}` : coursesPath(organization.slug)}
+            to={coursesPath(organization.slug)}
             className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
           >
-            {isParent ? `Back to ${organization.name}` : "Back to courses"}
+            Back to courses
           </Link>
         </p>
       </div>

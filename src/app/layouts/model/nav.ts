@@ -151,12 +151,6 @@ export function buildParentNav(
   const base = `/my/${orgSlug}`;
   const unreadAnnouncements = options?.unreadAnnouncements ?? 0;
   const unreadDiscussions = options?.unreadDiscussions ?? 0;
-  const courseChildren = childLinks(
-    lists.courses.map((course) => ({ id: course.id, label: course.title })),
-    (id) => `${base}/courses/${id}`,
-    `${base}/courses`,
-  );
-
   const sections: NavSection[] = [
     {
       id: "home",
@@ -188,17 +182,18 @@ export function buildParentNav(
       badgeCount: unreadDiscussions > 0 ? unreadDiscussions : undefined,
       children: [],
     },
-  ];
-
-  if (courseChildren.length > 0) {
-    sections.push({
+    {
       id: "courses",
       label: "Courses",
-      href: null,
+      href: `${base}/courses`,
       match: "prefix",
-      children: courseChildren,
-    });
-  }
+      children: childLinks(
+        lists.courses.map((course) => ({ id: course.id, label: course.title })),
+        (id) => `${base}/courses/${id}`,
+        `${base}/courses`,
+      ),
+    },
+  ];
 
   if (options?.showResources) {
     sections.push({

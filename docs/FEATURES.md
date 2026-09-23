@@ -402,7 +402,7 @@ Do **not** ship a separate “Export” product name in P0. Print *is* the path 
 
 **Student view:** Same home as a parent, for the one profile linked by `student_profiles.user_id`. Staff invite that email with a **student** invite (not the parent claim path).
 
-**Staff parent view (P0):** Owners, admins, and instructors get a **Teacher** / **Student view** control in org chrome (not parent-role or student-role users). **Student view** uses the same student chrome and read-only course / unit / material / print presentation. If that staff member has `parent_student_links` in the org, home is their real student home. If they are also the linked student account (`user_id`), home is that one profile. If neither, home is a preview (empty this-week, with a short explanation). Staff-only destinations (roster, course list, settings, material edit) return to org home while Student view is on. Default is Teacher. Print packets omit the answer key in Student view.
+**Staff parent view (P0):** Owners, admins, and instructors get a **Teacher** / **Student view** control in org chrome (not parent-role or student-role users). **Student view** uses the same student chrome and read-only course / unit / material / print presentation. If that staff member has `parent_student_links` in the org, home is their real student home. If they are also the linked student account (`user_id`), home is that one profile. If neither, home is a preview (empty this-week, with a short explanation). Staff-only destinations (roster, settings, material edit) return to org home while Student view is on. **Courses** list stays available (published courses only; no create). Default is Teacher. Print packets omit the answer key in Student view.
 
 **Links parents can receive:**
 

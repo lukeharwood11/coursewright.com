@@ -19,7 +19,7 @@ export function ActivityPage() {
   }
 
   return (
-    <div className="px-5 py-8 md:px-8">
+    <div className="px-5 py-4 md:px-8">
       <h1
         className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
         style={{ fontFamily: "var(--font-display)" }}

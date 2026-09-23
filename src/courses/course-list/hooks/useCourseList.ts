@@ -4,6 +4,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
+  familyVisibleCourses,
+  staffCanEdit,
+} from "@/app/layouts/model/viewMode";
+import {
   copyCourseFromCourse,
   courseQueryKeys,
   createCourse,
@@ -40,8 +44,9 @@ function serializeGradesParam(grades: string[]): string | null {
 }
 
 export function useCourseList() {
-  const { organization } = useOrgShell();
+  const { organization, role, parentPresentation } = useOrgShell();
   const [searchParams, setSearchParams] = useSearchParams();
+  const canCreate = staffCanEdit(role, parentPresentation);
 
   const queryText = searchParams.get("q") ?? "";
   const subject = searchParams.get("subject") ?? "";
@@ -64,7 +69,10 @@ export function useCourseList() {
     queryFn: () => getOrganization(organization.id),
   });
 
-  const allCourses = listQuery.data?.courses ?? [];
+  const visibleCourses = parentPresentation
+    ? familyVisibleCourses(listQuery.data?.courses ?? [])
+    : (listQuery.data?.courses ?? []);
+  const allCourses = visibleCourses;
   const filteredCourses = filterCourses(allCourses, {
     query: queryText,
     subject,
@@ -129,6 +137,7 @@ export function useCourseList() {
     catalogByCourseId: listQuery.data?.catalogByCourseId ?? {},
     loading: listQuery.isLoading,
     error: listQuery.error ? listQuery.error.message : null,
+    canCreate,
     query: queryText,
     setQuery,
     subject,
@@ -150,11 +159,12 @@ export function useCourseList() {
 }
 
 export function useCreateCourse() {
-  const { organization } = useOrgShell();
+  const { organization, role, parentPresentation } = useOrgShell();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
-  const open = searchParams.get("new") === "1";
+  const canCreate = staffCanEdit(role, parentPresentation);
+  const open = canCreate && searchParams.get("new") === "1";
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -264,6 +274,7 @@ export function useCreateCourse() {
   });
 
   function setOpen(next: boolean) {
+    if (!canCreate) return;
     const nextParams = new URLSearchParams(searchParams);
     if (next) nextParams.set("new", "1");
     else {
@@ -292,6 +303,7 @@ export function useCreateCourse() {
   return {
     open,
     setOpen,
+    canCreate,
     title,
     setTitle,
     description,

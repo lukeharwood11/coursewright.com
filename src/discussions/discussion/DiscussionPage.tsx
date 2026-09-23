@@ -116,7 +116,7 @@ export function DiscussionPage() {
   };
 
   return (
-    <div className="flex h-[calc(100dvh-6rem)] max-h-[calc(100dvh-6rem)] flex-col overflow-hidden bg-[var(--paper)]">
+    <div className="flex h-full flex-col overflow-hidden bg-[var(--paper)]">
       <DetailPageHeader
         backTo={discussionsHref}
         backLabel="Back to discussions"

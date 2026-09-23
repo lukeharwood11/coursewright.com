@@ -15,7 +15,7 @@ export function FeedbackPage() {
   }
 
   return (
-    <div className="w-full min-w-0 max-w-lg px-5 py-8 md:px-8">
+    <div className="w-full min-w-0 max-w-lg px-5 py-4 md:px-8">
       <h1
         className="text-[24px] font-semibold text-[var(--ink)]"
         style={{ fontFamily: "var(--font-display)" }}

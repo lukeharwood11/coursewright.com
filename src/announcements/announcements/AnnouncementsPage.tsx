@@ -42,7 +42,7 @@ export function AnnouncementsPage() {
 
   if (page.isParent) {
     return (
-      <div className="px-5 py-8 md:px-8">
+      <div className="px-5 py-4 md:px-8">
         <h1
           className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
           style={{ fontFamily: "var(--font-display)" }}
@@ -64,7 +64,7 @@ export function AnnouncementsPage() {
   const groups = groupAnnouncementsByAvailability(page.announcements, page.today);
 
   return (
-    <div className="px-5 py-8 md:px-8">
+    <div className="px-5 py-4 md:px-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1

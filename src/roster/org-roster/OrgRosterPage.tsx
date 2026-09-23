@@ -22,7 +22,7 @@ export function OrgRosterPage() {
   }, [roster.organization.name]);
 
   return (
-    <div className="space-y-6 px-5 pt-6 pb-8 md:px-8">
+    <div className="space-y-6 px-5 py-4 md:px-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1
           className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"

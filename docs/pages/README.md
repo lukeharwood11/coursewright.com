@@ -100,4 +100,4 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Print whole course | Explicitly out of scope for initial release |
 | Student accounts / cross-org families | **P2** |
 
-**Open TBDs that match FEATURES opens** (do not invent): family display name / merge-split UX; account preference fields; marketing/legal copy; soft-delete/versioning chrome density; parent visibility of course list.
+**Open TBDs that match FEATURES opens** (do not invent): family display name / merge-split UX; account preference fields; marketing/legal copy; soft-delete/versioning chrome density.

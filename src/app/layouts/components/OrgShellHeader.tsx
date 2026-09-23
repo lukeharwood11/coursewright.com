@@ -29,7 +29,7 @@ export function OrgShellHeader() {
 
   return (
     <header
-      className="cw-org-chrome flex flex-wrap items-center gap-3 border-b border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 md:px-6"
+      className="cw-org-chrome flex shrink-0 flex-wrap items-center gap-3 border-b border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 md:px-6"
       style={chromeStyle}
     >
       <button

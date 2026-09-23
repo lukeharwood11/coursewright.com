@@ -103,7 +103,7 @@ export function ResourcesPage() {
 
   if (page.notFound) {
     return (
-      <div className="px-5 py-8 md:px-8">
+      <div className="px-5 py-4 md:px-8">
         <h1
           className="text-[24px] font-semibold text-[var(--ink)]"
           style={{ fontFamily: "var(--font-display)" }}
@@ -249,7 +249,7 @@ export function ResourcesPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100dvh-4.5rem)] flex-col px-5 py-6 md:px-8">
+    <div className="flex h-full min-h-0 flex-col px-5 py-4 md:px-8">
       <ResourcePathBar
         orgSlug={page.organization.slug}
         currentFolder={page.currentFolder}

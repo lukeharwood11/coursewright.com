@@ -33,7 +33,15 @@ test("staff and parent nav include announcements and discussions, not activity",
   const parent = buildParentNav("coop", { courses: [], classes: [] });
   assert.deepEqual(
     parent.map((section) => section.id),
-    ["home", "calendar", "announcements", "discussions"],
+    ["home", "calendar", "announcements", "discussions", "courses"],
+  );
+  assert.equal(
+    parent.find((section) => section.id === "courses")?.href,
+    "/my/coop/courses",
+  );
+  assert.deepEqual(
+    parent.find((section) => section.id === "courses")?.children ?? [],
+    [],
   );
   assert.equal(
     parent.find((section) => section.id === "announcements")?.href,
@@ -150,6 +158,22 @@ test("account nav keeps an org icon beside the name", () => {
   const orgs = nav[0]?.children ?? [];
   assert.equal(orgs[0]?.iconUrl, "https://example.com/icon.png");
   assert.equal(orgs[1]?.iconUrl, undefined);
+});
+
+test("parent courses nav links to the list and nests enrolled courses", () => {
+  const parent = buildParentNav("coop", {
+    courses: [
+      { id: "1", title: "Algebra" },
+      { id: "2", title: "History" },
+    ],
+    classes: [],
+  });
+  const courses = parent.find((section) => section.id === "courses");
+  assert.equal(courses?.href, "/my/coop/courses");
+  assert.deepEqual(
+    courses?.children.map((child) => child.label),
+    ["Algebra", "History"],
+  );
 });
 
 test("parent nav includes resources when the parent can see any", () => {

@@ -37,7 +37,7 @@ export function ActivityPushChrome({ showPrompt }: { showPrompt: boolean }) {
   const blocked = push.permission === "denied";
 
   return (
-    <div className="cw-org-chrome border-b border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 md:px-6">
+    <div className="cw-org-chrome shrink-0 border-b border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 md:px-6">
       <div className="flex flex-wrap items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-[14px] font-bold text-[var(--ink)]">

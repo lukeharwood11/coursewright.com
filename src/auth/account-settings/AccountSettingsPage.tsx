@@ -22,7 +22,7 @@ export function AccountSettingsPage() {
   }
 
   return (
-    <div className="max-w-lg px-5 py-8 md:px-8">
+    <div className="max-w-lg px-5 py-4 md:px-8">
       <h1
         className="text-[24px] font-semibold text-[var(--ink)]"
         style={{ fontFamily: "var(--font-display)" }}

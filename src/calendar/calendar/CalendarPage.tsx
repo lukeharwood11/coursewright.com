@@ -20,15 +20,22 @@ export function CalendarPage() {
   }, []);
 
   return (
-    <div className="px-5 py-8 md:px-8">
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3">
-        <div className="flex w-full basis-full items-center justify-between gap-3">
-          <h1
-            className="min-w-0 text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            Calendar
-          </h1>
+    <div className="flex h-full flex-col overflow-hidden px-5 py-4 md:px-8">
+      <header className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2">
+        <h1
+          className="min-w-0 text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          Calendar
+        </h1>
+        <p className="min-w-0 text-[14px] text-[var(--ink-soft)]">{page.periodLabel}</p>
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
+          <CalendarToolbar
+            view={page.view}
+            onPrev={page.goPrev}
+            onNext={page.goNext}
+            onViewChange={page.setView}
+          />
           {page.parentMode ? null : (
             <ButtonLink
               to={newEventPath(page.organization.slug, { date: page.focusDate })}
@@ -39,16 +46,9 @@ export function CalendarPage() {
             </ButtonLink>
           )}
         </div>
-        <p className="text-[14px] text-[var(--ink-soft)]">{page.periodLabel}</p>
-        <CalendarToolbar
-          view={page.view}
-          onPrev={page.goPrev}
-          onNext={page.goNext}
-          onViewChange={page.setView}
-        />
-      </div>
+      </header>
 
-      <div className="mt-4">
+      <div className="mt-3 shrink-0">
         <CourseLegend
           courses={page.courses}
           hiddenCourseIds={page.hiddenCourseIds}
@@ -59,7 +59,7 @@ export function CalendarPage() {
       {page.loading ? (
         <PageLoading embedded label="Loading calendar…" />
       ) : (
-        <div className="mt-5">
+        <div className="mt-3 min-h-0 flex-1 overflow-auto">
           {page.view === "week" ? (
             <WeekCalendar
               orgSlug={page.organization.slug}

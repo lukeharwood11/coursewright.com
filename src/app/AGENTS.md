@@ -4,7 +4,7 @@ Delivery shell: router, providers, layouts, auth/role gates.
 
 ## Scope
 
-- `App.tsx`, `router.tsx`, `gates/`, `ScrollToTop` (reset window scroll on pathname change)
+- `App.tsx`, `router.tsx`, `gates/`, `ScrollToTop` (reset shell main or window scroll on pathname change)
 - Layouts: account shell (`/my`), org shells (`layouts/`)
 - Catch-all error UI + boundary (`error/`)
 - Route guards (UX only — RLS is the real gate)

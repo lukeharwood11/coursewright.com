@@ -19,7 +19,7 @@ export function CourseListPage() {
   }, [list.organization.name]);
 
   return (
-    <div className="px-5 py-8 md:px-8">
+    <div className="px-5 py-4 md:px-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1
@@ -29,7 +29,7 @@ export function CourseListPage() {
             Courses
           </h1>
         </div>
-        {!create.open ? (
+        {list.canCreate && !create.open ? (
           <Button onClick={() => create.setOpen(true)}>
             <PlusIcon className="h-5 w-5" aria-hidden />
             Create course
@@ -91,8 +91,9 @@ export function CourseListPage() {
 
       {!list.loading && list.allCourseCount === 0 && !create.open ? (
         <p className="mt-6 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-          No courses yet. Create one from scratch, or copy units and materials
-          from another course. You don’t need a roster to print.
+          {list.canCreate
+            ? "No courses yet. Create one from scratch, or copy units and materials from another course. You don’t need a roster to print."
+            : "No courses to show yet. When you’re enrolled in a published course, it will show up here."}
         </p>
       ) : null}
 

@@ -36,7 +36,7 @@ export function OrgSidebar() {
   return (
     <>
       <aside
-        className={`cw-org-chrome hidden h-screen shrink-0 border-r border-[var(--line-soft)] bg-[var(--surface)] md:sticky md:top-0 md:block motion-reduce:transition-none ${
+        className={`cw-org-chrome hidden h-dvh shrink-0 border-r border-[var(--line-soft)] bg-[var(--surface)] md:block motion-reduce:transition-none ${
           collapsed ? "w-[4.25rem]" : "w-[16.5rem]"
         } transition-[width] duration-200`}
         style={chromeStyle}

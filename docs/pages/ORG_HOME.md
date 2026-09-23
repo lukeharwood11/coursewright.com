@@ -37,7 +37,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 - **This week**: week label; **Important now** and dated-material counts for courses they can see (staff sees those materials, including unpublished).
 - **People**: student + class counts → [ORG_ROSTER](./ORG_ROSTER.md).
 - Switch org returns to org picker.
-- **Teacher / Student view** in the header: Student view swaps this dashboard for the student home (and student chrome). Staff-only pages (roster, course list, settings) return here while Student view is on.
+- **Teacher / Student view** in the header: Student view swaps this dashboard for the student home (and student chrome). Staff-only pages (roster, settings) return here while Student view is on; **Courses** stays available as the family list.
 - **Search** in product chrome (staff, Teacher view): Postgres FTS for courses and materials, plus staff pages by title; overlay only; dedicated route still TBD.
 - **P1:** templates in chrome.
 

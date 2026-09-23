@@ -42,21 +42,25 @@ export function MonthCalendar({
   schoolDays?: readonly SchoolDay[];
 }) {
   const dates = datesInRange(gridStart, gridEnd);
+  const weekCount = Math.max(1, Math.ceil(dates.length / 7));
   const visibleDays = lessonDays.filter((day) => !hiddenCourseIds.has(day.courseId));
   const visibleChips = chips.filter((chip) => !hiddenCourseIds.has(chip.courseId));
   const dayEvents = visibleEvents(events, hiddenCourseIds);
   const headings = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <div>
-      <div className="mb-1 grid grid-cols-7 gap-1">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="mb-1 grid shrink-0 grid-cols-7 gap-1">
         {headings.map((label) => (
           <p key={label} className="px-1 text-[11.5px] font-bold text-[var(--ink-faint)]">
             {label}
           </p>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-1">
+      <div
+        className="grid min-h-0 flex-1 grid-cols-7 gap-1"
+        style={{ gridTemplateRows: `repeat(${weekCount}, minmax(0, 1fr))` }}
+      >
         {dates.map((date) => {
           const inMonth = date >= monthStart && date <= monthEnd;
           const schoolDay = inMonth && isOrgSchoolDay(date, schoolDays);
@@ -65,7 +69,7 @@ export function MonthCalendar({
           return (
             <div
               key={date}
-              className={`relative min-h-[6.5rem] rounded-[8px] border p-1.5 ${
+              className={`relative min-h-0 overflow-hidden rounded-[8px] border p-1.5 ${
                 inMonth
                   ? schoolDay
                     ? "cw-calendar-school-day border-[var(--line-soft)]"
