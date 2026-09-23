@@ -14,6 +14,7 @@ Org-scoped **Resources**: nested folders and document / link / file items. Not c
 - Tables are `org_resource_*`. Do **not** insert `materials` rows.
 - Reuse Lexical page editor, org `files` / Storage, and print packet rendering.
 - Access is membership + ACL — not enrollment / `parent_student_links`.
+- Parent and student browse lists a visible item or folder at the Resources root when its parent folder is not visible. Use those RLS rows as-is; do not add another access check.
 - Soft-archive via `archived_at`. Never hard-delete user content from the app.
 - Page folders: `resources/` (root + folder browse), `resource/` (view), `resource-edit/` (edit). Shared `model/` + `databridge/`.
 

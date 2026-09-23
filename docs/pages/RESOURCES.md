@@ -13,7 +13,7 @@ Org-scoped **Resources** home: a folder view of top-level folders and unfiled it
 
 ## Behavior
 
-- List non-archived folders and items the actor can see (RLS: membership + folder/item ACL).
+- List non-archived folders and items the actor can see (RLS: membership + folder/item ACL). At the library root, parents and students also see a shared item — and a folder they can open — when its parent folder is hidden from them. Opening that item goes back to Resources, because the staff-only folder stays closed. Staff still see the real folder tree.
 - The screen is one folder at a time: folders first, then items. Click a folder **icon** to expand that folder in place (nested folders expand the same way). Click a name to open the folder or item.
 - Path bar: **Resources** at the root. Type filter is a quiet control: All / Documents / Files / Links. Folders stay visible while a type filter is on.
 - Editors (staff, or write-grant on this location): **+ New** at the top (same segment look as the type filter). Menu: **Folder**, then **Document**, **Link**, and **Upload files**.

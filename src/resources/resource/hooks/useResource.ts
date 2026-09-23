@@ -76,6 +76,9 @@ export function useResource() {
     queryFn: () => listMyResourceGrants(organization.id, user.id),
   });
 
+  const folderPending =
+    item?.folderId != null && folderQuery.data === undefined && !folderQuery.isError;
+
   const foldersById = new Map<number, FolderAclSource>();
   for (const folder of ancestorsQuery.data ?? []) foldersById.set(folder.id, folder);
   if (folderQuery.data) foldersById.set(folderQuery.data.id, folderQuery.data);
@@ -147,10 +150,11 @@ export function useResource() {
     ancestors: ancestorsQuery.data ?? [],
     canEdit: caps.canEdit,
     isStaff,
-    loading: itemQuery.isLoading,
+    loading: itemQuery.isLoading || folderPending,
     notFound: !itemQuery.isLoading && !item,
     error:
       itemQuery.error?.message ??
+      folderQuery.error?.message ??
       visibility.error?.message ??
       archive.error?.message ??
       move.error?.message ??

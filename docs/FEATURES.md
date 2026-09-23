@@ -636,7 +636,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 
 **Publish:** unpublished items are editors-only. Published items follow effective ACL (folder inherit walk, then item override).
 
-**Browse:** check rows to publish, unpublish, move, remove, print (one packet), or download. One file downloads directly; several files download as a zip. Folders in the selection move or remove with the rest — publish, print, and download apply to selected items only.
+**Browse:** check rows to publish, unpublish, move, remove, print (one packet), or download. One file downloads directly; several files download as a zip. Folders in the selection move or remove with the rest — publish, print, and download apply to selected items only. Parents and students see a shared item at the Resources root when they can open it and its folder is one they cannot open (including a legacy item shared with both audiences inside a staff-only folder). A folder they can open whose parent they cannot is listed there too. Staff still see the real folder tree. Sharing the item does not share that folder and does not require moving the item to root.
 
 **Access:** **Parents can see** and **Students can see** are separate. Org staff can always edit. **Specific parents** and **specific students** can be **Can view** or **Can edit**, and that permission can be changed later. Manage access uses a Parents tab and a Students tab, with a summary of both audiences at the bottom. Student profiles are not grantees — grants are org memberships.
 

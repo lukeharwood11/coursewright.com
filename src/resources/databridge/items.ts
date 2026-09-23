@@ -113,6 +113,24 @@ export async function listResourceItems(args: {
   });
 }
 
+/** Every non-archived item this actor can select. RLS still applies. */
+export async function listOrgResourceItems(
+  organizationId: number,
+): Promise<ResourceItemRecord[]> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("org_resource_items")
+    .select(ITEM_SELECT)
+    .eq("organization_id", organizationId)
+    .is("archived_at", null)
+    .order("title");
+  if (error) throw new Error(error.message);
+  return (data ?? []).flatMap((row) => {
+    const item = toItem(row);
+    return item ? [item] : [];
+  });
+}
+
 export async function getResourceItem(
   id: number,
 ): Promise<ResourceItemRecord | null> {

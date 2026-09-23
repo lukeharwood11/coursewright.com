@@ -10,6 +10,7 @@ import {
   createResourceFolder,
   getResourceFolder,
   listChildFolders,
+  listOrgResourceFolders,
   loadFolderAncestors,
   resourceFolderQueryKeys,
   updateResourceFolder,
@@ -17,6 +18,7 @@ import {
 import {
   archiveResourceItem,
   createResourceItem,
+  listOrgResourceItems,
   listResourceItems,
   resourceItemQueryKeys,
   updateResourceItem,
@@ -34,6 +36,7 @@ import {
   parseResourceTypeFilter,
   type ResourceTypeFilter,
 } from "@/resources/model/paths";
+import { resourceBrowseChildren } from "@/resources/model/tree";
 import type { ResourceVisibility } from "@/resources/model/kinds";
 import {
   validateFolderName,
@@ -61,16 +64,28 @@ export function useResourcesBrowse() {
   const isStaff = role ? isStaffRole(role) : false;
   const canCreateStaff = staffCanEdit(role, parentPresentation);
   const typeFilter = parseResourceTypeFilter(searchParams.get("type"));
+  // Parents and students cannot select staff-only ancestors. At the library
+  // root, load every row RLS already allows and surface ones whose folder
+  // is missing. Staff keep the real folder tree.
+  const listSharedAtRoot = !isStaff && folderId == null;
 
   const foldersQuery = useQuery({
-    queryKey: resourceFolderQueryKeys.children(organization.id, folderId),
+    queryKey: listSharedAtRoot
+      ? resourceFolderQueryKeys.all(organization.id)
+      : resourceFolderQueryKeys.children(organization.id, folderId),
     queryFn: () =>
-      listChildFolders({ organizationId: organization.id, parentId: folderId }),
+      listSharedAtRoot
+        ? listOrgResourceFolders(organization.id)
+        : listChildFolders({ organizationId: organization.id, parentId: folderId }),
   });
   const itemsQuery = useQuery({
-    queryKey: resourceItemQueryKeys.list(organization.id, folderId),
+    queryKey: listSharedAtRoot
+      ? resourceItemQueryKeys.visible(organization.id)
+      : resourceItemQueryKeys.list(organization.id, folderId),
     queryFn: () =>
-      listResourceItems({ organizationId: organization.id, folderId }),
+      listSharedAtRoot
+        ? listOrgResourceItems(organization.id)
+        : listResourceItems({ organizationId: organization.id, folderId }),
   });
   const folderQuery = useQuery({
     queryKey: resourceFolderQueryKeys.detail(folderId ?? 0),
@@ -119,7 +134,24 @@ export function useResourcesBrowse() {
         });
   const canEditHere = folderId == null ? canCreateStaff : folderCaps.canEdit;
 
-  const folders = (foldersQuery.data ?? []).map((folder) => ({
+  const listed = useMemo(() => {
+    const folders = foldersQuery.data ?? [];
+    const items = itemsQuery.data ?? [];
+    if (!listSharedAtRoot) return { folders, items };
+    const placed = resourceBrowseChildren({
+      folders,
+      items,
+      parentId: null,
+    });
+    return {
+      folders: [...placed.folders].sort(
+        (a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name),
+      ),
+      items: placed.items,
+    };
+  }, [listSharedAtRoot, foldersQuery.data, itemsQuery.data]);
+
+  const folders = listed.folders.map((folder) => ({
     folder,
     ...folderCapabilities({
       actor,
@@ -129,7 +161,7 @@ export function useResourcesBrowse() {
       archived: Boolean(folder.archivedAt),
     }),
   }));
-  const items = (itemsQuery.data ?? [])
+  const items = listed.items
     .filter((item) => typeFilter === "all" || item.type === typeFilter)
     .map((item) => ({
       item,

@@ -71,7 +71,9 @@ export function ResourcePage() {
     );
   }
 
-  const backTo = resourceBrowsePath(page.organization.slug, page.item.folderId);
+  const backFolderId =
+    page.item.folderId != null && page.folder == null ? null : page.item.folderId;
+  const backTo = resourceBrowsePath(page.organization.slug, backFolderId);
   const backLabel = page.folder?.name ?? "Resources";
 
   return (

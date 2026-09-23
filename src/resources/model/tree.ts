@@ -86,6 +86,36 @@ export function buildFolderOutline(
   return roots;
 }
 
+/**
+ * Rows to show inside `parentId` (null = Resources root).
+ *
+ * Direct children stay put. At the root, a folder or item whose parent is
+ * missing from `folders` is included too. Callers pass only rows the actor
+ * can already select, so a shared item under a staff-only folder shows up
+ * without a second access check and without moving it.
+ */
+export function resourceBrowseChildren<
+  F extends { id: number; parentId: number | null },
+  I extends { folderId: number | null },
+>(args: {
+  folders: F[];
+  items: I[];
+  parentId: number | null;
+}): { folders: F[]; items: I[] } {
+  const visibleFolderIds = new Set(args.folders.map((folder) => folder.id));
+  const folders = args.folders.filter((folder) => {
+    if (folder.parentId === args.parentId) return true;
+    if (args.parentId != null) return false;
+    return folder.parentId != null && !visibleFolderIds.has(folder.parentId);
+  });
+  const items = args.items.filter((item) => {
+    if (item.folderId === args.parentId) return true;
+    if (args.parentId != null) return false;
+    return item.folderId != null && !visibleFolderIds.has(item.folderId);
+  });
+  return { folders, items };
+}
+
 /** Ancestor folder ids from root down to (but not including) `folderId`. */
 export function folderAncestorIds(
   foldersById: Map<number, { id: number; parentId: number | null }>,
