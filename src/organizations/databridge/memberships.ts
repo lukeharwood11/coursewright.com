@@ -2,6 +2,10 @@ import {
   brandIconPublicUrl,
   chromeAccentFromHex,
 } from "@/organizations/model/brand";
+import {
+  DEFAULT_ORG_FEATURES,
+  type OrgFeatures,
+} from "@/organizations/model/features";
 import type { AssignableMembershipRole, OrgRole } from "@/organizations/model/role";
 import { EDITABLE_MEMBERSHIP_ROLES, EDITABLE_STAFF_ROLES, parseOrgRole } from "@/organizations/model/role";
 import { parseOrgTypeOrDefault, type OrgType } from "@/organizations/model/orgType";
@@ -25,6 +29,8 @@ export type OrganizationSummary = {
   phone: string | null;
   accentColor: string | null;
   iconUrl: string | null;
+  /** Defaults all on; org shell overlays organization_features. */
+  features: OrgFeatures;
 };
 
 type BrandingEmbed = {
@@ -62,6 +68,8 @@ export function toOrganizationSummary(row: OrganizationSummaryRow): Organization
     phone: row.phone ?? null,
     accentColor: brandingAccent(branding),
     iconUrl: brandingIconUrl(branding),
+    // Features load separately in the org shell (defaults all on).
+    features: { ...DEFAULT_ORG_FEATURES },
   };
 }
 
@@ -128,6 +136,7 @@ export const orgQueryKeys = {
   detail: (id: number) => ["organizations", "detail", id] as const,
   people: (orgId: number) => ["organizations", "people", orgId] as const,
   branding: (orgId: number) => ["organizations", "branding", orgId] as const,
+  features: (orgId: number) => ["organizations", "features", orgId] as const,
 };
 
 export async function listMyMemberships(userId: string): Promise<OrgMembership[]> {

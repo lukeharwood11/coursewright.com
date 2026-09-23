@@ -5,6 +5,7 @@ import { Button, ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import type { StudentSummary } from "@/roster/databridge/students";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
@@ -24,10 +25,14 @@ type PendingClassRemove = {
 
 export function ClassRosterPage() {
   const roster = useClassRoster();
+  const { organization } = useOrgShell();
   const [pendingRemove, setPendingRemove] = useState<PendingClassRemove | null>(null);
+  const showDiscussions = organization.features.discussions;
+  const showAnnouncements = organization.features.announcements;
+  const showEvents = organization.features.events;
   const eventsQuery = useClassEvents(
     roster.classGroup?.id ?? NaN,
-    Boolean(roster.classGroup),
+    Boolean(roster.classGroup) && showEvents,
   );
   useToastOnError(roster.error);
 
@@ -80,28 +85,32 @@ export function ClassRosterPage() {
         title={roster.classGroup.title}
         titleTrailing={
           <div className="flex shrink-0 flex-nowrap items-center gap-2">
-            <ButtonLink
-              variant="secondary"
-              className="max-xl:hidden shrink-0"
-              to={newDiscussionPath(roster.organization.slug, {
-                audience: "class",
-                classId: roster.classGroup.id,
-              })}
-            >
-              <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
-              Start a discussion
-            </ButtonLink>
-            <ButtonLink
-              variant="secondary"
-              className="max-xl:hidden shrink-0"
-              to={newAnnouncementPath(roster.organization.slug, {
-                audience: "class",
-                classId: roster.classGroup.id,
-              })}
-            >
-              <MegaphoneIcon className="h-5 w-5" aria-hidden />
-              Create Announcement
-            </ButtonLink>
+            {showDiscussions ? (
+              <ButtonLink
+                variant="secondary"
+                className="max-xl:hidden shrink-0"
+                to={newDiscussionPath(roster.organization.slug, {
+                  audience: "class",
+                  classId: roster.classGroup.id,
+                })}
+              >
+                <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden />
+                Start a discussion
+              </ButtonLink>
+            ) : null}
+            {showAnnouncements ? (
+              <ButtonLink
+                variant="secondary"
+                className="max-xl:hidden shrink-0"
+                to={newAnnouncementPath(roster.organization.slug, {
+                  audience: "class",
+                  classId: roster.classGroup.id,
+                })}
+              >
+                <MegaphoneIcon className="h-5 w-5" aria-hidden />
+                Create Announcement
+              </ButtonLink>
+            ) : null}
             <ClassActionsMenu
               orgSlug={roster.organization.slug}
               classId={roster.classGroup.id}
@@ -112,12 +121,14 @@ export function ClassRosterPage() {
         }
       />
       <div className="space-y-6 px-5 pt-4 pb-6 md:px-8">
-      <ClassEventsSection
-        orgSlug={roster.organization.slug}
-        classId={roster.classGroup.id}
-        events={eventsQuery.data ?? []}
-        canEdit
-      />
+      {showEvents ? (
+        <ClassEventsSection
+          orgSlug={roster.organization.slug}
+          classId={roster.classGroup.id}
+          events={eventsQuery.data ?? []}
+          canEdit
+        />
+      ) : null}
       <ClassLeadsSection
         orgSlug={roster.organization.slug}
         leads={roster.leads}

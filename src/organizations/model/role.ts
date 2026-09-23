@@ -60,6 +60,22 @@ export function canManageBranding(role: OrgRole): boolean {
   return role === "owner";
 }
 
+/** Feature customizations are owner-only. Admins see them read-only. */
+export function canManageCustomizations(role: OrgRole): boolean {
+  return role === "owner";
+}
+
+/**
+ * Panel Save/Cancel on organization settings.
+ * On Customizations, only owners see that pair — a read-only admin
+ * would otherwise get a disabled Save with nothing on this panel to save.
+ */
+export function showOrgSettingsFormActions(role: OrgRole, tab: string): boolean {
+  if (!canManageOrgSettings(role)) return false;
+  if (tab === "customizations") return canManageCustomizations(role);
+  return true;
+}
+
 /** Owners and admins invite collaborators. Instructors cannot. */
 export function canInviteStaff(role: OrgRole): boolean {
   return role === "owner" || role === "admin";

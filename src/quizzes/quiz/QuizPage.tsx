@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { PrinterIcon } from "@heroicons/react/24/outline";
+import {
+  CheckIcon,
+  EyeSlashIcon,
+  PencilSquareIcon,
+  PrinterIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { Button, ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
@@ -117,6 +123,7 @@ export function QuizPage() {
                 to={quizEditPath(pathArgs)}
                 state={quizNavState}
               >
+                <PencilSquareIcon className="h-4 w-4" aria-hidden />
                 Edit
               </ButtonLink>
             ) : null}
@@ -134,6 +141,7 @@ export function QuizPage() {
               disabled={page.publish.isPending}
               onClick={() => page.publish.mutate("published")}
             >
+              <CheckIcon className="h-4 w-4" aria-hidden />
               {page.publish.isPending ? "Publishing…" : "Publish"}
             </Button>
           </div>
@@ -214,6 +222,7 @@ export function QuizPage() {
               disabled={page.publish.isPending}
               onClick={() => page.publish.mutate("unpublished")}
             >
+              <EyeSlashIcon className="h-4 w-4" aria-hidden />
               Unpublish
             </Button>
           </div>
@@ -221,6 +230,7 @@ export function QuizPage() {
         {page.canEdit ? (
           <div className="mt-4">
             <Button variant="secondary" onClick={() => setConfirmRemove(true)}>
+              <TrashIcon className="h-4 w-4" aria-hidden />
               Remove quiz
             </Button>
           </div>

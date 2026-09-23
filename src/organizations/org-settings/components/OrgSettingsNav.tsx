@@ -1,5 +1,6 @@
 import type { ComponentType, SVGProps } from "react";
 import {
+  AdjustmentsHorizontalIcon,
   BuildingOffice2Icon,
   CreditCardIcon,
   IdentificationIcon,
@@ -7,6 +8,7 @@ import {
   UsersIcon,
 } from "@heroicons/react/24/outline";
 import {
+  AdjustmentsHorizontalIcon as AdjustmentsHorizontalSolidIcon,
   BuildingOffice2Icon as BuildingOffice2SolidIcon,
   CreditCardIcon as CreditCardSolidIcon,
   IdentificationIcon as IdentificationSolidIcon,
@@ -19,6 +21,7 @@ export type OrgSettingsTabId =
   | "organization"
   | "profile"
   | "branding"
+  | "customizations"
   | "collaborators"
   | "billing";
 
@@ -49,6 +52,12 @@ const ALL_TABS: OrgSettingsTab[] = [
     label: "Branding",
     outline: PaintBrushIcon,
     solid: PaintBrushSolidIcon,
+  },
+  {
+    id: "customizations",
+    label: "Customizations",
+    outline: AdjustmentsHorizontalIcon,
+    solid: AdjustmentsHorizontalSolidIcon,
   },
   {
     id: "collaborators",

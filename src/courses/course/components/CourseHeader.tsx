@@ -9,6 +9,7 @@ import { Badge } from "@/ui/Badge";
 import { ButtonLink } from "@/ui/Button";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PublishedBadge } from "@/ui/PublishedBadge";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { formatDateRange } from "@/courses/model/dates";
@@ -58,10 +59,13 @@ export function CourseHeader({
   isParent: boolean;
   onShare: () => void;
 }) {
+  const { organization } = useOrgShell();
   const [detailsOpen, setDetailsOpen] = useState(false);
   const dates = formatDateRange(startDate, endDate);
   const backTo = coursesPath(orgSlug);
   const backLabel = "Back to courses";
+  const showDiscussions = organization.features.discussions;
+  const showAnnouncements = organization.features.announcements;
 
   const openDetails = () => setDetailsOpen(true);
 
@@ -92,7 +96,7 @@ export function CourseHeader({
         }
         titleTrailing={
           <div className="flex shrink-0 flex-nowrap items-center gap-2">
-            {canEdit || isParent ? (
+            {showDiscussions && (canEdit || isParent) ? (
               <ButtonLink
                 variant="secondary"
                 className="max-xl:hidden shrink-0"
@@ -105,7 +109,7 @@ export function CourseHeader({
                 Start a discussion
               </ButtonLink>
             ) : null}
-            {canEdit ? (
+            {showAnnouncements && canEdit ? (
               <ButtonLink
                 variant="secondary"
                 className="max-xl:hidden shrink-0"

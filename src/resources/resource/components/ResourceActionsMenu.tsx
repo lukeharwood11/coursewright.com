@@ -6,6 +6,7 @@ import {
   EllipsisHorizontalIcon,
   PencilSquareIcon,
   PrinterIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { AnchoredPopup } from "@/ui/AnchoredPopup";
 import {
@@ -26,6 +27,7 @@ export function ResourceActionsMenu({
   isStaff,
   onMove,
   onAccess,
+  onRemove,
   className,
 }: {
   orgSlug: string;
@@ -34,6 +36,7 @@ export function ResourceActionsMenu({
   isStaff: boolean;
   onMove: () => void;
   onAccess: () => void;
+  onRemove: () => void;
   className?: string;
 }) {
   const menuId = useId();
@@ -111,6 +114,18 @@ export function ResourceActionsMenu({
               Manage access
             </button>
           ) : null}
+          <button
+            type="button"
+            role="menuitem"
+            className={`${itemClassName} text-[var(--amber-deep)]`}
+            onClick={() => {
+              setOpen(false);
+              onRemove();
+            }}
+          >
+            <TrashIcon className="h-4 w-4 shrink-0" aria-hidden />
+            Remove
+          </button>
         </div>
       </AnchoredPopup>
     </>

@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PencilSquareIcon, PrinterIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
-import { Button, ButtonLink } from "@/ui/Button";
+import { ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
@@ -117,6 +117,7 @@ export function ResourcePage() {
                 isStaff={page.isStaff}
                 onMove={() => setMoveOpen(true)}
                 onAccess={() => setAccessOpen(true)}
+                onRemove={() => setConfirmRemove(true)}
               />
             ) : null}
           </div>
@@ -187,18 +188,6 @@ export function ResourcePage() {
           pending={page.visibilityPending}
           onUnpublish={() => page.unpublish()}
         />
-
-        {page.canEdit ? (
-          <div className="mt-8">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setConfirmRemove(true)}
-            >
-              Remove
-            </Button>
-          </div>
-        ) : null}
       </div>
 
       <MoveResourceDialog

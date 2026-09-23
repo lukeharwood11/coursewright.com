@@ -1,4 +1,9 @@
 import { useState } from "react";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CheckIcon,
+} from "@heroicons/react/24/outline";
 import { formatSubmittedAt } from "@/submissions/model/dueInstant";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
@@ -75,6 +80,7 @@ export function QuizGradeWalkthrough({
           </p>
         </div>
         <Button type="button" variant="secondary" onClick={onBack}>
+          <ArrowLeftIcon className="h-4 w-4" aria-hidden />
           All submissions
         </Button>
       </div>
@@ -134,9 +140,11 @@ export function QuizGradeWalkthrough({
       </ol>
       <div className="mt-4 flex flex-wrap gap-2">
         <Button type="button" variant="secondary" disabled={!ready || saving} onClick={() => save(false)}>
+          <CheckIcon className="h-4 w-4" aria-hidden />
           {saving ? "Saving…" : "Save grade"}
         </Button>
         <Button type="button" disabled={!ready || saving || !hasNext} onClick={() => save(true)}>
+          <ArrowRightIcon className="h-4 w-4" aria-hidden />
           {hasNext ? "Save and next" : "No more waiting"}
         </Button>
       </div>

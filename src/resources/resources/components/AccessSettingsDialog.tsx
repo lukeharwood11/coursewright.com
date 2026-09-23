@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckIcon, PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { Select } from "@/ui/Select";
 import { listOrgPeople } from "@/organizations/databridge/memberships";
@@ -414,6 +415,7 @@ export function AccessSettingsDialog({
                     disabled={!personId || addGrant.isPending}
                     onClick={() => addGrant.mutate()}
                   >
+                    <PlusIcon className="h-4 w-4" aria-hidden />
                     Add
                   </Button>
                 </div>
@@ -461,6 +463,7 @@ export function AccessSettingsDialog({
           </div>
           <div className="mt-4 flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={onClose}>
+              <XMarkIcon className="h-4 w-4" aria-hidden />
               Cancel
             </Button>
             <Button
@@ -468,6 +471,7 @@ export function AccessSettingsDialog({
               disabled={saveAcl.isPending}
               onClick={() => saveAcl.mutate()}
             >
+              <CheckIcon className="h-4 w-4" aria-hidden />
               {saveAcl.isPending ? "Saving…" : "Save"}
             </Button>
           </div>
@@ -575,6 +579,7 @@ function GrantList({
                 disabled={pending}
                 onClick={() => onRemove(grant)}
               >
+                <TrashIcon className="h-4 w-4" aria-hidden />
                 Remove
               </Button>
             </span>

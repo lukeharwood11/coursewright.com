@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AccountSettingsPage, LoginPage, SignupPage } from "@/auth";
 import { RedirectIfAuthed, RequireAuth } from "@/app/gates/RequireAuth";
+import { RequireOrgFeature } from "@/app/gates/RequireOrgFeature";
 import { RequireStaff } from "@/app/gates/RequireStaff";
 import { AccountLayout } from "@/app/layouts/AccountLayout";
 import { OrgChrome } from "@/app/layouts/OrgChrome";
@@ -135,25 +136,49 @@ export function AppRoutes() {
                 </RequireStaff>
               }
             />
-            <Route path="calendar" element={<CalendarPage />} />
+            <Route
+              path="calendar"
+              element={
+                <RequireOrgFeature feature="calendar">
+                  <CalendarPage />
+                </RequireOrgFeature>
+              }
+            />
             <Route
               path="events/new"
               element={
-                <RequireStaff>
-                  <EventEditPage />
-                </RequireStaff>
+                <RequireOrgFeature feature="events">
+                  <RequireStaff>
+                    <EventEditPage />
+                  </RequireStaff>
+                </RequireOrgFeature>
               }
             />
-            <Route path="events/:eventId" element={<EventPage />} />
+            <Route
+              path="events/:eventId"
+              element={
+                <RequireOrgFeature feature="events">
+                  <EventPage />
+                </RequireOrgFeature>
+              }
+            />
             <Route
               path="events/:eventId/edit"
               element={
-                <RequireStaff>
-                  <EventEditPage />
-                </RequireStaff>
+                <RequireOrgFeature feature="events">
+                  <RequireStaff>
+                    <EventEditPage />
+                  </RequireStaff>
+                </RequireOrgFeature>
               }
             />
-            <Route element={<ResourcesLayout />}>
+            <Route
+              element={
+                <RequireOrgFeature feature="resources">
+                  <ResourcesLayout />
+                </RequireOrgFeature>
+              }
+            >
               <Route path="resources" element={<ResourcesPage />} />
               <Route
                 path="resources/folders/:folderId"
@@ -166,52 +191,93 @@ export function AppRoutes() {
               />
             </Route>
             <Route path="people/:userId" element={<UserProfilePage />} />
-            <Route path="announcements" element={<AnnouncementsPage />} />
+            <Route
+              path="announcements"
+              element={
+                <RequireOrgFeature feature="announcements">
+                  <AnnouncementsPage />
+                </RequireOrgFeature>
+              }
+            />
             <Route
               path="announcements/new"
               element={
-                <RequireStaff>
-                  <AnnouncementEditPage />
-                </RequireStaff>
+                <RequireOrgFeature feature="announcements">
+                  <RequireStaff>
+                    <AnnouncementEditPage />
+                  </RequireStaff>
+                </RequireOrgFeature>
               }
             />
             <Route
               path="announcements/:announcementId"
-              element={<AnnouncementPage />}
+              element={
+                <RequireOrgFeature feature="announcements">
+                  <AnnouncementPage />
+                </RequireOrgFeature>
+              }
             />
             <Route
               path="announcements/:announcementId/edit"
               element={
-                <RequireStaff>
-                  <AnnouncementEditPage />
-                </RequireStaff>
+                <RequireOrgFeature feature="announcements">
+                  <RequireStaff>
+                    <AnnouncementEditPage />
+                  </RequireStaff>
+                </RequireOrgFeature>
               }
             />
-            <Route path="discussions" element={<DiscussionsPage />} />
-            <Route path="discussions/new" element={<DiscussionNewPage />} />
+            <Route
+              path="discussions"
+              element={
+                <RequireOrgFeature feature="discussions">
+                  <DiscussionsPage />
+                </RequireOrgFeature>
+              }
+            />
+            <Route
+              path="discussions/new"
+              element={
+                <RequireOrgFeature feature="discussions">
+                  <DiscussionNewPage />
+                </RequireOrgFeature>
+              }
+            />
             <Route
               path="discussions/:discussionId"
-              element={<DiscussionPage />}
+              element={
+                <RequireOrgFeature feature="discussions">
+                  <DiscussionPage />
+                </RequireOrgFeature>
+              }
             />
             <Route path="activity" element={<ActivityPage />} />
             <Route
               path="courses/:courseId/lesson-plans/new"
               element={
-                <RequireStaff>
-                  <LessonPlanEditPage />
-                </RequireStaff>
+                <RequireOrgFeature feature="lessonPlans">
+                  <RequireStaff>
+                    <LessonPlanEditPage />
+                  </RequireStaff>
+                </RequireOrgFeature>
               }
             />
             <Route
               path="courses/:courseId/lesson-plans/:lessonPlanId"
-              element={<LessonPlanPage />}
+              element={
+                <RequireOrgFeature feature="lessonPlans">
+                  <LessonPlanPage />
+                </RequireOrgFeature>
+              }
             />
             <Route
               path="courses/:courseId/lesson-plans/:lessonPlanId/edit"
               element={
-                <RequireStaff>
-                  <LessonPlanEditPage />
-                </RequireStaff>
+                <RequireOrgFeature feature="lessonPlans">
+                  <RequireStaff>
+                    <LessonPlanEditPage />
+                  </RequireStaff>
+                </RequireOrgFeature>
               }
             />
             <Route
@@ -273,7 +339,14 @@ export function AppRoutes() {
           </Route>
           <Route element={<PrintLayout />}>
             <Route path="print-this-week" element={<PrintPage />} />
-            <Route path="events/:eventId/print" element={<PrintPage />} />
+            <Route
+              path="events/:eventId/print"
+              element={
+                <RequireOrgFeature feature="events">
+                  <PrintPage />
+                </RequireOrgFeature>
+              }
+            />
             <Route
               path="courses/:courseId/materials/:materialId/print"
               element={<PrintPage />}
@@ -290,10 +363,21 @@ export function AppRoutes() {
               path="courses/:courseId/units/:unitId/quizzes/:quizId/print"
               element={<PrintPage />}
             />
-            <Route path="resources/print" element={<PrintPage />} />
+            <Route
+              path="resources/print"
+              element={
+                <RequireOrgFeature feature="resources">
+                  <PrintPage />
+                </RequireOrgFeature>
+              }
+            />
             <Route
               path="resources/items/:itemId/print"
-              element={<PrintPage />}
+              element={
+                <RequireOrgFeature feature="resources">
+                  <PrintPage />
+                </RequireOrgFeature>
+              }
             />
           </Route>
         </Route>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { quizChoiceLetter } from "@/materials/model/quiz";
@@ -239,6 +240,7 @@ export function QuizTakeForm({
       {open ? (
         <div>
           <Button type="submit" disabled={submitting}>
+            <PaperAirplaneIcon className="h-4 w-4" aria-hidden />
             {submitting ? "Submitting…" : "Submit"}
           </Button>
           {acceptsUntil ? (

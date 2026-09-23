@@ -47,7 +47,10 @@ export function useCalendar() {
   const [hidden, setHidden] = useState<number[]>([]);
   const hiddenCourseIds = useMemo(() => new Set(hidden), [hidden]);
   const source = query.data;
-  const weekPlans = plansForWeek(source?.lessonPlans ?? [], week.start);
+  const lessonPlans = organization.features.lessonPlans
+    ? (source?.lessonPlans ?? [])
+    : [];
+  const weekPlans = plansForWeek(lessonPlans, week.start);
   const periodLabel =
     view === "day"
       ? weekdayDateHeading(focusDate)
@@ -68,6 +71,8 @@ export function useCalendar() {
     setSearch(params, { replace: true });
   }
 
+  const eventRows = organization.features.events ? (source?.events ?? []) : [];
+
   return {
     organization,
     view,
@@ -79,13 +84,13 @@ export function useCalendar() {
     parentMode,
     courses: source?.courses ?? [],
     weekNotes: lessonPlansToWeekNotes(weekPlans),
-    lessonDays: lessonPlansToDays(source?.lessonPlans ?? []),
+    lessonDays: lessonPlansToDays(lessonPlans),
     chips: [
       ...materialsToChips(source?.materials ?? []),
       ...quizzesToChips(source?.quizzes ?? []),
     ],
     events: expandEventsInRange(
-      (source?.events ?? []).map((event) => ({
+      eventRows.map((event) => ({
         id: event.id,
         title: event.title,
         location: event.location,

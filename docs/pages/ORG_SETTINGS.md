@@ -5,11 +5,11 @@
 
 ## Audience
 
-Org **owners** and **admins** (can edit). Instructors may view read-only. Parents cannot change settings. Billing and **branding** are **owner-only**.
+Org **owners** and **admins** (can edit). Instructors may view read-only. Parents cannot change settings. Billing, **branding**, and **customizations** are **owner-only**.
 
 ## Purpose
 
-Configure the organization: identity, permalink, organization type, **profile** (about, address, website, contact), **school days**, grade scheme, **branding**, and **collaborators** (section on this page — not a separate top-level route).
+Configure the organization: identity, permalink, organization type, **profile** (about, address, website, contact), **school days**, grade scheme, **branding**, **customizations**, and **collaborators** (section on this page — not a separate top-level route).
 
 
 ## Behavior
@@ -23,6 +23,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 - Collaborators section on this page: invite owner / admin / instructor by email (Resend `organization-invite`) and **copy a claim link**, list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). The list includes **parents** already in the org so owners/admins can **promote** them to instructor/admin/owner **without a new invite**. Owners and admins **change roles** (including demote to **parent** when the person has a linked student) and **remove** admins/instructors who have no linked student; the last remaining owner or admin cannot be removed or demoted. Those writes update **org membership** (who can run settings and invites). They do **not** change who can see course content — materials and roster stay **enrollment-gated** (and `parent_student_links` where applicable).
 - Billing section shows Free plan, **owners only**.
 - **Branding** (owners only): optional small icon and one accent color used as the primary color inside this organization (buttons, links, sidebar). Admins and instructors see a preview and “Only owners can change branding.” Blank color keeps Wright Green. Colors that are too light for white button text, or for link text on the page background, are rejected. Remove branding restores the CW mark and Wright Green. Login, the account home, emails, and print stay Course Wright.
+- **Customizations** (owners only): toggles for Discussions, Announcements, Resources, Lesson plans, Events, and Calendar view. Off hides those surfaces in nav, routes, and compose buttons; existing data stays. Admins and instructors see the list read-only (“Only owners can change customizations.”) and do not see Save or Cancel on that panel. Defaults: all on.
 
 ## Data shown
 
@@ -35,10 +36,11 @@ Configure the organization: identity, permalink, organization type, **profile** 
 - Pending collaborator invites: **email**, **role**, copyable `/invite/<token>` link, **Resend email**, cancel
 - Billing status — Free plan (owners only)
 - Branding preview: icon (or CW mark) and accent, **owners only** to edit
+- Customizations: on/off for Discussions, Announcements, Resources, Lesson plans, Events, Calendar view (**owners only** to edit)
 
 ## Contents
 
-Left **settings menu** (icons + labels) with one active panel on the right on desktop. On small screens the menu is a **Section** dropdown above the panel. Active section is reflected in `?tab=` (`organization` default / omitted; `profile`; `branding`; `collaborators`; `billing` when shown). Save / Cancel sit at the top-right of the content panel (aligned with that column’s right edge) whenever the viewer can edit. Branding keeps its own Save / Remove actions.
+Left **settings menu** (icons + labels) with one active panel on the right on desktop. On small screens the menu is a **Section** dropdown above the panel. Active section is reflected in `?tab=` (`organization` default / omitted; `profile`; `branding`; `customizations`; `collaborators`; `billing` when shown). Save / Cancel sit at the top-right of the content panel (aligned with that column’s right edge) whenever the viewer can edit organization or profile settings, and on Customizations when the viewer is an owner. Non-owners on Customizations do not see that Save or Cancel. Branding and Customizations keep their own Save actions (owners only).
 
 ### Organization
 
@@ -75,6 +77,12 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 - Preview of the sidebar mark and an active nav chip
 - **Save branding** and **Remove branding** — separate from the panel Save for Organization / Profile
 
+### Customizations (owners only)
+
+- Toggle **Discussions**, **Announcements**, **Resources**, **Lesson plans**, **Events**, **Calendar view**
+- **Save customizations** — separate from the panel Save for Organization / Profile. Non-owners do not see Save or Cancel on this panel
+- Turning a feature off hides it in the product; it does not delete existing content
+
 ### Billing (P1)
 
 - Shows **You’re on the Free plan.** (owners only). Paid plans later.
@@ -87,6 +95,7 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 - Set school days
 - Set grade scheme
 - Save branding or remove branding (owners only)
+- Save customizations (owners only). Non-owners on this panel do not see Save or Cancel
 - Invite collaborators (email + copy the claim link); cancel a pending invite; resend the email
 - Change roles for existing collaborators (including promote parent → staff and demote staff → parent when linked to a student)
 - Remove an admin or instructor with no linked student (blocked when they are the last owner/admin)
