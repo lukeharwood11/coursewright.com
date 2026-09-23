@@ -14,8 +14,12 @@ import {
 import type { MaterialRecord } from "@/materials/databridge/materials";
 import { materialPath } from "@/materials/model/paths";
 import type { MaterialKind } from "@/materials/model/kind";
+import type { QuizRecord } from "@/quizzes/databridge/quizzes";
+import { mergeOutline } from "@/quizzes/model/outline";
+import { quizPath } from "@/quizzes/model/paths";
 import type { UnitRecord } from "@/units/databridge/units";
 import { unitPath } from "@/units/model/paths";
+import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 
 function MaterialKindIcon({ kind }: { kind: MaterialKind }) {
   const Icon =
@@ -56,15 +60,20 @@ function UnitBranch({
   courseId,
   unit,
   materials,
+  quizzes,
 }: {
   orgSlug: string;
   courseId: number;
   unit: UnitRecord;
   materials: MaterialRecord[];
+  quizzes: QuizRecord[];
 }) {
   const [open, setOpen] = useState(true);
   const href = unitPath(orgSlug, courseId, unit.id);
   const Folder = open ? FolderOpenIcon : FolderIcon;
+  const outline = mergeOutline(materials, quizzes);
+  const materialById = new Map(materials.map((material) => [material.id, material]));
+  const quizById = new Map(quizzes.map((quiz) => [quiz.id, quiz]));
 
   return (
     <li>
@@ -93,21 +102,45 @@ function UnitBranch({
       </div>
       {open ? (
         <ul className="ml-[1.125rem] border-l border-[var(--line-soft)] pl-2">
-          {materials.length === 0 ? (
+          {outline.length === 0 ? (
             <li className="px-1.5 py-1 text-[12px] text-[var(--ink-faint)]">
               Empty
             </li>
           ) : (
-            materials.map((material) => (
-              <li key={material.id}>
-                <MaterialLink
-                  orgSlug={orgSlug}
-                  courseId={courseId}
-                  unitId={unit.id}
-                  material={material}
-                />
-              </li>
-            ))
+            outline.map((item) => {
+              if (item.kind === "quiz") {
+                const quiz = quizById.get(item.id);
+                if (!quiz) return null;
+                return (
+                  <li key={`quiz-${quiz.id}`}>
+                    <Link
+                      to={quizPath({
+                        orgSlug,
+                        courseId,
+                        unitId: unit.id,
+                        quizId: quiz.id,
+                      })}
+                      className="flex min-w-0 items-center gap-1.5 rounded-[4px] px-1.5 py-1 text-[12.5px] font-semibold text-[var(--ink)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]"
+                    >
+                      <ClipboardDocumentCheckIcon className="h-3.5 w-3.5 shrink-0 text-[var(--ink-faint)]" aria-hidden />
+                      <span className="min-w-0 truncate">{quiz.title}</span>
+                    </Link>
+                  </li>
+                );
+              }
+              const material = materialById.get(item.id);
+              if (!material) return null;
+              return (
+                <li key={material.id}>
+                  <MaterialLink
+                    orgSlug={orgSlug}
+                    courseId={courseId}
+                    unitId={unit.id}
+                    material={material}
+                  />
+                </li>
+              );
+            })
           )}
         </ul>
       ) : null}
@@ -121,6 +154,7 @@ export function CourseOutline({
   units,
   topLevelMaterials,
   materialsByUnitId,
+  quizzesByUnitId,
   open,
   onClose,
 }: {
@@ -129,6 +163,7 @@ export function CourseOutline({
   units: UnitRecord[];
   topLevelMaterials: MaterialRecord[];
   materialsByUnitId: Record<number, MaterialRecord[]>;
+  quizzesByUnitId: Record<number, QuizRecord[]>;
   open: boolean;
   onClose: () => void;
 }) {
@@ -174,6 +209,7 @@ export function CourseOutline({
                 courseId={courseId}
                 unit={unit}
                 materials={materialsByUnitId[unit.id] ?? []}
+                quizzes={quizzesByUnitId[unit.id] ?? []}
               />
             ))}
           </ul>

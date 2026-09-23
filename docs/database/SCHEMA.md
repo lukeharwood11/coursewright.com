@@ -60,7 +60,13 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | OrgResourceBlock | `org_resource_blocks` | **P1a** — Lexical body on document items |
 | OrgResourceGrant | `org_resource_grants` | **P1a** — extra read/write for a person on a folder or item |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates + published lesson plans (Sunday–Saturday). |
-| Page / Block / Quiz / Form | `blocks` (quiz is a Lexical node on a page) | Material **kind** page\|link\|file; blocks on pages only; **no** quiz table |
+| Page quiz | `blocks` body | Lexical `quiz` node on a page. Print only. Not a material kind |
+| Quiz | `quizzes` | Course outline item. Take in the app or print. Not a material |
+| QuizQuestion | `quiz_questions` | Prompt + kind. Correct answers are not on this row |
+| QuizChoice | `quiz_choices` | Multiple-choice option. No correct flag |
+| QuizAnswerKey | `quiz_answer_keys` | Correct choice or short-answer text |
+| QuizAttempt | `quiz_attempts` | One submitted entry. Not a material submission |
+| QuizAttemptAnswer | `quiz_attempt_answers` | Snapshot of the prompt and the selection |
 
 **Locked conventions:**
 
@@ -84,8 +90,8 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | Phase | Entities in focus |
 |-------|-------------------|
 | **P0** | Organization, User, Membership, **AdminInvite**, **AdminInviteStudents**, **StudentProfile**, **Class**, **ClassMember**, **ClassLeader**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **LessonPlan**, **LessonPlanDay**, **LessonPlanDayMaterial**, **Announcement**, **AnnouncementRead**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
-| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification**, **PushSubscription**, **Feedback**, **OrgResourceFolder**, **OrgResourceItem**, **OrgResourceBlock**, **OrgResourceGrant**, **MaterialSubmission**, **MaterialSubmissionVersion**, **MaterialSubmissionFile** |
-| **P2** | Cross-org Family management, StudentProfile.user_id, Quiz online, Submission, **ParentPayments** (orgs collect from parents) |
+| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification**, **PushSubscription**, **Feedback**, **OrgResourceFolder**, **OrgResourceItem**, **OrgResourceBlock**, **OrgResourceGrant**, **MaterialSubmission**, **MaterialSubmissionVersion**, **MaterialSubmissionFile**, **Quiz**, **QuizQuestion**, **QuizChoice**, **QuizAnswerKey**, **QuizAttempt**, **QuizAttemptAnswer** |
+| **P2** | Cross-org Family management, StudentProfile.user_id, dedicated student role, **ParentPayments** (orgs collect from parents) |
 
 ---
 
@@ -648,7 +654,7 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 
 ### Material submission
 
-A student (or a linked parent on their behalf) turns work in on a **course** material with `accept_submissions`. Not a quiz Submission (that stays **P2**: `Course ──< Quiz ──< Submission`). Not a separate assignment object.
+A student (or a linked parent on their behalf) turns work in on a **course** material with `accept_submissions`. Not a quiz attempt (`quiz_attempts`). Not a separate assignment object.
 
 One `material_submissions` row per student per material (unique while not deleted). The student’s account and any parent linked to that student upload into the same slot.
 
@@ -783,9 +789,39 @@ Staff do **not** need grant rows. Unique `(folder_id, grantee)` / `(item_id, gra
 | `members` | All active org memberships |
 | `restricted` | Only explicit grants (+ staff editors) |
 
-### Quiz / Form
+### Page quiz
 
-- **Quiz:** **P0** author + print. Shape = **block on a page** (Lexical `quiz` node; answers on the node). Not a material kind. Not in v1 “Add material” menu. No parallel quiz table; parent access stays enrollment / `parent_student_links`. Online take + autograde is **P1**.
+A **page quiz** is a Lexical `quiz` node inside rich-text `body.lexical`. Print only. Not a material kind. Not the course quiz below.
+
+### Quiz
+
+A **course quiz** is an outline item on a unit (or, in the database, with `unit_id` null). Families take it in the app when an accepting window is set. Otherwise they print it. Not a material and not `material_submissions`.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| course_id | bigint | FK → Course |
+| unit_id | bigint | FK → Unit, nullable. The UI adds quizzes on a unit |
+| title | text | Required |
+| description | text | |
+| position | int | Shared outline order with materials in the unit. A material wins a tie |
+| visibility | text | `unpublished` (default) · `published` |
+| accepts_from | timestamptz | Optional open. Missing means already open when an end is set |
+| accepts_until | timestamptz | Optional close. At or after this instant, submit is rejected |
+| accepts_timezone | text | IANA zone captured with the window |
+| allow_multiple_attempts | boolean | Default false. Off = one entry per student |
+| autograde_and_show | boolean | Default false. On = freeze a multiple-choice, number, and matching score on the entry |
+| share_answer_key_with_parents | boolean | Default false. Students never see the key |
+| copied_from_id | bigint | FK → Quiz, nullable |
+| deleted_at | timestamptz | Soft delete |
+
+Questions (`quiz_questions.kind` = `multiple_choice` · `short_answer` · `number` · `matching` · `long_answer`) do not store the correct answer on the question row. `answer_lines` is set only for `long_answer` (1–20 blank lines). Choices (`quiz_choices`) do not store a correct flag. `quiz_answer_keys` holds either a `choice_id` or `answer_text` (short answer, long answer, or the correct number). A matching question stores the left column in `quiz_match_prompts` and the right column in `quiz_match_options`. Both are visible with the quiz. The correct link is `quiz_match_keys`, hidden the same way as `quiz_answer_keys`. The right column is mixed when the quiz is taken or printed.
+
+`quiz_attempts` is one submitted entry: `submitted_by`, `student_profile_id`, `autograded`, nullable `score` / `score_total`. The score is frozen at submit. `quiz_attempt_answers` copies the prompt and the selection.
+
+Submit is `submit_quiz_attempt`. Clients cannot insert a score. Course-from-course copies questions, choices, keys, and matching prompts, options, and keys, not attempts.
+
 - **Form:** workshop.
 ### ShareLink
 
@@ -1211,6 +1247,13 @@ Discussion ──< DiscussionRead >── User
 Organization ──< Notification >── User
 User ──< PushSubscription
 User ──< Feedback >── Organization?
+Course ──< Quiz ──< QuizAttempt ──< QuizAttemptAnswer
+Quiz ──< QuizQuestion ──< QuizChoice
+QuizQuestion ──< QuizAnswerKey
+QuizQuestion ──< QuizMatchPrompt
+QuizQuestion ──< QuizMatchOption
+QuizQuestion ──< QuizMatchKey >── QuizMatchPrompt
+QuizMatchKey >── QuizMatchOption
 ```
 
 **Open:** Course ↔ Class link (enroll class, enroll individuals, or both).
@@ -1219,7 +1262,6 @@ User ──< Feedback >── Organization?
 
 ```
 StudentProfile.user_id → User (student account linked to existing profile)
-Course ──< Quiz ──< Submission (quiz attempt — not a material submission)
 Family cross-org management (extends P0 org Family)
 ```
 
@@ -1234,8 +1276,8 @@ Family cross-org management (extends P0 org Family)
 | Add material kinds page · link · file | Material.kind | **Decided** (v1) |
 | Rich-text block canonical store | Block.body | **Lexical JSON** (`body.lexical`) |
 | Video block: URL vs uploaded file | Block, File, players | **Open** |
-| Quiz / Form shape | Block on a page vs later material kind | **Quiz = page block** (Lexical node). Form unused |
-| Autograde answer storage + attempt model | QuizAttempt (phase TBD) | P1 |
+| Quiz / Form shape | Block on a page vs later material kind | **Page quiz** = Lexical node. **Course quiz** = `quizzes`. Form unused |
+| Autograde answer storage + attempt model | QuizAttempt | **Decided** — `quiz_answer_keys` + `quiz_attempts`. Score frozen at submit |
 | SaaS packaging (per teacher vs per course) | OrgSubscription | P1 |
 | Assignment object shape | Next conversation | Not P0 |
 | Parent visibility after enrollment ends | Membership stays active; what they still see | Deferred |

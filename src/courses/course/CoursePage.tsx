@@ -31,6 +31,7 @@ export function CoursePage() {
     units,
     topLevelMaterials,
     materialsByUnitId,
+    quizzesByUnitId,
     instructors,
     students,
     importantIds,
@@ -144,6 +145,7 @@ export function CoursePage() {
           units={units}
           topLevelMaterials={topLevelMaterials}
           materialsByUnitId={materialsByUnitId}
+          quizzesByUnitId={quizzesByUnitId}
           open={outlineOpen}
           onClose={() => setOutlineOpen(false)}
         />
@@ -173,6 +175,7 @@ export function CoursePage() {
                   unit={unit}
                   index={index}
                   materials={materialsByUnitId[unit.id] ?? []}
+                  quizzes={quizzesByUnitId[unit.id] ?? []}
                   importantIds={importantIds}
                   canEdit={canEdit}
                   expanded={expanded[unit.id] ?? defaultExpanded[unit.id] ?? true}

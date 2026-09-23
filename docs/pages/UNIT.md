@@ -36,7 +36,7 @@ Materials may also sit at **course top level** (no unit) from older data — see
 - Optional unit `start_date` / `end_date` (or range)
 - Materials list (icon, name, badges, dates) → [MATERIAL](./MATERIAL.md)
 - **Print unit** — continuous packet of materials in order (P0; control on unit header — never overflow-only) → [PRINT](./PRINT.md)
-- Add / reorder materials (edit+) — **Add material:** page · link · file
+- Add / reorder materials (edit+) — **Add material:** page · link · file. **Add quiz** sits beside it and opens the new unpublished quiz.
 - **P1:** Template↔course cues: overridden copy, promote, deprecate/delete impact (TBD chrome density)
 
 ## Primary actions
@@ -49,6 +49,7 @@ Materials may also sit at **course top level** (no unit) from older data — see
 ## Links to
 
 - [MATERIAL](./MATERIAL.md) — open / add material
+- [QUIZ](./QUIZ.md) — open / add a course quiz
 - [COURSE](./COURSE.md) — parent course
 - Via org chrome (instructor/admin): [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 - Parent return: [ORG_HOME](./ORG_HOME.md) (simpler chrome)

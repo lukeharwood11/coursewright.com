@@ -17,6 +17,7 @@ async function renderPacket(materials: PrintMaterialView[], packet: PrintPacket)
         subtitle: packet.subtitle,
         includeAnswerKey: packet.includeAnswerKey,
         materials,
+        quizQuestions: packet.quizQuestions,
       }}
     />,
   ).toBlob();
@@ -28,6 +29,11 @@ export async function renderPrintPdf(packet: PrintPacket): Promise<{
   filename: string;
 }> {
   const filename = printFilename(packet.title);
+  if (packet.quizQuestions && packet.quizQuestions.length > 0 && packet.materials.length === 0) {
+    const view = await toPrintPacketView(packet);
+    const bytes = await renderPacket(view.materials, packet);
+    return { bytes, filename };
+  }
   const only = packet.materials[0];
   if (
     packet.materials.length === 1 &&

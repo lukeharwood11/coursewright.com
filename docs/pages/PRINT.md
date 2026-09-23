@@ -1,9 +1,10 @@
 # PRINT
 
-**Generated PDF preview** of a material, a unit packet, this week’s work, or an org **Resource**. Not an “export” product — vocabulary is always **Print** (plus **Download** for the `.pdf` on this screen).
+**Generated PDF preview** of a material, a unit packet, a course quiz, this week’s work, or an org **Resource**. Not an “export” product — vocabulary is always **Print** (plus **Download** for the `.pdf` on this screen).
 
 **URL (material, course, top-level):** `/my/<org-slug>/courses/<course_id>/materials/<material_id>/print`  
 **URL (material, course, in unit):** `/my/<org-slug>/courses/<course_id>/units/<unit_id>/materials/<material_id>/print`  
+**URL (quiz):** `/my/<org-slug>/courses/<course_id>/units/<unit_id>/quizzes/<quiz_id>/print`  
 **URL (unit, course):** `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print`  
 **URL (this week):** `/my/<org-slug>/print-this-week` (optional `?students=<id>,<id>` for active students on the student home)  
 **URL (event):** `/my/<org-slug>/events/<event_id>/print`  
@@ -14,7 +15,7 @@
 
 ## Audience
 
-Anyone who can already **view** that material, unit, parent “this week” surface, or org resource — instructors/editors and enrolled parents (resources: membership + ACL, not enrollment). Create → print does **not** require a roster.
+Anyone who can already **view** that material, unit, course quiz, parent “this week” surface, or org resource — instructors/editors and enrolled parents (resources: membership + ACL, not enrollment). Create → print does **not** require a roster.
 
 ## Purpose
 
@@ -36,6 +37,7 @@ One composition: **generate a PDF** of the grain, **preview that PDF** in the pa
 |-------|-------------|
 | **Material** | One material by kind — **page:** blocks in order (quizzes print on the whole page: **parents** and staff **Student view** see questions only; **staff Teacher view** see the answer key from block data; multiple-choice choices use drawn checkbox squares, not bracket text); **link:** title + URL/QR; **file:** if the attached file is already a PDF/image, prefer previewing **that file**; otherwise a cover sheet (title, description). Video blocks → title + URL/QR, not a player frame. No quiz-block-only print in P0. |
 | **Unit** | Materials in `position` order as one packet; page breaks **between** materials. |
+| **Quiz** | One course quiz. Questions only unless this person may see the answer key (Teacher view, or a parent when **Share answer key with parents** is on). A student login never gets the key. Multiple-choice choices use the same drawn checkbox squares as a page quiz. A number prints one blank. Matching prints the left column and a mixed right column. A long answer prints the number of blank lines the teacher chose. |
 | **This week** | Current Sunday–Saturday dated materials (+ important now, if any) **and published lesson plans** for **active** students on student home, grouped like [ORG_HOME](./ORG_HOME.md) **by student**. Each student: **lesson plans first** (week note + day notes), then materials. Includes assigned and due work for the week. One student at a time; **page break before the next student**. Pack that student’s items onto a page when they fit, separated by a rule; if there isn’t enough room to start the next assignment cleanly, it starts on the next page. Optional `?students=` filters the packet. |
 | **Resource** | One org resource by type — **document:** Lexical blocks (same page layout as a page material; no quizzes in P1a); **file:** same as a file material; **link:** not printed from this screen. Several selected documents and files use `?items=` as one packet (links skipped). |
 | **Event** | The event write-up (same page layout as a page material), with when, location, and linked material titles |
@@ -58,10 +60,11 @@ One composition: **generate a PDF** of the grain, **preview that PDF** in the pa
 
 - **Download** — save the `.pdf`
 - **Print** — print the generated PDF (system dialog / share sheet)
-- **Back** — return to material, unit, or org home
+- **Back** — return to the quiz, material, unit, or org home
 
 ## Links to
 
+- [QUIZ](./QUIZ.md) — Back from a quiz print; source of **Print**
 - [MATERIAL](./MATERIAL.md) — Back from material print; source of **Print**
 - [UNIT](./UNIT.md) — Back from unit print; source of **Print unit**
 - [ORG_HOME](./ORG_HOME.md) — Back from this-week print; source of **Print this week**

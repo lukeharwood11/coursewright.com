@@ -16,7 +16,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 
 - Loads one course instance; instructor chrome for builders, simpler read chrome for students (including staff **Student view**).
 - Browse **top-level materials** (no unit) **above** ordered units when any exist. **Add material** is on the unit (not at course top level).
-- Optional **outline** panel (file-tree of top-level materials + units with nested materials); open by default on large screens (`lg`+), closed on smaller screens; **Show outline** / hide so it is not always open.
+- Optional **outline** panel (file-tree of top-level materials + units with nested materials and quizzes); open by default on large screens (`lg`+), closed on smaller screens; **Show outline** / hide so it is not always open.
 - Add unit / add material **into a unit** when permitted.
 - **Lesson plans:** staff list weekly plans on this course; **Add lesson plan** → [LESSON_PLAN](./LESSON_PLAN.md) new. Opening a row goes to the plan. Students see **published** plans only. An info icon next to the heading explains what a lesson plan is.
 - **Create Announcement:** staff toolbar on this page posts a one-way [ANNOUNCEMENT](./ANNOUNCEMENT.md) to this course (`…/announcements/new?audience=course&courseId=`). On small screens this action lives under the header **More** menu.
@@ -78,6 +78,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 
 - [UNIT](./UNIT.md) — open / add unit
 - [MATERIAL](./MATERIAL.md) — open material from unit rows
+- [QUIZ](./QUIZ.md) — open a quiz from the unit outline
 - [LESSON_PLAN](./LESSON_PLAN.md) — open / add lesson plan
 - [EVENT](./EVENT.md) — open / add an event for this course
 - [ANNOUNCEMENT](./ANNOUNCEMENT.md) — Create Announcement for this course

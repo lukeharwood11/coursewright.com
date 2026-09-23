@@ -12,6 +12,8 @@ import { formatDateRange } from "@/courses/model/dates";
 import { coursePath } from "@/courses/model/paths";
 import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
+import { AddQuizForm } from "@/quizzes/quiz/components/AddQuizForm";
+import { QuizRow } from "@/quizzes/quiz/components/QuizRow";
 import { unitPath, unitPrintPath } from "@/units/model/paths";
 import { useUnit } from "./hooks/useUnit";
 
@@ -266,8 +268,24 @@ export function UnitPage() {
             No materials in this unit yet.
           </p>
         )}
+        {page.quizzes.length > 0 ? (
+          <ul className="mt-3 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]">
+            {page.quizzes.map((quiz) => (
+              <QuizRow
+                key={quiz.id}
+                orgSlug={page.organization.slug}
+                courseId={course.id}
+                unitId={unit.id}
+                quizId={quiz.id}
+                title={quiz.title}
+                description={quiz.description}
+                visibility={quiz.visibility}
+              />
+            ))}
+          </ul>
+        ) : null}
         {page.canEdit && !unit.deletedAt ? (
-          <div className="mt-3">
+          <div className="mt-3 flex flex-col gap-2">
             <AddMaterialForm
               organizationId={page.organization.id}
               orgSlug={page.organization.slug}
@@ -275,6 +293,12 @@ export function UnitPage() {
               unitId={unit.id}
               fromUnitPage
               label="Add material to this unit"
+            />
+            <AddQuizForm
+              organizationId={page.organization.id}
+              orgSlug={page.organization.slug}
+              courseId={course.id}
+              unitId={unit.id}
             />
           </div>
         ) : null}

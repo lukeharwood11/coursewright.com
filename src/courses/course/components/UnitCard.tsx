@@ -5,6 +5,10 @@ import { formatDateRange } from "@/courses/model/dates";
 import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
 import type { MaterialRecord } from "@/materials/databridge/materials";
+import { AddQuizForm } from "@/quizzes/quiz/components/AddQuizForm";
+import { QuizRow } from "@/quizzes/quiz/components/QuizRow";
+import type { QuizRecord } from "@/quizzes/databridge/quizzes";
+import { mergeOutline } from "@/quizzes/model/outline";
 import { unitPath, unitPrintPath } from "@/units/model/paths";
 import type { UnitRecord } from "@/units/databridge/units";
 
@@ -14,6 +18,7 @@ export function UnitCard({
   unit,
   index,
   materials,
+  quizzes,
   importantIds,
   canEdit,
   expanded,
@@ -27,6 +32,7 @@ export function UnitCard({
   unit: UnitRecord;
   index: number;
   materials: MaterialRecord[];
+  quizzes: QuizRecord[];
   importantIds: Set<number>;
   canEdit: boolean;
   expanded: boolean;
@@ -36,6 +42,9 @@ export function UnitCard({
   isLast: boolean;
 }) {
   const dates = formatDateRange(unit.startDate, unit.endDate);
+  const outline = mergeOutline(materials, quizzes);
+  const materialById = new Map(materials.map((material) => [material.id, material]));
+  const quizById = new Map(quizzes.map((quiz) => [quiz.id, quiz]));
   const href = unitPath(orgSlug, unit.courseId, unit.id);
   const printHref = unitPrintPath(orgSlug, unit.courseId, unit.id);
 
@@ -102,24 +111,44 @@ export function UnitCard({
               Open unit
             </Link>
           </p>
-          {materials.length > 0 ? (
+          {outline.length > 0 ? (
             <ul>
-              {materials.map((material) => (
-                <MaterialRow
-                  key={material.id}
-                  orgSlug={orgSlug}
-                  courseId={unit.courseId}
-                  unitId={unit.id}
-                  materialId={material.id}
-                  title={material.title}
-                  description={material.description}
-                  kind={material.kind}
-                  scheduledDate={material.scheduledDate}
-                  dueDate={material.dueDate}
-                  importantNow={importantIds.has(material.id)}
-                  visibility={material.visibility}
-                />
-              ))}
+              {outline.map((item) => {
+                if (item.kind === "quiz") {
+                  const quiz = quizById.get(item.id);
+                  if (!quiz) return null;
+                  return (
+                    <QuizRow
+                      key={`quiz-${quiz.id}`}
+                      orgSlug={orgSlug}
+                      courseId={unit.courseId}
+                      unitId={unit.id}
+                      quizId={quiz.id}
+                      title={quiz.title}
+                      description={quiz.description}
+                      visibility={quiz.visibility}
+                    />
+                  );
+                }
+                const material = materialById.get(item.id);
+                if (!material) return null;
+                return (
+                  <MaterialRow
+                    key={material.id}
+                    orgSlug={orgSlug}
+                    courseId={unit.courseId}
+                    unitId={unit.id}
+                    materialId={material.id}
+                    title={material.title}
+                    description={material.description}
+                    kind={material.kind}
+                    scheduledDate={material.scheduledDate}
+                    dueDate={material.dueDate}
+                    importantNow={importantIds.has(material.id)}
+                    visibility={material.visibility}
+                  />
+                );
+              })}
             </ul>
           ) : (
             <p className="px-4 py-3 text-[13.5px] text-[var(--ink-faint)]">
@@ -127,13 +156,19 @@ export function UnitCard({
             </p>
           )}
           {canEdit ? (
-            <div className="px-4 pb-4">
+            <div className="flex flex-col gap-2 px-4 pb-4">
               <AddMaterialForm
                 organizationId={organizationId}
                 orgSlug={orgSlug}
                 courseId={unit.courseId}
                 unitId={unit.id}
                 label="Add material to this unit"
+              />
+              <AddQuizForm
+                organizationId={organizationId}
+                orgSlug={orgSlug}
+                courseId={unit.courseId}
+                unitId={unit.id}
               />
             </div>
           ) : null}

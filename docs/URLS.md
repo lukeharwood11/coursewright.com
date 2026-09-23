@@ -166,6 +166,8 @@ Materials may be **top-level** (no unit) or nested under a unit.
 | [MATERIAL](./pages/MATERIAL.md) (top-level) | `/my/<org-slug>/courses/<course_id>/materials/<material_id>` | `/my/<org-slug>/templates/<template_id>/materials/<material_id>` |
 | [MATERIAL](./pages/MATERIAL.md) (in unit) | `…/units/<unit_id>/materials/<material_id>` | `…/units/<unit_id>/materials/<material_id>` |
 | Material **edit** | `…/materials/<material_id>/edit` | Same suffix on course or template tree |
+| [QUIZ](./pages/QUIZ.md) | `/my/<org-slug>/courses/<course_id>/units/<unit_id>/quizzes/<quiz_id>` | Course only. Not a template route |
+| Quiz **edit** | `…/units/<unit_id>/quizzes/<quiz_id>/edit` | Staff who can manage the course |
 
 **View** = material URL without `/edit`. **Edit** = append `/edit` (instructors/editors). Parents use view only.
 
@@ -180,6 +182,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 | [PRINT](./pages/PRINT.md) (material, top-level) | `/my/<org-slug>/courses/<course_id>/materials/<material_id>/print` | Same on template tree (**P1**) |
 | [PRINT](./pages/PRINT.md) (material, in unit) | `…/units/<unit_id>/materials/<material_id>/print` | |
 | [PRINT](./pages/PRINT.md) (unit) | `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print` | Packet in material order |
+| [PRINT](./pages/PRINT.md) (quiz) | `…/units/<unit_id>/quizzes/<quiz_id>/print` | Blank quiz, or with the answer key when this person may see it |
 | [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Student home grain; Sun–Sat + important now. Optional `?students=` limits to active students |
 | [PRINT](./pages/PRINT.md) (event) | `/my/<org-slug>/events/<event_id>/print` | Event write-up |
 | [PRINT](./pages/PRINT.md) (resource) | `/my/<org-slug>/resources/items/<item_id>/print` | Document or file |

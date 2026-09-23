@@ -13,6 +13,12 @@ import { getUnit } from "@/units/databridge/units";
 import { loadParentDashboard } from "@/parent/databridge/dashboard";
 import { thisWeekPrintRefs, printMaterialFromLessonPlan } from "@/print/model/thisWeekPacket";
 import type { PrintMaterial, PrintPacket } from "@/print/model/packet";
+import type { CourseQuizPrintSource } from "@/quizzes/model/print";
+import {
+  getQuiz,
+  listLinkedStudents,
+  listQuizQuestions,
+} from "@/quizzes/databridge/quizzes";
 
 async function toPrintMaterial(
   material: Awaited<ReturnType<typeof getMaterial>>,
@@ -201,5 +207,55 @@ export async function loadWeekPrintPacket(args: {
     title: "This week",
     subtitle: dashboard.week.label,
     materials: printed,
+  };
+}
+
+export async function loadQuizPrintPacket(args: {
+  quizId: number;
+  userId: string;
+}): Promise<{
+  packet: Omit<PrintPacket, "quizQuestions">;
+  questions: CourseQuizPrintSource[];
+  shareAnswerKeyWithParents: boolean;
+  linkedStudents: { studentEmail: string | null }[];
+} | null> {
+  const quiz = await getQuiz(args.quizId);
+  if (!quiz) return null;
+  const [questions, linkedStudents] = await Promise.all([
+    listQuizQuestions(args.quizId),
+    listLinkedStudents(quiz.courseId, args.userId),
+  ]);
+  const quizQuestions: CourseQuizPrintSource[] = questions.map((question) => ({
+    id: question.id,
+    prompt: question.prompt,
+    kind: question.kind,
+    choices: question.choices.map((choice) => ({
+      id: String(choice.id),
+      text: choice.text,
+      correct: choice.correct,
+    })),
+    answer: question.answer,
+    answerLines: question.answerLines,
+    prompts: question.prompts.map((prompt) => ({
+      id: prompt.id,
+      position: prompt.position,
+      text: prompt.text,
+    })),
+    options: question.options.map((option) => ({
+      id: option.id,
+      position: option.position,
+      text: option.text,
+    })),
+    matchKeys: question.matchKeys,
+  }));
+  return {
+    packet: {
+      title: quiz.title,
+      subtitle: quiz.description || null,
+      materials: [],
+    },
+    questions: quizQuestions,
+    shareAnswerKeyWithParents: quiz.shareAnswerKeyWithParents,
+    linkedStudents,
   };
 }
