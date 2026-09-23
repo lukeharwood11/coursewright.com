@@ -8,14 +8,14 @@ App chrome: collapsible sidebar + top bar for signed-in `/my` pages.
 - **Org shell** (`/my/<org-slug>/…`) — staff vs parent nav (role decides chrome, not a second app). Staff get a **Teacher / Student view** toggle in the header.
 - Collapse on desktop; overlay drawer on small screens
 - Nested course / class links from domain databridge lists (org shell only)
-- Staff nav includes **Calendar**, **Announcements**, **Discussions**, and **Resources** (between Courses and Roster). **Activity** is a header bell (right of the avatar), not a sidebar tab.
+- Staff nav includes **Calendar**, **Announcements**, **Discussions**, and **Resources** (between Courses and Roster) when those org customizations are on. **Activity** is a header bell (right of the avatar), not a sidebar tab.
 - Shell is viewport-locked (`h-dvh`): sidebar + top bar stay put; **`<main>`** scrolls (`#app-shell-main`). Pages that fill the pane (Calendar, Resources browse, discussion thread) use `h-full` / internal scroll — not `100dvh` calcs that fight the chrome.
 - Category landing pages (org home, courses, calendar, announcements, discussions, resources, roster, activity, org/account settings, feedback, org picker) use compact page padding `px-5 py-4 md:px-8`. Detail screens with **DetailPageHeader** keep their own chrome spacing.
 
 ## Rules
 
 - Keep this layer thin — no course/roster business rules. Lists come from domain `databridge/`.
-- Student chrome stays simpler than staff (This week, Calendar, Announcements, Discussions, **Resources** when they can see at least one, **Courses** → list + nested enrolled courses). **Activity** is the header bell for staff and the student experience. Do not dump instructor destinations onto student screens.
+- Student chrome stays simpler than staff (This week, Calendar, Announcements, Discussions when enabled, **Resources** when enabled and they can see at least one, **Courses** → list + nested enrolled courses). **Activity** is the header bell for staff and the student experience. Do not dump instructor destinations onto student screens.
 - **Student view** for staff uses that same student chrome. Parent-role users never see the toggle.
 - Account-level chrome must not show org destinations (courses, roster, org settings).
 - Account menu includes **Send feedback** (`/my/feedback` or `/my/<org-slug>/feedback`).

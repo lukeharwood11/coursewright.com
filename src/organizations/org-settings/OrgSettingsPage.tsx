@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { BillingPlaceholder } from "@/billing";
-import { canManageBranding } from "@/organizations/model/role";
+import {
+  canManageBranding,
+  canManageCustomizations,
+  showOrgSettingsFormActions,
+} from "@/organizations/model/role";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { PageLoading } from "@/ui/PageLoading";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
@@ -10,6 +14,7 @@ import {
   OrgSettingsForm,
 } from "./components/OrgSettingsForm";
 import { BrandingSection } from "./components/BrandingSection";
+import { CustomizationsSection } from "./components/CustomizationsSection";
 import {
   OrgSettingsNav,
   parseOrgSettingsTab,
@@ -84,6 +89,7 @@ export function OrgSettingsPage() {
   }
 
   const formSection = isFormTab(activeTab) ? activeTab : "organization";
+  const showSettingsActions = showOrgSettingsFormActions(settings.role, activeTab);
 
   return (
     <div className="px-5 py-4 md:px-8">
@@ -111,7 +117,7 @@ export function OrgSettingsPage() {
         </aside>
 
         <div className="min-w-0">
-          {settings.canEdit ? (
+          {showSettingsActions ? (
             <div className="mb-4 flex min-h-10 justify-end">
               <PageFormActions
                 formId={ORG_SETTINGS_FORM_ID}
@@ -122,8 +128,8 @@ export function OrgSettingsPage() {
             </div>
           ) : null}
 
-          {/* Keep the settings form mounted on every tab so Save always
-              has a target and the action row height stays stable. */}
+          {/* Keep the settings form mounted on every tab so Save still has a
+              target when the viewer can edit those fields. */}
           <div
             className={isFormTab(activeTab) ? undefined : "hidden"}
             aria-hidden={!isFormTab(activeTab)}
@@ -167,6 +173,15 @@ export function OrgSettingsPage() {
                 organizationId={settings.organization.id}
                 orgName={settings.organization.name}
                 canManage={canManageBranding(settings.role)}
+              />
+            </div>
+          ) : null}
+
+          {activeTab === "customizations" ? (
+            <div role="tabpanel">
+              <CustomizationsSection
+                organizationId={settings.organization.id}
+                canManage={canManageCustomizations(settings.role)}
               />
             </div>
           ) : null}

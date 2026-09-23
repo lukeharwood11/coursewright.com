@@ -7,6 +7,7 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { AnchoredPopup } from "@/ui/AnchoredPopup";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { newEventPath } from "@/events/model/paths";
@@ -28,11 +29,15 @@ export function ClassActionsMenu({
   canEdit: boolean;
   className?: string;
 }) {
+  const { organization } = useOrgShell();
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
+  const showDiscussions = organization.features.discussions;
+  const showAnnouncements = organization.features.announcements;
+  const showEvents = organization.features.events;
 
-  if (!canEdit) {
+  if (!canEdit || (!showDiscussions && !showAnnouncements && !showEvents)) {
     return null;
   }
 
@@ -60,39 +65,45 @@ export function ClassActionsMenu({
         className="min-w-[11rem]"
       >
         <div className="py-1">
-          <Link
-            role="menuitem"
-            to={newDiscussionPath(orgSlug, {
-              audience: "class",
-              classId,
-            })}
-            className={`${itemClassName} xl:hidden`}
-            onClick={() => setOpen(false)}
-          >
-            <ChatBubbleLeftRightIcon className="h-4 w-4 shrink-0" aria-hidden />
-            Start a discussion
-          </Link>
-          <Link
-            role="menuitem"
-            to={newAnnouncementPath(orgSlug, {
-              audience: "class",
-              classId,
-            })}
-            className={`${itemClassName} xl:hidden`}
-            onClick={() => setOpen(false)}
-          >
-            <MegaphoneIcon className="h-4 w-4 shrink-0" aria-hidden />
-            Create Announcement
-          </Link>
-          <Link
-            role="menuitem"
-            to={newEventPath(orgSlug, { audience: "class", classId })}
-            className={`${itemClassName} xl:hidden`}
-            onClick={() => setOpen(false)}
-          >
-            <PlusIcon className="h-4 w-4 shrink-0" aria-hidden />
-            Add event
-          </Link>
+          {showDiscussions ? (
+            <Link
+              role="menuitem"
+              to={newDiscussionPath(orgSlug, {
+                audience: "class",
+                classId,
+              })}
+              className={`${itemClassName} xl:hidden`}
+              onClick={() => setOpen(false)}
+            >
+              <ChatBubbleLeftRightIcon className="h-4 w-4 shrink-0" aria-hidden />
+              Start a discussion
+            </Link>
+          ) : null}
+          {showAnnouncements ? (
+            <Link
+              role="menuitem"
+              to={newAnnouncementPath(orgSlug, {
+                audience: "class",
+                classId,
+              })}
+              className={`${itemClassName} xl:hidden`}
+              onClick={() => setOpen(false)}
+            >
+              <MegaphoneIcon className="h-4 w-4 shrink-0" aria-hidden />
+              Create Announcement
+            </Link>
+          ) : null}
+          {showEvents ? (
+            <Link
+              role="menuitem"
+              to={newEventPath(orgSlug, { audience: "class", classId })}
+              className={`${itemClassName} xl:hidden`}
+              onClick={() => setOpen(false)}
+            >
+              <PlusIcon className="h-4 w-4 shrink-0" aria-hidden />
+              Add event
+            </Link>
+          ) : null}
         </div>
       </AnchoredPopup>
     </>

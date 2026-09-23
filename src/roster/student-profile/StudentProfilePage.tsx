@@ -7,6 +7,7 @@ import { PageLoading } from "@/ui/PageLoading";
 import { Button, ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PageFormActions } from "@/ui/PageFormActions";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { enrollmentStatusLabel } from "@/roster/model/enrollment";
 import { StudentProfileFields } from "./components/StudentProfileFields";
@@ -22,6 +23,7 @@ import { useToastOnError } from "@/ui/useToastOnError";
 
 export function StudentProfilePage() {
   const profile = useStudentProfile();
+  const { organization } = useOrgShell();
   const [confirmRemove, setConfirmRemove] = useState(false);
   useToastOnError(profile.error);
   const parentInvite = useParentInvite(profile.student?.id ?? null);
@@ -78,16 +80,18 @@ export function StudentProfilePage() {
         title={profile.student.name}
         actions={
           <>
-            <ButtonLink
-              variant="secondary"
-              to={newAnnouncementPath(profile.organization.slug, {
-                audience: "student",
-                studentId: profile.student.id,
-              })}
-            >
-              <MegaphoneIcon className="h-5 w-5" aria-hidden />
-              Create Announcement
-            </ButtonLink>
+            {organization.features.announcements ? (
+              <ButtonLink
+                variant="secondary"
+                to={newAnnouncementPath(profile.organization.slug, {
+                  audience: "student",
+                  studentId: profile.student.id,
+                })}
+              >
+                <MegaphoneIcon className="h-5 w-5" aria-hidden />
+                Create Announcement
+              </ButtonLink>
+            ) : null}
             <Button
               type="button"
               variant="secondary"
