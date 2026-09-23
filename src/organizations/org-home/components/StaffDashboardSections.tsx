@@ -67,7 +67,7 @@ export function StaffGettingStarted({
           ) : null}
         </li>
         <li className="text-[var(--ink-soft)]">
-          3. Enroll students and publish a course when families should see it.
+          3. Enroll students and publish a course when students should see it.
         </li>
       </ol>
     </section>
@@ -145,7 +145,7 @@ export function StaffCoursesPreview({
 
       {dashboard.previewCourses.length === 0 ? (
         <p className="mt-3 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-          No courses yet. Create one to plan materials and share with families.
+          No courses yet. Create one to plan materials and share with students.
         </p>
       ) : (
         <ul className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

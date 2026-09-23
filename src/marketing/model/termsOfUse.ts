@@ -29,7 +29,7 @@ export function termsSections(host = publicHost()): TermsSection[] {
       id: "service",
       title: "The Service",
       paragraphs: [
-        `Course Wright is a web application that helps organizations plan courses, share materials with parents, and run their programs. The Service is provided at ${host} and may change as we improve the product.`,
+        `Course Wright is a web application that helps organizations plan courses, share materials with students, and run their programs. The Service is provided at ${host} and may change as we improve the product.`,
         "We may update, suspend, or discontinue features from time to time. We will try to avoid unnecessary disruption, but we do not guarantee that any particular feature will remain available forever.",
       ],
     },
@@ -65,7 +65,7 @@ export function termsSections(host = publicHost()): TermsSection[] {
       bullets: [
         "Use the Service for anything unlawful, harmful, or fraudulent.",
         "Upload malware, attempt to gain unauthorized access, or disrupt the Service or other users.",
-        "Harass, abuse, or invade the privacy of others, including students and families.",
+        "Harass, abuse, or invade the privacy of others, including students and their families.",
         "Scrape, reverse engineer, or overload the Service except as allowed by law.",
         "Misrepresent your identity or affiliation, or misuse invites and access links.",
         "Use the Service to send spam or unsolicited commercial messages unrelated to running your organization.",

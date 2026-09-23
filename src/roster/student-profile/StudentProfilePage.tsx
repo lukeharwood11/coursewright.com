@@ -1,16 +1,19 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MegaphoneIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
-import { ButtonLink } from "@/ui/Button";
+import { Button, ButtonLink } from "@/ui/Button";
+import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { enrollmentStatusLabel } from "@/roster/model/enrollment";
 import { StudentProfileFields } from "./components/StudentProfileFields";
 import { ParentInvitePanel } from "./components/ParentInvitePanel";
+import { StudentInvitePanel } from "./components/StudentInvitePanel";
 import { useParentInvite } from "./hooks/useParentInvite";
+import { useStudentInvite } from "./hooks/useStudentInvite";
 import {
   STUDENT_PROFILE_FORM_ID,
   useStudentProfile,
@@ -19,8 +22,15 @@ import { useToastOnError } from "@/ui/useToastOnError";
 
 export function StudentProfilePage() {
   const profile = useStudentProfile();
+  const [confirmRemove, setConfirmRemove] = useState(false);
   useToastOnError(profile.error);
   const parentInvite = useParentInvite(profile.student?.id ?? null);
+  const studentInvite = useStudentInvite(
+    profile.student?.id ?? null,
+    profile.student?.studentEmail ?? null,
+  );
+  useToastOnError(parentInvite.loadError);
+  useToastOnError(studentInvite.loadError);
 
   useEffect(() => {
     document.title = profile.student
@@ -78,6 +88,14 @@ export function StudentProfilePage() {
               <MegaphoneIcon className="h-5 w-5" aria-hidden />
               Create Announcement
             </ButtonLink>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={profile.removing}
+              onClick={() => setConfirmRemove(true)}
+            >
+              {profile.removing ? "Removing…" : "Remove"}
+            </Button>
             <PageFormActions
               formId={STUDENT_PROFILE_FORM_ID}
               saving={profile.saving}
@@ -115,7 +133,6 @@ export function StudentProfilePage() {
 
       <ParentInvitePanel
         parentEmail={profile.student.parentEmail}
-        studentEmail={profile.student.studentEmail}
         canInvite={parentInvite.canInvite}
         loading={parentInvite.loading}
         loadError={parentInvite.loadError}
@@ -132,6 +149,23 @@ export function StudentProfilePage() {
         onCopy={parentInvite.onCopy}
         onSendEmail={parentInvite.onSendEmail}
         onCancel={parentInvite.onCancel}
+      />
+
+      <StudentInvitePanel
+        studentEmail={profile.student.studentEmail}
+        canInvite={studentInvite.canInvite}
+        loading={studentInvite.loading}
+        account={studentInvite.account}
+        pending={studentInvite.pending}
+        inviting={studentInvite.inviting}
+        cancelingId={studentInvite.cancelingId}
+        sendingId={studentInvite.sendingId}
+        copiedId={studentInvite.copiedId}
+        origin={studentInvite.origin}
+        onInvite={studentInvite.onInvite}
+        onCopy={studentInvite.onCopy}
+        onSendEmail={studentInvite.onSendEmail}
+        onCancel={studentInvite.onCancel}
       />
 
       <div className="grid items-start gap-4 lg:grid-cols-2">
@@ -185,6 +219,18 @@ export function StudentProfilePage() {
         </section>
       </div>
       </div>
+      <ConfirmDialog
+        open={confirmRemove}
+        title="Remove student?"
+        body={`${profile.student.name} will leave the roster, including their classes and courses.`}
+        confirmLabel="Remove"
+        cancelLabel="Keep them"
+        onCancel={() => setConfirmRemove(false)}
+        onConfirm={() => {
+          setConfirmRemove(false);
+          profile.onRemove();
+        }}
+      />
     </div>
   );
 }

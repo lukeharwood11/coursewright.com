@@ -5,6 +5,7 @@ import { eventAppliesToFamily } from "@/events/model/audience";
 import { listLessonPlansInRange, type LessonPlanDetail } from "@/lesson-plans/databridge/lessonPlans";
 import { isPublished } from "@/materials/model/visibility";
 import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
+import { loadFamilyStudentIds } from "@/parent/databridge/dashboard";
 
 export type CalendarSourceMaterial = {
   id: number;
@@ -162,12 +163,7 @@ async function loadParentCalendar(
   },
   lessonPlans: LessonPlanDetail[],
 ): Promise<CalendarSource & { studentIds: number[] }> {
-  const { data: links, error: linksError } = await db
-    .from("parent_student_links")
-    .select("student_profile_id")
-    .eq("parent_user_id", args.userId);
-  if (linksError) throw new Error(linksError.message);
-  const studentIds = (links ?? []).map((row) => row.student_profile_id);
+  const studentIds = await loadFamilyStudentIds(args.organizationId, args.userId);
   if (studentIds.length === 0) {
     return { courses: [], materials: [], lessonPlans: [], events: [], studentIds: [] };
   }

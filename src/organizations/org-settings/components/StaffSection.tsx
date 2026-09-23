@@ -1,4 +1,5 @@
 import type { FormEvent } from "react";
+import { useToastOnError } from "@/ui/useToastOnError";
 import type { StaffInviteRole } from "@/organizations/model/role";
 import type { PendingStaffInvite } from "@/organizations/databridge/staffInvites";
 import type { StaffMemberRow } from "../hooks/useOrgStaff";
@@ -61,23 +62,19 @@ export function StaffSection({
   onChangeRole: (member: StaffMemberRow, nextRole: string) => void;
   onRemove: (member: StaffMemberRow) => void;
 }) {
+  useToastOnError(loadError);
+
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
       <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Collaborators</h2>
       <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink-soft)]">
         {canManage
-          ? "Invite someone new, or change roles below. Parents already in this organization can become instructors without another invite."
-          : "Owners, admins, instructors, and parents in this organization."}
+          ? "Invite someone new, or change roles below. People already linked to a student can become instructors without another invite."
+          : "Owners, admins, instructors, and student-linked members in this organization."}
       </p>
 
       {loading ? (
         <p className="mt-3 text-[14px] text-[var(--ink-soft)]">Loading collaborators…</p>
-      ) : null}
-
-      {loadError ? (
-        <p className="mt-3 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {loadError}
-        </p>
       ) : null}
 
       {!loading ? (

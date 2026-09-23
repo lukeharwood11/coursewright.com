@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { caughtErrorMessage } from "@/ui/toast";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import {
   clearOrganizationBranding,
@@ -101,7 +102,7 @@ export function useOrgBranding(organizationId: number | undefined) {
       toast("Branding saved.");
     },
     onError: (error: Error) => {
-      setFormError(error.message);
+      setFormError(caughtErrorMessage(error));
     },
   });
 
@@ -121,7 +122,7 @@ export function useOrgBranding(organizationId: number | undefined) {
     },
     onError: (error: Error) => {
       setConfirmRemove(false);
-      setFormError(error.message);
+      setFormError(caughtErrorMessage(error));
     },
   });
 
@@ -156,6 +157,7 @@ export function useOrgBranding(organizationId: number | undefined) {
     loadError: brandingQuery.error instanceof Error ? brandingQuery.error.message : null,
     accentText,
     iconUrl,
+    iconFileName: iconFile?.name ?? null,
     preview,
     formError: accentError ?? formError,
     hasChanges: hasChanges && !accentError,

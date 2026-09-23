@@ -23,10 +23,10 @@ test("a file is allowed when either the extension or the MIME matches", () => {
 });
 
 test("the rejection names the kinds the teacher allowed", () => {
-  assert.equal(turnInTypeMessage(["pdf", "image"]), "Turn in a PDF or a photo.");
+  assert.equal(turnInTypeMessage(["pdf", "image"]), "Submit a PDF or a photo.");
   assert.equal(
     turnInTypeMessage(["pdf", "document", "audio"]),
-    "Turn in a PDF, a document, or an audio file.",
+    "Submit a PDF, a document, or an audio file.",
   );
 });
 

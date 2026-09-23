@@ -16,7 +16,7 @@ export function HomeHero() {
         </h1>
         <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[var(--ink-soft)]">
           One place for homeschool co-ops and micro-schools to plan courses, share
-          materials with parents, and print what you need — without the clunky
+          materials with students, and print what you need — without the clunky
           complexity of typical school software.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">

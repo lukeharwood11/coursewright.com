@@ -38,7 +38,7 @@ export function resourceItemTypeLabel(type: ResourceItemType): string {
 
 export function resourceAccessModeLabel(mode: ResourceAccessMode): string {
   if (mode === "staff") return "Staff only";
-  if (mode === "parents") return "All parents";
+  if (mode === "parents") return "All students";
   if (mode === "members") return "Everyone in the organization";
   return "Specific people";
 }

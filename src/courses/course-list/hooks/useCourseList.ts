@@ -25,6 +25,7 @@ import { allowedGradeLevels, toggleGradeLevel } from "@/courses/model/gradeLevel
 import { coursePath } from "@/courses/model/paths";
 import { getOrganization, orgQueryKeys } from "@/organizations/databridge/organizations";
 import { staffDashboardQueryKey } from "@/organizations/databridge/staffDashboard";
+import { caughtErrorMessage } from "@/ui/toast";
 
 function parseGradesParam(raw: string | null): string[] {
   if (!raw) return [];
@@ -259,7 +260,7 @@ export function useCreateCourse() {
       });
       navigate(coursePath(organization.slug, course.id));
     },
-    onError: (error: Error) => setFormError(error.message),
+    onError: (error: Error) => setFormError(caughtErrorMessage(error)),
   });
 
   function setOpen(next: boolean) {

@@ -73,6 +73,7 @@ export function DayCalendar({
           key={`${card.date}-${card.courseId}-${card.planId ?? "chips"}`}
           orgSlug={orgSlug}
           card={card}
+          withIcons
         />
       ))}
     </div>

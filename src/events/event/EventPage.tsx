@@ -73,10 +73,12 @@ export function EventPage() {
         description={
           <div className="space-y-1 text-[14px] text-[var(--ink-soft)]">
             <p>{when}</p>
-            <p className="inline-flex items-center gap-1.5 font-semibold text-[var(--ink)]">
-              <MapPinIcon className="h-4 w-4 shrink-0 text-[var(--ink-faint)]" aria-hidden />
-              {event.location}
-            </p>
+            {event.location.trim() ? (
+              <p className="inline-flex items-center gap-1.5 font-semibold text-[var(--ink)]">
+                <MapPinIcon className="h-4 w-4 shrink-0 text-[var(--ink-faint)]" aria-hidden />
+                {event.location}
+              </p>
+            ) : null}
             <p>{audienceLine}</p>
           </div>
         }

@@ -99,21 +99,16 @@ export function EventEditPage() {
         <EventMaterialsField
           options={page.materials}
           selectedIds={page.draft.materialIds}
+          needsCourse={
+            page.draft.audience === "course" && page.draft.courseIds.length === 0
+          }
           disabled={page.pending}
           onToggle={page.toggleMaterial}
         />
-        {page.formError ? (
-          <p className="mt-4 text-[13.5px] font-semibold text-[var(--amber-deep)]">
-            {page.formError}
-          </p>
-        ) : null}
       </form>
 
       <div className="mt-8 max-w-3xl">
         <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Write-up</h2>
-        <p className="mt-1 text-[12.5px] text-[var(--ink-faint)]">
-          Same kind of page as a lesson: notes, files, and links. This stays with the event.
-        </p>
         <PageEditorMediaProvider
           value={{ organizationId: page.organization.id, userId: user.id }}
         >
@@ -135,8 +130,10 @@ export function EventEditPage() {
           formId={EVENT_FORM_ID}
           saving={page.saving}
           hasChanges={page.hasChanges}
+          canSave={page.canSave}
           saveLabel={page.isNew ? "Add event" : "Save"}
           cancelTo={page.cancelTo}
+          closeWhenUnchanged
         />
       </div>
     </div>

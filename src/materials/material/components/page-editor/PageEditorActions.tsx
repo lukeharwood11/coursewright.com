@@ -26,6 +26,7 @@ import { INSERT_TABLE_COMMAND } from "@lexical/table";
 import { INSERT_HORIZONTAL_RULE_COMMAND } from "@lexical/react/LexicalHorizontalRuleNode";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
+import { caughtErrorMessage } from "@/ui/toast";
 import { uploadNewFile } from "@/materials/databridge/files";
 import {
   parseTableDimensions,
@@ -172,9 +173,7 @@ export function PageEditorActionsProvider({
         });
         return true;
       } catch (caught) {
-        setUploadError(
-          caught instanceof Error ? caught.message : "Couldn’t attach that file.",
-        );
+        setUploadError(caughtErrorMessage(caught));
         return false;
       } finally {
         uploadingRef.current = false;

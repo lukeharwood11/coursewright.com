@@ -1,3 +1,4 @@
+import { InfoHint } from "@/ui/InfoHint";
 import { Input } from "@/ui/Input";
 import {
   SUBMISSION_FILE_TYPES,
@@ -66,21 +67,24 @@ export function SubmissionSettingsFields({
               ))}
             </ul>
           </fieldset>
-          <label className="flex max-w-[8rem] flex-col gap-1">
-            <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-              Submissions allowed
-            </span>
+          <div>
+            <div className="flex items-center gap-1.5 text-[13px] font-bold text-[var(--ink-soft)]">
+              <label htmlFor="submission-limit">Submissions allowed</label>
+              <InfoHint label="About submissions allowed">
+                How many times a student may turn work in. Each time can include more
+                than one file.
+              </InfoHint>
+            </div>
             <Input
+              id="submission-limit"
+              className="mt-1 max-w-[8rem]"
               type="number"
               min={MIN_SUBMISSION_LIMIT}
               max={MAX_SUBMISSION_LIMIT}
               value={submissionLimit}
               onChange={(event) => onLimitChange(Number(event.target.value))}
             />
-            <span className="text-[12px] text-[var(--ink-faint)]">
-              How many times a student may turn work in. Each time can include more than one file.
-            </span>
-          </label>
+          </div>
           <label className="flex items-start gap-2 text-[14px] text-[var(--ink)]">
             <input
               type="checkbox"

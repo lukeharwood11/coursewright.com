@@ -134,3 +134,18 @@ export async function updateStudent(
   }
   return toStudentSummary(data);
 }
+
+export async function deleteStudent(id: number): Promise<void> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("student_profiles")
+    .delete()
+    .eq("id", id)
+    .select("id")
+    .maybeSingle();
+
+  if (error) throw new Error(rosterWriteErrorMessage(error));
+  if (!data) {
+    throw new Error("You don’t have permission to remove this student.");
+  }
+}

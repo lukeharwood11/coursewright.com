@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { courseColorCssVar, type CourseColorKey } from "@/courses/model/courseColor";
 import { eventPath } from "@/events/model/paths";
 import { formatEventTime } from "@/events/model/schedule";
@@ -29,7 +30,7 @@ export function EventChip({
       to={eventPath(orgSlug, eventId)}
       className={
         showDetails
-          ? "block rounded-[8px] px-3 py-2 text-[14px] font-bold leading-snug"
+          ? "flex items-start gap-2.5 rounded-[8px] px-3 py-2 text-[14px] font-bold leading-snug"
           : "block rounded-[6px] px-1.5 py-0.5 text-[11.5px] font-bold leading-snug"
       }
       style={{
@@ -39,9 +40,17 @@ export function EventChip({
       }}
       title={[title, time, location].filter(Boolean).join(" · ")}
     >
-      <span className="block truncate">{title}</span>
-      {showDetails && time ? <span className="block font-semibold">{time}</span> : null}
-      {showDetails ? <span className="block truncate font-semibold">{location}</span> : null}
+      {showDetails ? (
+        <CalendarDaysIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+      ) : null}
+      <span className="min-w-0 flex-1">
+        <span className="block truncate">{title}</span>
+        {showDetails && time ? <span className="block font-semibold">{time}</span> : null}
+        {showDetails && location.trim() ? (
+          <span className="block truncate font-semibold">{location}</span>
+        ) : null}
+      </span>
+      {showDetails ? <span className="sr-only">Event</span> : null}
     </Link>
   );
 }

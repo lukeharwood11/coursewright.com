@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { caughtErrorMessage } from "@/ui/toast";
 import {
   getProfile,
   profileQueryKeys,
@@ -56,7 +57,7 @@ export function useAccountSettings() {
       toast("Account saved.");
     },
     onError: (error: Error) => {
-      setFormError(error.message);
+      setFormError(caughtErrorMessage(error));
     },
   });
 

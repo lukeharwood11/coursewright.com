@@ -9,7 +9,7 @@ import { weekdayDateLabel } from "@/lesson-plans/model/validate";
 import { lessonPlanIsPublished } from "@/lesson-plans/model/visibility";
 
 const LESSON_PLAN_HINT =
-  "A week’s plan for families, with the materials that go with each day.";
+  "A week’s plan for students, with the materials that go with each day.";
 
 function PlanRow({
   orgSlug,

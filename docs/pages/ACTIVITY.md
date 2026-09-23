@@ -5,7 +5,7 @@
 
 ## Audience
 
-Staff (Teacher view) and families (parent chrome / **Parent view**). Each person sees only their own notifications.
+Staff (Teacher view) and students (student chrome / **Student view**). Each person sees only their own notifications.
 
 ## Purpose
 
@@ -20,7 +20,7 @@ List stored **Activity** notifications — events that need this person’s atte
 - Clicking a row **acks** it (`read_at`) and opens the activity (a discussion post or an announcement). Opening the discussion another way acks matching **new post** notifications for that person. Opening the announcement acks matching **announcement** notifications. **@mentions** stay unread until clicked. A device-notification tap marks that one row read, including an @mention.
 - While this page is open, **Realtime** adds new rows without a full reload.
 - Empty: **Nothing here yet.**
-- Staff Teacher view and parent chrome share the same list; recipients differ by who was notified (instructors / class leads, people who started or posted on the thread, families when a teacher chose **Notify everyone**, anyone @mentioned, families when staff chose **Send notification** on an announcement). One new-post Activity item per discussion. One announcement Activity item per notice.
+- Staff Teacher view and student chrome share the same list; recipients differ by who was notified (instructors / class leads, people who started or posted on the thread, students when a teacher chose **Notify everyone**, anyone @mentioned, students when staff chose **Send notification** on an announcement). One new-post Activity item per discussion. One announcement Activity item per notice.
 
 ## Data shown
 
@@ -48,7 +48,7 @@ Read-only list (ack is the write).
 - [ANNOUNCEMENT](./ANNOUNCEMENT.md) — open the notice
 - [ORG_HOME](./ORG_HOME.md) — via chrome
 - Via org chrome (staff Teacher view): [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [ACTIVITY](./ACTIVITY.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); search overlay TBD
-- Via parent chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [RESOURCES](./RESOURCES.md) (when visible), [ACTIVITY](./ACTIVITY.md)
+- Via student chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [RESOURCES](./RESOURCES.md) (when visible), [ACTIVITY](./ACTIVITY.md)
 
 ## Notes
 

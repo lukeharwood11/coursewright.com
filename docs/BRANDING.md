@@ -26,22 +26,22 @@ Domain: **coursewright.com** (owned). Testing: **beta.coursewright.com**.
 
 **Elevator pitch:**
 
-> Course Wright gives homeschool co-ops and micro-schools one place to plan courses, reuse materials (copy a course; templates later), share with parents, and run their programs — without the clunky complexity of typical school software. Built materials should be **one tap from paper**. Plan wright. Share wright. Course Wright.
+> Course Wright gives homeschool co-ops and micro-schools one place to plan courses, reuse materials (copy a course; templates later), share with students, and run their programs — without the clunky complexity of typical school software. Built materials should be **one tap from paper**. Plan wright. Share wright. Course Wright.
 
 **Differentiation:**
 
 Course Wright is built around jobs co-ops and micro-schools actually need done — and does them **simply**:
 
 1. **One hub** for lesson materials and planning
-2. **Clear communication** with parents on materials and progress
-3. **Radically intuitive UX** — especially for **parents who hate technology**. They should understand what's going on the second they open a link or log in. Co-op volunteers shouldn't need training either.
-4. **Extreme shareability** — print, links, files. If a parent created materials and just wants to print them, that is **super easy**.
+2. **Clear communication** with students on materials and progress
+3. **Radically intuitive UX** — especially for **people who hate technology** opening the student experience (including linked parents). They should understand what's going on the second they open a link or log in. Co-op volunteers shouldn't need training either.
+4. **Extreme shareability** — print, links, files. If someone created materials and just wants to print them, that is **super easy**.
 
 Course Wright **bills organizations**. Orgs collecting from parents is later.
 
 **Why users switch:**
 
-Today, co-ops stitch together **Microsoft for files**, **WhatsApp for chatter**, and **Outlook for parent email** — plus tools like **Google Classroom** that feel **too heavy-handed** for their size. Course Wright replaces that patchwork with one hub and wins on **usability first**: especially for **parents who hate technology**, who should understand what's going on the moment they open it.
+Today, co-ops stitch together **Microsoft for files**, **WhatsApp for chatter**, and **Outlook for parent email** — plus tools like **Google Classroom** that feel **too heavy-handed** for their size. Course Wright replaces that patchwork with one hub and wins on **usability first**: especially for **tech-averse people using the student experience**, who should understand what's going on the moment they open it.
 
 ---
 
@@ -50,12 +50,14 @@ Today, co-ops stitch together **Microsoft for files**, **WhatsApp for chatter**,
 | Attribute | Direction |
 |-----------|-----------|
 | **Primary audience (now)** | Co-op and micro-school admins and instructors |
-| **Usability anchor** | **Parents who dislike technology** — if it works for them, it works for everyone |
-| **Secondary audience (P0)** | Parents — invited by email; **account required** (Google or email). Also parents who **create** materials and print |
-| **Secondary audience (P1)** | Parents viewing student progress (grades, notes, checklists) |
-| **Primary audience (later)** | Parents managing families; students using materials and quizzes |
+| **Usability anchor** | **Tech-averse people on the student experience** — if it works for them, it works for everyone |
+| **Secondary audience (P0)** | **Students** (and parents who inherit student privileges via invite + link). Account required (Google or email). Also people who **create** materials and print |
+| **Secondary audience (P1)** | Students (and linked parents) viewing progress (grades, notes, checklists) |
+| **Primary audience (later)** | Parents managing families; students with their own accounts using materials and quizzes |
 | **Voice** | Clear, warm, plain-spoken — guide users without talking down to them |
 | **Avoid** | Corporate edu-jargon, district-scale complexity, dense UI copy, feature-dump onboarding, Google Classroom-style heaviness |
+
+**Student-first orientation:** Product copy, chrome, and staff previews are oriented to **students**. Say “parent” only when a feature is explicitly about parents (invite a parent, parent email, parent membership role, parent–student link). Otherwise prefer student language — parents inherit student privileges.
 
 ---
 
@@ -68,7 +70,7 @@ Today, co-ops stitch together **Microsoft for files**, **WhatsApp for chatter**,
 - **Color:** Wright Green, Amber, Slate, Paper, Ink (+ tints documented in the style guide)
 - **UI:** borders over heavy shadows; badges for status; sentence case
 
-Concept screens (login, parent dashboard, instructor course) are encoded as layout patterns in the style guide.
+Concept screens (login, student home, instructor course) are encoded as layout patterns in the style guide.
 
 ---
 
@@ -114,14 +116,14 @@ Other drafts kept for reference (not in use):
 
 ### Key messages
 
-1. **Obvious the second you open it** — built for parents who hate technology, and instructors who'd rather teach than manage software.
+1. **Obvious the second you open it** — built for tech-averse people on the student experience, and instructors who'd rather teach than manage software.
 2. **One place instead of five** — replaces scattered Microsoft folders, WhatsApp threads, and Outlook chains for everyday course stuff.
 3. **Share wright — including paper** — print a material, a unit, or this week in one tap. No export wizard.
 4. **Lighter than Google Classroom** — co-ops don't need enterprise classroom software.
 5. **Built for co-ops and micro-schools** — not bloated district tools.
-6. **Parents stay in the loop** — invited by email, then an account (P0). Magic links later. Progress and auto-summaries in P1.
+6. **Students stay in the loop** — parents are invited by email and inherit the student view (P0). Magic links later. Progress and auto-summaries in P1.
 7. **Reuse without rework** — P0: create a course from another course. **P1:** templates with linked copies and optional promote.
-8. **We bill the org** — Course Wright charges organizations so they can serve parents. Parent-pay is later.
+8. **We bill the org** — Course Wright charges organizations so they can serve students. Parent-pay is later.
 
 **Public site:** Keep this positioning, but do **not** paste the Microsoft / WhatsApp / Outlook (or SharePoint) example onto marketing pages — that’s one person’s inspiration, not customer-facing copy. Talk about scattered folders, chats, and email in general. Pricing is an invite-only pilot; do not show plan options.
 
@@ -146,7 +148,7 @@ Other drafts kept for reference (not in use):
 | Page material body | **Blocks** | only when kind = page; rich text, video, … |
 | Page building block | **Block** | rich text, video, **quiz** (**P0** on pages); extensible |
 | Material date | **Scheduled date** | optional; wins over unit dates for "this week" |
-| Calendar week | **Sunday–Saturday** | parent "this week" |
+| Calendar week | **Sunday–Saturday** | student "this week" |
 | Link to one material | **Resource link** | deep link; login required in P0 — **not** an org **Resource** |
 | Org library | **Resources** | **P1a** — nested folders + document / link / file; not course materials |
 | Org library item | **Resource** | document · link · file in Resources |
@@ -155,12 +157,12 @@ Other drafts kept for reference (not in use):
 | Print preview routes | `…/print`, `/print-this-week` | not `/export`, not `?print=1` |
 | Save the generated file | **Download** | on the print screen only — the `.pdf` |
 | Print a unit as one packet | **Print unit** | generated PDF packet |
-| Print this week's work | **Print this week** | parent dashboard; Sunday–Saturday |
+| Print this week's work | **Print this week** | student home; Sunday–Saturday |
 | Course dates | **Start date** / **End date** | optional offering window |
 | Course description | **Description** | short stable blurb for the offering — not the P1 **Summary** |
 | Course meeting place | **Location** | optional free text — not a Class, not meeting times |
 | Course topic | **Subject / area** | optional free text catalog label — not a taxonomy |
-| Course family access | **Published** / **Unpublished** | unpublished = instructors/admins; published = enrolled parents. Distinct from **Active** / **Archived** |
+| Course family access | **Published** / **Unpublished** | unpublished = instructors/admins; published = enrolled students (parents inherit). Distinct from **Active** / **Archived** |
 | Course grades | **Grade levels** | catalog metadata — multiple grades and/or ranges; not P1 progress grades (**P1 templates** use the same) |
 | Course enrollment | **Roster** (page/nav) · **Enroll** / **Unenroll** (verbs) | Schema: `enrollments`. Class may **batch-preset** who to enroll (not a live link) |
 | Stored content | **Materials** | page / link / file in a unit |
@@ -180,8 +182,9 @@ Other drafts kept for reference (not in use):
 | Customized course copy | **Overridden** | **P1** — no longer receives template edits |
 | Retire without disrupting courses | **Deprecate** | **P1** — active courses untouched |
 | Soft-remove from template | **Delete** | **P1** — soft-deletes template + unmodified course copies |
-| Parent invite | **Invite** | email invite |
-| Parent entry | **Invite → account** | same email as invite |
+| Parent invite | **Invite parent** | email invite — **explicitly parent** |
+| Parent entry | **Invite → account** | same email as invite — **explicitly parent** |
+| Student / family chrome | **Student view** | This week + Focus + announcements; staff toggle label; parents inherit this presentation |
 | Calendar page | **Calendar** | month/week view of assigned (outline) and due (filled) work, color-coded by course |
 | This week's content | **This week** | week calendar of lesson plans + assigned/due chips; Sunday–Saturday |
 | Dated unit material (P0 homework) | **Material** (with dates) | not an assignment object yet |
@@ -194,7 +197,7 @@ Other drafts kept for reference (not in use):
 | In-app notice that something happened | **Activity** | **P1** — stored notifications; click marks read and opens the item |
 | Staff assigned to a class | **Lead** | Optional; zero or more owners/admins/instructors; notified of class discussion posts |
 | Course context blurb | **Summary** | **P1** — auto-drafted “what’s going on this week”; not the course **Description** |
-| Parent view (with account) | **Progress** | grades, notes, checklists, homework |
+| Student view (with account) | **Progress** | **P1** grades, notes, checklists, homework — student-oriented |
 | Person being taught | **Student** (profile) | student_profile, learner |
 | Student year/level | **Grade level** | optional on student; org chooses exact vs. range |
 | Student login (P2) | **Student account** | links to student profile |

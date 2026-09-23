@@ -12,7 +12,7 @@ Shared **events** on the calendar: one **course**, several **classes**, or the w
 
 - Audience is one course, one or more classes, or the organization (nothing attached).
 - Owners and admins can target any course or class in the org. An instructor can target a course they manage. Any org staff member can target classes or make an organization event.
-- Parents and staff **Parent view** can open an event they can see. They cannot add or edit.
+- Students and staff **Student view** can open an event they can see. They cannot add or edit.
 - One shared record. Editing it updates every course or class it is on.
 - Month and week show a title chip. Day view shows **start and end time** and **location**. No hourly grid. No repeat.
 - Print the write-up from the event page.

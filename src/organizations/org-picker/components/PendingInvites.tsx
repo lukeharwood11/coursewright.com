@@ -16,16 +16,20 @@ export function PendingInvites({
 }) {
   if (invites.length === 0) return null;
 
-  const hasParent = invites.some((invite) => invite.role === "parent");
-  const hasStaff = invites.some((invite) => invite.role !== "parent");
+  const hasFamily = invites.some(
+    (invite) => invite.role === "parent" || invite.role === "student",
+  );
+  const hasStaff = invites.some(
+    (invite) => invite.role !== "parent" && invite.role !== "student",
+  );
 
   return (
     <section className="mt-6">
       <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Invites</h2>
       <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-        {hasParent && hasStaff
+        {hasFamily && hasStaff
           ? "Accept to join these organizations."
-          : hasParent
+          : hasFamily
             ? "You were invited to view materials. Accept to join."
             : "Someone asked you to help run these organizations. Accept to join."}
       </p>

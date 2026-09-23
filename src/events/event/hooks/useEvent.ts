@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { toastCaughtError } from "@/ui/toast";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
@@ -61,7 +62,7 @@ export function useEvent() {
       navigate(`/my/${organization.slug}/calendar`);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toastCaughtError(error);
     },
   });
 

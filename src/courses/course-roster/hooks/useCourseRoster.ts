@@ -3,6 +3,12 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
+import {
+  caughtErrorMessage,
+  toastCaughtError,
+  toastCheckNetworkConnection,
+} from "@/ui/toast";
+import { isNetworkError } from "@/ui/networkError";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
@@ -28,6 +34,7 @@ import {
   listCourseEnrollments,
   unenrollStudent,
 } from "@/roster/databridge/enrollments";
+import { inviteCreatedStudents } from "@/roster/databridge/studentInvites";
 import {
   createStudents,
   listStudents,
@@ -40,6 +47,7 @@ import {
   studentsNotIn,
   toggleIdInSet,
   validateStudentBatch,
+  withInviteNote,
   type NewStudentDraft,
 } from "@/roster/model/studentProfile";
 
@@ -135,7 +143,7 @@ export function useCourseRoster() {
       toast(count === 1 ? "Student enrolled." : `${count} students enrolled.`);
     },
     onError: (error: Error) => {
-      setExistingError(error.message);
+      setExistingError(caughtErrorMessage(error));
     },
   });
 
@@ -156,18 +164,28 @@ export function useCourseRoster() {
         courseId,
         created.map((student) => student.id),
       );
-      return created.length;
+      const invites = await inviteCreatedStudents({
+        organizationId: organization.id,
+        students: created,
+        invitedBy: user.id,
+      });
+      return { count: created.length, invites };
     },
-    onSuccess: async (count) => {
+    onSuccess: async ({ count, invites }) => {
       setDrafts([emptyStudentDraft()]);
       setPasteText("");
       setNewError(null);
       setPanelOpen(false);
       await invalidateCourseRoster(queryClient, organization.id, courseId);
-      toast(count === 1 ? "Student enrolled." : `${count} students enrolled.`);
+      toast(
+        withInviteNote(
+          count === 1 ? "Student enrolled." : `${count} students enrolled.`,
+          invites,
+        ),
+      );
     },
     onError: (error: Error) => {
-      setNewError(error.message);
+      setNewError(caughtErrorMessage(error));
     },
   });
 
@@ -178,7 +196,7 @@ export function useCourseRoster() {
       toast("Student unenrolled.");
     },
     onError: (error: Error) => {
-      toast(error.message);
+      toastCaughtError(error);
     },
   });
 
@@ -191,6 +209,9 @@ export function useCourseRoster() {
       });
       toast("Teacher added.");
     },
+    onError: (error: Error) => {
+      if (isNetworkError(error)) toastCheckNetworkConnection();
+    },
   });
 
   const removeInstructorMutation = useMutation({
@@ -202,7 +223,7 @@ export function useCourseRoster() {
       toast("Teacher removed.");
     },
     onError: (error: Error) => {
-      toast(error.message);
+      toastCaughtError(error);
     },
   });
 
@@ -220,9 +241,7 @@ export function useCourseRoster() {
         .filter((id) => eligible.has(id));
       setSelectedIds((current) => mergeSelectedIds(current, fromClass));
     } catch (error) {
-      setExistingError(
-        error instanceof Error ? error.message : "Couldn’t load that class.",
-      );
+      setExistingError(caughtErrorMessage(error));
     }
   }
 
@@ -269,9 +288,10 @@ export function useCourseRoster() {
     setAddUserId,
     addInstructor: () => addInstructorMutation.mutate(),
     addingInstructor: addInstructorMutation.isPending,
-    addInstructorError: addInstructorMutation.error
-      ? addInstructorMutation.error.message
-      : null,
+    addInstructorError:
+      addInstructorMutation.error && !isNetworkError(addInstructorMutation.error)
+        ? addInstructorMutation.error.message
+        : null,
     onRemoveInstructor: (userId: string) =>
       removeInstructorMutation.mutate(userId),
     availableStudents,

@@ -9,7 +9,15 @@ export { InfoHint } from "./InfoHint";
 export { Input } from "./Input";
 export { PageFormActions } from "./PageFormActions";
 export { PageLoading } from "./PageLoading";
-export { toastNotImplemented, toastSomethingWentWrong } from "./toast";
+export { isNetworkError } from "./networkError";
+export {
+  caughtErrorMessage,
+  formOrMutationError,
+  toastCaughtError,
+  toastCheckNetworkConnection,
+  toastNotImplemented,
+  toastSomethingWentWrong,
+} from "./toast";
 export { useToastOnError } from "./useToastOnError";
 export { Mark, Wordmark } from "./Wordmark";
 export {

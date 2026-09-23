@@ -222,7 +222,7 @@ export function AnnouncementFormFields({
           className={`${controlClass} min-h-[6rem] resize-y`}
           value={body}
           onChange={(event) => onBody(event.target.value)}
-          placeholder="A short note families will see on home."
+          placeholder="A short note students will see on home."
         />
       </label>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -251,7 +251,7 @@ export function AnnouncementFormFields({
       </div>
       <p className="mt-2 text-[12.5px] text-[var(--ink-faint)]">
         Leave dates blank to show this on home until you remove it. If you set
-        dates, families only see it between them.
+        dates, students only see it between them.
       </p>
       <label className="mt-5 flex cursor-pointer items-start gap-2">
         <input
@@ -265,7 +265,7 @@ export function AnnouncementFormFields({
             Send notification
           </span>
           <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
-            Email families who already have an account, and show it in their Activity.
+            Email students who already have an account, and show it in their Activity.
           </span>
         </span>
       </label>

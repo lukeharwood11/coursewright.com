@@ -23,7 +23,7 @@ export function publicHost(): string {
 export const privacyLastUpdated = "September 19, 2026";
 
 export function privacyIntro(host = publicHost()): string {
-  return `This Privacy Policy applies specifically to the Course Wright application available at https://${host} (including Sign in with Google). It explains Course Wright’s data collection and usage practices — including how we access, use, store, and share Google user data. It is written for co-ops, micro-schools, instructors, and parents who trust us with school and family information. This is not a sample or template policy; it describes Course Wright’s actual practices.`;
+  return `This Privacy Policy applies specifically to the Course Wright application available at https://${host} (including Sign in with Google). It explains Course Wright’s data collection and usage practices — including how we access, use, store, and share Google user data. It is written for co-ops, micro-schools, instructors, students, and parents who trust us with school and family information. This is not a sample or template policy; it describes Course Wright’s actual practices.`;
 }
 
 export function privacySections(host = publicHost()): PrivacySection[] {
@@ -32,7 +32,7 @@ export function privacySections(host = publicHost()): PrivacySection[] {
       id: "data-collection-and-usage",
       title: "App data collection and usage",
       paragraphs: [
-        "Course Wright is a web application for homeschool co-ops and micro-schools to plan courses, share materials with parents, and run their programs. This section summarizes what personal data the app collects and how that data is used.",
+        "Course Wright is a web application for homeschool co-ops and micro-schools to plan courses, share materials with students, and run their programs. This section summarizes what personal data the app collects and how that data is used.",
         "Data collection: We collect account information you provide (name, email address, and sign-in credentials), organization and content data your co-op or school stores in the product (roster details, courses, units, materials, files, and parent links), usage and device data needed for security and product analytics (such as pages viewed, approximate location from IP address, and browser type), and messages you send us for support.",
         "Data usage: We use this information to provide, maintain, and secure the Course Wright service; authenticate users and enforce organization roles; store and deliver course materials; improve the product; prevent abuse; and communicate about accounts and invites. We do not sell personal information. We do not use personal information for third-party advertising.",
         "When you use Sign in with Google, we also process Google user data as described in the dedicated sections below (access, use, storage, sharing, and retention/deletion).",
@@ -101,7 +101,7 @@ export function privacySections(host = publicHost()): PrivacySection[] {
       id: "who",
       title: "Who we are",
       paragraphs: [
-        `Course Wright is a web application that helps homeschool co-ops and micro-schools plan courses, share materials with parents, and run their programs. The service described in this policy is provided at ${host}.`,
+        `Course Wright is a web application that helps homeschool co-ops and micro-schools plan courses, share materials with students, and run their programs. The service described in this policy is provided at ${host}.`,
       ],
     },
     {
@@ -168,7 +168,7 @@ export function privacySections(host = publicHost()): PrivacySection[] {
       ],
       bullets: [
         "With service providers who help us run Course Wright (listed above).",
-        "Within your organization, according to roles and sharing choices your admins and instructors make (for example, materials shared with parents).",
+        "Within your organization, according to roles and sharing choices your admins and instructors make (for example, materials shared with students).",
         "If required by law, legal process, or to protect the rights, safety, or security of Course Wright, our users, or the public.",
         "In connection with a merger, acquisition, or similar corporate transaction, subject to appropriate safeguards.",
       ],

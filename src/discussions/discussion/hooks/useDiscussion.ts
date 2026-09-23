@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import type { SerializedEditorState } from "lexical";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import {
+  formOrMutationError,
+  toastCheckNetworkConnection,
+} from "@/ui/toast";
+import { isNetworkError } from "@/ui/networkError";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
@@ -223,6 +228,9 @@ export function useDiscussion() {
       setAttachments([]);
       invalidate();
     },
+    onError: (error: Error) => {
+      if (isNetworkError(error)) toastCheckNetworkConnection();
+    },
   });
 
   const answered = useMutation({
@@ -299,6 +307,9 @@ export function useDiscussion() {
       setEditingMessageId(null);
       setEditError(null);
       invalidate();
+    },
+    onError: (error: Error) => {
+      if (isNetworkError(error)) toastCheckNetworkConnection();
     },
   });
 
@@ -390,13 +401,13 @@ export function useDiscussion() {
     editComposeKey,
     editCanSave: validatePost(editDraftBody, editAttachmentContent) == null,
     editSaving: saveEdit.isPending,
-    editError: editError ?? saveEdit.error?.message ?? null,
+    editError: formOrMutationError(editError, saveEdit.error),
     saveEdit: () => saveEdit.mutate(),
     attachments,
     setAttachments,
     materials: materialsQuery.data ?? [],
     canSubmit: validatePost(draftBody, attachmentContent) == null,
-    formError: formError ?? post.error?.message ?? null,
+    formError: formOrMutationError(formError, post.error),
     posting: post.isPending,
     post: () => post.mutate(),
     answered,

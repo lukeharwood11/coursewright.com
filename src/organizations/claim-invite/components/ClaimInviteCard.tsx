@@ -9,7 +9,7 @@ import { mismatchedInvitePrompt } from "@/organizations/model/inviteClaim";
 
 export function ClaimInviteCard({
   loading,
-  loadError,
+  loadError: _loadError,
   notFound,
   invite,
   alreadyAccepted,
@@ -48,7 +48,7 @@ export function ClaimInviteCard({
   onOpenOrg: () => void;
   onSignOut: () => void;
 }) {
-  const isParent = invite?.role === "parent";
+  const isFamily = invite?.role === "parent" || invite?.role === "student";
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--paper)] px-4 py-12">
@@ -66,19 +66,15 @@ export function ClaimInviteCard({
           Organization invite
         </h1>
         <p className="mb-5 text-center text-[13.5px] text-[var(--ink-soft)]">
-          {isParent
-            ? "You were invited to view course materials for a student."
+          {isFamily
+            ? invite?.role === "student"
+              ? "You were invited to sign in and see your own course materials."
+              : "You were invited to view course materials for a student."
             : "You were invited to help run an organization."}
         </p>
 
         {loading ? (
           <PageLoading embedded label="Loading invite…" />
-        ) : null}
-
-        {loadError ? (
-          <p className="text-center text-[13.5px] text-[var(--amber-deep)]" role="alert">
-            {loadError}
-          </p>
         ) : null}
 
         {notFound ? (
@@ -92,7 +88,7 @@ export function ClaimInviteCard({
             <p className="text-[15.5px] font-extrabold text-[var(--ink)]">
               {invite.organizationName}
             </p>
-            {isParent && invite.studentName ? (
+            {isFamily && invite.studentName ? (
               <p className="mt-1 text-[13.5px] text-[var(--ink-soft)]">
                 For {invite.studentName}
               </p>

@@ -81,7 +81,7 @@ src/
 ├── materials/                # content, files (incl. audio/video), versions, important now
 ├── submissions/              # families turn in files on a material
 ├── search/                   # P0 advanced / cross-facet search (when implemented)
-├── sharing/                  # resource links, share with parents
+├── sharing/                  # resource links, share with students
 ├── print/                    # print material / unit / this week
 ├── parent/                   # this week calendar + Focus + announcements
 ├── announcements/            # one-way notices (course / class / student)

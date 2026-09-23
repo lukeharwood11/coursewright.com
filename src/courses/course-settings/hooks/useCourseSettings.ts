@@ -6,6 +6,10 @@ import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanManageCourse } from "@/courses/model/access";
 import {
+  caughtErrorMessage,
+  formOrMutationError,
+} from "@/ui/toast";
+import {
   addCourseInstructor,
   courseQueryKeys,
   getCourse,
@@ -133,7 +137,7 @@ export function useCourseSettings() {
       await queryClient.invalidateQueries({ queryKey: ["calendar", organization.id] });
       await queryClient.invalidateQueries({ queryKey: ["parent", "dashboard", organization.id] });
     },
-    onError: (error: Error) => setFormError(error.message),
+    onError: (error: Error) => setFormError(caughtErrorMessage(error)),
   });
 
   const setVisibility = useMutation({
@@ -226,7 +230,7 @@ export function useCourseSettings() {
     toggleGrade: (label: string) =>
       setGradeLevels((current) => toggleGradeLevel(current, label)),
     gradeLabels: orgQuery.data?.gradeLabels ?? [],
-    formError: formError ?? (save.error ? save.error.message : null),
+    formError: formOrMutationError(formError, save.error),
     saving: save.isPending,
     hasChanges,
     onSubmit,

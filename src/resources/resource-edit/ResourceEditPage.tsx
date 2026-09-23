@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Input } from "@/ui/Input";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { PageLoading } from "@/ui/PageLoading";
@@ -18,6 +18,7 @@ export function ResourceEditPage() {
   const edit = useResourceEdit();
   const page = edit.page;
   const user = useAuthedUser();
+  const navigate = useNavigate();
   useToastOnError(edit.error ?? page.error);
 
   useEffect(() => {
@@ -75,6 +76,12 @@ export function ResourceEditPage() {
           saving={edit.saving}
           hasChanges={edit.hasChanges}
           cancelTo={viewHref}
+          closeWhenUnchanged
+          onSaveAndClose={async () => {
+            const ok = await edit.save();
+            if (!ok) return;
+            navigate(viewHref);
+          }}
         />
       </div>
 

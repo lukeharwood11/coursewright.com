@@ -15,6 +15,7 @@ export type OrgStaffMember = {
   name: string;
   email: string;
   hasLinkedStudent: boolean;
+  hasStudentAccount: boolean;
 };
 
 export type PendingOrgInvite = {
@@ -86,6 +87,7 @@ export const staffInviteQueryKeys = {
   staff: (orgId: number) => ["org-staff", orgId] as const,
   byToken: (token: string) => ["org-invites", "token", token] as const,
   parents: (orgId: number) => ["org-invites", "parents", orgId] as const,
+  students: (orgId: number) => ["org-invites", "students", orgId] as const,
   parentLinks: (studentIds: number[]) =>
     ["parent-links", ...studentIds.slice().sort((a, b) => a - b)] as const,
 };
@@ -100,7 +102,7 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
     .select("id, user_id, role, profile:profiles!memberships_user_id_fkey(name, email)")
     .eq("organization_id", organizationId)
     .eq("status", "active")
-    .in("role", ["owner", "admin", "instructor", "parent"]);
+    .in("role", ["owner", "admin", "instructor", "parent", "student"]);
 
   if (error) throw new Error(error.message);
 
@@ -119,18 +121,21 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
         name: profile.name,
         email: profile.email,
         hasLinkedStudent: false,
+        hasStudentAccount: false,
       };
     })
     .filter((row): row is OrgStaffMember => row !== null);
 
-  const linkedParents = await listLinkedParentUserIds(
-    organizationId,
-    members.map((member) => member.userId),
-  );
+  const userIds = members.map((member) => member.userId);
+  const [linkedParents, studentAccounts] = await Promise.all([
+    listLinkedParentUserIds(organizationId, userIds),
+    listStudentAccountUserIds(organizationId, userIds),
+  ]);
 
   return members.map((member) => ({
     ...member,
     hasLinkedStudent: linkedParents.has(member.userId),
+    hasStudentAccount: studentAccounts.has(member.userId),
   }));
 }
 
@@ -160,6 +165,28 @@ async function listLinkedParentUserIds(
   if (error) throw new Error(error.message);
 
   return new Set((data ?? []).map((row) => row.parent_user_id));
+}
+
+async function listStudentAccountUserIds(
+  organizationId: number,
+  userIds: string[],
+): Promise<Set<string>> {
+  if (userIds.length === 0) return new Set();
+
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("student_profiles")
+    .select("user_id")
+    .eq("organization_id", organizationId)
+    .in("user_id", userIds);
+
+  if (error) throw new Error(error.message);
+
+  return new Set(
+    (data ?? [])
+      .map((row) => row.user_id)
+      .filter((id): id is string => Boolean(id)),
+  );
 }
 
 export async function listOrgPendingInvites(
@@ -325,6 +352,73 @@ export async function createParentInvite(input: {
     if (!raced) throw error;
     return attachToExistingParentInvite(raced, input.studentProfileId);
   }
+}
+
+export async function createStudentInvite(input: {
+  organizationId: number;
+  studentProfileId: number;
+  email: string;
+  invitedBy: string;
+}): Promise<CreatedOrgInvite<PendingOrgInvite>> {
+  const email = input.email.trim().toLowerCase();
+  const invite = await insertInvite({
+    organizationId: input.organizationId,
+    email,
+    role: "student",
+    invitedBy: input.invitedBy,
+    studentProfileId: input.studentProfileId,
+  });
+  const emailStatus = await sendOrganizationInviteEmail(invite.id);
+  return { invite, email: emailStatus, attached: false };
+}
+
+export async function listOrgPendingStudentInvites(
+  organizationId: number,
+): Promise<PendingOrgInvite[]> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("admin_invites")
+    .select(INVITE_COLUMNS)
+    .eq("organization_id", organizationId)
+    .eq("role", "student")
+    .is("accepted_at", null)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return (data ?? [])
+    .map((row) => toPendingInvite(row as PendingInviteRow))
+    .filter((row): row is PendingOrgInvite => row !== null);
+}
+
+export type StudentAccountLink = {
+  studentProfileId: number;
+  userId: string;
+  name: string;
+  email: string;
+};
+
+export async function getStudentAccountLink(
+  studentProfileId: number,
+): Promise<StudentAccountLink | null> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("student_profiles")
+    .select("id, user_id, profile:profiles!student_profiles_user_id_fkey(name, email)")
+    .eq("id", studentProfileId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data?.user_id) return null;
+  const profile = unwrapOne(
+    data.profile as ProfileEmbed,
+  );
+  if (!profile) return null;
+  return {
+    studentProfileId: data.id,
+    userId: data.user_id,
+    name: profile.name,
+    email: profile.email,
+  };
 }
 
 async function attachToExistingParentInvite(

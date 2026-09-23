@@ -14,8 +14,14 @@ export const LAST_OWNER_ADMIN_MESSAGE =
 export const PARENT_ROLE_NEEDS_STUDENT_MESSAGE =
   "That person can only become a parent if they are linked to a student in this organization.";
 
+export const STUDENT_ROLE_NEEDS_ACCOUNT_MESSAGE =
+  "That person can only become a student if their account is linked to a student profile in this organization.";
+
 export const REMOVE_LINKED_PARENT_MESSAGE =
   "This person is linked to a student. Change their role to Parent instead of removing them.";
+
+export const REMOVE_LINKED_STUDENT_MESSAGE =
+  "This person is linked to a student profile. Change their role to Student instead of removing them.";
 
 export function isOrgManagerRole(role: OrgRole): boolean {
   return role === "owner" || role === "admin";
@@ -24,7 +30,12 @@ export function isOrgManagerRole(role: OrgRole): boolean {
 export function isEditableMembershipRole(
   role: OrgRole,
 ): role is EditableMembershipRole {
-  return role === "admin" || role === "instructor" || role === "parent";
+  return (
+    role === "admin" ||
+    role === "instructor" ||
+    role === "parent" ||
+    role === "student"
+  );
 }
 
 export function isEditableStaffRole(
@@ -53,18 +64,17 @@ export function assignableMembershipRoles(input: {
   actorRole: OrgRole;
   currentRole: OrgRole;
   hasLinkedStudent: boolean;
+  hasStudentAccount?: boolean;
 }): AssignableMembershipRole[] {
   const staffRoles = assignableStaffRoles(input.actorRole);
-  if (input.currentRole === "parent") {
+  if (input.currentRole === "parent" || input.currentRole === "student") {
     return staffRoles;
   }
-  if (
-    isEditableStaffRole(input.currentRole) &&
-    input.hasLinkedStudent
-  ) {
-    return [...staffRoles, "parent"];
-  }
-  return staffRoles;
+  if (!isEditableStaffRole(input.currentRole)) return staffRoles;
+  const family: AssignableMembershipRole[] = [];
+  if (input.hasLinkedStudent) family.push("parent");
+  if (input.hasStudentAccount) family.push("student");
+  return [...staffRoles, ...family];
 }
 
 export function staffMemberActions(input: {
@@ -73,6 +83,7 @@ export function staffMemberActions(input: {
     membershipId: number;
     role: OrgRole;
     hasLinkedStudent: boolean;
+    hasStudentAccount?: boolean;
   };
   members: readonly { membershipId: number; role: OrgRole }[];
 }): {
@@ -90,6 +101,7 @@ export function staffMemberActions(input: {
         actorRole: input.actorRole,
         currentRole: input.member.role,
         hasLinkedStudent: input.member.hasLinkedStudent,
+        hasStudentAccount: input.member.hasStudentAccount,
       })
     : [];
 
@@ -119,6 +131,7 @@ export function staffMemberActions(input: {
     canRemove:
       isEditableStaffRole(input.member.role) &&
       !input.member.hasLinkedStudent &&
+      !input.member.hasStudentAccount &&
       !wouldDemoteLastManager,
     changeRoles: rolesForSelect,
     lastManagerGuard,
@@ -131,6 +144,7 @@ export function validateChangeStaffRole(input: {
   nextRole: string;
   isLastManager: boolean;
   hasLinkedStudent: boolean;
+  hasStudentAccount?: boolean;
 }):
   | { ok: true; value: AssignableMembershipRole }
   | { ok: false; error: string } {
@@ -144,17 +158,21 @@ export function validateChangeStaffRole(input: {
 
   const nextRole = parseAssignableMembershipRole(input.nextRole);
   if (!nextRole) {
-    return { ok: false, error: "Choose instructor, admin, owner, or parent." };
+    return { ok: false, error: "Choose instructor, admin, owner, parent, or student." };
   }
 
   const allowed = assignableMembershipRoles({
     actorRole: input.actorRole,
     currentRole: input.currentRole,
     hasLinkedStudent: input.hasLinkedStudent,
+    hasStudentAccount: input.hasStudentAccount,
   });
   if (!allowed.includes(nextRole)) {
     if (nextRole === "parent") {
       return { ok: false, error: PARENT_ROLE_NEEDS_STUDENT_MESSAGE };
+    }
+    if (nextRole === "student") {
+      return { ok: false, error: STUDENT_ROLE_NEEDS_ACCOUNT_MESSAGE };
     }
     return {
       ok: false,
@@ -181,6 +199,7 @@ export function validateRemoveStaffMember(input: {
   targetRole: OrgRole;
   isLastManager: boolean;
   hasLinkedStudent: boolean;
+  hasStudentAccount?: boolean;
 }): { ok: true } | { ok: false; error: string } {
   if (!canManageStaff(input.actorRole)) {
     return { ok: false, error: "You don’t have permission to remove collaborators." };
@@ -192,6 +211,10 @@ export function validateRemoveStaffMember(input: {
 
   if (input.hasLinkedStudent) {
     return { ok: false, error: REMOVE_LINKED_PARENT_MESSAGE };
+  }
+
+  if (input.hasStudentAccount) {
+    return { ok: false, error: REMOVE_LINKED_STUDENT_MESSAGE };
   }
 
   if (input.isLastManager && isOrgManagerRole(input.targetRole)) {
@@ -213,6 +236,11 @@ export function staffMembershipWriteErrorMessage(error: {
     message.includes("can only become a parent if they are linked to a student")
   ) {
     return PARENT_ROLE_NEEDS_STUDENT_MESSAGE;
+  }
+  if (
+    message.includes("can only become a student if their account is linked")
+  ) {
+    return STUDENT_ROLE_NEEDS_ACCOUNT_MESSAGE;
   }
   if (
     error.code === "42501" ||

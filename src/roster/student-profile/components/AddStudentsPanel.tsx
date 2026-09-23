@@ -80,7 +80,7 @@ export function AddStudentsPanel({
   }
 
   return (
-    <section className="mt-6 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
+    <section className="mt-6 max-w-3xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">

@@ -25,7 +25,7 @@ Per course row (TBD density):
 
 - Course **title** and optional **icon** (set on create or in settings)
 - Optional **description**, **location**, **subject / area**
-- **Status** (e.g. active) and **unpublished** badge when hidden from families
+- **Status** (e.g. active) and **unpublished** badge when hidden from students
 - Optional **start/end dates**
 - **Grade metadata** in one pill (comma-separated, org scheme order)
 - **Instructors** (avatars + names on catalog cards)

@@ -4,13 +4,13 @@ export const STAFF_VIEW_MODES = ["teacher", "parent"] as const;
 export type StaffViewMode = (typeof STAFF_VIEW_MODES)[number];
 
 export const TEACHER_VIEW_LABEL = "Teacher";
-export const PARENT_VIEW_LABEL = "Parent view";
+export const PARENT_VIEW_LABEL = "Student view";
 
 export function parseStaffViewMode(value: string | null | undefined): StaffViewMode {
   return value === "parent" ? "parent" : "teacher";
 }
 
-/** Parent-only members always see parent chrome. Staff follow the header toggle. */
+/** Parent-role members always see student chrome. Staff follow the header toggle. */
 export function staffShowsParentPresentation(
   role: OrgRole | null,
   viewMode: StaffViewMode,

@@ -44,21 +44,18 @@ export function useMaterialSubmissions(args: {
     },
   });
 
-  async function openFile(storageRef: string, filename: string, download: boolean) {
-    const url = await fileSignedUrl(
-      storageRef,
-      download ? { download: filename } : undefined,
-    );
-    if (download) {
-      const link = document.createElement("a");
-      link.href = url;
-      link.rel = "noopener";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      return;
-    }
-    window.open(url, "_blank", "noopener");
+  async function downloadFile(storageRef: string, filename: string) {
+    const url = await fileSignedUrl(storageRef, { download: filename });
+    const link = document.createElement("a");
+    link.href = url;
+    link.rel = "noopener";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
+  async function signedUrl(storageRef: string) {
+    return fileSignedUrl(storageRef);
   }
 
   return {
@@ -68,6 +65,7 @@ export function useMaterialSubmissions(args: {
     error: submissions.error ?? students.error,
     turningIn: turnIn.isPending,
     turnIn: turnIn.mutateAsync,
-    openFile,
+    downloadFile,
+    signedUrl,
   };
 }

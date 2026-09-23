@@ -310,11 +310,19 @@ async function loadRecipientEmails(
     .in("student_profile_id", studentIds);
   if (error) throw error;
 
+  const { data: studentAccounts, error: studentError } = await db
+    .from("student_profiles")
+    .select("user_id, profile:profiles!student_profiles_user_id_fkey(email)")
+    .in("id", studentIds)
+    .not("user_id", "is", null);
+  if (studentError) throw studentError;
+
   const userIds = [
     ...new Set(
-      (data ?? [])
-        .map((row) => row.parent_user_id)
-        .filter((id): id is string => typeof id === "string" && id.length > 0),
+      [
+        ...(data ?? []).map((row) => row.parent_user_id),
+        ...(studentAccounts ?? []).map((row) => row.user_id),
+      ].filter((id): id is string => typeof id === "string" && id.length > 0),
     ),
   ];
   if (userIds.length === 0) return [];
@@ -333,6 +341,12 @@ async function loadRecipientEmails(
     const userId = row.parent_user_id as string;
     if (!active.has(userId)) continue;
     const profile = unwrapProfile((row as { parent?: unknown }).parent);
+    addEmail(emails, profile?.email);
+  }
+  for (const row of studentAccounts ?? []) {
+    const userId = row.user_id as string;
+    if (!active.has(userId)) continue;
+    const profile = unwrapProfile((row as { profile?: unknown }).profile);
     addEmail(emails, profile?.email);
   }
   return [...emails];

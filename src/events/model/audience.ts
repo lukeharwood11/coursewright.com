@@ -14,7 +14,7 @@ export function eventAudienceLabel(audience: EventAudience): string {
   return "Organization";
 }
 
-/** Parent view keeps an event when a linked student is in any target course or class. */
+/** Student view keeps an event when a linked student is in any target course or class. */
 export function eventAppliesToFamily(
   event: { audience: EventAudience; courseIds: number[]; classIds: number[] },
   courseIds: ReadonlySet<number>,

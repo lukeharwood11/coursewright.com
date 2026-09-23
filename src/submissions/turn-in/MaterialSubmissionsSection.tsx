@@ -1,9 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import type { MaterialRecord } from "@/materials/databridge/materials";
 import {
   acceptAttribute,
   parseSubmissionFileTypes,
+  submissionFileTypeLabel,
+  type SubmissionFileType,
 } from "@/submissions/model/fileTypes";
 import {
   attributionLine,
@@ -11,10 +14,55 @@ import {
   submissionSlotOpen,
   turnInBatchError,
 } from "@/submissions/model/submission";
-import { formatSubmittedAt } from "@/submissions/model/dueInstant";
-import type { MaterialSubmissionRecord } from "@/submissions/databridge/submissions";
+import {
+  browserTimeZone,
+  DEFAULT_DUE_TIME,
+  dueInstantIso,
+  formatSubmittedAt,
+  formatTimeRemaining,
+  submissionClosesAtDue,
+} from "@/submissions/model/dueInstant";
+import type {
+  MaterialSubmissionRecord,
+  SubmissionFileRecord,
+} from "@/submissions/databridge/submissions";
+import {
+  submissionPreviewKind,
+  type SubmissionPreviewKind,
+} from "@/submissions/model/preview";
 import { useMaterialSubmissions } from "./hooks/useMaterialSubmissions";
 import { SubmissionFileList } from "./components/SubmissionFileList";
+import { SubmissionFilePreview } from "./components/SubmissionFilePreview";
+
+type PreviewState = {
+  file: SubmissionFileRecord;
+  kind: SubmissionPreviewKind;
+  url: string | null;
+  text: string | null;
+  loading: boolean;
+  error: string | null;
+};
+
+function materialDueInstant(material: MaterialRecord): string | null {
+  if (material.dueAt) return material.dueAt;
+  if (!material.dueDate) return null;
+  try {
+    return dueInstantIso(
+      material.dueDate,
+      DEFAULT_DUE_TIME,
+      material.dueTimezone || browserTimeZone(),
+    );
+  } catch {
+    return null;
+  }
+}
+
+function submitDeadlineLabel(dueAt: string, now: Date, closesAtDue: boolean): string | null {
+  const left = formatTimeRemaining(dueAt, now);
+  if (!left) return null;
+  if (!closesAtDue) return left;
+  return `Closes in ${left.replace(/ left$/, "")}`;
+}
 
 export function MaterialSubmissionsSection({
   material,
@@ -30,9 +78,61 @@ export function MaterialSubmissionsSection({
     courseId,
     enabled: true,
   });
+  const [preview, setPreview] = useState<PreviewState | null>(null);
   const allowed = parseSubmissionFileTypes(material.submissionFileTypes);
   const hasAny = page.submissions.some((row) => row.versions.length > 0);
   const show = material.acceptSubmissions || hasAny || Boolean(page.error);
+
+  async function openPreview(file: SubmissionFileRecord) {
+    const kind = submissionPreviewKind(file.mimeType, file.filename);
+    if (!kind) return;
+    setPreview({
+      file,
+      kind,
+      url: null,
+      text: null,
+      loading: true,
+      error: null,
+    });
+    try {
+      const url = await page.signedUrl(file.storageRef);
+      if (kind === "text") {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Couldn’t load that file.");
+        const text = await response.text();
+        setPreview({
+          file,
+          kind,
+          url,
+          text,
+          loading: false,
+          error: null,
+        });
+        return;
+      }
+      setPreview({
+        file,
+        kind,
+        url,
+        text: null,
+        loading: false,
+        error: null,
+      });
+    } catch (caught) {
+      setPreview({
+        file,
+        kind,
+        url: null,
+        text: null,
+        loading: false,
+        error: caught instanceof Error ? caught.message : "Couldn’t open that file.",
+      });
+    }
+  }
+
+  function downloadFile(file: SubmissionFileRecord) {
+    void page.downloadFile(file.storageRef, file.filename);
+  }
 
   if (!show) return null;
   if (
@@ -46,44 +146,78 @@ export function MaterialSubmissionsSection({
   }
 
   return (
-    <section className="mt-8 max-w-2xl">
-      <h2
-        className="text-[20px] font-semibold text-[var(--ink)]"
-        style={{ fontFamily: "var(--font-display)" }}
+    <>
+      <aside
+        data-submission-panel
+        className="w-full rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4 xl:sticky xl:top-4 xl:w-[20rem] xl:shrink-0"
       >
-        {mode === "staff" ? "Submissions" : "Turn in"}
-      </h2>
-      {page.loading ? (
-        <p className="mt-3 text-[14px] text-[var(--ink-soft)]">Loading submissions…</p>
-      ) : null}
-      {page.error && !page.turningIn ? (
-        <p className="mt-3 text-[14px] text-[var(--amber-deep)]" role="alert">
-          {page.error instanceof Error ? page.error.message : "Something went wrong."}
-        </p>
-      ) : null}
-      {!page.loading && mode === "staff" ? (
-        <StaffSubmissionList
-          students={page.students}
-          submissions={page.submissions}
-          onOpen={(file, download) => {
-            void page.openFile(file.storageRef, file.filename, download);
-          }}
+        <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">
+          {mode === "staff" ? "Submissions" : "Submit"}
+        </h2>
+        {allowed.length > 0 && material.acceptSubmissions ? (
+          <AllowedFilesList allowed={allowed} />
+        ) : null}
+        {page.loading ? (
+          <p className="mt-3 text-[14px] text-[var(--ink-soft)]">Loading submissions…</p>
+        ) : null}
+        {page.error && !page.turningIn ? (
+          <p className="mt-3 text-[14px] text-[var(--amber-deep)]" role="alert">
+            {page.error instanceof Error ? page.error.message : "Something went wrong."}
+          </p>
+        ) : null}
+        {!page.loading && mode === "staff" ? (
+          <StaffSubmissionList
+            students={page.students}
+            submissions={page.submissions}
+            onOpen={openPreview}
+            onDownload={downloadFile}
+          />
+        ) : null}
+        {!page.loading && mode === "family" ? (
+          <FamilyTurnIn
+            material={material}
+            allowed={allowed}
+            students={page.students}
+            submissions={page.submissions}
+            turningIn={page.turningIn}
+            onTurnIn={page.turnIn}
+            onOpen={openPreview}
+            onDownload={downloadFile}
+          />
+        ) : null}
+      </aside>
+      {preview ? (
+        <SubmissionFilePreview
+          open
+          title={preview.file.filename}
+          kind={preview.kind}
+          url={preview.url}
+          text={preview.text}
+          loading={preview.loading}
+          error={preview.error}
+          onClose={() => setPreview(null)}
+          onDownload={() => downloadFile(preview.file)}
         />
       ) : null}
-      {!page.loading && mode === "family" ? (
-        <FamilyTurnIn
-          material={material}
-          allowed={allowed}
-          students={page.students}
-          submissions={page.submissions}
-          turningIn={page.turningIn}
-          onTurnIn={page.turnIn}
-          onOpen={(file, download) => {
-            void page.openFile(file.storageRef, file.filename, download);
-          }}
-        />
-      ) : null}
-    </section>
+    </>
+  );
+}
+
+function AllowedFilesList({ allowed }: { allowed: readonly SubmissionFileType[] }) {
+  return (
+    <div className="mt-3">
+      <p className="text-[12px] font-bold text-[var(--ink-faint)]">Allowed files</p>
+      <ul className="mt-1.5 flex flex-wrap gap-1.5">
+        {allowed.map((kind) => (
+          <li
+            key={kind}
+            className="rounded-[6px] bg-[var(--paper)] px-2 py-0.5 text-[12.5px] font-medium text-[var(--ink-soft)]"
+          >
+            {submissionFileTypeLabel(kind)}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -91,39 +225,42 @@ function StaffSubmissionList({
   students,
   submissions,
   onOpen,
+  onDownload,
 }: {
   students: { id: number; name: string }[];
   submissions: MaterialSubmissionRecord[];
-  onOpen: (file: MaterialSubmissionRecord["versions"][number]["files"][number], download: boolean) => void;
+  onOpen: (file: SubmissionFileRecord) => void;
+  onDownload: (file: SubmissionFileRecord) => void;
 }) {
   const rows = useMemo(() => mergeRoster(students, submissions), [students, submissions]);
   if (rows.length === 0) {
     return (
       <p className="mt-3 text-[14.5px] text-[var(--ink-soft)]">
-        No one has turned this in yet.
+        No one has submitted yet.
       </p>
     );
   }
   return (
     <ul className="mt-4 flex flex-col gap-4">
       {rows.map((row) => (
-        <li
-          key={row.studentId}
-          className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
-        >
-          <p className="text-[16px] font-bold text-[var(--ink)]">{row.studentName}</p>
+        <li key={row.studentId} className="border-t border-[var(--line-soft)] pt-3 first:border-t-0 first:pt-0">
+          <p className="text-[15px] font-bold text-[var(--ink)]">{row.studentName}</p>
           {row.versions.length === 0 ? (
-            <p className="mt-2 text-[14px] text-[var(--ink-soft)]">Not turned in</p>
+            <p className="mt-2 text-[14px] text-[var(--ink-soft)]">Not submitted</p>
           ) : (
             row.versions.map((version) => (
               <div key={version.id} className="mt-3">
-                <p className="text-[14.5px] text-[var(--ink)]">
+                <p className="text-[14px] text-[var(--ink)]">
                   {attributionLine(version.parentName, row.studentName)}
                 </p>
-                <p className="text-[13px] text-[var(--ink-soft)]">
+                <p className="text-[12.5px] text-[var(--ink-soft)]">
                   {formatSubmittedAt(version.submittedAt)}
                 </p>
-                <SubmissionFileList files={version.files} onOpen={onOpen} />
+                <SubmissionFileList
+                  files={version.files}
+                  onOpen={onOpen}
+                  onDownload={onDownload}
+                />
               </div>
             ))
           )}
@@ -195,6 +332,7 @@ function FamilyTurnIn({
   turningIn,
   onTurnIn,
   onOpen,
+  onDownload,
 }: {
   material: MaterialRecord;
   allowed: ReturnType<typeof parseSubmissionFileTypes>;
@@ -206,10 +344,12 @@ function FamilyTurnIn({
     files: File[];
     allowed: typeof allowed;
   }) => Promise<unknown>;
-  onOpen: (file: MaterialSubmissionRecord["versions"][number]["files"][number], download: boolean) => void;
+  onOpen: (file: SubmissionFileRecord) => void;
+  onDownload: (file: SubmissionFileRecord) => void;
 }) {
   const choices = familyChoices(students, submissions);
   const [studentId, setStudentId] = useState<number | null>(choices[0]?.id ?? null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const chosen =
     choices.find((row) => row.id === studentId) ?? choices[0] ?? null;
   const student = chosen;
@@ -217,19 +357,35 @@ function FamilyTurnIn({
   const versions = submission?.versions ?? [];
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => new Date());
+  const dueAt = materialDueInstant(material);
+
+  const closesAtDue = submissionClosesAtDue({
+    allowPastDue: material.allowSubmissionsPastDue,
+    dueAt,
+  });
+
+  useEffect(() => {
+    if (!dueAt) return;
+    const tick = () => setNow(new Date());
+    tick();
+    const id = window.setInterval(tick, 15_000);
+    return () => window.clearInterval(id);
+  }, [dueAt]);
 
   const pastDue = pastDueBlocksTurnIn({
     allowPastDue: material.allowSubmissionsPastDue,
-    dueAt: material.dueAt,
-    now: new Date(),
+    dueAt,
+    now,
   });
-  const open =
+  const remainingLabel = dueAt ? submitDeadlineLabel(dueAt, now, closesAtDue) : null;
+  const canSubmitForm =
     material.visibility === "published" &&
     material.acceptSubmissions &&
     student != null &&
     student.canTurnIn &&
-    submissionSlotOpen(versions.length, material.submissionLimit) &&
-    !pastDue;
+    submissionSlotOpen(versions.length, material.submissionLimit);
+  const open = canSubmitForm && !pastDue;
 
   async function submit() {
     if (!student) return;
@@ -275,40 +431,52 @@ function FamilyTurnIn({
 
       {versions.map((version) => (
         <div key={version.id} className="mb-4">
-          <p className="text-[14.5px] text-[var(--ink)]">
+          <p className="text-[14px] text-[var(--ink)]">
             {attributionLine(version.parentName, student?.name ?? submission?.studentName ?? "")}
           </p>
-          <p className="text-[13px] text-[var(--ink-soft)]">
+          <p className="text-[12.5px] text-[var(--ink-soft)]">
             {formatSubmittedAt(version.submittedAt)}
           </p>
-          <SubmissionFileList files={version.files} onOpen={onOpen} />
+          <SubmissionFileList
+            files={version.files}
+            onOpen={onOpen}
+            onDownload={onDownload}
+          />
         </div>
       ))}
 
-      {pastDue && material.acceptSubmissions ? (
-        <p className="text-[14.5px] text-[var(--ink-soft)]">
-          The due date has passed, so this can no longer be turned in.
+      {pastDue && material.acceptSubmissions && closesAtDue ? (
+        <p className="text-[14px] text-[var(--ink-soft)]">
+          Submission closed — the due date has passed.
         </p>
       ) : null}
 
       {open ? (
         <div className="mt-2">
-          <label className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1">
             <span className="text-[13px] font-bold text-[var(--ink-soft)]">
               {versions.length === 0 ? "Files" : "Another version"}
             </span>
             <input
+              ref={fileInputRef}
               type="file"
               multiple
               accept={acceptAttribute(allowed)}
-              className="text-[13.5px] text-[var(--ink-soft)]"
+              className="sr-only"
               onChange={(event) => {
                 const picked = [...(event.target.files ?? [])];
                 setFiles((current) => [...current, ...picked]);
                 event.target.value = "";
               }}
             />
-          </label>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Choose files
+            </Button>
+          </div>
           {files.length > 0 ? (
             <ul className="mt-2 flex flex-col gap-1">
               {files.map((file, index) => (
@@ -331,13 +499,23 @@ function FamilyTurnIn({
             </p>
           ) : null}
           <div className="mt-3">
-            <Button disabled={turningIn || files.length === 0} onClick={() => void submit()}>
+            <Button
+              fullWidth
+              disabled={turningIn || files.length === 0}
+              onClick={() => void submit()}
+            >
+              <ArrowUpTrayIcon className="h-5 w-5" aria-hidden />
               {turningIn
-                ? "Turning in…"
+                ? "Submitting…"
                 : versions.length === 0
-                  ? "Turn in"
-                  : "Turn in another version"}
+                  ? "Submit"
+                  : "Submit another version"}
             </Button>
+            {remainingLabel ? (
+              <p className="mt-2 text-center text-[12.5px] font-medium text-[var(--ink-soft)]">
+                {remainingLabel}
+              </p>
+            ) : null}
           </div>
         </div>
       ) : null}

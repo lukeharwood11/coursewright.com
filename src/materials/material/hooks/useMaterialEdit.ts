@@ -16,6 +16,7 @@ import {
   DEFAULT_SUBMISSION_LIMIT,
   submissionLimitValid,
 } from "@/submissions/model/submission";
+import { isNetworkError } from "@/ui/networkError";
 import { useMaterial } from "./useMaterial";
 
 const MATERIAL_EDIT_FORM_ID = "material-edit-form";
@@ -108,16 +109,17 @@ export function useMaterialEdit() {
     setContentDraft(json);
   }
 
-  async function save() {
-    if (!page.material) return;
-    if (!placementChanged && !contentChanged) return;
+  /** Returns true when save succeeded or there was nothing to save. */
+  async function save(): Promise<boolean> {
+    if (!page.material) return false;
+    if (!placementChanged && !contentChanged) return true;
     if (submissionsInvalid || limitInvalid) {
       setError(
         submissionsInvalid
           ? "Choose at least one kind of file families can turn in."
           : "Submissions allowed must be from 1 to 10.",
       );
-      return;
+      return false;
     }
     setSaving(true);
     setError(null);
@@ -150,8 +152,10 @@ export function useMaterialEdit() {
       });
       if (contentDraft) setContentBaseline(contentDraft);
       await page.invalidate();
-    } catch {
-      setError("Something went wrong.");
+      return true;
+    } catch (caught: unknown) {
+      setError(isNetworkError(caught) ? "Failed to fetch" : "Something went wrong.");
+      return false;
     } finally {
       setSaving(false);
     }

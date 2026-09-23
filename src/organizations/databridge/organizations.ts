@@ -3,7 +3,7 @@ import { createOrganizationErrorMessage } from "@/organizations/model/createOrga
 import type { ValidatedCreateOrganization } from "@/organizations/model/createOrganization";
 import { parseGradeScheme } from "@/organizations/model/gradeScheme";
 import type { GradeScheme } from "@/organizations/model/gradeScheme";
-import { parseOrgType } from "@/organizations/model/orgType";
+import { parseOrgTypeOrDefault } from "@/organizations/model/orgType";
 import type { OrgType } from "@/organizations/model/orgType";
 import {
   organizationWriteErrorMessage,
@@ -34,9 +34,9 @@ type OrganizationRow = OrganizationSummaryRow & {
 };
 
 function toOrganizationDetails(row: OrganizationRow): OrganizationDetails | null {
-  const orgType = parseOrgType(row.org_type);
+  const orgType = parseOrgTypeOrDefault(row.org_type);
   const gradeScheme = parseGradeScheme(row.grade_scheme);
-  if (!orgType || !gradeScheme) return null;
+  if (!gradeScheme) return null;
   return {
     ...toOrganizationSummary(row),
     orgType,

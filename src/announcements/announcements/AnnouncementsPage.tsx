@@ -82,8 +82,7 @@ export function AnnouncementsPage() {
 
       {page.announcements.length === 0 ? (
         <p className="mt-6 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-          No announcements yet. Post one when families need a notice that isn’t
-          this week’s materials.
+          There are no announcements at this time.
         </p>
       ) : (
         <div className="mt-6 flex max-w-2xl flex-col gap-5">

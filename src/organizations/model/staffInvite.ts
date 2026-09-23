@@ -128,6 +128,7 @@ const MEMBER_ROLE_ORDER: Record<OrgRole, number> = {
   admin: 1,
   instructor: 2,
   parent: 3,
+  student: 4,
 };
 
 export function compareStaffRole(a: OrgRole, b: OrgRole): number {

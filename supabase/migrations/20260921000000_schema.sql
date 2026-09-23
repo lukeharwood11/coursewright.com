@@ -161,7 +161,7 @@ create table public.organizations (
   search_vector tsvector generated always as (
     to_tsvector('english', coalesce(name, ''))
   ) stored,
-  constraint organizations_org_type_chk check (org_type in ('coop', 'micro_school', 'family')),
+  constraint organizations_org_type_chk check (org_type in ('other', 'coop', 'micro_school', 'family')),
   constraint organizations_grade_scheme_chk check (grade_scheme in ('k12', 'custom')),
   constraint organizations_slug_format_chk check (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
   constraint organizations_slug_len_chk check (char_length(slug) between 2 and 60),

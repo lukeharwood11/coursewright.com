@@ -65,7 +65,7 @@
 | Load org, courses, units, materials | **Create course from course** (copy units/materials — **P0**) |
 | Edit a material title / dates / text | **Send organization invite email** (`send-organization-invite` → Resend); **send announcement notification** (`send-announcement-notification` → Resend) |
 | Roster list / enroll when rules fit RLS | Invite claim / privileged membership writes |
-| Parent dashboard reads for this week | Soft-delete cascades / revert that touch many rows |
+| Student home reads for this week | Soft-delete cascades / revert that touch many rows |
 | Discussion CRUD + Realtime subscribe (P1) | Anything needing service-role or **external email** / **Web Push** (`send-activity-push`) |
 | ShareLink create/read when RLS allows | **P1:** Create course from template (copy + lineage) |
 | Auth session via Supabase client | **P1:** Template → course sync for unmodified copies |

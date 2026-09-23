@@ -9,6 +9,7 @@ import {
 
 const staff = { userId: "staff", isStaff: true, isParentRole: false };
 const parent = { userId: "parent", isStaff: false, isParentRole: true };
+const student = { userId: "student", isStaff: false, isParentRole: true };
 
 function folder(
   id: number,
@@ -57,7 +58,7 @@ test("staff can edit unpublished items; parents cannot without a grant", () => {
   assert.deepEqual(parentCaps, { canView: false, canEdit: false });
 });
 
-test("published parents-mode folder is readable by parent members", () => {
+test("published parents-mode folder is readable by parent and student members", () => {
   const foldersById = new Map([[1, folder(1, null, "parents", false)]]);
   const caps = itemCapabilities({
     actor: parent,
@@ -71,6 +72,18 @@ test("published parents-mode folder is readable by parent members", () => {
     grants: [],
   });
   assert.deepEqual(caps, { canView: true, canEdit: false });
+  const studentCaps = itemCapabilities({
+    actor: student,
+    visibility: "published",
+    archived: false,
+    aclInherit: true,
+    accessMode: "staff",
+    folderId: 1,
+    itemId: 9,
+    foldersById,
+    grants: [],
+  });
+  assert.deepEqual(studentCaps, { canView: true, canEdit: false });
 });
 
 test("write grant on a folder lets a parent edit inherited items", () => {

@@ -6,7 +6,7 @@
 
 ## Audience
 
-Instructors/editors on the course (**P0**) or template (**P1**). Parents: read + print when shared via enrollment.
+Instructors/editors on the course (**P0**) or template (**P1**). Students: read + print when shared via enrollment.
 
 ## Purpose
 
@@ -17,7 +17,7 @@ Materials may also sit at **course top level** (no unit) from older data — see
 
 - Edit unit title / dates when permitted; **Edit** opens the form; **Save unit** / **Cancel** in the page header (Save disabled when unchanged; Cancel leaves edit view on this unit, confirms if dirty).
 - Show one unit in a **course** context (**P0**). Template URL tree is **P1**.
-- List materials in this unit; add material (**page** / **link** / **file**) / reorder when permitted. Parents (and staff **Parent view**) only see **published** materials.
+- List materials in this unit; add material (**page** / **link** / **file**) / reorder when permitted. Students (and staff **Student view**; linked parents inherit) only see **published** materials.
 - Course-level materials (no unit) appear on [COURSE](./COURSE.md) **above** the units list — not on this page.
 - **Print unit** produces one continuous packet (P0); opens [PRINT](./PRINT.md) at `…/units/<unit_id>/print`.
 - Dating: optional unit range; material `scheduled_date` wins for “this week” when set.

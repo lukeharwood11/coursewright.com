@@ -1,12 +1,15 @@
 import { useEffect } from "react";
 import { Button } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { PushNotificationSetting } from "@/notifications";
 import { AccountProfileForm } from "./components/AccountProfileForm";
 import { useAccountSettings } from "./hooks/useAccountSettings";
 
 export function AccountSettingsPage() {
   const account = useAccountSettings();
+  useToastOnError(account.loadError);
+  useToastOnError(account.signOutError);
 
   useEffect(() => {
     document.title = "Account · Course Wright";
@@ -30,12 +33,6 @@ export function AccountSettingsPage() {
         This is your Course Wright account — not a single organization.
       </p>
 
-      {account.loadError ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {account.loadError}
-        </p>
-      ) : null}
-
       <AccountProfileForm
         name={account.name}
         email={account.email}
@@ -47,12 +44,6 @@ export function AccountSettingsPage() {
       />
 
       <PushNotificationSetting />
-
-      {account.signOutError ? (
-        <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {account.signOutError}
-        </p>
-      ) : null}
 
       <div className="mt-6">
         <Button

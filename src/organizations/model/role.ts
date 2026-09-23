@@ -1,4 +1,4 @@
-export const ORG_ROLES = ["owner", "admin", "instructor", "parent"] as const;
+export const ORG_ROLES = ["owner", "admin", "instructor", "parent", "student"] as const;
 export type OrgRole = (typeof ORG_ROLES)[number];
 
 export const STAFF_INVITE_ROLES = ["owner", "admin", "instructor"] as const;
@@ -9,7 +9,7 @@ export type StaffInviteRole = (typeof STAFF_INVITE_ROLES)[number];
  * Owner rows stay badge-only (invite or promote someone else to owner).
  * Parent rows are editable so they can be promoted to staff without a new invite.
  */
-export const EDITABLE_MEMBERSHIP_ROLES = ["admin", "instructor", "parent"] as const;
+export const EDITABLE_MEMBERSHIP_ROLES = ["admin", "instructor", "parent", "student"] as const;
 export type EditableMembershipRole = (typeof EDITABLE_MEMBERSHIP_ROLES)[number];
 
 /** @deprecated Prefer EDITABLE_MEMBERSHIP_ROLES. */
@@ -20,15 +20,16 @@ export type EditableStaffRole = (typeof EDITABLE_STAFF_ROLES)[number];
 export const CHANGEABLE_STAFF_ROLES = EDITABLE_STAFF_ROLES;
 export type ChangeableStaffRole = EditableStaffRole;
 
-/** Roles assignable on an existing membership (staff invite roles + parent demotion). */
-export type AssignableMembershipRole = StaffInviteRole | "parent";
+/** Roles assignable on an existing membership (staff invite roles + family demotion). */
+export type AssignableMembershipRole = StaffInviteRole | "parent" | "student";
 
 export function parseOrgRole(value: string): OrgRole | null {
   if (
     value === "owner" ||
     value === "admin" ||
     value === "instructor" ||
-    value === "parent"
+    value === "parent" ||
+    value === "student"
   ) {
     return value;
   }
@@ -37,6 +38,11 @@ export function parseOrgRole(value: string): OrgRole | null {
 
 export function isStaffRole(role: OrgRole): boolean {
   return role === "owner" || role === "admin" || role === "instructor";
+}
+
+/** Parent and student memberships use the student presentation. */
+export function isFamilyViewerRole(role: OrgRole): boolean {
+  return role === "parent" || role === "student";
 }
 
 /** Owners and admins can change org identity, permalink, profile, school days, and grade scheme. */
@@ -79,7 +85,7 @@ export function parseStaffInviteRole(value: string): StaffInviteRole | null {
 export function parseAssignableMembershipRole(
   value: string,
 ): AssignableMembershipRole | null {
-  if (value === "parent") return "parent";
+  if (value === "parent" || value === "student") return value;
   return parseStaffInviteRole(value);
 }
 
@@ -123,6 +129,7 @@ export function roleLabel(role: OrgRole): string {
   if (role === "owner") return "Owner";
   if (role === "admin") return "Admin";
   if (role === "instructor") return "Instructor";
+  if (role === "student") return "Student";
   return "Parent";
 }
 

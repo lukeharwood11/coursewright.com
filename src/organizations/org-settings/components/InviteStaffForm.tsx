@@ -1,4 +1,5 @@
 import type { FormEvent } from "react";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { Select } from "@/ui/Select";
@@ -24,6 +25,7 @@ export function InviteStaffForm({
   onRoleChange: (value: StaffInviteRole) => void;
   onSubmit: (event: FormEvent) => void;
 }) {
+  useToastOnError(error);
   return (
     <form onSubmit={onSubmit} className="mt-4 grid gap-3 sm:grid-cols-[1fr_10rem_auto]">
       <label className="flex flex-col gap-1">
@@ -60,11 +62,6 @@ export function InviteStaffForm({
           {submitting ? "Inviting…" : "Invite"}
         </Button>
       </div>
-      {error ? (
-        <p className="text-[13px] text-[var(--amber-deep)] sm:col-span-3" role="alert">
-          {error}
-        </p>
-      ) : null}
     </form>
   );
 }

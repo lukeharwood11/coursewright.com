@@ -132,7 +132,7 @@ Deno.serve(async (request) => {
 
 function canSendInviteEmail(inviteRole: string, membershipRole: string | null): boolean {
   if (membershipRole == null) return false;
-  if (inviteRole === "parent") {
+  if (inviteRole === "parent" || inviteRole === "student") {
     return membershipRole === "owner" || membershipRole === "admin" || membershipRole === "instructor";
   }
   if (inviteRole === "owner" || inviteRole === "admin" || inviteRole === "instructor") {

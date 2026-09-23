@@ -114,7 +114,7 @@ Aligned with P0 in [FEATURES.md](./FEATURES.md):
 | `events/` | Course, class, or organization events and their write-up | Instructor; parent |
 | `billing/` | Org SaaS (P1) | Admin |
 
-Cross-cutting usability (tech-averse parents, print in the open) is a **constraint on every domain**, not a separate `usability/` package.
+Cross-cutting usability (tech-averse people on the student experience, print in the open) is a **constraint on every domain**, not a separate `usability/` package.
 
 ---
 

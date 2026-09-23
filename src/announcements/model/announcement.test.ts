@@ -181,7 +181,7 @@ test("validateAnnouncementDraft requires audience, targets, and title", () => {
       startDate: "",
       endDate: "",
     }),
-    "Add a title so families know what this is.",
+    "Add a title so students know what this is.",
   );
   assert.equal(
     validateAnnouncementDraft({

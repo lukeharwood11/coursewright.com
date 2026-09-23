@@ -39,7 +39,7 @@ test("validateLessonPlanDraft requires a title and a Sunday", () => {
       weekStart: "2026-09-13",
       days: visibleDaysForWeek("2026-09-13"),
     }),
-    "Add a title so families know what this is.",
+    "Add a title so students know what this is.",
   );
   assert.equal(
     validateLessonPlanDraft({

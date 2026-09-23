@@ -1,7 +1,7 @@
 import { CalendarDaysIcon, DocumentTextIcon, ExclamationTriangleIcon, PrinterIcon } from "@heroicons/react/24/outline";
 import { Mark } from "@/ui/Wordmark";
 
-/** Static illustration of the parent “this week” pattern — not live product data. */
+/** Static illustration of the student “this week” pattern — not live product data. */
 export function ParentPreviewCard() {
   return (
     <div

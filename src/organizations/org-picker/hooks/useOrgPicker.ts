@@ -10,6 +10,7 @@ import {
 } from "@/organizations/databridge/memberships";
 import { validateCreateOrganization } from "@/organizations/model/createOrganization";
 import { formatSlugInput } from "@/organizations/model/slug";
+import { caughtErrorMessage } from "@/ui/toast";
 
 export function useOrgPicker() {
   const user = useAuthedUser();
@@ -41,7 +42,7 @@ export function useOrgPicker() {
       navigate(`/my/${org.slug}`);
     },
     onError: (error: Error) => {
-      setFormError(error.message);
+      setFormError(caughtErrorMessage(error));
     },
   });
 

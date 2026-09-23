@@ -8,11 +8,11 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 - Create organization; org settings (`/my/<org-slug>/settings`)
 - Org-visible **user profiles** (`/my/<org-slug>/people/<user_id>`) + reusable `user-card/`
 - **Permalink `slug`** — generated on create; changing it must warn that existing links break
-- Grade scheme (K–12 / Custom) and organization type (co-op / school / family)
+- Grade scheme (K–12 / Custom) and organization type (other / co-op / school / family; default **other**)
 - Optional org **profile** (about, address, website, contact email, phone) shown on org home when set
 - **School days** (default Mon–Fri) — owners/admins edit; lesson-plan compose uses them as the default day set
 - Admin invites (email via Resend `organization-invite` + copyable claim link)
-- Parent invites use the **same** `/invite/<token>` claim path (`role = parent`); create UI lives in `roster/`. The claim page loads unsigned so the invited email is obvious before signup/login.
+- Parent invites use the **same** `/invite/<token>` claim path (`role = parent`); student invites use that path with `role = student`. Create UI lives in `roster/`. The claim page loads unsigned so the invited email is obvious before signup/login.
 - **Collaborators** (staff membership) — change admin ↔ instructor ↔ parent (parent only when linked to a student); promote parents to staff without a new invite; remove admins/instructors with no linked student (not the last owner or admin). **Membership table only** — do not wire staff role into materials/roster RLS
 - Not: course builder, roster details (those are sibling domains)
 
@@ -22,7 +22,7 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 - PostgREST + RLS for normal org CRUD; Functions only if invite claim needs privileged writes.
 - Anyone can create an org ([FEATURES.md](../../docs/FEATURES.md)).
 - Slug uniqueness is enforced in the DB; never invent redirects for old slugs unless FEATURES says so.
-- Parent “this week” on org home uses `parent/` model + databridge and the shared `calendar/` week view. Staff **Parent view** renders that same home.
+- Parent “this week” on org home uses `parent/` model + databridge and the shared `calendar/` week view. Staff **Student view** renders that same home.
 - **Owners and admins** can update org settings. Instructors/parents cannot (RLS + UI).
 - **Billing is owner-only** — do not show billing controls to admins. Billing UI lives in `billing/`.
 - **Branding is owner-only** — icon and one accent color. Inside the org it replaces the primary color (buttons, links, sidebar). Admins see it read-only. Login, marketing, and the account home stay Wright Green. The icon file and `organization_icons` path are public (future invites). The accent color is not.

@@ -6,7 +6,7 @@
 
 ## Audience
 
-Parents (and staff **Parent view**) for linked students’ courses. Staff Teacher view for courses they can manage.
+Students (and staff **Student view**; linked parents inherit) for linked students’ courses. Staff Teacher view for courses they can manage.
 
 ## Purpose
 
@@ -14,14 +14,14 @@ Month, week, and day view of when work is **assigned** and **due**, plus lesson-
 
 ## Behavior
 
-- Sidebar **Calendar** for staff and parents.
+- Sidebar **Calendar** for staff and the student experience.
 - **Month** view: day cells with chips — **assigned** outlined in the course color, **due** filled. Lesson-plan text is not shown in month cells (too tight); switch to week or day to read plans. Chips and course labels open the material or lesson plan. Tapping the day (not a chip) switches to **day** view for that date.
 - **Week** view: Sunday–Saturday columns. Each day, per visible course: day plan text (if any), then a divider, then that day’s lesson-plan materials **and** assigned/due materials (deduped, kept with that class). Week notes sit as a colored bar per course above the grid. Items open the material or lesson plan. Tapping the day (not an item) switches to **day** view. [ORG_HOME](./ORG_HOME.md) This week uses the same chips and notes, but **omits empty days** and wraps remaining days as cards (those day cards also open day view).
-- **Day** view: that date only — **events** first (title, start/end time when set, location), then the same class blocks as week (plan text + materials). Previous / next move one day.
+- **Day** view: that date only — **events** first (calendar icon; title, start/end time when set, location), then the same class blocks as week (plan text + materials). Material rows show a **bookmark** (assigned), **clock** (due), or **document** (plan-only) icon on the left. Previous / next move one day.
 - **Events** are their own chips (title on month and week). A course event uses that course color and follows the legend. Class events and organization events are not hidden by the legend. Clicking an event opens [EVENT](./EVENT.md).
-- Staff Teacher view: **Add event** (date filled from the day you’re looking at). Parents and Parent view do not add events.
+- Staff Teacher view: **Add event** (date filled from the day you’re looking at). Students and Student view do not add events.
 - **Legend** lists courses with their color; tap to show/hide. Filter is client-side (this browser).
-- Parents: published materials + published lesson plans on enrolled, active, published courses of **active** students (student tags are on This week; Calendar shows all linked enrolled students unless later filtered the same way — Calendar uses the same student set as the parent dashboard without collapsing tags; if the parent has multiple students, all their courses appear, color-coded).
+- Students: published materials + published lesson plans on enrolled, active, published courses of **active** students (student tags are on This week; Calendar shows all linked enrolled students unless later filtered the same way — Calendar uses the same student set as the student home without collapsing tags; if more than one linked student, all their courses appear, color-coded).
 - Staff Teacher view: courses they can manage, including unpublished lesson plans (draft styling) and unpublished dated materials.
 - Empty: plain language, no LMS jargon.
 

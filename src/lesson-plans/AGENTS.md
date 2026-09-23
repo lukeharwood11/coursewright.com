@@ -17,7 +17,7 @@ Weekly course **lesson plans**: a Sunday–Saturday week note, optional per-day 
 - Attaching a material does **not** change assignment or due dates.
 - Soft-delete only. Course-from-course does **not** copy lesson plans.
 - Page folders: `lesson-plan/` (view), `lesson-plan-edit/` (new + edit). Shared `model/` + `databridge/`.
-- Calendar UI lives in `calendar/`; parent home composes that domain.
+- Calendar UI lives in `calendar/`; student home composes that domain.
 
 ## Don’t
 

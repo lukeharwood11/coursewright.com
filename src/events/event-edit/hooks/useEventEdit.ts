@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import type { SerializedEditorState } from "lexical";
 import { toast } from "sonner";
+import { toastCaughtError } from "@/ui/toast";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
@@ -85,7 +86,6 @@ export function useEventEdit() {
     JSON.stringify({ ...emptyEventDraft(), ...prefill }),
   );
   const [hydratedId, setHydratedId] = useState<number | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loaded || hydratedId === loaded.id) return;
@@ -189,15 +189,17 @@ export function useEventEdit() {
       navigate(eventPath(organization.slug, id));
     },
     onError: (error: Error) => {
-      setFormError(error.message);
+      toastCaughtError(error);
     },
   });
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
     const message = validateEventDraft(draft);
-    setFormError(message);
-    if (message) return;
+    if (message) {
+      toast.error(message);
+      return;
+    }
     save.mutate();
   }
 
@@ -213,7 +215,6 @@ export function useEventEdit() {
     courses: courseOptions,
     classes: classOptions,
     materials: materialsQuery.data ?? [],
-    formError,
     pending: save.isPending,
     editorKey: isNew ? "event-new" : `event-${eventId}`,
     setAudience: (audience: EventAudience) =>
@@ -248,6 +249,7 @@ export function useEventEdit() {
     hasChanges:
       JSON.stringify(draft) !== baseline ||
       (lexicalJson !== null && lexicalJson !== initialLexical.current),
+    canSave: validateEventDraft(draft) === null,
     saving: save.isPending,
     cancelTo: isNew
       ? `/my/${organization.slug}/calendar`

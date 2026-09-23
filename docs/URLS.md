@@ -78,7 +78,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 
 | Page | URL | Notes |
 |------|-----|-------|
-| [ORG_SETTINGS](./pages/ORG_SETTINGS.md) | `/my/<org-slug>/settings` | Slug, grade scheme, **staff section** (not a separate top-level page) |
+| [ORG_SETTINGS](./pages/ORG_SETTINGS.md) | `/my/<org-slug>/settings` | Left settings menu + one panel (`?tab=`). Slug, grade scheme, collaborators, billing (owners) — not separate top-level pages |
 | [USER_PROFILE](./pages/USER_PROFILE.md) | `/my/<org-slug>/people/<user_id>` | Org-visible profile for a person with an account |
 | Billing (P1) | <!-- TBD — under settings --> | Course Wright → org |
 
@@ -104,7 +104,7 @@ One-way notices (course, class, or student). Org-scoped because the audience is 
 
 | Page | URL | Notes |
 |------|-----|-------|
-| [ANNOUNCEMENTS](./pages/ANNOUNCEMENTS.md) | `/my/<org-slug>/announcements` | Staff list (Teacher view); parent list of current notices (parent chrome / Parent view) |
+| [ANNOUNCEMENTS](./pages/ANNOUNCEMENTS.md) | `/my/<org-slug>/announcements` | Staff list (Teacher view); parent list of current notices (student chrome / Student view) |
 | [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md) (view) | `/my/<org-slug>/announcements/<announcement_id>` | Families open from home; staff open from the list |
 | [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md) (new) | `/my/<org-slug>/announcements/new` | Staff compose. Optional `?audience=course\|class\|student` plus `courseId` / `classId` / `studentId` |
 | [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md) (edit) | `/my/<org-slug>/announcements/<announcement_id>/edit` | Staff edit |
@@ -117,7 +117,7 @@ Two-way threads (one course or one class). Org-scoped because the audience is no
 
 | Page | URL | Notes |
 |------|-----|-------|
-| [DISCUSSIONS](./pages/DISCUSSIONS.md) | `/my/<org-slug>/discussions` | Staff list (Teacher view); family list (parent chrome / Parent view) |
+| [DISCUSSIONS](./pages/DISCUSSIONS.md) | `/my/<org-slug>/discussions` | Staff list (Teacher view); family list (student chrome / Student view) |
 | [DISCUSSION](./pages/DISCUSSION.md) (view) | `/my/<org-slug>/discussions/<discussion_id>` | Thread: flat posts, quote-in-body, plain/Lexical, attachments, answered |
 | [DISCUSSION](./pages/DISCUSSION.md) (new) | `/my/<org-slug>/discussions/new` | Compose. Optional `?audience=course\|class` plus `courseId` / `classId` |
 
@@ -180,7 +180,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 | [PRINT](./pages/PRINT.md) (material, top-level) | `/my/<org-slug>/courses/<course_id>/materials/<material_id>/print` | Same on template tree (**P1**) |
 | [PRINT](./pages/PRINT.md) (material, in unit) | `…/units/<unit_id>/materials/<material_id>/print` | |
 | [PRINT](./pages/PRINT.md) (unit) | `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print` | Packet in material order |
-| [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Parent dashboard grain; Sun–Sat + important now. Optional `?students=` limits to active students |
+| [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Student home grain; Sun–Sat + important now. Optional `?students=` limits to active students |
 | [PRINT](./pages/PRINT.md) (event) | `/my/<org-slug>/events/<event_id>/print` | Event write-up |
 | [PRINT](./pages/PRINT.md) (resource) | `/my/<org-slug>/resources/items/<item_id>/print` | Document or file |
 | [PRINT](./pages/PRINT.md) (resources) | `/my/<org-slug>/resources/print?items=<id>,<id>` | Selected documents and files |
@@ -203,7 +203,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 
 ## Parent experience
 
-Covered by [ORG_HOME](./pages/ORG_HOME.md) + [CALENDAR](./pages/CALENDAR.md) + read-focused use of the course / unit / material tree. **Lesson plans** open [LESSON_PLAN](./pages/LESSON_PLAN.md). **Announcements** open [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md). **Discussions** (**P1**) open [DISCUSSION](./pages/DISCUSSION.md). No separate `/home` path in P0. Staff can switch to that presentation with **Parent view** in org chrome.
+Covered by [ORG_HOME](./pages/ORG_HOME.md) + [CALENDAR](./pages/CALENDAR.md) + read-focused use of the course / unit / material tree. **Lesson plans** open [LESSON_PLAN](./pages/LESSON_PLAN.md). **Announcements** open [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md). **Discussions** (**P1**) open [DISCUSSION](./pages/DISCUSSION.md). No separate `/home` path in P0. Staff can switch to that presentation with **Student view** in org chrome.
 
 ---
 

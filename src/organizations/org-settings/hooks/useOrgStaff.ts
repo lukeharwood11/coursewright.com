@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { caughtErrorMessage, toastCaughtError } from "@/ui/toast";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import {
   removeStaffMembership,
@@ -131,7 +132,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
       });
     },
     onError: (error: Error) => {
-      setFormError(error.message);
+      setFormError(caughtErrorMessage(error));
     },
   });
 
@@ -147,7 +148,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
       );
     },
     onError: (error: Error) => {
-      toast(error.message);
+      toastCaughtError(error);
     },
   });
 
@@ -162,7 +163,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
       });
     },
     onError: (error: Error) => {
-      toast(error.message);
+      toastCaughtError(error);
     },
   });
 
@@ -178,6 +179,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
         nextRole: input.nextRole,
         isLastManager: isLastOrgManager(members, input.member.membershipId),
         hasLinkedStudent: input.member.hasLinkedStudent,
+        hasStudentAccount: input.member.hasStudentAccount,
       });
       if (!parsed.ok) throw new Error(parsed.error);
       if (parsed.value === input.member.role) return input;
@@ -193,7 +195,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
       await invalidateStaff();
     },
     onError: (error: Error) => {
-      toast(error.message);
+      toastCaughtError(error);
     },
   });
 
@@ -205,6 +207,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
         targetRole: member.role,
         isLastManager: isLastOrgManager(members, member.membershipId),
         hasLinkedStudent: member.hasLinkedStudent,
+        hasStudentAccount: member.hasStudentAccount,
       });
       if (!parsed.ok) throw new Error(parsed.error);
       await removeStaffMembership(member.membershipId);
@@ -223,7 +226,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
       await invalidateStaff();
     },
     onError: (error: Error) => {
-      toast(error.message);
+      toastCaughtError(error);
     },
   });
 

@@ -72,7 +72,7 @@ export function HomePatchwork() {
               One hub for the whole course
             </h2>
             <p className="mt-3 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-              Plan materials, share files, run quizzes, and keep families updated
+              Plan materials, share files, run quizzes, and keep students updated
               from the same place — so nobody has to remember which app holds
               which piece.
             </p>

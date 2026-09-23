@@ -22,9 +22,9 @@ View (and edit) a single material placement — the thing parents open from this
 - Instructors: edit via `…/edit`, set important now, **publish / unpublish**, share resource link, print, version/revert, soft-delete.
 - **Published:** green **Published** badge (check) next to the title for staff; no “families can see this” banner. **Unpublish** sits at the bottom of the material view/edit.
 - **Unpublished:** amber warning banner + Publish; unpublished badge next to title.
-- Parents: read + print + play media for **published** materials; unpublished is not listed and not openable (RLS); no builder chrome; account required (P0). Staff **Parent view** matches that presentation (quizzes show questions only). When the material **accepts submissions**, a linked parent turns in one or more files for an enrolled student.
+- Students: read + print + play media for **published** materials; unpublished is not listed and not openable (RLS); no builder chrome; account required (P0). Staff **Student view** matches that presentation (quizzes show questions only). When the material **accepts submissions**, a linked parent turns in one or more files for an enrolled student.
 - **Accept submissions** (edit): off by default. When on, the teacher chooses allowed file groups (at least one), how many submissions a student may make (1–10, default 2), and whether submissions are allowed past the due time (on by default).
-- A submission is one turn-in: one or more files, one timestamp, labeled **"<Parent name> on behalf of <child name>"**. The family and the teacher both see every submission. There is no separate submissions URL.
+- A submission is one turn-in: one or more files, one timestamp, labeled **"<Parent name> on behalf of <child name>"** (or the student name when they submit themselves). The family and the teacher both see every submission in a **right side panel** on the material view (allowed file kinds listed there). There is no separate submissions URL. Submitted files offer **Download**; **Open** appears only when the browser can render the file (PDF, photo, audio, video, plain text) and shows it in a fullscreen view portal.
 - View URL is the material path without `/edit`; edit appends `/edit`.
 - Print → [PRINT](./PRINT.md) (`…/print`) → generated PDF in-app preview → Download / Print; no export wizard.
 - Instance content promote to template is **P1** (opt-in); overridden copies do not receive template sync for that resource.
@@ -65,8 +65,7 @@ View (and edit) a single material placement — the thing parents open from this
 - Kind badge: page / link / file
 - **Visibility** — unpublished: amber badge + warning banner; published: green Published badge (staff). Unpublish at bottom of page/edit
 - Optional `scheduled_date` (assignment date; wins over unit dates for “this week”; required for top-level materials to appear in “this week”)
-- Optional `due_date` (Add due date on add/edit; the calendar day also drives This week)
-- Optional due **time** next to that date, default **11:59 PM**, in the timezone of the person who saves it
+- Optional `due_date` — **Add due date** sits next to the assignment date label; when opened, due date + time appear **below** the assignment date (default time **11:59 PM**, timezone of the person who saves it)
 - **Accept submissions** — allowed files, submissions allowed, allow submissions past due date
 - Important now flag (instructor)
 
@@ -86,7 +85,7 @@ View (and edit) a single material placement — the thing parents open from this
 ### Edit
 
 - **Edit URL:** `…/materials/<material_id>/edit` (locked — [URLS.md](../URLS.md))
-- Placement fields + page content: **Save** / **Cancel** in the page header; Save disabled when unchanged; Cancel returns to the material view (confirms if dirty)
+- Placement fields + page content: **Save** / **Cancel** (reads **Close** when unchanged) in the page header; on desktop also **Save & close** (primary; saves then returns to the material view; when unchanged, just closes). Save disabled when unchanged; Cancel returns to the material view (confirms if dirty)
 - **page:** [Lexical](https://lexical.dev/) WYSIWYG with a playground-style **icon** toolbar (not word buttons). Headings, lists, quotes, tables, links, video URL embeds, in-page files, **audio** insert (upload or record), **quizzes** with marked correct answers. Type `/` to insert a block. Table insert asks for rows and columns. Audio insert opens the same recorder UI used on file materials. A version is stored only when the instructor saves and something changed — not per keystroke.
 - **link / file:** edit URL or replace file (file replace → new FileVersion)
 - Versioning / who changed what / revert dangerous actions
@@ -100,7 +99,7 @@ View (and edit) a single material placement — the thing parents open from this
 - **Download** (file materials)
 - **Preview** (PDF — fullscreen) / **Expand** (image)
 - Play audio (custom player) / video (native)
-- **Edit** → `…/edit` (editors)
+- **Edit** → `…/edit` (editors); on edit: **Save**, **Cancel**/**Close**, and (desktop) **Save & close**
 - Toggle important now
 - **Accept submissions** (and allowed files, submissions allowed, past-due rule)
 - **Publish / unpublish**
@@ -109,11 +108,11 @@ View (and edit) a single material placement — the thing parents open from this
 ## Parent variant
 
 - Immediate clarity; print obvious; no builder chrome; phone-usable
-- When the material accepts submissions: **Turn in** (several files at once). After a turn-in, the line **"<Parent name> on behalf of <child name>"** and the local date and time. **Turn in another version** while submissions remain. If the due instant has passed and late turn-in is off, say so and keep files already turned in.
+- When the material accepts submissions: a **Submit** side panel on the right lists allowed file kinds and lets the family **Submit** (several files at once, upload icon). After a submission, the line **"<Parent name> on behalf of <child name>"** (or just the student name when they submit themselves) and the local date and time. **Submit another version** while submissions remain. When **allow submissions past due** is off, show time left under Submit; once the due instant passes, hide Submit and say submission is closed.
 
 ## Staff submissions
 
-- On the material view, course managers see **Submissions**: each active student, or **Not turned in**, and every version with the same attribution line, timestamp, and files. Students who already turned something in stay listed after they leave the course.
+- On the material view, course managers see a **Submissions** side panel on the right (with allowed file kinds when accept submissions is on): each active student, or **Not submitted**, and every version with the same attribution line, timestamp, and files. Students who already submitted stay listed after they leave the course. File rows: **Open** (in-app portal when the type is viewable) and **Download**; no Open for types the browser cannot render (e.g. Word, HEIC).
 
 ## Links to
 

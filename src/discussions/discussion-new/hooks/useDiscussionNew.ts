@@ -2,6 +2,11 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { SerializedEditorState } from "lexical";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  formOrMutationError,
+  toastCheckNetworkConnection,
+} from "@/ui/toast";
+import { isNetworkError } from "@/ui/networkError";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
@@ -298,6 +303,9 @@ export function useDiscussionNew() {
       });
       navigate(discussionPath(organization.slug, created.id));
     },
+    onError: (error: Error) => {
+      if (isNetworkError(error)) toastCheckNetworkConnection();
+    },
   });
 
   return {
@@ -326,10 +334,10 @@ export function useDiscussionNew() {
     courses,
     classes,
     courseEmptyHint: parentPresentation
-      ? "You can start a discussion for a course your child is enrolled in."
+      ? "You can start a discussion for a course you are enrolled in."
       : "You can start a discussion for a course you teach.",
     classEmptyHint: parentPresentation
-      ? "You can start a discussion for a class your child is in."
+      ? "You can start a discussion for a class you are in."
       : "Choose a class.",
     materials: materialsQuery.data ?? [],
     mentionPeople: mentionPeopleQuery.data ?? [],
@@ -337,7 +345,7 @@ export function useDiscussionNew() {
     userId: user.id,
     hasChanges,
     canSave,
-    formError: formError ?? save.error?.message ?? null,
+    formError: formOrMutationError(formError, save.error),
     saving: save.isPending,
     loading:
       coursesQuery.isLoading ||

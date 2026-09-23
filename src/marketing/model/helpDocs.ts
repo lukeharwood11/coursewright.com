@@ -30,7 +30,7 @@ export const helpDocTopics: HelpDocTopic[] = [
     body: [
       {
         type: "p",
-        text: "Course Wright helps homeschool co-ops and micro-schools plan courses, share materials with parents, and run the program from one place. This short guide covers the basics.",
+        text: "Course Wright helps homeschool co-ops and micro-schools plan courses, share materials with students, and run the program from one place. This short guide covers the basics.",
       },
       { type: "h2", text: "Create an account" },
       {
@@ -63,13 +63,13 @@ export const helpDocTopics: HelpDocTopic[] = [
         type: "ul",
         items: [
           "Invite staff (owners, admins, and instructors) from organization settings — see Staff & roles.",
-          "Add students and classes from Roster when you are ready to enroll families.",
-          "Create a course, add units and materials, then share or print what parents need.",
+          "Add students and classes from Roster when you are ready to enroll them.",
+          "Create a course, add units and materials, then share or print what students need.",
         ],
       },
       {
         type: "p",
-        text: "Parents join by invite only. They sign up or sign in with the invited email, then see this week’s work for their linked students.",
+        text: "Parents join by invite only (see Invite parents under Roster). They sign up or sign in with the invited email, then see the same student experience for their linked students.",
       },
     ],
   },
@@ -86,7 +86,7 @@ export const helpDocTopics: HelpDocTopic[] = [
       { type: "h2", text: "Organization home" },
       {
         type: "p",
-        text: "Staff home is a dashboard for running the program. Parents see a simpler “this week” view for their students once they are invited and enrolled.",
+        text: "Staff home is a dashboard for running the program. The student experience is a simpler “this week” view once someone is invited and enrolled. Staff can preview it with Student view in the header.",
       },
       { type: "h2", text: "Sidebar" },
       {
@@ -129,7 +129,7 @@ export const helpDocTopics: HelpDocTopic[] = [
     body: [
       {
         type: "p",
-        text: "A course is an offering for a term or year. Inside it you add units, materials, and notices for families.",
+        text: "A course is an offering for a term or year. Inside it you add units, materials, and notices for students.",
       },
       { type: "h2", text: "Create a course" },
       {
@@ -146,14 +146,14 @@ export const helpDocTopics: HelpDocTopic[] = [
         items: [
           "Units group work in order. Dates on units are optional.",
           "Materials can be a page (blocks of content, including quizzes), a link, or a file (including audio and video).",
-          "New materials start unpublished. Publish when parents should see them.",
-          "Mark items Important now when families need to notice them on home.",
+          "New materials start unpublished. Publish when students should see them.",
+          "Mark items Important now when students need to notice them on home.",
         ],
       },
       { type: "h2", text: "Lesson plans" },
       {
         type: "p",
-        text: "A lesson plan is a weekly note for one Sunday–Saturday week. You can write a note for the whole week, notes for each day, and attach materials to a day. New plans start unpublished. Publish when families should see them on This week and Calendar.",
+        text: "A lesson plan is a weekly note for one Sunday–Saturday week. You can write a note for the whole week, notes for each day, and attach materials to a day. New plans start unpublished. Publish when students should see them on This week and Calendar.",
       },
       { type: "h2", text: "Calendar" },
       {
@@ -163,14 +163,14 @@ export const helpDocTopics: HelpDocTopic[] = [
       { type: "h2", text: "Announcements" },
       {
         type: "p",
-        text: "An announcement is a one-way note to a course, a class, or a student. Families see it on home while it is current. Opening it marks it read. There is no reply thread — that is later.",
+        text: "An announcement is a one-way note to a course, a class, or a student. Students see it on home while it is current. Opening it marks it read. There is no reply thread — that is later.",
       },
       { type: "h2", text: "Print and share" },
       {
         type: "ul",
         items: [
           "Use Print on a material or Print unit on a unit — print stays visible, not buried in menus.",
-          "Parents can Print this week from their home for the current week’s work.",
+          "Students can Print this week from home for the current week’s work.",
           "Share links still require an account in this release; recipients sign in before they see the material.",
         ],
       },
@@ -220,7 +220,7 @@ export const helpDocTopics: HelpDocTopic[] = [
       { type: "h2", text: "Course enrollments" },
       {
         type: "p",
-        text: "Enrollments live on each course’s roster. Parents only see materials for students enrolled in an active course, and only for published materials.",
+        text: "Enrollments live on each course’s roster. The student experience only shows materials for students enrolled in an active course, and only for published materials. Parents who are linked to a student inherit that same access.",
       },
       { type: "h2", text: "Invite parents" },
       {
@@ -228,7 +228,7 @@ export const helpDocTopics: HelpDocTopic[] = [
         items: [
           "From a student profile or course roster, invite one or more parent emails.",
           "Course Wright emails a claim link, and you can copy the same link to share yourself.",
-          "The parent opens the link, creates an account or signs in with that email, then sees linked students once enrollments and publish rules are met.",
+          "The parent opens the link, creates an account or signs in with that email, then sees the student experience for linked students once enrollments and publish rules are met.",
         ],
       },
       {
@@ -268,7 +268,7 @@ export const helpDocTopics: HelpDocTopic[] = [
       },
       {
         type: "callout",
-        text: "Changing or removing staff updates membership only (who can run settings and invites). It does not rewrite who sees course materials — families still need enrollment (and parent links where they apply).",
+        text: "Changing or removing staff updates membership only (who can run settings and invites). It does not rewrite who sees course materials — students still need enrollment (and parent links where they apply).",
       },
       { type: "h2", text: "What each role can do" },
       {
@@ -277,25 +277,25 @@ export const helpDocTopics: HelpDocTopic[] = [
           "Owner — everything an admin can do, plus billing when billing ships. The creator of the organization is the first owner.",
           "Admin — manage the organization (name, permalink, grade scheme), invite staff, change or remove admins and instructors (except the last owner/admin), full roster, full org visibility. Cannot manage billing.",
           "Instructor — build and edit courses, manage course rosters, co-teach, upload and share files, print, invite parents, mark Important now. Does not manage org-wide staff or billing.",
-          "Parent — view and print shared content for linked, enrolled students in active courses after claiming an invite. A parent who created an organization is an owner for that org, not the parent role.",
+          "Parent — membership for someone linked to a student. They see the student experience (view and print shared content for linked, enrolled students) after claiming an invite. A parent who created an organization is an owner for that org, not the parent role.",
         ],
       },
-      { type: "h2", text: "Teacher / Parent view" },
+      { type: "h2", text: "Teacher / Student view" },
       {
         type: "p",
-        text: "Owners, admins, and instructors can switch most organization pages to a parent-style presentation with Teacher / Parent view in the header. Parent-only accounts do not see that control.",
+        text: "Owners, admins, and instructors can switch most organization pages to the student presentation with Teacher / Student view in the header. Parent-only accounts do not see that control — they always see the student experience.",
       },
     ],
   },
   {
     slug: "parents",
-    title: "For families",
-    navLabel: "For families",
-    description: "How parents join and what they see on home.",
+    title: "Student experience",
+    navLabel: "Student experience",
+    description: "How invited people join and what the student home looks like.",
     body: [
       {
         type: "p",
-        text: "Parents are invited by the organization. You need an account with the same email as the invite.",
+        text: "The student home is oriented to enrolled students. Parents are invited by the organization and inherit that same view for their linked students. You need an account with the same email as the invite.",
       },
       { type: "h2", text: "Accept an invite" },
       {
@@ -303,7 +303,7 @@ export const helpDocTopics: HelpDocTopic[] = [
         items: [
           "Open the invite link from email (or a link someone copied for you).",
           "Confirm the invited email on the page, then create an account or sign in with that address.",
-          "After you claim the invite, you join as a parent for the linked student(s).",
+          "After you claim the invite, you join for the linked student(s) and see their work.",
         ],
       },
       {
@@ -317,7 +317,7 @@ export const helpDocTopics: HelpDocTopic[] = [
           "This week — this week’s calendar (lesson plans and assigned/due work)",
           "Focus — Important now plus what’s assigned or due next",
           "Announcements — one-way notes for a course, class, or student, with a notification until you open them",
-          "Discussions — two-way threads for a course or class your child is in",
+          "Discussions — two-way threads for a course or class you are in",
           "Calendar — month or week view of the same work",
           "Print this week — print the week’s packet when you want it on paper",
         ],
@@ -328,7 +328,7 @@ export const helpDocTopics: HelpDocTopic[] = [
       },
       {
         type: "p",
-        text: "If you have more than one student, home groups work by child so it stays easy to scan.",
+        text: "If you are linked to more than one student, home groups work by student so it stays easy to scan.",
       },
     ],
   },
@@ -341,7 +341,7 @@ export const helpDocNav: HelpDocNavGroup[] = [
     slugs: ["organization", "courses", "roster", "staff-roles"],
   },
   {
-    heading: "Families",
+    heading: "Students",
     slugs: ["parents"],
   },
 ];

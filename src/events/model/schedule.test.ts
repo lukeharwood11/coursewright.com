@@ -68,10 +68,14 @@ test("a family sees a course or class event only for a linked student, and every
   assert.equal(eventAppliesToFamily(orgEvent, new Set(), new Set()), true);
 });
 
-test("location and a coherent schedule are required", () => {
-  assert.equal(validateEventDraft(draft({ location: "  " })), "Add a location.");
+test("audience, location length, and a coherent schedule are required", () => {
   assert.equal(validateEventDraft(draft({ courseIds: [] })), "Choose a course.");
   assert.equal(validateEventDraft(draft({ courseIds: [1, 2] })), "Choose a course.");
+  assert.equal(
+    validateEventDraft(draft({ audience: "class", courseIds: [], classIds: [] })),
+    "Choose at least one class.",
+  );
+  assert.equal(validateEventDraft(draft({ location: "  " })), null);
   assert.equal(
     validateEventDraft(draft({ audience: "organization", courseIds: [], classIds: [] })),
     null,
