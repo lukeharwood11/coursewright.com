@@ -807,16 +807,16 @@ A **course quiz** is an outline item on a unit (or, in the database, with `unit_
 | accepts_until | timestamptz | Optional close. At or after this instant, submit is rejected |
 | accepts_timezone | text | IANA zone captured with the window |
 | allow_multiple_attempts | boolean | Default false. Off = one entry per student |
-| autograde_and_show | boolean | Default false. On = freeze a multiple-choice score on the entry |
+| autograde_and_show | boolean | Default false. On = freeze a multiple-choice, number, and matching score on the entry |
 | share_answer_key_with_parents | boolean | Default false. Students never see the key |
 | copied_from_id | bigint | FK → Quiz, nullable |
 | deleted_at | timestamptz | Soft delete |
 
-Questions (`quiz_questions.kind` = `multiple_choice` · `short_answer`) do not store the correct answer. Choices (`quiz_choices`) do not store a correct flag. `quiz_answer_keys` holds either a `choice_id` or `answer_text`.
+Questions (`quiz_questions.kind` = `multiple_choice` · `short_answer` · `number` · `matching` · `long_answer`) do not store the correct answer on the question row. `answer_lines` is set only for `long_answer` (1–20 blank lines). Choices (`quiz_choices`) do not store a correct flag. `quiz_answer_keys` holds either a `choice_id` or `answer_text` (short answer, long answer, or the correct number). A matching question stores the left column in `quiz_match_prompts` and the right column in `quiz_match_options`. Both are visible with the quiz. The correct link is `quiz_match_keys`, hidden the same way as `quiz_answer_keys`. The right column is mixed when the quiz is taken or printed.
 
 `quiz_attempts` is one submitted entry: `submitted_by`, `student_profile_id`, `autograded`, nullable `score` / `score_total`. The score is frozen at submit. `quiz_attempt_answers` copies the prompt and the selection.
 
-Submit is `submit_quiz_attempt`. Clients cannot insert a score. Course-from-course copies questions, choices, and keys, not attempts.
+Submit is `submit_quiz_attempt`. Clients cannot insert a score. Course-from-course copies questions, choices, keys, and matching prompts, options, and keys, not attempts.
 
 - **Form:** workshop.
 ### ShareLink
@@ -1246,6 +1246,10 @@ User ──< Feedback >── Organization?
 Course ──< Quiz ──< QuizAttempt ──< QuizAttemptAnswer
 Quiz ──< QuizQuestion ──< QuizChoice
 QuizQuestion ──< QuizAnswerKey
+QuizQuestion ──< QuizMatchPrompt
+QuizQuestion ──< QuizMatchOption
+QuizQuestion ──< QuizMatchKey >── QuizMatchPrompt
+QuizMatchKey >── QuizMatchOption
 ```
 
 **Open:** Course ↔ Class link (enroll class, enroll individuals, or both).

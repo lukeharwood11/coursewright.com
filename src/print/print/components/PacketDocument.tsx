@@ -11,8 +11,8 @@ import {
 } from "@react-pdf/renderer";
 import { isPdfMime } from "@/print/model/fileKind";
 import { pageHasQuiz, printSegmentsFromBlocks } from "@/materials/model/pageContent";
-import { quizPrintLines } from "@/materials/model/quiz";
-import type { QuizBody } from "@/materials/model/quiz";
+import { quizPrintLines, type QuizBody } from "@/materials/model/quiz";
+import type { CourseQuizPrintView } from "@/quizzes/model/print";
 import { groupPacketSections } from "@/print/model/packet";
 import type { PrintMaterialView, PrintPacketView } from "@/print/model/previewAssets";
 
@@ -232,6 +232,73 @@ function PrintCheckbox({ checked }: { checked: boolean }) {
   );
 }
 
+function courseQuizBody(quiz: CourseQuizPrintView): QuizBody | null {
+  if (quiz.kind !== "multiple_choice" && quiz.kind !== "short_answer") return null;
+  return {
+    prompt: quiz.prompt,
+    questionKind: quiz.kind,
+    choices: quiz.choices,
+    answer: quiz.answer,
+  };
+}
+
+function CourseQuizPrint({
+  quiz,
+  includeAnswerKey,
+}: {
+  quiz: CourseQuizPrintView;
+  includeAnswerKey: boolean;
+}) {
+  const pageQuiz = courseQuizBody(quiz);
+  if (pageQuiz) return <QuizPrint quiz={pageQuiz} includeAnswerKey={includeAnswerKey} />;
+  const lines = courseQuizLines(quiz, includeAnswerKey);
+  return (
+    <View style={styles.quiz} wrap={quiz.kind === "long_answer"}>
+      {lines.map((line) => (
+        <Text key={line.id} style={line.tone === "meta" ? styles.meta : styles.body}>
+          {line.text}
+        </Text>
+      ))}
+    </View>
+  );
+}
+
+function courseQuizLines(
+  quiz: CourseQuizPrintView,
+  includeAnswerKey: boolean,
+): { id: string; tone: "body" | "meta"; text: string }[] {
+  const lines: { id: string; tone: "body" | "meta"; text: string }[] = [
+    { id: "prompt", tone: "body", text: quiz.prompt.trim() || "Question" },
+  ];
+  if (quiz.kind === "number") {
+    lines.push({
+      id: "answer",
+      tone: "body",
+      text: includeAnswerKey && quiz.answer.trim()
+        ? `Answer: ${quiz.answer.trim()}`
+        : "Answer: ____________________",
+    });
+    return lines;
+  }
+  if (quiz.kind === "long_answer") {
+    if (includeAnswerKey && quiz.answer.trim()) {
+      lines.push({ id: "answer", tone: "body", text: quiz.answer.trim() });
+    }
+    for (let index = 0; index < quiz.answerLines; index += 1) {
+      lines.push({ id: `line-${index}`, tone: "body", text: "________________________________" });
+    }
+    return lines;
+  }
+  quiz.matchLeft.forEach((item, index) => {
+    const blank = includeAnswerKey && item.letter ? item.letter : "____";
+    lines.push({ id: `left-${index}`, tone: "body", text: `${index + 1}. ${item.text}    ${blank}` });
+  });
+  quiz.matchRight.forEach((item) => {
+    lines.push({ id: `right-${item.letter}`, tone: "meta", text: `${item.letter}. ${item.text}` });
+  });
+  return lines;
+}
+
 function QuizPrint({
   quiz,
   includeAnswerKey,
@@ -377,7 +444,7 @@ export function PacketDocument({ packet }: { packet: PrintPacketView }) {
           {packet.subtitle ? <Text style={styles.meta}>{packet.subtitle}</Text> : null}
           {includeAnswerKey ? <Text style={styles.label}>Answer key</Text> : null}
           {packet.quizQuestions.map((quiz, index) => (
-            <QuizPrint key={index} quiz={quiz} includeAnswerKey={includeAnswerKey} />
+            <CourseQuizPrint key={index} quiz={quiz} includeAnswerKey={includeAnswerKey} />
           ))}
         </Page>
       </Document>

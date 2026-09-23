@@ -23,8 +23,8 @@ Open one course quiz to print it, take it while it is accepting entries, or revi
 - A parent with more than one enrolled child picks the student first. One student shows that student’s name.
 - **Allow more than one attempt** off: one submitted entry per student. On: more entries until the window closes.
 - Nothing is stored until **Submit**. There is no draft.
-- **Grade multiple-choice questions automatically and show the score right away** on: the submitter sees a score like **8 of 10** immediately. Off: the entry is saved with no score. Later edits to the key do not change a saved score.
-- Short answers are stored and shown to the teacher. They are not part of the automatic score.
+- **Grade questions automatically and show the score right away** on: the submitter sees a score like **8 of 10** immediately. Off: the entry is saved with no score. Later edits to the key do not change a saved score.
+- Question kinds: **multiple choice**, **short answer**, **number**, **matching**, and **long answer**. Number and matching score with multiple choice. Short answer and long answer are stored for the teacher. A long answer asks how many blank lines to give (1–20). Matching mixes the right column the same way on screen and on paper.
 - The score a family sees is the latest entry for that student.
 - A parent entry is labeled **"<Parent name> on behalf of <child name>"**. A student login is labeled with the student name only.
 - **Teacher view** always shows the answer key and every entry, including answers. **Share answer key with parents** (default off) lets a parent see the key whenever the quiz is published, including while the window is open and after it ends. A student login never sees the key. Staff **Parent view** follows the parent rule.
@@ -34,7 +34,7 @@ Open one course quiz to print it, take it while it is accepting entries, or revi
 
 - Title, description, **Quiz** badge, published or unpublished badge (staff)
 - Accepting window, when one is set
-- Questions and choices (correct choices only when the answer key may show)
+- Questions, choices, and matching columns (correct choices and matching letters only when the answer key may show)
 - Latest family entry, or every entry for the teacher (who submitted, when, score when one was stored, and the answers)
 - Answer key when this person may see it
 

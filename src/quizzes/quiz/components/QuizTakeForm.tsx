@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/ui/Button";
+import { Input } from "@/ui/Input";
 import { quizChoiceLetter } from "@/materials/model/quiz";
 import type { QuizQuestionRecord } from "@/quizzes/databridge/quizzes";
 import type { LinkedStudent } from "@/quizzes/databridge/quizzes";
-import type { QuizWindowState } from "@/quizzes/model/quiz";
+import { clampAnswerLines, matchLayout, type QuizWindowState } from "@/quizzes/model/quiz";
 import { formatDueDeadline } from "@/submissions/model/dueInstant";
 
 export function QuizTakeForm({
@@ -29,12 +30,18 @@ export function QuizTakeForm({
   submitting: boolean;
   onSubmit: (args: {
     studentProfileId: number;
-    answers: { questionId: number; choiceIds: number[]; text: string }[];
+    answers: {
+      questionId: number;
+      choiceIds: number[];
+      text: string;
+      matches: { leftId: number; rightId: number }[];
+    }[];
   }) => void;
 }) {
   const [studentId, setStudentId] = useState<number | null>(students[0]?.id ?? null);
   const [selected, setSelected] = useState<Record<number, number[]>>({});
   const [text, setText] = useState<Record<number, string>>({});
+  const [matches, setMatches] = useState<Record<number, Record<number, number>>>({});
   const chosen = studentId ?? students[0]?.id ?? null;
   const already = chosen == null ? 0 : attemptsForStudent(chosen);
   const blocked = !allowMultiple && already > 0;
@@ -70,6 +77,9 @@ export function QuizTakeForm({
             questionId: question.id,
             choiceIds: selected[question.id] ?? [],
             text: text[question.id] ?? "",
+            matches: Object.entries(matches[question.id] ?? {}).flatMap(([leftId, rightId]) =>
+              rightId ? [{ leftId: Number(leftId), rightId }] : [],
+            ),
           })),
         });
       }}
@@ -102,7 +112,42 @@ export function QuizTakeForm({
             <p className="text-[15px] font-bold text-[var(--ink)]">
               {index + 1}. {question.prompt.trim() || "Question"}
             </p>
-            {question.kind === "short_answer" ? (
+            {question.kind === "long_answer" ? (
+              <textarea
+                className="mt-3 w-full rounded-[6px] border border-[var(--line)] px-3 py-2 text-[14.5px]"
+                rows={clampAnswerLines(question.answerLines ?? 4)}
+                value={text[question.id] ?? ""}
+                disabled={!open}
+                onChange={(event) =>
+                  setText((current) => ({ ...current, [question.id]: event.target.value }))
+                }
+              />
+            ) : question.kind === "number" ? (
+              <Input
+                className="mt-3 w-full max-w-xs"
+                inputMode="decimal"
+                placeholder="Number"
+                value={text[question.id] ?? ""}
+                disabled={!open}
+                onChange={(event) =>
+                  setText((current) => ({ ...current, [question.id]: event.target.value }))
+                }
+              />
+            ) : question.kind === "matching" ? (
+              <MatchingFields
+                questionId={question.id}
+                prompts={question.prompts}
+                options={question.options}
+                picks={matches[question.id] ?? {}}
+                disabled={!open}
+                onPick={(leftId, rightId) =>
+                  setMatches((current) => ({
+                    ...current,
+                    [question.id]: { ...current[question.id], [leftId]: rightId },
+                  }))
+                }
+              />
+            ) : question.kind === "short_answer" ? (
               <textarea
                 className="mt-3 min-h-[5rem] w-full rounded-[6px] border border-[var(--line)] px-3 py-2 text-[14.5px]"
                 value={text[question.id] ?? ""}
@@ -160,5 +205,50 @@ export function QuizTakeForm({
         </div>
       ) : null}
     </form>
+  );
+}
+
+function MatchingFields({
+  questionId,
+  prompts,
+  options,
+  picks,
+  disabled,
+  onPick,
+}: {
+  questionId: number;
+  prompts: QuizQuestionRecord["prompts"];
+  options: QuizQuestionRecord["options"];
+  picks: Record<number, number>;
+  disabled: boolean;
+  onPick: (leftId: number, rightId: number) => void;
+}) {
+  const layout = matchLayout(prompts, options, questionId);
+  if (layout.left.length === 0 || layout.right.length === 0) {
+    return <p className="mt-3 text-[14px] text-[var(--ink-soft)]">This match isn’t ready yet.</p>;
+  }
+  return (
+    <div className="mt-3 flex flex-col gap-3">
+      {layout.left.map((item, index) => (
+        <label key={item.id} className="flex flex-col gap-1">
+          <span className="text-[14.5px] text-[var(--ink)]">
+            {index + 1}. {item.text}
+          </span>
+          <select
+            className="max-w-md rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-3 py-[11px] text-[14.5px]"
+            value={picks[item.id] ?? ""}
+            disabled={disabled}
+            onChange={(event) => onPick(item.id, Number(event.target.value))}
+          >
+            <option value="">Choose</option>
+            {layout.right.map((choice) => (
+              <option key={choice.id} value={choice.id}>
+                {choice.letter}. {choice.text}
+              </option>
+            ))}
+          </select>
+        </label>
+      ))}
+    </div>
   );
 }

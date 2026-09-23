@@ -13,6 +13,7 @@ import {
   loadWeekPrintPacket,
 } from "@/print/databridge/packets";
 import { accountIsStudentOnCourse, canShowAnswerKey } from "@/quizzes/model/quiz";
+import { presentCourseQuizPrint } from "@/quizzes/model/print";
 import { pdfBytesToBlob } from "@/print/model/mergePdfs";
 import { renderPrintPdf } from "./renderPrintPdf";
 
@@ -95,13 +96,9 @@ export function usePrint() {
         packet = {
           ...quizPacket.packet,
           includeAnswerKey: showKey,
-          quizQuestions: showKey
-            ? quizPacket.packet.quizQuestions
-            : (quizPacket.packet.quizQuestions ?? []).map((question) => ({
-                ...question,
-                answer: "",
-                choices: question.choices.map((choice) => ({ ...choice, correct: false })),
-              })),
+          quizQuestions: quizPacket.questions.map((question) =>
+            presentCourseQuizPrint(question, showKey),
+          ),
         };
       }
       if (!packet) throw new Error("We couldn’t find that to print.");

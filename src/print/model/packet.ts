@@ -1,6 +1,6 @@
 import type { BlockKind } from "@/materials/model/blocks";
 import type { MaterialKind } from "@/materials/model/kind";
-import type { QuizBody } from "@/materials/model/quiz";
+import type { CourseQuizPrintView } from "@/quizzes/model/print";
 
 export type PrintBlock = {
   kind: BlockKind;
@@ -37,7 +37,7 @@ export type PrintPacket = {
   includeAnswerKey?: boolean;
   materials: PrintMaterial[];
   /** Standalone course quiz. Page quiz blocks stay on materials. */
-  quizQuestions?: QuizBody[];
+  quizQuestions?: CourseQuizPrintView[];
 };
 
 /** Pack same-section materials together; missing keys stay one material per page. */

@@ -709,8 +709,8 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | **Answer key** | Teacher view always. **Share answer key with parents** (default off) shows it to parents whenever the quiz is published. A student login (account email matches that student’s `student_email`) never sees it. Staff Parent view follows the parent rule |
 | **Who submitted** | A parent entry is **"<Parent name> on behalf of <child name>"**. A student login is the student name only. A parent with more than one enrolled child picks the student first |
 | **Attempts** | **Allow more than one attempt** (default off). Off = one submitted entry per student. On = more entries until the window closes. Every entry is kept. The family sees the latest. Nothing is stored until Submit |
-| **Score** | Multiple choice is one point when the selected choices match the correct set exactly. Short answer is stored and shown to the teacher, not scored. **Grade multiple-choice questions automatically and show the score right away** (default off) freezes **8 of 10** on that entry. Later key edits do not rescore |
-| **Copy** | Course-from-course copies the quiz, questions, choices, and keys. It does not copy entries |
+| **Score** | Multiple choice is one point when the selected choices match the correct set exactly. A number is one point when it is the same value (`3.5`, `3.50`, and `7/2` match). Matching is one point when every pair is exact. Short answer and long answer are stored and shown to the teacher, not scored. A long answer prints the number of blank lines the teacher chose (1–20). **Grade questions automatically and show the score right away** (default off) freezes the score on that entry. Later key edits do not rescore |
+| **Copy** | Course-from-course copies the quiz, questions, choices, keys, and matching prompts, options, and keys. It does not copy entries |
 | **Not this slice** | Manual points, a max-attempt count, Activity, a gradebook, quizzes on course templates, and changes to page quiz blocks |
 
 ---
@@ -833,7 +833,7 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | Roster = page noun; Enroll/Unenroll = course verbs | **Decided** | BRANDING; class/org use Add/Remove |
 | Quiz authoring + correct answers + print (blank + answer key) | **Decided** | **P0 page quiz** — Lexical `quiz` node on a lesson page. Not a material kind. Many per page. Whole-page print; parent/student and staff Parent view = questions only; staff Teacher view = answer key. No roster required |
 | Staff parent view (header toggle) | **Decided** | All staff (owner/admin/instructor). Real parent home if linked students; otherwise a preview. Hidden for parent-only users. Default Teacher. Parent view print omits the page-quiz answer key. Course quizzes follow the parent answer-key rule |
-| Quiz online take + autograde | **Decided** | **P1 course quiz** — outline item, not a page block and not `material_submissions`. Optional start/end. Print when neither is set. Multiple choice can score immediately. Short answers are stored, not scored. Share answer key with parents (students never). One attempt unless allowed |
+| Quiz online take + autograde | **Decided** | **P1 course quiz** — outline item, not a page block and not `material_submissions`. Optional start/end. Print when neither is set. Multiple choice, number, and matching can score immediately. Short answer and long answer are stored, not scored. A long answer has 1–20 blank lines. Share answer key with parents (students never). One attempt unless allowed |
 | Page as composable entity (blocks) | **Decided** | Material is the page; no separate Page table required in P0 |
 | Forms as a content kind | **In design** | Job-to-be-done + who responds TBD |
 | Rich-text block canonical store (MD / JSON / HTML) | **Decided** | Lexical editor state JSON in `blocks.body.lexical`; WYSIWYG on material edit |

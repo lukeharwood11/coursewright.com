@@ -138,7 +138,12 @@ export function useQuiz() {
   const submit = useMutation({
     mutationFn: (args: {
       studentProfileId: number;
-      answers: { questionId: number; choiceIds: number[]; text: string }[];
+      answers: {
+        questionId: number;
+        choiceIds: number[];
+        text: string;
+        matches: { leftId: number; rightId: number }[];
+      }[];
     }) => submitQuizAttempt({ quizId, ...args }),
     onSuccess: invalidate,
   });

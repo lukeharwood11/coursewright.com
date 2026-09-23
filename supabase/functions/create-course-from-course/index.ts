@@ -251,7 +251,7 @@ Deno.serve(async (request) => {
     if (sourceQuizIds.length > 0) {
       const { data: questions, error: questionsError } = await db
         .from("quiz_questions")
-        .select("id, quiz_id, position, prompt, kind")
+        .select("id, quiz_id, position, prompt, kind, answer_lines")
         .in("quiz_id", sourceQuizIds)
         .is("deleted_at", null)
         .order("position");
@@ -268,6 +268,7 @@ Deno.serve(async (request) => {
             position: question.position,
             prompt: question.prompt,
             kind: question.kind,
+            answer_lines: question.answer_lines,
           })
           .select("id")
           .maybeSingle();
@@ -307,6 +308,70 @@ Deno.serve(async (request) => {
           .select("question_id, choice_id, answer_text")
           .in("question_id", sourceQuestionIds);
         if (keysError) throw keysError;
+        const { data: prompts, error: promptsError } = await db
+          .from("quiz_match_prompts")
+          .select("id, question_id, position, text")
+          .in("question_id", sourceQuestionIds)
+          .is("deleted_at", null)
+          .order("position");
+        if (promptsError) throw promptsError;
+        const promptMap = new Map<number, number>();
+        for (const prompt of prompts ?? []) {
+          const newQuestionId = questionMap.get(prompt.question_id);
+          if (!newQuestionId) continue;
+          const { data: copied, error } = await db
+            .from("quiz_match_prompts")
+            .insert({
+              question_id: newQuestionId,
+              position: prompt.position,
+              text: prompt.text,
+            })
+            .select("id")
+            .maybeSingle();
+          if (error) throw error;
+          if (copied) promptMap.set(prompt.id, copied.id);
+        }
+        const { data: options, error: optionsError } = await db
+          .from("quiz_match_options")
+          .select("id, question_id, position, text")
+          .in("question_id", sourceQuestionIds)
+          .is("deleted_at", null)
+          .order("position");
+        if (optionsError) throw optionsError;
+        const optionMap = new Map<number, number>();
+        for (const option of options ?? []) {
+          const newQuestionId = questionMap.get(option.question_id);
+          if (!newQuestionId) continue;
+          const { data: copied, error } = await db
+            .from("quiz_match_options")
+            .insert({
+              question_id: newQuestionId,
+              position: option.position,
+              text: option.text,
+            })
+            .select("id")
+            .maybeSingle();
+          if (error) throw error;
+          if (copied) optionMap.set(option.id, copied.id);
+        }
+        const { data: matchKeys, error: matchKeysError } = await db
+          .from("quiz_match_keys")
+          .select("question_id, prompt_id, option_id")
+          .in("question_id", sourceQuestionIds);
+        if (matchKeysError) throw matchKeysError;
+        for (const key of matchKeys ?? []) {
+          const newQuestionId = questionMap.get(key.question_id);
+          const newPromptId = promptMap.get(key.prompt_id);
+          const newOptionId = optionMap.get(key.option_id);
+          if (!newQuestionId || !newPromptId || !newOptionId) continue;
+          const { error } = await db.from("quiz_match_keys").insert({
+            question_id: newQuestionId,
+            prompt_id: newPromptId,
+            option_id: newOptionId,
+          });
+          if (error) throw error;
+        }
+
         for (const key of keys ?? []) {
           const newQuestionId = questionMap.get(key.question_id);
           if (!newQuestionId) continue;

@@ -1,6 +1,14 @@
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import type { QuizQuestionDraft } from "@/quizzes/databridge/quizzes";
+import {
+  clampAnswerLines,
+  LONG_ANSWER_LINE_MAX,
+  LONG_ANSWER_LINE_MIN,
+  MATCH_PAIR_MAX,
+  parseCourseQuizKind,
+  quizNumberValue,
+} from "@/quizzes/model/quiz";
 import type { WindowFields } from "@/quizzes/model/window";
 
 const controlClass = [
@@ -20,6 +28,11 @@ function blankQuestion(): QuizQuestionDraft {
       { id: null, text: "", correct: false },
       { id: null, text: "", correct: false },
     ],
+    pairs: [
+      { promptId: null, optionId: null, left: "", right: "" },
+      { promptId: null, optionId: null, left: "", right: "" },
+    ],
+    answerLines: 4,
   };
 }
 
@@ -119,7 +132,10 @@ export function QuizEditorForm({
         />
         <span>
           <span className="font-bold">
-            Grade multiple-choice questions automatically and show the score right away
+            Grade questions automatically and show the score right away
+          </span>
+          <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
+            Multiple choice, number, and matching. Short answer and long answer are saved for you to read.
           </span>
         </span>
       </label>
@@ -163,56 +179,33 @@ export function QuizEditorForm({
               <select
                 className={controlClass}
                 value={question.kind}
-                onChange={(event) =>
+                onChange={(event) => {
+                  const kind = parseCourseQuizKind(event.target.value);
                   patchQuestion(index, {
-                    kind: event.target.value === "short_answer" ? "short_answer" : "multiple_choice",
-                  })
-                }
+                    kind,
+                    answerLines:
+                      kind === "long_answer" ? clampAnswerLines(question.answerLines || 4) : question.answerLines,
+                    pairs:
+                      kind === "matching" && question.pairs.length === 0
+                        ? [
+                            { promptId: null, optionId: null, left: "", right: "" },
+                            { promptId: null, optionId: null, left: "", right: "" },
+                          ]
+                        : question.pairs,
+                  });
+                }}
               >
                 <option value="multiple_choice">Multiple choice</option>
                 <option value="short_answer">Short answer</option>
+                <option value="number">Number</option>
+                <option value="matching">Matching</option>
+                <option value="long_answer">Long answer</option>
               </select>
             </label>
-            {question.kind === "short_answer" ? (
-              <label className="mt-3 flex flex-col gap-1">
-                <span className="text-[13px] font-bold text-[var(--ink-soft)]">Answer</span>
-                <Input
-                  className="w-full"
-                  value={question.answer}
-                  onChange={(event) => patchQuestion(index, { answer: event.target.value })}
-                />
-              </label>
-            ) : (
-              <ul className="mt-3 flex flex-col gap-2">
-                {question.choices.map((choice, choiceIndex) => (
-                  <li key={`${choice.id ?? "c"}-${choiceIndex}`} className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 accent-[var(--green)]"
-                      checked={choice.correct}
-                      aria-label={`Correct choice ${choiceIndex + 1}`}
-                      onChange={(event) => {
-                        const choices = question.choices.map((item, i) =>
-                          i === choiceIndex ? { ...item, correct: event.target.checked } : item,
-                        );
-                        patchQuestion(index, { choices });
-                      }}
-                    />
-                    <Input
-                      className="w-full"
-                      value={choice.text}
-                      placeholder={`Choice ${choiceIndex + 1}`}
-                      onChange={(event) => {
-                        const choices = question.choices.map((item, i) =>
-                          i === choiceIndex ? { ...item, text: event.target.value } : item,
-                        );
-                        patchQuestion(index, { choices });
-                      }}
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
+            <QuestionFields
+              question={question}
+              onChange={(patch) => patchQuestion(index, patch)}
+            />
           </div>
         ))}
         <Button variant="ghost" fullWidth onClick={() => onQuestions([...questions, blankQuestion()])}>
@@ -220,6 +213,164 @@ export function QuizEditorForm({
         </Button>
       </div>
     </div>
+  );
+}
+
+function QuestionFields({
+  question,
+  onChange,
+}: {
+  question: QuizQuestionDraft;
+  onChange: (patch: Partial<QuizQuestionDraft>) => void;
+}) {
+  if (question.kind === "number") {
+    const invalid = question.answer.trim() !== "" && quizNumberValue(question.answer) == null;
+    return (
+      <label className="mt-3 flex flex-col gap-1">
+        <span className="text-[13px] font-bold text-[var(--ink-soft)]">Correct number</span>
+        <Input
+          className="w-full"
+          value={question.answer}
+          placeholder="3.5 or 7/2"
+          onChange={(event) => onChange({ answer: event.target.value })}
+        />
+        <span className="text-[12.5px] text-[var(--ink-faint)]">
+          {invalid
+            ? "Use a number like 3.5 or 7/2."
+            : "3.5, 3.50, and 7/2 count as the same answer."}
+        </span>
+      </label>
+    );
+  }
+
+  if (question.kind === "long_answer") {
+    return (
+      <div className="mt-3 flex flex-col gap-3">
+        <label className="flex max-w-[8rem] flex-col gap-1">
+          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Lines</span>
+          <Input
+            className="w-full"
+            type="number"
+            min={LONG_ANSWER_LINE_MIN}
+            max={LONG_ANSWER_LINE_MAX}
+            value={question.answerLines}
+            onChange={(event) => onChange({ answerLines: clampAnswerLines(Number(event.target.value)) })}
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Answer</span>
+          <textarea
+            className={`${controlClass} min-h-[6rem] resize-y`}
+            value={question.answer}
+            onChange={(event) => onChange({ answer: event.target.value })}
+          />
+          <span className="text-[12.5px] text-[var(--ink-faint)]">
+            Saved for you to read. It is not part of the automatic score.
+          </span>
+        </label>
+      </div>
+    );
+  }
+
+  if (question.kind === "matching") {
+    return (
+      <div className="mt-3 flex flex-col gap-2">
+        <p className="text-[12.5px] text-[var(--ink-faint)]">
+          Each row is one pair. The right column is mixed up when families take or print the quiz.
+        </p>
+        {question.pairs.map((pair, pairIndex) => (
+          <div key={`${pair.promptId ?? "p"}-${pairIndex}`} className="flex items-center gap-2">
+            <Input
+              className="w-full"
+              value={pair.left}
+              placeholder="Prompt"
+              onChange={(event) => {
+                const pairs = question.pairs.map((item, index) =>
+                  index === pairIndex ? { ...item, left: event.target.value } : item,
+                );
+                onChange({ pairs });
+              }}
+            />
+            <Input
+              className="w-full"
+              value={pair.right}
+              placeholder="Match"
+              onChange={(event) => {
+                const pairs = question.pairs.map((item, index) =>
+                  index === pairIndex ? { ...item, right: event.target.value } : item,
+                );
+                onChange({ pairs });
+              }}
+            />
+            <Button
+              variant="secondary"
+              onClick={() => onChange({ pairs: question.pairs.filter((_, index) => index !== pairIndex) })}
+            >
+              Remove
+            </Button>
+          </div>
+        ))}
+        {question.pairs.length < MATCH_PAIR_MAX ? (
+          <Button
+            variant="ghost"
+            onClick={() =>
+              onChange({
+                pairs: [...question.pairs, { promptId: null, optionId: null, left: "", right: "" }],
+              })
+            }
+          >
+            Add pair
+          </Button>
+        ) : (
+          <p className="text-[12.5px] text-[var(--ink-faint)]">A match can have up to 20 pairs.</p>
+        )}
+      </div>
+    );
+  }
+
+  if (question.kind === "short_answer") {
+    return (
+      <label className="mt-3 flex flex-col gap-1">
+        <span className="text-[13px] font-bold text-[var(--ink-soft)]">Answer</span>
+        <Input
+          className="w-full"
+          value={question.answer}
+          onChange={(event) => onChange({ answer: event.target.value })}
+        />
+      </label>
+    );
+  }
+
+  return (
+    <ul className="mt-3 flex flex-col gap-2">
+      {question.choices.map((choice, choiceIndex) => (
+        <li key={`${choice.id ?? "c"}-${choiceIndex}`} className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-[var(--green)]"
+            checked={choice.correct}
+            aria-label={`Correct choice ${choiceIndex + 1}`}
+            onChange={(event) => {
+              const choices = question.choices.map((item, index) =>
+                index === choiceIndex ? { ...item, correct: event.target.checked } : item,
+              );
+              onChange({ choices });
+            }}
+          />
+          <Input
+            className="w-full"
+            value={choice.text}
+            placeholder={`Choice ${choiceIndex + 1}`}
+            onChange={(event) => {
+              const choices = question.choices.map((item, index) =>
+                index === choiceIndex ? { ...item, text: event.target.value } : item,
+              );
+              onChange({ choices });
+            }}
+          />
+        </li>
+      ))}
+    </ul>
   );
 }
 

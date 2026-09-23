@@ -36,6 +36,13 @@ function draftsFromQuestions(
       text: choice.text,
       correct: choice.correct,
     })),
+    pairs: question.pairs.map((pair) => ({
+      promptId: pair.promptId,
+      optionId: pair.optionId,
+      left: pair.left,
+      right: pair.right,
+    })),
+    answerLines: question.answerLines ?? 4,
   }));
 }
 
