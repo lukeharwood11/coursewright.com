@@ -9,6 +9,7 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 - Org-visible **user profiles** (`/my/<org-slug>/people/<user_id>`) + reusable `user-card/`
 - **Permalink `slug`** — generated on create; changing it must warn that existing links break
 - Grade scheme (K–12 / Custom) and organization type (other / co-op / school / family; default **other**)
+- **Grading** tab (`?tab=grading`) is the org score scale (`none` / letter / pass/fail). Owners and admins save it. It is not `grade_scheme` / `grade_labels`. UI lives in `src/grading/`
 - Optional org **profile** (about, address, website, contact email, phone) shown on org home when set
 - **School days** (default Mon–Fri) — owners/admins edit; lesson-plan compose uses them as the default day set
 - Admin invites (email via Resend `organization-invite` + copyable claim link)

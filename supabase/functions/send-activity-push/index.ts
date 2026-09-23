@@ -15,6 +15,7 @@ type NotificationRow = {
   discussion_id: number | null;
   discussion_message_id: number | null;
   announcement_id: number | null;
+  student_profile_id: number | null;
   title: string;
   preview: string;
   audience_label: string;
@@ -69,7 +70,7 @@ Deno.serve(async (request) => {
     const { data: notification, error: notificationError } = await db
       .from("notifications")
       .select(
-        "id, user_id, kind, discussion_id, discussion_message_id, announcement_id, title, preview, audience_label, read_at, organization_id",
+        "id, user_id, kind, discussion_id, discussion_message_id, announcement_id, student_profile_id, title, preview, audience_label, read_at, organization_id",
       )
       .eq("id", notificationId)
       .maybeSingle();
@@ -105,6 +106,22 @@ Deno.serve(async (request) => {
       return jsonResponse({ error: "Couldn’t send that notification." }, 500);
     }
 
+    let gradePath: string | null = null;
+    if (
+      (row.kind === "quiz_grade" || row.kind === "course_final") &&
+      row.student_profile_id != null
+    ) {
+      const { data: profile } = await db
+        .from("student_profiles")
+        .select("user_id")
+        .eq("id", row.student_profile_id)
+        .maybeSingle();
+      gradePath =
+        profile?.user_id === row.user_id
+          ? `/my/${organization.slug}/progress`
+          : `/my/${organization.slug}/students/${row.student_profile_id}`;
+    }
+
     const payload = activityPushPayload({
       kind: row.kind,
       title: row.title,
@@ -115,6 +132,7 @@ Deno.serve(async (request) => {
       discussionId: row.discussion_id,
       discussionMessageId: row.discussion_message_id,
       announcementId: row.announcement_id,
+      gradePath,
     });
     const message = JSON.stringify(payload);
 

@@ -29,6 +29,16 @@ export function activityPushTitle(args: {
     const title = args.title.trim() || "Discussion";
     return `New discussion: ${title}${inAudience}`;
   }
+  if (args.kind === "report_card") {
+    return audience ? `Report card in ${audience}` : "Report card";
+  }
+  if (args.kind === "quiz_grade") {
+    const name = args.title.trim() || "Quiz";
+    return audience ? `Grade saved: ${name} in ${audience}` : `Grade saved: ${name}`;
+  }
+  if (args.kind === "course_final") {
+    return audience ? `Final grade in ${audience}` : "Final grade";
+  }
   const title = args.title.trim() || "Activity";
   return audience ? `${title} in ${audience}` : title;
 }
@@ -39,6 +49,8 @@ export function activityPushBody(kind: string, preview: string): string {
     return trimmed.length > 160 ? `${trimmed.slice(0, 160).trimEnd()}…` : trimmed;
   }
   if (kind === "announcement") return "New announcement.";
+  if (kind === "quiz_grade" || kind === "course_final") return "Grade saved.";
+  if (kind === "report_card") return "Report card sent.";
   return "Posted in this discussion.";
 }
 
@@ -49,9 +61,12 @@ export function activityPushPath(args: {
   discussionId: number | null;
   discussionMessageId: number | null;
   announcementId: number | null;
+  gradePath?: string | null;
 }): string {
   let path = `/my/${args.orgSlug}/activity`;
-  if (args.announcementId != null) {
+  if (args.gradePath) {
+    path = args.gradePath;
+  } else if (args.announcementId != null) {
     path = `/my/${args.orgSlug}/announcements/${args.announcementId}`;
   } else if (args.discussionId != null && args.discussionMessageId != null) {
     path = `/my/${args.orgSlug}/discussions/${args.discussionId}#message-${args.discussionMessageId}`;
@@ -79,6 +94,7 @@ export function activityPushPayload(args: {
   discussionId: number | null;
   discussionMessageId: number | null;
   announcementId: number | null;
+  gradePath?: string | null;
 }): ActivityPushPayload {
   return {
     title: activityPushTitle(args),

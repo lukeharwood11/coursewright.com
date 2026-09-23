@@ -40,8 +40,8 @@ test("searchResultTypeLabel covers this slice’s types", () => {
 test("filterPageResults matches staff destinations by title", () => {
   const pages = staffSearchPages("coop");
   assert.deepEqual(
-    filterPageResults(pages, "rost").map((row) => row.id),
-    ["page:roster"],
+    filterPageResults(pages, "stud").map((row) => row.id),
+    ["page:students"],
   );
   assert.deepEqual(
     filterPageResults(pages, "announ").map((row) => row.id),

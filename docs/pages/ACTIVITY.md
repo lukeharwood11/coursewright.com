@@ -16,15 +16,15 @@ List stored **Activity** notifications — events that need this person’s atte
 - Load this org’s notifications for the signed-in person (RLS: own rows only).
 - Reached from the org header **bell** → **View all activity** (the bell itself previews unread only).
 - Unread first, then newest.
-- Each row shows a **type icon** (discussion post, @mention, or announcement) and a headline that names the activity. Unread rows use a stronger card; the icon does **not** switch to a read-receipt checkmark.
-- Clicking a row **acks** it (`read_at`) and opens the activity (a discussion post or an announcement). Opening the discussion another way acks matching **new post** notifications for that person. Opening the announcement acks matching **announcement** notifications. **@mentions** stay unread until clicked. A device-notification tap marks that one row read, including an @mention.
+- Each row shows a **type icon** (discussion post, @mention, announcement, or report card) and a headline that names the activity. Unread rows use a stronger card; the icon does **not** switch to a read-receipt checkmark.
+- Clicking a row **acks** it (`read_at`) and opens the activity (a discussion post, an announcement, or a sent report card). Opening the discussion another way acks matching **new post** notifications for that person. Opening the announcement acks matching **announcement** notifications. **@mentions** stay unread until clicked. A device-notification tap marks that one row read, including an @mention.
 - While this page is open, **Realtime** adds new rows without a full reload.
 - Empty: **Nothing here yet.**
 - Staff Teacher view and student chrome share the same list; recipients differ by who was notified (instructors / class leads, people who started or posted on the thread, students when a teacher chose **Notify everyone**, anyone @mentioned, students when staff chose **Send notification** on an announcement). One new-post Activity item per discussion. One announcement Activity item per notice.
 
 ## Data shown
 
-- Headline by kind, e.g. **New discussion: {title} in {course/class}**, **Mentioned in {title} in {course/class}**, or **Announcement: {title} in {audience}**
+- Headline by kind, e.g. **New discussion: {title} in {course/class}**, **Mentioned in {title} in {course/class}**, **Announcement: {title} in {audience}**, **Report card in {course}**, **Grade saved: {quiz} in {course}**, or **Final grade in {course}**
 - **Preview** of the post
 - Who posted + time
 - Unread vs seen (card emphasis only — not a checkmark)
@@ -46,9 +46,12 @@ Read-only list (ack is the write).
 
 - [DISCUSSION](./DISCUSSION.md) — open the post
 - [ANNOUNCEMENT](./ANNOUNCEMENT.md) — open the notice
+- [REPORT_CARD](./REPORT_CARD.md) — open a sent report card
+- [PROGRESS](./PROGRESS.md) — a learner opens a saved quiz grade or final
+- [STUDENT_PROFILE](./STUDENT_PROFILE.md) — a parent opens that same grade for a linked student
 - [ORG_HOME](./ORG_HOME.md) — via chrome
 - Via org chrome (staff Teacher view): [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [ACTIVITY](./ACTIVITY.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); search overlay TBD
-- Via student chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [RESOURCES](./RESOURCES.md) (when visible), [ACTIVITY](./ACTIVITY.md)
+- Via student chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [PROGRESS](./PROGRESS.md), [RESOURCES](./RESOURCES.md) (when visible), [ACTIVITY](./ACTIVITY.md)
 
 ## Notes
 

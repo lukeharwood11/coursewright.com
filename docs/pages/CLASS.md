@@ -5,7 +5,7 @@
 
 ## Audience
 
-Admins and instructors.
+Admins and instructors manage the class. Parents and learners can open the same page read-only for classes they can already see. There is no second, lighter class page.
 
 ## Purpose
 
@@ -24,7 +24,9 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - **Events** for this class: title, when, location. **Add event** starts a class event with this class selected; staff can check other classes. Opening a row goes to [EVENT](./EVENT.md).
 - **Announce** to this class → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
 - **Start a discussion** (**P1**) → [DISCUSSION](./DISCUSSION.md) new with this class prefilled.
-- Disclaimer: membership here does not enroll in a course — use [COURSE_ROSTER](./COURSE_ROSTER.md) (Class may be a batch preset there).
+- Disclaimer: membership here does not enroll in a course — use [COURSE_ROSTER](./COURSE_ROSTER.md) (Class may be a batch preset there). A class is not a grade container.
+- Parents and learners see members the class policies already allow. Add, remove, announce, discussion, event edit, and lead management stay with staff who can edit.
+- Back goes to Students → Classes for staff and parents, and to [PROGRESS](./PROGRESS.md) for learners.
 
 ## Data shown
 
@@ -41,7 +43,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - **Add students** panel (batch existing + batch new)
 - Remove from class on each row (confirm — class only; does not remove from the org roster)
 - Empty state: add students when ready
-- Back to [ORG_ROSTER](./ORG_ROSTER.md) (class list lives there)
+- Back to [ORG_ROSTER](./ORG_ROSTER.md) Classes tab, or [PROGRESS](./PROGRESS.md) for a learner
 
 ## Primary actions
 
@@ -55,6 +57,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 ## Links to
 
 - [ORG_ROSTER](./ORG_ROSTER.md) — class list and org students
+- [PROGRESS](./PROGRESS.md) — learner back link
 - [USER_PROFILE](./USER_PROFILE.md) — teacher cards
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — open a member
 - [EVENT](./EVENT.md) — add or open an event for this class

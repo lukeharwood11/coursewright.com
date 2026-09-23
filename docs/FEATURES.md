@@ -106,7 +106,7 @@ A person who signs up to make their own materials is the org **owner** (anyone c
 
 Roster exists at **three** levels: **organization** (student profiles, staff), **class** (named group of students), and **course** (who participates in an offering).
 
-**UI vocabulary:** page/nav noun is **Roster**; course verbs are **Enroll** / **Unenroll**; class/org verbs are **Add** / **Remove**. Batch select is the default add path.
+**UI vocabulary:** staff and parent chrome label is **Students** (Classes is a tab under that page). Learner chrome label is **Progress**. Course verbs stay **Enroll** / **Unenroll**; class and org verbs stay **Add** / **Remove**. There is no top-level **Roster** or **Records** item. Batch select is the default add path.
 
 | Capability | Who | Notes |
 |------------|-----|-------|
@@ -192,7 +192,7 @@ Student profile `grade_level` is optional and must match the org's chosen scheme
 
 ### Course grade metadata (P0)
 
-**Courses** carry **grade-level metadata** so instructors can find and filter offerings by who they're for — separate from student profile grade, and separate from P1 progress grading. (**Course templates** use the same model when templates ship in **P1**.)
+**Courses** carry **grade-level metadata** so instructors can find and filter offerings by who they're for — separate from student profile grade, and separate from org grading scores. (**Course templates** use the same model when templates ship in **P1**.)
 
 | Rule | Detail |
 |------|--------|
@@ -203,7 +203,7 @@ Student profile `grade_level` is optional and must match the org's chosen scheme
 | **Display order** | Shown as one comma-separated pill, sorted in the org admin’s grade-scheme order (not selection order) |
 | **Copy from course** | Grade metadata may be copied into the new course when creating from another course (editable after) |
 
-This is **catalog metadata** (“what ages/grades is this course for?”), not student report-card grades (those remain **P1 Progress — grading**).
+This is **catalog metadata** (“what ages/grades is this course for?”). Student scores and report cards are **Progress — grading** (org grading scale). Do not store those on `grade_scheme` / `grade_labels`.
 
 ### Advanced search (P0)
 
@@ -219,7 +219,7 @@ Teachers will ask **“where do I have this resource?”** Search is a **core P0
 
 **Stack note:** Prefer Postgres full-text + facet filters via PostgREST; escalate to a dedicated index only if needed — [STACK.md](./STACK.md).
 
-**This slice (staff chrome):** Overlay search uses generated `search_vector` GIN indexes via PostgREST `fts(english)` (`to_tsquery`, not `plainto_tsquery`) for **courses** and **materials**, so prefixes like `frac` match Fractions. Staff **pages** (Home / Courses / Roster / Settings) match by title in the client. Staff only; no `/search` route; no Algolia/Elastic/side index. Hits are findability only — they do not grant access; enrollment / `parent_student_links` stay the gate.
+**This slice (staff chrome):** Overlay search uses generated `search_vector` GIN indexes via PostgREST `fts(english)` (`to_tsquery`, not `plainto_tsquery`) for **courses** and **materials**, so prefixes like `frac` match Fractions. Staff **pages** (Home / Courses / Students / Settings) match by title in the client. Staff only; no `/search` route; no Algolia/Elastic/side index. Hits are findability only — they do not grant access; enrollment / `parent_student_links` stay the gate.
 
 **Deferred:** facets, files, units, roster people / families, page/block body text, `ts_rank`, parent search, dedicated `/search` route.
 
@@ -585,7 +585,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 | **Template → course sync** | Template edits flow to linked course copies that still exist and have **not** been overridden | planned | Lineage columns only |
 | **Deprecate vs. delete (template)** | Deprecate (active courses untouched) or delete (soft-deletes template + unmodified course copies) | planned | Soft-delete / deprecate fields ready |
 | **Course summary (auto-draft)** | System drafts a parent-facing summary from current course work; instructor can edit | planned | Adds dashboard layer (B) |
-| **Progress — grading** | Instructors record grades; visible to parents | planned | **Org-configurable** scale |
+| **Progress — grading** | Instructors record grades; visible to parents | shipped | Org grading scale (`none` default, letter, or pass/fail) is separate from the age-level grade scheme. Students hub for staff and parents; Progress for learners. Course gradebook finals are an unweighted mean of locked quiz percents plus a teacher override. Report cards are draft → submit, one at a time, with email enqueue. `src/grading/` |
 | **Progress — instructor notes** | Instructors share notes on student progress | planned | |
 | **Progress — completion checklists** | Track what's done vs. outstanding | planned | |
 | **Assignment objects** | Separate from dated unit materials | planned | **Next conversation** — not spec'd |
@@ -597,7 +597,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 | **Org white labelling** | Owners upload a small icon and set one accent color used as that org’s primary color | shipped | Buttons, links, and the sidebar use the accent. Login, marketing, account home, email, and print stay Course Wright. Color must pass WCAG AA for white text and for text on paper. `organization_branding` + public `org-brand` bucket. Owners only write. The icon file and `organization_icons` path are public so a future invite can show the picture without a membership. Accent stays member-only |
 | **Org feature customizations** | Owners turn optional surfaces on or off: Discussions, Announcements, Resources, Lesson plans, Events, Calendar view | shipped | Org settings **Customizations** tab. `organization_features` (owner writes; members read). Missing row = all on. Off hides sidebar items, routes, and compose buttons; does not delete data. Non-owners see the tab read-only, without Save or Cancel |
 | **Discussions** | Two-way thread for **one course** or **one class**. Title + who it is for. Staff and families in that group can start a thread and everyone on it can post. Flat conversation with optional **Quote** (Teams-style block in the message body). Composer is **plain text** by default; **T** turns on **Lexical** rich text. The person who started it, or staff who can see it, can mark it **resolved**. Posts can attach **files**, **links to course materials**, and **URLs**. While the app is open, new posts and resolved state appear without a refresh (**Supabase Realtime**). Distinct from **announcements** | in progress | Flat thread + quote-in-body + plain/Lexical composer (`20260922000003_discussion_quotes.sql`). Families start a discussion only for a **course their child is enrolled in** (active + published) or a **class their child is in**. Staff: owners/admins any course/class in the org; instructors for courses they teach and classes they can already manage on the roster. Invited student emails use the parent claim path. No email in this slice. Ad-hoc student-group audience later. |
-| **Notifications** | In-app **Activity** list of events that need a person’s attention. Discussion posts notify **course instructors** or **class leads**, plus anyone who **started** the thread or **posted** in it. **@mentions** notify that person if they can see the thread. Staff starting a discussion can opt in to **Notify everyone** on the thread. Announcement **Send notification** also writes Activity for claimed families. Clicking a row marks it read and opens the activity. The installed app can show the same activity as a device notification | shipped | Stored `notifications` rows (ack = `read_at`). One **new post** Activity row per person per discussion (later posts update that row instead of adding more). One **announcement** row per person per notice (a later send updates it). Rows show a type icon + headline (e.g. **New discussion: … in …** / **Mentioned in …** / **Announcement: … in …**), not a read-receipt checkmark. Header **bell** (right of the avatar) with unread badge; dropdown previews the three newest unread or **You're all caught up!**, plus **View all activity**. Announcement opt-in email stays **Send notification** (same toggle also writes Activity). Discussion thread unread badge and announcement sidebar unread stay separate. Installed PWA (home screen or installed window) can turn on device notifications for these rows; a browser tab does not. Tap opens the item and marks that row read. VAPID and webhook secrets are **HN-018** |
+| **Notifications** | In-app **Activity** list of events that need a person’s attention. Discussion posts notify **course instructors** or **class leads**, plus anyone who **started** the thread or **posted** in it. **@mentions** notify that person if they can see the thread. Staff starting a discussion can opt in to **Notify everyone** on the thread. Announcement **Send notification** also writes Activity for claimed families. A saved quiz grade or course final override writes Activity for that student’s account and linked parents (no email). A report card writes Activity on submit. Clicking a row marks it read and opens the activity. The installed app can show the same activity as a device notification | shipped | Stored `notifications` rows (ack = `read_at`). One **new post** Activity row per person per discussion (later posts update that row instead of adding more). One **announcement** row per person per notice (a later send updates it). Rows show a type icon + headline (e.g. **New discussion: … in …** / **Mentioned in …** / **Announcement: … in …**), not a read-receipt checkmark. Header **bell** (right of the avatar) with unread badge; dropdown previews the three newest unread or **You're all caught up!**, plus **View all activity**. Announcement opt-in email stays **Send notification** (same toggle also writes Activity). Discussion thread unread badge and announcement sidebar unread stay separate. Installed PWA (home screen or installed window) can turn on device notifications for these rows; a browser tab does not. Tap opens the item and marks that row read. VAPID and webhook secrets are **HN-018** |
 | **Loading mark** | Shared animated **CW** loading state for pages, with optional “what’s loading” text | shipped | `PageLoading` in `src/ui/`; honors `prefers-reduced-motion` |
 | **Product feedback** | **Send feedback** in the account menu → form with name / email / org filled in | shipped | `/my/feedback` and `/my/<org-slug>/feedback`. Inserts `feedback` rows via PostgREST (no email) |
 | **Record audio snippet** | When adding (or replacing) a **file** material, or inserting **Audio** on a **page**, record a clip under 5 minutes with the device microphone | shipped | Still a Storage **file** (file material or in-page `file` node) — not a new kind. Browser `MediaRecorder`; upload via existing Storage path. Page insert uses the same recorder UI in a popup |
@@ -805,7 +805,7 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | Parent profile stays active if enrollment ends (P0) | **Decided** | Defer visibility rules |
 | File types/sizes generous | **Decided** | Keep open |
 | Grade scheme presets: K–12 and Custom | **Decided** | Org onboarding |
-| P1 grading scales org-configurable | **Decided** | P1 Grade |
+| P1 grading scales org-configurable | **Decided** | Shipped as org grading (`none` / letter / pass/fail), separate from age-level grade scheme |
 | Success metric: MAUs | **Decided** | Vision |
 | Tagline: Plan wright. Share wright. Course Wright. / Courses, done wright. | **Decided** | BRANDING.md |
 | Anyone can create an org; creator is first owner | **Decided** | Org creation. Owners and admins manage org settings; only owners manage billing. |
@@ -834,7 +834,7 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | Material = page of ordered blocks when kind=page | **Decided** | First-class block rows in DB |
 | Class = org group of students, separate from Course | **Decided** | Course enrolls individuals; Class is a batch preset into enroll (not live) |
 | Course roster UI: list-first + batch Enroll students | **Decided** | Multi-select + optional Class preset; batch create-and-enroll |
-| Roster = page noun; Enroll/Unenroll = course verbs | **Decided** | BRANDING; class/org use Add/Remove |
+| Roster = page noun; Enroll/Unenroll = course verbs | **Superseded** | Org people chrome is **Students** (staff/parents) and **Progress** (learners). Course verbs stay Enroll/Unenroll; class/org stay Add/Remove. No top-level Roster or Records |
 | Quiz authoring + correct answers + print (blank + answer key) | **Decided** | **P0 page quiz** — Lexical `quiz` node on a lesson page. Not a material kind. Many per page. Whole-page print; parent/student and staff **Student view** = questions only; staff Teacher view = answer key. No roster required |
 | Staff parent view (header toggle) | **Decided** | All staff (owner/admin/instructor). Real student home if linked students; otherwise a preview. Hidden for parent-role users. Default Teacher. UI label **Student view**. Student view print omits the page-quiz answer key. Course quizzes follow the parent answer-key rule |
 | Quiz online take + autograde | **Decided** | **P1 course quiz** — outline item, not a page block and not `material_submissions`. Optional start/end. Print when neither is set. Each question has possible points (default 1, fractions allowed). Multiple choice, number, and matching autograde a first pass the teacher can overwrite. Short answer and long answer wait for the teacher’s points. A long answer has 1–20 blank lines. Share answer key with parents (students never). One attempt unless allowed |

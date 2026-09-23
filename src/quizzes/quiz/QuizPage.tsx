@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { getGradingScale, gradingScaleQueryKeys } from "@/grading/databridge/scales";
+import { percentOf, percentToLabel } from "@/grading/model/scale";
 import {
   CheckIcon,
   EyeSlashIcon,
@@ -38,6 +42,18 @@ import { useQuiz } from "./hooks/useQuiz";
 
 export function QuizPage() {
   const page = useQuiz();
+  const { organization } = useOrgShell();
+  const scaleQuery = useQuery({
+    queryKey: gradingScaleQueryKeys.org(organization.id),
+    queryFn: () => getGradingScale(organization.id),
+  });
+  function formatScore(score: number, scoreTotal: number) {
+    const base = formatQuizScore(score, scoreTotal);
+    const label = scaleQuery.data
+      ? percentToLabel(percentOf(score, scoreTotal), scaleQuery.data)
+      : null;
+    return label ? `${base} · ${label}` : base;
+  }
   const location = useLocation();
   const navigate = useNavigate();
   const [confirmRemove, setConfirmRemove] = useState(false);
@@ -172,7 +188,7 @@ export function QuizPage() {
                     submitted.score != null &&
                     submitted.scoreTotal != null
                   ) {
-                    setResult(formatQuizScore(submitted.score, submitted.scoreTotal));
+                    setResult(formatScore(submitted.score, submitted.scoreTotal));
                   } else {
                     setResult("Submitted.");
                   }
@@ -212,7 +228,7 @@ export function QuizPage() {
             }
           />
         ) : (
-          <QuizAttemptList attempts={familyAttempts} timeZone={zone} />
+          <QuizAttemptList attempts={familyAttempts} timeZone={zone} formatScore={formatScore} />
         )}
         {page.showKey ? <AnswerKeySection questions={page.questions} /> : null}
         {page.canEdit && isPublished(quiz.visibility) ? (

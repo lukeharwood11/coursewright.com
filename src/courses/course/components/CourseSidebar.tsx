@@ -2,6 +2,7 @@ import { ButtonLink } from "@/ui/Button";
 import { UserCard } from "@/organizations/user-card/UserCard";
 import { Avatar } from "@/ui/Avatar";
 import { courseRosterPath } from "@/courses/model/paths";
+import { gradebookPath } from "@/grading/model/paths";
 import type { CourseInstructor } from "@/courses/databridge/courses";
 import type { CourseEnrollment } from "@/roster/databridge/enrollments";
 
@@ -57,7 +58,14 @@ export function CourseSidebar({
         </ul>
       )}
       {canEdit ? (
-        <div className="mt-4">
+        <div className="mt-4 flex flex-col gap-2">
+          <ButtonLink
+            variant="secondary"
+            to={gradebookPath(orgSlug, courseId)}
+            fullWidth
+          >
+            Gradebook
+          </ButtonLink>
           <ButtonLink
             variant="secondary"
             to={courseRosterPath(orgSlug, courseId)}

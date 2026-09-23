@@ -1970,8 +1970,12 @@ export type Database = {
           id: number
           kind: string
           organization_id: number
+          enrollment_id: number | null
           preview: string
+          quiz_attempt_id: number | null
           read_at: string | null
+          report_card_instance_id: number | null
+          student_profile_id: number | null
           title: string
           user_id: string
         }
@@ -1985,8 +1989,12 @@ export type Database = {
           id?: number
           kind: string
           organization_id: number
+          enrollment_id?: number | null
           preview?: string
+          quiz_attempt_id?: number | null
           read_at?: string | null
+          report_card_instance_id?: number | null
+          student_profile_id?: number | null
           title: string
           user_id: string
         }
@@ -2000,8 +2008,12 @@ export type Database = {
           id?: number
           kind?: string
           organization_id?: number
+          enrollment_id?: number | null
           preview?: string
+          quiz_attempt_id?: number | null
           read_at?: string | null
+          report_card_instance_id?: number | null
+          student_profile_id?: number | null
           title?: string
           user_id?: string
         }
@@ -2386,6 +2398,192 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      organization_grading_scales: {
+        Row: {
+          bands: Json
+          mode: string
+          organization_id: number
+          pass_threshold: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          bands?: Json
+          mode?: string
+          organization_id: number
+          pass_threshold?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          bands?: Json
+          mode?: string
+          organization_id?: number
+          pass_threshold?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      course_final_grades: {
+        Row: {
+          enrollment_id: number
+          override_label: string | null
+          override_note: string | null
+          overridden_at: string | null
+          overridden_by: string | null
+        }
+        Insert: {
+          enrollment_id: number
+          override_label?: string | null
+          override_note?: string | null
+          overridden_at?: string | null
+          overridden_by?: string | null
+        }
+        Update: {
+          enrollment_id?: number
+          override_label?: string | null
+          override_note?: string | null
+          overridden_at?: string | null
+          overridden_by?: string | null
+        }
+        Relationships: []
+      }
+      grade_override_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          enrollment_id: number | null
+          id: number
+          kind: string
+          new_value: string | null
+          note: string | null
+          organization_id: number
+          previous_value: string | null
+          quiz_attempt_id: number | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          enrollment_id?: number | null
+          id?: number
+          kind: string
+          new_value?: string | null
+          note?: string | null
+          organization_id: number
+          previous_value?: string | null
+          quiz_attempt_id?: number | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          enrollment_id?: number | null
+          id?: number
+          kind?: string
+          new_value?: string | null
+          note?: string | null
+          organization_id?: number
+          previous_value?: string | null
+          quiz_attempt_id?: number | null
+        }
+        Relationships: []
+      }
+      report_card_instances: {
+        Row: {
+          course_id: number
+          created_at: string
+          enrollment_id: number
+          generated_by: string | null
+          id: number
+          narrative: string
+          organization_id: number
+          sent_at: string | null
+          snapshot: Json
+          status: string
+          student_profile_id: number
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          course_id: number
+          created_at?: string
+          enrollment_id: number
+          generated_by?: string | null
+          id?: number
+          narrative?: string
+          organization_id: number
+          sent_at?: string | null
+          snapshot?: Json
+          status?: string
+          student_profile_id: number
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          course_id?: number
+          created_at?: string
+          enrollment_id?: number
+          generated_by?: string | null
+          id?: number
+          narrative?: string
+          organization_id?: number
+          sent_at?: string | null
+          snapshot?: Json
+          status?: string
+          student_profile_id?: number
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      report_card_deliveries: {
+        Row: {
+          attempt_count: number
+          channel: string
+          id: number
+          last_error: string | null
+          queued_at: string
+          recipient_email: string | null
+          recipient_key: string
+          recipient_kind: string
+          recipient_user_id: string | null
+          report_card_instance_id: number
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          attempt_count?: number
+          channel: string
+          id?: number
+          last_error?: string | null
+          queued_at?: string
+          recipient_email?: string | null
+          recipient_key: string
+          recipient_kind: string
+          recipient_user_id?: string | null
+          report_card_instance_id: number
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          attempt_count?: number
+          channel?: string
+          id?: number
+          last_error?: string | null
+          queued_at?: string
+          recipient_email?: string | null
+          recipient_key?: string
+          recipient_kind?: string
+          recipient_user_id?: string | null
+          report_card_instance_id?: number
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: []
       }
       organizations: {
         Row: {
@@ -3394,6 +3592,25 @@ export type Database = {
         }
         Returns: undefined
       }
+      grade_quiz_attempt_noted: {
+        Args: { p_attempt_id: number; p_note: string; p_points: Json }
+        Returns: undefined
+      }
+      course_gradebook: { Args: { p_course_id: number }; Returns: Json }
+      student_course_grades: { Args: { p_student_profile_id: number }; Returns: Json }
+      set_course_final_override: {
+        Args: { p_enrollment_id: number; p_label: string | null; p_note: string }
+        Returns: undefined
+      }
+      generate_report_card: { Args: { p_enrollment_id: number }; Returns: number }
+      generate_student_report_cards: {
+        Args: { p_student_profile_id: number }
+        Returns: Json
+      }
+      generate_course_report_cards: { Args: { p_course_id: number }; Returns: Json }
+      refresh_report_card: { Args: { p_id: number }; Returns: undefined }
+      submit_report_card: { Args: { p_id: number }; Returns: undefined }
+      resend_report_card_delivery: { Args: { p_delivery_id: number }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

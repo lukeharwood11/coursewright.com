@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { AccountSettingsPage, LoginPage, SignupPage } from "@/auth";
 import { RedirectIfAuthed, RequireAuth } from "@/app/gates/RequireAuth";
 import { RequireOrgFeature } from "@/app/gates/RequireOrgFeature";
@@ -9,6 +9,7 @@ import { OrgLayout } from "@/app/layouts/OrgLayout";
 import { PrintLayout } from "@/app/layouts/PrintLayout";
 import { StubPage } from "@/app/StubPage";
 import { CourseListPage, CoursePage, CourseRosterPage, CourseSettingsPage } from "@/courses";
+import { CourseGradebookPage, ProgressPage, ReportCardPage } from "@/grading";
 import { CalendarPage } from "@/calendar";
 import { EventEditPage, EventPage } from "@/events";
 import { FeedbackPage } from "@/feedback";
@@ -66,6 +67,11 @@ import { UnitPage } from "@/units";
  * Thin route table. Domain screens live under src/<domain>/<page>/.
  * Paths: docs/URLS.md
  */
+function RosterStudentRedirect() {
+  const { studentId } = useParams();
+  return <Navigate to={`../students/${studentId ?? ""}`} replace />;
+}
+
 export function AppRoutes() {
   return (
     <Routes>
@@ -133,6 +139,14 @@ export function AppRoutes() {
               element={
                 <RequireStaff>
                   <CourseRosterPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="courses/:courseId/gradebook"
+              element={
+                <RequireStaff>
+                  <CourseGradebookPage />
                 </RequireStaff>
               }
             />
@@ -312,30 +326,13 @@ export function AppRoutes() {
                 </RequireStaff>
               }
             />
-            <Route
-              path="roster"
-              element={
-                <RequireStaff>
-                  <OrgRosterPage />
-                </RequireStaff>
-              }
-            />
-            <Route
-              path="roster/:studentId"
-              element={
-                <RequireStaff>
-                  <StudentProfilePage />
-                </RequireStaff>
-              }
-            />
-            <Route
-              path="classes/:classId"
-              element={
-                <RequireStaff>
-                  <ClassRosterPage />
-                </RequireStaff>
-              }
-            />
+            <Route path="progress" element={<ProgressPage />} />
+            <Route path="students" element={<OrgRosterPage />} />
+            <Route path="students/:studentId" element={<StudentProfilePage />} />
+            <Route path="report-cards/:cardId" element={<ReportCardPage />} />
+            <Route path="roster" element={<Navigate to="../students" replace />} />
+            <Route path="roster/:studentId" element={<RosterStudentRedirect />} />
+            <Route path="classes/:classId" element={<ClassRosterPage />} />
           </Route>
           <Route element={<PrintLayout />}>
             <Route path="print-this-week" element={<PrintPage />} />

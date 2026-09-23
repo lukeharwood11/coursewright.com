@@ -73,6 +73,7 @@ export function canManageCustomizations(role: OrgRole): boolean {
 export function showOrgSettingsFormActions(role: OrgRole, tab: string): boolean {
   if (!canManageOrgSettings(role)) return false;
   if (tab === "customizations") return canManageCustomizations(role);
+  if (tab === "grading") return false;
   return true;
 }
 

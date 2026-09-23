@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { activityPath } from "./paths.ts";
+import { activityItemPath, activityPath } from "./paths.ts";
 import {
   activityBellPreview,
   activityHeadline,
@@ -21,6 +21,9 @@ test("parseActivityKind accepts activity kinds", () => {
   assert.equal(parseActivityKind("discussion_message"), "discussion_message");
   assert.equal(parseActivityKind("discussion_mention"), "discussion_mention");
   assert.equal(parseActivityKind("announcement"), "announcement");
+  assert.equal(parseActivityKind("report_card"), "report_card");
+  assert.equal(parseActivityKind("quiz_grade"), "quiz_grade");
+  assert.equal(parseActivityKind("course_final"), "course_final");
   assert.equal(parseActivityKind("other"), null);
 });
 
@@ -140,6 +143,68 @@ test("activityHeadline names the activity and place", () => {
       audienceLabel: "",
     }),
     "Announcement: No school Friday",
+  );
+  assert.equal(
+    activityHeadline({
+      kind: "quiz_grade",
+      title: "Fractions check",
+      audienceLabel: "Math",
+    }),
+    "Grade saved: Fractions check in Math",
+  );
+  assert.equal(
+    activityHeadline({
+      kind: "course_final",
+      title: "Final",
+      audienceLabel: "Math",
+    }),
+    "Final grade in Math",
+  );
+  assert.equal(
+    activityHeadline({
+      kind: "course_final",
+      title: "Final",
+      audienceLabel: "",
+    }),
+    "Final grade",
+  );
+});
+
+test("published grades open Progress for a learner and the student for a parent", () => {
+  const quiz = {
+    kind: "quiz_grade",
+    discussionId: null,
+    discussionMessageId: null,
+    announcementId: null,
+    reportCardInstanceId: null,
+    studentProfileId: 12,
+  };
+  assert.equal(
+    activityItemPath("coop", quiz, { learner: true }),
+    "/my/coop/progress",
+  );
+  assert.equal(
+    activityItemPath("coop", quiz, { learner: false }),
+    "/my/coop/students/12",
+  );
+  assert.equal(
+    activityItemPath("coop", { ...quiz, kind: "course_final" }, { learner: false }),
+    "/my/coop/students/12",
+  );
+  assert.equal(
+    activityItemPath(
+      "coop",
+      {
+        kind: "report_card",
+        discussionId: null,
+        discussionMessageId: null,
+        announcementId: null,
+        reportCardInstanceId: 4,
+        studentProfileId: 12,
+      },
+      { learner: true },
+    ),
+    "/my/coop/report-cards/4",
   );
 });
 

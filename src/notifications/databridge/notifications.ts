@@ -16,6 +16,10 @@ type NotificationRow = {
   discussion_id: number | null;
   discussion_message_id: number | null;
   announcement_id: number | null;
+  report_card_instance_id: number | null;
+  student_profile_id: number | null;
+  quiz_attempt_id: number | null;
+  enrollment_id: number | null;
   actor_id: string | null;
   title: string;
   preview: string;
@@ -42,6 +46,10 @@ function toActivityItem(row: NotificationRow): ActivityItem | null {
     discussionId: row.discussion_id,
     discussionMessageId: row.discussion_message_id,
     announcementId: row.announcement_id,
+    reportCardInstanceId: row.report_card_instance_id,
+    studentProfileId: row.student_profile_id,
+    quizAttemptId: row.quiz_attempt_id,
+    enrollmentId: row.enrollment_id,
     actorId: row.actor_id,
     actorName,
     title: row.title,
@@ -59,7 +67,7 @@ export async function listNotifications(
   const { data, error } = await db
     .from("notifications")
     .select(
-      "id, organization_id, kind, discussion_id, discussion_message_id, announcement_id, actor_id, title, preview, audience_label, created_at, read_at, actor:profiles!notifications_actor_id_fkey(name)",
+      "id, organization_id, kind, discussion_id, discussion_message_id, announcement_id, report_card_instance_id, student_profile_id, quiz_attempt_id, enrollment_id, actor_id, title, preview, audience_label, created_at, read_at, actor:profiles!notifications_actor_id_fkey(name)",
     )
     .eq("organization_id", organizationId)
     .order("created_at", { ascending: false });

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { MegaphoneIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
@@ -8,6 +8,10 @@ import { Button, ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { staffCanEdit } from "@/app/layouts/model/viewMode";
+import { studentsHubTier } from "@/grading/model/access";
+import { progressPath, studentsPath } from "@/grading/model/paths";
+import { StudentGradesSection } from "@/grading";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { enrollmentStatusLabel } from "@/roster/model/enrollment";
 import { StudentProfileFields } from "./components/StudentProfileFields";
@@ -19,11 +23,15 @@ import {
   STUDENT_PROFILE_FORM_ID,
   useStudentProfile,
 } from "./hooks/useStudentProfile";
+import { useAckNotificationFromSearch } from "@/notifications/activity/hooks/useAckNotificationFromSearch";
 import { useToastOnError } from "@/ui/useToastOnError";
 
 export function StudentProfilePage() {
   const profile = useStudentProfile();
-  const { organization } = useOrgShell();
+  useAckNotificationFromSearch();
+  const { organization, role, parentPresentation } = useOrgShell();
+  const tier = studentsHubTier(role, parentPresentation);
+  const canEdit = staffCanEdit(role, parentPresentation);
   const [confirmRemove, setConfirmRemove] = useState(false);
   useToastOnError(profile.error);
   const parentInvite = useParentInvite(profile.student?.id ?? null);
@@ -39,6 +47,10 @@ export function StudentProfilePage() {
       ? `${profile.student.name} · Course Wright`
       : "Student · Course Wright";
   }, [profile.student]);
+
+  if (tier === "learner") {
+    return <Navigate to={progressPath(organization.slug)} replace />;
+  }
 
   if (profile.loading) {
     return (
@@ -60,10 +72,10 @@ export function StudentProfilePage() {
         </p>
         <p className="mt-4 text-[13px]">
           <Link
-            to={`/my/${profile.organization.slug}/roster`}
+            to={studentsPath(profile.organization.slug)}
             className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
           >
-            Back to roster
+            Back to students
           </Link>
         </p>
       </div>
@@ -75,10 +87,11 @@ export function StudentProfilePage() {
   return (
     <div>
       <DetailPageHeader
-        backTo={`/my/${profile.organization.slug}/roster`}
-        backLabel="Back to roster"
+        backTo={studentsPath(profile.organization.slug)}
+        backLabel="Back to students"
         title={profile.student.name}
         actions={
+          canEdit ? (
           <>
             {organization.features.announcements ? (
               <ButtonLink
@@ -104,12 +117,16 @@ export function StudentProfilePage() {
               formId={STUDENT_PROFILE_FORM_ID}
               saving={profile.saving}
               hasChanges={profile.hasChanges}
-              cancelTo={`/my/${profile.organization.slug}/roster`}
+              cancelTo={studentsPath(profile.organization.slug)}
             />
           </>
+          ) : null
         }
       />
       <div className="space-y-6 px-5 pt-4 pb-6 md:px-8">
+      <StudentGradesSection studentId={profile.student.id} />
+      {canEdit ? (
+      <>
       <form
         id={STUDENT_PROFILE_FORM_ID}
         className="max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5"
@@ -171,6 +188,8 @@ export function StudentProfilePage() {
         onSendEmail={studentInvite.onSendEmail}
         onCancel={studentInvite.onCancel}
       />
+      </>
+      ) : null}
 
       <div className="grid items-start gap-4 lg:grid-cols-2">
         <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
@@ -184,7 +203,11 @@ export function StudentProfilePage() {
               {profile.enrollments.map((enrollment) => (
                 <li key={enrollment.id} className="flex items-center gap-3 py-2">
                   <Link
-                    to={`${base}/courses/${enrollment.courseId}/roster`}
+                    to={
+                      canEdit
+                        ? `${base}/courses/${enrollment.courseId}/roster`
+                        : `${base}/courses/${enrollment.courseId}`
+                    }
                     className="min-w-0 flex-1 truncate text-[14.5px] font-extrabold text-[var(--ink)] hover:text-[var(--green-deep)]"
                   >
                     {enrollment.courseTitle}

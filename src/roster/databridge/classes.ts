@@ -124,6 +124,35 @@ export async function listClassMembers(classId: number): Promise<ClassMember[]> 
   });
 }
 
+export type ClassMembershipLabel = {
+  studentProfileId: number;
+  classId: number;
+  title: string;
+};
+
+export async function listClassMembershipLabels(
+  organizationId: number,
+): Promise<ClassMembershipLabel[]> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("class_members")
+    .select("student_profile_id, class_id, class:classes!inner(organization_id, title, deleted_at)");
+  if (error) throw new Error(error.message);
+  return (data ?? []).flatMap((row) => {
+    const classRow = unwrapOne(row.class);
+    if (!classRow || classRow.deleted_at || classRow.organization_id !== organizationId) {
+      return [];
+    }
+    return [
+      {
+        studentProfileId: row.student_profile_id,
+        classId: row.class_id,
+        title: classRow.title,
+      },
+    ];
+  });
+}
+
 export async function listClassesForStudent(
   studentProfileId: number,
 ): Promise<ClassSummary[]> {

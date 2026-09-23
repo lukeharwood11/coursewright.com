@@ -1,6 +1,8 @@
 import {
+  AcademicCapIcon,
   AtSymbolIcon,
   ChatBubbleLeftRightIcon,
+  CheckCircleIcon,
   MegaphoneIcon,
 } from "@heroicons/react/24/solid";
 import { formatDiscussionActivityAt } from "@/discussions/model/time";
@@ -22,6 +24,12 @@ function ActivityTypeIcon({ kind }: { kind: ActivityKind }) {
   }
   if (kind === "announcement") {
     return <MegaphoneIcon className={className} aria-hidden />;
+  }
+  if (kind === "report_card") {
+    return <AcademicCapIcon className={className} aria-hidden />;
+  }
+  if (kind === "quiz_grade" || kind === "course_final") {
+    return <CheckCircleIcon className={className} aria-hidden />;
   }
   return <ChatBubbleLeftRightIcon className={className} aria-hidden />;
 }

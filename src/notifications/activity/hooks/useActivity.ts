@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { studentsHubTier } from "@/grading/model/access";
 import {
   listNotifications,
   markNotificationRead,
@@ -14,7 +15,8 @@ import {
 import { activityItemPath } from "@/notifications/model/paths";
 
 export function useActivity() {
-  const { organization } = useOrgShell();
+  const { organization, role, parentPresentation } = useOrgShell();
+  const learner = studentsHubTier(role, parentPresentation) === "learner";
   const user = useAuthedUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -35,7 +37,7 @@ export function useActivity() {
       void queryClient.invalidateQueries({
         queryKey: notificationQueryKeys.org(organization.id, user.id),
       });
-      const href = activityItemPath(organization.slug, item);
+      const href = activityItemPath(organization.slug, item, { learner });
       if (href) navigate(href);
     },
   });
