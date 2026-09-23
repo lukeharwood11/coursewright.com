@@ -20,6 +20,7 @@ Learners: a student account, or staff using **Student view**. Teachers, parents,
 - Classes open the canonical [CLASS](./CLASS.md) page, read-only for the learner.
 - Grades are per course enrollment. The label comes from the org grading scale. Mode `none` shows a percent. A teacher final override shows that label.
 - Report cards listed here are **sent** only.
+- Activity for a saved quiz grade or a final override opens this page for the learner. A device notification uses `?activity=` and marks that row read.
 - No bulk actions, no other students, no grading settings.
 
 ## Data shown

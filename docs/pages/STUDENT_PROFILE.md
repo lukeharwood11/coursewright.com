@@ -25,6 +25,7 @@ View/edit one org-level **student profile**, including an optional student accou
 - **Grades** lists each active course the viewer may read (teachers: courses they teach; owners/admins: all; parents: linked published courses). The label is derived from the org scale. A final override shows that label and the stamp.
 - Staff who can act see **Gradebook** on a course row and a **Report cards** list. **Generate** (Pattern A) drafts one card per course they can manage and opens the first draft.
 - Parents do not edit the profile, remove the student, or generate cards. They see classes and grades.
+- Activity for a saved quiz grade or a final override opens this page for a linked parent. A device notification uses `?activity=` and marks that row read.
 - **Announce** (staff) → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
 - Owners and admins who can edit see **Grading settings** on the grades section.
 - Creating profiles often happens on first course or class add; this page manages the canonical org record.

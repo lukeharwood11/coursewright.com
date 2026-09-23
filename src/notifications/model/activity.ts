@@ -7,7 +7,9 @@ export type ActivityKind =
   | "discussion_message"
   | "discussion_mention"
   | "announcement"
-  | "report_card";
+  | "report_card"
+  | "quiz_grade"
+  | "course_final";
 
 export type ActivityItem = {
   id: number;
@@ -17,6 +19,9 @@ export type ActivityItem = {
   discussionMessageId: number | null;
   announcementId: number | null;
   reportCardInstanceId: number | null;
+  studentProfileId: number | null;
+  quizAttemptId: number | null;
+  enrollmentId: number | null;
   actorId: string | null;
   actorName: string;
   title: string;
@@ -31,7 +36,9 @@ export function parseActivityKind(value: string): ActivityKind | null {
     value === "discussion_message" ||
     value === "discussion_mention" ||
     value === "announcement" ||
-    value === "report_card"
+    value === "report_card" ||
+    value === "quiz_grade" ||
+    value === "course_final"
   ) {
     return value;
   }
@@ -125,6 +132,13 @@ export function activityHeadline(args: {
   }
   if (args.kind === "report_card") {
     return audience ? `Report card in ${audience}` : "Report card";
+  }
+  if (args.kind === "quiz_grade") {
+    const name = args.title.trim() || "Quiz";
+    return audience ? `Grade saved: ${name} in ${audience}` : `Grade saved: ${name}`;
+  }
+  if (args.kind === "course_final") {
+    return audience ? `Final grade in ${audience}` : "Final grade";
   }
   return `New discussion: ${title}${inAudience}`;
 }

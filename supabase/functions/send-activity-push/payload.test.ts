@@ -15,6 +15,9 @@ test("push headlines match Activity", () => {
     { kind: "discussion_message" as const, title: "  ", audienceLabel: "" },
     { kind: "announcement" as const, title: "No school Friday", audienceLabel: "Homeroom" },
     { kind: "announcement" as const, title: "No school Friday", audienceLabel: "" },
+    { kind: "quiz_grade" as const, title: "Fractions check", audienceLabel: "Math" },
+    { kind: "course_final" as const, title: "Final", audienceLabel: "Math" },
+    { kind: "report_card" as const, title: "Report card", audienceLabel: "Math" },
   ];
   for (const item of cases) {
     assert.equal(activityPushTitle(item), activityHeadline(item));
@@ -70,6 +73,28 @@ test("push path opens the same item and acks that row", () => {
       announcementId: null,
     }),
     "/my/coop/activity?activity=1",
+  );
+  assert.equal(
+    activityPushPath({
+      orgSlug: "coop",
+      notificationId: 6,
+      discussionId: null,
+      discussionMessageId: null,
+      announcementId: null,
+      gradePath: "/my/coop/progress",
+    }),
+    "/my/coop/progress?activity=6",
+  );
+  assert.equal(
+    activityPushPath({
+      orgSlug: "coop",
+      notificationId: 7,
+      discussionId: null,
+      discussionMessageId: null,
+      announcementId: null,
+      gradePath: "/my/coop/students/12",
+    }),
+    "/my/coop/students/12?activity=7",
   );
   assert.equal(activityPushTag(42), "activity-42");
 });

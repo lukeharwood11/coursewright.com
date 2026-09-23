@@ -5,10 +5,12 @@ import { PageLoading } from "@/ui/PageLoading";
 import { studentsHubTier } from "@/grading/model/access";
 import { formatGradeDisplay } from "@/grading/model/scale";
 import { reportCardPath, studentsPath } from "@/grading/model/paths";
+import { useAckNotificationFromSearch } from "@/notifications/activity/hooks/useAckNotificationFromSearch";
 import { useProgress } from "./hooks/useProgress";
 
 export function ProgressPage() {
   const progress = useProgress();
+  useAckNotificationFromSearch();
   const { role, parentPresentation } = useOrgShell();
   const tier = studentsHubTier(role, parentPresentation);
 

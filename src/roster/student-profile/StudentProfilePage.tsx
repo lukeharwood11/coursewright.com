@@ -23,10 +23,12 @@ import {
   STUDENT_PROFILE_FORM_ID,
   useStudentProfile,
 } from "./hooks/useStudentProfile";
+import { useAckNotificationFromSearch } from "@/notifications/activity/hooks/useAckNotificationFromSearch";
 import { useToastOnError } from "@/ui/useToastOnError";
 
 export function StudentProfilePage() {
   const profile = useStudentProfile();
+  useAckNotificationFromSearch();
   const { organization, role, parentPresentation } = useOrgShell();
   const tier = studentsHubTier(role, parentPresentation);
   const canEdit = staffCanEdit(role, parentPresentation);

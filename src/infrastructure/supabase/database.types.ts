@@ -1970,9 +1970,12 @@ export type Database = {
           id: number
           kind: string
           organization_id: number
+          enrollment_id: number | null
           preview: string
+          quiz_attempt_id: number | null
           read_at: string | null
           report_card_instance_id: number | null
+          student_profile_id: number | null
           title: string
           user_id: string
         }
@@ -1986,9 +1989,12 @@ export type Database = {
           id?: number
           kind: string
           organization_id: number
+          enrollment_id?: number | null
           preview?: string
+          quiz_attempt_id?: number | null
           read_at?: string | null
           report_card_instance_id?: number | null
+          student_profile_id?: number | null
           title: string
           user_id: string
         }
@@ -2002,9 +2008,12 @@ export type Database = {
           id?: number
           kind?: string
           organization_id?: number
+          enrollment_id?: number | null
           preview?: string
+          quiz_attempt_id?: number | null
           read_at?: string | null
           report_card_instance_id?: number | null
+          student_profile_id?: number | null
           title?: string
           user_id?: string
         }

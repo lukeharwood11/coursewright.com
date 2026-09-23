@@ -417,6 +417,9 @@ declare
   caller uuid := (select auth.uid());
   v_course_id bigint;
   v_org_id bigint;
+  v_course_title text;
+  v_student_id bigint;
+  v_student_name text;
   v_mode text;
   v_pass numeric;
   v_bands jsonb;
@@ -431,10 +434,11 @@ begin
     raise exception 'Keep the note under 2000 characters.' using errcode = '23514';
   end if;
 
-  select c.id, c.organization_id
-  into v_course_id, v_org_id
+  select c.id, c.organization_id, c.title, e.student_profile_id, sp.name
+  into v_course_id, v_org_id, v_course_title, v_student_id, v_student_name
   from public.enrollments e
   join public.courses c on c.id = e.course_id
+  join public.student_profiles sp on sp.id = e.student_profile_id
   where e.id = p_enrollment_id;
 
   if v_course_id is null then
@@ -505,6 +509,25 @@ begin
     v_prev,
     v_label
   );
+
+  -- Activity only when a final label is set or an existing override changes.
+  -- Mode none cannot set a label. Clearing back to the average still notifies.
+  if v_label is not null or v_prev is not null then
+    perform private.notify_published_grade(
+      v_org_id,
+      v_student_id,
+      'course_final',
+      caller,
+      'Final',
+      left(
+        coalesce(v_student_name, 'Student') || ' · ' || coalesce(v_label, 'the average'),
+        160
+      ),
+      coalesce(v_course_title, ''),
+      null,
+      p_enrollment_id
+    );
+  end if;
 end;
 $$;
 
@@ -524,14 +547,19 @@ declare
   v_org bigint;
   v_enrollment bigint;
   v_note text;
+  v_quiz_title text;
+  v_course_title text;
+  v_student_name text;
 begin
   if new.teacher_graded_at is null
      or new.teacher_graded_at is not distinct from old.teacher_graded_at then
     return new;
   end if;
 
-  select q.organization_id into v_org
+  select q.organization_id, q.title, c.title
+  into v_org, v_quiz_title, v_course_title
   from public.quizzes q
+  join public.courses c on c.id = q.course_id
   where q.id = new.quiz_id;
 
   select e.id into v_enrollment
@@ -564,6 +592,31 @@ begin
       else new.score::text || '/' || new.score_total::text
     end
   );
+
+  select name into v_student_name
+  from public.student_profiles
+  where id = new.student_profile_id;
+
+  -- Save grade lock only. Submit and partial attempts do not set teacher_graded_at.
+  perform private.notify_published_grade(
+    v_org,
+    new.student_profile_id,
+    'quiz_grade',
+    coalesce(new.graded_by, (select auth.uid())),
+    coalesce(nullif(btrim(v_quiz_title), ''), 'Quiz'),
+    left(
+      coalesce(v_student_name, 'Student')
+        || ' · '
+        || coalesce(new.score::text, '0')
+        || '/'
+        || coalesce(new.score_total::text, '0'),
+      160
+    ),
+    coalesce(v_course_title, ''),
+    new.id,
+    v_enrollment
+  );
+
   return new;
 end;
 $$;
@@ -1384,9 +1437,25 @@ alter table public.notifications
   add column if not exists report_card_instance_id bigint
     references public.report_card_instances (id) on delete cascade;
 
+alter table public.notifications
+  add column if not exists student_profile_id bigint
+    references public.student_profiles (id) on delete cascade;
+
+alter table public.notifications
+  add column if not exists quiz_attempt_id bigint
+    references public.quiz_attempts (id) on delete cascade;
+
+alter table public.notifications
+  add column if not exists enrollment_id bigint
+    references public.enrollments (id) on delete cascade;
+
 create index if not exists notifications_report_card_instance_id_idx
   on public.notifications (report_card_instance_id)
   where report_card_instance_id is not null;
+
+create index if not exists notifications_quiz_attempt_id_idx
+  on public.notifications (quiz_attempt_id)
+  where quiz_attempt_id is not null;
 
 alter table public.notifications
   drop constraint if exists notifications_kind_chk;
@@ -1397,12 +1466,121 @@ alter table public.notifications
     'discussion_message',
     'discussion_mention',
     'announcement',
-    'report_card'
+    'report_card',
+    'quiz_grade',
+    'course_final'
   ));
 
 create unique index if not exists notifications_user_report_card_key
   on public.notifications (user_id, report_card_instance_id)
   where kind = 'report_card' and report_card_instance_id is not null;
+
+create unique index if not exists notifications_user_quiz_grade_key
+  on public.notifications (user_id, quiz_attempt_id)
+  where kind = 'quiz_grade' and quiz_attempt_id is not null;
+
+create unique index if not exists notifications_user_course_final_key
+  on public.notifications (user_id, enrollment_id)
+  where kind = 'course_final' and enrollment_id is not null;
+
+-- One unread Activity row per person per published grade. A later Save grade
+-- or final override refreshes that row. No email. Report cards stay on submit.
+create or replace function private.notify_published_grade(
+  p_organization_id bigint,
+  p_student_profile_id bigint,
+  p_kind text,
+  p_actor uuid,
+  p_title text,
+  p_preview text,
+  p_audience text,
+  p_quiz_attempt_id bigint,
+  p_enrollment_id bigint
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  recipient record;
+begin
+  if p_organization_id is null or p_student_profile_id is null then
+    return;
+  end if;
+  if p_kind = 'quiz_grade' and p_quiz_attempt_id is null then
+    return;
+  end if;
+  if p_kind = 'course_final' and p_enrollment_id is null then
+    return;
+  end if;
+  if p_kind not in ('quiz_grade', 'course_final') then
+    return;
+  end if;
+
+  perform set_config('coursewright.notification_write', '1', true);
+
+  for recipient in
+    select sp.user_id as user_id
+    from public.student_profiles sp
+    where sp.id = p_student_profile_id
+      and sp.user_id is not null
+    union
+    select l.parent_user_id as user_id
+    from public.parent_student_links l
+    where l.student_profile_id = p_student_profile_id
+      and l.parent_user_id is not null
+  loop
+    if p_kind = 'quiz_grade' then
+      insert into public.notifications (
+        organization_id, user_id, kind, actor_id, title, preview, audience_label,
+        student_profile_id, quiz_attempt_id, enrollment_id
+      )
+      values (
+        p_organization_id, recipient.user_id, 'quiz_grade', p_actor,
+        p_title, coalesce(p_preview, ''), coalesce(p_audience, ''),
+        p_student_profile_id, p_quiz_attempt_id, p_enrollment_id
+      )
+      on conflict (user_id, quiz_attempt_id)
+        where kind = 'quiz_grade' and quiz_attempt_id is not null
+      do update
+      set
+        actor_id = excluded.actor_id,
+        title = excluded.title,
+        preview = excluded.preview,
+        audience_label = excluded.audience_label,
+        student_profile_id = excluded.student_profile_id,
+        enrollment_id = excluded.enrollment_id,
+        created_at = now(),
+        read_at = null;
+    else
+      insert into public.notifications (
+        organization_id, user_id, kind, actor_id, title, preview, audience_label,
+        student_profile_id, enrollment_id
+      )
+      values (
+        p_organization_id, recipient.user_id, 'course_final', p_actor,
+        p_title, coalesce(p_preview, ''), coalesce(p_audience, ''),
+        p_student_profile_id, p_enrollment_id
+      )
+      on conflict (user_id, enrollment_id)
+        where kind = 'course_final' and enrollment_id is not null
+      do update
+      set
+        actor_id = excluded.actor_id,
+        title = excluded.title,
+        preview = excluded.preview,
+        audience_label = excluded.audience_label,
+        student_profile_id = excluded.student_profile_id,
+        created_at = now(),
+        read_at = null;
+    end if;
+  end loop;
+end;
+$$;
+
+revoke all on function private.notify_published_grade(
+  bigint, bigint, text, uuid, text, text, text, bigint, bigint
+) from public, anon, authenticated;
 
 create or replace function private.notification_guard_update()
 returns trigger
@@ -1423,6 +1601,9 @@ begin
      or new.discussion_message_id is distinct from old.discussion_message_id
      or new.announcement_id is distinct from old.announcement_id
      or new.report_card_instance_id is distinct from old.report_card_instance_id
+     or new.student_profile_id is distinct from old.student_profile_id
+     or new.quiz_attempt_id is distinct from old.quiz_attempt_id
+     or new.enrollment_id is distinct from old.enrollment_id
      or new.actor_id is distinct from old.actor_id
      or new.title is distinct from old.title
      or new.preview is distinct from old.preview
