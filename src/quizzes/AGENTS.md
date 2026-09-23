@@ -13,6 +13,7 @@ Course **Quiz**: an outline item families take in the app or print. Not a materi
 - Attempts are `quiz_attempts`, not `material_submissions`. Submit goes through `submit_quiz_attempt`. A teacher saves points for the whole entry with `grade_quiz_attempt`. `auto_points` is the first pass. `teacher_points` replaces it. `autograded` stays true after that override. `teacher_graded_at` marks a teacher grade.
 - After submit, the take form refills with that student’s latest answers (greyed out when they cannot submit again). Each answer shows points earned or **Yet to be graded**. The outline shows **Score 4.5/5 (90%)** only when every answer has points; otherwise a submitted check.
 - Staff quiz details list waiting submissions (needs grading, then autograded and not verified) and graded ones. Grading is one submission at a time, then **Save and next**.
+- Family score labels, when the org mode is not `none`, are derived in the quiz page from the org grading scale. The gradebook and report cards live in `src/grading/`. Do not dual-write points.
 
 ## Rules
 

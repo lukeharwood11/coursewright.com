@@ -21,6 +21,7 @@ test("parseActivityKind accepts activity kinds", () => {
   assert.equal(parseActivityKind("discussion_message"), "discussion_message");
   assert.equal(parseActivityKind("discussion_mention"), "discussion_mention");
   assert.equal(parseActivityKind("announcement"), "announcement");
+  assert.equal(parseActivityKind("report_card"), "report_card");
   assert.equal(parseActivityKind("other"), null);
 });
 

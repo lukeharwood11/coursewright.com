@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { BillingPlaceholder } from "@/billing";
+import { GradingSection } from "@/grading";
 import {
   canManageBranding,
   canManageCustomizations,
@@ -166,6 +167,12 @@ export function OrgSettingsPage() {
               onSubmit={settings.onSubmit}
             />
           </div>
+
+          {activeTab === "grading" ? (
+            <div role="tabpanel">
+              <GradingSection />
+            </div>
+          ) : null}
 
           {activeTab === "branding" ? (
             <div role="tabpanel">

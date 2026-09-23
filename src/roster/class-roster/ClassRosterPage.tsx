@@ -6,6 +6,9 @@ import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { staffCanEdit } from "@/app/layouts/model/viewMode";
+import { studentsHubTier } from "@/grading/model/access";
+import { progressPath, studentsClassesPath } from "@/grading/model/paths";
 import type { StudentSummary } from "@/roster/databridge/students";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
@@ -25,7 +28,12 @@ type PendingClassRemove = {
 
 export function ClassRosterPage() {
   const roster = useClassRoster();
-  const { organization } = useOrgShell();
+  const { organization, role, parentPresentation } = useOrgShell();
+  const canManage = staffCanEdit(role, parentPresentation);
+  const backTo =
+    studentsHubTier(role, parentPresentation) === "learner"
+      ? progressPath(organization.slug)
+      : studentsClassesPath(organization.slug);
   const [pendingRemove, setPendingRemove] = useState<PendingClassRemove | null>(null);
   const showDiscussions = organization.features.discussions;
   const showAnnouncements = organization.features.announcements;
@@ -62,10 +70,10 @@ export function ClassRosterPage() {
         </p>
         <p className="mt-4 text-[13px]">
           <Link
-            to={`/my/${roster.organization.slug}/roster`}
+            to={backTo}
             className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
           >
-            Back to roster
+            Back to students
           </Link>
         </p>
       </div>
@@ -80,12 +88,12 @@ export function ClassRosterPage() {
   return (
     <div>
       <DetailPageHeader
-        backTo={`/my/${roster.organization.slug}/roster`}
-        backLabel="Back to roster"
+        backTo={backTo}
+        backLabel="Back to students"
         title={roster.classGroup.title}
         titleTrailing={
           <div className="flex shrink-0 flex-nowrap items-center gap-2">
-            {showDiscussions ? (
+            {canManage && showDiscussions ? (
               <ButtonLink
                 variant="secondary"
                 className="max-xl:hidden shrink-0"
@@ -98,7 +106,7 @@ export function ClassRosterPage() {
                 Start a discussion
               </ButtonLink>
             ) : null}
-            {showAnnouncements ? (
+            {canManage && showAnnouncements ? (
               <ButtonLink
                 variant="secondary"
                 className="max-xl:hidden shrink-0"
@@ -111,12 +119,14 @@ export function ClassRosterPage() {
                 Create Announcement
               </ButtonLink>
             ) : null}
+            {canManage ? (
             <ClassActionsMenu
               orgSlug={roster.organization.slug}
               classId={roster.classGroup.id}
               canEdit
               className="xl:hidden"
             />
+            ) : null}
           </div>
         }
       />
@@ -126,14 +136,14 @@ export function ClassRosterPage() {
           orgSlug={roster.organization.slug}
           classId={roster.classGroup.id}
           events={eventsQuery.data ?? []}
-          canEdit
+          canEdit={canManage}
         />
       ) : null}
       <ClassLeadsSection
         orgSlug={roster.organization.slug}
         leads={roster.leads}
         staff={roster.staff}
-        canManage={roster.canManageLeads}
+        canManage={canManage && roster.canManageLeads}
         addOpen={roster.addLeadOpen}
         onOpenAdd={roster.openAddLead}
         onCloseAdd={roster.closeAddLead}
@@ -148,7 +158,7 @@ export function ClassRosterPage() {
           <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">
             Students
           </h2>
-          {!roster.panelOpen ? (
+          {canManage && !roster.panelOpen ? (
             <Button type="button" onClick={roster.openPanel}>
               <UserPlusIcon className="h-5 w-5" aria-hidden />
               Add students
@@ -159,7 +169,9 @@ export function ClassRosterPage() {
           students={students}
           orgSlug={roster.organization.slug}
           emptyMessage="No students in this class yet."
-          trailing={(student) => {
+          trailing={
+            canManage
+              ? (student) => {
             const memberId = memberIdByStudent.get(student.id);
             if (!memberId) return null;
             return (
@@ -171,10 +183,13 @@ export function ClassRosterPage() {
                 {roster.removingId === memberId ? "Removing…" : "Remove"}
               </Button>
             );
-          }}
+          }
+              : undefined
+          }
         />
       </section>
 
+      {canManage ? (
       <AddStudentsPanel
         open={roster.panelOpen}
         onClose={roster.closePanel}
@@ -215,6 +230,7 @@ export function ClassRosterPage() {
         onApplyPaste={roster.onApplyPaste}
         onSubmitNew={roster.onSubmitNew}
       />
+      ) : null}
 
       <ConfirmDialog
         open={pendingRemove != null}

@@ -9,7 +9,7 @@ Org **owners** and **admins** (can edit). Instructors may view read-only. Parent
 
 ## Purpose
 
-Configure the organization: identity, permalink, organization type, **profile** (about, address, website, contact), **school days**, grade scheme, **branding**, **customizations**, and **collaborators** (section on this page — not a separate top-level route).
+Configure the organization: identity, permalink, organization type, **profile** (about, address, website, contact), **school days**, grade scheme, **grading** (score scale), **branding**, **customizations**, and **collaborators** (section on this page — not a separate top-level route).
 
 
 ## Behavior
@@ -40,7 +40,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 
 ## Contents
 
-Left **settings menu** (icons + labels) with one active panel on the right on desktop. On small screens the menu is a **Section** dropdown above the panel. Active section is reflected in `?tab=` (`organization` default / omitted; `profile`; `branding`; `customizations`; `collaborators`; `billing` when shown). Save / Cancel sit at the top-right of the content panel (aligned with that column’s right edge) whenever the viewer can edit organization or profile settings, and on Customizations when the viewer is an owner. Non-owners on Customizations do not see that Save or Cancel. Branding and Customizations keep their own Save actions (owners only).
+Left **settings menu** (icons + labels) with one active panel on the right on desktop. On small screens the menu is a **Section** dropdown above the panel. Active section is reflected in `?tab=` (`organization` default / omitted; `profile`; `grading`; `branding`; `customizations`; `collaborators`; `billing` when shown). Save / Cancel sit at the top-right of the content panel (aligned with that column’s right edge) whenever the viewer can edit organization or profile settings, and on Customizations when the viewer is an owner. Non-owners on Customizations do not see that Save or Cancel. Grading, Branding, and Customizations keep their own Save actions. The shared panel Save is hidden on Grading.
 
 ### Organization
 
@@ -49,6 +49,15 @@ Left **settings menu** (icons + labels) with one active panel on the right on de
 - Organization type: co-op, school, or family
 - **School days** — circle toggles Sunday–Saturday under web address; info hint: days this organization usually operates. Default Monday–Friday. Lesson-plan compose uses these days; staff can still add another weekday on a plan
 - **Grade scheme** — K–12 or custom labels (same panel)
+
+### Grading
+
+Owners and admins edit one org-wide score scale. Instructors see the same fields disabled (“Only owners and admins can change grading.”). This is not the age-level grade scheme.
+
+- Mode: **Points only** (`none`, the default for a new org), **Letters**, or **Pass / fail**
+- Pass / fail: one inclusive percent
+- Letters: label plus “at or above” percent. **Use A 92 starter** fills A 92, B 84, C 76, D 68, F 0. One band must start at 0. **Save grading** writes the scale
+- Teachers consume the scale on quizzes, the gradebook, and report cards. They do not edit it
 
 ### Profile
 
@@ -94,6 +103,7 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 - Set profile fields
 - Set school days
 - Set grade scheme
+- Save grading (owners and admins; own button on the Grading tab)
 - Save branding or remove branding (owners only)
 - Save customizations (owners only). Non-owners on this panel do not see Save or Cancel
 - Invite collaborators (email + copy the claim link); cancel a pending invite; resend the email
@@ -107,6 +117,7 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — cross-org account settings (distinct from this page)
 - [INVITE_CLAIM](./INVITE_CLAIM.md) — copied staff invite link (recipient); parent invites use the same URL from roster
 - [LOGIN](./LOGIN.md) — after sign-out (if sign-out lives in chrome)
+- [ORG_ROSTER](./ORG_ROSTER.md) — Students hub can link here on `?tab=grading`
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
 ## Notes

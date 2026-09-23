@@ -22,6 +22,28 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ## Open
 
+### HN-019 — Apply org grading migration, deploy report-card email, create the Resend template
+
+| | |
+|--|--|
+| **Why** | Org grading tables, RLS, and report-card RPCs live in `supabase/migrations/20261003000000_org_grading.sql`. Submit enqueues rows in the database. The email itself is Edge Function `send-report-card`, which posts Resend event `report-card`. Without the migration, the UI cannot save a scale or a card. Without the function and template, cards still submit and Activity still writes; email stays queued or fails. |
+| **Where** | Supabase testing project **`yplmaauelutcosqqvnya`** (and production when that tier should grade). Resend dashboard for the event template. Same `RESEND_API_KEY` as **HN-015** — do not create a second key. |
+| **Placeholder** | `supabase/functions/send-report-card/index.ts` (`HN-019`) |
+
+**Steps:**
+
+1. From the repo, with `SUPABASE_ACCESS_TOKEN` set, apply migrations and deploy functions to testing:
+   `./scripts/deploy-supabase.sh testing`
+   That script links the testing branch ref from Terraform, runs `supabase db push --linked --yes`, and deploys every function including `send-report-card`.
+2. If Terraform state is not available, use the known testing ref directly:
+   `supabase link --project-ref yplmaauelutcosqqvnya --yes`
+   `supabase db push --linked --yes`
+   `supabase functions deploy send-report-card --project-ref yplmaauelutcosqqvnya --use-api`
+3. In Resend, create an event template named `report-card`. Payload fields the function sends: `organization_name`, `student_name`, `course_title`, `narrative`, `grade_summary`, `report_card_link`, `recipient_kind` (`student` or `parent`).
+4. Confirm `RESEND_API_KEY` is already set on that project (HN-015). Do not put the key in git.
+
+**Done when:** a testing org can save Grading, and a submitted report card either sends through Resend or shows a failed delivery with **Resend** on the card (missing key or missing template), without blocking the submit itself.
+
 ### HN-018 — VAPID keys and Activity push webhook secret
 
 | | |

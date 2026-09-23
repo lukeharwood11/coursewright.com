@@ -292,13 +292,8 @@ export function useOrgRoster() {
       setSelectedIds((current) => toggleIdInSet(current, id));
       setAssignError(null);
     },
-    onSelectAllMatching: () => {
-      setSelectedIds((current) =>
-        mergeSelectedIds(
-          current,
-          students.map((student) => student.id),
-        ),
-      );
+    onSelectIds: (ids: number[]) => {
+      setSelectedIds((current) => mergeSelectedIds(current, ids));
       setAssignError(null);
     },
     onClearSelection: () => {

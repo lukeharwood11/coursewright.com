@@ -87,6 +87,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - [PRINT](./PRINT.md) — **Print** on materials / **Print unit** entry points
 - [USER_PROFILE](./USER_PROFILE.md) — teachers in the sidebar
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — course roster
+- [COURSE_GRADEBOOK](./COURSE_GRADEBOOK.md) — staff who can edit the course
 - [COURSE_SETTINGS](./COURSE_SETTINGS.md) — course settings
 - [COURSE_LIST](./COURSE_LIST.md) — after create-from-course lands on new course / list
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD

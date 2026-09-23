@@ -78,7 +78,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 
 | Page | URL | Notes |
 |------|-----|-------|
-| [ORG_SETTINGS](./pages/ORG_SETTINGS.md) | `/my/<org-slug>/settings` | Left settings menu + one panel (`?tab=`). Slug, grade scheme, collaborators, billing (owners) — not separate top-level pages |
+| [ORG_SETTINGS](./pages/ORG_SETTINGS.md) | `/my/<org-slug>/settings` | Left settings menu + one panel (`?tab=`). Slug, grade scheme, **grading** (`?tab=grading`), collaborators, billing (owners) — not separate top-level pages |
 | [USER_PROFILE](./pages/USER_PROFILE.md) | `/my/<org-slug>/people/<user_id>` | Org-visible profile for a person with an account |
 | Billing (P1) | <!-- TBD — under settings --> | Course Wright → org |
 
@@ -91,6 +91,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | [COURSE_LIST](./pages/COURSE_LIST.md) | `/my/<org-slug>/courses` | |
 | [COURSE](./pages/COURSE.md) | `/my/<org-slug>/courses/<course_id>` | Builder home |
 | [COURSE_ROSTER](./pages/COURSE_ROSTER.md) | `/my/<org-slug>/courses/<course_id>/roster` | Enrollments |
+| [COURSE_GRADEBOOK](./pages/COURSE_GRADEBOOK.md) | `/my/<org-slug>/courses/<course_id>/gradebook` | Staff who can manage the course. Needs-grade queue, matrix, final override |
 | [COURSE_SETTINGS](./pages/COURSE_SETTINGS.md) | `/my/<org-slug>/courses/<course_id>/settings` | Dates, status, instructors, grades, calendar color |
 | [LESSON_PLAN](./pages/LESSON_PLAN.md) (view) | `/my/<org-slug>/courses/<course_id>/lesson-plans/<lesson_plan_id>` | Week plan + day notes and materials |
 | [LESSON_PLAN](./pages/LESSON_PLAN.md) (new) | `/my/<org-slug>/courses/<course_id>/lesson-plans/new` | Staff compose (`?week=` optional Sunday) |
@@ -196,9 +197,11 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 
 | Page | URL | Notes |
 |------|-----|-------|
-| [ORG_ROSTER](./pages/ORG_ROSTER.md) | `/my/<org-slug>/roster` | Org student profiles + class list |
-| [STUDENT_PROFILE](./pages/STUDENT_PROFILE.md) | `/my/<org-slug>/roster/<student_id>` | |
-| [CLASS](./pages/CLASS.md) | `/my/<org-slug>/classes/<class_id>` | Class roster (student group) |
+| [ORG_ROSTER](./pages/ORG_ROSTER.md) | `/my/<org-slug>/students` | Students hub. Classes tab: `?tab=classes`. `/roster` redirects here |
+| [STUDENT_PROFILE](./pages/STUDENT_PROFILE.md) | `/my/<org-slug>/students/<student_id>` | `/roster/<student_id>` redirects here |
+| [PROGRESS](./pages/PROGRESS.md) | `/my/<org-slug>/progress` | Learner chrome only. Staff and parents are sent to Students |
+| [REPORT_CARD](./pages/REPORT_CARD.md) | `/my/<org-slug>/report-cards/<card_id>` | Draft, review, submit. Families can open a sent card |
+| [CLASS](./pages/CLASS.md) | `/my/<org-slug>/classes/<class_id>` | Canonical class page. Parents and learners can open it read-only |
 | [FAMILIES](./pages/FAMILIES.md) | `/my/<org-slug>/families` | Parent directory — **not currently routed in SPA** |
 | [FAMILY](./pages/FAMILY.md) | `/my/<org-slug>/families/<family_id>` | **Not currently routed in SPA** |
 
@@ -206,7 +209,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 
 ## Parent experience
 
-Covered by [ORG_HOME](./pages/ORG_HOME.md) + [CALENDAR](./pages/CALENDAR.md) + read-focused use of the course / unit / material tree. **Lesson plans** open [LESSON_PLAN](./pages/LESSON_PLAN.md). **Announcements** open [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md). **Discussions** (**P1**) open [DISCUSSION](./pages/DISCUSSION.md). No separate `/home` path in P0. Staff can switch to that presentation with **Student view** in org chrome.
+Covered by [ORG_HOME](./pages/ORG_HOME.md) + [CALENDAR](./pages/CALENDAR.md) + read-focused use of the course / unit / material tree. Parents use **Students** ([ORG_ROSTER](./pages/ORG_ROSTER.md)) for linked children. Learners use **Progress** ([PROGRESS](./pages/PROGRESS.md)). **Lesson plans** open [LESSON_PLAN](./pages/LESSON_PLAN.md). **Announcements** open [ANNOUNCEMENT](./pages/ANNOUNCEMENT.md). **Discussions** (**P1**) open [DISCUSSION](./pages/DISCUSSION.md). No separate `/home` path in P0. Staff **Student view** uses learner chrome, including Progress.
 
 ---
 

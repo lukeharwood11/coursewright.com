@@ -79,6 +79,9 @@ verify_jwt = true
 [functions.send-announcement-notification]
 verify_jwt = true
 
+[functions.send-report-card]
+verify_jwt = true
+
 [functions.send-activity-push]
 verify_jwt = false
 

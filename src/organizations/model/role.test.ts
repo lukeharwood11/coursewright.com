@@ -14,6 +14,8 @@ test("admins do not see Save/Cancel on Customizations", () => {
   assert.equal(showOrgSettingsFormActions("admin", "profile"), true);
   assert.equal(showOrgSettingsFormActions("admin", "branding"), true);
   assert.equal(showOrgSettingsFormActions("admin", "collaborators"), true);
+  assert.equal(showOrgSettingsFormActions("admin", "grading"), false);
+  assert.equal(showOrgSettingsFormActions("owner", "grading"), false);
 });
 
 test("instructors never see org settings Save/Cancel", () => {

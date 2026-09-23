@@ -7,7 +7,7 @@ Student profiles, **classes** (student groups), **families** (parent directory �
 - Student profiles (name required; parent emails, student email & grade optional)
 - **Class** — org-scoped group of students (not a course; no materials)
 - **Family** — org-scoped household in the parent directory (not a course; no materials). Schema + `databridge/families` + `model/family` remain; `families/` and `family/` page folders are **not currently routed**.
-- Org roster (`org-roster/`), class roster (`class-roster/`), course roster (`course-roster/`), student profile
+- Org people hub (`org-roster/` at `/students`, Classes tab `?tab=classes`), class roster (`class-roster/`), course roster (`course-roster/`), student profile. `/roster` redirects to `/students`. Learners are sent to Progress (`src/grading/`). Parents and learners may open a class read-only.
 - Parent email linkage + invites (Resend email + copyable `/invite/<token>`; same claim path as staff)
 - Student email invites (`admin_invites.role = student`) from the student profile. Adding a student with an email also sends that invite. Student email stays optional. Claim sets `user_id`.
 - **Remove** a student from the org roster (and their profile page). Cascades class membership, enrollments, parent links, and invites. A student-role membership ends; staff role is kept.

@@ -9,6 +9,7 @@ import {
   Cog6ToothIcon,
   FolderOpenIcon,
   HomeIcon,
+  AcademicCapIcon,
   UserCircleIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
@@ -21,6 +22,7 @@ import {
   Cog6ToothIcon as Cog6ToothSolidIcon,
   FolderOpenIcon as FolderOpenSolidIcon,
   HomeIcon as HomeSolidIcon,
+  AcademicCapIcon as AcademicCapSolidIcon,
   UserCircleIcon as UserCircleSolidIcon,
   UsersIcon as UsersSolidIcon,
 } from "@heroicons/react/24/solid";
@@ -44,7 +46,8 @@ const sectionIcons: Record<string, { outline: IconComponent; solid: IconComponen
   calendar: { outline: CalendarDaysIcon, solid: CalendarDaysSolidIcon },
   courses: { outline: BookOpenIcon, solid: BookOpenSolidIcon },
   resources: { outline: FolderOpenIcon, solid: FolderOpenSolidIcon },
-  roster: { outline: UsersIcon, solid: UsersSolidIcon },
+  students: { outline: UsersIcon, solid: UsersSolidIcon },
+  progress: { outline: AcademicCapIcon, solid: AcademicCapSolidIcon },
   settings: { outline: Cog6ToothIcon, solid: Cog6ToothSolidIcon },
 };
 
@@ -120,7 +123,7 @@ function SidebarSection({
   const sectionActive =
     navItemIsActive(pathname, section) ||
     section.children.some((child) => navItemIsActive(pathname, child)) ||
-    (section.id === "roster" && /\/classes\//.test(pathname));
+    (section.id === "students" && /\/classes\//.test(pathname));
   const href = collapsed ? collapsedHref(section) : section.href;
   const showChildren = !collapsed && section.children.length > 0;
   const Icon = sectionActive ? icons.solid : icons.outline;

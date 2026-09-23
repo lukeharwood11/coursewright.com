@@ -55,8 +55,9 @@ Org pages share a **collapsible sidebar** (overlay drawer on small screens). Whe
 - [DISCUSSIONS](./DISCUSSIONS.md) — **P1**
 - [ACTIVITY](./ACTIVITY.md) — **P1** (header bell, not a sidebar tab)
 - [COURSE_LIST](./COURSE_LIST.md)
-- [RESOURCES](./RESOURCES.md) — **P1a** (between Courses and Roster)
-- [ORG_ROSTER](./ORG_ROSTER.md)
+- [RESOURCES](./RESOURCES.md) — **P1a** (between Courses and Students)
+- [ORG_ROSTER](./ORG_ROSTER.md) — chrome label **Students** (staff, parents, admins, owners). Classes is a tab on that page, not a sidebar sibling
+- [PROGRESS](./PROGRESS.md) — learner chrome (student role and staff **Student view**)
 - [ORG_SETTINGS](./ORG_SETTINGS.md)
 - [ORG_PICKER](./ORG_PICKER.md) — switch org
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)
@@ -66,4 +67,4 @@ Org pages share a **collapsible sidebar** (overlay drawer on small screens). Whe
 [TEMPLATE_LIST](./TEMPLATE_LIST.md) is **P1** — do not put templates in P0 org chrome.
 [FAMILIES](./FAMILIES.md) / [FAMILY](./FAMILY.md) remain product outlines but are **not currently in org chrome or routes**.
 
-Student chrome is simpler — see [ORG_HOME](./ORG_HOME.md) student variant; do not dump instructor nav onto student screens. Student sidebar: This week, Calendar, Announcements (red unread count), Discussions (**P1**, red unread count), **Courses** (list + nested enrolled courses), **Resources** when they can see at least one published item. **Activity** is a header bell (right of the avatar) with a red unread count. Staff **Student view** uses the same student chrome; the toggle lives in the org header (not on print screens).
+Student chrome is simpler — see [ORG_HOME](./ORG_HOME.md) student variant; do not dump instructor nav onto student screens. Student sidebar: This week, Calendar, Announcements (red unread count), Discussions (**P1**, red unread count), **Progress** (own classes and grades), **Courses** (list + nested enrolled courses), **Resources** when they can see at least one published item. **Activity** is a header bell (right of the avatar) with a red unread count. Staff **Student view** uses the same student chrome, including **Progress** instead of **Students**. The toggle lives in the org header (not on print screens). There is no top-level **Roster** or **Records** item.

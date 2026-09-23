@@ -46,8 +46,11 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [MATERIAL](./MATERIAL.md) | view `…/materials/<id>`; edit `…/materials/<id>/edit` (top-level or under unit) |
 | [QUIZ](./QUIZ.md) | `…/units/<unit_id>/quizzes/<quiz_id>`; edit appends `/edit` |
 | [PRINT](./PRINT.md) | `…/materials/<id>/print`; `…/units/<id>/print`; `…/quizzes/<id>/print`; `/my/<org-slug>/print-this-week`; `…/resources/items/<id>/print`; `…/resources/print?items=` |
-| [ORG_ROSTER](./ORG_ROSTER.md) | `/my/<org-slug>/roster` |
-| [STUDENT_PROFILE](./STUDENT_PROFILE.md) | `/my/<org-slug>/roster/<student_id>` |
+| [COURSE_GRADEBOOK](./COURSE_GRADEBOOK.md) | `/my/<org-slug>/courses/<course_id>/gradebook` |
+| [ORG_ROSTER](./ORG_ROSTER.md) | `/my/<org-slug>/students` (`?tab=classes`; `/roster` redirects) |
+| [STUDENT_PROFILE](./STUDENT_PROFILE.md) | `/my/<org-slug>/students/<student_id>` |
+| [PROGRESS](./PROGRESS.md) | `/my/<org-slug>/progress` |
+| [REPORT_CARD](./REPORT_CARD.md) | `/my/<org-slug>/report-cards/<card_id>` |
 | [CLASS](./CLASS.md) | `/my/<org-slug>/classes/<class_id>` |
 | [FAMILIES](./FAMILIES.md) | `/my/<org-slug>/families` | **Not currently routed** |
 | [FAMILY](./FAMILY.md) | `/my/<org-slug>/families/<family_id>` | **Not currently routed** |
@@ -66,6 +69,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Org permalink slug | [ORG_PICKER](./ORG_PICKER.md), [ORG_SETTINGS](./ORG_SETTINGS.md) |
 | Admin invites / staff roles / last-admin guard | [ORG_SETTINGS](./ORG_SETTINGS.md), [INVITE_CLAIM](./INVITE_CLAIM.md), [ORG_PICKER](./ORG_PICKER.md) (pending requests) |
 | Org grade scheme | [ORG_SETTINGS](./ORG_SETTINGS.md) |
+| Progress — grading | [ORG_SETTINGS](./ORG_SETTINGS.md) Grading tab, [ORG_ROSTER](./ORG_ROSTER.md), [PROGRESS](./PROGRESS.md), [COURSE_GRADEBOOK](./COURSE_GRADEBOOK.md), [REPORT_CARD](./REPORT_CARD.md) |
 | Authentication (email password / magic link + Google) | [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md) |
 | Account / org-visible people | [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md), [USER_PROFILE](./USER_PROFILE.md) |
 | RBAC (owner / admin / instructor / parent) | Role splits on [ORG_HOME](./ORG_HOME.md) + gated pages; staff **Student view** in org chrome |
@@ -92,7 +96,8 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Forms content kind | FEATURES in design — P1b inside Resources; not on [MATERIAL](./MATERIAL.md) |
 | Course templates + ACL / promote / sync | **P1** — [TEMPLATE_LIST](./TEMPLATE_LIST.md), [TEMPLATE](./TEMPLATE.md), [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) |
 | Course quiz (take in the app or print) | **P1** — [QUIZ](./QUIZ.md); print via [PRINT](./PRINT.md) |
-| Parent summary layer / Progress tab | **P1** |
+| Learner Progress + Students hub grades | shipped — [PROGRESS](./PROGRESS.md), [ORG_ROSTER](./ORG_ROSTER.md), [COURSE_GRADEBOOK](./COURSE_GRADEBOOK.md), [REPORT_CARD](./REPORT_CARD.md) |
+| Parent rich grades summary on home | **P1** |
 | Discussions | **P1** — [DISCUSSIONS](./DISCUSSIONS.md), [DISCUSSION](./DISCUSSION.md) |
 | Resources | **P1a** — [RESOURCES](./RESOURCES.md), [RESOURCE_FOLDER](./RESOURCE_FOLDER.md), [RESOURCE](./RESOURCE.md); print via [PRINT](./PRINT.md) |
 | Activity / notifications | **P1** — [ACTIVITY](./ACTIVITY.md) |

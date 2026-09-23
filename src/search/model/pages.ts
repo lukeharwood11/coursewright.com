@@ -24,10 +24,10 @@ export function staffSearchPages(orgSlug: string): SearchResult[] {
       href: `${base}/courses`,
     },
     {
-      id: "page:roster",
+      id: "page:students",
       type: "page",
-      title: "Roster",
-      href: `${base}/roster`,
+      title: "Students",
+      href: `${base}/students`,
     },
     {
       id: "page:settings",

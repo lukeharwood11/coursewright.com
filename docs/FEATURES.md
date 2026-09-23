@@ -106,7 +106,7 @@ A person who signs up to make their own materials is the org **owner** (anyone c
 
 Roster exists at **three** levels: **organization** (student profiles, staff), **class** (named group of students), and **course** (who participates in an offering).
 
-**UI vocabulary:** page/nav noun is **Roster**; course verbs are **Enroll** / **Unenroll**; class/org verbs are **Add** / **Remove**. Batch select is the default add path.
+**UI vocabulary:** staff and parent chrome label is **Students** (Classes is a tab under that page). Learner chrome label is **Progress**. Course verbs stay **Enroll** / **Unenroll**; class and org verbs stay **Add** / **Remove**. There is no top-level **Roster** or **Records** item. Batch select is the default add path.
 
 | Capability | Who | Notes |
 |------------|-----|-------|
@@ -192,7 +192,7 @@ Student profile `grade_level` is optional and must match the org's chosen scheme
 
 ### Course grade metadata (P0)
 
-**Courses** carry **grade-level metadata** so instructors can find and filter offerings by who they're for — separate from student profile grade, and separate from P1 progress grading. (**Course templates** use the same model when templates ship in **P1**.)
+**Courses** carry **grade-level metadata** so instructors can find and filter offerings by who they're for — separate from student profile grade, and separate from org grading scores. (**Course templates** use the same model when templates ship in **P1**.)
 
 | Rule | Detail |
 |------|--------|
@@ -203,7 +203,7 @@ Student profile `grade_level` is optional and must match the org's chosen scheme
 | **Display order** | Shown as one comma-separated pill, sorted in the org admin’s grade-scheme order (not selection order) |
 | **Copy from course** | Grade metadata may be copied into the new course when creating from another course (editable after) |
 
-This is **catalog metadata** (“what ages/grades is this course for?”), not student report-card grades (those remain **P1 Progress — grading**).
+This is **catalog metadata** (“what ages/grades is this course for?”). Student scores and report cards are **Progress — grading** (org grading scale). Do not store those on `grade_scheme` / `grade_labels`.
 
 ### Advanced search (P0)
 
@@ -219,7 +219,7 @@ Teachers will ask **“where do I have this resource?”** Search is a **core P0
 
 **Stack note:** Prefer Postgres full-text + facet filters via PostgREST; escalate to a dedicated index only if needed — [STACK.md](./STACK.md).
 
-**This slice (staff chrome):** Overlay search uses generated `search_vector` GIN indexes via PostgREST `fts(english)` (`to_tsquery`, not `plainto_tsquery`) for **courses** and **materials**, so prefixes like `frac` match Fractions. Staff **pages** (Home / Courses / Roster / Settings) match by title in the client. Staff only; no `/search` route; no Algolia/Elastic/side index. Hits are findability only — they do not grant access; enrollment / `parent_student_links` stay the gate.
+**This slice (staff chrome):** Overlay search uses generated `search_vector` GIN indexes via PostgREST `fts(english)` (`to_tsquery`, not `plainto_tsquery`) for **courses** and **materials**, so prefixes like `frac` match Fractions. Staff **pages** (Home / Courses / Students / Settings) match by title in the client. Staff only; no `/search` route; no Algolia/Elastic/side index. Hits are findability only — they do not grant access; enrollment / `parent_student_links` stay the gate.
 
 **Deferred:** facets, files, units, roster people / families, page/block body text, `ts_rank`, parent search, dedicated `/search` route.
 
@@ -585,7 +585,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 | **Template → course sync** | Template edits flow to linked course copies that still exist and have **not** been overridden | planned | Lineage columns only |
 | **Deprecate vs. delete (template)** | Deprecate (active courses untouched) or delete (soft-deletes template + unmodified course copies) | planned | Soft-delete / deprecate fields ready |
 | **Course summary (auto-draft)** | System drafts a parent-facing summary from current course work; instructor can edit | planned | Adds dashboard layer (B) |
-| **Progress — grading** | Instructors record grades; visible to parents | planned | **Org-configurable** scale |
+| **Progress — grading** | Instructors record grades; visible to parents | shipped | Org grading scale (`none` default, letter, or pass/fail) is separate from the age-level grade scheme. Students hub for staff and parents; Progress for learners. Course gradebook finals are an unweighted mean of locked quiz percents plus a teacher override. Report cards are draft → submit, one at a time, with email enqueue. `src/grading/` |
 | **Progress — instructor notes** | Instructors share notes on student progress | planned | |
 | **Progress — completion checklists** | Track what's done vs. outstanding | planned | |
 | **Assignment objects** | Separate from dated unit materials | planned | **Next conversation** — not spec'd |
@@ -805,7 +805,7 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | Parent profile stays active if enrollment ends (P0) | **Decided** | Defer visibility rules |
 | File types/sizes generous | **Decided** | Keep open |
 | Grade scheme presets: K–12 and Custom | **Decided** | Org onboarding |
-| P1 grading scales org-configurable | **Decided** | P1 Grade |
+| P1 grading scales org-configurable | **Decided** | Shipped as org grading (`none` / letter / pass/fail), separate from age-level grade scheme |
 | Success metric: MAUs | **Decided** | Vision |
 | Tagline: Plan wright. Share wright. Course Wright. / Courses, done wright. | **Decided** | BRANDING.md |
 | Anyone can create an org; creator is first owner | **Decided** | Org creation. Owners and admins manage org settings; only owners manage billing. |
@@ -834,7 +834,7 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | Material = page of ordered blocks when kind=page | **Decided** | First-class block rows in DB |
 | Class = org group of students, separate from Course | **Decided** | Course enrolls individuals; Class is a batch preset into enroll (not live) |
 | Course roster UI: list-first + batch Enroll students | **Decided** | Multi-select + optional Class preset; batch create-and-enroll |
-| Roster = page noun; Enroll/Unenroll = course verbs | **Decided** | BRANDING; class/org use Add/Remove |
+| Roster = page noun; Enroll/Unenroll = course verbs | **Superseded** | Org people chrome is **Students** (staff/parents) and **Progress** (learners). Course verbs stay Enroll/Unenroll; class/org stay Add/Remove. No top-level Roster or Records |
 | Quiz authoring + correct answers + print (blank + answer key) | **Decided** | **P0 page quiz** — Lexical `quiz` node on a lesson page. Not a material kind. Many per page. Whole-page print; parent/student and staff **Student view** = questions only; staff Teacher view = answer key. No roster required |
 | Staff parent view (header toggle) | **Decided** | All staff (owner/admin/instructor). Real student home if linked students; otherwise a preview. Hidden for parent-role users. Default Teacher. UI label **Student view**. Student view print omits the page-quiz answer key. Course quizzes follow the parent answer-key rule |
 | Quiz online take + autograde | **Decided** | **P1 course quiz** — outline item, not a page block and not `material_submissions`. Optional start/end. Print when neither is set. Each question has possible points (default 1, fractions allowed). Multiple choice, number, and matching autograde a first pass the teacher can overwrite. Short answer and long answer wait for the teacher’s points. A long answer has 1–20 blank lines. Share answer key with parents (students never). One attempt unless allowed |

@@ -9,9 +9,11 @@ import type { QuizAttemptAnswerRecord, QuizAttemptRecord } from "@/quizzes/datab
 export function QuizAttemptList({
   attempts,
   timeZone,
+  formatScore = formatQuizScore,
 }: {
   attempts: Array<QuizAttemptRecord & { label: string; answers: QuizAttemptAnswerRecord[] }>;
   timeZone: string;
+  formatScore?: (score: number, scoreTotal: number) => string;
 }) {
   if (attempts.length === 0) return null;
   const visible = latestAttemptsByStudent(attempts);
@@ -34,7 +36,7 @@ export function QuizAttemptList({
               <p className="text-[12.5px] text-[var(--ink-faint)]">
                 {formatSubmittedAt(attempt.submittedAt, timeZone)}
                 {showScore
-                  ? ` · ${formatQuizScore(attempt.score!, attempt.scoreTotal!)}`
+                  ? ` · ${formatScore(attempt.score!, attempt.scoreTotal!)}`
                   : " · Submitted"}
               </p>
             </li>

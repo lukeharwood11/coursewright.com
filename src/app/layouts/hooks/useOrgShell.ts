@@ -25,7 +25,8 @@ import {
   classQueryKeys,
   listClasses,
 } from "@/roster/databridge/classes";
-import { buildParentNav, buildStaffNav } from "../model/nav";
+import { studentsHubTier } from "@/grading/model/access";
+import { buildLearnerNav, buildParentNav, buildStaffNav } from "../model/nav";
 import {
   canUseStaffViewToggle,
   familyVisibleCourses,
@@ -152,19 +153,23 @@ export function useOrgShellData(orgSlug: string | undefined) {
       }
     : undefined;
 
+  const hubTier = studentsHubTier(role, parentPresentation);
+  const navOptions = {
+    ...featureFlags,
+    unreadAnnouncements,
+    unreadDiscussions,
+    showResources: Boolean(visibleResourcesQuery.data),
+  };
   const navSections =
     organization && role
-      ? parentPresentation
-        ? buildParentNav(organization.slug, lists, {
-            ...featureFlags,
-            unreadAnnouncements,
-            unreadDiscussions,
-            showResources: Boolean(visibleResourcesQuery.data),
-          })
-        : buildStaffNav(organization.slug, lists, {
-            ...featureFlags,
-            unreadDiscussions,
-          })
+      ? hubTier === "learner"
+        ? buildLearnerNav(organization.slug, lists, navOptions)
+        : hubTier === "view"
+          ? buildParentNav(organization.slug, lists, navOptions)
+          : buildStaffNav(organization.slug, lists, {
+              ...featureFlags,
+              unreadDiscussions,
+            })
       : [];
 
   const profileName = profileQuery.data?.name ?? "";

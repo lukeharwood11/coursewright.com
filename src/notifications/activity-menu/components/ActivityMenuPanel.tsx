@@ -1,4 +1,5 @@
 import {
+  AcademicCapIcon,
   AtSymbolIcon,
   ChatBubbleLeftRightIcon,
   MegaphoneIcon,
@@ -22,6 +23,9 @@ function ActivityTypeIcon({ kind }: { kind: ActivityKind }) {
   }
   if (kind === "announcement") {
     return <MegaphoneIcon className={className} aria-hidden />;
+  }
+  if (kind === "report_card") {
+    return <AcademicCapIcon className={className} aria-hidden />;
   }
   return <ChatBubbleLeftRightIcon className={className} aria-hidden />;
 }

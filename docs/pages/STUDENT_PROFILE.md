@@ -1,11 +1,12 @@
 # STUDENT_PROFILE
 
-**URL:** `/my/<org-slug>/roster/<student_id>`  
+**URL:** `/my/<org-slug>/students/<student_id>`  
+**Redirect:** `/my/<org-slug>/roster/<student_id>` → this page  
 **URL map:** [URLS.md](../URLS.md)
 
 ## Audience
 
-Admins and instructors.
+Teachers, parents (linked students), admins, and owners. Learners are sent to [PROGRESS](./PROGRESS.md).
 
 ## Purpose
 
@@ -20,8 +21,12 @@ View/edit one org-level **student profile**, including an optional student accou
 - **Student account:** optional student email. Invite uses `admin_invites.role = student` (not a parent invite). Claim sets `user_id` so that person sees this one student’s work.
 - **Save** / **Cancel** in the page header; Save disabled when nothing changed; Cancel goes back (confirms if dirty).
 - **Remove** (confirm) deletes the profile. They leave classes and courses. A student-account membership ends; a staff role is kept.
-- Show course enrollments and class membership.
-- **Announce** to this student → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
+- Show course enrollments and class membership. A class link opens the same [CLASS](./CLASS.md) page as the Students **Classes** tab.
+- **Grades** lists each active course the viewer may read (teachers: courses they teach; owners/admins: all; parents: linked published courses). The label is derived from the org scale. A final override shows that label and the stamp.
+- Staff who can act see **Gradebook** on a course row and a **Report cards** list. **Generate** (Pattern A) drafts one card per course they can manage and opens the first draft.
+- Parents do not edit the profile, remove the student, or generate cards. They see classes and grades.
+- **Announce** (staff) → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
+- Owners and admins who can edit see **Grading settings** on the grades section.
 - Creating profiles often happens on first course or class add; this page manages the canonical org record.
 
 ## Data shown
@@ -30,8 +35,10 @@ View/edit one org-level **student profile**, including an optional student accou
 - **Student email** (optional, editable)
 - **Grade level** (optional, editable; scheme-constrained)
 - Parents: linked accounts, pending invites; **Add a parent** when none yet, **Add another parent** after the first
-- Enrollments: course title + status + link to that course roster
-- Class memberships: class name + link
+- Enrollments: course title + status. Staff link to that course roster; parents link to the course
+- Class memberships: class name + link to the canonical class page
+- Grades: course title, derived percent/label or override, stamp when overridden
+- Report cards (staff): course, status (`draft` / `submitted` / `sent`)
 - Parent invite / claim status (pending link, copyable claim URL, or accepted)
 
 ## Contents
@@ -59,10 +66,16 @@ View/edit one org-level **student profile**, including an optional student accou
 - Create Announcement
 - Create parent (or student-email) invite (email + copy the claim link); **Resend email** or cancel a pending invite; add a parent (then another)
 - Open class / course enrollments
+- Staff: open gradebook, generate a report card, open a card
+- Owners/admins: open grading settings
 
 ## Links to
 
-- [ORG_ROSTER](./ORG_ROSTER.md) — back to roster
+- [ORG_ROSTER](./ORG_ROSTER.md) — back to students
+- [PROGRESS](./PROGRESS.md) — learner redirect
+- [COURSE_GRADEBOOK](./COURSE_GRADEBOOK.md) — staff gradebook for a course
+- [REPORT_CARD](./REPORT_CARD.md) — generate / open a card
+- [ORG_SETTINGS](./ORG_SETTINGS.md) — grading settings (owners/admins)
 - [ANNOUNCEMENT](./ANNOUNCEMENT.md) — Create Announcement for this student
 - [INVITE_CLAIM](./INVITE_CLAIM.md) — copied parent invite link (recipient)
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — course enrollment contexts

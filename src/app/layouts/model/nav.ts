@@ -136,18 +136,11 @@ export function buildStaffNav(
       ),
     },
     {
-      id: "roster",
-      label: "Roster",
-      href: `${base}/roster`,
+      id: "students",
+      label: "Students",
+      href: `${base}/students`,
       match: "prefix",
-      children: childLinks(
-        lists.classes.map((classGroup) => ({
-          id: classGroup.id,
-          label: classGroup.title,
-        })),
-        (id) => `${base}/classes/${id}`,
-        `${base}/roster`,
-      ),
+      children: [],
     },
   );
 
@@ -227,17 +220,116 @@ export function buildParentNav(
     });
   }
 
-  sections.push({
-    id: "courses",
-    label: "Courses",
-    href: `${base}/courses`,
-    match: "prefix",
-    children: childLinks(
-      lists.courses.map((course) => ({ id: course.id, label: course.title })),
-      (id) => `${base}/courses/${id}`,
-      `${base}/courses`,
-    ),
-  });
+  sections.push(
+    {
+      id: "courses",
+      label: "Courses",
+      href: `${base}/courses`,
+      match: "prefix",
+      children: childLinks(
+        lists.courses.map((course) => ({ id: course.id, label: course.title })),
+        (id) => `${base}/courses/${id}`,
+        `${base}/courses`,
+      ),
+    },
+    {
+      id: "students",
+      label: "Students",
+      href: `${base}/students`,
+      match: "prefix",
+      children: [],
+    },
+  );
+
+  if (options?.showResources && options?.resources !== false) {
+    sections.push({
+      id: "resources",
+      label: "Resources",
+      href: `${base}/resources`,
+      match: "prefix",
+      children: [],
+    });
+  }
+
+  return sections;
+}
+
+/** Learner chrome. Own Progress — not the staff/parent Students hub. */
+export function buildLearnerNav(
+  orgSlug: string,
+  lists: NavLists,
+  options?: NavFeatureFlags & {
+    unreadAnnouncements?: number;
+    unreadDiscussions?: number;
+    showResources?: boolean;
+  },
+): NavSection[] {
+  const base = `/my/${orgSlug}`;
+  const unreadAnnouncements = options?.unreadAnnouncements ?? 0;
+  const unreadDiscussions = options?.unreadDiscussions ?? 0;
+  const showCalendar = options?.calendar !== false;
+  const showAnnouncements = options?.announcements !== false;
+  const showDiscussions = options?.discussions !== false;
+  const sections: NavSection[] = [
+    {
+      id: "home",
+      label: "This week",
+      href: base,
+      match: "exact",
+      children: [],
+    },
+  ];
+
+  if (showCalendar) {
+    sections.push({
+      id: "calendar",
+      label: "Calendar",
+      href: `${base}/calendar`,
+      match: "prefix",
+      children: [],
+    });
+  }
+  if (showAnnouncements) {
+    sections.push({
+      id: "announcements",
+      label: "Announcements",
+      href: `${base}/announcements`,
+      match: "prefix",
+      badgeCount: unreadAnnouncements > 0 ? unreadAnnouncements : undefined,
+      children: [],
+    });
+  }
+  if (showDiscussions) {
+    sections.push({
+      id: "discussions",
+      label: "Discussions",
+      href: `${base}/discussions`,
+      match: "prefix",
+      badgeCount: unreadDiscussions > 0 ? unreadDiscussions : undefined,
+      children: [],
+    });
+  }
+
+  sections.push(
+    {
+      id: "progress",
+      label: "Progress",
+      href: `${base}/progress`,
+      match: "prefix",
+      children: [],
+    },
+    {
+      id: "courses",
+      label: "Courses",
+      href: `${base}/courses`,
+      match: "prefix",
+      children: childLinks(
+        lists.courses.map((course) => ({ id: course.id, label: course.title })),
+        (id) => `${base}/courses/${id}`,
+        `${base}/courses`,
+      ),
+    },
+  );
 
   if (options?.showResources && options?.resources !== false) {
     sections.push({
