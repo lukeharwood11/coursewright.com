@@ -13,7 +13,7 @@ Edge Functions for **complex / privileged** jobs only.
 - Screaming names: job/use case, not `api-v1`.
 - Use service role only inside Functions, never in the SPA.
 - Keep Functions few — if PostgREST + RLS suffice, don’t add a Function.
-- **P0 candidates:** create-course-from-course (copy units/materials), send-organization-invite (Resend), send-announcement-notification (Resend), invite claim, revert cascades.
+- **P0 candidates:** create-course-from-course (copy units/materials/blocks/quizzes), send-organization-invite (Resend), send-announcement-notification (Resend), invite claim, revert cascades.
 - **P1 candidates:** template copy, sync, promote, Stripe webhooks.
 
 ## Don’t

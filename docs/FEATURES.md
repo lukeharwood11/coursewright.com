@@ -72,13 +72,13 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Homework (P0)** | Dated materials in a unit — appear on parent "this week" when dates fall in Sun–Sat | shipped | Optional **assignment date** (`scheduled_date`) and optional **due date** (`due_date`). Parent home shows **Assigned next** / **Due next**; This week includes either date in range. **Not** a separate assignment type |
 | **Course builder** | Create and organize **courses** within an org (no templates in P0) | shipped | Create, course home, units, materials (page/link/file), print/share chrome; collapsible course outline (units + materials tree) |
 | **Courses (instances)** | Runnable offerings with dates and a roster — from scratch or **copied from another course** | shipped | Create from scratch + settings + roster. Copy via Function. Catalog: **description**, **location**, **subject / area**, optional **icon** on list cards. Course list: search, subject + grade filters, pagination. **Templates are P1** |
-| **Create course from course** | Duplicate an existing course’s units/materials into a new independent course | shipped | Edge Function `create-course-from-course` deployed on testing; copy content only — **no roster**, **no live sync**. Copies start unpublished |
+| **Create course from course** | Duplicate an existing course’s units/materials into a new independent course | shipped | Edge Function `create-course-from-course`; copy content only — **no roster**, **no live sync**, **no quiz attempts**. Copies units, materials, blocks, and quizzes (questions, choices, answer keys). Copies start unpublished |
 | **Course visibility** | **Published / unpublished** controls whether families can see the course | shipped | Unpublished: amber warning + Publish. Published: green check badge by title; Unpublish lives in course settings. Distinct from `status` (active / archived) |
 | **Co-teaching** | Multiple instructors per course | shipped | Course settings: owners/admins add co-teachers (RLS); instructors see the list |
 | **Units** | Materials organized in **units**; each unit may have optional dates | shipped | Course home + unit page; **courses only** in P0 |
 | **Rich materials** | **Add material** kinds: **page** / **link** / **file**; pages are ordered **blocks** | shipped | v1 kinds. Page editor is [Lexical](https://lexical.dev/) with a playground-style **icon** toolbar, **/** slash commands, and insert popups (table rows/columns, link, video, **audio**). Rich text stored as `body.lexical`. Toolbar: headings, lists, tables, quotes, links, video URLs, in-page file attachments, **audio** (upload or record), **quizzes**. Paste image → upload as in-page file; images render as clean pictures (no filename chrome) |
 | **Material visibility** | **Published / unpublished** controls who can see a material | shipped | Unpublished: amber warning + Publish. Published: green check badge by title; Unpublish at bottom of material view/edit. New materials start unpublished |
-| **Quizzes (author + print)** | Create quizzes, mark correct answers, print blank (+ instructor answer key) | shipped | **Quiz = block on a page** (Lexical `quiz` node in `body.lexical`; not a material kind). Many per page. Answers stored on the node. Whole-page print: parent/student = questions only; staff = answer key. Multiple-choice choices use drawn SVG checkbox squares (blank for students; filled check on the answer key) — not `[ ]`/`[X]` text or Unicode bullets. No roster required. Online take is **P1** |
+| **Quizzes (author + print)** | Create quizzes, mark correct answers, print blank (+ instructor answer key) | shipped | **Page quiz** = Lexical `quiz` node on a lesson page (not a material kind). Many per page. Print only: parent/student = questions; staff Teacher view = answer key. Drawn SVG checkbox squares. A separate **course quiz** (outline item) is the take-in-app path — see P1 |
 | **File sharing** | Upload and attach files; share with parents as part of course materials | shipped | File materials upload to Storage `org-files` with `files` / `file_versions`. PDFs: compact card + **Preview** fullscreen (no inline preview by default); images keep inline preview + Expand |
 | **Audio & video files** | Video as a **block** on a material page; uploaded audio via **file** materials / in-page file attachments | shipped | Video **URL embed** in page blocks (upload vs URL still **TBD**). Uploaded audio uses a shared custom in-app player (play/pause, scrub, time, 1×/1.5×) on file materials and in-page files; uploaded video still uses native `<video>`. Instructors can **record a microphone clip** (under 5 minutes) when adding or replacing a file material, or via the page editor **Audio** insert (same recorder UI → in-page file attachment) |
 | **Course grade levels** | Courses carry **grade metadata** — multiple grades and/or ranges | shipped | Editor on create + course settings. Course and catalog show grades in **one pill**, comma-separated, in the org’s grade-scheme order. Templates get the same model in **P1** |
@@ -473,19 +473,19 @@ Course
 | **Rich text / video blocks on pages** | **P0** | Page composition |
 | **Uploaded audio** | **P0** | Not a v1 add-material kind — upload as **file** material or in-page file attachment; custom in-app player |
 | **Quizzes — author + print** | **P0** (product) | Block on a page — **not** in v1 add-material menu |
-| **Quizzes — take online + autograde** | **P1** | |
+| **Quizzes — take in the app** | **P1** | Course outline item. Page quiz blocks stay print-only |
 | **Forms** | **in design** | |
 
 #### Editor
 
-Page materials use a **Lexical** WYSIWYG editor ([lexical.dev](https://lexical.dev/), playground-style icon toolbar). Canonical store for rich-text blocks is the Lexical editor state in `blocks.body.lexical`. Existing `body.markdown` still loads. Insert **table / link / video / audio** through popups (table asks for rows and columns; audio asks for an upload or microphone recording). Type **`/`** for Notion-like slash commands (`/3x4` inserts a table). Markdown shortcuts (`#`, `-`, `1.`, `>`, `---`) still apply. Video URLs stay `video` blocks (insert from the editor). **Quizzes** are Lexical `quiz` nodes on the page (many allowed); correct answers live on the node for print (P0) and autograde (P1). Uploaded files, images, and audio/video can sit inside the Lexical document (no extra block kind). Instructors save from the page header; a new `material_versions` row is written only when saved placement or page content actually changed.
+Page materials use a **Lexical** WYSIWYG editor ([lexical.dev](https://lexical.dev/), playground-style icon toolbar). Canonical store for rich-text blocks is the Lexical editor state in `blocks.body.lexical`. Existing `body.markdown` still loads. Insert **table / link / video / audio** through popups (table asks for rows and columns; audio asks for an upload or microphone recording). Type **`/`** for Notion-like slash commands (`/3x4` inserts a table). Markdown shortcuts (`#`, `-`, `1.`, `>`, `---`) still apply. Video URLs stay `video` blocks (insert from the editor). **Page quizzes** are Lexical `quiz` nodes on the page (many allowed); correct answers live on the node for print. Taking a quiz in the app is a separate course quiz. Uploaded files, images, and audio/video can sit inside the Lexical document (no extra block kind). Instructors save from the page header; a new `material_versions` row is written only when saved placement or page content actually changed.
 
 #### Closed workshop questions
 
 1. ~~Page entity~~ → **page** materials are pages of blocks. No separate Page table required unless reuse demands it later.
 2. ~~Reuse of the same page in multiple units~~ → **P0:** content is copied with course-from-course; no shared Page instance across units.
 3. ~~Add material kinds (v1)~~ → **page · link · file**.
-4. ~~Quiz~~ → **block on a page** (Lexical `quiz` node). Not a material kind. Many per page. Answers stored on the node.
+4. ~~Quiz as a material kind~~ → a **page quiz** is a Lexical `quiz` node. Not a material kind. The take-in-app **Quiz** is a course outline item (P1), not a page block.
 
 #### Still open
 
@@ -588,7 +588,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 | **Progress — completion checklists** | Track what's done vs. outstanding | planned | |
 | **Assignment objects** | Separate from dated unit materials | planned | **Next conversation** — not spec'd |
 | **Material submissions** | A material can accept files turned in by a family | shipped | Accept submissions, allowed file groups, submissions allowed (1–10, default 2), multiple files per turn-in, "<Parent name> on behalf of <child name>", due time default 11:59 PM. Not an assignment object and not a quiz Submission. `src/submissions/` |
-| **Quizzes (take online + autograde)** | Take quizzes in-app; score from P0-stored correct answers | planned | Authoring + print already P0 |
+| **Quizzes (take in the app or print)** | A course quiz families take while an accepting window is set, or print when it is not | shipped | Outline item on a unit, separate from a page quiz block. `src/quizzes/`. See **Quizzes** below |
 | **Resources** | Org-scoped nested folders + document / link / file (Lexical + print). Folder and item ACL presets or per-person read/write (including a specific parent). Publish/unpublish. Bulk drag-drop upload with progress. Multi-select to publish, move, remove, print together, or download files (zip when more than one). Independent of course enrollment | shipped | P1a. Forms (P1b) stay a later item type. Not `materials` rows. `src/resources/` |
 | **Forms** | Structured response collection | in design | P1b inside Resources — not a second nav |
 | **Course Wright billing (orgs)** | We charge organizations so they can serve parents | planned | `billing/` SPA stub + owner-only placeholder on org settings. Packaging: per teacher or per course — **hypothesis**. Provider: **Stripe** *(hypothesis)* |
@@ -697,6 +697,24 @@ Staff **Parent view** uses the family rules (create only if they have linked stu
 
 ---
 
+### Quizzes (take in the app or print)
+
+A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page stays a printable side element.
+
+| Rule | Detail |
+|------|--------|
+| **Who sees it** | Staff who can manage the course. Families when the course is active and published, the quiz is published, and their student is enrolled. New quizzes start unpublished |
+| **Accepting window** | Optional start and/or end. Neither set → print and download only, no Submit. One or both set → submit only while now is inside the bounds that are set. At or after the end is rejected in the database |
+| **Print** | Anyone who can open the quiz can print it, including during and after the window |
+| **Answer key** | Teacher view always. **Share answer key with parents** (default off) shows it to parents whenever the quiz is published. A student login (account email matches that student’s `student_email`) never sees it. Staff Parent view follows the parent rule |
+| **Who submitted** | A parent entry is **"<Parent name> on behalf of <child name>"**. A student login is the student name only. A parent with more than one enrolled child picks the student first |
+| **Attempts** | **Allow more than one attempt** (default off). Off = one submitted entry per student. On = more entries until the window closes. Every entry is kept. The family sees the latest. Nothing is stored until Submit |
+| **Score** | Multiple choice is one point when the selected choices match the correct set exactly. Short answer is stored and shown to the teacher, not scored. **Grade multiple-choice questions automatically and show the score right away** (default off) freezes **8 of 10** on that entry. Later key edits do not rescore |
+| **Copy** | Course-from-course copies the quiz, questions, choices, and keys. It does not copy entries |
+| **Not this slice** | Manual points, a max-attempt count, Activity, a gradebook, quizzes on course templates, and changes to page quiz blocks |
+
+---
+
 ## P2 — Later (long term)
 
 | Feature | Description | Status | Notes |
@@ -704,7 +722,7 @@ Staff **Parent view** uses the family rules (create only if they have linked stu
 | **Parent family management (cross-org)** | Parents manage household **across organizations** | planned | Extends P0 **org-scoped** Family / parent directory |
 | **Student accounts** | Students log in to view assigned work | planned | Links a User account to an existing `student_profile` |
 | **Student materials view** | Students access shared lesson materials | planned | Via linked account |
-| **Quizzes** | Students take quizzes in-app | planned | Online take moved to **P1**; author + print is **P0** |
+| **Quizzes** | Students take quizzes in-app | deferred | Take-in-app shipped as the P1 course quiz. A dedicated student role stays here |
 | **Orgs collecting payment from parents** | Tuition / class fees through Course Wright | planned | **Future** — not P0/P1 |
 | **Integrations** | <!-- TBD --> | planned | |
 | **Transcripts / records** | <!-- TBD --> | planned | |
@@ -813,9 +831,9 @@ Staff **Parent view** uses the family rules (create only if they have linked stu
 | Class = org group of students, separate from Course | **Decided** | Course enrolls individuals; Class is a batch preset into enroll (not live) |
 | Course roster UI: list-first + batch Enroll students | **Decided** | Multi-select + optional Class preset; batch create-and-enroll |
 | Roster = page noun; Enroll/Unenroll = course verbs | **Decided** | BRANDING; class/org use Add/Remove |
-| Quiz authoring + correct answers + print (blank + answer key) | **Decided** | **P0** — quiz is a **block on a page** (Lexical `quiz` node). Not a material kind. Many per page. Whole-page print; parent/student = questions only; staff = answer key. No roster required. No `/quiz` routes |
-| Staff parent view (header toggle) | **Decided** | All staff (owner/admin/instructor). Real parent home if linked students; otherwise a preview. Hidden for parent-only users. Default Teacher. Parent view print omits answer key |
-| Quiz online take + autograde | **Decided** | **P1** — uses answers stored in P0 |
+| Quiz authoring + correct answers + print (blank + answer key) | **Decided** | **P0 page quiz** — Lexical `quiz` node on a lesson page. Not a material kind. Many per page. Whole-page print; parent/student and staff Parent view = questions only; staff Teacher view = answer key. No roster required |
+| Staff parent view (header toggle) | **Decided** | All staff (owner/admin/instructor). Real parent home if linked students; otherwise a preview. Hidden for parent-only users. Default Teacher. Parent view print omits the page-quiz answer key. Course quizzes follow the parent answer-key rule |
+| Quiz online take + autograde | **Decided** | **P1 course quiz** — outline item, not a page block and not `material_submissions`. Optional start/end. Print when neither is set. Multiple choice can score immediately. Short answers are stored, not scored. Share answer key with parents (students never). One attempt unless allowed |
 | Page as composable entity (blocks) | **Decided** | Material is the page; no separate Page table required in P0 |
 | Forms as a content kind | **In design** | Job-to-be-done + who responds TBD |
 | Rich-text block canonical store (MD / JSON / HTML) | **Decided** | Lexical editor state JSON in `blocks.body.lexical`; WYSIWYG on material edit |

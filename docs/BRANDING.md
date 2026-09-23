@@ -169,7 +169,7 @@ Other drafts kept for reference (not in use):
 | External URL | **Link** (material kind **or** Resource type) | not a course deep link — that’s **Resource link** |
 | Uploaded media on a page | **Video** (block) | URL and/or file — **open**; audio TBD |
 | In-product find | **Search** | native, cross-facet — P0 |
-| Assessment | **Quiz** | block on a page; printable blank + staff answer key in P0; autograde when online — **P1** |
+| Assessment | **Quiz** | Course outline item families take in the app or print. A **page quiz** is a block on a lesson page (print only) |
 | Structured response | **Form** | not a quiz — in design |
 | Uploaded file | **File** | attachment, upload |
 | Prior file blob | **File version** | replace keeps old Storage objects for revert |
@@ -185,7 +185,8 @@ Other drafts kept for reference (not in use):
 | Calendar page | **Calendar** | month/week view of assigned (outline) and due (filled) work, color-coded by course |
 | This week's content | **This week** | week calendar of lesson plans + assigned/due chips; Sunday–Saturday |
 | Dated unit material (P0 homework) | **Material** (with dates) | not an assignment object yet |
-| Turned-in work on a material | **Submission** | one or more files, one timestamp; "<Parent name> on behalf of <child name>"; not a quiz attempt |
+| Turned-in work on a material | **Submission** | one or more files, one timestamp; "<Parent name> on behalf of <child name>"; not a quiz entry |
+| Turned-in quiz | **Entry** | one submit. Parent: "<Parent name> on behalf of <child name>". Student login: the student name |
 | Extra org admin | **Admin invite** | email, claimable |
 | Instructor priority flag | **Important now** | pinned, highlight, urgent |
 | Dated weekly course plan | **Lesson plan** | one Sunday–Saturday week; published / unpublished; optional week note + per-day notes and materials; not an assignment object; not email |

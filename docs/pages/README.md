@@ -44,7 +44,8 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) | `/my/<org-slug>/templates/<template_id>/settings` | **P1** |
 | [UNIT](./UNIT.md) | `/my/<org-slug>/courses/…/units/<unit_id>` (template tree **P1**) |
 | [MATERIAL](./MATERIAL.md) | view `…/materials/<id>`; edit `…/materials/<id>/edit` (top-level or under unit) |
-| [PRINT](./PRINT.md) | `…/materials/<id>/print`; `…/units/<id>/print`; `/my/<org-slug>/print-this-week`; `…/resources/items/<id>/print`; `…/resources/print?items=` |
+| [QUIZ](./QUIZ.md) | `…/units/<unit_id>/quizzes/<quiz_id>`; edit appends `/edit` |
+| [PRINT](./PRINT.md) | `…/materials/<id>/print`; `…/units/<id>/print`; `…/quizzes/<id>/print`; `/my/<org-slug>/print-this-week`; `…/resources/items/<id>/print`; `…/resources/print?items=` |
 | [ORG_ROSTER](./ORG_ROSTER.md) | `/my/<org-slug>/roster` |
 | [STUDENT_PROFILE](./STUDENT_PROFILE.md) | `/my/<org-slug>/roster/<student_id>` |
 | [CLASS](./CLASS.md) | `/my/<org-slug>/classes/<class_id>` |
@@ -90,7 +91,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Resource share entry URL | Path TBD — recipients land on [MATERIAL](./MATERIAL.md) after login |
 | Forms content kind | FEATURES in design — P1b inside Resources; not on [MATERIAL](./MATERIAL.md) |
 | Course templates + ACL / promote / sync | **P1** — [TEMPLATE_LIST](./TEMPLATE_LIST.md), [TEMPLATE](./TEMPLATE.md), [TEMPLATE_SETTINGS](./TEMPLATE_SETTINGS.md) |
-| Quiz online take + autograde | **P1** |
+| Course quiz (take in the app or print) | **P1** — [QUIZ](./QUIZ.md); print via [PRINT](./PRINT.md) |
 | Parent summary layer / Progress tab | **P1** |
 | Discussions | **P1** — [DISCUSSIONS](./DISCUSSIONS.md), [DISCUSSION](./DISCUSSION.md) |
 | Resources | **P1a** — [RESOURCES](./RESOURCES.md), [RESOURCE_FOLDER](./RESOURCE_FOLDER.md), [RESOURCE](./RESOURCE.md); print via [PRINT](./PRINT.md) |

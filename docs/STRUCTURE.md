@@ -80,6 +80,7 @@ src/
 ├── units/                    # structure, order, optional dates
 ├── materials/                # content, files (incl. audio/video), versions, important now
 ├── submissions/              # families turn in files on a material
+├── quizzes/                  # course quiz: take in the app or print
 ├── search/                   # P0 advanced / cross-facet search (when implemented)
 ├── sharing/                  # resource links, share with parents
 ├── print/                    # print material / unit / this week

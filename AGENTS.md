@@ -62,6 +62,7 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | [src/units/AGENTS.md](./src/units/AGENTS.md) | Units |
 | [src/materials/AGENTS.md](./src/materials/AGENTS.md) | Materials, files, versions, important now |
 | [src/submissions/AGENTS.md](./src/submissions/AGENTS.md) | Material turn-in (files, limit, due instant) |
+| [src/quizzes/AGENTS.md](./src/quizzes/AGENTS.md) | Course quizzes (take in the app or print) |
 | [src/sharing/AGENTS.md](./src/sharing/AGENTS.md) | Resource links / share with parents |
 | [src/search/AGENTS.md](./src/search/AGENTS.md) | Cross-facet / chrome search |
 | [src/print/AGENTS.md](./src/print/AGENTS.md) | Print material / unit / this week / resource |

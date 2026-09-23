@@ -208,6 +208,120 @@ Deno.serve(async (request) => {
       }
     }
 
+    const { data: quizzes, error: quizzesError } = await db
+      .from("quizzes")
+      .select(
+        "id, unit_id, title, description, position, visibility, accepts_from, accepts_until, accepts_timezone, allow_multiple_attempts, autograde_and_show, share_answer_key_with_parents",
+      )
+      .eq("course_id", source.id)
+      .is("deleted_at", null)
+      .order("position");
+    if (quizzesError) throw quizzesError;
+
+    const quizMap = new Map<number, number>();
+    for (const quiz of quizzes ?? []) {
+      const newUnitId = quiz.unit_id == null ? null : (unitMap.get(quiz.unit_id) ?? null);
+      if (quiz.unit_id != null && newUnitId == null) continue;
+      const { data: copied, error } = await db
+        .from("quizzes")
+        .insert({
+          organization_id: source.organization_id,
+          course_id: created.id,
+          unit_id: newUnitId,
+          title: quiz.title,
+          description: quiz.description,
+          position: quiz.position,
+          visibility: quiz.visibility,
+          accepts_from: quiz.accepts_from,
+          accepts_until: quiz.accepts_until,
+          accepts_timezone: quiz.accepts_timezone,
+          allow_multiple_attempts: quiz.allow_multiple_attempts,
+          autograde_and_show: quiz.autograde_and_show,
+          share_answer_key_with_parents: quiz.share_answer_key_with_parents,
+          copied_from_id: quiz.id,
+          created_by: user.id,
+        })
+        .select("id")
+        .maybeSingle();
+      if (error) throw error;
+      if (copied) quizMap.set(quiz.id, copied.id);
+    }
+
+    const sourceQuizIds = [...quizMap.keys()];
+    if (sourceQuizIds.length > 0) {
+      const { data: questions, error: questionsError } = await db
+        .from("quiz_questions")
+        .select("id, quiz_id, position, prompt, kind")
+        .in("quiz_id", sourceQuizIds)
+        .is("deleted_at", null)
+        .order("position");
+      if (questionsError) throw questionsError;
+
+      const questionMap = new Map<number, number>();
+      for (const question of questions ?? []) {
+        const newQuizId = quizMap.get(question.quiz_id);
+        if (!newQuizId) continue;
+        const { data: copied, error } = await db
+          .from("quiz_questions")
+          .insert({
+            quiz_id: newQuizId,
+            position: question.position,
+            prompt: question.prompt,
+            kind: question.kind,
+          })
+          .select("id")
+          .maybeSingle();
+        if (error) throw error;
+        if (copied) questionMap.set(question.id, copied.id);
+      }
+
+      const sourceQuestionIds = [...questionMap.keys()];
+      if (sourceQuestionIds.length > 0) {
+        const { data: choices, error: choicesError } = await db
+          .from("quiz_choices")
+          .select("id, question_id, position, text")
+          .in("question_id", sourceQuestionIds)
+          .is("deleted_at", null)
+          .order("position");
+        if (choicesError) throw choicesError;
+
+        const choiceMap = new Map<number, number>();
+        for (const choice of choices ?? []) {
+          const newQuestionId = questionMap.get(choice.question_id);
+          if (!newQuestionId) continue;
+          const { data: copied, error } = await db
+            .from("quiz_choices")
+            .insert({
+              question_id: newQuestionId,
+              position: choice.position,
+              text: choice.text,
+            })
+            .select("id")
+            .maybeSingle();
+          if (error) throw error;
+          if (copied) choiceMap.set(choice.id, copied.id);
+        }
+
+        const { data: keys, error: keysError } = await db
+          .from("quiz_answer_keys")
+          .select("question_id, choice_id, answer_text")
+          .in("question_id", sourceQuestionIds);
+        if (keysError) throw keysError;
+        for (const key of keys ?? []) {
+          const newQuestionId = questionMap.get(key.question_id);
+          if (!newQuestionId) continue;
+          const newChoiceId = key.choice_id == null ? null : (choiceMap.get(key.choice_id) ?? null);
+          if (key.choice_id != null && newChoiceId == null) continue;
+          const { error } = await db.from("quiz_answer_keys").insert({
+            question_id: newQuestionId,
+            choice_id: newChoiceId,
+            answer_text: key.answer_text,
+          });
+          if (error) throw error;
+        }
+      }
+    }
+
     return jsonResponse({ courseId: created.id });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Couldn’t copy that course.";

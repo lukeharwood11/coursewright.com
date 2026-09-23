@@ -102,9 +102,10 @@ Aligned with P0 in [FEATURES.md](./FEATURES.md):
 | `units/` | Grouping + optional dates | Instructor |
 | `materials/` | **Pages** (materials) + **blocks**, files, versions, important now | Instructor; parent views |
 | `submissions/` | Turn-in on a material | Parent turns in; instructor reviews |
+| `quizzes/` | Course quiz: take in the app or print | Instructor; parent takes or prints |
 | `search/` | Advanced / cross-facet find (“where is this resource?”) | Admin, instructor (parent TBD) |
 | `sharing/` | Resource links, share-with-parents | Instructor → parent |
-| `print/` | Print material / unit / this week / org resource | Creator + parent |
+| `print/` | Print material / unit / quiz / this week / org resource | Creator + parent |
 | `parent/` | This week calendar + Focus + **announcements** | Parent role |
 | `announcements/` | One-way notices (course / class / student) | Instructor, admin; parent views |
 | `discussions/` | **P1** — two-way threads (one course or one class) | Instructor, admin; parent views |

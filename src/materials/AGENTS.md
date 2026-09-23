@@ -16,7 +16,7 @@ Lesson materials: **page** / **link** / **file**, plus ordered **blocks** on pag
 ## Rules
 
 - `unit_id` is **nullable** — null = leftover top-level on the course (shown above units). The UI adds new materials on a unit.
-- Do **not** invent a quiz **material kind** or parallel quiz table — quiz is a **block on a page**.
+- Do **not** invent a quiz **material kind**. A page **quiz** node stays here for print. A course quiz families take in the app lives in `src/quizzes/`.
 - Page content lives in `blocks` rows — do not dump the whole page into `materials.body`. Rich-text `body.lexical` is the Lexical editor state (including quiz nodes); keep video URLs as `video` blocks.
 - Generous file types/sizes for `kind = file` — keep open.
 - Versioning + soft deletes are P0 — never hard-delete user content from the app.
