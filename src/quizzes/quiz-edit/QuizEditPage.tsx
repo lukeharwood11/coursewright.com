@@ -18,6 +18,7 @@ export function QuizEditPage() {
   const navigate = useNavigate();
   const quizNavState = quizLocationState(quizOpenedFromUnit(location.state));
   useToastOnError(page.loadError);
+  useToastOnError(page.saveError);
 
   if (page.loading) return <PageLoading label="Loading quiz…" />;
 
@@ -74,9 +75,6 @@ export function QuizEditPage() {
           page.save();
         }}
       >
-        {page.saveError ? (
-          <p className="mb-4 text-[14px] text-[var(--amber-deep)]">{page.saveError}</p>
-        ) : null}
         <QuizEditorForm
           title={page.title}
           description={page.description}

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { caughtErrorMessage } from "@/ui/toast";
+import { toastCaughtError } from "@/ui/toast";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import {
   getOrganization,
@@ -132,7 +132,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
       toast("Organization saved.");
     },
     onError: (error: Error) => {
-      setFormError(caughtErrorMessage(error));
+      toastCaughtError(error);
     },
   });
 
@@ -150,7 +150,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
   function onToggleSchoolDay(day: SchoolDay) {
     const next = toggleSchoolDay(schoolDays, day);
     if (sameSchoolDays(next, schoolDays) && schoolDays.includes(day)) {
-      setFormError("Choose at least one school day.");
+      toast("Choose at least one school day.");
       return;
     }
     setSchoolDays(next);

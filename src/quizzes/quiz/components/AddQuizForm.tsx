@@ -1,6 +1,7 @@
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { useAddQuiz } from "../hooks/useAddQuiz";
 
 const controlClass = [
@@ -33,6 +34,7 @@ export function AddQuizForm({
     unitId,
     fromUnitPage,
   });
+  useToastOnError(add.error);
 
   function close() {
     add.setOpen(false);
@@ -71,14 +73,13 @@ export function AddQuizForm({
           onChange={(event) => add.setDescription(event.target.value)}
         />
       </label>
-      {add.error ? (
-        <p className="mt-2 text-[13px] text-[var(--amber-deep)]">{add.error}</p>
-      ) : null}
       <div className="mt-3 flex flex-wrap gap-2">
         <Button type="submit" disabled={add.submitting}>
+          <CheckIcon className="h-4 w-4" aria-hidden />
           {add.submitting ? "Adding…" : "Add quiz"}
         </Button>
         <Button type="button" variant="secondary" onClick={close}>
+          <XMarkIcon className="h-4 w-4" aria-hidden />
           Cancel
         </Button>
       </div>

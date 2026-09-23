@@ -1,6 +1,8 @@
 import { useEffect, useId, useState } from "react";
+import { CheckIcon, LinkIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
+import { toastCaughtError } from "@/ui/toast";
 
 export function FolderNameDialog({
   open,
@@ -52,7 +54,9 @@ export function FolderNameDialog({
         className="relative w-full max-w-sm rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow)]"
         onSubmit={(event) => {
           event.preventDefault();
-          void onSubmit(name).then(() => onClose()).catch(() => undefined);
+          void onSubmit(name)
+            .then(() => onClose())
+            .catch((caught) => toastCaughtError(caught));
         }}
       >
         <h2 id={titleId} className="text-[15.5px] font-extrabold text-[var(--ink)]">
@@ -71,9 +75,11 @@ export function FolderNameDialog({
         </label>
         <div className="mt-5 flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onClose}>
+            <XMarkIcon className="h-4 w-4" aria-hidden />
             Cancel
           </Button>
           <Button type="submit" disabled={pending || !name.trim()}>
+            <CheckIcon className="h-4 w-4" aria-hidden />
             {pending ? pendingLabel : submitLabel}
           </Button>
         </div>
@@ -127,7 +133,9 @@ export function LinkResourceDialog({
         className="relative w-full max-w-sm rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow)]"
         onSubmit={(event) => {
           event.preventDefault();
-          void onCreate({ title, url }).then(() => onClose()).catch(() => undefined);
+          void onCreate({ title, url })
+            .then(() => onClose())
+            .catch((caught) => toastCaughtError(caught));
         }}
       >
         <h2 id={titleId} className="text-[15.5px] font-extrabold text-[var(--ink)]">
@@ -156,9 +164,11 @@ export function LinkResourceDialog({
         </label>
         <div className="mt-5 flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onClose}>
+            <XMarkIcon className="h-4 w-4" aria-hidden />
             Cancel
           </Button>
           <Button type="submit" disabled={pending || !title.trim() || !url.trim()}>
+            <LinkIcon className="h-4 w-4" aria-hidden />
             {pending ? "Creating…" : "Create"}
           </Button>
         </div>

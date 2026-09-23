@@ -177,7 +177,7 @@ function OrganizationSection({
           </InfoHint>
         </div>
         <div
-          className="mt-2 flex flex-wrap gap-2"
+          className="mt-2 grid grid-cols-7 gap-1 sm:gap-2"
           role="group"
           aria-label="School days"
         >
@@ -192,7 +192,7 @@ function OrganizationSection({
                 disabled={!canEdit}
                 onClick={() => onToggleSchoolDay(day)}
                 className={[
-                  "flex h-10 w-10 items-center justify-center rounded-full border text-[13px] font-bold",
+                  "flex aspect-square w-full max-h-10 items-center justify-center rounded-full border text-[clamp(11px,3.2vw,13px)] font-bold",
                   selected
                     ? "border-[var(--green)] bg-[var(--green)] text-[var(--surface)]"
                     : "border-[var(--line)] bg-[var(--surface)] text-[var(--ink-soft)]",
