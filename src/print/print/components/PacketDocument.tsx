@@ -368,8 +368,22 @@ function MaterialBody({
 }
 
 export function PacketDocument({ packet }: { packet: PrintPacketView }) {
-  const sections = groupPacketSections(packet.materials);
   const includeAnswerKey = Boolean(packet.includeAnswerKey);
+  if (packet.quizQuestions && packet.quizQuestions.length > 0 && packet.materials.length === 0) {
+    return (
+      <Document title={packet.title} author="Course Wright" producer="Course Wright">
+        <Page size="LETTER" wrap style={styles.page}>
+          <Text style={styles.title}>{packet.title}</Text>
+          {packet.subtitle ? <Text style={styles.meta}>{packet.subtitle}</Text> : null}
+          {includeAnswerKey ? <Text style={styles.label}>Answer key</Text> : null}
+          {packet.quizQuestions.map((quiz, index) => (
+            <QuizPrint key={index} quiz={quiz} includeAnswerKey={includeAnswerKey} />
+          ))}
+        </Page>
+      </Document>
+    );
+  }
+  const sections = groupPacketSections(packet.materials);
   return (
     <Document title={packet.title} author="Course Wright" producer="Course Wright">
       {sections.map((section, sectionIndex) => {

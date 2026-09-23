@@ -7,10 +7,12 @@ import { parseResourcePrintItemIds } from "@/resources/model/paths";
 import {
   loadEventPrintPacket,
   loadMaterialPrintPacket,
+  loadQuizPrintPacket,
   loadResourcePrintPacket,
   loadUnitPrintPacket,
   loadWeekPrintPacket,
 } from "@/print/databridge/packets";
+import { accountIsStudentOnCourse, canShowAnswerKey } from "@/quizzes/model/quiz";
 import { pdfBytesToBlob } from "@/print/model/mergePdfs";
 import { renderPrintPdf } from "./renderPrintPdf";
 
@@ -19,6 +21,7 @@ function grainFromPath(
   materialId: number,
   unitId: number,
 ): PrintGrainKind {
+  if (pathname.includes("/quizzes/") && pathname.endsWith("/print")) return "quiz";
   if (pathname.includes("/events/") && pathname.endsWith("/print")) return "event";
   if (pathname.includes("/resources/") && pathname.endsWith("/print")) return "resource";
   if (pathname.includes("print-this-week")) return "thisWeek";
@@ -38,6 +41,7 @@ export function usePrint() {
   const materialId = params.materialId ? Number(params.materialId) : NaN;
   const itemId = params.itemId ? Number(params.itemId) : NaN;
   const eventId = params.eventId ? Number(params.eventId) : NaN;
+  const quizId = params.quizId ? Number(params.quizId) : NaN;
   const grain = grainFromPath(location.pathname, materialId, unitId);
   const studentIds = parsePrintStudentIds(location.search);
 
@@ -51,7 +55,9 @@ export function usePrint() {
     ],
     queryFn: async () => {
       const loaded =
-        grain === "event"
+        grain === "quiz"
+          ? null
+          : grain === "event"
           ? await loadEventPrintPacket(eventId)
           : grain === "thisWeek"
           ? await loadWeekPrintPacket({
@@ -68,9 +74,39 @@ export function usePrint() {
           : grain === "material"
             ? await loadMaterialPrintPacket(materialId)
             : await loadUnitPrintPacket(unitId);
-      if (!loaded) throw new Error("We couldn’t find that to print.");
-      const packet = { ...loaded, includeAnswerKey };
-      if (packet.materials.length === 0) {
+      let packet =
+        grain === "quiz"
+          ? null
+          : loaded
+            ? { ...loaded, includeAnswerKey }
+            : null;
+      if (grain === "quiz") {
+        const quizPacket = await loadQuizPrintPacket({ quizId, userId: user.id });
+        if (!quizPacket) throw new Error("We couldn’t find that to print.");
+        const viewerIsStudent = accountIsStudentOnCourse(
+          user.email,
+          quizPacket.linkedStudents,
+        );
+        const showKey = canShowAnswerKey({
+          teacherView: !parentPresentation,
+          shareWithParents: quizPacket.shareAnswerKeyWithParents,
+          viewerIsStudent,
+        });
+        packet = {
+          ...quizPacket.packet,
+          includeAnswerKey: showKey,
+          quizQuestions: showKey
+            ? quizPacket.packet.quizQuestions
+            : (quizPacket.packet.quizQuestions ?? []).map((question) => ({
+                ...question,
+                answer: "",
+                choices: question.choices.map((choice) => ({ ...choice, correct: false })),
+              })),
+        };
+      }
+      if (!packet) throw new Error("We couldn’t find that to print.");
+      const hasQuiz = (packet.quizQuestions?.length ?? 0) > 0;
+      if (packet.materials.length === 0 && !hasQuiz) {
         return { packet, blob: null as Blob | null, filename: "print.pdf" };
       }
       const pdf = await renderPrintPdf(packet);
@@ -90,7 +126,11 @@ export function usePrint() {
     packet: query.data?.packet ?? null,
     blob: query.data?.blob ?? null,
     filename: query.data?.filename ?? "print.pdf",
-    empty: Boolean(query.data && query.data.packet.materials.length === 0),
+    empty: Boolean(
+      query.data &&
+        query.data.packet.materials.length === 0 &&
+        (query.data.packet.quizQuestions?.length ?? 0) === 0,
+    ),
     notFound: Boolean(
       query.error && query.error.message.includes("couldn’t find"),
     ),
@@ -102,6 +142,7 @@ export function usePrint() {
       materialId: Number.isFinite(materialId) ? materialId : null,
       itemId: Number.isFinite(itemId) ? itemId : null,
       eventId: Number.isFinite(eventId) ? eventId : null,
+      quizId: Number.isFinite(quizId) ? quizId : null,
     }),
     retry: () => {
       void query.refetch();

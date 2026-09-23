@@ -13,6 +13,12 @@ import { getUnit } from "@/units/databridge/units";
 import { loadParentDashboard } from "@/parent/databridge/dashboard";
 import { thisWeekPrintRefs, printMaterialFromLessonPlan } from "@/print/model/thisWeekPacket";
 import type { PrintMaterial, PrintPacket } from "@/print/model/packet";
+import type { QuizBody } from "@/materials/model/quiz";
+import {
+  getQuiz,
+  listLinkedStudents,
+  listQuizQuestions,
+} from "@/quizzes/databridge/quizzes";
 
 async function toPrintMaterial(
   material: Awaited<ReturnType<typeof getMaterial>>,
@@ -201,5 +207,41 @@ export async function loadWeekPrintPacket(args: {
     title: "This week",
     subtitle: dashboard.week.label,
     materials: printed,
+  };
+}
+
+export async function loadQuizPrintPacket(args: {
+  quizId: number;
+  userId: string;
+}): Promise<{
+  packet: PrintPacket;
+  shareAnswerKeyWithParents: boolean;
+  linkedStudents: { studentEmail: string | null }[];
+} | null> {
+  const quiz = await getQuiz(args.quizId);
+  if (!quiz) return null;
+  const [questions, linkedStudents] = await Promise.all([
+    listQuizQuestions(args.quizId),
+    listLinkedStudents(quiz.courseId, args.userId),
+  ]);
+  const quizQuestions: QuizBody[] = questions.map((question) => ({
+    prompt: question.prompt,
+    questionKind: question.kind,
+    choices: question.choices.map((choice) => ({
+      id: String(choice.id),
+      text: choice.text,
+      correct: choice.correct,
+    })),
+    answer: question.answer,
+  }));
+  return {
+    packet: {
+      title: quiz.title,
+      subtitle: quiz.description || null,
+      materials: [],
+      quizQuestions,
+    },
+    shareAnswerKeyWithParents: quiz.shareAnswerKeyWithParents,
+    linkedStudents,
   };
 }

@@ -8,6 +8,7 @@ One-tap print: material, unit, this week. **Client-generated PDF** with in-app p
   - `…/materials/<id>/print`
   - `…/units/<id>/print`
   - `/my/<org-slug>/print-this-week`
+  - `…/units/<unit_id>/quizzes/<quiz_id>/print`
   - `…/resources/items/<id>/print`
 - Build a PDF from material / unit / this-week data; show it in a **PDF viewer**
 - Actions: **Download** (`.pdf`), **Print** (that PDF), **Back**
@@ -17,7 +18,7 @@ One-tap print: material, unit, this week. **Client-generated PDF** with in-app p
 
 - **`@react-pdf/renderer`**: ink layout (page / link / cover / images / QR). **`pdf-lib`**: pass through or append original PDF files in a packet.
 - Preview is the generated (or attached) PDF in an iframe. **Download** saves that blob; **Print** prints that iframe.
-- Page quizzes print on the whole page: staff Teacher-view packets include the answer key; parent packets (and staff **Parent view**) are questions only. Multiple-choice choices use drawn SVG checkbox squares (Helvetica-safe), not Unicode bullets or `[ ]`/`[X]` text.
+- Page quizzes print on the whole page: staff Teacher-view packets include the answer key; parent packets (and staff **Parent view**) are questions only. A **course quiz** print follows the same checkbox drawing. The answer key is included for Teacher view, and for a parent when the quiz shares the key. A student login never gets that key. Multiple-choice choices use drawn SVG checkbox squares (Helvetica-safe), not Unicode bullets or `[ ]`/`[X]` text.
 This-week packets print **one student at a time** (page break before the next student). For each student, **published lesson plans** (week note + day notes) print first, then that student’s important-now and dated this-week materials, packed onto a page when they fit, with a rule between them.
 - If `kind = file` and the blob is already PDF, preview that file. JPEG/PNG files are placed on a generated page.
 - No `PrintJob` table — generate on the fly.

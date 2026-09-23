@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
+import { listQuizzesForCourse, quizQueryKeys } from "@/quizzes/databridge/quizzes";
 import { staffCanManageCourse } from "@/courses/model/access";
 import {
   courseQueryKeys,
@@ -66,6 +67,11 @@ export function useCourse() {
     queryFn: () => listMaterialsForCourse(courseId),
     enabled: Number.isFinite(courseId),
   });
+  const quizzesQuery = useQuery({
+    queryKey: quizQueryKeys.list(courseId),
+    queryFn: () => listQuizzesForCourse(courseId),
+    enabled: Number.isFinite(courseId),
+  });
   const instructorsQuery = useQuery({
     queryKey: courseQueryKeys.instructors(courseId),
     queryFn: () => listCourseInstructors(courseId),
@@ -107,6 +113,9 @@ export function useCourse() {
   const materials = parentPresentation
     ? familyVisibleMaterials(materialsQuery.data ?? [])
     : (materialsQuery.data ?? []);
+  const quizzes = parentPresentation
+    ? familyVisibleMaterials(quizzesQuery.data ?? [])
+    : (quizzesQuery.data ?? []);
   const units = unitsQuery.data ?? [];
   const importantIds = new Set(
     (importantQuery.data ?? []).map((row) => row.materialId),
@@ -176,6 +185,13 @@ export function useCourse() {
       acc[row.unitId] = list;
       return acc;
     }, {}),
+    quizzesByUnitId: quizzes.reduce<Record<number, typeof quizzes>>((acc, row) => {
+      if (row.unitId == null) return acc;
+      const list = acc[row.unitId] ?? [];
+      list.push(row);
+      acc[row.unitId] = list;
+      return acc;
+    }, {}),
     instructors: instructorsQuery.data ?? [],
     students: (enrollmentsQuery.data ?? []).filter(
       (row) => row.status === "active",
@@ -186,6 +202,7 @@ export function useCourse() {
       courseQuery.isLoading ||
       unitsQuery.isLoading ||
       materialsQuery.isLoading ||
+      quizzesQuery.isLoading ||
       instructorsQuery.isLoading,
     error: courseQuery.error
       ? courseQuery.error.message
@@ -193,6 +210,8 @@ export function useCourse() {
         ? unitsQuery.error.message
         : materialsQuery.error
           ? materialsQuery.error.message
+          : quizzesQuery.error
+            ? quizzesQuery.error.message
           : addUnit.error?.message ??
             reorderUnit.error?.message ??
             setVisibility.error?.message ??

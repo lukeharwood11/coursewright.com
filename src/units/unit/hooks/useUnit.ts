@@ -26,6 +26,7 @@ import {
   updateUnit,
 } from "@/units/databridge/units";
 import { swapPositions } from "@/units/model/order";
+import { listQuizzesForUnit, quizQueryKeys } from "@/quizzes/databridge/quizzes";
 
 export function useUnit() {
   const { courseId: courseIdParam, unitId: unitIdParam } = useParams();
@@ -45,6 +46,11 @@ export function useUnit() {
     queryKey: ["courses", "detail", courseId],
     queryFn: () => getCourse(courseId),
     enabled: Number.isFinite(courseId),
+  });
+  const quizzesQuery = useQuery({
+    queryKey: quizQueryKeys.unit(unitId),
+    queryFn: () => listQuizzesForUnit(unitId),
+    enabled: Number.isFinite(unitId),
   });
   const materialsQuery = useQuery({
     queryKey: materialQueryKeys.unit(unitId),
@@ -79,6 +85,9 @@ export function useUnit() {
   const materials = parentPresentation
     ? familyVisibleMaterials(materialsQuery.data ?? [])
     : (materialsQuery.data ?? []);
+  const quizzes = parentPresentation
+    ? familyVisibleMaterials(quizzesQuery.data ?? [])
+    : (quizzesQuery.data ?? []);
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: unitQueryKeys.detail(unitId) });
@@ -127,11 +136,13 @@ export function useUnit() {
     unit: belongsHere ? unit : null,
     course: belongsHere ? course : null,
     materials,
+    quizzes,
     importantIds: new Set((importantQuery.data ?? []).map((row) => row.materialId)),
     loading:
       unitQuery.isLoading ||
       courseQuery.isLoading ||
-      instructorsQuery.isLoading,
+      instructorsQuery.isLoading ||
+      quizzesQuery.isLoading,
     error: unitQuery.error
       ? unitQuery.error.message
       : courseQuery.error

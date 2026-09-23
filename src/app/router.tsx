@@ -24,6 +24,7 @@ import {
 import { ActivityPage } from "@/notifications";
 import { LessonPlanEditPage, LessonPlanPage } from "@/lesson-plans";
 import { MaterialEditPage, MaterialPage } from "@/materials";
+import { QuizEditPage, QuizPage } from "@/quizzes";
 import {
   AboutPage,
   ContactPage,
@@ -241,6 +242,18 @@ export function AppRoutes() {
               element={<MaterialEditPage />}
             />
             <Route
+              path="courses/:courseId/units/:unitId/quizzes/:quizId"
+              element={<QuizPage />}
+            />
+            <Route
+              path="courses/:courseId/units/:unitId/quizzes/:quizId/edit"
+              element={
+                <RequireStaff>
+                  <QuizEditPage />
+                </RequireStaff>
+              }
+            />
+            <Route
               path="roster"
               element={
                 <RequireStaff>
@@ -278,6 +291,10 @@ export function AppRoutes() {
             />
             <Route
               path="courses/:courseId/units/:unitId/materials/:materialId/print"
+              element={<PrintPage />}
+            />
+            <Route
+              path="courses/:courseId/units/:unitId/quizzes/:quizId/print"
               element={<PrintPage />}
             />
             <Route path="resources/print" element={<PrintPage />} />

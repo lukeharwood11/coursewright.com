@@ -67,5 +67,6 @@ export async function toPrintPacketView(
     subtitle: packet.subtitle,
     includeAnswerKey: packet.includeAnswerKey,
     materials,
+    quizQuestions: packet.quizQuestions,
   };
 }
