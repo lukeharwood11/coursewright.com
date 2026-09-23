@@ -8,6 +8,7 @@ import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
+import { ClassActionsMenu } from "./components/ClassActionsMenu";
 import { ClassEventsSection } from "./components/ClassEventsSection";
 import { ClassLeadsSection } from "./components/ClassLeadsSection";
 import { useClassEvents } from "./hooks/useClassEvents";
@@ -69,10 +70,11 @@ export function ClassRosterPage() {
         backTo={`/my/${roster.organization.slug}/roster`}
         backLabel="Back to roster"
         title={roster.classGroup.title}
-        actions={
-          <>
+        titleTrailing={
+          <div className="flex shrink-0 flex-nowrap items-center gap-2">
             <ButtonLink
               variant="secondary"
+              className="max-xl:hidden shrink-0"
               to={newDiscussionPath(roster.organization.slug, {
                 audience: "class",
                 classId: roster.classGroup.id,
@@ -83,6 +85,7 @@ export function ClassRosterPage() {
             </ButtonLink>
             <ButtonLink
               variant="secondary"
+              className="max-xl:hidden shrink-0"
               to={newAnnouncementPath(roster.organization.slug, {
                 audience: "class",
                 classId: roster.classGroup.id,
@@ -91,7 +94,13 @@ export function ClassRosterPage() {
               <MegaphoneIcon className="h-5 w-5" aria-hidden />
               Create Announcement
             </ButtonLink>
-          </>
+            <ClassActionsMenu
+              orgSlug={roster.organization.slug}
+              classId={roster.classGroup.id}
+              canEdit
+              className="xl:hidden"
+            />
+          </div>
         }
       />
       <div className="space-y-6 px-5 pt-4 pb-6 md:px-8">

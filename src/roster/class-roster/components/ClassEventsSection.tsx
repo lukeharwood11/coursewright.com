@@ -23,6 +23,7 @@ export function ClassEventsSection({
         {canEdit ? (
           <ButtonLink
             variant="secondary"
+            className="max-xl:hidden shrink-0"
             to={newEventPath(orgSlug, { audience: "class", classId })}
           >
             <PlusIcon className="h-5 w-5" aria-hidden />
