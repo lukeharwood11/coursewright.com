@@ -156,29 +156,28 @@ export function DiscussionMessageItem({
           isOwn
             ? "bg-[var(--green-tint)]"
             : "bg-[var(--surface)]",
+          showActions ? "[-webkit-touch-callout:none]" : "",
         ].join(" ")}
         onContextMenu={
           showActions ? actions.openFromContextMenu : undefined
         }
+        {...(showActions ? actions.longPressHandlers : {})}
       >
         {showActions ? (
-          <div className="absolute right-1 top-1 md:contents">
-            <MessageActionsMenu
-              canEdit={canEdit}
-              canQuote={canQuote}
-              canRemove={canRemove}
-              onEdit={onStartEdit}
-              onQuote={onQuote}
-              onCopyLink={() => {
-                void copyLink();
-              }}
-              onRemove={onRemove}
-              open={actions.open}
-              onClose={actions.close}
-              onTriggerClick={actions.openFromTrigger}
-              anchorRect={actions.anchorRect}
-            />
-          </div>
+          <MessageActionsMenu
+            canEdit={canEdit}
+            canQuote={canQuote}
+            canRemove={canRemove}
+            onEdit={onStartEdit}
+            onQuote={onQuote}
+            onCopyLink={() => {
+              void copyLink();
+            }}
+            onRemove={onRemove}
+            open={actions.open}
+            onClose={actions.close}
+            anchorRect={actions.anchorRect}
+          />
         ) : null}
 
         {removed ? (
@@ -220,7 +219,7 @@ export function DiscussionMessageItem({
             ) : null}
           </div>
         ) : (
-          <div className="max-md:pr-8">
+          <div>
             {body.format === "plain" && body.text.trim() ? (
               <MentionedPlainText text={body.text} people={mentionPeople} />
             ) : null}
