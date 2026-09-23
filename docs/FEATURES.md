@@ -590,7 +590,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 | **Assignment objects** | Separate from dated unit materials | planned | **Next conversation** — not spec'd |
 | **Material submissions** | A material can accept files turned in by a student (parents on their behalf) | shipped | Accept submissions, allowed file groups, submissions allowed (1–10, default 2), multiple files per turn-in, "<Parent name> on behalf of <child name>" (student self-turn-in uses their name), due time default 11:59 PM. Submitted files: **Open** in a fullscreen portal when the browser can render them (PDF / image / audio / video / txt); otherwise Download only. Not an assignment object and not a quiz attempt. `src/submissions/` |
 | **Quizzes (take in the app or print)** | A course quiz families take while an accepting window is set, or print when it is not | shipped | Outline item on a unit, separate from a page quiz block. `src/quizzes/`. See **Quizzes** below |
-| **Resources** | Org-scoped nested folders + document / link / file (Lexical + print). Folder and item ACL presets or per-person read/write (including a specific parent). Publish/unpublish. Bulk drag-drop upload with progress. Multi-select to publish, move, remove, print together, or download files (zip when more than one). Independent of course enrollment | shipped | P1a. Forms (P1b) stay a later item type. Not `materials` rows. `src/resources/` |
+| **Resources** | Org-scoped nested folders + document / link / file (Lexical + print). Folder and item access: **parents can see** and **students can see** are separate, plus per-person read/write. Publish/unpublish. Bulk drag-drop upload with progress. Multi-select to publish, move, remove, print together, or download files (zip when more than one). Independent of course enrollment | shipped | P1a. Forms (P1b) stay a later item type. Not `materials` rows. `src/resources/` |
 | **Forms** | Structured response collection | in design | P1b inside Resources — not a second nav |
 | **Course Wright billing (orgs)** | We charge organizations so they can serve parents | planned | `billing/` SPA stub + owner-only placeholder on org settings. Packaging: per teacher or per course — **hypothesis**. Provider: **Stripe** *(hypothesis)* |
 | **Org white labelling** | Owners upload a small icon and set one accent color used as that org’s primary color | shipped | Buttons, links, and the sidebar use the accent. Login, marketing, account home, email, and print stay Course Wright. Color must pass WCAG AA for white text and for text on paper. `organization_branding` + public `org-brand` bucket. Owners only write. The icon file and `organization_icons` path are public so a future invite can show the picture without a membership. Accent stays member-only |
@@ -638,9 +638,9 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 
 **Browse:** check rows to publish, unpublish, move, remove, print (one packet), or download. One file downloads directly; several files download as a zip. Folders in the selection move or remove with the rest — publish, print, and download apply to selected items only.
 
-**Presets** (`staff` / `parents` / `members` / `restricted`) set who can **view**. Org staff can always edit. **Specific people** can be **Can view** or **Can edit**, and that permission can be changed later. Student profiles are not grantees.
+**Access:** **Parents can see** and **Students can see** are separate. Org staff can always edit. **Specific parents** and **specific students** can be **Can view** or **Can edit**, and that permission can be changed later. Manage access uses a Parents tab and a Students tab, with a summary of both audiences at the bottom. Student profiles are not grantees — grants are org memberships.
 
-**Nav:** staff always see **Resources** (between Courses and Roster). Parents see it when they can open at least one item.
+**Nav:** staff always see **Resources** (between Courses and Roster). Parents and students see it when they can open at least one item.
 
 ### Discussions (P1)
 

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { isFamilyViewerRole, isStaffRole } from "@/organizations/model/role";
+import { isStaffRole } from "@/organizations/model/role";
 import { fileSignedUrl, getFile } from "@/materials/databridge/files";
 import { listResourceBlocks, resourceBlockQueryKeys } from "@/resources/databridge/blocks";
 import {
@@ -85,12 +85,16 @@ export function useResource() {
         actor: {
           userId: user.id,
           isStaff,
-          isParentRole: role ? isFamilyViewerRole(role) : false,
+          isParent: role === "parent",
+          isStudent: role === "student",
         },
         visibility: item.visibility,
         archived: Boolean(item.archivedAt),
         aclInherit: item.aclInherit,
-        accessMode: item.accessMode,
+        audience: {
+          parentsCanView: item.parentsCanView,
+          studentsCanView: item.studentsCanView,
+        },
         folderId: item.folderId,
         itemId: item.id,
         foldersById,

@@ -1,9 +1,7 @@
 import { requireSupabase } from "./client";
 import {
-  parseResourceAccessMode,
   parseResourceItemType,
   parseResourceVisibility,
-  type ResourceAccessMode,
   type ResourceItemType,
   type ResourceVisibility,
 } from "@/resources/model/kinds";
@@ -19,7 +17,8 @@ export type ResourceItemRecord = {
   fileId: number | null;
   visibility: ResourceVisibility;
   aclInherit: boolean;
-  accessMode: ResourceAccessMode;
+  parentsCanView: boolean;
+  studentsCanView: boolean;
   archivedAt: string | null;
   createdBy: string;
   creatorName: string;
@@ -28,7 +27,7 @@ export type ResourceItemRecord = {
 };
 
 const ITEM_SELECT =
-  "id, organization_id, folder_id, type, title, description, url, file_id, visibility, acl_inherit, access_mode, archived_at, created_by, created_at, updated_at, creator:profiles!org_resource_items_created_by_fkey(name)" as const;
+  "id, organization_id, folder_id, type, title, description, url, file_id, visibility, acl_inherit, parents_can_view, students_can_view, archived_at, created_by, created_at, updated_at, creator:profiles!org_resource_items_created_by_fkey(name)" as const;
 
 function embeddedName(
   value: { name: string | null } | { name: string | null }[] | null,
@@ -48,7 +47,8 @@ function toItem(row: {
   file_id: number | null;
   visibility: string;
   acl_inherit: boolean;
-  access_mode: string;
+  parents_can_view: boolean;
+  students_can_view: boolean;
   archived_at: string | null;
   created_by: string;
   created_at: string;
@@ -68,7 +68,8 @@ function toItem(row: {
     fileId: row.file_id,
     visibility: parseResourceVisibility(row.visibility),
     aclInherit: row.acl_inherit,
-    accessMode: parseResourceAccessMode(row.access_mode),
+    parentsCanView: row.parents_can_view,
+    studentsCanView: row.students_can_view,
     archivedAt: row.archived_at,
     createdBy: row.created_by,
     creatorName: embeddedName(row.creator),
@@ -149,7 +150,8 @@ export async function createResourceItem(args: {
       created_by: args.createdBy,
       visibility: "unpublished",
       acl_inherit: true,
-      access_mode: "staff",
+      parents_can_view: false,
+      students_can_view: false,
     })
     .select(ITEM_SELECT)
     .maybeSingle();
@@ -168,7 +170,8 @@ export async function updateResourceItem(
     folderId?: number | null;
     visibility?: ResourceVisibility;
     aclInherit?: boolean;
-    accessMode?: ResourceAccessMode;
+    parentsCanView?: boolean;
+    studentsCanView?: boolean;
     archivedAt?: string | null;
   },
 ): Promise<ResourceItemRecord> {
@@ -182,7 +185,12 @@ export async function updateResourceItem(
       ...(patch.folderId !== undefined ? { folder_id: patch.folderId } : {}),
       ...(patch.visibility ? { visibility: patch.visibility } : {}),
       ...(patch.aclInherit !== undefined ? { acl_inherit: patch.aclInherit } : {}),
-      ...(patch.accessMode ? { access_mode: patch.accessMode } : {}),
+      ...(patch.parentsCanView !== undefined
+        ? { parents_can_view: patch.parentsCanView }
+        : {}),
+      ...(patch.studentsCanView !== undefined
+        ? { students_can_view: patch.studentsCanView }
+        : {}),
       ...(patch.archivedAt !== undefined ? { archived_at: patch.archivedAt } : {}),
     })
     .eq("id", id)

@@ -72,7 +72,10 @@ export function useExpandedResourceFolder({
         visibility: item.visibility,
         archived: Boolean(item.archivedAt),
         aclInherit: item.aclInherit,
-        accessMode: item.accessMode,
+        audience: {
+          parentsCanView: item.parentsCanView,
+          studentsCanView: item.studentsCanView,
+        },
         folderId: item.folderId,
         itemId: item.id,
         foldersById,

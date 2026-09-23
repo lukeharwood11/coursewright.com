@@ -4,7 +4,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
-import { isFamilyViewerRole, isStaffRole } from "@/organizations/model/role";
+import { isStaffRole } from "@/organizations/model/role";
 import {
   archiveResourceFolder,
   createResourceFolder,
@@ -102,7 +102,8 @@ export function useResourcesBrowse() {
   const actor = {
     userId: user.id,
     isStaff,
-    isParentRole: role ? isFamilyViewerRole(role) : false,
+    isParent: role === "parent",
+    isStudent: role === "student",
   };
   const grants = grantsQuery.data ?? [];
   const currentFolder = folderQuery.data ?? null;
@@ -137,7 +138,10 @@ export function useResourcesBrowse() {
         visibility: item.visibility,
         archived: Boolean(item.archivedAt),
         aclInherit: item.aclInherit,
-        accessMode: item.accessMode,
+        audience: {
+          parentsCanView: item.parentsCanView,
+          studentsCanView: item.studentsCanView,
+        },
         folderId: item.folderId,
         itemId: item.id,
         foldersById,

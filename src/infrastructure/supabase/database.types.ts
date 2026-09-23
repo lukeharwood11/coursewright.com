@@ -2103,7 +2103,6 @@ export type Database = {
       }
       org_resource_folders: {
         Row: {
-          access_mode: string
           acl_inherit: boolean
           archived_at: string | null
           created_at: string
@@ -2113,11 +2112,12 @@ export type Database = {
           name: string
           organization_id: number
           parent_id: number | null
+          parents_can_view: boolean
           sort_order: number
+          students_can_view: boolean
           updated_at: string
         }
         Insert: {
-          access_mode?: string
           acl_inherit?: boolean
           archived_at?: string | null
           created_at?: string
@@ -2127,11 +2127,12 @@ export type Database = {
           name: string
           organization_id: number
           parent_id?: number | null
+          parents_can_view?: boolean
           sort_order?: number
+          students_can_view?: boolean
           updated_at?: string
         }
         Update: {
-          access_mode?: string
           acl_inherit?: boolean
           archived_at?: string | null
           created_at?: string
@@ -2141,7 +2142,9 @@ export type Database = {
           name?: string
           organization_id?: number
           parent_id?: number | null
+          parents_can_view?: boolean
           sort_order?: number
+          students_can_view?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -2229,7 +2232,6 @@ export type Database = {
       }
       org_resource_items: {
         Row: {
-          access_mode: string
           acl_inherit: boolean
           archived_at: string | null
           created_at: string
@@ -2239,7 +2241,9 @@ export type Database = {
           folder_id: number | null
           id: number
           organization_id: number
+          parents_can_view: boolean
           search_vector: unknown
+          students_can_view: boolean
           title: string
           type: string
           updated_at: string
@@ -2247,7 +2251,6 @@ export type Database = {
           visibility: string
         }
         Insert: {
-          access_mode?: string
           acl_inherit?: boolean
           archived_at?: string | null
           created_at?: string
@@ -2257,6 +2260,8 @@ export type Database = {
           folder_id?: number | null
           id?: number
           organization_id: number
+          parents_can_view?: boolean
+          students_can_view?: boolean
           title: string
           type: string
           updated_at?: string
@@ -2264,7 +2269,6 @@ export type Database = {
           visibility?: string
         }
         Update: {
-          access_mode?: string
           acl_inherit?: boolean
           archived_at?: string | null
           created_at?: string
@@ -2274,6 +2278,8 @@ export type Database = {
           folder_id?: number | null
           id?: number
           organization_id?: number
+          parents_can_view?: boolean
+          students_can_view?: boolean
           title?: string
           type?: string
           updated_at?: string

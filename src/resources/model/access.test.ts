@@ -4,25 +4,28 @@ import {
   aclSourceFolder,
   folderCapabilities,
   itemCapabilities,
+  previewResourceAudience,
+  resourceAccessSummary,
   type FolderAclSource,
 } from "./access.ts";
 
-const staff = { userId: "staff", isStaff: true, isParentRole: false };
-const parent = { userId: "parent", isStaff: false, isParentRole: true };
-const student = { userId: "student", isStaff: false, isParentRole: true };
+const staff = { userId: "staff", isStaff: true, isParent: false, isStudent: false };
+const parent = { userId: "parent", isStaff: false, isParent: true, isStudent: false };
+const student = { userId: "student", isStaff: false, isParent: false, isStudent: true };
 
 function folder(
   id: number,
   parentId: number | null,
-  accessMode: FolderAclSource["accessMode"] = "staff",
+  parentsCanView = false,
+  studentsCanView = false,
   aclInherit = parentId != null,
 ): FolderAclSource {
-  return { id, parentId, accessMode, aclInherit };
+  return { id, parentId, parentsCanView, studentsCanView, aclInherit };
 }
 
 test("acl inherit walks to the nearest non-inheriting ancestor", () => {
-  const root = folder(1, null, "parents", false);
-  const child = folder(2, 1, "staff", true);
+  const root = folder(1, null, true, false, false);
+  const child = folder(2, 1, false, false, true);
   const byId = new Map([
     [1, root],
     [2, child],
@@ -36,10 +39,10 @@ test("staff can edit unpublished items; parents cannot without a grant", () => {
     visibility: "unpublished",
     archived: false,
     aclInherit: true,
-    accessMode: "staff",
+    audience: { parentsCanView: false, studentsCanView: false },
     folderId: 1,
     itemId: 9,
-    foldersById: new Map([[1, folder(1, null, "parents", false)]]),
+    foldersById: new Map([[1, folder(1, null, true, false, false)]]),
     grants: [],
   });
   assert.deepEqual(caps, { canView: true, canEdit: true });
@@ -49,51 +52,83 @@ test("staff can edit unpublished items; parents cannot without a grant", () => {
     visibility: "unpublished",
     archived: false,
     aclInherit: true,
-    accessMode: "staff",
+    audience: { parentsCanView: false, studentsCanView: false },
     folderId: 1,
     itemId: 9,
-    foldersById: new Map([[1, folder(1, null, "parents", false)]]),
+    foldersById: new Map([[1, folder(1, null, true, false, false)]]),
     grants: [],
   });
   assert.deepEqual(parentCaps, { canView: false, canEdit: false });
 });
 
-test("published parents-mode folder is readable by parent and student members", () => {
-  const foldersById = new Map([[1, folder(1, null, "parents", false)]]);
-  const caps = itemCapabilities({
+test("parent and student visibility are independent", () => {
+  const foldersById = new Map([[1, folder(1, null, true, false, false)]]);
+  const parentCaps = itemCapabilities({
     actor: parent,
     visibility: "published",
     archived: false,
     aclInherit: true,
-    accessMode: "staff",
+    audience: { parentsCanView: false, studentsCanView: false },
     folderId: 1,
     itemId: 9,
     foldersById,
     grants: [],
   });
-  assert.deepEqual(caps, { canView: true, canEdit: false });
+  assert.deepEqual(parentCaps, { canView: true, canEdit: false });
   const studentCaps = itemCapabilities({
     actor: student,
     visibility: "published",
     archived: false,
     aclInherit: true,
-    accessMode: "staff",
+    audience: { parentsCanView: false, studentsCanView: false },
     folderId: 1,
     itemId: 9,
     foldersById,
     grants: [],
   });
-  assert.deepEqual(studentCaps, { canView: true, canEdit: false });
+  assert.deepEqual(studentCaps, { canView: false, canEdit: false });
+});
+
+test("students can see a folder when only the student flag is on", () => {
+  const foldersById = new Map([[1, folder(1, null, false, true, false)]]);
+  assert.equal(
+    itemCapabilities({
+      actor: student,
+      visibility: "published",
+      archived: false,
+      aclInherit: true,
+      audience: { parentsCanView: true, studentsCanView: true },
+      folderId: 1,
+      itemId: 9,
+      foldersById,
+      grants: [],
+    }).canView,
+    true,
+  );
+  assert.equal(
+    itemCapabilities({
+      actor: parent,
+      visibility: "published",
+      archived: false,
+      aclInherit: true,
+      audience: { parentsCanView: true, studentsCanView: true },
+      folderId: 1,
+      itemId: 9,
+      foldersById,
+      grants: [],
+    }).canView,
+    false,
+  );
 });
 
 test("write grant on a folder lets a parent edit inherited items", () => {
-  const foldersById = new Map([[1, folder(1, null, "restricted", false)]]);
+  const foldersById = new Map([[1, folder(1, null, false, false, false)]]);
   const caps = itemCapabilities({
     actor: parent,
     visibility: "unpublished",
     archived: false,
     aclInherit: true,
-    accessMode: "staff",
+    audience: { parentsCanView: false, studentsCanView: false },
     folderId: 1,
     itemId: 9,
     foldersById,
@@ -111,13 +146,13 @@ test("write grant on a folder lets a parent edit inherited items", () => {
 });
 
 test("restricted item grant is required when not inheriting", () => {
-  const foldersById = new Map([[1, folder(1, null, "parents", false)]]);
+  const foldersById = new Map([[1, folder(1, null, true, false, false)]]);
   const none = itemCapabilities({
     actor: parent,
     visibility: "published",
     archived: false,
     aclInherit: false,
-    accessMode: "restricted",
+    audience: { parentsCanView: false, studentsCanView: false },
     folderId: 1,
     itemId: 9,
     foldersById,
@@ -130,7 +165,7 @@ test("restricted item grant is required when not inheriting", () => {
     visibility: "published",
     archived: false,
     aclInherit: false,
-    accessMode: "restricted",
+    audience: { parentsCanView: false, studentsCanView: false },
     folderId: 1,
     itemId: 9,
     foldersById,
@@ -148,8 +183,8 @@ test("restricted item grant is required when not inheriting", () => {
 });
 
 test("folder capabilities follow the ACL source", () => {
-  const root = folder(1, null, "parents", false);
-  const child = folder(2, 1, "staff", true);
+  const root = folder(1, null, true, false, false);
+  const child = folder(2, 1, false, true, true);
   const byId = new Map([
     [1, root],
     [2, child],
@@ -164,4 +199,67 @@ test("folder capabilities follow the ACL source", () => {
     }).canView,
     true,
   );
+  assert.equal(
+    folderCapabilities({
+      actor: student,
+      folder: child,
+      foldersById: byId,
+      grants: [],
+      archived: false,
+    }).canView,
+    false,
+  );
+});
+
+test("an unfiled item that inherits is closed to parents and students", () => {
+  const preview = previewResourceAudience({
+    kind: "item",
+    id: 9,
+    parentId: null,
+    folderId: null,
+    inherit: true,
+    draft: { parentsCanView: true, studentsCanView: true },
+    foldersById: new Map(),
+  });
+  assert.deepEqual(preview.audience, { parentsCanView: false, studentsCanView: false });
+  assert.equal(preview.unresolved, false);
+});
+
+test("access summary lists both audiences even when only one is being edited", () => {
+  const summary = resourceAccessSummary({
+    kind: "folder",
+    followsName: null,
+    unresolved: false,
+    audience: { parentsCanView: true, studentsCanView: false },
+    grants: [
+      { name: "Sam Lee", permission: "write", audience: "student" },
+      { name: "Alex Rivera", permission: "read", audience: "parent" },
+    ],
+    unpublished: false,
+  });
+  assert.deepEqual(summary.lines, [
+    "Parents can see this.",
+    "Students cannot see this.",
+    "Sam Lee can edit.",
+    "Staff can always open and edit this.",
+  ]);
+});
+
+test("access summary names the folder being followed and unpublished items", () => {
+  const summary = resourceAccessSummary({
+    kind: "item",
+    followsName: "Handbooks",
+    unresolved: false,
+    audience: { parentsCanView: false, studentsCanView: true },
+    grants: [],
+    unpublished: true,
+  });
+  assert.equal(summary.title, "Access for this resource");
+  assert.deepEqual(summary.lines, [
+    "Follows “Handbooks”.",
+    "Parents cannot see this.",
+    "Students can see this.",
+    "Staff can always open and edit this.",
+    "This isn’t published, so only editors can open it until you publish.",
+  ]);
 });

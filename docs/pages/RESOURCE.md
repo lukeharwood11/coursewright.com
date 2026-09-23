@@ -19,7 +19,7 @@ Open one org resource: a **document** (Lexical page), **link**, or **file**.
 - Document: read-only Lexical page (same chrome as course page materials).
 - Link: title + URL.
 - File: in-app preview/download via org File (same players as file materials).
-- Editors: **Edit** and **Print** (document and file) in the header on wide screens; on smaller screens they live under the header **⋯** menu with **Move** and **Manage access** (staff: inherit folder access or custom; gear icon). **Publish** / **Unpublish** and **Remove** (archive) stay on the page body.
+- Editors: **Edit** and **Print** (document and file) in the header on wide screens; on smaller screens they live under the header **⋯** menu with **Move** and **Manage access** (staff: inherit folder access, or Parents and Students tabs with a summary of both; gear icon). **Publish** / **Unpublish** and **Remove** (archive) stay on the page body.
 - Unpublished: editors only. Families/parents do not see it until published.
 
 ### Edit

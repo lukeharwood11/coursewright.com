@@ -218,8 +218,14 @@ export function ResourcePage() {
           organizationId: page.organization.id,
           canInherit: true,
         }}
-        accessMode={page.item.accessMode}
+        audience={{
+          parentsCanView: page.item.parentsCanView,
+          studentsCanView: page.item.studentsCanView,
+        }}
         aclInherit={page.item.aclInherit}
+        parentId={null}
+        folderId={page.item.folderId}
+        unpublished={page.item.visibility !== "published"}
         onClose={() => setAccessOpen(false)}
         onSaved={page.invalidate}
       />

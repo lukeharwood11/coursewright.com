@@ -1,8 +1,4 @@
 import { requireSupabase } from "./client";
-import {
-  parseResourceAccessMode,
-  type ResourceAccessMode,
-} from "@/resources/model/kinds";
 
 export type ResourceFolderRecord = {
   id: number;
@@ -10,7 +6,8 @@ export type ResourceFolderRecord = {
   parentId: number | null;
   name: string;
   description: string;
-  accessMode: ResourceAccessMode;
+  parentsCanView: boolean;
+  studentsCanView: boolean;
   aclInherit: boolean;
   sortOrder: number;
   archivedAt: string | null;
@@ -21,7 +18,7 @@ export type ResourceFolderRecord = {
 };
 
 const FOLDER_SELECT =
-  "id, organization_id, parent_id, name, description, access_mode, acl_inherit, sort_order, archived_at, created_by, created_at, updated_at, creator:profiles!org_resource_folders_created_by_fkey(name)" as const;
+  "id, organization_id, parent_id, name, description, parents_can_view, students_can_view, acl_inherit, sort_order, archived_at, created_by, created_at, updated_at, creator:profiles!org_resource_folders_created_by_fkey(name)" as const;
 
 function embeddedName(
   value: { name: string | null } | { name: string | null }[] | null,
@@ -36,7 +33,8 @@ function toFolder(row: {
   parent_id: number | null;
   name: string;
   description: string | null;
-  access_mode: string;
+  parents_can_view: boolean;
+  students_can_view: boolean;
   acl_inherit: boolean;
   sort_order: number;
   archived_at: string | null;
@@ -51,7 +49,8 @@ function toFolder(row: {
     parentId: row.parent_id,
     name: row.name,
     description: row.description ?? "",
-    accessMode: parseResourceAccessMode(row.access_mode),
+    parentsCanView: row.parents_can_view,
+    studentsCanView: row.students_can_view,
     aclInherit: row.acl_inherit,
     sortOrder: row.sort_order,
     archivedAt: row.archived_at,
@@ -140,7 +139,8 @@ export async function createResourceFolder(args: {
   parentId: number | null;
   name: string;
   createdBy: string;
-  accessMode?: ResourceAccessMode;
+  parentsCanView?: boolean;
+  studentsCanView?: boolean;
   aclInherit?: boolean;
 }): Promise<ResourceFolderRecord> {
   const db = requireSupabase();
@@ -153,7 +153,8 @@ export async function createResourceFolder(args: {
       parent_id: args.parentId,
       name: args.name.trim(),
       created_by: args.createdBy,
-      access_mode: args.accessMode ?? "staff",
+      parents_can_view: args.parentsCanView ?? false,
+      students_can_view: args.studentsCanView ?? false,
       acl_inherit: args.parentId == null ? false : aclInherit,
     })
     .select(FOLDER_SELECT)
@@ -169,7 +170,8 @@ export async function updateResourceFolder(
     name?: string;
     description?: string | null;
     parentId?: number | null;
-    accessMode?: ResourceAccessMode;
+    parentsCanView?: boolean;
+    studentsCanView?: boolean;
     aclInherit?: boolean;
     archivedAt?: string | null;
   },
@@ -181,7 +183,12 @@ export async function updateResourceFolder(
       ...(patch.name != null ? { name: patch.name.trim() } : {}),
       ...(patch.description !== undefined ? { description: patch.description } : {}),
       ...(patch.parentId !== undefined ? { parent_id: patch.parentId } : {}),
-      ...(patch.accessMode ? { access_mode: patch.accessMode } : {}),
+      ...(patch.parentsCanView !== undefined
+        ? { parents_can_view: patch.parentsCanView }
+        : {}),
+      ...(patch.studentsCanView !== undefined
+        ? { students_can_view: patch.studentsCanView }
+        : {}),
       ...(patch.aclInherit !== undefined ? { acl_inherit: patch.aclInherit } : {}),
       ...(patch.archivedAt !== undefined ? { archived_at: patch.archivedAt } : {}),
     })

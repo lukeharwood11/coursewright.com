@@ -6,7 +6,7 @@ Org-scoped **Resources**: nested folders and document / link / file items. Not c
 
 - Browse `/my/<org-slug>/resources` and `/resources/folders/<id>`
 - View / edit / print `/resources/items/<id>`
-- Folder + item ACL (presets or per-person grants), publish/unpublish
+- Folder + item ACL (`parents_can_view` and `students_can_view` are separate, plus per-person grants), publish/unpublish
 - Bulk drag-drop file upload with progress
 
 ## Rules
