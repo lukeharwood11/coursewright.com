@@ -1,3 +1,4 @@
+import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import { formatSubmittedAt } from "@/submissions/model/dueInstant";
 import { Button } from "@/ui/Button";
 import {
@@ -45,6 +46,7 @@ export function QuizSubmissionQueue({
         </div>
         {waiting.length > 0 ? (
           <Button type="button" onClick={onGradeNext}>
+            <ClipboardDocumentCheckIcon className="h-4 w-4" aria-hidden />
             Grade next
           </Button>
         ) : null}

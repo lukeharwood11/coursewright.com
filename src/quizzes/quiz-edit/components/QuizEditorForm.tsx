@@ -1,3 +1,4 @@
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import type { QuizQuestionDraft } from "@/quizzes/databridge/quizzes";
@@ -179,6 +180,7 @@ export function QuizEditorForm({
                 variant="secondary"
                 onClick={() => onQuestions(questions.filter((_, i) => i !== index))}
               >
+                <TrashIcon className="h-4 w-4" aria-hidden />
                 Remove
               </Button>
             </div>
@@ -240,6 +242,7 @@ export function QuizEditorForm({
           </div>
         ))}
         <Button variant="ghost" fullWidth onClick={() => onQuestions([...questions, blankQuestion()])}>
+          <PlusIcon className="h-4 w-4" aria-hidden />
           Add question
         </Button>
       </div>
@@ -337,6 +340,7 @@ function QuestionFields({
               variant="secondary"
               onClick={() => onChange({ pairs: question.pairs.filter((_, index) => index !== pairIndex) })}
             >
+              <TrashIcon className="h-4 w-4" aria-hidden />
               Remove
             </Button>
           </div>
@@ -350,6 +354,7 @@ function QuestionFields({
               })
             }
           >
+            <PlusIcon className="h-4 w-4" aria-hidden />
             Add pair
           </Button>
         ) : (

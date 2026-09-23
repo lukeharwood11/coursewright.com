@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { CheckIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { Input } from "@/ui/Input";
@@ -18,6 +19,7 @@ export function BrandingSection({
 }) {
   const branding = useOrgBranding(organizationId);
   useToastOnError(branding.loadError);
+  useToastOnError(branding.formError);
   const colorValue = branding.preview.accent || DEFAULT_CHROME.accent;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -116,17 +118,12 @@ export function BrandingSection({
                 </span>
               </label>
 
-              {branding.formError ? (
-                <p className="text-[14px] text-[var(--ink)]" role="alert">
-                  {branding.formError}
-                </p>
-              ) : null}
-
               <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={branding.onSave}
                   disabled={!branding.hasChanges || branding.saving || branding.removing}
                 >
+                  <CheckIcon className="h-4 w-4" aria-hidden />
                   {branding.saving ? "Saving…" : "Save branding"}
                 </Button>
                 {branding.canRemove ? (
@@ -135,15 +132,12 @@ export function BrandingSection({
                     onClick={branding.onAskRemove}
                     disabled={branding.saving || branding.removing}
                   >
+                    <TrashIcon className="h-4 w-4" aria-hidden />
                     Remove branding
                   </Button>
                 ) : null}
               </div>
             </div>
-          ) : branding.formError ? (
-            <p className="text-[14px] text-[var(--ink)]" role="alert">
-              {branding.formError}
-            </p>
           ) : null}
         </div>
       )}

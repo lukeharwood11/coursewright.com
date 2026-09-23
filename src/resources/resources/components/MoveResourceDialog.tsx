@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
+  ArrowRightIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   FolderIcon,
   FolderOpenIcon,
   HomeIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { useToastOnError } from "@/ui/useToastOnError";
@@ -128,6 +130,7 @@ export function MoveResourceDialog({
   useToastOnError(
     open && foldersQuery.isError ? (foldersQuery.error?.message ?? null) : null,
   );
+  useToastOnError(open ? error : null);
   const folders = foldersQuery.data ?? [];
   const excluded = useMemo(() => {
     const roots = [
@@ -238,11 +241,9 @@ export function MoveResourceDialog({
             </ul>
           )}
         </div>
-        {error ? (
-          <p className="mt-3 text-[13.5px] text-[var(--amber-deep)]">{error}</p>
-        ) : null}
         <div className="mt-5 flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onClose}>
+            <XMarkIcon className="h-4 w-4" aria-hidden />
             Cancel
           </Button>
           <Button
@@ -253,6 +254,7 @@ export function MoveResourceDialog({
             }
             onClick={() => onMove(destination)}
           >
+            <ArrowRightIcon className="h-4 w-4" aria-hidden />
             {pending ? "Moving…" : "Move"}
           </Button>
         </div>

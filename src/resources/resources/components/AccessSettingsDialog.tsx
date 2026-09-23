@@ -20,7 +20,8 @@ import {
   type ResourceAccessMode,
   type ResourceGrantPermission,
 } from "@/resources/model/kinds";
-import { caughtErrorMessage } from "@/ui/toast";
+import { toastCaughtError } from "@/ui/toast";
+import { CheckIcon, PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 type Target =
   | { kind: "folder"; id: number; organizationId: number; canInherit: boolean }
@@ -46,12 +47,9 @@ export function AccessSettingsDialog({
   const [mode, setMode] = useState<ResourceAccessMode>(accessMode);
   const [personId, setPersonId] = useState("");
   const [permission, setPermission] = useState<"read" | "write">("read");
-  const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     setInherit(aclInherit);
     setMode(accessMode);
-    setError(null);
   }, [aclInherit, accessMode, open, target?.id]);
 
   const peopleQuery = useQuery({
@@ -100,7 +98,7 @@ export function AccessSettingsDialog({
       onSaved();
       onClose();
     },
-    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
+    onError: (caught: Error) => toastCaughtError(caught),
   });
 
   const addGrant = useMutation({
@@ -123,7 +121,7 @@ export function AccessSettingsDialog({
             : resourceGrantQueryKeys.item(target?.id ?? 0),
       });
     },
-    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
+    onError: (caught: Error) => toastCaughtError(caught),
   });
 
   const removeGrant = useMutation({
@@ -136,7 +134,7 @@ export function AccessSettingsDialog({
             : resourceGrantQueryKeys.item(target?.id ?? 0),
       });
     },
-    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
+    onError: (caught: Error) => toastCaughtError(caught),
   });
 
   const changeGrant = useMutation({
@@ -158,7 +156,7 @@ export function AccessSettingsDialog({
             : resourceGrantQueryKeys.item(target?.id ?? 0),
       });
     },
-    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
+    onError: (caught: Error) => toastCaughtError(caught),
   });
 
   if (!open || !target) return null;
@@ -296,18 +294,16 @@ export function AccessSettingsDialog({
                 disabled={!personId || addGrant.isPending}
                 onClick={() => addGrant.mutate()}
               >
+                <PlusIcon className="h-4 w-4" aria-hidden />
                 Add
               </Button>
             </div>
           </div>
         ) : null}
 
-        {error ? (
-          <p className="mt-3 text-[13.5px] text-[var(--amber-deep)]">{error}</p>
-        ) : null}
-
         <div className="mt-5 flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onClose}>
+            <XMarkIcon className="h-4 w-4" aria-hidden />
             Cancel
           </Button>
           <Button
@@ -315,6 +311,7 @@ export function AccessSettingsDialog({
             disabled={saveAcl.isPending}
             onClick={() => saveAcl.mutate()}
           >
+            <CheckIcon className="h-4 w-4" aria-hidden />
             {saveAcl.isPending ? "Saving…" : "Save"}
           </Button>
         </div>
@@ -353,6 +350,7 @@ function GrantRow({
           <option value="write">Can edit</option>
         </Select>
         <Button type="button" variant="secondary" disabled={pending} onClick={onRemove}>
+          <TrashIcon className="h-4 w-4" aria-hidden />
           Remove
         </Button>
       </span>
