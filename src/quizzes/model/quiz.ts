@@ -207,33 +207,149 @@ export function scoreMultipleChoice(
   return { score, scoreTotal };
 }
 
+/** Up to two decimal places, without trailing zeros. 4.50 → "4.5", 4.00 → "4". */
+export function formatPoints(value: number): string {
+  const rounded = Math.round(value * 100) / 100;
+  return rounded.toFixed(2).replace(/\.?0+$/, "");
+}
+
+export function roundPoints(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
 export function formatQuizScore(score: number, scoreTotal: number): string {
-  if (scoreTotal <= 0) return `Score ${score}/${scoreTotal}`;
+  const shown = `${formatPoints(score)}/${formatPoints(scoreTotal)}`;
+  if (scoreTotal <= 0) return `Score ${shown}`;
   const percent = Math.round((score / scoreTotal) * 100);
-  return `Score ${score}/${scoreTotal} (${percent}%)`;
+  return `Score ${shown} (${percent}%)`;
 }
 
-export type QuizAnswerGrade = "correct" | "incorrect" | "pending";
-
-/** Correct / incorrect when marked; otherwise yet to be graded. */
-export function quizAnswerGrade(isCorrect: boolean | null): QuizAnswerGrade {
-  if (isCorrect === true) return "correct";
-  if (isCorrect === false) return "incorrect";
-  return "pending";
+/**
+ * Points for one question.
+ * Multiple choice passes `misses` (wrong choices selected). Each correct choice is an equal
+ * share, and each wrong choice subtracts that share, never below 0.
+ * Matching passes `misses` as 0: each correct pair earns its share, and a wrong pair does not subtract.
+ * A fully correct answer returns `points` exactly.
+ */
+export function awardedPoints(args: {
+  points: number;
+  hits: number;
+  total: number;
+  misses?: number;
+}): number | null {
+  const misses = args.misses ?? 0;
+  if (args.total <= 0) return null;
+  if (args.hits >= args.total && misses <= 0) return roundPoints(args.points);
+  const raw = (args.points * (args.hits - misses)) / args.total;
+  return roundPoints(Math.max(0, raw));
 }
 
-export function quizAnswerGradeLabel(grade: QuizAnswerGrade): string {
-  if (grade === "correct") return "Correct";
-  if (grade === "incorrect") return "Incorrect";
-  return "Yet to be graded";
+export function questionPointsAreValid(points: number): boolean {
+  if (!Number.isFinite(points) || points <= 0 || points > 9999.99) return false;
+  return Math.abs(points * 100 - Math.round(points * 100)) < 1e-6;
 }
 
-/** True when every answer on the attempt has Correct or Incorrect. */
+export function quizPossiblePoints(questions: readonly { points: number }[]): number {
+  return roundPoints(
+    questions.reduce((sum, question) => sum + (Number.isFinite(question.points) ? question.points : 0), 0),
+  );
+}
+
+/** Teacher points replace the autograde. A missing teacher value keeps the autograded points. */
+export function earnedQuizPoints(answer: {
+  teacherPoints: number | null;
+  autoPoints: number | null;
+}): number | null {
+  if (answer.teacherPoints != null) return answer.teacherPoints;
+  return answer.autoPoints;
+}
+
+export function awardedPointsAreValid(points: number, possible: number): boolean {
+  if (!Number.isFinite(points) || !Number.isFinite(possible)) return false;
+  if (points < 0 || points > possible + 1e-9) return false;
+  return Math.abs(points * 100 - Math.round(points * 100)) < 1e-6;
+}
+
+export type QuizAnswerGrade = "correct" | "incorrect" | "partial" | "pending";
+
+/** Full points, partial points, zero, or not scored yet. */
+export function quizAnswerGrade(
+  earned: number | null,
+  possible: number | null,
+): QuizAnswerGrade {
+  if (earned == null || possible == null) return "pending";
+  if (earned <= 0) return "incorrect";
+  if (earned + 1e-9 >= possible) return "correct";
+  return "partial";
+}
+
+export function quizAnswerGradeLabel(
+  grade: QuizAnswerGrade,
+  earned: number | null = null,
+  possible: number | null = null,
+): string {
+  if (grade === "pending" || earned == null || possible == null) return "Yet to be graded";
+  return `${formatPoints(earned)} / ${formatPoints(possible)}`;
+}
+
+/** True when every answer has autograded or teacher points. */
 export function attemptIsFullyGraded(
-  answers: readonly { isCorrect: boolean | null }[],
+  answers: readonly { teacherPoints: number | null; autoPoints: number | null }[],
 ): boolean {
   if (answers.length === 0) return true;
-  return answers.every((answer) => answer.isCorrect !== null);
+  return answers.every((answer) => earnedQuizPoints(answer) != null);
+}
+
+export type QuizGradeStatus = "needs_grading" | "autograded" | "graded";
+
+export function quizGradeStatus(attempt: {
+  autograded: boolean;
+  teacherGradedAt: string | null;
+  answers: readonly { teacherPoints: number | null; autoPoints: number | null }[];
+}): QuizGradeStatus {
+  if (attempt.teacherGradedAt) return "graded";
+  const waiting = attempt.answers.some((answer) => earnedQuizPoints(answer) == null);
+  if (waiting || !attempt.autograded) return "needs_grading";
+  return "autograded";
+}
+
+export function quizGradeStatusLabel(status: QuizGradeStatus): string {
+  if (status === "needs_grading") return "Needs grading";
+  if (status === "autograded") return "Autograded";
+  return "Graded";
+}
+
+export function orderedAttemptAnswers<T extends { questionId: number }>(
+  questionIds: readonly number[],
+  answers: readonly T[],
+): T[] {
+  const byQuestion = new Map(answers.map((answer) => [answer.questionId, answer]));
+  const ordered = questionIds.flatMap((questionId) => {
+    const answer = byQuestion.get(questionId);
+    return answer ? [answer] : [];
+  });
+  const seen = new Set(ordered.map((answer) => answer.questionId));
+  return [...ordered, ...answers.filter((answer) => !seen.has(answer.questionId))];
+}
+
+/** Oldest waiting entries first: needs grading, then autograded and not yet verified. */
+export function quizGradingQueue<
+  T extends {
+    id: number;
+    submittedAt: string;
+    autograded: boolean;
+    teacherGradedAt: string | null;
+    answers: readonly { teacherPoints: number | null; autoPoints: number | null }[];
+  },
+>(attempts: readonly T[]): T[] {
+  return [...attempts]
+    .filter((attempt) => quizGradeStatus(attempt) !== "graded")
+    .sort((a, b) => {
+      const rank = quizGradeStatus(a) === "needs_grading" ? 0 : 1;
+      const other = quizGradeStatus(b) === "needs_grading" ? 0 : 1;
+      if (rank !== other) return rank - other;
+      return a.submittedAt.localeCompare(b.submittedAt);
+    });
 }
 
 export type SavedQuizAnswerFields = {

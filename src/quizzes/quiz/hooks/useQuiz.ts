@@ -7,7 +7,7 @@ import { staffCanManageCourse } from "@/courses/model/access";
 import { courseQueryKeys, getCourse, listCourseInstructors } from "@/courses/databridge/courses";
 import {
   getQuiz,
-  gradeQuizAttemptAnswer,
+  gradeQuizAttempt,
   listAttemptAnswers,
   listLinkedStudents,
   listQuizAttempts,
@@ -158,12 +158,11 @@ export function useQuiz() {
     }) => submitQuizAttempt({ quizId, ...args }),
     onSuccess: invalidate,
   });
-  const gradeAnswer = useMutation({
+  const gradeAttempt = useMutation({
     mutationFn: (args: {
       attemptId: number;
-      questionId: number;
-      isCorrect: boolean;
-    }) => gradeQuizAttemptAnswer(args),
+      points: { questionId: number; points: number }[];
+    }) => gradeQuizAttempt(args),
     onSuccess: invalidate,
   });
 
@@ -189,12 +188,12 @@ export function useQuiz() {
       attemptsQuery.error?.message ??
       publish.error?.message ??
       submit.error?.message ??
-      gradeAnswer.error?.message ??
+      gradeAttempt.error?.message ??
       null,
     notFound: !quizQuery.isLoading && (!quiz || !belongsHere || familyHidden),
     publish,
     remove,
     submit,
-    gradeAnswer,
+    gradeAttempt,
   };
 }

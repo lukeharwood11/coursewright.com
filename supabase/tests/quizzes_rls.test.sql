@@ -380,7 +380,7 @@ select set_config(
   true
 );
 
-select is(
+select ok(
   (
     select public.submit_quiz_attempt(
       (select id from quizzes where title = 'Number quiz'),
@@ -400,19 +400,18 @@ select is(
         )
       )
     ) ->> 'score'
-  ),
-  '1',
-  '7/2 matches a number key of 3.5'
+  ) is null,
+  'a long answer waits for a teacher before the score is shown'
 );
 
 select is(
   (
-    select score_total::text
-    from quiz_attempts
-    where quiz_id = (select id from quizzes where title = 'Number quiz')
+    select auto_points = 1
+    from quiz_attempt_answers
+    where question_id = (select id from quiz_questions where prompt = 'Half of 7')
   ),
-  '1',
-  'a long answer is not part of the score'
+  true,
+  '7/2 matches a number key of 3.5 and earns the full points'
 );
 
 select is(
@@ -555,23 +554,98 @@ select lives_ok(
 
 select lives_ok(
   $$
-    select public.grade_quiz_attempt_answer(
+    select public.grade_quiz_attempt(
       (select id from quiz_attempts where quiz_id = (select id from quizzes where title = 'Number quiz')),
-      (select id from quiz_questions where prompt = 'Explain'),
-      true
+      jsonb_build_array(
+        jsonb_build_object(
+          'questionId', (select id from quiz_questions where prompt = 'Half of 7'),
+          'points', 1
+        ),
+        jsonb_build_object(
+          'questionId', (select id from quiz_questions where prompt = 'Explain'),
+          'points', 0.5
+        )
+      )
     )
   $$,
-  'staff can mark a long answer correct'
+  'staff can save points for every question'
 );
 
 select is(
   (
-    select is_correct::text
+    select score = 1.5 and score_total = 2 and autograded and teacher_graded_at is not null
+    from quiz_attempts
+    where quiz_id = (select id from quizzes where title = 'Number quiz')
+  ),
+  true,
+  'a teacher grade can be a fraction and keeps the autograde flag'
+);
+
+select is(
+  (
+    select teacher_points = 0.5 and auto_points is null
     from quiz_attempt_answers
     where question_id = (select id from quiz_questions where prompt = 'Explain')
   ),
-  'true',
-  'teacher mark stores is_correct on a long answer'
+  true,
+  'the essay stores the teacher points separately from autograde'
+);
+
+reset role;
+insert into quizzes (
+  organization_id, course_id, title, visibility, created_by,
+  accepts_from, accepts_until, autograde_and_show
+)
+select o.id, c.id, 'Partial quiz', 'published', 'c1111111-1111-1111-1111-111111111111',
+  now() - interval '1 hour', now() + interval '1 hour', true
+from organizations o
+join courses c on c.organization_id = o.id
+where o.name = 'Quiz Co-op';
+
+insert into quiz_questions (quiz_id, position, prompt, kind, points)
+select id, 0, 'Cities', 'multiple_choice', 4 from quizzes where title = 'Partial quiz';
+insert into quiz_choices (question_id, position, text)
+select id, 0, 'Paris' from quiz_questions where prompt = 'Cities';
+insert into quiz_choices (question_id, position, text)
+select id, 1, 'Rome' from quiz_questions where prompt = 'Cities';
+insert into quiz_choices (question_id, position, text)
+select id, 2, 'Lyon' from quiz_questions where prompt = 'Cities';
+insert into quiz_answer_keys (question_id, choice_id)
+select q.id, c.id
+from quiz_questions q
+join quiz_choices c on c.question_id = q.id
+where q.prompt = 'Cities' and c.text in ('Paris', 'Rome');
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'c2222222-2222-2222-2222-222222222222', true);
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"c2222222-2222-2222-2222-222222222222","role":"authenticated"}',
+  true
+);
+
+select is(
+  (
+    select public.submit_quiz_attempt(
+      (select id from quizzes where title = 'Partial quiz'),
+      (select id from student_profiles where name = 'Ava Quiz'),
+      jsonb_build_array(
+        jsonb_build_object(
+          'questionId', (select id from quiz_questions where prompt = 'Cities'),
+          'choiceIds', (
+            select jsonb_agg(c.id)
+            from quiz_choices c
+            join quiz_questions q on q.id = c.question_id
+            where q.prompt = 'Cities' and c.text in ('Paris', 'Lyon')
+          ),
+          'text', '',
+          'matches', '[]'::jsonb
+        )
+      )
+    ) ->> 'score'
+  ),
+  '0',
+  'one correct and one wrong choice cancel on a multiple-answer question'
 );
 
 select * from finish();

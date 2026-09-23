@@ -251,7 +251,7 @@ Deno.serve(async (request) => {
     if (sourceQuizIds.length > 0) {
       const { data: questions, error: questionsError } = await db
         .from("quiz_questions")
-        .select("id, quiz_id, position, prompt, kind, answer_lines")
+        .select("id, quiz_id, position, prompt, kind, answer_lines, points")
         .in("quiz_id", sourceQuizIds)
         .is("deleted_at", null)
         .order("position");
@@ -268,6 +268,7 @@ Deno.serve(async (request) => {
             position: question.position,
             prompt: question.prompt,
             kind: question.kind,
+            points: question.points,
             answer_lines: question.answer_lines,
           })
           .select("id")

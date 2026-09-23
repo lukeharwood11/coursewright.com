@@ -19,6 +19,7 @@ import {
   quizOpenedFromUnit,
 } from "@/quizzes/model/navigation";
 import { quizPath } from "@/quizzes/model/paths";
+import { questionPointsAreValid, roundPoints } from "@/quizzes/model/quiz";
 import {
   emptyWindowFields,
   instantsFromWindowFields,
@@ -47,6 +48,7 @@ function draftsFromQuestions(
       right: pair.right,
     })),
     answerLines: question.answerLines ?? 4,
+    points: question.points,
   }));
 }
 
@@ -133,6 +135,9 @@ export function useQuizEdit() {
       ) {
         throw new Error("The end time needs to be after the start time.");
       }
+      if (questions.some((question) => !questionPointsAreValid(question.points))) {
+        throw new Error("Each question needs possible points greater than 0, such as 1 or 4.5.");
+      }
       await updateQuiz(quizId, {
         title: trimmed,
         description: description.trim(),
@@ -143,7 +148,10 @@ export function useQuizEdit() {
         autogradeAndShow: autograde,
         shareAnswerKeyWithParents: shareKey,
       });
-      await saveQuizQuestions(quizId, questions);
+      await saveQuizQuestions(
+        quizId,
+        questions.map((question) => ({ ...question, points: roundPoints(question.points) })),
+      );
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: quizQueryKeys.detail(quizId) });

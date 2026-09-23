@@ -9,6 +9,8 @@ import type {
 } from "@/quizzes/databridge/quizzes";
 import {
   clampAnswerLines,
+  earnedQuizPoints,
+  formatPoints,
   matchLayout,
   quizAnswerGrade,
   savedQuizAnswerFields,
@@ -129,10 +131,10 @@ export function QuizTakeForm({
       <ol className="flex flex-col gap-4">
         {questions.map((question, index) => {
           const savedAnswer = reviewAnswers.find((answer) => answer.questionId === question.id);
+          const earned = savedAnswer ? earnedQuizPoints(savedAnswer) : null;
+          const possible = savedAnswer?.pointsPossible ?? question.points;
           const grade =
-            saved && savedAnswer
-              ? quizAnswerGrade(savedAnswer.isCorrect)
-              : null;
+            saved && savedAnswer ? quizAnswerGrade(earned, possible) : null;
           return (
             <li
               key={question.id}
@@ -142,7 +144,12 @@ export function QuizTakeForm({
                 <p className="text-[15px] font-bold text-[var(--ink)]">
                   {index + 1}. {question.prompt.trim() || "Question"}
                 </p>
-                {grade ? <QuizAnswerGradeBadge grade={grade} /> : null}
+                <span className="text-[12.5px] font-bold text-[var(--ink-faint)]">
+                  {formatPoints(possible)} {possible === 1 ? "point" : "points"}
+                </span>
+                {grade ? (
+                  <QuizAnswerGradeBadge grade={grade} earned={earned} possible={possible} />
+                ) : null}
               </div>
               {question.kind === "long_answer" ? (
                 <textarea
