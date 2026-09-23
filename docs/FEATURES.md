@@ -22,7 +22,7 @@ Use the Notes column for blockers, partials (e.g. “schema ready; no UI”), an
 
 Usability is a **P0 requirement**, not a later polish pass. Every feature below must meet this bar.
 
-**Design anchor:** Parents who **hate technology**. They open a link or the app and must understand **what's going on immediately** — which course, which child, what materials, what's due. No manuals, no LMS jargon, no hunting through menus.
+**Design anchor:** Anyone opening the **student experience** who **hates technology**. They open a link or the app and must understand **what's going on immediately** — which course, which student, what materials, what's due. No manuals, no LMS jargon, no hunting through menus. Linked parents inherit that same view.
 
 **Instructor/admin bar:** A co-op volunteer or teaching parent completes core tasks **without training or documentation**.
 
@@ -31,25 +31,26 @@ Usability is a **P0 requirement**, not a later polish pass. Every feature below 
 **Rules:**
 
 - Flows are **short and obvious** — minimize steps, menus, and jargon
-- Parent-facing views are **simpler** than instructor views, not equal complexity
+- **Student-facing** views are **simpler** than instructor views, not equal complexity
 - Empty states and first-run experiences clearly answer **"what do I do next?"**
 - Prefer one clear path over configurable complexity
-- **Responsive web must work well on phones** — no native app, but parents will open links on mobile
+- **Responsive web must work well on phones** — no native app, but people will open student links on mobile
 - Avoid **Google Classroom-style density** — lighter, clearer, co-op-scaled
 - **Print and share sit in the open** — never nested in overflow menus
 - **Create → print does not require a roster** — no students, invites, or parent accounts needed to print what you made
+- Prefer **student** language in product copy; say **parent** only when the feature is explicitly about parents (invites, parent email, parent role, parent–student links). Parents inherit student privileges.
 
-If a feature can't be built intuitively for a tech-averse parent, **simplify the feature** before shipping it.
+If a feature can't be built intuitively for a tech-averse person on the student experience, **simplify the feature** before shipping it.
 
 ---
 
 ## P0 — Must have (short term)
 
-**Audience:** Co-op and micro-school **admins**, **instructors (teachers)**, and **parents** — including a parent who creates materials themselves and just wants them **on paper**.
+**Audience:** Co-op and micro-school **admins**, **instructors (teachers)**, and **students** — including linked **parents** who inherit the student experience, and someone who creates materials themselves and just wants them **on paper**.
 
-A **parent (person)** who signs up to make their own materials is the org **owner** (anyone can create an org). The **parent role** is for invited families viewing someone else's course. Both paths get the same print bar.
+A person who signs up to make their own materials is the org **owner** (anyone can create an org). The **parent role** is for invited parents linked to a student; they see the **student** presentation. Both paths get the same print bar.
 
-**Core value:** A **course builder** with **organizational management**, **roster management**, **RBAC**, **file sharing**, and **extreme shareability** (print + links), so admins can run the org, instructors build and share courses, and parents can **use the materials** — on screen or printed — without extra software.
+**Core value:** A **course builder** with **organizational management**, **roster management**, **RBAC**, **file sharing**, and **extreme shareability** (print + links), so admins can run the org, instructors build and share courses, and students can **use the materials** — on screen or printed — without extra software.
 
 ### P0 feature set
 
@@ -64,22 +65,22 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Org school days** | Org chooses which weekdays school operates | shipped | Default Mon–Fri. Owners/admins edit circle toggles in org settings; instructors read-only. Lesson-plan compose defaults to those days, with a dropdown to add another weekday |
 | **Org profile** | Optional about, address, website, contact email, and phone | shipped | Owners/admins edit in org settings. Compact **About this organization** card on org home (staff + parent) when any field is set. Not a public `/about` page |
 | **Admin invites** | Add other admins by email; those emails can be **claimed** by accounts | shipped | Invite owner/admin/instructor; **email via Resend** `organization-invite` (HN-015) plus copyable `/invite/<token>`; unsigned claim page names the invited email and prefills signup/login (HN-016) |
-| **Student profiles** | Org-level student records — no dedicated student role required | shipped | Org roster create/edit + profile page; **multiple parent invites** (one pending token per email; siblings share it) + optional **student email** (same claim path). Parent invite email + copy-link on profile and course roster. Created when first added to a course or class; dedicated student role later (P2) |
+| **Student profiles** | Org-level student records; optional student login | shipped | Org roster create/edit + profile page; **multiple parent invites** (one pending token per email; siblings share it) + optional **student email** on a distinct **student** invite. Parent invite email + copy-link on profile and course roster. Created when first added to a course or class |
 | **Classes** | Org-scoped **group of students** — separate from a Course | shipped | Create class + batch add/remove members. Class is a **batch preset** into course enroll (not a live link). Owners/admins assign optional **class leads** (zero or more owners/admins/instructors) |
-| **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | shipped | List-first org / class / course roster with **batch select** enroll/add; multiple parent invites + optional student email; parent invite emails via Resend `organization-invite` (HN-015) plus copyable claim link |
-| **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches parent vs staff home. **P0 roles:** owner, admin, instructor, parent. Owner vs admin = billing. Instructors **see and edit courses they teach**; they may **view** a course they parent in (read-only). Owners/admins still see all courses. Staff change/remove is **membership-only** — family content stays enrollment-gated. **Staff parent view** in progress (header toggle) |
+| **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | shipped | List-first org / class / course roster with **batch select** enroll/add and **remove from the org roster** (also leaves classes and courses); multiple parent invites + optional student email; parent invite emails via Resend `organization-invite` (HN-015) plus copyable claim link |
+| **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches student vs staff home. **Roles:** owner, admin, instructor, parent, student. Owner vs admin = billing. Instructors **see and edit courses they teach**; they may **view** a course they parent in (read-only). Owners/admins still see all courses. Staff change/remove is **membership-only** — family content stays enrollment-gated. **Staff Student view** in progress (header toggle). **Student** membership uses the same chrome as parent and is linked with `student_profiles.user_id` |
 | **Admin account management** | Admins invite, **change roles**, and **remove** admins/instructors | shipped | Org settings updates `memberships` only (owners can promote to owner; admins change admin ↔ instructor ↔ **parent**; remove admin/instructor when they have no linked student). **Promote parent → staff** is a direct role change (no new invite). **Demote staff → parent** only when they have a `parent_student_links` row for a student in the org. Last owner/admin blocked in DB + UI. Does **not** add a staff-role gate on materials/roster RLS. Invite emails via Resend; copy-link remains |
-| **Homework (P0)** | Dated materials in a unit — appear on parent "this week" when dates fall in Sun–Sat | shipped | Optional **assignment date** (`scheduled_date`) and optional **due date** (`due_date`). Parent home shows **Assigned next** / **Due next**; This week includes either date in range. **Not** a separate assignment type |
+| **Homework (P0)** | Dated materials in a unit — appear on student "this week" when dates fall in Sun–Sat | shipped | Optional **assignment date** (`scheduled_date`) and optional **due date** (`due_date`). Student home shows **Assigned next** / **Due next**; This week includes either date in range. **Not** a separate assignment type |
 | **Course builder** | Create and organize **courses** within an org (no templates in P0) | shipped | Create, course home, units, materials (page/link/file), print/share chrome; collapsible course outline (units + materials tree) |
 | **Courses (instances)** | Runnable offerings with dates and a roster — from scratch or **copied from another course** | shipped | Create from scratch + settings + roster. Copy via Function. Catalog: **description**, **location**, **subject / area**, optional **icon** on list cards. Course list: search, subject + grade filters, pagination. **Templates are P1** |
 | **Create course from course** | Duplicate an existing course’s units/materials into a new independent course | shipped | Edge Function `create-course-from-course`; copy content only — **no roster**, **no live sync**, **no quiz attempts**. Copies units, materials, blocks, and quizzes (questions, choices, answer keys). Copies start unpublished |
 | **Course visibility** | **Published / unpublished** controls whether families can see the course | shipped | Unpublished: amber warning + Publish. Published: green check badge by title; Unpublish lives in course settings. Distinct from `status` (active / archived) |
 | **Co-teaching** | Multiple instructors per course | shipped | Course settings: owners/admins add co-teachers (RLS); instructors see the list |
 | **Units** | Materials organized in **units**; each unit may have optional dates | shipped | Course home + unit page; **courses only** in P0 |
-| **Rich materials** | **Add material** kinds: **page** / **link** / **file**; pages are ordered **blocks** | shipped | v1 kinds. Page editor is [Lexical](https://lexical.dev/) with a playground-style **icon** toolbar, **/** slash commands, and insert popups (table rows/columns, link, video, **audio**). Rich text stored as `body.lexical`. Toolbar: headings, lists, tables, quotes, links, video URLs, in-page file attachments, **audio** (upload or record), **quizzes**. Paste image → upload as in-page file; images render as clean pictures (no filename chrome) |
+| **Rich materials** | **Add material** kinds: **page** / **link** / **file**; pages are ordered **blocks** | shipped | v1 kinds. Page editor is [Lexical](https://lexical.dev/) with a playground-style **icon** toolbar, **/** slash commands, and insert popups (table rows/columns, link, video, **audio**). Rich text stored as `body.lexical`. Toolbar: headings, lists, tables, quotes, links, video URLs, in-page file attachments, **audio** (upload or record), **quizzes**. Paste image → upload as in-page file; images render as clean pictures (no filename chrome). Material edit: desktop **Save & close** saves then returns to the material view |
 | **Material visibility** | **Published / unpublished** controls who can see a material | shipped | Unpublished: amber warning + Publish. Published: green check badge by title; Unpublish at bottom of material view/edit. New materials start unpublished |
-| **Quizzes (author + print)** | Create quizzes, mark correct answers, print blank (+ instructor answer key) | shipped | **Page quiz** = Lexical `quiz` node on a lesson page (not a material kind). Many per page. Print only: parent/student = questions; staff Teacher view = answer key. Drawn SVG checkbox squares. A separate **course quiz** (outline item) is the take-in-app path — see P1 |
-| **File sharing** | Upload and attach files; share with parents as part of course materials | shipped | File materials upload to Storage `org-files` with `files` / `file_versions`. PDFs: compact card + **Preview** fullscreen (no inline preview by default); images keep inline preview + Expand |
+| **Quizzes (author + print)** | Create quizzes, mark correct answers, print blank (+ instructor answer key) | shipped | **Page quiz** = Lexical `quiz` node on a lesson page (not a material kind). Many per page. Print only: parent/student and staff **Student view** = questions; staff Teacher view = answer key. Multiple-choice choices use drawn SVG checkbox squares (blank for students; filled check on the answer key) — not `[ ]`/`[X]` text or Unicode bullets. No roster required. A separate **course quiz** (outline item) is the take-in-app path — see P1 |
+| **File sharing** | Upload and attach files; share with students as part of course materials | shipped | File materials upload to Storage `org-files` with `files` / `file_versions`. PDFs: compact card + **Preview** fullscreen (no inline preview by default); images keep inline preview + Expand |
 | **Audio & video files** | Video as a **block** on a material page; uploaded audio via **file** materials / in-page file attachments | shipped | Video **URL embed** in page blocks (upload vs URL still **TBD**). Uploaded audio uses a shared custom in-app player (play/pause, scrub, time, 1×/1.5×) on file materials and in-page files; uploaded video still uses native `<video>`. Instructors can **record a microphone clip** (under 5 minutes) when adding or replacing a file material, or via the page editor **Audio** insert (same recorder UI → in-page file attachment) |
 | **Course grade levels** | Courses carry **grade metadata** — multiple grades and/or ranges | shipped | Editor on create + course settings. Course and catalog show grades in **one pill**, comma-separated, in the org’s grade-scheme order. Templates get the same model in **P1** |
 | **Advanced search** | Native, easy, **cross-facet** search — “where do I have this resource?” | in progress | Staff chrome overlay (no `/search` route): Postgres FTS on `search_vector` for courses + materials; staff pages by title. Findability only (RLS). Deferred: facets, files, units, people, parent search, `ts_rank`, dedicated index |
@@ -91,15 +92,15 @@ A **parent (person)** who signs up to make their own materials is the org **owne
 | **Parent invites (email)** | Invite parents by email to access shared content | shipped | One pending invite per org+email; more students attach without a second email. Emails Resend `organization-invite` (HN-015) and keeps copy `/invite/<token>` (same path as staff). Membership + links for all attached students on claim. Unrouted family directory attaches chosen students to one pending invite when linking an email with no account |
 | **Parent access (link or account)** | Parent clicks invite link **or** signs up / logs in with the **same email** | shipped | Unsigned `/invite/<token>` shows the invited address; signup/login prefills it (HN-016). Course access still requires enrollment |
 | **Parent org membership** | Parent becomes a parent in the org when they claim an invite | shipped | Membership created on claim; materials still gated on enrollment + published course |
-| **Share resources with parents** | Share course content and files with enrolled families | shipped | Copy material URL (account required). Dedicated share-entry path still TBD |
-| **Parent dashboard** | This week’s **calendar** (lesson plans + assigned/due chips), **Focus** (Important now + Coming up), **announcements**, student tags, **Print this week** | shipped | Parent/student home; staff **Parent view** uses the same chrome. Current **announcements** (unread first, notification icon until opened; check icon once seen) sit above the week cards. Sidebar **Announcements** lists the same current notices and shows a red unread count. Main body is the current Sunday–Saturday week as **wrapping day cards** (empty days omitted). Focus rail (right on desktop, below on small screens) holds **Important now** and **Coming up**. Student tags still filter who is shown. **Print this week** prints published lesson plans first, then important now + dated materials, one student at a time |
-| **Resource links** | Send a parent a link that opens a **specific resource** (after they log in) | shipped | Copy signed-in material URL; `share_links` row recorded. Public entry path still TBD |
-| **Instructor "important now"** | Flag items needing immediate parent attention | shipped | Toggle on material; parent home surfaces it |
+| **Share resources with students** | Share course content and files with enrolled students (parents inherit) | shipped | Copy material URL (account required). Dedicated share-entry path still TBD |
+| **Student home (this week)** | This week’s **calendar** (lesson plans + assigned/due chips), **Focus** (Important now + Coming up), **announcements**, student tags, **Print this week** | shipped | Student home; staff **Student view** uses the same chrome. Linked parents inherit this presentation. Current **announcements** (unread first, notification icon until opened; check icon once seen) sit above the week cards. Sidebar **Announcements** lists the same current notices and shows a red unread count. Main body is the current Sunday–Saturday week as **wrapping day cards** (empty days omitted). Focus rail (right on desktop, below on small screens) holds **Important now** and **Coming up**. Student tags still filter who is shown. **Print this week** prints published lesson plans first, then important now + dated materials, one student at a time |
+| **Resource links** | Send a link that opens a **specific resource** (after login) | shipped | Copy signed-in material URL; `share_links` row recorded. Public entry path still TBD |
+| **Instructor "important now"** | Flag items needing immediate student attention | shipped | Toggle on material; student home surfaces it |
 | **Lesson plans** | Weekly course plan: optional week note, per-day notes, optional materials per day; **published / unpublished** | shipped | One plan per course per Sunday–Saturday week. Compose defaults to the org’s **school days**; staff can **Add another day** via a modal of remaining weekdays. Per-day **Link materials** opens an outline multi-select with search. Days with existing notes stay visible even if they are not school days. Default title `This week in <course title>`. New plans start unpublished. Families only see published plans. Replaces **bulletins** (no data migration). Course-from-course does **not** copy lesson plans. |
-| **Calendar** | Month, week, and day view of assigned/due work and lesson plans, color-coded by course | shipped | Sidebar **Calendar** for staff and parents. Assigned = outline chip; due = filled chip. Items open the material or lesson plan. Tapping a day (not an item) opens **day** view. Course colors from a small palette (`courses.color_key`) with a filterable legend. Week view shows lesson-plan text in seven columns; This week uses wrapping day cards and hides empty days |
-| **Events** | Calendar item for **one course**, **one or more classes**, or the **whole organization** (no course or class). Required **location**. Optional end date and start/end times. Write-up page plus links to existing course materials | shipped | Not a `materials` row. Owners, admins, and instructors add it. An instructor can only attach a course they manage. Any teacher can make an organization event. Month and week show a title chip. Day view shows time and location. No hourly grid, repeat, or notification. Families see a course or class event when a linked student is in it, and every organization event |
+| **Calendar** | Month, week, and day view of assigned/due work and lesson plans, color-coded by course | shipped | Sidebar **Calendar** for staff and the student experience. Assigned = outline chip; due = filled chip. Items open the material or lesson plan. Tapping a day (not an item) opens **day** view. Course colors from a small palette (`courses.color_key`) with a filterable legend. Week view shows lesson-plan text in seven columns; This week uses wrapping day cards and hides empty days |
+| **Events** | Calendar item for **one course**, **one or more classes**, or the **whole organization** (no course or class). Optional **location**. Optional end date and start/end times. Write-up page plus links to existing course materials | shipped | Not a `materials` row. Owners, admins, and instructors add it. An instructor can only attach a course they manage. Any teacher can make an organization event. Month and week show a title chip. Day view shows time and location when set. No hourly grid, repeat, or notification. Families see a course or class event when a linked student is in it, and every organization event |
 | **Announcements** | One-way notice to one or more **courses**, **classes**, or **students** (same kind). Optional start/end dates control homepage visibility. Opening it marks it read and clears the notification icon. Families also have an **Announcements** list with a read-receipt icon once opened, and a red unread count on the sidebar. Optional **Send notification** emails families who already have an account and adds an Activity row for them. No reply thread | in progress | Distinct from **lesson plans** (those attach this week’s materials) and from **P1 discussions**. Org owners/admins can post any audience. Instructors can post for courses they teach, and for classes or students they can already manage on roster. Families see current announcements on home and `/announcements`. Opt-in email via Resend `announcement-notification` to claimed accounts only (same `RESEND_API_KEY` as HN-015). The same send also writes one Activity row per recipient. |
-| **Staff parent view** | Owners, admins, and instructors switch most org pages to parent presentation | in progress | Header **Teacher** / **Parent view**. Real this-week if they have linked students; otherwise a preview. Hidden for parent-only users. SPA + unit tests in; browser E2E against testing Auth blocked by email send rate limit |
+| **Staff Student view** | Owners, admins, and instructors switch most org pages to the student presentation | in progress | Header **Teacher** / **Student view**. Real this-week if they have linked students; otherwise a preview. Hidden for parent-role users (they always see student chrome). SPA + unit tests in; browser E2E against testing Auth blocked by email send rate limit |
 
 ### Roster management (P0)
 
@@ -157,13 +158,13 @@ Keep **Course.enrollment → student_profile** as the access gate for parents.
 
 ### Student profiles (P0)
 
-Students are represented as **`student_profile`** records in the organization — not user accounts.
+Students are represented as **`student_profile`** records. A **student account** is optional: staff invite `student_email` with `admin_invites.role = student`, and claim sets `student_profiles.user_id`.
 
 | Rule | Detail |
 |------|--------|
-| **No student role yet** | Student profiles do not have a dedicated membership role in P0/P1. Optional **student email** can be invited with the same parent claim path so that person sees this one student's work |
+| **Student role** | Membership `role = student` is separate from parent. Claim links that one profile via `user_id` (not `parent_student_links`). One account per profile in an org |
 | **Created on first enrollment** | When an instructor adds a student to a course and they don't exist in the org yet, a `student_profile` is created automatically |
-| **Future accounts (P2)** | A dedicated student role can be linked to an existing `student_profile` via `user_id` — profile stays the canonical record |
+| **Same student home** | A student account sees the parent presentation for that one profile (published courses they are enrolled in). Staff can promote a student to staff without a new invite, and demote back to student only when `user_id` is set |
 
 **Fields:**
 
@@ -171,7 +172,7 @@ Students are represented as **`student_profile`** records in the organization �
 |-------|----------|-------|
 | **Name** | Yes | That's the only required field |
 | **Parent emails** | Optional | One or more. First email may be stored on create; more parents are invited from the student profile |
-| **Student email** | Optional | Contact email for the student. Staff can copy an invite so that email can sign in and see this student's work (parent claim path) |
+| **Student email** | Optional | Contact email for the student. Staff invite that address with a **student** claim (`role = student`), not a parent invite |
 | **Grade level** | Optional | Value depends on **org grade scheme** — exact grade or range |
 
 ### Org grade scheme (P0)
@@ -295,7 +296,7 @@ Minimum viable file sharing to replace **Microsoft / shared folders** for lesson
 | **Audio files** | Upload audio as materials; **in-app playback** | **P0.** Parents/instructors play without downloading first |
 | **Video files** | Upload video as materials; **in-app video player** (play, scrub, fullscreen as browser allows) | **P0.** Hosted file playback — distinct from YouTube **embeds** |
 | **Organize with materials** | Materials **reference** org-scoped `File` entities | Not a separate file browser in P0 — attach in course builder |
-| **Share with parents** | Parents access files through shared course content / dashboard | Same access rules as other materials |
+| **Share with students** | Parents access files through shared course content / dashboard | Same access rules as other materials |
 | **Template copy** | When templates ship (**P1**): course materials keep the **same `file_id`** — reference only, no blob clone | See [FILE_STORAGE.md](./FILE_STORAGE.md). **P0 course-from-course copy** also shares `file_id` (no blob clone) |
 | **File versioning** | Each file replace stores a **new Storage blob** (prior blobs kept); revert restores a previous blob | Shared across all referrers unless forked |
 
@@ -318,16 +319,16 @@ The smallest complete loop in P0: **create materials → print them (or send a l
 | **Print** | Anyone looking at materials they can access | One **Print** action → [PRINT](./pages/PRINT.md) (`…/print`) → **generated PDF preview** → Download or Print | **The P0 bar.** Must feel instant |
 | **File sharing** | Instructors → enrolled parents | Files live on materials; parents open/download from the course / dashboard | Same access as other materials |
 | **Resource link** | Instructor sends; parent opens | Link opens **that** material after login | Account required in P0 |
-| **Parent dashboard** | Enrolled parent (or invited student email) | Up next + important now + this week; student tags; **Print** on a material or on this week for **active** students | Same print bar as creator |
+| **Student home** | Enrolled parent (or invited student email) | Up next + important now + this week; student tags; **Print** on a material or on this week for **active** students | Same print bar as creator |
 
 **Print grain (P0):**
 
 | Action | Prints | Where it lives |
 |--------|--------|----------------|
-| **Print** (on a material) | That material — in-app text/lesson plan in a print layout; files open in a print-ready view (PDF prints natively) | Creator course, parent dashboard, resource page |
+| **Print** (on a material) | That material — in-app text/lesson plan in a print layout; files open in a print-ready view (PDF prints natively) | Creator course, student home, resource page |
 | **Print** (on a Resources document or file) | That org resource | [RESOURCE](./pages/RESOURCE.md) |
 | **Print unit** | The unit as one continuous packet (materials in order) | Creator course (unit), parent view of that unit |
-| **Print this week** | This Sunday–Saturday week's dated materials (and important now, if any) **plus published lesson plans** for **active** students on the parent home — one student at a time, **that child’s lesson plans first**, then a page break | Parent dashboard |
+| **Print this week** | This Sunday–Saturday week's dated materials (and important now, if any) **plus published lesson plans** for **active** students on the student home — one student at a time, **that child’s lesson plans first**, then a page break | Student home |
 
 **Not P0:** Print whole course.
 
@@ -395,19 +396,19 @@ Do **not** ship a separate “Export” product name in P0. Print *is* the path 
 | **Discussions** | P1 | Two-way thread for **one course** or **one class**. Title + audience. Families and staff who belong to that group can start a thread and post. One-level replies. Author or staff can mark **resolved**. Files, links to materials, and URLs on a post. Live updates while the app is open. Sidebar list + unread badge — **not** on This week home |
 | **(A) This week** | P0 | Current Sunday–Saturday week as **wrapping day cards** (empty days omitted): lesson-plan text in each day, materials after a divider with that class, assigned = outline / due = filled. **Focus** rail: Important now + Coming up |
 | **Calendar** | P0 | Sidebar month/week/day view of assigned and due work (and lesson plans on week/day view), color-coded by course with a filter legend. Calendar items are links; tapping a day opens day view. **Events** for that person’s course, classes, or the whole organization appear as their own chips |
-| **Events** | P0 | One course, several classes, or the whole organization. Location required. Optional end date and times (shown on day view). Write-up on the event page, plus links to course materials |
+| **Events** | P0 | One course, several classes, or the whole organization. Location optional. Optional end date and times (shown on day view). Write-up on the event page, plus links to course materials |
 | **(B) Summary** | P1 | System-drafted overview; instructor can edit |
 | **Student tags** | P0 | When a parent has **more than one** student, tags at the top toggle who is active. Deselecting a student hides their work. One student (or a student viewing themselves) skips the tags. |
 
-**Student view:** Same home as a parent, without multi-student tags/sections. Optional student email is invited with the parent claim path so that person only sees that one student. Dedicated student membership role remains **P2**.
+**Student view:** Same home as a parent, for the one profile linked by `student_profiles.user_id`. Staff invite that email with a **student** invite (not the parent claim path).
 
-**Staff parent view (P0):** Owners, admins, and instructors get a **Teacher** / **Parent view** control in org chrome (not parent-only users). **Parent view** uses the same parent chrome and read-only course / unit / material / print presentation. If that staff member has `parent_student_links` in the org, home is their real parent dashboard. If not, home is a preview (empty this-week, with a short explanation). Staff-only destinations (roster, course list, settings, material edit) return to org home while Parent view is on. Default is Teacher. Print packets omit the answer key in Parent view.
+**Staff parent view (P0):** Owners, admins, and instructors get a **Teacher** / **Student view** control in org chrome (not parent-role or student-role users). **Student view** uses the same student chrome and read-only course / unit / material / print presentation. If that staff member has `parent_student_links` in the org, home is their real student home. If they are also the linked student account (`user_id`), home is that one profile. If neither, home is a preview (empty this-week, with a short explanation). Staff-only destinations (roster, course list, settings, material edit) return to org home while Student view is on. Default is Teacher. Print packets omit the answer key in Student view.
 
 **Links parents can receive:**
 
 | Link | What happens (P0) |
 |------|-------------------|
-| **Invite / dashboard** | Sign up or log in → parent home (this week’s calendar + Focus + current announcements). Empty if not yet enrolled (class/student announcements can still show). |
+| **Invite / dashboard** | Sign up or log in → student home (this week’s calendar + Focus + current announcements). Empty if not yet enrolled (class/student announcements can still show). |
 | **Resource link** | Sign up or log in → **that specific material/file** — **Print** is obvious on that page |
 
 Deep links still require an account in P0. Magic links (no account) may come later.
@@ -431,7 +432,7 @@ Content on **courses** may use **units** for grouping (templates are **P1**). Ma
 
 **P0 lesson plans:** a course **Lesson plan** covers one Sunday–Saturday week. Instructors write an optional **week note**, optional notes for each day, and may **link materials** for each day (same course) via an outline multi-select with search. The compose form defaults to the org’s **school days**; staff can add another weekday from a modal of remaining days. Days that already have a note or materials stay on the form even if they are not school days. New plans start **unpublished**; families only see **published** plans (same publish controls as materials). A published plan with only a week note is a whole-week note for families. Attaching a material to a day does **not** change that material’s assignment or due date. Soft-delete to take it down. Unpublished materials attached to a plan are omitted for families (same as elsewhere). Course-from-course copy does **not** copy lesson plans (instance communication, like important now). This is **in-app**, not email. **Bulletins** are removed.
 
-**P0 announcements:** an **Announcement** is a **one-way** notice (title + optional body) aimed at one audience kind: **course(s)**, **class(es)**, or **student(s)** — one or more targets of that kind. It is **not** a lesson plan (no attached materials) and **not** a discussion (no reply thread — **P1 Discussions**). Optional **start date** and **end date**: if set, families see it on home (and the parent **Announcements** list) while today is in that window (inclusive); if omitted, it stays current until staff remove it. Opening the notice marks it **read** for that person, removes the **notification icon**, shows a **read receipt** on the list, and clears that item from the sidebar unread badge. Parents of a matching student (and that student, when they sign in on the parent claim path) see it. **Who can post:** org **owners and admins** (any audience in the org); **instructors** for courses they teach, or for a class / student they can already manage on the roster. Soft-delete to take it down. Course-from-course copy does **not** copy announcements. Staff may opt in to **Send notification**, which emails families who already have an account (Resend `announcement-notification`) and writes one **Activity** row per recipient. A later send updates that row instead of stacking. Pending invites are not mailed or pinged. The notice still saves if email fails. Sidebar unread stays separate and still appears for every unseen notice. Broader P1 Notifications (lesson plans, etc.) stay separate.
+**P0 announcements:** an **Announcement** is a **one-way** notice (title + optional body) aimed at one audience kind: **course(s)**, **class(es)**, or **student(s)** — one or more targets of that kind. It is **not** a lesson plan (no attached materials) and **not** a discussion (no reply thread — **P1 Discussions**). Optional **start date** and **end date**: if set, families see it on home (and the parent **Announcements** list) while today is in that window (inclusive); if omitted, it stays current until staff remove it. Opening the notice marks it **read** for that person, removes the **notification icon**, shows a **read receipt** on the list, and clears that item from the sidebar unread badge. Parents of a matching student (and that student, when they sign in with a student account) see it. **Who can post:** org **owners and admins** (any audience in the org); **instructors** for courses they teach, or for a class / student they can already manage on the roster. Soft-delete to take it down. Course-from-course copy does **not** copy announcements. Staff may opt in to **Send notification**, which emails families who already have an account (Resend `announcement-notification`) and writes one **Activity** row per recipient. A later send updates that row instead of stacking. Pending invites are not mailed or pinged. The notice still saves if email fails. Sidebar unread stays separate and still appears for every unseen notice. Broader P1 Notifications (lesson plans, etc.) stay separate.
 
 ### Materials & content creation
 
@@ -587,7 +588,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 | **Progress — instructor notes** | Instructors share notes on student progress | planned | |
 | **Progress — completion checklists** | Track what's done vs. outstanding | planned | |
 | **Assignment objects** | Separate from dated unit materials | planned | **Next conversation** — not spec'd |
-| **Material submissions** | A material can accept files turned in by a family | shipped | Accept submissions, allowed file groups, submissions allowed (1–10, default 2), multiple files per turn-in, "<Parent name> on behalf of <child name>", due time default 11:59 PM. Not an assignment object and not a quiz Submission. `src/submissions/` |
+| **Material submissions** | A material can accept files turned in by a student (parents on their behalf) | shipped | Accept submissions, allowed file groups, submissions allowed (1–10, default 2), multiple files per turn-in, "<Parent name> on behalf of <child name>" (student self-turn-in uses their name), due time default 11:59 PM. Submitted files: **Open** in a fullscreen portal when the browser can render them (PDF / image / audio / video / txt); otherwise Download only. Not an assignment object and not a quiz attempt. `src/submissions/` |
 | **Quizzes (take in the app or print)** | A course quiz families take while an accepting window is set, or print when it is not | shipped | Outline item on a unit, separate from a page quiz block. `src/quizzes/`. See **Quizzes** below |
 | **Resources** | Org-scoped nested folders + document / link / file (Lexical + print). Folder and item ACL presets or per-person read/write (including a specific parent). Publish/unpublish. Bulk drag-drop upload with progress. Multi-select to publish, move, remove, print together, or download files (zip when more than one). Independent of course enrollment | shipped | P1a. Forms (P1b) stay a later item type. Not `materials` rows. `src/resources/` |
 | **Forms** | Structured response collection | in design | P1b inside Resources — not a second nav |
@@ -647,17 +648,17 @@ A **Discussion** is a **two-way** thread (title + posts) aimed at **one course**
 
 **Audience (this slice):** exactly **one** target of one kind — `course` or `class`. A class already is the named group of students (and therefore their parents). An ad-hoc list of students (announcement-style `student` audience) is **later**.
 
-**Who is on the thread:** org **staff** who can see it, **parents** of matching students, and **invited student emails** on the parent claim path. Course threads: enrolled families of that **active + published** course, plus that course’s instructors (and other org staff). Class threads: parents of class members (class membership is enough — no course enrollment required), plus org staff. Everyone who can see the thread can **post**.
+**Who is on the thread:** org **staff** who can see it, **parents** of matching students, and **student accounts** linked to those profiles. Course threads: enrolled families of that **active + published** course, plus that course’s instructors (and other org staff). Class threads: parents and the student account of class members (class membership is enough — no course enrollment required), plus org staff. Everyone who can see the thread can **post**.
 
 **Who can start one:**
 
 | Actor | Can start for |
 |-------|----------------|
-| **Parent** (and invited student email) | A **course their linked student is enrolled in** (active + published), or a **class their linked student is in** |
+| **Parent** or **student account** | A **course their linked student is enrolled in** (active + published), or a **class their linked student is in**. A student account uses their own profile |
 | **Instructor** | Courses they teach; classes they can already manage on the roster |
 | **Owner / admin** | Any course or class in the org |
 
-Staff **Parent view** uses the family rules (create only if they have linked students). Teacher view uses the staff rules. Staff Parent view without linked students is an empty preview — no compose.
+Staff **Student view** uses the student rules (create only if they have linked students). Teacher view uses the staff rules. Staff Student view without linked students is an empty preview — no compose.
 
 **Thread shape:** required **title**; required **opening post** (plain text and/or rich text and/or at least one attachment). Posts are a **flat** timeline (oldest first). **Quote** on any non-removed message adds a Teams-style cite into the **new message body** (not a nested reply, not separate DB columns). Composer is **plain text** by default; **T** switches that compose session to the same **Lexical** editor chrome as page materials (icon toolbar, `/` slash commands, floating format, tables/links/video/divider — **no quiz**, no in-page file upload; message attachments stay on the composer **file** / **+** controls). Typing **@** opens a picker of people who can currently see the thread (not the author); choosing a name (click or Enter) replaces the query with a mention **pill**. Marking **resolved** does **not** lock the thread. **Resolved** / **Open** is a status badge (resolved shows a checkmark). The person who **started** the discussion, or **staff** who can see it, can mark resolved and unmark it. Title is not edited after create in this slice. **Remove** (soft-delete) a discussion: staff only. A poster may remove **their own** post (soft-delete); staff may remove any post. A poster may **edit** the body of **their own** non-removed post (in-place). Adding an **@mention** on edit also notifies that person (a mention already stored on the post is not pinged again). Removed posts show a short “This message was removed.” Quoted text already in later bodies stays. Audience cannot change after create.
 
@@ -677,7 +678,7 @@ Staff **Parent view** uses the family rules (create only if they have linked stu
 
 **Copy / search:** course-from-course does **not** copy discussions. Discussion titles are not in P0 chrome search in this slice.
 
-**Usability:** parent chrome stays simpler than staff. Sentence case. No “forum” / LMS jargon. **New discussion**, **Quote**, **Mark as resolved**. **Notify everyone** only on staff compose. **@** to mention someone on the thread.
+**Usability:** student chrome stays simpler than staff. Sentence case. No “forum” / LMS jargon. **New discussion**, **Quote**, **Mark as resolved**. **Notify everyone** only on staff compose. **@** to mention someone on the thread.
 
 ### Activity / notifications (P1)
 
@@ -706,7 +707,7 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | **Who sees it** | Staff who can manage the course. Families when the course is active and published, the quiz is published, and their student is enrolled. New quizzes start unpublished |
 | **Accepting window** | Optional start and/or end. Neither set → print and download only, no Submit. One or both set → submit only while now is inside the bounds that are set. At or after the end is rejected in the database |
 | **Print** | Anyone who can open the quiz can print it, including during and after the window |
-| **Answer key** | Teacher view always. **Share answer key with parents** (default off) shows it to parents whenever the quiz is published. A student login (account email matches that student’s `student_email`) never sees it. Staff Parent view follows the parent rule |
+| **Answer key** | Teacher view always. **Share answer key with parents** (default off) shows it to parents whenever the quiz is published. A student login (account email matches that student’s `student_email`) never sees it. Staff **Student view** follows the parent rule |
 | **Who submitted** | A parent entry is **"<Parent name> on behalf of <child name>"**. A student login is the student name only. A parent with more than one enrolled child picks the student first |
 | **Attempts** | **Allow more than one attempt** (default off). Off = one submitted entry per student. On = more entries until the window closes. Every entry is kept. The family sees the latest. Nothing is stored until Submit |
 | **Score** | Multiple choice is one point when the selected choices match the correct set exactly. A number is one point when it is the same value (`3.5`, `3.50`, and `7/2` match). Matching is one point when every pair is exact. Short answer and long answer are stored and shown to the teacher, not scored. A long answer prints the number of blank lines the teacher chose (1–20). **Grade questions automatically and show the score right away** (default off) freezes the score on that entry. Later key edits do not rescore |
@@ -720,9 +721,9 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | Feature | Description | Status | Notes |
 |---------|-------------|--------|-------|
 | **Parent family management (cross-org)** | Parents manage household **across organizations** | planned | Extends P0 **org-scoped** Family / parent directory |
-| **Student accounts** | Students log in to view assigned work | planned | Links a User account to an existing `student_profile` |
-| **Student materials view** | Students access shared lesson materials | planned | Via linked account |
-| **Quizzes** | Students take quizzes in-app | deferred | Take-in-app shipped as the P1 course quiz. A dedicated student role stays here |
+| **Student accounts** | Students log in to view assigned work | shipped | Distinct `admin_invites.role = student`. Claim sets `student_profiles.user_id` and membership `role = student`. Same published-course gates and chrome as parents, for that one profile |
+| **Student materials view** | Students access shared lesson materials | shipped | Same published enrollment gate as parents, via `user_id` |
+| **Quizzes** | Students take quizzes in-app | deferred | Take-in-app shipped as the P1 course quiz |
 | **Orgs collecting payment from parents** | Tuition / class fees through Course Wright | planned | **Future** — not P0/P1 |
 | **Integrations** | <!-- TBD --> | planned | |
 | **Transcripts / records** | <!-- TBD --> | planned | |
@@ -732,7 +733,6 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 ## Explicitly out of scope (for now)
 
 - **Native mobile apps** (iOS / Android) — web only
-- **Student user accounts** — dedicated student role deferred to P2; P0 can invite optional student email via the parent claim path so that person sees that one student
 - **Full parent family management across orgs** — deferred to P2 (org-scoped Family / parent directory is **P0**)
 - **Orgs collecting tuition from parents** — future; Course Wright bills orgs first
 - **Print whole course** — initial release is material / unit / this week only
@@ -744,10 +744,11 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 
 | Decision | Status | Blocks |
 |----------|--------|--------|
-| Target org types: co-ops, schools (`micro_school`), and family (home materials) | **Decided** | Positioning, onboarding; UI label for `micro_school` is **School**; family = parents making materials at home |
+| Target org types: **Other** (generic organization), co-ops, schools (`micro_school`), and family (home materials) | **Decided** | New orgs default to **Other**; in-app copy uses organization / co-op / school / family from org type; UI label for `micro_school` is **School**; family = parents making materials at home |
 | P0 = course builder (**courses only**) + org management + roster management + RBAC + file sharing + extreme shareability (print + links) | **Decided** | All P0 features; **templates are P1** |
 | Roster management in P0 | **Decided** | StudentProfile, Enrollment, ParentInvite |
-| Student = student_profile, no account (P0/P1) | **Decided** | StudentProfile entity |
+| Student accounts link `student_profiles.user_id` on a student invite claim | **Decided** | Membership role `student`; not `parent_student_links` |
+| P0 roles: owner, admin, instructor, parent, student | **Decided** | RBAC, Membership. Owner vs admin = billing (P1). |
 | First course enrollment creates student_profile in org | **Decided** | Enrollment workflow |
 | Instructors add students to org via course enrollment | **Decided** | RBAC, roster UX |
 | Student profile fields: name (required), parent email (optional), grade level (optional) | **Decided** | StudentProfile |
@@ -765,7 +766,6 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | Course visibility published / unpublished | **Decided** | Unpublished = instructors/admins; published = enrolled parents (students later). New courses start unpublished. Parents need active + published |
 | File sharing minimum in P0 | **Decided** | File upload, Material attachments, parent access |
 | Product analytics: PostHog | **Decided** | STACK.md; HUMAN_NEEDED for project keys |
-| P0 roles: owner, admin, instructor, parent | **Decided** | RBAC, Membership. Owner vs admin = billing (P1). |
 | Parent ↔ staff role change (no re-invite) | **Decided** | One membership row per user/org. Promote parent → staff by updating `memberships.role`. Demote staff → parent only with a `parent_student_links` row for a student in that org. Remove staff only when they have no linked student. |
 | Admin manages accounts in P0 | **Decided** | Invite; **change admin ↔ instructor**; **remove** admins/instructors; cannot remove/demote last owner or admin |
 | Org permalink slug on create | **Decided** | Unique `Organization.slug`; changing it warns that existing links break (no auto-redirect in P0) |
@@ -792,7 +792,7 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | Content organized in units; unit dates optional | **Superseded** | Units optional; materials may be top-level |
 | App entity PKs use **bigserial** / **bigint** (auto-increment) | **Decided** | FKs to app entities are `bigint`; `profiles` / auth stay `uuid` |
 | Material dating: optional unit dates, optional material `scheduled_date` (assignment), optional `due_date` | **Decided** | Assignment date wins for assignment-week membership when set; else unit range if material has a unit; top-level needs `scheduled_date` for assignment-week. Materials also appear on This week when `due_date` falls in the week. UI labels Assigned vs Due |
-| Material submissions | **Decided** | Toggle on a course material. One slot per enrolled student. Teacher sets file groups and how many submissions (1–10, default 2). Each submission is one or more files with one timestamp. Due time is an instant (`due_at`, default 11:59 PM in the saver’s timezone); This week still uses calendar `due_date`. Allow past due defaults on |
+| Material submissions | **Decided** | Toggle on a course material. One slot per enrolled student. Teacher sets file groups and how many submissions (1–10, default 2). Each submission is one or more files with one timestamp. The student account or a linked parent turns it in. Due time is an instant (`due_at`, default 11:59 PM in the saver’s timezone); This week still uses calendar `due_date`. Allow past due defaults on |
 | Multiple instructors per course | **Decided** | CourseInstructor |
 | Class leads (zero or more staff) | **Decided** | Owners/admins assign owner/admin/instructor as `ClassLeader`. Optional. Notified of class discussion posts. |
 | In-app Activity notifications | **Decided** | Stored per user. Discussion posts → instructors, class leads, thread starter, and people who posted (one row per discussion). Staff **Notify everyone** on discussion create. Announcement **Send notification** → claimed families (one row per announcement). Click acks. Installed PWA can also send a device notification for each unread Activity row. |
@@ -831,8 +831,8 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | Class = org group of students, separate from Course | **Decided** | Course enrolls individuals; Class is a batch preset into enroll (not live) |
 | Course roster UI: list-first + batch Enroll students | **Decided** | Multi-select + optional Class preset; batch create-and-enroll |
 | Roster = page noun; Enroll/Unenroll = course verbs | **Decided** | BRANDING; class/org use Add/Remove |
-| Quiz authoring + correct answers + print (blank + answer key) | **Decided** | **P0 page quiz** — Lexical `quiz` node on a lesson page. Not a material kind. Many per page. Whole-page print; parent/student and staff Parent view = questions only; staff Teacher view = answer key. No roster required |
-| Staff parent view (header toggle) | **Decided** | All staff (owner/admin/instructor). Real parent home if linked students; otherwise a preview. Hidden for parent-only users. Default Teacher. Parent view print omits the page-quiz answer key. Course quizzes follow the parent answer-key rule |
+| Quiz authoring + correct answers + print (blank + answer key) | **Decided** | **P0 page quiz** — Lexical `quiz` node on a lesson page. Not a material kind. Many per page. Whole-page print; parent/student and staff **Student view** = questions only; staff Teacher view = answer key. No roster required |
+| Staff parent view (header toggle) | **Decided** | All staff (owner/admin/instructor). Real student home if linked students; otherwise a preview. Hidden for parent-role users. Default Teacher. UI label **Student view**. Student view print omits the page-quiz answer key. Course quizzes follow the parent answer-key rule |
 | Quiz online take + autograde | **Decided** | **P1 course quiz** — outline item, not a page block and not `material_submissions`. Optional start/end. Print when neither is set. Multiple choice, number, and matching can score immediately. Short answer and long answer are stored, not scored. A long answer has 1–20 blank lines. Share answer key with parents (students never). One attempt unless allowed |
 | Page as composable entity (blocks) | **Decided** | Material is the page; no separate Page table required in P0 |
 | Forms as a content kind | **In design** | Job-to-be-done + who responds TBD |

@@ -10,6 +10,8 @@ import { parentWeekCalendar } from "@/parent/model/weekCalendar";
 import { ParentAnnouncementList } from "./ParentAnnouncementList";
 import { ParentFocusRail } from "./ParentFocusRail";
 import { ParentStudentTags } from "./ParentStudentTags";
+import type { OrgType } from "@/organizations/model/orgType";
+import { orgTypeYourNoun } from "@/organizations/model/orgType";
 import type { SchoolDay } from "@/organizations/model/schoolDays";
 
 export function ParentDashboardBody({
@@ -20,6 +22,7 @@ export function ParentDashboardBody({
   preview = false,
   onToggleStudent,
   schoolDays,
+  orgType,
 }: {
   orgSlug: string;
   full: ParentDashboard;
@@ -28,6 +31,7 @@ export function ParentDashboardBody({
   preview?: boolean;
   onToggleStudent: (id: number) => void;
   schoolDays: readonly SchoolDay[];
+  orgType: OrgType;
 }) {
   const [hidden, setHidden] = useState<number[]>([]);
   const hiddenCourseIds = useMemo(() => new Set(hidden), [hidden]);
@@ -36,15 +40,15 @@ export function ParentDashboardBody({
     if (preview) {
       return (
         <p className="mt-4 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-          Open a published course in the sidebar to see it the way a family
+          Open a published course in the sidebar to see it the way a student
           would — without editing tools.
         </p>
       );
     }
     return (
       <p className="mt-6 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-        You’re not on a course yet. When your co-op adds you, this week’s
-        materials will show up here.
+        You’re not on a course yet. When your {orgTypeYourNoun(orgType)} adds you,
+        this week’s materials will show up here.
       </p>
     );
   }

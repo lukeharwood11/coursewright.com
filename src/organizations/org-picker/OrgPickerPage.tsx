@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { PageLoading } from "@/ui/PageLoading";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { CreateOrganizationForm } from "./components/CreateOrganizationForm";
 import { OrgList } from "./components/OrgList";
 import { PendingInvites } from "./components/PendingInvites";
@@ -9,6 +10,9 @@ import { usePendingStaffInvites } from "./hooks/usePendingStaffInvites";
 export function OrgPickerPage() {
   const picker = useOrgPicker();
   const pending = usePendingStaffInvites();
+  useToastOnError(picker.loadError);
+  useToastOnError(pending.loadError);
+  useToastOnError(pending.acceptError);
 
   useEffect(() => {
     document.title = "Organizations · Course Wright";
@@ -35,22 +39,10 @@ export function OrgPickerPage() {
         <PageLoading embedded label="Loading organizations…" />
       ) : null}
 
-      {picker.loadError ? (
-        <p className="mt-6 text-[13.5px] text-[var(--amber-deep)]" role="alert">
-          {picker.loadError}
-        </p>
-      ) : null}
-
-      {pending.loadError ? (
-        <p className="mt-6 text-[13.5px] text-[var(--amber-deep)]" role="alert">
-          {pending.loadError}
-        </p>
-      ) : null}
-
       <PendingInvites
         invites={pending.invites}
         acceptingId={pending.acceptingId}
-        error={pending.acceptError}
+        error={null}
         onAccept={pending.onAccept}
       />
 

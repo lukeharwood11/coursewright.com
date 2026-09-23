@@ -3,6 +3,9 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { caughtErrorMessage, toastCaughtError, toastCheckNetworkConnection } from "@/ui/toast";
+import { isNetworkError } from "@/ui/networkError";
+import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import { getOrganization } from "@/organizations/databridge/organizations";
@@ -18,6 +21,7 @@ import {
   removeClassLeader,
   removeClassMember,
 } from "@/roster/databridge/classes";
+import { inviteCreatedStudents } from "@/roster/databridge/studentInvites";
 import {
   createStudents,
   listStudents,
@@ -30,10 +34,12 @@ import {
   studentsNotIn,
   toggleIdInSet,
   validateStudentBatch,
+  withInviteNote,
   type NewStudentDraft,
 } from "@/roster/model/studentProfile";
 
 export function useClassRoster() {
+  const user = useAuthedUser();
   const { classId: classIdParam } = useParams();
   const classId = classIdParam ? Number(classIdParam) : NaN;
   const { organization, role } = useOrgShell();
@@ -110,7 +116,7 @@ export function useClassRoster() {
       toast(count === 1 ? "Student added to class." : `${count} students added to class.`);
     },
     onError: (error: Error) => {
-      setExistingError(error.message);
+      setExistingError(caughtErrorMessage(error));
     },
   });
 
@@ -127,18 +133,28 @@ export function useClassRoster() {
         classId,
         created.map((student) => student.id),
       );
-      return created.length;
+      const invites = await inviteCreatedStudents({
+        organizationId: organization.id,
+        students: created,
+        invitedBy: user.id,
+      });
+      return { count: created.length, invites };
     },
-    onSuccess: async (count) => {
+    onSuccess: async ({ count, invites }) => {
       setDrafts([emptyStudentDraft()]);
       setPasteText("");
       setNewError(null);
       setPanelOpen(false);
       await invalidateClass(queryClient, organization.id, classId);
-      toast(count === 1 ? "Student added to class." : `${count} students added to class.`);
+      toast(
+        withInviteNote(
+          count === 1 ? "Student added to class." : `${count} students added to class.`,
+          invites,
+        ),
+      );
     },
     onError: (error: Error) => {
-      setNewError(error.message);
+      setNewError(caughtErrorMessage(error));
     },
   });
 
@@ -149,7 +165,7 @@ export function useClassRoster() {
       toast("Student removed from class.");
     },
     onError: (error: Error) => {
-      toast(error.message);
+      toastCaughtError(error);
     },
   });
 
@@ -160,6 +176,9 @@ export function useClassRoster() {
         queryKey: classQueryKeys.leaders(classId),
       });
       toast("Lead added.");
+    },
+    onError: (error: Error) => {
+      if (isNetworkError(error)) toastCheckNetworkConnection();
     },
   });
 
@@ -172,7 +191,7 @@ export function useClassRoster() {
       toast("Lead removed.");
     },
     onError: (error: Error) => {
-      toast(error.message);
+      toastCaughtError(error);
     },
   });
 
@@ -223,7 +242,10 @@ export function useClassRoster() {
     },
     addLead: (userId: string) => addLeadMutation.mutate(userId),
     addingLead: addLeadMutation.isPending,
-    addLeadError: addLeadMutation.error ? addLeadMutation.error.message : null,
+    addLeadError:
+      addLeadMutation.error && !isNetworkError(addLeadMutation.error)
+        ? addLeadMutation.error.message
+        : null,
     onRemoveLead: (userId: string) => removeLeadMutation.mutate(userId),
     availableStudents,
     gradeLabels: organizationQuery.data?.gradeLabels ?? [],

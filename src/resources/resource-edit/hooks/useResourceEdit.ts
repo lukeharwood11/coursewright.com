@@ -4,6 +4,7 @@ import { saveResourceDocument } from "@/resources/databridge/blocks";
 import { editorStateToBlocks } from "@/materials/model/pageContent";
 import { useResource } from "@/resources/resource/hooks/useResource";
 import { validateResourceLinkUrl, validateResourceTitle } from "@/resources/model/validate";
+import { isNetworkError } from "@/ui/networkError";
 
 const FORM_ID = "resource-edit-form";
 
@@ -54,21 +55,22 @@ export function useResourceEdit() {
     setContentDraft(json);
   }
 
-  async function save() {
-    if (!page.item) return;
+  /** Returns true when save succeeded or there was nothing to save. */
+  async function save(): Promise<boolean> {
+    if (!page.item) return false;
     const titleError = validateResourceTitle(title);
     if (titleError) {
       setError(titleError);
-      return;
+      return false;
     }
     if (page.item.type === "link") {
       const urlError = validateResourceLinkUrl(url);
       if (urlError) {
         setError(urlError);
-        return;
+        return false;
       }
     }
-    if (!placementChanged && !contentChanged) return;
+    if (!placementChanged && !contentChanged) return true;
     setSaving(true);
     setError(null);
     try {
@@ -88,8 +90,16 @@ export function useResourceEdit() {
         setContentBaseline(contentDraft);
       }
       page.invalidate();
+      return true;
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Couldn’t save.");
+      setError(
+        isNetworkError(caught)
+          ? "Failed to fetch"
+          : caught instanceof Error
+            ? caught.message
+            : "Couldn’t save.",
+      );
+      return false;
     } finally {
       setSaving(false);
     }

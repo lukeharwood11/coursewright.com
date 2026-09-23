@@ -115,7 +115,7 @@ export function describeAllowedFiles(allowed: readonly SubmissionFileType[]): st
 }
 
 export function turnInTypeMessage(allowed: readonly SubmissionFileType[]): string {
-  return `Turn in ${describeAllowedFiles(allowed)}.`;
+  return `Submit ${describeAllowedFiles(allowed)}.`;
 }
 
 export function acceptAttribute(allowed: readonly SubmissionFileType[]): string {

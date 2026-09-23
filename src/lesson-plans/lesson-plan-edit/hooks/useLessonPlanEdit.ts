@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  formOrMutationError,
+  toastCheckNetworkConnection,
+} from "@/ui/toast";
+import { isNetworkError } from "@/ui/networkError";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
@@ -175,6 +180,9 @@ export function useLessonPlanEdit() {
       invalidate(result.id);
       navigate(lessonPlanPath(organization.slug, courseId, result.id));
     },
+    onError: (error: Error) => {
+      if (isNetworkError(error)) toastCheckNetworkConnection();
+    },
   });
 
   const setVisibility = useMutation({
@@ -237,7 +245,7 @@ export function useLessonPlanEdit() {
     materials: materialsQuery.data ?? [],
     units: unitsQuery.data ?? [],
     hasChanges,
-    formError: formError ?? save.error?.message ?? null,
+    formError: formOrMutationError(formError, save.error),
     saving: save.isPending,
     visibilityPending: setVisibility.isPending,
     setVisibility,

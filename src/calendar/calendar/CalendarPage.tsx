@@ -21,41 +21,32 @@ export function CalendarPage() {
 
   return (
     <div className="px-5 py-8 md:px-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3">
+        <div className="flex w-full basis-full items-center justify-between gap-3">
           <h1
-            className="text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
+            className="min-w-0 text-[24px] font-semibold text-[var(--ink)] md:text-[26px]"
             style={{ fontFamily: "var(--font-display)" }}
           >
             Calendar
           </h1>
-          <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
-            {page.periodLabel}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
           {page.parentMode ? null : (
             <ButtonLink
               to={newEventPath(page.organization.slug, { date: page.focusDate })}
+              className="shrink-0"
             >
               <PlusIcon className="h-5 w-5" aria-hidden />
               Add event
             </ButtonLink>
           )}
-          <CalendarToolbar
-            view={page.view}
-            onPrev={page.goPrev}
-            onNext={page.goNext}
-            onViewChange={page.setView}
-          />
         </div>
+        <p className="text-[14px] text-[var(--ink-soft)]">{page.periodLabel}</p>
+        <CalendarToolbar
+          view={page.view}
+          onPrev={page.goPrev}
+          onNext={page.goNext}
+          onViewChange={page.setView}
+        />
       </div>
-
-      <p className="mt-3 text-[13px] text-[var(--ink-faint)]">
-        Filled chips are due. Outlined chips are assigned. Events show the title here, and the
-        time and location when you open the day. Tap a class in the legend to hide it. Tap a day
-        to open that day.
-      </p>
 
       <div className="mt-4">
         <CourseLegend

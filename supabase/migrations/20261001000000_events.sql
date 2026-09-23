@@ -37,10 +37,7 @@ create table public.events (
     )
   ),
   constraint events_title_chk check (char_length(btrim(title)) > 0),
-  constraint events_location_chk check (
-    char_length(btrim(location)) > 0
-    and char_length(location) <= 200
-  ),
+  constraint events_location_chk check (char_length(location) <= 200),
   constraint events_dates_chk check (ends_on is null or ends_on >= starts_on),
   constraint events_times_chk check (
     (end_time is null or start_time is not null)
@@ -65,7 +62,7 @@ before update on public.events
 for each row execute function private.set_updated_at();
 
 comment on table public.events is
-  'SCHEMA.md Event — one course, several classes, or the whole organization; location required';
+  'SCHEMA.md Event — one course, several classes, or the whole organization; optional location';
 
 create or replace function private.event_targets_in_org()
 returns trigger
@@ -423,8 +420,18 @@ alter table public.event_materials enable row level security;
 
 create policy events_select on public.events
 for select to authenticated
-using ((select private.can_view_event(id)));
-
+using (
+  deleted_at is null
+  and (
+    (select private.can_manage_event(
+      organization_id,
+      audience,
+      course_ids,
+      class_ids
+    ))
+    or (select private.parent_can_view_event(id))
+  )
+);
 create policy events_insert on public.events
 for insert to authenticated
 with check (

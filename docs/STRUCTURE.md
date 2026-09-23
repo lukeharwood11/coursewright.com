@@ -82,7 +82,7 @@ src/
 ├── submissions/              # families turn in files on a material
 ├── quizzes/                  # course quiz: take in the app or print
 ├── search/                   # P0 advanced / cross-facet search (when implemented)
-├── sharing/                  # resource links, share with parents
+├── sharing/                  # resource links, share with students
 ├── print/                    # print material / unit / this week
 ├── parent/                   # this week calendar + Focus + announcements
 ├── announcements/            # one-way notices (course / class / student)

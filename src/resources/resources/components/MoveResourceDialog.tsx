@@ -8,6 +8,7 @@ import {
   HomeIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
+import { useToastOnError } from "@/ui/useToastOnError";
 import {
   listOrgResourceFolders,
   resourceFolderQueryKeys,
@@ -124,6 +125,9 @@ export function MoveResourceDialog({
     queryFn: () => listOrgResourceFolders(organizationId),
     enabled: open,
   });
+  useToastOnError(
+    open && foldersQuery.isError ? (foldersQuery.error?.message ?? null) : null,
+  );
   const folders = foldersQuery.data ?? [];
   const excluded = useMemo(() => {
     const roots = [
@@ -197,8 +201,8 @@ export function MoveResourceDialog({
               Loading folders…
             </p>
           ) : foldersQuery.isError ? (
-            <p className="px-2 py-3 text-[13.5px] text-[var(--amber-deep)]">
-              Couldn’t load folders.
+            <p className="px-2 py-3 text-[13.5px] text-[var(--ink-faint)]">
+              Folders unavailable
             </p>
           ) : (
             <ul className="flex flex-col gap-0.5" aria-label="Folder outline">

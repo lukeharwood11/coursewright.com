@@ -5,6 +5,8 @@ import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { Wordmark } from "@/ui/Wordmark";
+import { isNetworkError } from "@/ui/networkError";
+import { toastCheckNetworkConnection } from "@/ui/toast";
 import { GoogleMark } from "./GoogleMark";
 import { signInWithEmail } from "@/auth/api/signInWithEmail";
 import { signInWithPassword } from "@/auth/api/signInWithPassword";
@@ -59,11 +61,19 @@ export function AuthScreen({
   const [awaitingEmailVerification, setAwaitingEmailVerification] = useState(false);
   const showPassword = passwordSignIn || passwordSignUp;
 
+  function showError(error: string) {
+    if (isNetworkError(error)) {
+      toastCheckNetworkConnection();
+      return;
+    }
+    setMessage(error);
+  }
+
   async function onGoogle() {
     setBusy(true);
     setMessage(null);
     const result = await signInWithGoogle(nextPath);
-    if (result.error) setMessage(result.error);
+    if (result.error) showError(result.error);
     setBusy(false);
   }
 
@@ -75,7 +85,7 @@ export function AuthScreen({
     setBusy(true);
     setMessage(null);
     const result = await signInWithEmail(email.trim(), nextPath);
-    if (result.error) setMessage(result.error);
+    if (result.error) showError(result.error);
     else setMessage("Check your email for a sign-in link.");
     setBusy(false);
   }
@@ -90,7 +100,7 @@ export function AuthScreen({
       setBusy(true);
       setMessage(null);
       const result = await signUpWithPassword(email.trim(), password, nextPath);
-      if (result.error) setMessage(result.error);
+      if (result.error) showError(result.error);
       else if (result.needsEmailVerification) setAwaitingEmailVerification(true);
       setBusy(false);
       return;
@@ -104,7 +114,7 @@ export function AuthScreen({
     setBusy(true);
     setMessage(null);
     const result = await signInWithPassword(email.trim(), password);
-    if (result.error) setMessage(friendlySignInError(result.error));
+    if (result.error) showError(friendlySignInError(result.error));
     setBusy(false);
   }
 

@@ -32,7 +32,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - Optional **teachers / leads** (owners, admins, or instructors assigned to this class)
 - Members: **name**, optional **grade**, optional parent / student email
 - Batch picker of org students not already in the class
-- New-student draft rows: name (required), parent email, student email, grade (org scheme)
+- New-student draft rows: name (required), optional student email (invite goes out on add), optional parent email, grade (org scheme)
 
 ## Contents
 

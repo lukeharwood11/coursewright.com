@@ -1,6 +1,8 @@
+import { useRef } from "react";
 import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { Input } from "@/ui/Input";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { DEFAULT_CHROME } from "@/organizations/model/brand";
 import { useOrgBranding } from "../hooks/useOrgBranding";
 import { BrandingPreview } from "./BrandingPreview";
@@ -15,7 +17,15 @@ export function BrandingSection({
   canManage: boolean;
 }) {
   const branding = useOrgBranding(organizationId);
+  useToastOnError(branding.loadError);
   const colorValue = branding.preview.accent || DEFAULT_CHROME.accent;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const iconStatus = branding.iconFileName
+    ? branding.iconFileName
+    : branding.iconUrl
+      ? "Current icon"
+      : "No icon selected";
 
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
@@ -45,26 +55,43 @@ export function BrandingSection({
 
           {canManage ? (
             <div className="flex flex-col gap-3">
-              <label className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">Icon</span>
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept="image/png,image/jpeg,image/webp"
-                  className="text-[14px] text-[var(--ink)] file:mr-3 file:rounded-[6px] file:border file:border-[var(--line)] file:bg-[var(--surface)] file:px-3 file:py-2 file:text-[13px] file:font-bold file:text-[var(--ink)]"
+                  className="sr-only"
                   onChange={(event) => {
                     branding.onIconChange(event.target.files?.[0] ?? null);
                     event.target.value = "";
                   }}
                 />
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {branding.iconUrl || branding.iconFileName
+                      ? "Replace icon"
+                      : "Choose icon"}
+                  </Button>
+                  {branding.iconUrl ? (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={branding.onRemoveIcon}
+                    >
+                      Remove icon
+                    </Button>
+                  ) : null}
+                </div>
+                <span className="text-[13.5px] text-[var(--ink)]">{iconStatus}</span>
                 <span className="text-[12.5px] text-[var(--ink-faint)]">
                   Square PNG, JPEG, or WebP, under 256 KB.
                 </span>
-              </label>
-              {branding.iconUrl ? (
-                <Button variant="secondary" onClick={branding.onRemoveIcon}>
-                  Remove icon
-                </Button>
-              ) : null}
+              </div>
 
               <label className="flex flex-col gap-1">
                 <span className="text-[13px] font-bold text-[var(--ink-soft)]">Accent color</span>

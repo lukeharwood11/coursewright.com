@@ -68,7 +68,7 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Org grade scheme | [ORG_SETTINGS](./ORG_SETTINGS.md) |
 | Authentication (email password / magic link + Google) | [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md) |
 | Account / org-visible people | [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md), [USER_PROFILE](./USER_PROFILE.md) |
-| RBAC (owner / admin / instructor / parent) | Role splits on [ORG_HOME](./ORG_HOME.md) + gated pages; staff **Parent view** in org chrome |
+| RBAC (owner / admin / instructor / parent) | Role splits on [ORG_HOME](./ORG_HOME.md) + gated pages; staff **Student view** in org chrome |
 | Student profiles | [ORG_ROSTER](./ORG_ROSTER.md), [STUDENT_PROFILE](./STUDENT_PROFILE.md), [COURSE_ROSTER](./COURSE_ROSTER.md), [CLASS](./CLASS.md) |
 | Roster / enrollments / parent linkage & invites | [ORG_ROSTER](./ORG_ROSTER.md), [COURSE_ROSTER](./COURSE_ROSTER.md), [STUDENT_PROFILE](./STUDENT_PROFILE.md), [CLASS](./CLASS.md) |
 | Families / parent directory | [FAMILIES](./FAMILIES.md), [FAMILY](./FAMILY.md) — feature kept; SPA UI not currently routed |
@@ -78,9 +78,9 @@ Every P0 feature in [FEATURES.md](../FEATURES.md) maps to at least one locked pa
 | Classes (student groups) | [ORG_ROSTER](./ORG_ROSTER.md) (list/create), [CLASS](./CLASS.md) |
 | File / content versioning, soft deletes | [MATERIAL](./MATERIAL.md), [COURSE](./COURSE.md) |
 | Homework = dated materials; Important now; **Lesson plans**; Calendar; **Announcements** | [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [MATERIAL](./MATERIAL.md), [LESSON_PLAN](./LESSON_PLAN.md), [ANNOUNCEMENT](./ANNOUNCEMENT.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [COURSE](./COURSE.md) |
-| Parent dashboard / access rules | [ORG_HOME](./ORG_HOME.md); claim via [INVITE_CLAIM](./INVITE_CLAIM.md) / [LOGIN](./LOGIN.md) / [SIGNUP](./SIGNUP.md) |
+| Student home / access rules | [ORG_HOME](./ORG_HOME.md); claim via [INVITE_CLAIM](./INVITE_CLAIM.md) / [LOGIN](./LOGIN.md) / [SIGNUP](./SIGNUP.md) |
 | Print (material / unit / this week) | [PRINT](./PRINT.md); entry from [MATERIAL](./MATERIAL.md), [UNIT](./UNIT.md), [ORG_HOME](./ORG_HOME.md) |
-| Resource links / share with parents | [MATERIAL](./MATERIAL.md) (entry URL TBD) |
+| Resource links / share with students | [MATERIAL](./MATERIAL.md) (entry URL TBD) |
 | Advanced search | Product chrome — [ORG_HOME](./ORG_HOME.md) + org chrome; route TBD |
 | Marketing / trust | [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [TERMS](./TERMS.md), [COOKIES](./COOKIES.md), [DOCS](./DOCS.md) |
 

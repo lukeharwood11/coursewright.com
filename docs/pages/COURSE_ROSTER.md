@@ -30,7 +30,7 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
 - Enrolled students: **name**, optional **grade**, parent / student email / invite status
 - Batch picker of org students not already enrolled
 - Optional class list for preset
-- New-student draft rows: name (required), parent email, student email, grade (org scheme)
+- New-student draft rows: name (required), optional student email (invite goes out on add), optional parent email, grade (org scheme)
 
 ## Contents
 

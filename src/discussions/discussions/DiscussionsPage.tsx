@@ -33,11 +33,6 @@ export function DiscussionsPage() {
           >
             Discussions
           </h1>
-          {page.isParent ? (
-            <p className="mt-1 max-w-xl text-[14px] leading-relaxed text-[var(--ink-soft)]">
-              Talk with other families and teachers in a course or class.
-            </p>
-          ) : null}
         </div>
         {page.canCompose ? (
           <ButtonLink to={newDiscussionPath(page.organization.slug)}>
@@ -56,21 +51,11 @@ export function DiscussionsPage() {
 
       {page.items.length === 0 ? (
         <p className="mt-6 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-          {emptyCopy(page.isParent, page.canCompose)}
+          There are no discussions at this time.
         </p>
       ) : (
         <DiscussionList orgSlug={page.organization.slug} items={page.items} />
       )}
     </div>
   );
-}
-
-function emptyCopy(isParent: boolean, canCompose: boolean): string {
-  if (isParent && !canCompose) {
-    return "Discussions are for a class your child is in, or a course they are enrolled in.";
-  }
-  if (canCompose) {
-    return "No discussions yet. Start one when a course or class needs a place to talk.";
-  }
-  return "No discussions yet.";
 }

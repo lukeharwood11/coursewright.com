@@ -4,11 +4,11 @@ Design-system primitives from [STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md).
 
 ## Scope
 
-- Button, ButtonLink, Input, Select, Wordmark, Badge, PublishedBadge, Avatar, PageFormActions, ConfirmDialog, InfoHint, **PageLoading** (animated mark + optional label)
+- Button, ButtonLink, Input, Select, Wordmark, Badge, PublishedBadge, Avatar, PageFormActions (optional desktop **Save & close**; optional **Close** when unchanged), ConfirmDialog, InfoHint, **PageLoading** (animated mark + optional label)
 - **DetailPageHeader** — shared detail-screen chrome (surface bar, compact title + inline back, meta, actions)
 - `AnchoredPopup` — viewport-aware menus / tooltips (flip and stay in frame)
 - `InfoHint` — information-circle button + anchored tooltip (lesson plans, class leads, …)
-- `toastNotImplemented` / `toastSomethingWentWrong` (sonner); `useToastOnError` for load/mutation failures instead of page error copy
+- `toastNotImplemented` / `toastSomethingWentWrong` / `toastCheckNetworkConnection` / `toastCaughtError` / `caughtErrorMessage` (sonner); `isNetworkError`; `useToastOnError` for load/mutation failures instead of page error copy (network failures toast “Check your network connection…”)
 - Storybook stories colocated as `*.stories.tsx`
 - No product flows
 

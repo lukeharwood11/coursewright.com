@@ -50,6 +50,10 @@ test("the attribution line names the parent and the child", () => {
   );
 });
 
+test("a student turning in for themselves is just their name", () => {
+  assert.equal(attributionLine("Sam Rivera", "Sam Rivera"), "Sam Rivera");
+});
+
 test("every file in the batch must match the allowed kinds", () => {
   assert.equal(
     turnInBatchError(
@@ -59,7 +63,7 @@ test("every file in the batch must match the allowed kinds", () => {
       ],
       ["image"],
     ),
-    "Turn in a photo.",
+    "Submit a photo.",
   );
   assert.equal(
     turnInBatchError(

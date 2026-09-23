@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   PARENT_ROLE_NEEDS_STUDENT_MESSAGE,
   REMOVE_LINKED_PARENT_MESSAGE,
+  STUDENT_ROLE_NEEDS_ACCOUNT_MESSAGE,
   assignableMembershipRoles,
   staffMemberActions,
   validateChangeStaffRole,
@@ -94,6 +95,33 @@ test("validateChangeStaffRole rejects parent demotion without a linked student",
     ok: false,
     error: PARENT_ROLE_NEEDS_STUDENT_MESSAGE,
   });
+});
+
+test("validateChangeStaffRole rejects student demotion without a linked account", () => {
+  const result = validateChangeStaffRole({
+    actorRole: "admin",
+    currentRole: "instructor",
+    nextRole: "student",
+    isLastManager: false,
+    hasLinkedStudent: false,
+    hasStudentAccount: false,
+  });
+  assert.deepEqual(result, {
+    ok: false,
+    error: STUDENT_ROLE_NEEDS_ACCOUNT_MESSAGE,
+  });
+});
+
+test("assignableMembershipRoles offers student when the account is linked", () => {
+  assert.deepEqual(
+    assignableMembershipRoles({
+      actorRole: "owner",
+      currentRole: "instructor",
+      hasLinkedStudent: false,
+      hasStudentAccount: true,
+    }),
+    ["instructor", "admin", "owner", "student"],
+  );
 });
 
 test("validateRemoveStaffMember rejects linked parents", () => {

@@ -27,7 +27,8 @@ Open one org resource: a **document** (Lexical page), **link**, or **file**.
 - Name (all types — file **resource title**, not the Storage blob name).
 - Description.
 - Link URL when type is link.
-- Document: Lexical editor; save in the header.
+- **Save** / **Cancel** (reads **Close** when unchanged) in the header; on desktop also **Save & close** (primary; saves then returns to the resource view).
+- Document: Lexical editor for the body.
 - Cancel with unsaved changes confirms.
 
 Not found: back to Resources.
@@ -48,7 +49,7 @@ Not found: back to Resources.
 ## Primary actions
 
 - Print
-- Edit / Save
+- Edit / Save / (desktop) Save & close; Cancel reads Close when unchanged
 - Move / Manage access (staff) under header **⋯**
 - Publish / Unpublish
 - Remove
@@ -58,7 +59,7 @@ Not found: back to Resources.
 - [RESOURCE_FOLDER](./RESOURCE_FOLDER.md) or [RESOURCES](./RESOURCES.md) — back
 - [PRINT](./PRINT.md) — `/my/<org-slug>/resources/items/<item_id>/print`
 - Via org chrome (staff Teacher view): [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [ACTIVITY](./ACTIVITY.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md), [FEEDBACK](./FEEDBACK.md)
-- Via parent chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [RESOURCES](./RESOURCES.md), [ACTIVITY](./ACTIVITY.md)
+- Via student chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [RESOURCES](./RESOURCES.md), [ACTIVITY](./ACTIVITY.md)
 
 ## Notes
 

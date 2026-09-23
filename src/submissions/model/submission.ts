@@ -43,10 +43,11 @@ export function pastDueBlocksTurnIn(args: {
   return args.now.getTime() > due;
 }
 
-export function attributionLine(parentName: string, childName: string): string {
-  const parent = parentName.trim() || "Parent";
+export function attributionLine(submitterName: string, childName: string): string {
+  const submitter = submitterName.trim() || "Someone";
   const child = childName.trim() || "student";
-  return `${parent} on behalf of ${child}`;
+  if (submitter.toLowerCase() === child.toLowerCase()) return submitter;
+  return `${submitter} on behalf of ${child}`;
 }
 
 export type TurnInFile = { name: string; type: string };
@@ -57,7 +58,7 @@ export function turnInBatchError(
 ): string | null {
   if (files.length < 1) return "Choose at least one file.";
   if (files.length > MAX_FILES_PER_TURN_IN) {
-    return `Turn in up to ${MAX_FILES_PER_TURN_IN} files at a time.`;
+    return `Submit up to ${MAX_FILES_PER_TURN_IN} files at a time.`;
   }
   const rejected = files.find(
     (file) => !fileAllowedForSubmission(allowed, file.name, file.type),

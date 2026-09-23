@@ -173,6 +173,24 @@ export function validateStudentBatch(
   return { ok: true, values };
 }
 
+export function withInviteNote(
+  base: string,
+  invites: { withEmail: number; sent: number; failed: number },
+): string {
+  if (invites.withEmail === 0) return base;
+  if (invites.failed === 0) {
+    return `${base} ${invites.sent === 1 ? "Invite sent." : "Invites sent."}`;
+  }
+  if (invites.sent === 0) {
+    return `${base} ${
+      invites.withEmail === 1
+        ? "The invite email didn’t send."
+        : "The invite emails didn’t send."
+    }`;
+  }
+  return `${base} ${invites.sent} ${invites.sent === 1 ? "invite" : "invites"} sent. ${invites.failed} didn’t send.`;
+}
+
 export function toggleIdInSet(ids: number[], id: number): number[] {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
 }

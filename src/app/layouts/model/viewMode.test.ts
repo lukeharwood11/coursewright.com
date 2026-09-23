@@ -10,6 +10,12 @@ import {
   staffShowsParentPresentation,
 } from "./viewMode.ts";
 
+test("student-role users always see parent presentation and no toggle", () => {
+  assert.equal(staffShowsParentPresentation("student", "teacher"), true);
+  assert.equal(canUseStaffViewToggle("student"), false);
+  assert.equal(staffCanEdit("student", true), false);
+});
+
 test("parent-only users always see parent presentation and no toggle", () => {
   assert.equal(staffShowsParentPresentation("parent", "teacher"), true);
   assert.equal(staffShowsParentPresentation("parent", "parent"), true);
@@ -17,7 +23,7 @@ test("parent-only users always see parent presentation and no toggle", () => {
   assert.equal(staffCanEdit("parent", true), false);
 });
 
-test("staff default to teacher presentation until Parent view is on", () => {
+test("staff default to teacher presentation until Student view is on", () => {
   for (const role of ["owner", "admin", "instructor"] as const) {
     assert.equal(canUseStaffViewToggle(role), true);
     assert.equal(staffShowsParentPresentation(role, "teacher"), false);

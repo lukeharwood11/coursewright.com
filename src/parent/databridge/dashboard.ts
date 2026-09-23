@@ -35,6 +35,31 @@ export const parentQueryKeys = {
     ["parent", "dashboard", orgId, userId] as const,
 };
 
+export async function loadFamilyStudentIds(
+  organizationId: number,
+  userId: string,
+): Promise<number[]> {
+  const db = requireSupabase();
+  const { data: ownProfiles, error: ownError } = await db
+    .from("student_profiles")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .eq("user_id", userId);
+
+  if (ownError) throw new Error(ownError.message);
+
+  const ownIds = (ownProfiles ?? []).map((row) => row.id);
+  if (ownIds.length > 0) return ownIds;
+
+  const { data: links, error: linksError } = await db
+    .from("parent_student_links")
+    .select("student_profile_id")
+    .eq("parent_user_id", userId);
+
+  if (linksError) throw new Error(linksError.message);
+  return (links ?? []).map((row) => row.student_profile_id);
+}
+
 export async function loadParentDashboard(
   organizationId: number,
   userId: string,
@@ -43,14 +68,7 @@ export async function loadParentDashboard(
   const week = calendarWeekContaining();
   const today = localIsoDate();
 
-  const { data: links, error: linksError } = await db
-    .from("parent_student_links")
-    .select("student_profile_id")
-    .eq("parent_user_id", userId);
-
-  if (linksError) throw new Error(linksError.message);
-
-  const studentIds = (links ?? []).map((row) => row.student_profile_id);
+  const studentIds = await loadFamilyStudentIds(organizationId, userId);
   if (studentIds.length === 0) {
     return buildParentDashboard({
       week,

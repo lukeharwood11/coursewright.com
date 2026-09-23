@@ -250,7 +250,7 @@ Deprecate is the safe default when content should retire without disrupting live
 1. Instructors (and admins) can add students when managing a course roster.
 2. If the student does not yet exist in the org, enrolling them in a course **creates a `student_profile`** under the organization.
 3. No `User` account is created for the student in P0/P1.
-4. In P2, a student `User` account can be **linked** to an existing `student_profile` via `user_id`.
+4. A student `User` account is **linked** to an existing `student_profile` via `user_id` when a student invite is claimed.
 
 ### CourseInstructor
 
@@ -339,7 +339,7 @@ UI map: [URLS.md](../URLS.md), [PRINT](../pages/PRINT.md).
 | id | bigint | PK |
 | name | text | |
 | slug | text | **Unique permalink** — generated on create; changeable with UX warning that links will break |
-| org_type | text | `coop` · `micro_school` · `family` |
+| org_type | text | `other` (default for new orgs) · `coop` · `micro_school` · `family` |
 | grade_scheme | text | `k12` · `custom` |
 | grade_labels | text[] | Allowed labels for student `grade_level` and course/template `grade_levels`. K–12 preset includes K, 1–12, and common bands (K-2, 3-5, 6-8, 9-12). Custom is org-defined. |
 | school_days | smallint[] | Weekdays the org operates. Values match JS `Date.getDay()` (`0` Sunday … `6` Saturday). Default `{1,2,3,4,5}` (Mon–Fri). At least one unique value in `0..6`. Lesson-plan compose defaults to these days; the Sunday–Saturday week model is unchanged. |
@@ -385,43 +385,45 @@ Authenticated users only: admins, instructors, parents. **Not students** (P0/P1)
 
 ### Membership
 
-Org staff and parent memberships. One active membership per user per org (single `role`). Owners and admins may **change** roles among `admin` ↔ `instructor` ↔ `parent` (and owners may assign `owner`) and **remove** admin/instructor memberships that have no linked student. Setting `role = parent` requires an existing `ParentStudentLink` to a `StudentProfile` in that org (so a parent can be promoted to staff without a new invite, and staff can be demoted back to parent only when they still parent a student). **Cannot** remove or demote the last remaining `owner` or `admin`. These writes touch **`memberships` only**. Course materials and roster stay **enrollment-gated** (and `ParentStudentLink` where applicable) — do **not** add a second staff-role gate on content RLS.
+Org staff and parent or student memberships. One active membership per user per org (single `role`). Owners and admins may **change** roles among `admin` ↔ `instructor` ↔ `parent` ↔ `student` (and owners may assign `owner`) and **remove** admin/instructor memberships that have no linked student and no student account. Setting `role = parent` requires an existing `ParentStudentLink` to a `StudentProfile` in that org. Setting `role = student` requires `StudentProfile.user_id` for that user in the org. **Cannot** remove or demote the last remaining `owner` or `admin`. These writes touch **`memberships` only**. Course materials and roster stay **enrollment-gated** (and `ParentStudentLink` or `StudentProfile.user_id` where applicable) — do **not** add a second staff-role gate on content RLS.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
 | user_id | uuid | FK → User, **nullable** until invite is claimed |
-| role | text | owner · admin · instructor · parent |
+| role | text | owner · admin · instructor · parent · student |
 | status | text | active · invited · suspended |
 
 ### AdminInvite
 
-Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` (staff) or `parent`. Claimed by opening `/invite/<token>` or by signing in with that email and accepting a pending request. **Anyone with the token can preview** org name, role, and invited email via `get_invite` (unsigned `email_matches` is false). **Claim still requires** a signed-in account on that email. **Membership is created on claim.** Parent course access still requires enrollment (see Parent access gate).
+Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` (staff), `parent`, or `student`. Claimed by opening `/invite/<token>` or by signing in with that email and accepting a pending request. **Anyone with the token can preview** org name, role, and invited email via `get_invite` (unsigned `email_matches` is false). **Claim still requires** a signed-in account on that email. **Membership is created on claim.** Family course access still requires enrollment (see Parent access gate). Student claim also sets `StudentProfile.user_id`.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
 | email | text | Lowercased — must match the account that claims |
-| role | text | `owner` · `admin` · `instructor` · `parent` |
-| student_profile_id | bigint | FK → StudentProfile, **required when `role = parent`** (anchor student), else null |
+| role | text | `owner` · `admin` · `instructor` · `parent` · `student` |
+| student_profile_id | bigint | FK → StudentProfile, **required when `role` is `parent` or `student`** (anchor student), else null |
 | invited_by | uuid | FK → User |
 | token | text | Unique invite token (returned on insert; used in `/invite/<token>`) |
 | accepted_at | timestamptz | nullable |
 | membership_id | bigint | FK → Membership, nullable |
 
-**Pending uniqueness:** one pending staff invite per `(organization_id, email)`; one pending parent invite per `(organization_id, email)`. Additional students for a parent invite attach via `admin_invite_students`.
+**Pending uniqueness:** one pending staff invite per `(organization_id, email)`; one pending parent invite per `(organization_id, email)`; one pending student invite per `(organization_id, email)`. Additional students for a parent invite attach via `admin_invite_students`. Student invites do not attach extra students.
 
 **Who can invite staff:** owners and admins. Admins may invite `admin` or `instructor`. Only owners may invite another `owner`. Instructors cannot invite org staff.
 
 **Who can invite parents:** owners, admins, and instructors. Parent invites are created from roster / student profile (copy `/invite/<token>`). Same email for another student attaches to the existing pending invite (no second email). The Families directory, when routed, attaches chosen students to one pending invite when linking an email with no account.
 
+**Who can invite students:** owners, admins, and instructors. One profile per invite. Claim sets `student_profiles.user_id` and creates membership `role = student` unless the person is already staff (staff role is kept; `user_id` is still set).
+
 ---
 
 ### StudentProfile
 
-Org-level student record. **No dedicated student membership role in P0/P1.** Optional `student_email` may be invited with the parent claim path so that person sees this student's work.
+Org-level student record. Optional **student account**: `user_id` is set when a `role = student` invite is claimed.
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -429,13 +431,15 @@ Org-level student record. **No dedicated student membership role in P0/P1.** Opt
 | organization_id | bigint | FK → Organization |
 | name | text | **Required** — only required field |
 | parent_email | text | **Optional** — first parent email for create/search; more parents via invites + `ParentStudentLink` |
-| student_email | text | **Optional** — student contact email; invite uses parent claim path (student role is P2) |
+| student_email | text | **Optional** — student contact email; invite uses `admin_invites.role = student` |
 | grade_level | text | **Optional** — must be in org `grade_labels` when set |
-| user_id | uuid | FK → User, **nullable** — linked in P2 when student gets an account |
+| user_id | uuid | FK → User, **nullable** — set on student-invite claim. Unique per org when set |
 | created_at | timestamptz | |
 | created_via_course_id | bigint | FK → Course, nullable — course that triggered first enrollment |
 
 No other student-profile fields in P0 besides optional parent/student emails and grade.
+
+Staff may **delete** a profile. Class membership, enrollments, parent links, and invites cascade. If `user_id` has a `role = student` membership in the org, that membership ends. A staff role on the same account is kept.
 
 ### Family
 
@@ -624,7 +628,7 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 | due_date | date | **optional** — calendar due day; materials also appear on parent This week when this date falls in the week |
 | due_at | timestamptz | **optional** — due instant for submissions. Null until the due date is saved with a time. Default wall time is 11:59 PM |
 | due_timezone | text | **optional** — IANA zone captured when the due time is saved. Display the deadline in this zone |
-| accept_submissions | boolean | default false. Linked parents may turn in files for an enrolled student |
+| accept_submissions | boolean | default false. The student account or a linked parent may turn in files for an enrolled student |
 | allow_submissions_past_due | boolean | default true. When false, turn-in stops after `due_at` |
 | submission_limit | int | 1–10, default 2. How many times one student may turn work in |
 | submission_file_types | text[] | `pdf` · `image` · `document` · `audio` · `video`. At least one when accept submissions is on |
@@ -650,9 +654,9 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 
 ### Material submission
 
-A family turns work in on a **course** material with `accept_submissions`. Not a quiz attempt (`quiz_attempts`). Not a separate assignment object.
+A student (or a linked parent on their behalf) turns work in on a **course** material with `accept_submissions`. Not a quiz attempt (`quiz_attempts`). Not a separate assignment object.
 
-One `material_submissions` row per student per material (unique while not deleted). Any parent linked to that student uploads into the same slot.
+One `material_submissions` row per student per material (unique while not deleted). The student’s account and any parent linked to that student upload into the same slot.
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -663,13 +667,13 @@ One `material_submissions` row per student per material (unique while not delete
 | student_profile_id | bigint | FK → StudentProfile |
 | deleted_at | timestamptz | soft delete. The app does not delete turned-in work |
 
-**Version** (`material_submission_versions`): `version` starts at 1. Unique `(submission_id, version)`. `submitted_by` is the parent. `submitted_at` is set when every file in the batch has landed. The count of versions cannot pass `submission_limit` (enforced in the RPC). Lowering the limit does not hide versions already stored.
+**Version** (`material_submission_versions`): `version` starts at 1. Unique `(submission_id, version)`. `submitted_by` is the parent or student account that turned it in. `submitted_at` is set when every file in the batch has landed. The count of versions cannot pass `submission_limit` (enforced in the RPC). Lowering the limit does not hide versions already stored.
 
 **Files** (`material_submission_files`): one or more per version, each an immutable `files` row. Unique `file_id`. A later submission does not replace an earlier file.
 
-**Who can read:** course managers (`can_manage_course`) see every student. A parent sees a submission only for a student they are linked to, and only while the material is published and they can view the course. Submission files are **not** readable by every family who can see the material.
+**Who can read:** course managers (`can_manage_course`) see every student. A parent sees a submission only for a student they are linked to, and only while the material is published and they can view the course. A student account sees only their own slot under the same published-course gate. Submission files are **not** readable by every family who can see the material.
 
-**Who can write:** `begin_material_submission` / `finish_material_submission` only. The parent must be linked, the student enrolled and active, the material published and accepting submissions, every file in an allowed group, and the past-due rule must allow it. Parents do not get a general file insert.
+**Who can write:** `begin_material_submission` / `finish_material_submission` only. The caller must be the student (`student_profiles.user_id`) or a linked parent, the student enrolled and active, the material published and accepting submissions, every file in an allowed group, and the past-due rule must allow it. Families do not get a general file insert.
 
 An in-progress upload claim (`material_submission_uploads`) holds file ids between begin and finish. It is not a submission. Abandoned claims stay unreferenced.
 
@@ -901,7 +905,7 @@ Unique `(lesson_plan_day_id, material_id)`. Families only follow links to **publ
 
 ### Event
 
-A calendar item for **one course**, **one or more classes**, or the **whole organization** (no course and no class). Not a course material. One row is the event everywhere it appears. **Location** is required. Optional end date (inclusive) and optional start/end times. No repeat.
+A calendar item for **one course**, **one or more classes**, or the **whole organization** (no course and no class). Not a course material. One row is the event everywhere it appears. **Location** is optional. Optional end date (inclusive) and optional start/end times. No repeat.
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -911,7 +915,7 @@ A calendar item for **one course**, **one or more classes**, or the **whole orga
 | course_ids | bigint[] | The one course when `audience = course` (cardinality = 1); else `{}` |
 | class_ids | bigint[] | Class targets when `audience = class` (cardinality ≥ 1); else `{}` |
 | title | text | required |
-| location | text | required, trimmed, at most 200 characters |
+| location | text | optional, trimmed, at most 200 characters |
 | starts_on | date | required — first calendar day (inclusive) |
 | ends_on | date | nullable — last day (inclusive); null means `starts_on` only; must be ≥ `starts_on` |
 | start_time | time | nullable — local clock time, no time zone |
@@ -985,7 +989,7 @@ A **one-way** notice to one or more targets of a single audience kind: **course(
 
 **Who can post:** org owners and admins (any audience in the org). Instructors for courses they can manage (every selected course), or for a class / student they can already manage on the roster (`is_org_staff`).
 
-**Who can read:** staff in the org. Parents (and invited student emails on the parent claim path) when the notice applies to a linked student: enrolled in **any** of the **courses** (active + published), **or** a member of **any** of the **classes**, **or** listed as **any** of the **students**. Class membership can surface a class announcement even without a course enrollment. Materials / this-week / print stay enrollment-gated.
+**Who can read:** staff in the org. Parents (via `parent_student_links`) and student accounts (via `student_profiles.user_id`) when the notice applies to that student: enrolled in **any** of the **courses** (active + published), **or** a member of **any** of the **classes**, **or** listed as **any** of the **students**. Class membership can surface a class announcement even without a course enrollment. Materials / this-week / print stay enrollment-gated.
 
 **Email and Activity:** not stored on the announcement row. Staff may opt in to **Send notification** on save; Edge Function `send-announcement-notification` emails claimed family accounts only (`parent_student_links` → `profiles.email` with an active org membership) for affected students — one Resend `announcement-notification` event per unique address — and calls `notify_announcement` so those same accounts (except the sender) get one Activity row. A later send updates that row. Pending invites and `student_email` contact fields are not mailed or pinged. Payload includes a truncated audience preview (`audience_summary`) and the full target list (`audience_list`).
 
@@ -1036,7 +1040,7 @@ CourseSummary, Grade, InstructorNote, ChecklistItem. **OrgSubscription** = Cours
 
 **Answered:** `answered_at` / `answered_by` set together; cleared together to unmark. Does **not** lock posting. Who may update these columns: `created_by`, or org staff who can see the row.
 
-**Who can insert:** org owners/admins (any course/class in the org). Instructors for a course they teach, or a class they can already manage on the roster (`is_org_staff` class rule — same as announcements). Parents (and invited student emails on the parent claim path) for a course their linked student is enrolled in (`status = active`, `visibility = published`) or a class their linked student is a member of.
+**Who can insert:** org owners/admins (any course/class in the org). Instructors for a course they teach, or a class they can already manage on the roster (`is_org_staff` class rule — same as announcements). Parents (linked student) and student accounts (own profile) for a course that student is enrolled in (`status = active`, `visibility = published`) or a class that student is a member of.
 
 **Who can read:** org staff (all non-deleted discussions in the org). Parents (and invited student emails) when it applies to a linked student: enrolled in that **course** (active + published), **or** a member of that **class**. Class membership can surface a class discussion even without a course enrollment. Materials / this-week / print stay enrollment-gated. The discussions SELECT policy must use the new row’s audience columns (not a re-query by `id`) so PostgREST `INSERT … RETURNING` succeeds for a parent who is allowed to start the thread.
 

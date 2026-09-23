@@ -4,10 +4,9 @@ import type { PendingOrgInvite, ParentLinkStatus } from "@/organizations/databri
 
 export function ParentInvitePanel({
   parentEmail,
-  studentEmail,
   canInvite,
   loading,
-  loadError,
+  loadError: _loadError,
   pending,
   linked,
   addEmail,
@@ -23,7 +22,6 @@ export function ParentInvitePanel({
   onCancel,
 }: {
   parentEmail: string | null;
-  studentEmail: string | null;
   canInvite: boolean;
   loading: boolean;
   loadError: string | null;
@@ -51,11 +49,6 @@ export function ParentInvitePanel({
     Boolean(parentEmail) &&
     !pendingEmails.has(parentEmail ?? "") &&
     !linkedEmails.has(parentEmail ?? "");
-  const studentReady =
-    Boolean(studentEmail) &&
-    studentEmail !== parentEmail &&
-    !pendingEmails.has(studentEmail ?? "") &&
-    !linkedEmails.has(studentEmail ?? "");
   const hasParents = linked.length > 0 || pending.length > 0 || Boolean(parentEmail);
 
   return (
@@ -64,12 +57,6 @@ export function ParentInvitePanel({
 
       {loading ? (
         <p className="mt-3 text-[14px] text-[var(--ink-soft)]">Loading parents…</p>
-      ) : null}
-
-      {loadError ? (
-        <p className="mt-3 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {loadError}
-        </p>
       ) : null}
 
       {!loading && linked.length > 0 ? (
@@ -161,39 +148,6 @@ export function ParentInvitePanel({
           </label>
         </form>
       ) : null}
-
-      {studentEmail ? (
-        <div className="mt-6 border-t border-[var(--line-soft)] pt-4">
-          <h3 className="text-[13px] font-bold text-[var(--ink-soft)]">
-            Student email
-          </h3>
-          <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink-soft)]">
-            {studentEmail} can sign in to see this student’s work — same invite
-            as a parent, without other children.
-          </p>
-          {!loading && studentReady ? (
-            <div className="mt-3">
-              <Button
-                onClick={() => onInvite(studentEmail)}
-                disabled={invitingEmail === studentEmail}
-              >
-                {invitingEmail === studentEmail
-                  ? "Creating…"
-                  : "Invite student email"}
-              </Button>
-            </div>
-          ) : null}
-          {!loading && !studentReady ? (
-            <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">
-              This email already has an invite or is linked.
-            </p>
-          ) : null}
-        </div>
-      ) : (
-        <p className="mt-4 text-[13.5px] text-[var(--ink-soft)]">
-          Save a student email above if they should see this work themselves.
-        </p>
-      )}
     </section>
   );
 }

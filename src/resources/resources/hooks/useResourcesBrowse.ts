@@ -4,7 +4,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
-import { isStaffRole } from "@/organizations/model/role";
+import { isFamilyViewerRole, isStaffRole } from "@/organizations/model/role";
 import {
   archiveResourceFolder,
   createResourceFolder,
@@ -49,6 +49,7 @@ import type {
   SelectedResourceItem,
 } from "@/resources/model/selection";
 import { useResourceUploadStore } from "@/resources/stores/uploadQueue";
+import { caughtErrorMessage } from "@/ui/toast";
 
 export function useResourcesBrowse() {
   const params = useParams();
@@ -101,7 +102,7 @@ export function useResourcesBrowse() {
   const actor = {
     userId: user.id,
     isStaff,
-    isParentRole: role === "parent",
+    isParentRole: role ? isFamilyViewerRole(role) : false,
   };
   const grants = grantsQuery.data ?? [];
   const currentFolder = folderQuery.data ?? null;
@@ -162,7 +163,7 @@ export function useResourcesBrowse() {
       });
     },
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const moveFolder = useMutation({
@@ -177,7 +178,7 @@ export function useResourcesBrowse() {
       });
     },
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const moveItem = useMutation({
@@ -185,7 +186,7 @@ export function useResourcesBrowse() {
       return updateResourceItem(input.id, { folderId: input.folderId });
     },
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const renameFolder = useMutation({
@@ -195,7 +196,7 @@ export function useResourcesBrowse() {
       return updateResourceFolder(input.id, { name: input.name });
     },
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const renameItem = useMutation({
@@ -205,26 +206,26 @@ export function useResourcesBrowse() {
       return updateResourceItem(input.id, { title: input.title });
     },
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const archiveFolder = useMutation({
     mutationFn: (id: number) => archiveResourceFolder(id),
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const archiveItem = useMutation({
     mutationFn: (id: number) => archiveResourceItem(id),
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const setItemVisibility = useMutation({
     mutationFn: (input: { id: number; visibility: ResourceVisibility }) =>
       updateResourceItem(input.id, { visibility: input.visibility }),
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const batchMove = useMutation({
@@ -245,7 +246,7 @@ export function useResourcesBrowse() {
       }
     },
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const batchArchive = useMutation({
@@ -254,7 +255,7 @@ export function useResourcesBrowse() {
       for (const id of input.itemIds) await archiveResourceItem(id);
     },
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const batchVisibility = useMutation({
@@ -264,7 +265,7 @@ export function useResourcesBrowse() {
       }
     },
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const downloadFiles = useMutation({
@@ -280,7 +281,7 @@ export function useResourcesBrowse() {
       const zip = await buildResourceFilesZip(files);
       triggerDownloadBytes(zip.filename, zip.bytes);
     },
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const createDocument = useMutation({
@@ -296,7 +297,7 @@ export function useResourcesBrowse() {
       });
     },
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const createLink = useMutation({
@@ -317,7 +318,7 @@ export function useResourcesBrowse() {
       });
     },
     onSuccess: invalidateBrowse,
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   function setTypeFilter(next: ResourceTypeFilter) {

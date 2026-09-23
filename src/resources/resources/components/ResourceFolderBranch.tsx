@@ -8,6 +8,7 @@ import type {
 } from "@/resources/model/access";
 import type { ResourceTypeFilter } from "@/resources/model/paths";
 import { resourceBrowsePath, resourceItemPath } from "@/resources/model/paths";
+import { useToastOnError } from "@/ui/useToastOnError";
 import { useExpandedResourceFolder } from "../hooks/useExpandedResourceFolder";
 import type { ResourceMenuEntry } from "./ResourceContextMenu";
 import { ResourceFolderRow, ResourceItemRow } from "./ResourceRows";
@@ -72,6 +73,7 @@ export function ResourceFolderBranch({
     grants,
     knownFolders,
   });
+  useToastOnError(contents.error);
   const empty = contents.folders.length === 0 && contents.items.length === 0;
 
   return (
@@ -103,8 +105,8 @@ export function ResourceFolderBranch({
           {contents.loading ? (
             <li className="px-2 py-1.5 text-[13px] text-[var(--ink-faint)]">Loading…</li>
           ) : contents.error ? (
-            <li className="px-2 py-1.5 text-[13px] text-[var(--amber-deep)]">
-              Couldn’t load this folder.
+            <li className="px-2 py-1.5 text-[13px] text-[var(--ink-faint)]">
+              Folder unavailable
             </li>
           ) : empty ? (
             <li className="px-2 py-1.5 text-[13px] text-[var(--ink-faint)]">Empty</li>

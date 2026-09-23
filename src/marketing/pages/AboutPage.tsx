@@ -27,8 +27,8 @@ const audience: { title: string; body: string; icon: OutlineIcon }[] = [
     icon: BookOpenIcon,
   },
   {
-    title: "Parents",
-    body: "See this week’s work and print what you need. The screen should make sense immediately — even if you don’t like technology.",
+    title: "Students",
+    body: "See this week’s work and print what you need. The screen should make sense immediately — even if you don’t like technology. Parents who are linked to a student see the same view.",
     icon: UsersIcon,
   },
 ];
@@ -36,8 +36,8 @@ const audience: { title: string; body: string; icon: OutlineIcon }[] = [
 const jobs: { text: string; icon: OutlineIcon }[] = [
   { text: "Plan courses and group work into units", icon: CalendarDaysIcon },
   { text: "Copy a course so you aren’t starting from a blank page each term", icon: Square2StackIcon },
-  { text: "Share materials with parents — including print", icon: PrinterIcon },
-  { text: "Run the org with clear admin, instructor, and parent roles", icon: UserGroupIcon },
+  { text: "Share materials with students — including print", icon: PrinterIcon },
+  { text: "Run the org with clear admin, instructor, and student-facing roles", icon: UserGroupIcon },
 ];
 
 export function AboutPage() {
@@ -52,8 +52,8 @@ export function AboutPage() {
       </h1>
       <p className="mt-4 text-[15.5px] leading-relaxed text-[var(--ink-soft)]">
         Course Wright gives you one place to plan courses, share materials with
-        parents, and run your program. It is meant to feel obvious — especially
-        for families opening a link on a phone.
+        students, and run your program. It is meant to feel obvious — especially
+        for anyone opening a link on a phone.
       </p>
 
       <ul className="mt-10 grid gap-4 sm:grid-cols-3">

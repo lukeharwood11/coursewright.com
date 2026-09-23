@@ -60,15 +60,14 @@ export function sameIdList(left: number[], right: number[]): boolean {
 }
 
 export function validateEventDraft(draft: EventDraft): string | null {
-  if (!draft.title.trim()) return "Add a title.";
-  if (!draft.location.trim()) return "Add a location.";
-  if (draft.location.trim().length > 200) return "Keep the location under 200 characters.";
   if (draft.audience === "course" && draft.courseIds.length !== 1) {
     return "Choose a course.";
   }
   if (draft.audience === "class" && draft.classIds.length === 0) {
     return "Choose at least one class.";
   }
+  if (!draft.title.trim()) return "Add a title.";
+  if (draft.location.trim().length > 200) return "Keep the location under 200 characters.";
   if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.startsOn)) return "Choose a start date.";
   if (draft.endsOn && !/^\d{4}-\d{2}-\d{2}$/.test(draft.endsOn)) {
     return "Choose an end date, or leave it blank.";

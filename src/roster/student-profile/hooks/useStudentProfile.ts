@@ -1,8 +1,9 @@
 import type { FormEvent } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { caughtErrorMessage, toastCaughtError } from "@/ui/toast";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import { getOrganization } from "@/organizations/databridge/organizations";
@@ -15,6 +16,7 @@ import {
   listStudentEnrollments,
 } from "@/roster/databridge/enrollments";
 import {
+  deleteStudent,
   getStudent,
   studentQueryKeys,
   updateStudent,
@@ -31,6 +33,7 @@ export function useStudentProfile() {
   const studentId = studentIdParam ? Number(studentIdParam) : NaN;
   const { organization } = useOrgShell();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const query = useQuery({
     queryKey: studentQueryKeys.detail(studentId),
@@ -99,7 +102,23 @@ export function useStudentProfile() {
       toast("Student saved.");
     },
     onError: (error: Error) => {
-      setFormError(error.message);
+      setFormError(caughtErrorMessage(error));
+    },
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: () => deleteStudent(studentId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: studentQueryKeys.list(organization.id),
+      });
+      await queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+      await queryClient.invalidateQueries({ queryKey: ["classes"] });
+      toast("Student removed from the roster.");
+      navigate(`/my/${organization.slug}/roster`);
+    },
+    onError: (error: Error) => {
+      toastCaughtError(error);
     },
   });
 
@@ -137,6 +156,7 @@ export function useStudentProfile() {
     gradeLevel,
     formError,
     saving: saveMutation.isPending,
+    removing: removeMutation.isPending,
     hasChanges,
     setName: (value: string) => {
       setName(value);
@@ -151,5 +171,6 @@ export function useStudentProfile() {
       setFormError(null);
     },
     onSubmit,
+    onRemove: () => removeMutation.mutate(),
   };
 }

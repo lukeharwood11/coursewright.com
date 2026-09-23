@@ -169,7 +169,6 @@ export function EventFormFields({
         <Input
           className="mt-1 w-full"
           value={location}
-          required
           maxLength={200}
           disabled={disabled}
           placeholder="Where it happens"

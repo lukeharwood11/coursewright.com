@@ -16,10 +16,10 @@ Configure the organization: identity, permalink, organization type, **profile** 
 
 - Requires org **owner or admin** to save identity / profile / school days / grade scheme / type.
 - Instructors see the same fields, disabled.
-- Parents (and staff **Parent view**) are sent back to [ORG_HOME](./ORG_HOME.md).
+- Students (and staff **Student view**; linked parents inherit) are sent back to [ORG_HOME](./ORG_HOME.md).
 - Save org name/metadata; changing **permalink slug** shows a warning that existing links break (no auto-redirect in P0) and requires an explicit confirmation.
-- **Save** and **Cancel** stay in the page header (upper right). Save is disabled when nothing changed; Cancel goes back (confirms first if there are unsaved changes).
-- Set **organization type** (co-op / school / family), optional **profile** (about, location, website, contact email, phone), **school days** (which weekdays the org operates; default Mon–Fri), and **grade scheme** (K–12 / custom labels). Family is for parents making materials at home. At least one school day must stay selected.
+- **Save** and **Cancel** sit at the top-right of the content panel (aligned with that column). Save is disabled when nothing changed; Cancel goes back (confirms first if there are unsaved changes).
+- Set **organization type** (other / co-op / school / family; new orgs default to **other**), optional **profile** (about, location, website, contact email, phone), **school days** (which weekdays the org operates; default Mon–Fri), and **grade scheme** (K–12 / custom labels). Family is for households making materials at home. At least one school day must stay selected.
 - Collaborators section on this page: invite owner / admin / instructor by email (Resend `organization-invite`) and **copy a claim link**, list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). The list includes **parents** already in the org so owners/admins can **promote** them to instructor/admin/owner **without a new invite**. Owners and admins **change roles** (including demote to **parent** when the person has a linked student) and **remove** admins/instructors who have no linked student; the last remaining owner or admin cannot be removed or demoted. Those writes update **org membership** (who can run settings and invites). They do **not** change who can see course content — materials and roster stay **enrollment-gated** (and `parent_student_links` where applicable).
 - Billing section shows Free plan, **owners only**.
 - **Branding** (owners only): optional small icon and one accent color used as the primary color inside this organization (buttons, links, sidebar). Admins and instructors see a preview and “Only owners can change branding.” Blank color keeps Wright Green. Colors that are too light for white button text, or for link text on the page background, are rejected. Remove branding restores the CW mark and Wright Green. Login, the account home, emails, and print stay Course Wright.
@@ -38,13 +38,15 @@ Configure the organization: identity, permalink, organization type, **profile** 
 
 ## Contents
 
+Left **settings menu** (icons + labels) with one active panel on the right on desktop. On small screens the menu is a **Section** dropdown above the panel. Active section is reflected in `?tab=` (`organization` default / omitted; `profile`; `branding`; `collaborators`; `billing` when shown). Save / Cancel sit at the top-right of the content panel (aligned with that column’s right edge) whenever the viewer can edit. Branding keeps its own Save / Remove actions.
+
 ### Organization
 
 - Organization name
 - **Permalink slug** — editable; UI **must warn** that changing it breaks existing links (no auto-redirect in P0)
 - Organization type: co-op, school, or family
 - **School days** — circle toggles Sunday–Saturday under web address; info hint: days this organization usually operates. Default Monday–Friday. Lesson-plan compose uses these days; staff can still add another weekday on a plan
-- **Grade scheme** — K–12 or custom labels (same card)
+- **Grade scheme** — K–12 or custom labels (same panel)
 
 ### Profile
 
@@ -56,7 +58,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 
 Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing page.
 
-### Collaborators / roles (section)
+### Collaborators / roles
 
 - List owners, admins, instructors, and parents
 - Invite owners / admins / instructors by email; Course Wright emails the claim link and you can copy it again
@@ -71,7 +73,7 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 - Small icon upload (PNG, JPEG, or WebP, under 256 KB) and remove icon
 - One accent color (`#RRGGBB`) or blank for Wright Green
 - Preview of the sidebar mark and an active nav chip
-- **Save branding** and **Remove branding** — separate from the header Save for the rest of this page
+- **Save branding** and **Remove branding** — separate from the panel Save for Organization / Profile
 
 ### Billing (P1)
 
@@ -79,7 +81,7 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 
 ## Primary actions
 
-- Save org settings / slug (with warning) — header Save disabled when unchanged; Cancel leaves (confirm if dirty)
+- Save org settings / slug (with warning) — panel Save disabled when unchanged; Cancel leaves (confirm if dirty)
 - Cancel — discard unsaved changes
 - Set profile fields
 - Set school days

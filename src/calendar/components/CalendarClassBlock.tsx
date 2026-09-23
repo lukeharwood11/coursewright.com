@@ -7,9 +7,12 @@ import { chipKind, MaterialChip } from "./MaterialChip";
 export function CalendarClassBlock({
   orgSlug,
   card,
+  withIcons = false,
 }: {
   orgSlug: string;
   card: WeekClassCard;
+  /** Day view: icons on material rows to tell assigned vs due vs plan items apart. */
+  withIcons?: boolean;
 }) {
   const courseLabel = (
     <>
@@ -53,6 +56,7 @@ export function CalendarClassBlock({
                 title={material.title}
                 kind={chipKind(material.assigned, material.due)}
                 colorKey={card.colorKey}
+                withIcon={withIcons}
               />
             ))}
           </div>
@@ -71,6 +75,7 @@ export function CalendarClassBlock({
               kind={chip.kind}
               colorKey={chip.colorKey}
               unpublished={chip.unpublished}
+              withIcon={withIcons}
             />
           ))}
         </div>

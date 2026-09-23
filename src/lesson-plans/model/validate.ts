@@ -173,7 +173,7 @@ export function lessonPlanDaysToShow<T extends { date: string; body: string; mat
 }
 
 export function validateLessonPlanDraft(draft: LessonPlanDraft): string | null {
-  if (!draft.title.trim()) return "Add a title so families know what this is.";
+  if (!draft.title.trim()) return "Add a title so students know what this is.";
   if (!draft.weekStart) return "Choose the week this plan is for.";
   if (!isSunday(draft.weekStart)) {
     return "Lesson plans start on Sunday.";

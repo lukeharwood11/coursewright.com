@@ -203,46 +203,48 @@ export function MaterialPage() {
         </div>
       ) : null}
 
-      <div className="mt-6">
-        <MaterialBody page={page} />
-      </div>
+      <div className="mt-6 flex flex-col gap-6 xl:flex-row xl:items-start">
+        <div className="min-w-0 flex-1">
+          <MaterialBody page={page} />
 
-      {!page.material.deletedAt && page.material.courseId ? (
-        <MaterialSubmissionsSection
-          material={page.material}
-          courseId={page.material.courseId}
-          mode={page.isParent || !page.canEdit ? "family" : "staff"}
-        />
-      ) : null}
+          {page.canEdit ? (
+            <div className="mt-6 flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => page.toggleImportant.mutate(!page.importantNow)}
+              >
+                {page.importantNow ? "Remove important now" : "Mark important now"}
+              </Button>
+              {!page.material.deletedAt ? (
+                <Button
+                  variant="secondary"
+                  onClick={() => setConfirmRemove(true)}
+                  disabled={page.remove.isPending}
+                >
+                  Remove
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
 
-      {page.canEdit ? (
-        <div className="mt-6 flex flex-wrap gap-2">
-          <Button
-            variant="secondary"
-            onClick={() => page.toggleImportant.mutate(!page.importantNow)}
-          >
-            {page.importantNow ? "Remove important now" : "Mark important now"}
-          </Button>
           {!page.material.deletedAt ? (
-            <Button
-              variant="secondary"
-              onClick={() => setConfirmRemove(true)}
-              disabled={page.remove.isPending}
-            >
-              Remove
-            </Button>
+            <UnpublishControl
+              visibility={page.material.visibility}
+              canEdit={page.canEdit}
+              pending={page.setVisibility.isPending}
+              onUnpublish={() => page.setVisibility.mutate("unpublished")}
+            />
           ) : null}
         </div>
-      ) : null}
 
-      {!page.material.deletedAt ? (
-        <UnpublishControl
-          visibility={page.material.visibility}
-          canEdit={page.canEdit}
-          pending={page.setVisibility.isPending}
-          onUnpublish={() => page.setVisibility.mutate("unpublished")}
-        />
-      ) : null}
+        {!page.material.deletedAt && page.material.courseId ? (
+          <MaterialSubmissionsSection
+            material={page.material}
+            courseId={page.material.courseId}
+            mode={page.isParent || !page.canEdit ? "family" : "staff"}
+          />
+        ) : null}
+      </div>
 
       <ConfirmDialog
         open={confirmRemove}

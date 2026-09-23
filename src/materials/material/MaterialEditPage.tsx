@@ -15,8 +15,8 @@ import {
   UnpublishControl,
   VisibilityBanner,
 } from "./components/VisibilityBanner";
-import { OptionalDueDateField } from "./components/OptionalDueDateField";
 import { SubmissionSettingsFields } from "./components/SubmissionSettingsFields";
+import { MaterialDateFields } from "./components/MaterialDateFields";
 import { timeZoneLabel } from "@/submissions/model/dueInstant";
 import { AudioSnippetRecorder } from "./components/AudioSnippetRecorder";
 import { PageEditorMediaProvider } from "./components/PageEditorMediaContext";
@@ -114,9 +114,18 @@ export function MaterialEditPage() {
           hasChanges={edit.hasChanges}
           canSave={edit.canSave}
           cancelTo={viewHref}
+          closeWhenUnchanged
           onCancel={() =>
             navigate(viewHref, materialNavState ? { state: materialNavState } : undefined)
           }
+          onSaveAndClose={async () => {
+            const ok = await edit.save();
+            if (!ok) return;
+            navigate(
+              viewHref,
+              materialNavState ? { state: materialNavState } : undefined,
+            );
+          }}
         />
       </div>
 
@@ -168,26 +177,14 @@ export function MaterialEditPage() {
               />
             </label>
           ) : null}
-          <label className="mt-3 flex min-w-0 flex-col gap-1">
-            <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-              Assignment date (optional)
-            </span>
-            <Input
-              className="w-full"
-              type="date"
-              value={edit.scheduledDate}
-              onChange={(event) => edit.setScheduledDate(event.target.value)}
-            />
-            <span className="text-[12px] text-[var(--ink-faint)]">
-              If you set a date, this shows up on parents’ This week page that week.
-            </span>
-          </label>
-          <OptionalDueDateField
-            value={edit.dueDate}
-            time={edit.dueTime}
+          <MaterialDateFields
+            scheduledDate={edit.scheduledDate}
+            dueDate={edit.dueDate}
+            dueTime={edit.dueTime}
             timeZoneLabel={timeZoneLabel(edit.dueTimezone)}
-            onChange={edit.setDueDate}
-            onTimeChange={edit.setDueTime}
+            onScheduledChange={edit.setScheduledDate}
+            onDueDateChange={edit.setDueDate}
+            onDueTimeChange={edit.setDueTime}
           />
           <SubmissionSettingsFields
             acceptSubmissions={edit.acceptSubmissions}
@@ -368,7 +365,7 @@ function FileEditor({
       <ConfirmDialog
         open={restoreVersion != null}
         title="Restore this file version?"
-        body="The file families see will switch to this older copy. You can replace or restore again afterward."
+        body="The file students see will switch to this older copy. You can replace or restore again afterward."
         confirmLabel={restoringFile ? "Restoring…" : "Restore"}
         cancelLabel="Keep current file"
         onCancel={() => setRestoreVersion(null)}

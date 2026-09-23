@@ -43,7 +43,7 @@ export function LoginPage() {
             .
           </p>
           {invite.fromInvite ? null : (
-            <p className="mt-2">Joining a co-op? Ask your admin for an invite.</p>
+            <p className="mt-2">Joining an organization? Ask your admin for an invite.</p>
           )}
         </>
       }

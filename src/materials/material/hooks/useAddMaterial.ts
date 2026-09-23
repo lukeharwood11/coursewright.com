@@ -10,6 +10,7 @@ import type { MaterialKind } from "@/materials/model/kind";
 import { materialEditPath, materialPath } from "@/materials/model/paths";
 import { validateMaterialFields } from "@/materials/model/validate";
 import { DEFAULT_DUE_TIME, browserTimeZone, dueInstantIso } from "@/submissions/model/dueInstant";
+import { caughtErrorMessage } from "@/ui/toast";
 
 export function useAddMaterial(args: {
   organizationId: number;
@@ -93,7 +94,7 @@ export function useAddMaterial(args: {
         navState ? { state: navState } : undefined,
       );
     },
-    onError: (error: Error) => setFormError(error.message),
+    onError: (error: Error) => setFormError(caughtErrorMessage(error)),
   });
 
   function reset() {

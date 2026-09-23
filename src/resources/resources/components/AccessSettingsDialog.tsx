@@ -20,6 +20,7 @@ import {
   type ResourceAccessMode,
   type ResourceGrantPermission,
 } from "@/resources/model/kinds";
+import { caughtErrorMessage } from "@/ui/toast";
 
 type Target =
   | { kind: "folder"; id: number; organizationId: number; canInherit: boolean }
@@ -99,7 +100,7 @@ export function AccessSettingsDialog({
       onSaved();
       onClose();
     },
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const addGrant = useMutation({
@@ -122,7 +123,7 @@ export function AccessSettingsDialog({
             : resourceGrantQueryKeys.item(target?.id ?? 0),
       });
     },
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const removeGrant = useMutation({
@@ -135,7 +136,7 @@ export function AccessSettingsDialog({
             : resourceGrantQueryKeys.item(target?.id ?? 0),
       });
     },
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   const changeGrant = useMutation({
@@ -157,7 +158,7 @@ export function AccessSettingsDialog({
             : resourceGrantQueryKeys.item(target?.id ?? 0),
       });
     },
-    onError: (caught: Error) => setError(caught.message),
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
   if (!open || !target) return null;

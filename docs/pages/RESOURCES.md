@@ -5,7 +5,7 @@
 
 ## Audience
 
-Owners, admins, and instructors always (Teacher view). Parents (and staff **Parent view**) when they can see at least one resource.
+Owners, admins, and instructors always (Teacher view). Students (and staff **Student view**; linked parents inherit) when they can see at least one resource.
 
 ## Purpose
 
@@ -23,7 +23,7 @@ Org-scoped **Resources** home: a folder view of top-level folders and unfiled it
 - Opening a folder goes to [RESOURCE_FOLDER](./RESOURCE_FOLDER.md). Opening an item goes to [RESOURCE](./RESOURCE.md).
 - Checkboxes select folders and items (including inside an expanded folder). **Select all** covers this view’s top-level rows. The selection bar offers **Publish**, **Unpublish**, **Print**, **Download**, **Move**, and **Remove** when they apply. **Move** opens an outline folder picker (expandable tree, plus top-level Resources). Print opens one packet. One file downloads on its own; several files download as a zip. Folders in the selection can move or be removed; publish, print, and download apply to selected items only.
 - Right-click a folder or item, or use its **⋯** (editors): **Open**, **Rename**, **Move**, **Manage access** (staff; gear), **Publish** or **Unpublish** (items), **Print** (not links), **Download** (files), **Remove**.
-- Empty: explain the next step for editors (add a folder or drop files); for families, that nothing is shared here yet. A type filter with no matches says so.
+- Empty: explain the next step for editors (add a folder or drop files); for students, that nothing is shared here yet. A type filter with no matches says so.
 
 ## Data shown
 
@@ -56,7 +56,7 @@ Org-scoped **Resources** home: a folder view of top-level folders and unfiled it
 - [RESOURCE](./RESOURCE.md)
 - [PRINT](./PRINT.md) — selected documents and files, or one item
 - Via org chrome (staff Teacher view): [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [ACTIVITY](./ACTIVITY.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md), [FEEDBACK](./FEEDBACK.md)
-- Via parent chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [RESOURCES](./RESOURCES.md) (when visible), [ACTIVITY](./ACTIVITY.md)
+- Via student chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [RESOURCES](./RESOURCES.md) (when visible), [ACTIVITY](./ACTIVITY.md)
 
 ## Notes
 

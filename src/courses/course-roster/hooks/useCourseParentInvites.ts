@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { toastCaughtError } from "@/ui/toast";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
@@ -85,7 +86,7 @@ export function useCourseParentInvites(students: StudentSummary[]) {
       });
     },
     onError: (error: Error) => {
-      toast(error.message);
+      toastCaughtError(error);
     },
   });
 

@@ -222,6 +222,27 @@ as $$
     and now() > p_material.due_at;
 $$;
 
+create or replace function private.family_can_access_submission(
+  p_student_profile_id bigint,
+  p_course_id bigint
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select
+    (
+      private.parent_linked_to_student(p_student_profile_id)
+      and private.parent_can_view_course(p_course_id)
+    )
+    or (
+      private.student_owns_profile(p_student_profile_id)
+      and private.student_can_view_course(p_course_id)
+    );
+$$;
+
 create or replace function private.parent_can_view_submission_file(p_file_id bigint)
 returns boolean
 language sql
@@ -242,8 +263,8 @@ as $$
       and s.deleted_at is null
       and m.deleted_at is null
       and m.visibility = 'published'
-      and private.parent_linked_to_student(s.student_profile_id)
-      and private.parent_can_view_course(m.course_id)
+      and m.course_id is not null
+      and private.family_can_access_submission(s.student_profile_id, m.course_id)
   );
 $$;
 
@@ -297,9 +318,13 @@ as $$
     and private.parent_can_view_submission_file(private.submission_path_file_id(p_name));
 $$;
 
+revoke all on function private.family_can_access_submission(bigint, bigint)
+  from public, anon;
 revoke all on function private.parent_can_view_submission_file(bigint) from public, anon;
 revoke all on function private.can_insert_submission_object(text) from public, anon;
 revoke all on function private.can_select_submission_object(text) from public, anon;
+grant execute on function private.family_can_access_submission(bigint, bigint)
+  to authenticated, service_role;
 grant execute on function private.parent_can_view_submission_file(bigint)
   to authenticated, service_role;
 grant execute on function private.can_insert_submission_object(text)
@@ -323,7 +348,7 @@ set search_path = ''
 as $$
 declare
   material public.materials%rowtype;
-  submission_id bigint;
+  slot_id bigint;
   finished int;
   batch text;
   elem jsonb;
@@ -348,11 +373,21 @@ begin
   end if;
 
   if material.visibility <> 'published'
-     or not private.parent_can_view_course(material.course_id) then
+     or not (
+       private.parent_can_view_course(material.course_id)
+       or private.student_can_view_course(material.course_id)
+     ) then
     raise exception 'This material isn’t available.' using errcode = '42501';
   end if;
 
-  if not private.parent_linked_to_student(p_student_profile_id) then
+  if not (
+    private.parent_linked_to_student(p_student_profile_id)
+    or private.student_owns_profile(p_student_profile_id)
+  ) then
+    raise exception 'You can’t turn this in for that student.' using errcode = '42501';
+  end if;
+
+  if not private.family_can_access_submission(p_student_profile_id, material.course_id) then
     raise exception 'You can’t turn this in for that student.' using errcode = '42501';
   end if;
 
@@ -398,24 +433,24 @@ begin
     end if;
   end loop;
 
-  select s.id into submission_id
+  select s.id into slot_id
   from public.material_submissions s
   where s.material_id = p_material_id
     and s.student_profile_id = p_student_profile_id
     and s.deleted_at is null
   for update;
 
-  if submission_id is null then
+  if slot_id is null then
     begin
       insert into public.material_submissions (
         organization_id, course_id, material_id, student_profile_id
       ) values (
         material.organization_id, material.course_id, material.id, p_student_profile_id
       )
-      returning id into submission_id;
+      returning id into slot_id;
     exception
       when unique_violation then
-        select s.id into submission_id
+        select s.id into slot_id
         from public.material_submissions s
         where s.material_id = p_material_id
           and s.student_profile_id = p_student_profile_id
@@ -426,7 +461,7 @@ begin
 
   select count(*) into finished
   from public.material_submission_versions v
-  where v.submission_id = submission_id;
+  where v.submission_id = slot_id;
 
   if finished >= material.submission_limit then
     raise exception 'No more versions can be turned in.' using errcode = 'P0001';
@@ -491,7 +526,7 @@ set search_path = ''
 as $$
 declare
   material public.materials%rowtype;
-  submission_id bigint;
+  slot_id bigint;
   finished int;
   batch text;
   expected int;
@@ -524,8 +559,7 @@ begin
       using errcode = 'P0001';
   end if;
 
-  if not private.parent_linked_to_student(p_student_profile_id)
-     or not private.parent_can_view_course(material.course_id) then
+  if not private.family_can_access_submission(p_student_profile_id, material.course_id) then
     raise exception 'You can’t turn this in for that student.' using errcode = '42501';
   end if;
 
@@ -576,21 +610,21 @@ begin
       using errcode = 'P0001';
   end if;
 
-  select s.id into submission_id
+  select s.id into slot_id
   from public.material_submissions s
   where s.material_id = p_material_id
     and s.student_profile_id = p_student_profile_id
     and s.deleted_at is null
   for update;
 
-  if submission_id is null then
+  if slot_id is null then
     raise exception 'That upload didn’t finish. Try turning it in again.'
       using errcode = 'P0001';
   end if;
 
   select count(*) into finished
   from public.material_submission_versions v
-  where v.submission_id = submission_id;
+  where v.submission_id = slot_id;
 
   if finished >= material.submission_limit then
     raise exception 'No more versions can be turned in.' using errcode = 'P0001';
@@ -601,7 +635,7 @@ begin
   insert into public.material_submission_versions (
     submission_id, version, submitted_by, submitted_at
   ) values (
-    submission_id, next_version, (select auth.uid()), now()
+    slot_id, next_version, (select auth.uid()), now()
   )
   returning id into version_id;
 
@@ -653,9 +687,8 @@ using (
         (m.course_id is not null and (select private.can_manage_course(m.course_id)))
         or (
           m.visibility = 'published'
-          and (select private.parent_linked_to_student(student_profile_id))
           and m.course_id is not null
-          and (select private.parent_can_view_course(m.course_id))
+          and (select private.family_can_access_submission(student_profile_id, m.course_id))
         )
       )
   )
@@ -678,9 +711,13 @@ using (
             (m.course_id is not null and (select private.can_manage_course(m.course_id)))
             or (
               m.visibility = 'published'
-              and (select private.parent_linked_to_student(s.student_profile_id))
               and m.course_id is not null
-              and (select private.parent_can_view_course(m.course_id))
+              and (
+                select private.family_can_access_submission(
+                  s.student_profile_id,
+                  m.course_id
+                )
+              )
             )
           )
       )
@@ -702,9 +739,13 @@ using (
         (m.course_id is not null and (select private.can_manage_course(m.course_id)))
         or (
           m.visibility = 'published'
-          and (select private.parent_linked_to_student(s.student_profile_id))
           and m.course_id is not null
-          and (select private.parent_can_view_course(m.course_id))
+          and (
+            select private.family_can_access_submission(
+              s.student_profile_id,
+              m.course_id
+            )
+          )
         )
       )
   )

@@ -347,7 +347,7 @@ export async function sendAnnouncementNotification(
   if (counts.failed > 0) {
     return {
       ...counts,
-      error: `Emailed ${counts.sent} ${counts.sent === 1 ? "family" : "families"}; some emails didn’t go through.`,
+      error: `Emailed ${counts.sent} ${counts.sent === 1 ? "student" : "students"}; some emails didn’t go through.`,
     };
   }
   return { ...counts, error: null };

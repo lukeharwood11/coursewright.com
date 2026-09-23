@@ -71,10 +71,10 @@ export function PageContentEditor({
                 contentEditable={
                   <ContentEditable
                     className="cw-editor-input"
-                    aria-placeholder="Write this lesson… Type / for blocks"
+                    aria-placeholder="Type / for blocks"
                     placeholder={
                       <p className="cw-editor-placeholder">
-                        Write this lesson… Type / for blocks
+                        Type / for blocks
                       </p>
                     }
                   />

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { caughtErrorMessage } from "@/ui/toast";
 import { getProfile, profileQueryKeys } from "@/auth/api/profiles";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useAppShell } from "@/app/layouts/OrgShellContext";
@@ -50,7 +51,7 @@ export function useFeedback() {
       setFormError(null);
       toast("Thanks — we got your note.");
     },
-    onError: (error: Error) => setFormError(error.message),
+    onError: (error: Error) => setFormError(caughtErrorMessage(error)),
   });
 
   function onSubmit(event: FormEvent) {

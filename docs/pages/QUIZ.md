@@ -27,7 +27,7 @@ Open one course quiz to print it, take it while it is accepting entries, or revi
 - Question kinds: **multiple choice**, **short answer**, **number**, **matching**, and **long answer**. Number and matching score with multiple choice. Short answer and long answer are stored for the teacher. A long answer asks how many blank lines to give (1–20). Matching mixes the right column the same way on screen and on paper.
 - The score a family sees is the latest entry for that student.
 - A parent entry is labeled **"<Parent name> on behalf of <child name>"**. A student login is labeled with the student name only.
-- **Teacher view** always shows the answer key and every entry, including answers. **Share answer key with parents** (default off) lets a parent see the key whenever the quiz is published, including while the window is open and after it ends. A student login never sees the key. Staff **Parent view** follows the parent rule.
+- **Teacher view** always shows the answer key and every entry, including answers. **Share answer key with parents** (default off) lets a parent see the key whenever the quiz is published, including while the window is open and after it ends. A student login never sees the key. Staff **Student view** follows the parent rule.
 - **Remove quiz** soft-deletes it after confirm.
 
 ## Data shown

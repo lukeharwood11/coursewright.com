@@ -10,6 +10,7 @@ import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PageLoading } from "@/ui/PageLoading";
 import { useToastOnError } from "@/ui/useToastOnError";
+import { isNetworkError } from "@/ui/networkError";
 import type { ResourceFolderRecord } from "@/resources/databridge/folders";
 import type { ResourceItemRecord } from "@/resources/databridge/items";
 import type { ResourceAccessMode } from "@/resources/model/kinds";
@@ -77,6 +78,14 @@ export function ResourcesPage() {
     [selected],
   );
   useToastOnError(page.error);
+  const moveErrorForToast =
+    move?.kind === "item"
+      ? (page.moveItem.error?.message ?? null)
+      : move?.kind === "folder"
+        ? (page.moveFolder.error?.message ?? null)
+        : null;
+  useToastOnError(moveErrorForToast);
+  useToastOnError(batchMoveOpen ? (page.batchMove.error?.message ?? null) : null);
 
   useEffect(() => {
     setSelected([]);
@@ -171,11 +180,16 @@ export function ResourcesPage() {
     move?.kind === "item"
       ? (page.moveItem.error?.message ?? null)
       : (page.moveFolder.error?.message ?? null);
-  const actions = selectionActions(selected);
+  const moveErrorDisplay =
+    moveError && !isNetworkError(moveError) ? moveError : null;
+  const batchMoveError = page.batchMove.error?.message ?? null;
+  const batchMoveErrorDisplay =
+    batchMoveError && !isNetworkError(batchMoveError) ? batchMoveError : null;
   const batchPending =
     page.batchMove.isPending ||
     page.batchArchive.isPending ||
     page.batchVisibility.isPending;
+  const actions = selectionActions(selected);
 
   function toggleFolder(folder: ResourceFolderRecord, canEdit: boolean) {
     setSelected((rows) =>
@@ -426,7 +440,7 @@ export function ResourcesPage() {
           currentFolderId={move.kind === "folder" ? move.parentId : move.folderId}
           excludeFolderId={move.kind === "folder" ? move.id : null}
           pending={movePending}
-          error={moveError}
+          error={moveErrorDisplay}
           onClose={() => setMove(null)}
           onMove={(parentId) => {
             const done =
@@ -450,7 +464,7 @@ export function ResourcesPage() {
           excludeFolderIds={actions.folders.map((folder) => folder.id)}
           requireDifferentDestination={false}
           pending={page.batchMove.isPending}
-          error={page.batchMove.error?.message ?? null}
+          error={batchMoveErrorDisplay}
           onClose={() => setBatchMoveOpen(false)}
           onMove={(parentId) => {
             void page.batchMove

@@ -9,7 +9,7 @@
 
 ## Audience
 
-Staff Teacher view to add and edit (owner, admin, or instructor). Anyone who can already see the event can open it: families when a linked student is in the course or a target class, every member for an organization event, and staff who can manage that audience.
+Staff Teacher view to add and edit (owner, admin, or instructor). Anyone who can already see the event can open it: students when a linked student is in the course or a target class, every member for an organization event, and staff who can manage that audience.
 
 ## Purpose
 
@@ -19,25 +19,25 @@ A calendar event for one course, several classes, or the whole organization, wit
 ## Behavior
 
 - Audience is **Course**, **Class**, or **Organization**. A course event picks exactly one course. A class event picks one or more classes. An organization event has no course or class. Arriving from a course or class starts that target selected. One event cannot mix a course with classes, or cover more than one course.
-- **Location** is required. **Starts** is required. **Ends** is optional (blank means that one day). **Start time** and **end time** are optional. On one day, the end time is at or after the start time.
+- **Location** is optional. **Starts** is required. **Ends** is optional (blank means that one day). **Start time** and **end time** are optional. On one day, the end time is at or after the start time.
 - Owners and admins can pick any course or class in the org, and can make an organization event. An instructor can pick a course they manage. Any teacher can pick classes in the org or make an organization event.
 - The write-up uses the same page editor as a lesson (text, files, links, video, quizzes). It is stored with the event, not as a course material.
 - Staff can also link existing course materials. A course event only links materials from that course.
-- Saving puts the event on the calendar for people it applies to. Remove is a soft delete and takes it off every course or class it was shared with.
+- Saving puts the event on the calendar for people it applies to (then opens the event). On edit, **Cancel** reads **Close** when nothing is staged. Remove is a soft delete and takes it off every course or class it was shared with.
 - Editing from any of those courses or classes edits the same event.
-- Parents and staff **Parent view** can read and print. They cannot add or edit.
+- Students and staff **Student view** can read and print. They cannot add or edit.
 - **Print** opens [PRINT](./PRINT.md) for the write-up.
 
 ## Data shown
 
-- Title, date range, start/end time when set, **location**
+- Title, date range, start/end time when set, **location** when set
 - Audience names (courses or classes)
 - Write-up
 - Linked materials (title; open the material)
 
 ## Contents
 
-- Header: title, when, location, audience
+- Header: title, when, location when set, audience
 - Write-up
 - Materials list when any are linked
 - **Print**, and **Edit** / **Remove** when the person can change it

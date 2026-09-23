@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PlusIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
+import { ConfirmDialog } from "@/ui/ConfirmDialog";
+import type { StudentSummary } from "@/roster/databridge/students";
 import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { BatchCreateStudentsForm } from "@/roster/student-profile/components/BatchCreateStudentsForm";
@@ -12,6 +14,7 @@ import { useToastOnError } from "@/ui/useToastOnError";
 
 export function OrgRosterPage() {
   const roster = useOrgRoster();
+  const [pendingRemove, setPendingRemove] = useState<StudentSummary | null>(null);
   useToastOnError(roster.error);
 
   useEffect(() => {
@@ -63,6 +66,15 @@ export function OrgRosterPage() {
             onToggle={roster.onToggle}
             onSelectAll={roster.onSelectAllMatching}
             onClearSelection={roster.onClearSelection}
+            trailing={(student) => (
+              <Button
+                variant="secondary"
+                onClick={() => setPendingRemove(student)}
+                disabled={roster.removingId === student.id}
+              >
+                {roster.removingId === student.id ? "Removing…" : "Remove"}
+              </Button>
+            )}
           />
         )}
 
@@ -83,15 +95,16 @@ export function OrgRosterPage() {
       </section>
 
       {roster.panelOpen ? (
-        <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
+        <section className="max-w-3xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">
                 Add students
               </h2>
               <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-                Name is enough. Parent email and grade are optional. Paste
-                several names at once when you’re adding a group.
+                Name is enough. Student email, parent email, and grade are
+                optional. A student email sends an invite when you add them.
+                Paste several names at once when you’re adding a group.
               </p>
             </div>
             <Button type="button" variant="secondary" onClick={roster.closePanel}>
@@ -186,6 +199,25 @@ export function OrgRosterPage() {
           </ul>
         )}
       </section>
+
+      <ConfirmDialog
+        open={pendingRemove != null}
+        title="Remove student?"
+        body={
+          pendingRemove
+            ? `${pendingRemove.name} will leave the roster, including their classes and courses.`
+            : ""
+        }
+        confirmLabel="Remove"
+        cancelLabel="Keep them"
+        onCancel={() => setPendingRemove(null)}
+        onConfirm={() => {
+          if (!pendingRemove) return;
+          const student = pendingRemove;
+          setPendingRemove(null);
+          roster.onRemove(student.id);
+        }}
+      />
     </div>
   );
 }

@@ -42,7 +42,7 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 2. **Do not invent product behavior** — if it’s not in FEATURES / SCHEMA / decisions, ask or leave TBD.
 3. **Feature status** — when you **start** or **finish** work on a feature, update its **Status** (and Notes if useful) in [docs/FEATURES.md](./docs/FEATURES.md). Start → `in progress`; finish scoped work → `shipped` (or `deferred` if parked). Status key lives at the top of that file.
 4. **PostgREST-first** — simple CRUD from the frontend; Edge Functions only for complex/privileged jobs ([docs/STACK.md](./docs/STACK.md)).
-5. **Usability bar** — tech-averse parents; print/share stay obvious ([docs/FEATURES.md](./docs/FEATURES.md)).
+5. **Usability bar** — tech-averse people on the student experience; print/share stay obvious ([docs/FEATURES.md](./docs/FEATURES.md)).
 6. **`AGENTS.md` in every code folder** — when you create a new folder that will hold code, add a short local `AGENTS.md`. Prefer the nearest guide while editing.
 7. **Human blockers** — if you need AWS / Supabase / Google / DNS admin access, add a placeholder in code and a detailed item in [docs/HUMAN_NEEDED.md](./docs/HUMAN_NEEDED.md). Do not invent secrets or fake completed cloud setup.
 8. **Docs live in `docs/`** — don’t recreate planning markdown at the repo root (except this file and README).
@@ -63,10 +63,10 @@ When experiment mode ends, treat migrations as append-only again, remove or reti
 | [src/materials/AGENTS.md](./src/materials/AGENTS.md) | Materials, files, versions, important now |
 | [src/submissions/AGENTS.md](./src/submissions/AGENTS.md) | Material turn-in (files, limit, due instant) |
 | [src/quizzes/AGENTS.md](./src/quizzes/AGENTS.md) | Course quizzes (take in the app or print) |
-| [src/sharing/AGENTS.md](./src/sharing/AGENTS.md) | Resource links / share with parents |
+| [src/sharing/AGENTS.md](./src/sharing/AGENTS.md) | Resource links / share with students |
 | [src/search/AGENTS.md](./src/search/AGENTS.md) | Cross-facet / chrome search |
 | [src/print/AGENTS.md](./src/print/AGENTS.md) | Print material / unit / this week / resource |
-| [src/parent/AGENTS.md](./src/parent/AGENTS.md) | Parent dashboard |
+| [src/parent/AGENTS.md](./src/parent/AGENTS.md) | Student home |
 | [src/announcements/AGENTS.md](./src/announcements/AGENTS.md) | One-way notices (course / class / student) |
 | [src/discussions/AGENTS.md](./src/discussions/AGENTS.md) | **P1** two-way threads (one course or one class) |
 | [src/notifications/AGENTS.md](./src/notifications/AGENTS.md) | **P1** in-app Activity notifications |

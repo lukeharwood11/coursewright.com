@@ -22,7 +22,7 @@ export const K12_GRADE_LABELS = [
 
 /** Defaults for fields the org picker does not ask yet (editable later in org settings). */
 export const CREATE_ORG_DEFAULTS = {
-  orgType: "coop" as const,
+  orgType: "other" as const,
   gradeScheme: "k12" as const,
   gradeLabels: [...K12_GRADE_LABELS],
   schoolDays: DEFAULT_SCHOOL_DAYS,

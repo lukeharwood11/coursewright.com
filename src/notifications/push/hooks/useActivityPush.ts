@@ -11,6 +11,8 @@ import {
   type PushPermission,
   isInstalledPwa,
 } from "@/notifications/model/push";
+import { isNetworkError } from "@/ui/networkError";
+import { toastCheckNetworkConnection } from "@/ui/toast";
 import { ensurePushSubscription, pushSubscriptionKeys } from "../browser";
 
 function readInstalled(): boolean {
@@ -164,8 +166,9 @@ export function useActivityPush() {
       writeFlag(PUSH_DEVICE_DISABLED_KEY, false);
       setDisabledOnDevice(false);
       await sync();
-    } catch {
-      setError("Couldn’t turn on notifications. Try again.");
+    } catch (caught) {
+      if (isNetworkError(caught)) toastCheckNetworkConnection();
+      else setError("Couldn’t turn on notifications. Try again.");
     } finally {
       setBusy(false);
     }
@@ -185,8 +188,9 @@ export function useActivityPush() {
         await deletePushSubscription(endpoint);
       }
       setSubscribed(false);
-    } catch {
-      setError("Couldn’t turn off notifications. Try again.");
+    } catch (caught) {
+      if (isNetworkError(caught)) toastCheckNetworkConnection();
+      else setError("Couldn’t turn off notifications. Try again.");
     } finally {
       setBusy(false);
     }

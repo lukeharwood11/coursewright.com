@@ -6,10 +6,10 @@ Two-way **discussions**: a thread for **one course** or **one class**. Title, fl
 
 ## Scope (when implementing)
 
-- Org list + **New discussion** (staff Teacher view and families who may start one)
+- Org list + **New discussion** (staff Teacher view and students who may start one)
 - Thread view: posts, quotes, file / material / URL attachments, **Mark as answered**, thread **⋯** → **Members** (user cards → org profile)
 - Composer: plain textarea by default; **T** activates the same Lexical chrome as page materials (toolbar, `/`, floating format) without quiz / in-page file upload; **@** mentions a person on the thread; file icon; **+** opens modal for material or link
-- Parent list of threads that apply to linked students (same URL; parent chrome / Parent view)
+- Parent list of threads that apply to linked students (same URL; student chrome / Student view)
 - Sidebar unread count (red) of threads with new activity since `last_read_at`
 - Staff compose: optional **Notify everyone** (Activity notifications). Course instructors / class leads, plus people who started or posted on the thread, are notified of posts (one Activity item per discussion). **@mentions** also notify that person.
 - Realtime: `databridge/` subscribes via the shared Supabase client; page hooks update TanStack Query

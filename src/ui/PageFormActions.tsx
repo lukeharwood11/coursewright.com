@@ -1,5 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  CheckIcon,
+  DocumentCheckIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { Button } from "./Button";
 import { ConfirmDialog } from "./ConfirmDialog";
 
@@ -11,7 +16,10 @@ export function PageFormActions({
   canSave = true,
   cancelTo,
   onCancel,
+  onSaveAndClose,
+  closeWhenUnchanged = false,
   saveLabel = "Save",
+  saveAndCloseLabel = "Save & close",
 }: {
   formId: string;
   saving: boolean;
@@ -22,10 +30,22 @@ export function PageFormActions({
   cancelTo: string;
   /** When set, Cancel leaves edit mode here instead of navigating. */
   onCancel?: () => void;
+  /**
+   * Desktop-only: save then leave edit. When unchanged, just leaves.
+   * Omit on pages that should not offer this action.
+   */
+  onSaveAndClose?: () => void | Promise<void>;
+  /** When true and nothing is staged, Cancel reads “Close”. */
+  closeWhenUnchanged?: boolean;
   saveLabel?: string;
+  saveAndCloseLabel?: string;
 }) {
   const navigate = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const saveDisabled = saving || !hasChanges || !canSave;
+  const saveAndCloseDisabled = saving || (hasChanges && !canSave);
+  const leaveLabel =
+    closeWhenUnchanged && !hasChanges ? "Close" : "Cancel";
 
   function leave() {
     if (onCancel) {
@@ -53,15 +73,31 @@ export function PageFormActions({
           onClick={onCancelClick}
           disabled={saving}
         >
-          Cancel
+          <XMarkIcon className="h-4 w-4" aria-hidden />
+          {leaveLabel}
         </Button>
         <Button
           type="submit"
           form={formId}
-          disabled={saving || !hasChanges || !canSave}
+          variant={onSaveAndClose ? "secondary" : "primary"}
+          disabled={saveDisabled}
         >
+          <CheckIcon className="h-4 w-4" aria-hidden />
           {saving ? "Saving…" : saveLabel}
         </Button>
+        {onSaveAndClose ? (
+          <Button
+            type="button"
+            className="hidden md:inline-flex"
+            onClick={() => {
+              void onSaveAndClose();
+            }}
+            disabled={saveAndCloseDisabled}
+          >
+            <DocumentCheckIcon className="h-4 w-4" aria-hidden />
+            {saving ? "Saving…" : saveAndCloseLabel}
+          </Button>
+        ) : null}
       </div>
       <ConfirmDialog
         open={confirmOpen}

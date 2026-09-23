@@ -4,6 +4,7 @@ import { uploadResourceFile } from "@/resources/databridge/upload";
 import { resourceFolderQueryKeys } from "@/resources/databridge/folders";
 import { resourceItemQueryKeys } from "@/resources/databridge/items";
 import { useResourceUploadStore } from "@/resources/stores/uploadQueue";
+import { caughtErrorMessage } from "@/ui/toast";
 
 const CONCURRENCY = 3;
 
@@ -55,7 +56,7 @@ export function useResourceUploadProcessor() {
         .catch((caught: unknown) => {
           patch(job.id, {
             status: "failed",
-            error: caught instanceof Error ? caught.message : "That file didn’t upload.",
+            error: caughtErrorMessage(caught),
           });
         })
         .finally(() => {

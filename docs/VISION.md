@@ -2,7 +2,7 @@
 
 ## One-liner
 
-Course Wright is an intuitive LMS for **homeschool co-ops and micro-schools** — a course builder with org management and role-based access, so admins run the org, instructors teach, and parents can **use the materials** (on screen or printed) without the clunky complexity of typical school software.
+Course Wright is an intuitive LMS for **homeschool co-ops and micro-schools** — a course builder with org management and role-based access, so admins run the org, instructors teach, and students can **use the materials** (on screen or printed) without the clunky complexity of typical school software. Linked parents inherit student privileges.
 
 **Tagline:** Plan wright. Share wright. Course Wright.  
 **Short:** Courses, done wright.
@@ -10,10 +10,10 @@ Course Wright is an intuitive LMS for **homeschool co-ops and micro-schools** �
 ## Problems we solve
 
 1. **Unified lesson material + planning** — Course content, plans, and resources live in one place instead of scattered across drives, email, and spreadsheets. **Print is part of this** — paper is a first-class way to use what you built.
-2. **Communication with parents** — Invite parents by email; they create/log in with that email to view **and print** materials. Magic-link (no account) is a later option. Progress (grades, notes, checklists) in P1.
-3. **Billing** — Course Wright charges **organizations** so they can run courses and serve parents. Orgs collecting payment from parents is **later**.
-4. **Software that doesn't get in the way** — Existing LMS and co-op tools are often clunky, confusing, and overbuilt. Course Wright prioritizes clarity and ease of use so instructors and parents can get things done without a manual.
-5. **Replace the patchwork** — Many co-ops today juggle **Microsoft (file sharing)**, **WhatsApp (day-to-day communication)**, and **Outlook (parent email)**. Course Wright consolidates materials and parent-facing communication into one obvious place.
+2. **Communication with students** — Share materials with enrolled students. Parents are invited by email and inherit that student view (account required). Magic-link (no account) is a later option. Progress (grades, notes, checklists) in P1.
+3. **Billing** — Course Wright charges **organizations** so they can run courses and serve students. Orgs collecting payment from parents is **later**.
+4. **Software that doesn't get in the way** — Existing LMS and co-op tools are often clunky, confusing, and overbuilt. Course Wright prioritizes clarity and ease of use so instructors and students can get things done without a manual.
+5. **Replace the patchwork** — Many co-ops today juggle **Microsoft (file sharing)**, **WhatsApp (day-to-day communication)**, and **Outlook (parent email)**. Course Wright consolidates materials and student-facing communication into one obvious place.
 
 ## What users use today
 
@@ -21,20 +21,21 @@ Course Wright is an intuitive LMS for **homeschool co-ops and micro-schools** �
 |------|---------------|---------------------------|
 | **Microsoft (OneDrive/SharePoint/etc.)** | File sharing for lesson materials | Unified material storage in the course builder |
 | **WhatsApp** | Quick communication between families and instructors | Materials and updates in-app |
-| **Outlook / email** | Formal communication with parents | Email invites + in-app parent views |
+| **Outlook / email** | Formal communication with parents | Email invites + in-app student views |
 | **Google Classroom** | Some orgs have tried it | Rejected as **too heavy-handed** |
 
 ## Who we serve
 
 | Segment | Phase | Description |
 |---------|-------|-------------|
-| **Homeschool co-ops** | P0 | Admins, instructors, parents — course builder, RBAC, parent sharing |
+| **Homeschool co-ops** | P0 | Admins, instructors, students — course builder, RBAC, student sharing (parents inherit) |
 | **Micro-schools** | P0 | Same workflows as co-ops |
 | **Org admins / owners** | P0 | Anyone can create an org (they become first **owner**). Owners and admins manage the org; **only owners** manage billing. Multiple admins; invite extra admins by email. |
 | **Instructors** | P0 | Build courses, enroll students, invite parents, share and **print** materials |
-| **Parents** | P0 | Invited by email; **must have an account** to view. Same email as invite. **Design anchor:** parents who dislike technology. **Print** this week / each material is obvious |
-| **Parents creating materials** | P0 | A parent can create an org, build a course, and **print** — roster optional. Smallest valuable loop |
-| **Parents (progress)** | P1 | Grades, instructor notes, completion checklists, homework tracking |
+| **Students (experience)** | P0 | Enrolled students’ materials, this week, print. **Design anchor:** tech-averse people opening this view. |
+| **Parents (role)** | P0 | Invited by email; **must have an account**. Same email as invite. Inherit the **student** experience for linked students. |
+| **People creating materials** | P0 | Anyone can create an org, build a course, and **print** — roster optional. Smallest valuable loop |
+| **Students (progress)** | P1 | Grades, instructor notes, completion checklists, homework tracking |
 | **Student profiles** | P0 | Org-level records (`student_profile`) — no login; created on first course enrollment |
 | **Students (accounts)** | P2 | User accounts linked to existing student profiles |
 
@@ -50,28 +51,28 @@ Course Wright is an intuitive LMS for **homeschool co-ops and micro-schools** �
 8. **Versioned, reversible content** — course content is versioned (who changed what). Dangerous actions can be reverted. **Soft deletes** — never hard-delete user content. (**P1:** same for templates; deprecate vs delete on template resources.)
 9. **Template access is simple (P1)** — creator is owner; org admins see everything; any instructor who can **view** a template can create a course from it.
 10. **Courses are offerings** — optional dates, own roster, multiple instructors; created from scratch or from another course (P0); optionally from a template or promoted into one (P1).
-11. **Low friction for parents, still authenticated** — Email invite, then sign up / log in. **If a tech-averse parent can't understand the screen immediately, we've failed.** Magic links may come later.
-12. **Create → print is a complete product** — A parent (or instructor) can make materials and print them **without a roster, invites, or anyone else in the org**. Enrollment makes sharing richer; it is not the on-ramp to value.
-13. **Access follows enrollment** — Parents belong to an org when their student profile is enrolled in a course with `status = active`.
+11. **Low friction for the student experience, still authenticated** — Email invite (parents), then sign up / log in. **If a tech-averse person can't understand the student screen immediately, we've failed.** Magic links may come later.
+12. **Create → print is a complete product** — Someone can make materials and print them **without a roster, invites, or anyone else in the org**. Enrollment makes sharing richer; it is not the on-ramp to value.
+13. **Access follows enrollment** — Student materials require an enrolled student profile in a course with `status = active`. Linked parents inherit that access.
 14. **One hub for teaching** — Replaces scattered files, WhatsApp threads, and email chains where possible.
 
 ### Usability bar
 
-**Primary design persona:** The **tech-averse parent**. They open an invite link or log in and need to understand **what's going on the second they land**.
+**Primary design persona:** Anyone opening the **student experience** who **hates technology** (including linked parents). They open an invite link or log in and need to understand **what's going on the second they land**.
 
-**Parent view requirements:**
+**Student view requirements:**
 
 - Instant clarity — student, course, and "what you need to know" visible immediately
-- Parent dashboard: this calendar week's lesson plans and dated materials (P0), important now (P0), calendar (P0), summary (P1)
+- Student home: this calendar week's lesson plans and dated materials (P0), important now (P0), calendar (P0), summary (P1)
 - **Print this week** and **Print** on each material — paper without extra software
 - Plain language — no LMS jargon
 - Works on a phone in a browser
 
 ## Short-term vision (0–12 months) — P0
 
-**Goal:** Ship a **course builder** with **organizational management**, **roster management**, **RBAC**, **file sharing**, **parent access**, and **extreme shareability** (print + links) that co-ops, micro-schools, and a parent making materials at home can run on day one.
+**Goal:** Ship a **course builder** with **organizational management**, **roster management**, **RBAC**, **file sharing**, **student access** (parents inherit), and **extreme shareability** (print + links) that co-ops, micro-schools, and someone making materials at home can run on day one.
 
-**Primary users:** Admins, instructors, and parents.
+**Primary users:** Admins, instructors, and students (with parent invites for family access).
 
 **Focus areas:**
 
@@ -79,10 +80,10 @@ Course Wright is an intuitive LMS for **homeschool co-ops and micro-schools** �
 - **Roster management** — students, parent links, enrollments, staff/instructors
 - **RBAC** — owner, admin, instructor, parent roles; owners/admins manage accounts
 - **Course builder** — **courses** with **units** (optional dates); create from scratch or **from another course**. (**Templates / sync / promote = P1**)
-- **P0 "homework"** — dated materials in a unit (shows on parent "this week") — not a separate assignment type yet
+- **P0 "homework"** — dated materials in a unit (shows on student "this week") — not a separate assignment type yet
 - **Student profiles** — no accounts; created when first added to a course; linkable to accounts in P2
 - **Instructor course roster** — instructors enroll students; new students auto-create org profiles; **multiple instructors** per course
-- **File sharing (minimum)** — generous file types; upload as course materials; share with parents; **audio/video with in-app players**
+- **File sharing (minimum)** — generous file types; upload as course materials; share with students; **audio/video with in-app players**
 - **Course grade metadata** — courses tagged with multiple grades and/or ranges
 - **Advanced search** — native, cross-facet find (“where is this resource?”)
 - **Families / parent directory** — org-scoped households from roster; parents belong to a family profile (names + TBD fields)
@@ -90,7 +91,7 @@ Course Wright is an intuitive LMS for **homeschool co-ops and micro-schools** �
 - **Print** — one-tap print of a material, a unit packet, or this week's work (generated PDF preview → Download / Print)
 - **Parent invites** — email-based; **account required** in P0 to view (magic links later)
 - **Parent org access** — gated on student profile enrolled in a course with `status = active`; parent profile stays **active** if enrollment ends (P0)
-- **Parent dashboard** — this **Sunday–Saturday** week calendar (lesson plans + assigned/due) + Focus (important now + coming up)
+- **Student home** — this **Sunday–Saturday** week calendar (lesson plans + assigned/due) + Focus (important now + coming up)
 - **Product analytics** — PostHog
 
 **Success looks like:**

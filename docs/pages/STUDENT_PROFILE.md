@@ -9,16 +9,17 @@ Admins and instructors.
 
 ## Purpose
 
-View/edit one org-level **student profile** (not a dedicated student account in P0/P1).
+View/edit one org-level **student profile**, including an optional student account invite.
 
 
 ## Behavior
 
-- View/edit one `student_profile` (no dedicated student role in P0/P1).
+- View/edit one `student_profile`.
 - Edit name, optional student email, optional grade (must match org grade scheme when set).
 - **Parents:** add **one or more** parent emails; each is emailed an `/invite/<token>` (copy-link remains). Linked parents and pending invites are listed.
-- **Student email:** optional. Invite uses the same claim path so that email can sign in and see this student's work.
+- **Student account:** optional student email. Invite uses `admin_invites.role = student` (not a parent invite). Claim sets `user_id` so that person sees this one student’s work.
 - **Save** / **Cancel** in the page header; Save disabled when nothing changed; Cancel goes back (confirms if dirty).
+- **Remove** (confirm) deletes the profile. They leave classes and courses. A student-account membership ends; a staff role is kept.
 - Show course enrollments and class membership.
 - **Announce** to this student → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
 - Creating profiles often happens on first course or class add; this page manages the canonical org record.
@@ -48,11 +49,13 @@ View/edit one org-level **student profile** (not a dedicated student account in 
 - Classes in this org → [CLASS](./CLASS.md)
 - Parent invite / claim status on this page; email + copy `/invite/<token>`
 - Family membership is not shown here while the families directory is unrouted
-- No dedicated student-role controls (accounts = P2; student email uses parent claim path)
+- Student account: linked user when `user_id` is set, or a pending student invite
+- No family-directory controls while the families directory is unrouted
 
 ## Primary actions
 
 - Edit profile fields
+- Remove from the roster
 - Create Announcement
 - Create parent (or student-email) invite (email + copy the claim link); **Resend email** or cancel a pending invite; add a parent (then another)
 - Open class / course enrollments

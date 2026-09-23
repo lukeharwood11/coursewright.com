@@ -7,7 +7,7 @@
 
 ## Audience
 
-Anyone with an active membership in this organization (staff and families).
+Anyone with an active membership in this organization (staff and students).
 
 ## Purpose
 
@@ -17,10 +17,10 @@ Org-visible directory page for a person with an account: who they are here, what
 
 - Requires a signed-in org member. People outside the org cannot open the profile (RPC + RLS).
 - Shows **name** and **role in this organization**. Email is not shown here (staff still see email on [ORG_SETTINGS](./ORG_SETTINGS.md)).
-- **Teaches** lists active courses they are assigned to. Families only see **published** courses.
+- **Teaches** lists active courses they are assigned to. Students only see **published** courses.
 - **Leads** lists classes they are assigned as class leads.
-- **Courses** lists active courses their linked students are enrolled in (published for families).
-- Opening a course goes to [COURSE](./COURSE.md). Opening a class (staff) goes to [CLASS](./CLASS.md). Families see class names without a staff-only link.
+- **Courses** lists active courses their linked students are enrolled in (published for students).
+- Opening a course goes to [COURSE](./COURSE.md). Opening a class (staff) goes to [CLASS](./CLASS.md). Students see class names without a staff-only link.
 - Missing person or no membership in this org: plain-language not found.
 - Reached from user cards (discussion members, teachers, collaborators, class leads) and from discussion author profile circles / names (modal on the thread; full page elsewhere).
 

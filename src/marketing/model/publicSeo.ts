@@ -2,7 +2,7 @@ import { helpDocPath, helpDocTopics } from "./helpDocs.ts";
 
 /** Default meta description for the site and home (BRANDING elevator pitch, plain). */
 export const SITE_DESCRIPTION =
-  "Course Wright gives homeschool co-ops and micro-schools one place to plan courses, share materials with parents, and print what you need — without the clunky complexity of typical school software.";
+  "Course Wright gives homeschool co-ops and micro-schools one place to plan courses, share materials with students, and print what you need — without the clunky complexity of typical school software.";
 
 export const SITE_NAME = "Course Wright";
 
@@ -33,7 +33,7 @@ const marketingPages: PublicSeoPage[] = [
     path: "/about",
     title: "About",
     description:
-      "Who Course Wright is for — homeschool co-ops and micro-schools that need one simple hub for courses, materials, and parents.",
+      "Who Course Wright is for — homeschool co-ops and micro-schools that need one simple hub for courses, materials, and students.",
     changefreq: "monthly",
     priority: 0.9,
   },

@@ -2,6 +2,8 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { caughtErrorMessage, toastCaughtError } from "@/ui/toast";
+import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
   courseQueryKeys,
@@ -19,8 +21,10 @@ import {
   enrollStudents,
   enrollmentQueryKeys,
 } from "@/roster/databridge/enrollments";
+import { inviteCreatedStudents } from "@/roster/databridge/studentInvites";
 import {
   createStudents,
+  deleteStudent,
   listStudents,
   studentQueryKeys,
 } from "@/roster/databridge/students";
@@ -32,11 +36,13 @@ import {
   studentMatchesQuery,
   toggleIdInSet,
   validateStudentBatch,
+  withInviteNote,
   type NewStudentDraft,
 } from "@/roster/model/studentProfile";
 
 export function useOrgRoster() {
   const { organization } = useOrgShell();
+  const user = useAuthedUser();
   const queryClient = useQueryClient();
 
   const studentsQuery = useQuery({
@@ -83,9 +89,15 @@ export function useOrgRoster() {
         organizationQuery.data?.gradeLabels ?? [],
       );
       if (!parsed.ok) throw new Error(parsed.error);
-      return createStudents(organization.id, parsed.values);
+      const created = await createStudents(organization.id, parsed.values);
+      const invites = await inviteCreatedStudents({
+        organizationId: organization.id,
+        students: created,
+        invitedBy: user.id,
+      });
+      return { created, invites };
     },
-    onSuccess: async (created) => {
+    onSuccess: async ({ created, invites }) => {
       setDrafts([emptyStudentDraft()]);
       setPasteText("");
       setStudentError(null);
@@ -94,13 +106,16 @@ export function useOrgRoster() {
         queryKey: studentQueryKeys.list(organization.id),
       });
       toast(
-        created.length === 1
-          ? "Student added."
-          : `${created.length} students added.`,
+        withInviteNote(
+          created.length === 1
+            ? "Student added."
+            : `${created.length} students added.`,
+          invites,
+        ),
       );
     },
     onError: (error: Error) => {
-      setStudentError(error.message);
+      setStudentError(caughtErrorMessage(error));
     },
   });
 
@@ -120,7 +135,7 @@ export function useOrgRoster() {
       toast("Class created.");
     },
     onError: (error: Error) => {
-      setClassError(error.message);
+      setClassError(caughtErrorMessage(error));
     },
   });
 
@@ -149,7 +164,7 @@ export function useOrgRoster() {
       toast(count === 1 ? "Student added to class." : `${count} students added to class.`);
     },
     onError: (error: Error) => {
-      setAssignError(error.message);
+      setAssignError(caughtErrorMessage(error));
     },
   });
 
@@ -181,7 +196,7 @@ export function useOrgRoster() {
       toast(count === 1 ? "Student enrolled." : `${count} students enrolled.`);
     },
     onError: (error: Error) => {
-      setAssignError(error.message);
+      setAssignError(caughtErrorMessage(error));
     },
   });
 
@@ -218,6 +233,22 @@ export function useOrgRoster() {
     setStudentError(null);
   }
 
+  const removeMutation = useMutation({
+    mutationFn: (studentId: number) => deleteStudent(studentId),
+    onSuccess: async (_data, studentId) => {
+      setSelectedIds((current) => current.filter((id) => id !== studentId));
+      await queryClient.invalidateQueries({
+        queryKey: studentQueryKeys.list(organization.id),
+      });
+      await queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+      await queryClient.invalidateQueries({ queryKey: ["classes"] });
+      toast("Student removed from the roster.");
+    },
+    onError: (error: Error) => {
+      toastCaughtError(error);
+    },
+  });
+
   const assigning =
     addToClassMutation.isPending || enrollInCourseMutation.isPending;
 
@@ -251,6 +282,7 @@ export function useOrgRoster() {
           ? coursesQuery.error.message
           : null,
     addingStudents: addStudentsMutation.isPending,
+    removingId: removeMutation.isPending ? (removeMutation.variables ?? null) : null,
     creatingClass: createClassMutation.isPending,
     assigning,
     setQuery: (value: string) => {
@@ -320,6 +352,7 @@ export function useOrgRoster() {
     },
     onApplyPaste,
     onAddStudents,
+    onRemove: (studentId: number) => removeMutation.mutate(studentId),
     setClassTitle: (value: string) => {
       setClassTitle(value);
       setClassError(null);

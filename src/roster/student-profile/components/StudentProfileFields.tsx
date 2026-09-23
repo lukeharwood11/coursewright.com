@@ -43,25 +43,10 @@ export function StudentProfileFields({
           autoComplete="off"
         />
       </label>
-      {showParentEmail ? (
-        <label className="flex flex-col gap-1">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-            Parent email
-          </span>
-          <Input
-            className="w-full"
-            type="email"
-            value={parentEmail}
-            onChange={(event) => onParentEmailChange(event.target.value)}
-            disabled={disabled}
-            autoComplete="off"
-            placeholder="optional"
-          />
-        </label>
-      ) : null}
-      <label className="flex flex-col gap-1">
-        <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-          Student email
+      <label className="flex flex-col gap-1 sm:col-span-2">
+        <span className="text-[13px] font-bold text-[var(--ink)]">
+          Student email{" "}
+          <span className="font-medium text-[var(--ink-soft)]">(optional)</span>
         </span>
         <Input
           className="w-full"
@@ -70,9 +55,23 @@ export function StudentProfileFields({
           onChange={(event) => onStudentEmailChange(event.target.value)}
           disabled={disabled}
           autoComplete="off"
-          placeholder="optional"
         />
       </label>
+      {showParentEmail ? (
+        <label className="flex flex-col gap-1">
+          <span className="text-[12.5px] font-medium text-[var(--ink-faint)]">
+            Parent email (optional)
+          </span>
+          <Input
+            className="w-full"
+            type="email"
+            value={parentEmail}
+            onChange={(event) => onParentEmailChange(event.target.value)}
+            disabled={disabled}
+            autoComplete="off"
+          />
+        </label>
+      ) : null}
       <label className="flex flex-col gap-1">
         <span className="text-[13px] font-bold text-[var(--ink-soft)]">Grade</span>
         <select

@@ -13,6 +13,7 @@ Repo-root utility scripts (not app runtime).
 | `build-spa.sh <tier>` | Write gitignored `.env.production` from Terraform outputs (incl. `VITE_PUBLIC_HOST` from `site_domain`; testing refuses parent/main) + `npm run build` |
 | `deploy-spa.sh <tier>` | `aws s3 sync dist/` + CloudFront invalidate |
 | `deploy-supabase.sh <tier>` | `db push` + Edge Functions to tier’s Supabase ref (testing = branch, production = main) |
+| `setup-activity-push.sh` | **HN-018** — VAPID + Activity push webhook on testing and/or production. Refs come from Terraform state. Production needs `--yes`. |
 | `deploy.sh <tier>` | Local one-shot: plan → apply → supabase → build → SPA (production requires `--yes`) |
 | `gha-resolve-plan-run.sh` | Actions helper: matching plan artifact run id + git SHA |
 | `lib/terraform-env.sh` | Shared helpers (sourced by the scripts above) |

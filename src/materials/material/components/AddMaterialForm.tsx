@@ -4,7 +4,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { MATERIAL_KINDS, materialKindLabel, type MaterialKind } from "@/materials/model/kind";
 import { useAddMaterial } from "../hooks/useAddMaterial";
 import { AudioSnippetRecorder } from "./AudioSnippetRecorder";
-import { OptionalDueDateField } from "./OptionalDueDateField";
+import { MaterialDateFields } from "./MaterialDateFields";
 import { browserTimeZone, timeZoneLabel } from "@/submissions/model/dueInstant";
 
 const controlClass = [
@@ -108,26 +108,14 @@ export function AddMaterialForm({
           <AudioSnippetRecorder file={add.file} onFile={add.setFile} />
         </div>
       ) : null}
-      <label className="mt-3 flex min-w-0 flex-col gap-1">
-        <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-          Assignment date (optional)
-        </span>
-        <Input
-          className="w-full"
-          type="date"
-          value={add.scheduledDate}
-          onChange={(event) => add.setScheduledDate(event.target.value)}
-        />
-        <span className="text-[12px] text-[var(--ink-faint)]">
-          If you set a date, this shows up on parents’ This week page that week.
-        </span>
-      </label>
-      <OptionalDueDateField
-        value={add.dueDate}
-        time={add.dueTime}
+      <MaterialDateFields
+        scheduledDate={add.scheduledDate}
+        dueDate={add.dueDate}
+        dueTime={add.dueTime}
         timeZoneLabel={timeZoneLabel(browserTimeZone())}
-        onChange={add.setDueDate}
-        onTimeChange={add.setDueTime}
+        onScheduledChange={add.setScheduledDate}
+        onDueDateChange={add.setDueDate}
+        onDueTimeChange={add.setDueTime}
       />
       {add.formError ? (
         <p className="mt-3 text-[13px] text-[var(--amber-deep)]" role="alert">

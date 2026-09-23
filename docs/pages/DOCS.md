@@ -35,7 +35,7 @@ Public help documentation: getting started, organization basics, courses, roster
 | Courses & materials | `/docs/courses` |
 | Roster | `/docs/roster` |
 | Staff & roles | `/docs/staff-roles` |
-| For families | `/docs/parents` |
+| Student experience | `/docs/parents` |
 
 Roster covers students, classes, enrollments, and parent invites. Staff & roles covers inviting owners/admins/instructors and permission differences (aligned with FEATURES RBAC).
 

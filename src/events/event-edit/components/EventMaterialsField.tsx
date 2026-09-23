@@ -1,11 +1,13 @@
 export function EventMaterialsField({
   options,
   selectedIds,
+  needsCourse,
   disabled,
   onToggle,
 }: {
   options: Array<{ id: number; title: string; courseTitle: string }>;
   selectedIds: number[];
+  needsCourse: boolean;
   disabled: boolean;
   onToggle: (id: number) => void;
 }) {
@@ -15,14 +17,11 @@ export function EventMaterialsField({
       <legend className="text-[13px] font-bold text-[var(--ink-soft)]">
         Linked materials
       </legend>
-      <p className="mt-1 text-[12.5px] text-[var(--ink-faint)]">
-        Optional. Families open these from the event when they can already see the material.
-      </p>
-      {options.length === 0 ? (
+      {needsCourse ? (
         <p className="mt-2 text-[12.5px] text-[var(--ink-faint)]">
-          Choose a course first, or there aren’t any materials to link yet.
+          Choose a course first to link material
         </p>
-      ) : (
+      ) : options.length === 0 ? null : (
         <ul className="mt-2 max-h-64 divide-y divide-[var(--line-soft)] overflow-y-auto rounded-[6px] border border-[var(--line)]">
           {options.map((option) => (
             <li key={option.id}>

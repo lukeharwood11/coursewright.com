@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { caughtErrorMessage } from "@/ui/toast";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import {
   getOrganization,
@@ -51,7 +52,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
-  const [orgType, setOrgType] = useState("coop");
+  const [orgType, setOrgType] = useState("other");
   const [gradeScheme, setGradeScheme] = useState("k12");
   const [gradeLabelsText, setGradeLabelsText] = useState("");
   const [schoolDays, setSchoolDays] = useState<SchoolDay[]>(DEFAULT_SCHOOL_DAYS);
@@ -131,7 +132,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
       toast("Organization saved.");
     },
     onError: (error: Error) => {
-      setFormError(error.message);
+      setFormError(caughtErrorMessage(error));
     },
   });
 

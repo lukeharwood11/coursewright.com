@@ -18,7 +18,7 @@ Configure the course instance (not content authoring — that’s [COURSE](./COU
 - **Save** / **Cancel** sit in the page header (upper right). Save is disabled when nothing changed; Cancel goes back (confirms first if there are unsaved changes).
 - Optional dates are informational only (not access gates).
 - **Status** (active / archived) is whether the offering is running.
-- **Publish / unpublish** controls whether enrolled families can see the course (distinct from status).
+- **Publish / unpublish** controls whether enrolled students can see the course (distinct from status).
 - Manage co-teachers.
 - Soft-delete/archive TBD; no hard deletes of content.
 - **P1:** promote from-scratch course to template or open linked template.

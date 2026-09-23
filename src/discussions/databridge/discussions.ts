@@ -9,6 +9,7 @@ import {
 } from "@/discussions/model/audience";
 import type { DiscussionDraft } from "@/discussions/model/validate";
 import { requireSupabase } from "./client";
+import { loadFamilyStudentIds } from "@/parent/databridge/dashboard";
 
 export type DiscussionRecord = {
   id: number;
@@ -603,13 +604,7 @@ export async function listParentDiscussionContext(
   userId: string,
 ): Promise<ParentDiscussionContext> {
   const db = requireSupabase();
-  const { data: links, error: linksError } = await db
-    .from("parent_student_links")
-    .select("student_profile_id")
-    .eq("parent_user_id", userId);
-  if (linksError) throw new Error(linksError.message);
-
-  const studentIds = (links ?? []).map((row) => row.student_profile_id);
+  const studentIds = await loadFamilyStudentIds(organizationId, userId);
   if (studentIds.length === 0) {
     return { students: [], enrollments: [], classMembers: [] };
   }

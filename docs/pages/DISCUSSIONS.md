@@ -5,7 +5,7 @@
 
 ## Audience
 
-Owners, admins, and instructors in **Teacher view** use the staff list. Parents (and staff **Parent view**) use the same URL for threads that apply to their linked students. Both can compose when the FEATURES create rules allow it.
+Owners, admins, and instructors in **Teacher view** use the staff list. Students (and staff **Student view**; linked parents inherit) use the same URL for threads that apply to their linked students. Both can compose when the FEATURES create rules allow it.
 
 ## Purpose
 
@@ -18,10 +18,10 @@ List two-way **discussions** for a course or a class. Distinct from [ANNOUNCEMEN
 - Filter chips: **All** / **Open** / **Resolved**. Default **All**.
 - Unread first within the current filter (no `last_read_at`, or `last_message_at` after it). Unread rows show a notification icon; up-to-date rows have no leading icon.
 - Opening a row goes to [DISCUSSION](./DISCUSSION.md).
-- **New discussion** goes to compose when the actor may start one. Staff **Parent view** without linked students: empty preview, no compose.
+- **New discussion** goes to compose when the actor may start one. Staff **Student view** without linked students: empty preview, no compose.
 - While this list is open, **Realtime** refreshes new threads, last activity, answered state, and unread without a full page reload.
 
-Empty: plain language plus **New discussion** when compose is allowed. Families without a matching course or class: explain that discussions are for a class their child is in or a course they are enrolled in.
+Empty: **There are no discussions at this time.** **New discussion** still shows when compose is allowed.
 
 ## Data shown
 
@@ -36,7 +36,6 @@ Empty: plain language plus **New discussion** when compose is allowed. Families 
 ## Contents
 
 - Page title **Discussions**
-- Short line for families: talk with other families and teachers in a course or class
 - Filter chips
 - List
 - **New discussion**
@@ -51,7 +50,7 @@ Empty: plain language plus **New discussion** when compose is allowed. Families 
 - [DISCUSSION](./DISCUSSION.md) — view or new
 - [ORG_HOME](./ORG_HOME.md) — back to home / this week
 - Via org chrome (staff Teacher view): [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [ACTIVITY](./ACTIVITY.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); search overlay TBD
-- Via parent chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [RESOURCES](./RESOURCES.md) (when visible), [ACTIVITY](./ACTIVITY.md)
+- Via student chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [RESOURCES](./RESOURCES.md) (when visible), [ACTIVITY](./ACTIVITY.md)
 
 ## Notes
 

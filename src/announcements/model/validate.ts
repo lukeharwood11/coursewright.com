@@ -70,7 +70,7 @@ export function validateAnnouncementDraft(draft: AnnouncementDraft): string | nu
   if (draft.audience === "student" && draft.studentIds.length === 0) {
     return "Choose at least one student.";
   }
-  if (!draft.title.trim()) return "Add a title so families know what this is.";
+  if (!draft.title.trim()) return "Add a title so students know what this is.";
   if (draft.startDate && draft.endDate && draft.endDate < draft.startDate) {
     return "The end date needs to be on or after the start date.";
   }

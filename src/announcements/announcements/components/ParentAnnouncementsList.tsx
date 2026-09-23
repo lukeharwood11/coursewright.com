@@ -27,7 +27,7 @@ export function ParentAnnouncementsList({
   if (items.length === 0) {
     return (
       <p className="mt-6 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-        No announcements right now.
+        There are no announcements at this time.
       </p>
     );
   }

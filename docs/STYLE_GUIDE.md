@@ -170,7 +170,7 @@ import { PrinterIcon } from "@heroicons/react/24/outline";
 | Class | Look | Use |
 |-------|------|-----|
 | **Primary** | Green fill, white text, 700, 11–12px padding | Main action (“Continue”, “Add material”) |
-| **Secondary** | White, `1px` line, 700 | “Share with parents”, “Print”, “View” on important card |
+| **Secondary** | White, `1px` line, 700 | “Share with students”, “Print”, “View” on important card |
 | **Ghost** | Dashed line, left-aligned, full width | “Add material to this unit” |
 | **Google** | White, line border, icon + “Sign in with Google” | Login only |
 
@@ -220,7 +220,7 @@ Numbered circle (green tint / green deep). Unit name Manrope 800. Optional dates
 
 Paper canvas. Centered card, max-width ~320px. Wordmark → Lora heading → one-line subcopy → Google → “or” divider → email → Continue. Footer: “New to Course Wright? Ask your co-op admin for an invite.”
 
-### Parent dashboard (phone — usability anchor)
+### Student home (phone — usability anchor)
 
 1. Top bar: **CW** or tiny wordmark + **org name** (700) + avatar + **Activity bell**. On desktop, a simpler collapsible sidebar (This week, Calendar, Announcements, Discussions, their courses) sits beside the page. Content uses the remaining width — do not center a narrow column on large screens.
 2. Greeting (Lora) + week range (“Week of Sep 1 – Sep 7”, Sunday–Saturday) + **Print this week**
@@ -228,7 +228,7 @@ Paper canvas. Centered card, max-width ~320px. Wordmark → Lora heading → one
 4. Two columns on large screens: **this week’s calendar** | **Focus** (**Important now** + **Coming up** — Assigned next / Due next). Course-colored week notes sit above the grid. Stacks on small screens (calendar first).
 5. Week calendar cells show lesson-plan text, then a divider, then materials. **Assigned** chips are outlined in the course color; **Due** chips are filled. A course legend filters classes.
 
-Keep parent chrome minimal. One job on the home tab.
+Keep student chrome minimal. One job on the home tab.
 
 ### Instructor / owner / admin (desktop)
 
@@ -254,7 +254,7 @@ Print builds a **real PDF** and previews that file on dedicated `/print` (and `p
 | Header (small) | Course Wright wordmark + course title — once, faint, not a branded poster |
 | Page breaks | Controlled in the PDF layout. **Unit:** break between materials. **This week:** break between students; pack a student’s materials onto a page when they fit (rule between assignments); start the next assignment on a new page if it can’t begin cleanly |
 
-**Print** is a secondary button in the product; on parent “this week” it can sit beside the week range. Label is always **Print**, **Print unit**, or **Print this week** — never Export. On the print screen itself, **Download** is allowed for the `.pdf`.
+**Print** is a secondary button in the product; on student “this week” it can sit beside the week range. Label is always **Print**, **Print unit**, or **Print this week** — never Export. On the print screen itself, **Download** is allowed for the `.pdf`.
 
 Invoking print navigates to the print route, generates the PDF, and shows it in an in-app viewer.
 
@@ -294,7 +294,7 @@ Not: “LMS”, “modules”, “assignments dashboard”, “sync payload”, 
 - Purple, terracotta-on-cream, or Inter/Roboto as brand type  
 - A second icon set mixed with Heroicons  
 - Stacked heavy shadows, glowing pills, uppercase tracked eyebrows  
-- Crowding the parent home with instructor complexity
+- Crowding the student home with instructor complexity
 - Beige or green full-page backgrounds when printing
 - “Export” or format pickers in front of Print  
 

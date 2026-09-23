@@ -37,6 +37,14 @@ export function BatchCreateStudentsForm({
   onSubmit: (event: FormEvent) => void;
 }) {
   const filledCount = drafts.filter((draft) => draft.name.trim()).length;
+  const invitingCount = drafts.filter(
+    (draft) => draft.name.trim() && draft.studentEmail.trim(),
+  ).length;
+  const buttonLabel = addStudentsButtonLabel(
+    submitLabel(filledCount),
+    filledCount,
+    invitingCount,
+  );
 
   return (
     <form onSubmit={onSubmit}>
@@ -121,9 +129,23 @@ export function BatchCreateStudentsForm({
 
       <div className="mt-4">
         <Button type="submit" disabled={saving || filledCount === 0}>
-          {saving ? "Saving…" : submitLabel(filledCount)}
+          {saving ? "Saving…" : buttonLabel}
         </Button>
       </div>
     </form>
   );
+}
+
+function addStudentsButtonLabel(
+  base: string,
+  added: number,
+  inviting: number,
+): string {
+  if (inviting === 0) return base;
+  if (inviting === added) {
+    return added === 1 ? `${base} and send invite` : `${base} and send invites`;
+  }
+  return inviting === 1
+    ? `${base} and send 1 invite`
+    : `${base} and send ${inviting} invites`;
 }

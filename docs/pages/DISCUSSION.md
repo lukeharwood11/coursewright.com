@@ -8,7 +8,7 @@ Optional query on **new:** `audience=course|class` plus `courseId` or `classId` 
 
 ## Audience
 
-Staff compose in Teacher view for courses they teach / classes they manage (owners and admins: any in the org). Families compose for a course their child is enrolled in or a class their child is in. Anyone who can see the thread can post and quote. Staff **Parent view** uses the family presentation; opening still marks the thread read for that person.
+Staff compose in Teacher view for courses they teach / classes they manage (owners and admins: any in the org). Students compose for a course they are enrolled in or a class they are in. Anyone who can see the thread can post and quote. Staff **Student view** uses the student presentation; opening still marks the thread read for that person.
 
 ## Purpose
 
@@ -33,12 +33,12 @@ One two-way **discussion**: title, who it is for, flat posts (plain or Lexical),
 ### New
 
 - **Audience** required: **Course** or **Class** — pick the kind, then **one** target. Prefill from the query string when arriving from a course or class page.
-- Families only see courses their linked student is enrolled in (active + published) and classes that student is in. Instructors see courses they teach and classes they can manage. Owners and admins see any course or class in the org.
+- Students only see courses their linked student is enrolled in (active + published) and classes that student is in. Instructors see courses they teach and classes they can manage. Owners and admins see any course or class in the org.
 - Title required. Opening post required (text and/or attachment); same plain / **T** Lexical composer. Typing **@** mentions someone who would be on the thread (after a course or class is chosen).
 - **Start discussion** stays disabled until there is a title, one audience target, and an opening post.
 - Staff Teacher view: **Notify everyone** (off by default). When on, the opening post also notifies everyone who can see the thread in [ACTIVITY](./ACTIVITY.md). Course instructors or class leads are always notified of posts (except the author), as are people who started the thread or posted in it. One new-post Activity item per discussion. **@mentions** also notify that person.
 - Cancel returns to the list.
-- Staff **Parent view** without linked students cannot open `/new` (redirect to org home). Parent-only users without a matching course or class see an empty picker and cannot post.
+- Staff **Student view** without linked students cannot open `/new` (redirect to org home). Parent-only users without a matching course or class see an empty picker and cannot post.
 
 No `/edit` route — title and audience are not edited after create in this slice.
 
@@ -93,7 +93,7 @@ Writeable on view: new post / quote, edit own post (body + @mentions), answered 
 - [MATERIAL](./MATERIAL.md) — open an attached material
 - [ORG_HOME](./ORG_HOME.md) — via chrome
 - Via org chrome (staff Teacher view): [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [ACTIVITY](./ACTIVITY.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); search overlay TBD
-- Via parent chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [RESOURCES](./RESOURCES.md) (when visible), [ACTIVITY](./ACTIVITY.md)
+- Via student chrome: [ORG_HOME](./ORG_HOME.md), [CALENDAR](./CALENDAR.md), [ANNOUNCEMENTS](./ANNOUNCEMENTS.md), [DISCUSSIONS](./DISCUSSIONS.md), [RESOURCES](./RESOURCES.md) (when visible), [ACTIVITY](./ACTIVITY.md)
 
 ## Notes
 
