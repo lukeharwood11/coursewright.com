@@ -14,6 +14,7 @@ export type ParentDashboardMaterial = {
   assignedDate: string | null;
   dueDate: string | null;
   unitId: number | null;
+  itemKind?: "material" | "quiz";
 };
 
 export type ParentDashboardCourse = {
@@ -150,6 +151,7 @@ export type ParentDashboardSource = {
     unitId: number | null;
     unitStart: string | null;
     unitEnd: string | null;
+    itemKind?: "material" | "quiz";
   }>;
   importantNow: Array<{
     id: number;
@@ -230,6 +232,7 @@ function toDashboardMaterial(
     ),
     dueDate: material.dueDate,
     unitId: material.unitId,
+    itemKind: material.itemKind ?? "material",
   };
 }
 
@@ -633,7 +636,7 @@ function collectNextByDate(
 
   const seen = new Set<string>();
   return items.filter((item) => {
-    const key = `${item.studentId}:${item.material.id}`;
+    const key = `${item.studentId}:${item.material.itemKind ?? "material"}:${item.material.id}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;

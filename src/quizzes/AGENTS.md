@@ -11,6 +11,7 @@ Course **Quiz**: an outline item families take in the app or print. Not a materi
 - Kinds: multiple choice, short answer, number, matching, long answer. A long answer has a line count (1–20). Short answer and long answer are not scored.
 - Answer keys live in `quiz_answer_keys`. Matching links live in `quiz_match_keys` (prompts and options are separate rows families can read). A student login (account email matches that student’s `student_email`) never sees the key. Staff Teacher view always does.
 - Attempts are `quiz_attempts`, not `material_submissions`. Submit goes through `submit_quiz_attempt`.
+- After submit, the take form refills with that student’s latest answers (greyed out when they cannot submit again). Each answer shows Correct / Incorrect / Yet to be graded (`is_correct` on `quiz_attempt_answers`: set by autograde for scored kinds, or by the teacher for short/long and anything left pending). The outline shows **Score 4/5 (80%)** only when every answer is graded; otherwise a submitted check.
 
 ## Rules
 
@@ -25,4 +26,5 @@ Course **Quiz**: an outline item families take in the app or print. Not a materi
 
 - Add a quiz material kind.
 - Put quizzes on course templates in this slice.
-- Add manual points, a max-attempt count, Activity, or a gradebook here.
+- Add a max-attempt count, Activity, or a gradebook here.
+- Count short/long answers toward the automatic score total (teachers only mark Correct / Incorrect so the entry can be fully graded).

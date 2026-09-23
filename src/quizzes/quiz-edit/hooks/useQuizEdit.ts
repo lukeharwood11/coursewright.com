@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
@@ -14,6 +14,10 @@ import {
   updateQuiz,
   type QuizQuestionDraft,
 } from "@/quizzes/databridge/quizzes";
+import {
+  quizLocationState,
+  quizOpenedFromUnit,
+} from "@/quizzes/model/navigation";
 import { quizPath } from "@/quizzes/model/paths";
 import {
   emptyWindowFields,
@@ -54,7 +58,9 @@ export function useQuizEdit() {
   const { organization, role, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
+  const quizNavState = quizLocationState(quizOpenedFromUnit(location.state));
 
   const quizQuery = useQuery({
     queryKey: quizQueryKeys.detail(quizId),
@@ -143,7 +149,7 @@ export function useQuizEdit() {
       await queryClient.invalidateQueries({ queryKey: quizQueryKeys.detail(quizId) });
       await queryClient.invalidateQueries({ queryKey: quizQueryKeys.questions(quizId) });
       await queryClient.invalidateQueries({ queryKey: quizQueryKeys.list(courseId) });
-      navigate(viewPath);
+      navigate(viewPath, quizNavState ? { state: quizNavState } : undefined);
     },
   });
 

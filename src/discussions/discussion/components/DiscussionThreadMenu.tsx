@@ -110,7 +110,7 @@ export function DiscussionThreadMenu({
               <button
                 type="button"
                 role="menuitem"
-                className={itemClassName}
+                className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[13px] font-bold text-[#C44536] hover:bg-[#C44536]/10 hover:text-[#A3382C] focus-visible:bg-[#C44536]/10 focus-visible:outline-none"
                 onClick={() => {
                   setOpen(false);
                   onDelete();

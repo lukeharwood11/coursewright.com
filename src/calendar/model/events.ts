@@ -5,6 +5,8 @@ import type { EventAudience } from "@/events/model/audience";
 export type CalendarChipKind = "assigned" | "due";
 
 export type CalendarMaterialChip = {
+  /** Material or course quiz chip. Default treated as material when omitted in older callers. */
+  itemKind?: "material" | "quiz";
   materialId: number;
   title: string;
   courseId: number;
@@ -162,17 +164,23 @@ export function chipsForMaterials(
     unitStart: string | null;
     unitEnd: string | null;
     unpublished: boolean;
+    itemKind?: "material" | "quiz";
   }>,
 ): CalendarMaterialChip[] {
   const chips: CalendarMaterialChip[] = [];
   for (const material of materials) {
-    const assigned = assignedDateForChip(
-      material.scheduledDate,
-      material.unitStart,
-      material.unitEnd,
-    );
+    const itemKind = material.itemKind ?? "material";
+    const assigned =
+      itemKind === "quiz"
+        ? material.scheduledDate
+        : assignedDateForChip(
+            material.scheduledDate,
+            material.unitStart,
+            material.unitEnd,
+          );
     if (assigned) {
       chips.push({
+        itemKind,
         materialId: material.id,
         title: material.title,
         courseId: material.courseId,
@@ -186,6 +194,7 @@ export function chipsForMaterials(
     }
     if (material.dueDate) {
       chips.push({
+        itemKind,
         materialId: material.id,
         title: material.title,
         courseId: material.courseId,
@@ -201,19 +210,68 @@ export function chipsForMaterials(
   return chips;
 }
 
+/** Assigned = accepts_from wall date; due = accepts_until wall date. */
+export function chipsForQuizzes(
+  quizzes: Array<{
+    id: number;
+    title: string;
+    courseId: number;
+    courseTitle: string;
+    colorKey: CourseColorKey;
+    assignedDate: string | null;
+    dueDate: string | null;
+    unitId: number | null;
+    unpublished: boolean;
+  }>,
+): CalendarMaterialChip[] {
+  const chips: CalendarMaterialChip[] = [];
+  for (const quiz of quizzes) {
+    if (quiz.assignedDate) {
+      chips.push({
+        itemKind: "quiz",
+        materialId: quiz.id,
+        title: quiz.title,
+        courseId: quiz.courseId,
+        courseTitle: quiz.courseTitle,
+        colorKey: quiz.colorKey,
+        date: quiz.assignedDate,
+        kind: "assigned",
+        unitId: quiz.unitId,
+        unpublished: quiz.unpublished,
+      });
+    }
+    if (quiz.dueDate) {
+      chips.push({
+        itemKind: "quiz",
+        materialId: quiz.id,
+        title: quiz.title,
+        courseId: quiz.courseId,
+        courseTitle: quiz.courseTitle,
+        colorKey: quiz.colorKey,
+        date: quiz.dueDate,
+        kind: "due",
+        unitId: quiz.unitId,
+        unpublished: quiz.unpublished,
+      });
+    }
+  }
+  return chips;
+}
+
 export function mergeDayMaterials(
   planMaterials: Array<{ id: number; title: string; unitId: number | null }>,
   chips: CalendarMaterialChip[],
   courseId: number,
   date: string,
 ): CalendarLessonPlanDay["materials"] {
+  const materialChips = chips.filter((chip) => (chip.itemKind ?? "material") === "material");
   const assigned = new Set(
-    chips
+    materialChips
       .filter((chip) => chip.courseId === courseId && chip.date === date && chip.kind === "assigned")
       .map((chip) => chip.materialId),
   );
   const due = new Set(
-    chips
+    materialChips
       .filter((chip) => chip.courseId === courseId && chip.date === date && chip.kind === "due")
       .map((chip) => chip.materialId),
   );
@@ -229,7 +287,7 @@ export function mergeDayMaterials(
       due: due.has(material.id),
     });
   }
-  for (const chip of chips) {
+  for (const chip of materialChips) {
     if (chip.courseId !== courseId || chip.date !== date) continue;
     if (seen.has(chip.materialId)) continue;
     seen.add(chip.materialId);
@@ -251,12 +309,15 @@ export function leftoverChips(
 ): CalendarMaterialChip[] {
   const covered = new Set(
     lessonDays.flatMap((day) =>
-      day.date === date ? day.materials.map((material) => `${day.courseId}:${material.id}`) : [],
+      day.date === date
+        ? day.materials.map((material) => `${day.courseId}:material:${material.id}`)
+        : [],
     ),
   );
   return chips.filter((chip) => {
     if (chip.date !== date) return false;
-    return !covered.has(`${chip.courseId}:${chip.materialId}`);
+    const kind = chip.itemKind ?? "material";
+    return !covered.has(`${chip.courseId}:${kind}:${chip.materialId}`);
   });
 }
 

@@ -6,6 +6,7 @@ import { listLessonPlansInRange, type LessonPlanDetail } from "@/lesson-plans/da
 import { isPublished } from "@/materials/model/visibility";
 import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
 import { loadFamilyStudentIds } from "@/parent/databridge/dashboard";
+import { quizAssignedDate, quizDueDate } from "@/quizzes/model/window";
 
 export type CalendarSourceMaterial = {
   id: number;
@@ -21,9 +22,22 @@ export type CalendarSourceMaterial = {
   unpublished: boolean;
 };
 
+export type CalendarSourceQuiz = {
+  id: number;
+  title: string;
+  courseId: number;
+  courseTitle: string;
+  colorKey: CourseColorKey;
+  assignedDate: string | null;
+  dueDate: string | null;
+  unitId: number | null;
+  unpublished: boolean;
+};
+
 export type CalendarSource = {
   courses: Array<{ id: number; title: string; colorKey: CourseColorKey }>;
   materials: CalendarSourceMaterial[];
+  quizzes: CalendarSourceQuiz[];
   lessonPlans: LessonPlanDetail[];
   events: EventSummary[];
 };
@@ -63,6 +77,7 @@ export async function loadCalendarSource(args: {
     return {
       courses: parent.courses,
       materials: parent.materials,
+      quizzes: parent.quizzes,
       lessonPlans: parent.lessonPlans,
       events: events.filter((event) => eventAppliesToFamily(event, courseIds, classIds)),
     };
@@ -117,6 +132,7 @@ async function loadStaffCalendar(
   const courseById = new Map(courses.map((course) => [course.id, course]));
 
   let materials: CalendarSourceMaterial[] = [];
+  let quizzes: CalendarSourceQuiz[] = [];
   if (courseIds.length > 0) {
     const { data, error } = await db
       .from("materials")
@@ -148,9 +164,35 @@ async function loadStaffCalendar(
         },
       ];
     });
+
+    const { data: quizRows, error: quizError } = await db
+      .from("quizzes")
+      .select(
+        "id, title, accepts_from, accepts_until, accepts_timezone, course_id, unit_id, deleted_at, visibility",
+      )
+      .in("course_id", courseIds)
+      .is("deleted_at", null);
+    if (quizError) throw new Error(quizError.message);
+    quizzes = (quizRows ?? []).flatMap((row) => {
+      const course = courseById.get(row.course_id);
+      if (!course) return [];
+      return [
+        {
+          id: row.id,
+          title: row.title,
+          courseId: row.course_id,
+          courseTitle: course.title,
+          colorKey: course.colorKey,
+          assignedDate: quizAssignedDate(row.accepts_from, row.accepts_timezone),
+          dueDate: quizDueDate(row.accepts_until, row.accepts_timezone),
+          unitId: row.unit_id,
+          unpublished: row.visibility !== "published",
+        },
+      ];
+    });
   }
 
-  return { courses, materials, lessonPlans, events: [] };
+  return { courses, materials, quizzes, lessonPlans, events: [] };
 }
 
 async function loadParentCalendar(
@@ -165,7 +207,7 @@ async function loadParentCalendar(
 ): Promise<CalendarSource & { studentIds: number[] }> {
   const studentIds = await loadFamilyStudentIds(args.organizationId, args.userId);
   if (studentIds.length === 0) {
-    return { courses: [], materials: [], lessonPlans: [], events: [], studentIds: [] };
+    return { courses: [], materials: [], quizzes: [], lessonPlans: [], events: [], studentIds: [] };
   }
 
   const { data: enrollmentRows, error: enrollmentError } = await db
@@ -192,6 +234,7 @@ async function loadParentCalendar(
   const courseById = new Map(uniqueCourses.map((course) => [course.id, course]));
 
   let materials: CalendarSourceMaterial[] = [];
+  let quizzes: CalendarSourceQuiz[] = [];
   if (courseIds.length > 0) {
     const { data, error } = await db
       .from("materials")
@@ -224,6 +267,33 @@ async function loadParentCalendar(
         },
       ];
     });
+
+    const { data: quizRows, error: quizError } = await db
+      .from("quizzes")
+      .select(
+        "id, title, accepts_from, accepts_until, accepts_timezone, course_id, unit_id, deleted_at, visibility",
+      )
+      .in("course_id", courseIds)
+      .is("deleted_at", null)
+      .eq("visibility", "published");
+    if (quizError) throw new Error(quizError.message);
+    quizzes = (quizRows ?? []).flatMap((row) => {
+      const course = courseById.get(row.course_id);
+      if (!course) return [];
+      return [
+        {
+          id: row.id,
+          title: row.title,
+          courseId: row.course_id,
+          courseTitle: course.title,
+          colorKey: course.colorKey,
+          assignedDate: quizAssignedDate(row.accepts_from, row.accepts_timezone),
+          dueDate: quizDueDate(row.accepts_until, row.accepts_timezone),
+          unitId: row.unit_id,
+          unpublished: false,
+        },
+      ];
+    });
   }
 
   const publishedPlans = lessonPlans
@@ -239,6 +309,7 @@ async function loadParentCalendar(
   return {
     courses: uniqueCourses,
     materials,
+    quizzes,
     lessonPlans: publishedPlans,
     events: [],
     studentIds,

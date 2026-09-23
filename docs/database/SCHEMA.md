@@ -818,7 +818,7 @@ A **course quiz** is an outline item on a unit (or, in the database, with `unit_
 
 Questions (`quiz_questions.kind` = `multiple_choice` · `short_answer` · `number` · `matching` · `long_answer`) do not store the correct answer on the question row. `answer_lines` is set only for `long_answer` (1–20 blank lines). Choices (`quiz_choices`) do not store a correct flag. `quiz_answer_keys` holds either a `choice_id` or `answer_text` (short answer, long answer, or the correct number). A matching question stores the left column in `quiz_match_prompts` and the right column in `quiz_match_options`. Both are visible with the quiz. The correct link is `quiz_match_keys`, hidden the same way as `quiz_answer_keys`. The right column is mixed when the quiz is taken or printed.
 
-`quiz_attempts` is one submitted entry: `submitted_by`, `student_profile_id`, `autograded`, nullable `score` / `score_total`. The score is frozen at submit. `quiz_attempt_answers` copies the prompt and the selection.
+`quiz_attempts` is one submitted entry: `submitted_by`, `student_profile_id`, `autograded`, nullable `score` / `score_total`. The score is frozen at submit. `quiz_attempt_answers` copies the prompt and the selection (`choice_ids`, `answer_text`, `match_pairs`), plus nullable `is_correct` (set by autograde for scored kinds, or by staff via `grade_quiz_attempt_answer` for short/long and anything left pending). An entry is fully graded when every answer has `is_correct` set — families see the frozen score on the outline only then.
 
 Submit is `submit_quiz_attempt`. Clients cannot insert a score. Course-from-course copies questions, choices, keys, and matching prompts, options, and keys, not attempts.
 

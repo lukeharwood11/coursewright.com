@@ -7,10 +7,16 @@ import {
   formatQuizScore,
   latestAttemptsByStudent,
   matchKeyLetters,
+  matchKeyTexts,
   matchLayout,
   matchingIsCorrect,
   multipleChoiceIsCorrect,
   numbersMatch,
+  quizAnswerGrade,
+  quizAnswerGradeLabel,
+  quizOutlineProgress,
+  attemptIsFullyGraded,
+  savedQuizAnswerFields,
   stableShuffle,
   quizAttemptLabel,
   quizWindowState,
@@ -65,7 +71,81 @@ test("multiple choice matches the correct set exactly", () => {
     ]),
     { score: 1, scoreTotal: 2 },
   );
-  assert.equal(formatQuizScore(1, 2), "1 of 2");
+  assert.equal(formatQuizScore(1, 2), "Score 1/2 (50%)");
+  assert.equal(formatQuizScore(4, 5), "Score 4/5 (80%)");
+  assert.equal(formatQuizScore(0, 0), "Score 0/0");
+});
+
+test("marked answers show correct or incorrect; otherwise pending", () => {
+  assert.equal(quizAnswerGrade(null), "pending");
+  assert.equal(quizAnswerGrade(true), "correct");
+  assert.equal(quizAnswerGrade(false), "incorrect");
+  assert.equal(quizAnswerGradeLabel("correct"), "Correct");
+  assert.equal(quizAnswerGradeLabel("incorrect"), "Incorrect");
+  assert.equal(quizAnswerGradeLabel("pending"), "Yet to be graded");
+});
+
+test("outline progress waits until every answer is graded", () => {
+  assert.equal(quizOutlineProgress(null).kind, "none");
+  assert.equal(
+    quizOutlineProgress({
+      score: 4,
+      scoreTotal: 5,
+      ungradedAnswerCount: 1,
+    }).kind,
+    "submitted",
+  );
+  assert.deepEqual(
+    quizOutlineProgress({
+      score: 4,
+      scoreTotal: 5,
+      ungradedAnswerCount: 0,
+    }),
+    { kind: "scored", label: "Score 4/5 (80%)" },
+  );
+  assert.equal(
+    quizOutlineProgress({
+      score: null,
+      scoreTotal: null,
+      ungradedAnswerCount: 0,
+    }).kind,
+    "submitted",
+  );
+  assert.equal(attemptIsFullyGraded([{ isCorrect: true }, { isCorrect: false }]), true);
+  assert.equal(attemptIsFullyGraded([{ isCorrect: true }, { isCorrect: null }]), false);
+});
+
+test("saved answers refill the take form fields", () => {
+  assert.deepEqual(
+    savedQuizAnswerFields([
+      {
+        questionId: 1,
+        choiceIds: [3, 4],
+        answerText: "",
+        matchPairs: [],
+      },
+      {
+        questionId: 2,
+        choiceIds: [],
+        answerText: "7/2",
+        matchPairs: [],
+      },
+      {
+        questionId: 3,
+        choiceIds: [],
+        answerText: "",
+        matchPairs: [
+          { leftId: 10, rightId: 20 },
+          { leftId: 11, rightId: 21 },
+        ],
+      },
+    ]),
+    {
+      selected: { 1: [3, 4] },
+      text: { 2: "7/2" },
+      matches: { 3: { 10: 20, 11: 21 } },
+    },
+  );
 });
 
 test("parents are named on behalf of the student; students are not", () => {
@@ -177,6 +257,7 @@ test("matching is an exact pairing and the right column stays stable", () => {
   );
   const canine = first.right.find((item) => item.id === 10);
   assert.equal(matchKeyLetters(first, [{ promptId: 1, optionId: 10 }]).get(1), canine?.letter);
+  assert.equal(matchKeyTexts(first, [{ promptId: 1, optionId: 10 }]).get(1), "canine");
   assert.deepEqual(
     stableShuffle([1, 2, 3], 9),
     stableShuffle([1, 2, 3], 9),

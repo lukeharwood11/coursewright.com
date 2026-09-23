@@ -1,7 +1,7 @@
 -- Course quizzes: families see published quizzes, students never see the key,
 -- and submit_quiz_attempt enforces the window and attempt limit.
 begin;
-select plan(18);
+select plan(21);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -415,6 +415,25 @@ select is(
   'a long answer is not part of the score'
 );
 
+select is(
+  (
+    select is_correct::text
+    from quiz_attempt_answers
+    where question_id = (select id from quiz_questions where prompt = 'Half of 7')
+  ),
+  'true',
+  'an autograded number stores correct'
+);
+
+select ok(
+  (
+    select is_correct is null
+    from quiz_attempt_answers
+    where question_id = (select id from quiz_questions where prompt = 'Explain')
+  ),
+  'a long answer stays yet to be graded'
+);
+
 reset role;
 insert into quizzes (
   organization_id, course_id, title, visibility, created_by,
@@ -508,6 +527,51 @@ select is(
 select is_empty(
   $$select * from quiz_match_keys$$,
   'a student cannot read a matching key'
+);
+
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'c1111111-1111-1111-1111-111111111111', true);
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"c1111111-1111-1111-1111-111111111111","role":"authenticated"}',
+  true
+);
+
+select lives_ok(
+  $$
+    insert into quizzes (
+      organization_id, course_id, title, visibility, created_by
+    )
+    select o.id, c.id, 'Staff created quiz', 'unpublished',
+      'c1111111-1111-1111-1111-111111111111'
+    from organizations o
+    join courses c on c.organization_id = o.id
+    where o.name = 'Quiz Co-op'
+    returning title
+  $$,
+  'staff can insert a quiz and return the new row'
+);
+
+select lives_ok(
+  $$
+    select public.grade_quiz_attempt_answer(
+      (select id from quiz_attempts where quiz_id = (select id from quizzes where title = 'Number quiz')),
+      (select id from quiz_questions where prompt = 'Explain'),
+      true
+    )
+  $$,
+  'staff can mark a long answer correct'
+);
+
+select is(
+  (
+    select is_correct::text
+    from quiz_attempt_answers
+    where question_id = (select id from quiz_questions where prompt = 'Explain')
+  ),
+  'true',
+  'teacher mark stores is_correct on a long answer'
 );
 
 select * from finish();

@@ -50,7 +50,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Units list (ordered) → [UNIT](./UNIT.md); add unit
 - Materials under units: **title**, **description**, kind/badge, dates, print affordance
 - Sidebar / secondary: teachers, link to [COURSE_ROSTER](./COURSE_ROSTER.md)
-- Actions: Add unit then **Add material** (page · link · file) on the unit, **Add lesson plan**, Create Announcement / **Start a discussion** (**P1**) / Settings (header on `md+`; those three also under **More** on small screens), **More** menu (Share / Duplicate), Print entry points; **Create course from this course** (copy → new independent course)
+- Actions: Add unit then **Add** (Material / Quiz) on the unit, **Add lesson plan**, Create Announcement / **Start a discussion** (**P1**) / Settings (header on `md+`; those three also under **More** on small screens), **More** menu (Share / Duplicate), Print entry points; **Create course from this course** (copy → new independent course)
 - Versioning / soft-delete awareness for dangerous actions (TBD exact UX)
 
 ## Primary actions

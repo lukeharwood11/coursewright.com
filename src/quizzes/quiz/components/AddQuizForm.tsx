@@ -13,15 +13,33 @@ export function AddQuizForm({
   orgSlug,
   courseId,
   unitId,
+  fromUnitPage = false,
+  formOnly = false,
+  onCancel,
 }: {
   organizationId: number;
   orgSlug: string;
   courseId: number;
   unitId: number;
+  fromUnitPage?: boolean;
+  /** Skip the trigger button; parent mounts this only when the form should show. */
+  formOnly?: boolean;
+  onCancel?: () => void;
 }) {
-  const add = useAddQuiz({ organizationId, orgSlug, courseId, unitId });
+  const add = useAddQuiz({
+    organizationId,
+    orgSlug,
+    courseId,
+    unitId,
+    fromUnitPage,
+  });
 
-  if (!add.open) {
+  function close() {
+    add.setOpen(false);
+    onCancel?.();
+  }
+
+  if (!formOnly && !add.open) {
     return (
       <Button variant="ghost" fullWidth onClick={() => add.setOpen(true)}>
         <PlusIcon className="h-5 w-5" aria-hidden />
@@ -33,7 +51,7 @@ export function AddQuizForm({
   return (
     <form
       onSubmit={add.onSubmit}
-      className="mt-3 rounded-[10px] border border-dashed border-[var(--line)] bg-[var(--surface)] p-4"
+      className="rounded-[10px] border border-dashed border-[var(--line)] bg-[var(--surface)] p-4"
     >
       <p className="text-[13px] font-bold text-[var(--ink-soft)]">Add quiz</p>
       <label className="mt-3 flex flex-col gap-1">
@@ -60,7 +78,7 @@ export function AddQuizForm({
         <Button type="submit" disabled={add.submitting}>
           {add.submitting ? "Adding…" : "Add quiz"}
         </Button>
-        <Button type="button" variant="secondary" onClick={() => add.setOpen(false)}>
+        <Button type="button" variant="secondary" onClick={close}>
           Cancel
         </Button>
       </div>

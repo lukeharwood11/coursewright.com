@@ -11,6 +11,7 @@ import { EventChip } from "./EventChip";
 import { calendarPath } from "@/calendar/model/paths";
 import { lessonPlanPath } from "@/lesson-plans/model/paths";
 import { materialPath } from "@/materials/model/paths";
+import { quizPath } from "@/quizzes/model/paths";
 import { courseColorCssVar } from "@/courses/model/courseColor";
 import {
   DEFAULT_SCHOOL_DAYS,
@@ -114,13 +115,22 @@ export function MonthCalendar({
                 ))}
                 {extra.slice(0, 4).map((chip) => (
                   <Link
-                    key={`${chip.kind}-${chip.materialId}`}
-                    to={materialPath({
-                      orgSlug,
-                      courseId: chip.courseId,
-                      unitId: chip.unitId,
-                      materialId: chip.materialId,
-                    })}
+                    key={`${chip.itemKind ?? "material"}-${chip.kind}-${chip.materialId}`}
+                    to={
+                      (chip.itemKind ?? "material") === "quiz"
+                        ? quizPath({
+                            orgSlug,
+                            courseId: chip.courseId,
+                            unitId: chip.unitId,
+                            quizId: chip.materialId,
+                          })
+                        : materialPath({
+                            orgSlug,
+                            courseId: chip.courseId,
+                            unitId: chip.unitId,
+                            materialId: chip.materialId,
+                          })
+                    }
                     className="truncate rounded-[4px] px-1 py-px text-[10.5px] font-bold"
                     style={{
                       color: chip.kind === "due" ? "#fff" : courseColorCssVar(chip.colorKey),

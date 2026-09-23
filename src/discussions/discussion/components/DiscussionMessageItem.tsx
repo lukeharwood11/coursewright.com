@@ -1,4 +1,3 @@
-import { TrashIcon } from "@heroicons/react/24/outline";
 import type { SerializedEditorState } from "lexical";
 import { formatDiscussionMessageTime } from "@/discussions/model/time";
 import { parseDiscussionBody } from "@/discussions/model/messageBody";
@@ -11,7 +10,10 @@ import type { MentionPerson } from "@/discussions/model/mentions";
 import { Avatar } from "@/ui/Avatar";
 import { DiscussionAttachments } from "./DiscussionAttachments";
 import { DiscussionLexicalEditor } from "./DiscussionLexicalEditor";
-import { MessageActionsMenu } from "./MessageActionsMenu";
+import {
+  MessageActionsMenu,
+  useMessageActionsMenu,
+} from "./MessageActionsMenu";
 import {
   MessageComposer,
   type ComposerMode,
@@ -91,6 +93,8 @@ export function DiscussionMessageItem({
       })
     : "";
   const showAuthor = showGroupMeta && !isOwn;
+  const actions = useMessageActionsMenu();
+  const showActions = !removed && !isEditing;
 
   async function copyLink() {
     const path = discussionMessagePath(orgSlug, discussionId, message.id);
@@ -153,34 +157,32 @@ export function DiscussionMessageItem({
             ? "bg-[var(--green-tint)]"
             : "bg-[var(--surface)]",
         ].join(" ")}
+        onContextMenu={
+          showActions ? actions.openFromContextMenu : undefined
+        }
       >
-        {!removed && !isEditing && (canEdit || canQuote || canRemove) ? (
-          <div className="absolute right-1 top-1 flex items-center gap-0.5">
+        {showActions ? (
+          <div className="absolute right-1 top-1 md:contents">
             <MessageActionsMenu
               canEdit={canEdit}
               canQuote={canQuote}
+              canRemove={canRemove}
               onEdit={onStartEdit}
               onQuote={onQuote}
               onCopyLink={() => {
                 void copyLink();
               }}
+              onRemove={onRemove}
+              open={actions.open}
+              onClose={actions.close}
+              onTriggerClick={actions.openFromTrigger}
+              anchorRect={actions.anchorRect}
             />
-            {canRemove ? (
-              <button
-                type="button"
-                className="rounded-[6px] p-1 text-[var(--ink-faint)] transition-colors hover:bg-[var(--amber-tint)] hover:text-[var(--amber-deep)]"
-                aria-label="Remove message"
-                title="Remove"
-                onClick={onRemove}
-              >
-                <TrashIcon className="h-3.5 w-3.5" aria-hidden />
-              </button>
-            ) : null}
           </div>
         ) : null}
 
         {removed ? (
-          <p className="pr-8 text-[13.5px] italic text-[var(--ink-faint)]">
+          <p className="text-[13.5px] italic text-[var(--ink-faint)]">
             This message was removed.
           </p>
         ) : isEditing ? (
@@ -218,7 +220,7 @@ export function DiscussionMessageItem({
             ) : null}
           </div>
         ) : (
-          <div className="pr-8">
+          <div className="max-md:pr-8">
             {body.format === "plain" && body.text.trim() ? (
               <MentionedPlainText text={body.text} people={mentionPeople} />
             ) : null}

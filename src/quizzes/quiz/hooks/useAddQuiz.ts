@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { createQuiz, quizQueryKeys } from "@/quizzes/databridge/quizzes";
+import { quizLocationState } from "@/quizzes/model/navigation";
 import { quizEditPath } from "@/quizzes/model/paths";
 
 export function useAddQuiz(args: {
@@ -10,6 +11,7 @@ export function useAddQuiz(args: {
   orgSlug: string;
   courseId: number;
   unitId: number;
+  fromUnitPage?: boolean;
 }) {
   const user = useAuthedUser();
   const navigate = useNavigate();
@@ -37,6 +39,7 @@ export function useAddQuiz(args: {
       setTitle("");
       setDescription("");
       setOpen(false);
+      const navState = quizLocationState(Boolean(args.fromUnitPage));
       navigate(
         quizEditPath({
           orgSlug: args.orgSlug,
@@ -44,6 +47,7 @@ export function useAddQuiz(args: {
           unitId: args.unitId,
           quizId: quiz.id,
         }),
+        navState ? { state: navState } : undefined,
       );
     },
   });

@@ -1,108 +1,109 @@
--- Number, matching, and long-answer questions on a course quiz.
--- Page quiz blocks stay multiple choice and short answer.
+-- Let student accounts see and turn in published course quizzes.
+-- Quizzes shipped with parent_can_view_course only; materials already include
+-- student_can_view_course. Same gap blocked submit and reading own attempts.
 
-alter table public.quiz_questions
-  drop constraint quiz_questions_kind_chk;
-
-alter table public.quiz_questions
-  add column answer_lines int;
-
-alter table public.quiz_questions
-  add constraint quiz_questions_kind_chk
-  check (kind in ('multiple_choice', 'short_answer', 'number', 'matching', 'long_answer'));
-
-alter table public.quiz_questions
-  add constraint quiz_questions_answer_lines_chk
-  check (
-    (kind = 'long_answer' and answer_lines between 1 and 20)
-    or (kind <> 'long_answer' and answer_lines is null)
-  );
-
-comment on column public.quiz_questions.answer_lines is
-  'Blank lines to print for a long answer. Null for every other kind.';
-
-create table public.quiz_match_prompts (
-  id bigserial primary key,
-  question_id bigint not null references public.quiz_questions (id) on delete cascade,
-  position int not null default 0,
-  text text not null default '',
-  deleted_at timestamptz,
-  created_at timestamptz not null default now()
-);
-
-create table public.quiz_match_options (
-  id bigserial primary key,
-  question_id bigint not null references public.quiz_questions (id) on delete cascade,
-  position int not null default 0,
-  text text not null default '',
-  deleted_at timestamptz,
-  created_at timestamptz not null default now()
-);
-
-create index quiz_match_prompts_question_id_idx
-  on public.quiz_match_prompts (question_id, position)
-  where deleted_at is null;
-
-create index quiz_match_options_question_id_idx
-  on public.quiz_match_options (question_id, position)
-  where deleted_at is null;
-
-comment on table public.quiz_match_prompts is
-  'Left column of a matching question. Visible with the quiz. The correct option is not stored here.';
-
-comment on table public.quiz_match_options is
-  'Right column of a matching question. Visible with the quiz. Display order is mixed; this position is the saved order.';
-
-create table public.quiz_match_keys (
-  id bigserial primary key,
-  question_id bigint not null references public.quiz_questions (id) on delete cascade,
-  prompt_id bigint not null references public.quiz_match_prompts (id) on delete cascade,
-  option_id bigint not null references public.quiz_match_options (id) on delete cascade,
-  unique (prompt_id),
-  unique (option_id)
-);
-
-create index quiz_match_keys_question_id_idx on public.quiz_match_keys (question_id);
-
-comment on table public.quiz_match_keys is
-  'Which option matches which prompt. Hidden from student logins, same as quiz_answer_keys.';
-
-create or replace function private.quiz_number_value(p_text text)
-returns numeric
-language plpgsql
-immutable
+create or replace function private.can_view_quiz(p_quiz_id bigint)
+returns boolean
+language sql
+stable
+security definer
 set search_path = ''
 as $$
-declare
-  raw text := btrim(coalesce(p_text, ''));
-  slash int;
-  numerator numeric;
-  denominator numeric;
-begin
-  if raw = '' or left(raw, 1) = '+' then
-    raw := btrim(case when left(raw, 1) = '+' then substring(raw from 2) else raw end);
-  end if;
-  if raw = '' then
-    return null;
-  end if;
-  if raw ~ '^-?[0-9]+/[0-9]+$' then
-    slash := strpos(raw, '/');
-    numerator := substring(raw from 1 for slash - 1)::numeric;
-    denominator := substring(raw from slash + 1)::numeric;
-    if denominator = 0 then
-      return null;
-    end if;
-    return numerator / denominator;
-  end if;
-  if raw ~ '^-?([0-9]+(\.[0-9]+)?|\.[0-9]+)$' then
-    return raw::numeric;
-  end if;
-  return null;
-end;
+  select exists (
+    select 1
+    from public.quizzes q
+    where q.id = p_quiz_id
+      and q.deleted_at is null
+      and (
+        (select private.is_org_staff(q.organization_id))
+        or (
+          q.visibility = 'published'
+          and (
+            (select private.parent_can_view_course(q.course_id))
+            or (select private.student_can_view_course(q.course_id))
+          )
+        )
+      )
+  );
 $$;
 
-revoke all on function private.quiz_number_value(text) from public, anon;
-grant execute on function private.quiz_number_value(text) to authenticated, service_role;
+create or replace function private.caller_is_student_on_course(p_course_id bigint)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.enrollments e
+    join public.student_profiles sp on sp.id = e.student_profile_id
+    join public.parent_student_links psl
+      on psl.student_profile_id = sp.id
+     and psl.parent_user_id = (select auth.uid())
+    join public.profiles p on p.id = psl.parent_user_id
+    where e.course_id = p_course_id
+      and e.status = 'active'
+      and sp.student_email is not null
+      and lower(btrim(sp.student_email)) = lower(btrim(p.email))
+  )
+  or exists (
+    select 1
+    from public.enrollments e
+    join public.student_profiles sp
+      on sp.id = e.student_profile_id
+     and sp.user_id = (select auth.uid())
+    where e.course_id = p_course_id
+      and e.status = 'active'
+  );
+$$;
+
+create or replace function private.can_read_quiz_attempt(p_attempt_id bigint)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.quiz_attempts a
+    join public.quizzes q on q.id = a.quiz_id
+    where a.id = p_attempt_id
+      and q.deleted_at is null
+      and (
+        (select private.can_manage_course(q.course_id))
+        or (
+          (
+            (select private.parent_linked_to_student(a.student_profile_id))
+            or (select private.student_owns_profile(a.student_profile_id))
+          )
+          and q.visibility = 'published'
+          and (
+            (select private.parent_can_view_course(q.course_id))
+            or (select private.student_can_view_course(q.course_id))
+          )
+        )
+      )
+  );
+$$;
+
+drop policy if exists quizzes_select on public.quizzes;
+create policy quizzes_select on public.quizzes
+for select to authenticated
+using (
+  deleted_at is null
+  and (
+    (select private.is_org_staff(organization_id))
+    or (
+      visibility = 'published'
+      and (
+        (select private.parent_can_view_course(course_id))
+        or (select private.student_can_view_course(course_id))
+      )
+    )
+  )
+);
 
 create or replace function public.submit_quiz_attempt(
   p_quiz_id bigint,
@@ -411,169 +412,7 @@ begin
 end;
 $$;
 
-comment on function public.submit_quiz_attempt(bigint, bigint, jsonb) is
-  'Record one quiz entry during the accepting window. Scores multiple choice, number, and matching when the quiz says to.';
 
-grant select, insert, update on table public.quiz_match_prompts to authenticated;
-grant select, insert, update on table public.quiz_match_options to authenticated;
-grant select, insert, update, delete on table public.quiz_match_keys to authenticated;
-grant select, insert, update, delete on table public.quiz_match_prompts to service_role;
-grant select, insert, update, delete on table public.quiz_match_options to service_role;
-grant select, insert, update, delete on table public.quiz_match_keys to service_role;
-grant usage, select on sequence public.quiz_match_prompts_id_seq to authenticated, service_role;
-grant usage, select on sequence public.quiz_match_options_id_seq to authenticated, service_role;
-grant usage, select on sequence public.quiz_match_keys_id_seq to authenticated, service_role;
-
-alter table public.quiz_match_prompts enable row level security;
-alter table public.quiz_match_options enable row level security;
-alter table public.quiz_match_keys enable row level security;
-
-create policy quiz_match_prompts_select on public.quiz_match_prompts
-for select to authenticated
-using (
-  deleted_at is null
-  and exists (
-    select 1
-    from public.quiz_questions qq
-    where qq.id = question_id
-      and qq.deleted_at is null
-      and (select private.can_view_quiz(qq.quiz_id))
-  )
-);
-
-create policy quiz_match_options_select on public.quiz_match_options
-for select to authenticated
-using (
-  deleted_at is null
-  and exists (
-    select 1
-    from public.quiz_questions qq
-    where qq.id = question_id
-      and qq.deleted_at is null
-      and (select private.can_view_quiz(qq.quiz_id))
-  )
-);
-
-create policy quiz_match_prompts_insert on public.quiz_match_prompts
-for insert to authenticated
-with check (
-  exists (
-    select 1
-    from public.quiz_questions qq
-    join public.quizzes q on q.id = qq.quiz_id
-    where qq.id = question_id
-      and q.deleted_at is null
-      and (select private.can_manage_course(q.course_id))
-  )
-);
-
-create policy quiz_match_options_insert on public.quiz_match_options
-for insert to authenticated
-with check (
-  exists (
-    select 1
-    from public.quiz_questions qq
-    join public.quizzes q on q.id = qq.quiz_id
-    where qq.id = question_id
-      and q.deleted_at is null
-      and (select private.can_manage_course(q.course_id))
-  )
-);
-
-create policy quiz_match_prompts_update on public.quiz_match_prompts
-for update to authenticated
-using (
-  exists (
-    select 1
-    from public.quiz_questions qq
-    join public.quizzes q on q.id = qq.quiz_id
-    where qq.id = question_id
-      and (select private.can_manage_course(q.course_id))
-  )
-)
-with check (
-  exists (
-    select 1
-    from public.quiz_questions qq
-    join public.quizzes q on q.id = qq.quiz_id
-    where qq.id = question_id
-      and (select private.can_manage_course(q.course_id))
-  )
-);
-
-create policy quiz_match_options_update on public.quiz_match_options
-for update to authenticated
-using (
-  exists (
-    select 1
-    from public.quiz_questions qq
-    join public.quizzes q on q.id = qq.quiz_id
-    where qq.id = question_id
-      and (select private.can_manage_course(q.course_id))
-  )
-)
-with check (
-  exists (
-    select 1
-    from public.quiz_questions qq
-    join public.quizzes q on q.id = qq.quiz_id
-    where qq.id = question_id
-      and (select private.can_manage_course(q.course_id))
-  )
-);
-
-create policy quiz_match_keys_select on public.quiz_match_keys
-for select to authenticated
-using (
-  exists (
-    select 1
-    from public.quiz_questions qq
-    where qq.id = question_id
-      and (select private.can_read_quiz_answer_key(qq.quiz_id))
-  )
-);
-
-create policy quiz_match_keys_insert on public.quiz_match_keys
-for insert to authenticated
-with check (
-  exists (
-    select 1
-    from public.quiz_questions qq
-    join public.quizzes q on q.id = qq.quiz_id
-    where qq.id = question_id
-      and (select private.can_manage_course(q.course_id))
-  )
-);
-
-create policy quiz_match_keys_update on public.quiz_match_keys
-for update to authenticated
-using (
-  exists (
-    select 1
-    from public.quiz_questions qq
-    join public.quizzes q on q.id = qq.quiz_id
-    where qq.id = question_id
-      and (select private.can_manage_course(q.course_id))
-  )
-)
-with check (
-  exists (
-    select 1
-    from public.quiz_questions qq
-    join public.quizzes q on q.id = qq.quiz_id
-    where qq.id = question_id
-      and (select private.can_manage_course(q.course_id))
-  )
-);
-
-create policy quiz_match_keys_delete on public.quiz_match_keys
-for delete to authenticated
-using (
-  exists (
-    select 1
-    from public.quiz_questions qq
-    join public.quizzes q on q.id = qq.quiz_id
-    where qq.id = question_id
-      and (select private.can_manage_course(q.course_id))
-  )
-);
+revoke all on function public.submit_quiz_attempt(bigint, bigint, jsonb) from public, anon;
+grant execute on function public.submit_quiz_attempt(bigint, bigint, jsonb)
+  to authenticated, service_role;

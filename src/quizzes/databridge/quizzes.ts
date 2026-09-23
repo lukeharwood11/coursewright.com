@@ -114,6 +114,10 @@ export type QuizAttemptAnswerRecord = {
   promptSnapshot: string;
   selectedSummary: string;
   answerText: string;
+  choiceIds: number[];
+  matchPairs: { leftId: number; rightId: number }[];
+  /** Frozen when the attempt was autograded. Null = not scored (short/long answer or no key). */
+  isCorrect: boolean | null;
 };
 
 export type LinkedStudent = {
@@ -128,6 +132,8 @@ export const quizQueryKeys = {
   detail: (id: number) => ["quizzes", "detail", id] as const,
   questions: (id: number) => ["quizzes", "questions", id] as const,
   attempts: (id: number) => ["quizzes", "attempts", id] as const,
+  attemptSummaries: (courseId: number, studentKey: string) =>
+    ["quizzes", "attempt-summaries", courseId, studentKey] as const,
 };
 
 type QuizRow = {
@@ -679,6 +685,18 @@ async function softDeleteMissing(
   if (error) throw new Error(error.message);
 }
 
+export type QuizAttemptSummary = {
+  id: number;
+  quizId: number;
+  studentProfileId: number;
+  submittedAt: string;
+  autograded: boolean;
+  score: number | null;
+  scoreTotal: number | null;
+  /** Answers still without Correct / Incorrect (usually short/long answer). */
+  ungradedAnswerCount: number;
+};
+
 export async function listQuizAttempts(quizId: number): Promise<QuizAttemptRecord[]> {
   const db = requireSupabase();
   const { data, error } = await db
@@ -709,6 +727,66 @@ export async function listQuizAttempts(quizId: number): Promise<QuizAttemptRecor
   });
 }
 
+/** Latest attempts for quizzes, newest first. RLS limits to what this person may read. */
+export async function listQuizAttemptSummariesForQuizzes(
+  quizIds: readonly number[],
+  studentIds?: readonly number[],
+): Promise<QuizAttemptSummary[]> {
+  if (quizIds.length === 0) return [];
+  const db = requireSupabase();
+  let query = db
+    .from("quiz_attempts")
+    .select("id, quiz_id, student_profile_id, submitted_at, autograded, score, score_total")
+    .in("quiz_id", [...quizIds])
+    .order("submitted_at", { ascending: false });
+  if (studentIds && studentIds.length > 0) {
+    query = query.in("student_profile_id", [...studentIds]);
+  }
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+  const rows = data ?? [];
+  const attemptIds = rows.map((row) => row.id);
+  const ungradedByAttempt = new Map<number, number>();
+  if (attemptIds.length > 0) {
+    const { data: answers, error: answersError } = await db
+      .from("quiz_attempt_answers")
+      .select("attempt_id, is_correct")
+      .in("attempt_id", attemptIds);
+    if (answersError) throw new Error(answersError.message);
+    for (const answer of answers ?? []) {
+      if (answer.is_correct !== null) continue;
+      ungradedByAttempt.set(
+        answer.attempt_id,
+        (ungradedByAttempt.get(answer.attempt_id) ?? 0) + 1,
+      );
+    }
+  }
+  return rows.map((row) => ({
+    id: row.id,
+    quizId: row.quiz_id,
+    studentProfileId: row.student_profile_id,
+    submittedAt: row.submitted_at,
+    autograded: row.autograded,
+    score: row.score,
+    scoreTotal: row.score_total,
+    ungradedAnswerCount: ungradedByAttempt.get(row.id) ?? 0,
+  }));
+}
+
+export async function gradeQuizAttemptAnswer(args: {
+  attemptId: number;
+  questionId: number;
+  isCorrect: boolean;
+}): Promise<void> {
+  const db = requireSupabase();
+  const { error } = await db.rpc("grade_quiz_attempt_answer", {
+    p_attempt_id: args.attemptId,
+    p_question_id: args.questionId,
+    p_is_correct: args.isCorrect,
+  });
+  if (error) throw new Error(error.message);
+}
+
 export async function listAttemptAnswers(
   attemptIds: readonly number[],
 ): Promise<QuizAttemptAnswerRecord[]> {
@@ -716,7 +794,9 @@ export async function listAttemptAnswers(
   const db = requireSupabase();
   const { data, error } = await db
     .from("quiz_attempt_answers")
-    .select("attempt_id, question_id, prompt_snapshot, selected_summary, answer_text")
+    .select(
+      "attempt_id, question_id, prompt_snapshot, selected_summary, answer_text, choice_ids, match_pairs, is_correct",
+    )
     .in("attempt_id", [...attemptIds]);
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => ({
@@ -725,7 +805,22 @@ export async function listAttemptAnswers(
     promptSnapshot: row.prompt_snapshot,
     selectedSummary: row.selected_summary,
     answerText: row.answer_text,
+    choiceIds: Array.isArray(row.choice_ids) ? row.choice_ids.map(Number) : [],
+    matchPairs: parseMatchPairs(row.match_pairs),
+    isCorrect: typeof row.is_correct === "boolean" ? row.is_correct : null,
   }));
+}
+
+function parseMatchPairs(value: unknown): { leftId: number; rightId: number }[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const record = item as Record<string, unknown>;
+    const leftId = Number(record.leftId);
+    const rightId = Number(record.rightId);
+    if (!Number.isFinite(leftId) || !Number.isFinite(rightId)) return [];
+    return [{ leftId, rightId }];
+  });
 }
 
 export async function listLinkedStudents(
@@ -733,12 +828,18 @@ export async function listLinkedStudents(
   userId: string,
 ): Promise<LinkedStudent[]> {
   const db = requireSupabase();
-  const links = await db
-    .from("parent_student_links")
-    .select("student_profile_id")
-    .eq("parent_user_id", userId);
+  const [links, own] = await Promise.all([
+    db.from("parent_student_links").select("student_profile_id").eq("parent_user_id", userId),
+    db.from("student_profiles").select("id").eq("user_id", userId),
+  ]);
   if (links.error) throw new Error(links.error.message);
-  const ids = (links.data ?? []).map((row) => row.student_profile_id);
+  if (own.error) throw new Error(own.error.message);
+  const ids = [
+    ...new Set([
+      ...(links.data ?? []).map((row) => row.student_profile_id),
+      ...(own.data ?? []).map((row) => row.id),
+    ]),
+  ];
   if (ids.length === 0) return [];
   const { data, error } = await db
     .from("enrollments")

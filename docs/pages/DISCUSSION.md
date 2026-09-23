@@ -22,7 +22,7 @@ One two-way **discussion**: title, who it is for, flat posts (plain or Lexical),
 - Opening the page **marks it read** for the signed-in person (`last_read_at`). Two parents each have their own unread state.
 - Posts in conversation order (oldest first). Flat list — no nested replies. Your posts align right (green tint); other people’s align left.
 - Author rows for other people’s posts show a **profile circle** left of the display name. Clicking the circle (or name) opens a **user profile modal** with the same content as [USER_PROFILE](./USER_PROFILE.md), plus a **View profile** link to the full page. Your own posts omit the author row.
-- **⋯** on a message: **Edit** (own messages — in-place editor + Save; **@mentions** added on save notify in [ACTIVITY](./ACTIVITY.md)), **Quote message** (inserts a Lexical quote into the composer), and **Copy link** (deep link to that message).
+- Message actions: on desktop, **right-click** a message; on small screens, **⋯**. **Edit** (own messages — in-place editor + Save; **@mentions** added on save notify in [ACTIVITY](./ACTIVITY.md)), **Quote message** (inserts a Lexical quote into the composer), **Copy link** (deep link to that message), and **Delete** in red when the poster or staff may remove the post.
 - Composer at the bottom: text field; toolbar with **T** (same Lexical chrome as page materials — icon toolbar, `/`, floating format; no quiz), **file**, and **+** (material or link via modal). Typing **@** opens a picker of people on the thread; choosing a name (click or Enter) replaces the query with a mention pill and notifies them in [ACTIVITY](./ACTIVITY.md). Post stays disabled until there is text and/or at least one attachment. Default composer: **Enter** posts, **Shift+Enter** new line (Enter selects from the @ picker when it is open). Rich text (**T**): **⌘/Ctrl+Enter** posts.
 - **Mark as answered** / **Mark as open** for the person who started the thread, and for staff who can see it. Answered does not lock posting. Inline in the thread toolbar from `md` up; under **⋯** on small screens.
 - Thread toolbar **⋯**: **Started by** note (plain label + started date) with a **user card** for the starter (opens [USER_PROFILE](./USER_PROFILE.md)); on small screens also **Mark as answered** / **Mark as open** and **Delete** when allowed; **Members** opens a modal listing everyone who can currently see the thread (org staff + parents linked to the audience course or class). Each person is a **user card** that opens [USER_PROFILE](./USER_PROFILE.md).
@@ -76,7 +76,7 @@ Writeable on view: new post / quote, edit own post (body + @mentions), answered 
 ## Primary actions
 
 - Read and post on the thread (marks read)
-- Quote a message / copy message link / edit own message (⋯ menu)
+- Quote a message / copy message link / edit own message / delete a message (right-click on desktop; ⋯ on small screens)
 - Open an author’s profile modal (profile circle or name)
 - Attach a file, material, or link
 - Mark as answered / open (starter or staff)

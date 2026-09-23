@@ -7,6 +7,7 @@ import { staffCanManageCourse } from "@/courses/model/access";
 import { courseQueryKeys, getCourse, listCourseInstructors } from "@/courses/databridge/courses";
 import {
   getQuiz,
+  gradeQuizAttemptAnswer,
   listAttemptAnswers,
   listLinkedStudents,
   listQuizAttempts,
@@ -21,6 +22,7 @@ import {
   quizAttemptLabel,
   quizWindowState,
 } from "@/quizzes/model/quiz";
+import { getUnit } from "@/units/databridge/units";
 
 export function useQuiz() {
   const params = useParams();
@@ -41,6 +43,11 @@ export function useQuiz() {
     queryKey: courseQueryKeys.detail(courseId),
     queryFn: () => getCourse(courseId),
     enabled: Number.isFinite(courseId),
+  });
+  const unitQuery = useQuery({
+    queryKey: ["units", "detail", unitId],
+    queryFn: () => getUnit(unitId),
+    enabled: Number.isFinite(unitId),
   });
   const questionsQuery = useQuery({
     queryKey: quizQueryKeys.questions(quizId),
@@ -123,6 +130,10 @@ export function useQuiz() {
     void queryClient.invalidateQueries({ queryKey: quizQueryKeys.questions(quizId) });
     void queryClient.invalidateQueries({ queryKey: quizQueryKeys.attempts(quizId) });
     void queryClient.invalidateQueries({ queryKey: quizQueryKeys.list(courseId) });
+    void queryClient.invalidateQueries({ queryKey: ["quizzes", "answers", quizId] });
+    void queryClient.invalidateQueries({
+      queryKey: ["quizzes", "attempt-summaries", courseId],
+    });
   }
 
   const publish = useMutation({
@@ -147,6 +158,14 @@ export function useQuiz() {
     }) => submitQuizAttempt({ quizId, ...args }),
     onSuccess: invalidate,
   });
+  const gradeAnswer = useMutation({
+    mutationFn: (args: {
+      attemptId: number;
+      questionId: number;
+      isCorrect: boolean;
+    }) => gradeQuizAttemptAnswer(args),
+    onSuccess: invalidate,
+  });
 
   return {
     organization,
@@ -154,6 +173,7 @@ export function useQuiz() {
     unitId: Number.isFinite(unitId) ? unitId : quiz?.unitId ?? null,
     quiz: belongsHere ? quiz : null,
     course,
+    unit: unitQuery.data ?? null,
     questions: questionsQuery.data ?? [],
     attempts,
     linkedStudents,
@@ -169,10 +189,12 @@ export function useQuiz() {
       attemptsQuery.error?.message ??
       publish.error?.message ??
       submit.error?.message ??
+      gradeAnswer.error?.message ??
       null,
     notFound: !quizQuery.isLoading && (!quiz || !belongsHere || familyHidden),
     publish,
     remove,
     submit,
+    gradeAnswer,
   };
 }

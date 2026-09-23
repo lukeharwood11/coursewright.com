@@ -1,9 +1,10 @@
 import type { LessonPlanDetail } from "@/lesson-plans/databridge/lessonPlans";
 import { lessonPlanIsPublished } from "@/lesson-plans/model/visibility";
 import { isPublished } from "@/materials/model/visibility";
-import type { CalendarSourceMaterial } from "@/calendar/databridge/calendar";
+import type { CalendarSourceMaterial, CalendarSourceQuiz } from "@/calendar/databridge/calendar";
 import {
   chipsForMaterials,
+  chipsForQuizzes,
   type CalendarLessonPlanDay,
   type CalendarMaterialChip,
   type CalendarWeekNote,
@@ -46,6 +47,10 @@ export function lessonPlansToDays(plans: LessonPlanDetail[]): CalendarLessonPlan
 
 export function materialsToChips(materials: CalendarSourceMaterial[]): CalendarMaterialChip[] {
   return chipsForMaterials(materials);
+}
+
+export function quizzesToChips(quizzes: CalendarSourceQuiz[]): CalendarMaterialChip[] {
+  return chipsForQuizzes(quizzes);
 }
 
 export function plansForWeek(

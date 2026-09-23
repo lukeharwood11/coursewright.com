@@ -26,7 +26,13 @@ import {
   updateUnit,
 } from "@/units/databridge/units";
 import { swapPositions } from "@/units/model/order";
-import { listQuizzesForUnit, quizQueryKeys } from "@/quizzes/databridge/quizzes";
+import {
+  listLinkedStudents,
+  listQuizAttemptSummariesForQuizzes,
+  listQuizzesForUnit,
+  quizQueryKeys,
+} from "@/quizzes/databridge/quizzes";
+import { latestAttemptByQuizId } from "@/quizzes/model/quiz";
 
 export function useUnit() {
   const { courseId: courseIdParam, unitId: unitIdParam } = useParams();
@@ -67,6 +73,11 @@ export function useUnit() {
     queryFn: () => listCourseInstructors(courseId),
     enabled: Number.isFinite(courseId) && staffEdit,
   });
+  const linkedStudentsQuery = useQuery({
+    queryKey: ["quizzes", "linked-students", courseId, user.id],
+    queryFn: () => listLinkedStudents(courseId, user.id),
+    enabled: Number.isFinite(courseId) && parentPresentation,
+  });
 
   const unit = unitQuery.data ?? null;
   const course = courseQuery.data ?? null;
@@ -88,6 +99,23 @@ export function useUnit() {
   const quizzes = parentPresentation
     ? familyVisibleMaterials(quizzesQuery.data ?? [])
     : (quizzesQuery.data ?? []);
+  const linkedStudentIds = (linkedStudentsQuery.data ?? []).map((row) => row.id);
+  const studentKey =
+    linkedStudentIds.slice().sort((a, b) => a - b).join(",") || "none";
+  const attemptsQuery = useQuery({
+    queryKey: quizQueryKeys.attemptSummaries(courseId, studentKey),
+    queryFn: () =>
+      listQuizAttemptSummariesForQuizzes(
+        quizzes.map((quiz) => quiz.id),
+        linkedStudentIds,
+      ),
+    enabled:
+      parentPresentation &&
+      Number.isFinite(courseId) &&
+      quizzes.length > 0 &&
+      linkedStudentIds.length > 0,
+  });
+  const attemptByQuizId = latestAttemptByQuizId(attemptsQuery.data ?? []);
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: unitQueryKeys.detail(unitId) });
@@ -137,6 +165,7 @@ export function useUnit() {
     course: belongsHere ? course : null,
     materials,
     quizzes,
+    attemptByQuizId,
     importantIds: new Set((importantQuery.data ?? []).map((row) => row.materialId)),
     loading:
       unitQuery.isLoading ||

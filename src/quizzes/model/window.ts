@@ -59,3 +59,21 @@ export function instantsFromWindowFields(
 export function viewerTimeZone(saved: string | null): string {
   return saved || browserTimeZone();
 }
+
+/** Calendar date for Assigned (accepts_from wall date in the quiz zone). */
+export function quizAssignedDate(
+  acceptsFrom: string | null,
+  acceptsTimezone: string | null,
+): string | null {
+  if (!acceptsFrom) return null;
+  return wallDateInZone(acceptsFrom, viewerTimeZone(acceptsTimezone));
+}
+
+/** Calendar date for Due (accepts_until wall date in the quiz zone). */
+export function quizDueDate(
+  acceptsUntil: string | null,
+  acceptsTimezone: string | null,
+): string | null {
+  if (!acceptsUntil) return null;
+  return wallDateInZone(acceptsUntil, viewerTimeZone(acceptsTimezone));
+}

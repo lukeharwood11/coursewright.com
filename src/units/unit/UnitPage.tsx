@@ -10,10 +10,9 @@ import { PageFormActions } from "@/ui/PageFormActions";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { formatDateRange } from "@/courses/model/dates";
 import { coursePath } from "@/courses/model/paths";
-import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
-import { AddQuizForm } from "@/quizzes/quiz/components/AddQuizForm";
 import { QuizRow } from "@/quizzes/quiz/components/QuizRow";
+import { UnitAddMenu } from "./components/UnitAddMenu";
 import { unitPath, unitPrintPath } from "@/units/model/paths";
 import { useUnit } from "./hooks/useUnit";
 
@@ -246,6 +245,7 @@ export function UnitPage() {
                 ) : null}
                 <div className="min-w-0 flex-1">
                   <MaterialRow
+                    as="div"
                     orgSlug={page.organization.slug}
                     courseId={course.id}
                     unitId={unit.id}
@@ -276,29 +276,27 @@ export function UnitPage() {
                 orgSlug={page.organization.slug}
                 courseId={course.id}
                 unitId={unit.id}
+                fromUnitPage
                 quizId={quiz.id}
                 title={quiz.title}
                 description={quiz.description}
                 visibility={quiz.visibility}
+                acceptsFrom={quiz.acceptsFrom}
+                acceptsUntil={quiz.acceptsUntil}
+                acceptsTimezone={quiz.acceptsTimezone}
+                attempt={page.attemptByQuizId.get(quiz.id) ?? null}
               />
             ))}
           </ul>
         ) : null}
         {page.canEdit && !unit.deletedAt ? (
-          <div className="mt-3 flex flex-col gap-2">
-            <AddMaterialForm
+          <div className="mt-3">
+            <UnitAddMenu
               organizationId={page.organization.id}
               orgSlug={page.organization.slug}
               courseId={course.id}
               unitId={unit.id}
               fromUnitPage
-              label="Add material to this unit"
-            />
-            <AddQuizForm
-              organizationId={page.organization.id}
-              orgSlug={page.organization.slug}
-              courseId={course.id}
-              unitId={unit.id}
             />
           </div>
         ) : null}

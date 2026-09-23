@@ -280,9 +280,9 @@ export function DiscussionPage() {
       />
       <ConfirmDialog
         open={removeMessageId != null}
-        title="Remove this message?"
+        title="Delete this message?"
         body="People will see that the message was removed. Quotes of it stay on later posts."
-        confirmLabel={page.removeMessage.isPending ? "Removing…" : "Remove"}
+        confirmLabel={page.removeMessage.isPending ? "Deleting…" : "Delete"}
         cancelLabel="Keep it"
         onCancel={() => setRemoveMessageId(null)}
         onConfirm={() => {

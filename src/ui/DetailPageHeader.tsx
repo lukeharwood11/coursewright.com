@@ -9,6 +9,7 @@ import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 export function DetailPageHeader({
   backTo,
   backLabel,
+  backState,
   title,
   titleAccessory,
   titleTrailing,
@@ -20,6 +21,8 @@ export function DetailPageHeader({
   backTo: string;
   /** Accessible name for the back control (also used as the tooltip). */
   backLabel: string;
+  /** Optional router location state for the back link. */
+  backState?: unknown;
   title: ReactNode;
   /** Icon or control beside the title (e.g. details). */
   titleAccessory?: ReactNode;
@@ -40,6 +43,7 @@ export function DetailPageHeader({
           <div className="flex min-w-0 items-center gap-1.5">
             <Link
               to={backTo}
+              state={backState}
               className="inline-flex shrink-0 items-center justify-center rounded-[6px] p-1 text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
               aria-label={backLabel}
               title={backLabel}

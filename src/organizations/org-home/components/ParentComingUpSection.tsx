@@ -4,6 +4,7 @@ import { ButtonLink } from "@/ui/Button";
 import type { ParentDashboardNextItem } from "@/parent/model/dashboard";
 import { formatMaterialDate } from "@/parent/model/thisWeek";
 import { materialPath, materialPrintPath } from "@/materials/model/paths";
+import { quizPath, quizPrintPath } from "@/quizzes/model/paths";
 
 export function ParentComingUpSection({
   orgSlug,
@@ -63,19 +64,40 @@ function ComingUpRow({
   item: ParentDashboardNextItem;
   showStudent: boolean;
 }) {
+  const itemKind = item.material.itemKind ?? "material";
+  const href =
+    itemKind === "quiz"
+      ? quizPath({
+          orgSlug,
+          courseId: item.courseId,
+          unitId: item.material.unitId,
+          quizId: item.material.id,
+        })
+      : materialPath({
+          orgSlug,
+          courseId: item.courseId,
+          unitId: item.material.unitId,
+          materialId: item.material.id,
+        });
+  const printHref =
+    itemKind === "quiz"
+      ? quizPrintPath({
+          orgSlug,
+          courseId: item.courseId,
+          unitId: item.material.unitId,
+          quizId: item.material.id,
+        })
+      : materialPrintPath({
+          orgSlug,
+          courseId: item.courseId,
+          unitId: item.material.unitId,
+          materialId: item.material.id,
+        });
   return (
     <li className="flex items-start gap-2.5 py-2.5">
       <div className="min-w-0 flex-1">
         <p className="text-[12px] font-bold text-[var(--ink-faint)]">{label}</p>
-        <Link
-          to={materialPath({
-            orgSlug,
-            courseId: item.courseId,
-            unitId: item.material.unitId,
-            materialId: item.material.id,
-          })}
-          className="mt-0.5 block min-w-0 text-left"
-        >
+        <Link to={href} className="mt-0.5 block min-w-0 text-left">
           <span className="block text-[15px] font-bold text-[var(--ink)]">
             {item.material.title}
           </span>
@@ -96,12 +118,7 @@ function ComingUpRow({
       <ButtonLink
         variant="secondary"
         className="mt-3 shrink-0 px-2.5 py-1.5 text-[12px]"
-        to={materialPrintPath({
-          orgSlug,
-          courseId: item.courseId,
-          unitId: item.material.unitId,
-          materialId: item.material.id,
-        })}
+        to={printHref}
       >
         <PrinterIcon className="h-4 w-4" aria-hidden />
         Print

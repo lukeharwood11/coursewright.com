@@ -2,10 +2,23 @@ import { useMemo, useState } from "react";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { quizChoiceLetter } from "@/materials/model/quiz";
-import type { QuizQuestionRecord } from "@/quizzes/databridge/quizzes";
-import type { LinkedStudent } from "@/quizzes/databridge/quizzes";
-import { clampAnswerLines, matchLayout, type QuizWindowState } from "@/quizzes/model/quiz";
+import type {
+  LinkedStudent,
+  QuizAttemptAnswerRecord,
+  QuizQuestionRecord,
+} from "@/quizzes/databridge/quizzes";
+import {
+  clampAnswerLines,
+  matchLayout,
+  quizAnswerGrade,
+  savedQuizAnswerFields,
+  type QuizWindowState,
+} from "@/quizzes/model/quiz";
 import { formatDueDeadline } from "@/submissions/model/dueInstant";
+import { QuizAnswerGradeBadge } from "./QuizAnswerGradeBadge";
+
+const disabledFieldClass =
+  "disabled:cursor-not-allowed disabled:bg-[var(--paper)] disabled:text-[var(--ink-soft)]";
 
 export function QuizTakeForm({
   questions,
@@ -16,6 +29,7 @@ export function QuizTakeForm({
   timeZone,
   allowMultiple,
   attemptsForStudent,
+  latestAnswersForStudent,
   submitting,
   onSubmit,
 }: {
@@ -27,6 +41,7 @@ export function QuizTakeForm({
   timeZone: string;
   allowMultiple: boolean;
   attemptsForStudent: (studentId: number) => number;
+  latestAnswersForStudent: (studentId: number) => QuizAttemptAnswerRecord[];
   submitting: boolean;
   onSubmit: (args: {
     studentProfileId: number;
@@ -46,6 +61,14 @@ export function QuizTakeForm({
   const already = chosen == null ? 0 : attemptsForStudent(chosen);
   const blocked = !allowMultiple && already > 0;
   const open = windowState === "open" && !blocked && chosen != null && questions.length > 0;
+  const saved =
+    !open && chosen != null
+      ? savedQuizAnswerFields(latestAnswersForStudent(chosen))
+      : null;
+  const reviewAnswers = chosen != null && !open ? latestAnswersForStudent(chosen) : [];
+  const shownSelected = saved?.selected ?? selected;
+  const shownText = saved?.text ?? text;
+  const shownMatches = saved?.matches ?? matches;
 
   const note = useMemo(() => {
     if (windowState === "not_yet" && acceptsFrom) {
@@ -104,93 +127,107 @@ export function QuizTakeForm({
       )}
       {note ? <p className="text-[14px] text-[var(--ink-soft)]">{note}</p> : null}
       <ol className="flex flex-col gap-4">
-        {questions.map((question, index) => (
-          <li
-            key={question.id}
-            className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
-          >
-            <p className="text-[15px] font-bold text-[var(--ink)]">
-              {index + 1}. {question.prompt.trim() || "Question"}
-            </p>
-            {question.kind === "long_answer" ? (
-              <textarea
-                className="mt-3 w-full rounded-[6px] border border-[var(--line)] px-3 py-2 text-[14.5px]"
-                rows={clampAnswerLines(question.answerLines ?? 4)}
-                value={text[question.id] ?? ""}
-                disabled={!open}
-                onChange={(event) =>
-                  setText((current) => ({ ...current, [question.id]: event.target.value }))
-                }
-              />
-            ) : question.kind === "number" ? (
-              <Input
-                className="mt-3 w-full max-w-xs"
-                inputMode="decimal"
-                placeholder="Number"
-                value={text[question.id] ?? ""}
-                disabled={!open}
-                onChange={(event) =>
-                  setText((current) => ({ ...current, [question.id]: event.target.value }))
-                }
-              />
-            ) : question.kind === "matching" ? (
-              <MatchingFields
-                questionId={question.id}
-                prompts={question.prompts}
-                options={question.options}
-                picks={matches[question.id] ?? {}}
-                disabled={!open}
-                onPick={(leftId, rightId) =>
-                  setMatches((current) => ({
-                    ...current,
-                    [question.id]: { ...current[question.id], [leftId]: rightId },
-                  }))
-                }
-              />
-            ) : question.kind === "short_answer" ? (
-              <textarea
-                className="mt-3 min-h-[5rem] w-full rounded-[6px] border border-[var(--line)] px-3 py-2 text-[14.5px]"
-                value={text[question.id] ?? ""}
-                disabled={!open}
-                onChange={(event) =>
-                  setText((current) => ({ ...current, [question.id]: event.target.value }))
-                }
-              />
-            ) : (
-              <ul className="mt-3 flex flex-col gap-2">
-                {question.choices
-                  .filter((choice) => choice.text.trim() !== "")
-                  .map((choice, choiceIndex) => {
-                  const checked = (selected[question.id] ?? []).includes(choice.id);
-                  return (
-                    <li key={choice.id}>
-                      <label className="flex items-start gap-2 text-[14.5px] text-[var(--ink)]">
-                        <input
-                          type="checkbox"
-                          className="mt-1 h-4 w-4 accent-[var(--green)]"
-                          checked={checked}
-                          disabled={!open}
-                          onChange={() => {
-                            setSelected((current) => {
-                              const list = current[question.id] ?? [];
-                              const next = checked
-                                ? list.filter((id) => id !== choice.id)
-                                : [...list, choice.id];
-                              return { ...current, [question.id]: next };
-                            });
-                          }}
-                        />
-                        <span>
-                          {quizChoiceLetter(choiceIndex)}. {choice.text}
-                        </span>
-                      </label>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </li>
-        ))}
+        {questions.map((question, index) => {
+          const savedAnswer = reviewAnswers.find((answer) => answer.questionId === question.id);
+          const grade =
+            saved && savedAnswer
+              ? quizAnswerGrade(savedAnswer.isCorrect)
+              : null;
+          return (
+            <li
+              key={question.id}
+              className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-[15px] font-bold text-[var(--ink)]">
+                  {index + 1}. {question.prompt.trim() || "Question"}
+                </p>
+                {grade ? <QuizAnswerGradeBadge grade={grade} /> : null}
+              </div>
+              {question.kind === "long_answer" ? (
+                <textarea
+                  className={`mt-3 w-full rounded-[6px] border border-[var(--line)] px-3 py-2 text-[14.5px] ${disabledFieldClass}`}
+                  rows={clampAnswerLines(question.answerLines ?? 4)}
+                  value={shownText[question.id] ?? ""}
+                  disabled={!open}
+                  onChange={(event) =>
+                    setText((current) => ({ ...current, [question.id]: event.target.value }))
+                  }
+                />
+              ) : question.kind === "number" ? (
+                <Input
+                  className={`mt-3 w-full max-w-xs ${disabledFieldClass}`}
+                  inputMode="decimal"
+                  placeholder="Number"
+                  value={shownText[question.id] ?? ""}
+                  disabled={!open}
+                  onChange={(event) =>
+                    setText((current) => ({ ...current, [question.id]: event.target.value }))
+                  }
+                />
+              ) : question.kind === "matching" ? (
+                <MatchingFields
+                  questionId={question.id}
+                  prompts={question.prompts}
+                  options={question.options}
+                  picks={shownMatches[question.id] ?? {}}
+                  disabled={!open}
+                  onPick={(leftId, rightId) =>
+                    setMatches((current) => ({
+                      ...current,
+                      [question.id]: { ...current[question.id], [leftId]: rightId },
+                    }))
+                  }
+                />
+              ) : question.kind === "short_answer" ? (
+                <textarea
+                  className={`mt-3 min-h-[5rem] w-full rounded-[6px] border border-[var(--line)] px-3 py-2 text-[14.5px] ${disabledFieldClass}`}
+                  value={shownText[question.id] ?? ""}
+                  disabled={!open}
+                  onChange={(event) =>
+                    setText((current) => ({ ...current, [question.id]: event.target.value }))
+                  }
+                />
+              ) : (
+                <ul className="mt-3 flex flex-col gap-2">
+                  {question.choices
+                    .filter((choice) => choice.text.trim() !== "")
+                    .map((choice, choiceIndex) => {
+                      const checked = (shownSelected[question.id] ?? []).includes(choice.id);
+                      return (
+                        <li key={choice.id}>
+                          <label
+                            className={`flex items-start gap-2 text-[14.5px] ${
+                              open ? "text-[var(--ink)]" : "text-[var(--ink-soft)]"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              className="mt-1 h-4 w-4 accent-[var(--green)] disabled:cursor-not-allowed"
+                              checked={checked}
+                              disabled={!open}
+                              onChange={() => {
+                                setSelected((current) => {
+                                  const list = current[question.id] ?? [];
+                                  const next = checked
+                                    ? list.filter((id) => id !== choice.id)
+                                    : [...list, choice.id];
+                                  return { ...current, [question.id]: next };
+                                });
+                              }}
+                            />
+                            <span>
+                              {quizChoiceLetter(choiceIndex)}. {choice.text}
+                            </span>
+                          </label>
+                        </li>
+                      );
+                    })}
+                </ul>
+              )}
+            </li>
+          );
+        })}
       </ol>
       {open ? (
         <div>
@@ -231,11 +268,11 @@ function MatchingFields({
     <div className="mt-3 flex flex-col gap-3">
       {layout.left.map((item, index) => (
         <label key={item.id} className="flex flex-col gap-1">
-          <span className="text-[14.5px] text-[var(--ink)]">
+          <span className={`text-[14.5px] ${disabled ? "text-[var(--ink-soft)]" : "text-[var(--ink)]"}`}>
             {index + 1}. {item.text}
           </span>
           <select
-            className="max-w-md rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-3 py-[11px] text-[14.5px]"
+            className={`max-w-md rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-3 py-[11px] text-[14.5px] ${disabledFieldClass}`}
             value={picks[item.id] ?? ""}
             disabled={disabled}
             onChange={(event) => onPick(item.id, Number(event.target.value))}
@@ -243,7 +280,7 @@ function MatchingFields({
             <option value="">Choose</option>
             {layout.right.map((choice) => (
               <option key={choice.id} value={choice.id}>
-                {choice.letter}. {choice.text}
+                {choice.text}
               </option>
             ))}
           </select>

@@ -64,7 +64,7 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 - Invite owners / admins / instructors by email; Course Wright emails the claim link and you can copy it again
 - Pending invites: copy link again, **Resend email**, or cancel
 - Change **roles** for existing members: owners may set instructor / admin / owner; admins may set instructor / admin; either may set **parent** only when that person has a linked student in the org. Promote parent → staff with no new invite. Membership role only — not a materials/roster access gate
-- Remove admins/instructors who have **no** linked student (membership only). If they have a linked student, demote to parent instead
+- Remove admins/instructors who have **no** linked student (membership only; confirm). If they have a linked student, demote to parent instead
 - Guard: cannot remove or demote the **last remaining owner or admin**
 - Existing **owner** rows stay badge-only (promote others to owner; don’t demote owners from this list)
 

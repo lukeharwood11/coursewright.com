@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { PrinterIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { Button, ButtonLink } from "@/ui/Button";
@@ -9,9 +9,14 @@ import { PageLoading } from "@/ui/PageLoading";
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { coursePath } from "@/courses/model/paths";
-import { unitPath } from "@/units/model/paths";
 import { isPublished } from "@/materials/model/visibility";
+import {
+  quizBackDestination,
+  quizLocationState,
+  quizOpenedFromUnit,
+} from "@/quizzes/model/navigation";
 import { quizEditPath, quizPrintPath } from "@/quizzes/model/paths";
+import { formatQuizScore } from "@/quizzes/model/quiz";
 import { viewerTimeZone } from "@/quizzes/model/window";
 import { AnswerKeySection } from "./components/AnswerKeySection";
 import { QuizAttemptList } from "./components/QuizAttemptList";
@@ -20,6 +25,7 @@ import { useQuiz } from "./hooks/useQuiz";
 
 export function QuizPage() {
   const page = useQuiz();
+  const location = useLocation();
   const navigate = useNavigate();
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -56,10 +62,15 @@ export function QuizPage() {
 
   const quiz = page.quiz;
   const zone = viewerTimeZone(quiz.acceptsTimezone);
-  const backTo =
-    page.unitId != null
-      ? unitPath(page.organization.slug, page.courseId, page.unitId)
-      : coursePath(page.organization.slug, page.courseId);
+  const fromUnit = quizOpenedFromUnit(location.state);
+  const quizNavState = quizLocationState(fromUnit);
+  const back = quizBackDestination({
+    fromUnit,
+    orgSlug: page.organization.slug,
+    courseId: page.courseId,
+    courseTitle: page.course?.title ?? "course",
+    unit: page.unit,
+  });
   const pathArgs = {
     orgSlug: page.organization.slug,
     courseId: page.courseId,
@@ -73,8 +84,8 @@ export function QuizPage() {
   return (
     <div>
       <DetailPageHeader
-        backTo={backTo}
-        backLabel="Back to unit"
+        backTo={back.to}
+        backLabel={back.label}
         title={quiz.title}
         meta={
           <span className="flex flex-wrap items-center gap-1.5">
@@ -93,7 +104,11 @@ export function QuizPage() {
               Print
             </ButtonLink>
             {page.canEdit ? (
-              <ButtonLink variant="secondary" to={quizEditPath(pathArgs)}>
+              <ButtonLink
+                variant="secondary"
+                to={quizEditPath(pathArgs)}
+                state={quizNavState}
+              >
                 Edit
               </ButtonLink>
             ) : null}
@@ -127,17 +142,26 @@ export function QuizPage() {
             attemptsForStudent={(studentId) =>
               page.attempts.filter((attempt) => attempt.studentProfileId === studentId).length
             }
+            latestAnswersForStudent={(studentId) =>
+              page.attempts.find((attempt) => attempt.studentProfileId === studentId)?.answers ??
+              []
+            }
             submitting={page.submit.isPending}
             onSubmit={(args) => {
               setResult(null);
               page.submit.mutate(args, {
                 onSuccess: (submitted) => {
+                  const needsManualGrade = page.questions.some(
+                    (question) =>
+                      question.kind === "short_answer" || question.kind === "long_answer",
+                  );
                   if (
                     submitted.autograded &&
                     submitted.score != null &&
-                    submitted.scoreTotal != null
+                    submitted.scoreTotal != null &&
+                    !needsManualGrade
                   ) {
-                    setResult(`${submitted.score} of ${submitted.scoreTotal}`);
+                    setResult(formatQuizScore(submitted.score, submitted.scoreTotal));
                   } else {
                     setResult("Submitted.");
                   }
@@ -158,6 +182,13 @@ export function QuizPage() {
           attempts={page.canEdit ? page.attempts : familyAttempts}
           timeZone={zone}
           showAll={page.canEdit}
+          canGrade={page.canEdit}
+          gradingKey={
+            page.gradeAnswer.isPending && page.gradeAnswer.variables
+              ? `${page.gradeAnswer.variables.attemptId}:${page.gradeAnswer.variables.questionId}`
+              : null
+          }
+          onGrade={(args) => page.gradeAnswer.mutate(args)}
         />
         {page.showKey ? <AnswerKeySection questions={page.questions} /> : null}
         {page.canEdit && isPublished(quiz.visibility) ? (
@@ -189,7 +220,7 @@ export function QuizPage() {
         onConfirm={() => {
           setConfirmRemove(false);
           page.remove.mutate(undefined, {
-            onSuccess: () => navigate(backTo),
+            onSuccess: () => navigate(back.to),
           });
         }}
       />

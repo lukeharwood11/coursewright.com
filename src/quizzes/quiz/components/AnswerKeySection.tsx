@@ -1,6 +1,6 @@
 import { quizChoiceLetter } from "@/materials/model/quiz";
 import type { QuizQuestionRecord } from "@/quizzes/databridge/quizzes";
-import { matchKeyLetters, matchLayout } from "@/quizzes/model/quiz";
+import { matchKeyTexts, matchLayout } from "@/quizzes/model/quiz";
 
 export function AnswerKeySection({ questions }: { questions: QuizQuestionRecord[] }) {
   return (
@@ -40,15 +40,15 @@ export function AnswerKeySection({ questions }: { questions: QuizQuestionRecord[
 
 function MatchingKey({ question }: { question: QuizQuestionRecord }) {
   const layout = matchLayout(question.prompts, question.options, question.id);
-  const letters = matchKeyLetters(layout, question.matchKeys);
-  if (layout.left.length === 0 || letters.size === 0) {
+  const texts = matchKeyTexts(layout, question.matchKeys);
+  if (layout.left.length === 0 || texts.size === 0) {
     return <p className="text-[14px] text-[var(--ink-soft)]">Not marked yet</p>;
   }
   return (
     <ul className="mt-1 flex flex-col gap-1 text-[14px] text-[var(--ink-soft)]">
-      {layout.left.map((item, index) => (
+      {layout.left.map((item) => (
         <li key={item.id}>
-          {index + 1}. {item.text} — {letters.get(item.id) ?? "—"}
+          {item.text} → {texts.get(item.id) ?? "—"}
         </li>
       ))}
     </ul>

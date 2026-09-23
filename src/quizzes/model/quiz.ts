@@ -112,6 +112,20 @@ export function matchLayout(
   };
 }
 
+/** Correct option text for each prompt, after the same shuffle the family sees. */
+export function matchKeyTexts(
+  layout: MatchLayout,
+  keys: readonly MatchKey[],
+): Map<number, string> {
+  const textByOption = new Map(layout.right.map((option) => [option.id, option.text]));
+  const texts = new Map<number, string>();
+  for (const key of keys) {
+    const text = textByOption.get(key.optionId);
+    if (text) texts.set(key.promptId, text);
+  }
+  return texts;
+}
+
 /** Letter of the correct option, after the same shuffle the family sees. */
 export function matchKeyLetters(
   layout: MatchLayout,
@@ -194,7 +208,68 @@ export function scoreMultipleChoice(
 }
 
 export function formatQuizScore(score: number, scoreTotal: number): string {
-  return `${score} of ${scoreTotal}`;
+  if (scoreTotal <= 0) return `Score ${score}/${scoreTotal}`;
+  const percent = Math.round((score / scoreTotal) * 100);
+  return `Score ${score}/${scoreTotal} (${percent}%)`;
+}
+
+export type QuizAnswerGrade = "correct" | "incorrect" | "pending";
+
+/** Correct / incorrect when marked; otherwise yet to be graded. */
+export function quizAnswerGrade(isCorrect: boolean | null): QuizAnswerGrade {
+  if (isCorrect === true) return "correct";
+  if (isCorrect === false) return "incorrect";
+  return "pending";
+}
+
+export function quizAnswerGradeLabel(grade: QuizAnswerGrade): string {
+  if (grade === "correct") return "Correct";
+  if (grade === "incorrect") return "Incorrect";
+  return "Yet to be graded";
+}
+
+/** True when every answer on the attempt has Correct or Incorrect. */
+export function attemptIsFullyGraded(
+  answers: readonly { isCorrect: boolean | null }[],
+): boolean {
+  if (answers.length === 0) return true;
+  return answers.every((answer) => answer.isCorrect !== null);
+}
+
+export type SavedQuizAnswerFields = {
+  selected: Record<number, number[]>;
+  text: Record<number, string>;
+  matches: Record<number, Record<number, number>>;
+};
+
+/** Form field values from a stored attempt (for read-only review). */
+export function savedQuizAnswerFields(
+  answers: readonly {
+    questionId: number;
+    choiceIds: readonly number[];
+    answerText: string;
+    matchPairs: readonly { leftId: number; rightId: number }[];
+  }[],
+): SavedQuizAnswerFields {
+  const selected: Record<number, number[]> = {};
+  const text: Record<number, string> = {};
+  const matches: Record<number, Record<number, number>> = {};
+  for (const answer of answers) {
+    if (answer.choiceIds.length > 0) {
+      selected[answer.questionId] = [...answer.choiceIds];
+    }
+    if (answer.answerText) {
+      text[answer.questionId] = answer.answerText;
+    }
+    if (answer.matchPairs.length > 0) {
+      const picks: Record<number, number> = {};
+      for (const pair of answer.matchPairs) {
+        picks[pair.leftId] = pair.rightId;
+      }
+      matches[answer.questionId] = picks;
+    }
+  }
+  return { selected, text, matches };
 }
 
 export function accountIsStudentOnCourse(
@@ -238,4 +313,46 @@ export function canShowAnswerKey(args: {
 }): boolean {
   if (args.teacherView) return true;
   return args.shareWithParents && !args.viewerIsStudent;
+}
+
+/** Outline / calendar progress for the viewer’s latest attempt. */
+export type QuizOutlineProgress =
+  | { kind: "scored"; label: string }
+  | { kind: "submitted" }
+  | { kind: "none" };
+
+/**
+ * Score only when a frozen score exists and every answer is graded
+ * (including short/long answers the teacher marks). Submitted otherwise.
+ * Nothing when there is no attempt.
+ */
+export function quizOutlineProgress(attempt: {
+  score: number | null;
+  scoreTotal: number | null;
+  ungradedAnswerCount: number;
+} | null | undefined): QuizOutlineProgress {
+  if (!attempt) return { kind: "none" };
+  if (
+    attempt.score != null &&
+    attempt.scoreTotal != null &&
+    attempt.ungradedAnswerCount === 0
+  ) {
+    return {
+      kind: "scored",
+      label: formatQuizScore(attempt.score, attempt.scoreTotal),
+    };
+  }
+  return { kind: "submitted" };
+}
+
+/** Newest attempt per quiz among the given rows (newest first). */
+export function latestAttemptByQuizId<
+  T extends { quizId: number; submittedAt: string },
+>(attempts: readonly T[]): Map<number, T> {
+  const latest = new Map<number, T>();
+  for (const attempt of attempts) {
+    if (latest.has(attempt.quizId)) continue;
+    latest.set(attempt.quizId, attempt);
+  }
+  return latest;
 }

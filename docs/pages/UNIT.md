@@ -17,7 +17,7 @@ Materials may also sit at **course top level** (no unit) from older data — see
 
 - Edit unit title / dates when permitted; **Edit** opens the form; **Save unit** / **Cancel** in the page header (Save disabled when unchanged; Cancel leaves edit view on this unit, confirms if dirty).
 - Show one unit in a **course** context (**P0**). Template URL tree is **P1**.
-- List materials in this unit; add material (**page** / **link** / **file**) / reorder when permitted. Students (and staff **Student view**; linked parents inherit) only see **published** materials.
+- List materials and quizzes in this unit; **Add** → Material (page / link / file) or Quiz when permitted. Students (and staff **Student view**; linked parents inherit) only see **published** materials and quizzes.
 - Course-level materials (no unit) appear on [COURSE](./COURSE.md) **above** the units list — not on this page.
 - **Print unit** produces one continuous packet (P0); opens [PRINT](./PRINT.md) at `…/units/<unit_id>/print`.
 - Dating: optional unit range; material `scheduled_date` wins for “this week” when set.
@@ -28,6 +28,7 @@ Materials may also sit at **course top level** (no unit) from older data — see
 - Unit **title**, **order**
 - Optional unit **start/end dates** (or range)
 - Materials: **title**, **description**, kind/badge, optional assignment/due dates, unpublished badge (instructors), important-now badge, print affordance
+- Quizzes: **title**, **description**, Quiz badge, optional Assigned / Due from the accepting window, unpublished badge (instructors), family progress (score when fully graded, submitted check when turned in but still waiting on short/long grading, otherwise nothing), print affordance
 - Parent course name for orientation (**P1:** or template name)
 
 ## Contents
@@ -36,12 +37,12 @@ Materials may also sit at **course top level** (no unit) from older data — see
 - Optional unit `start_date` / `end_date` (or range)
 - Materials list (icon, name, badges, dates) → [MATERIAL](./MATERIAL.md)
 - **Print unit** — continuous packet of materials in order (P0; control on unit header — never overflow-only) → [PRINT](./PRINT.md)
-- Add / reorder materials (edit+) — **Add material:** page · link · file. **Add quiz** sits beside it and opens the new unpublished quiz.
+- Add / reorder materials (edit+) — **Add** menu: Material (page · link · file) or Quiz (opens the new unpublished quiz)
 - **P1:** Template↔course cues: overridden copy, promote, deprecate/delete impact (TBD chrome density)
 
 ## Primary actions
 
-- Open / add material (page · link · file)
+- Open / add material (page · link · file) or quiz via **Add**
 - Print unit
 - Edit unit dates / title
 - Reorder materials

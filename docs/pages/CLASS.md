@@ -39,7 +39,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - Member list → [STUDENT_PROFILE](./STUDENT_PROFILE.md)
 - **Teachers** as compact cards (avatar, name, remove for owners and admins). An info icon next to the heading explains that they are optional class leads and are notified in Activity when someone posts in a discussion for this class. **Add teacher** opens a search modal.
 - **Add students** panel (batch existing + batch new)
-- Remove from class on each row
+- Remove from class on each row (confirm — class only; does not remove from the org roster)
 - Empty state: add students when ready
 - Back to [ORG_ROSTER](./ORG_ROSTER.md) (class list lives there)
 

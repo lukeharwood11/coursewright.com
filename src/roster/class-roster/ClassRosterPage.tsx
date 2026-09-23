@@ -1,9 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChatBubbleLeftRightIcon, MegaphoneIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 import { Button, ButtonLink } from "@/ui/Button";
+import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
+import type { StudentSummary } from "@/roster/databridge/students";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { newDiscussionPath } from "@/discussions/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
@@ -14,8 +16,14 @@ import { useClassEvents } from "./hooks/useClassEvents";
 import { useClassRoster } from "./hooks/useClassRoster";
 import { useToastOnError } from "@/ui/useToastOnError";
 
+type PendingClassRemove = {
+  student: StudentSummary;
+  memberId: number;
+};
+
 export function ClassRosterPage() {
   const roster = useClassRoster();
+  const [pendingRemove, setPendingRemove] = useState<PendingClassRemove | null>(null);
   const eventsQuery = useClassEvents(
     roster.classGroup?.id ?? NaN,
     Boolean(roster.classGroup),
@@ -137,7 +145,7 @@ export function ClassRosterPage() {
             return (
               <Button
                 variant="secondary"
-                onClick={() => roster.onRemove(memberId)}
+                onClick={() => setPendingRemove({ student, memberId })}
                 disabled={roster.removingId === memberId}
               >
                 {roster.removingId === memberId ? "Removing…" : "Remove"}
@@ -186,6 +194,25 @@ export function ClassRosterPage() {
         onPasteTextChange={roster.setPasteText}
         onApplyPaste={roster.onApplyPaste}
         onSubmitNew={roster.onSubmitNew}
+      />
+
+      <ConfirmDialog
+        open={pendingRemove != null}
+        title="Remove from class?"
+        body={
+          pendingRemove
+            ? `${pendingRemove.student.name} will leave this class only. They stay on the organization roster and in their courses.`
+            : ""
+        }
+        confirmLabel="Remove"
+        cancelLabel="Keep them"
+        onCancel={() => setPendingRemove(null)}
+        onConfirm={() => {
+          if (!pendingRemove) return;
+          const { memberId } = pendingRemove;
+          setPendingRemove(null);
+          roster.onRemove(memberId);
+        }}
       />
       </div>
     </div>

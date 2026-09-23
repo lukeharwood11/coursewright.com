@@ -15,9 +15,9 @@ Month, week, and day view of when work is **assigned** and **due**, plus lesson-
 ## Behavior
 
 - Sidebar **Calendar** for staff and the student experience.
-- **Month** view: day cells with chips — **assigned** outlined in the course color, **due** filled. Lesson-plan text is not shown in month cells (too tight); switch to week or day to read plans. Chips and course labels open the material or lesson plan. Tapping the day (not a chip) switches to **day** view for that date.
-- **Week** view: Sunday–Saturday columns. Each day, per visible course: day plan text (if any), then a divider, then that day’s lesson-plan materials **and** assigned/due materials (deduped, kept with that class). Week notes sit as a colored bar per course above the grid. Items open the material or lesson plan. Tapping the day (not an item) switches to **day** view. [ORG_HOME](./ORG_HOME.md) This week uses the same chips and notes, but **omits empty days** and wraps remaining days as cards (those day cards also open day view).
-- **Day** view: that date only — **events** first (calendar icon; title, start/end time when set, location), then the same class blocks as week (plan text + materials). Material rows show a **bookmark** (assigned), **clock** (due), or **document** (plan-only) icon on the left. Previous / next move one day.
+- **Month** view: day cells with chips — **assigned** outlined in the course color, **due** filled. Lesson-plan text is not shown in month cells (too tight); switch to week or day to read plans. Chips and course labels open the material, **quiz**, or lesson plan. Tapping the day (not a chip) switches to **day** view for that date.
+- **Week** view: Sunday–Saturday columns. Each day, per visible course: day plan text (if any), then a divider, then that day’s lesson-plan materials **and** assigned/due materials and quizzes (deduped, kept with that class). Week notes sit as a colored bar per course above the grid. Items open the material, quiz, or lesson plan. Tapping the day (not an item) switches to **day** view. [ORG_HOME](./ORG_HOME.md) This week uses the same chips and notes, but **omits empty days** and wraps remaining days as cards (those day cards also open day view).
+- **Day** view: that date only — **events** first (calendar icon; title, start/end time when set, location), then the same class blocks as week (plan text + materials / quizzes). Material and quiz rows show a **bookmark** (assigned), **clock** (due), or **document** (plan-only) icon on the left. Previous / next move one day.
 - **Events** are their own chips (title on month and week). A course event uses that course color and follows the legend. Class events and organization events are not hidden by the legend. Clicking an event opens [EVENT](./EVENT.md).
 - Staff Teacher view: **Add event** (date filled from the day you’re looking at). Students and Student view do not add events.
 - **Legend** lists courses with their color; tap to show/hide. Filter is client-side (this browser).
@@ -29,7 +29,7 @@ Month, week, and day view of when work is **assigned** and **due**, plus lesson-
 
 - Month, week, or day grid for the focused date
 - Course legend (title + color)
-- Material chips: title; **Assigned** vs **Due**
+- Material and quiz chips: title; **Assigned** vs **Due**. Quizzes use accepting-window wall dates (starts → Assigned, ends → Due)
 - Event chips: title. Day view also shows start/end time and location
 - Week / day view: lesson-plan week notes (week) and day text
 - Unpublished / draft cue for staff
@@ -39,7 +39,7 @@ Month, week, and day view of when work is **assigned** and **due**, plus lesson-
 - Header (one compact row): **Calendar** title, period label, then **prev/next** and **month/week/day** view segment (icons + labels); **Add event** on the same row for staff Teacher view
 - Legend
 - Month grid, week calendar, or day list
-- Click a material → [MATERIAL](./MATERIAL.md); click a lesson plan block → [LESSON_PLAN](./LESSON_PLAN.md); click a day → this page with `?view=day`
+- Click a material → [MATERIAL](./MATERIAL.md); click a quiz → [QUIZ](./QUIZ.md); click a lesson plan block → [LESSON_PLAN](./LESSON_PLAN.md); click a day → this page with `?view=day`
 
 ## Primary actions
 
@@ -55,6 +55,7 @@ Month, week, and day view of when work is **assigned** and **due**, plus lesson-
 - [ORG_HOME](./ORG_HOME.md) — This week
 - [EVENT](./EVENT.md) — event chip; **Add event**
 - [MATERIAL](./MATERIAL.md) — assigned/due chip
+- [QUIZ](./QUIZ.md) — assigned/due quiz chip
 - [LESSON_PLAN](./LESSON_PLAN.md) — week plan
 - [COURSE](./COURSE.md) — course from legend (staff / parent-viewable)
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md)

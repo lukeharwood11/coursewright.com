@@ -205,7 +205,10 @@ as $$
         (select private.is_org_staff(q.organization_id))
         or (
           q.visibility = 'published'
-          and (select private.parent_can_view_course(q.course_id))
+          and (
+            (select private.parent_can_view_course(q.course_id))
+            or (select private.student_can_view_course(q.course_id))
+          )
         )
       )
   );
@@ -230,6 +233,15 @@ as $$
       and e.status = 'active'
       and sp.student_email is not null
       and lower(btrim(sp.student_email)) = lower(btrim(p.email))
+  )
+  or exists (
+    select 1
+    from public.enrollments e
+    join public.student_profiles sp
+      on sp.id = e.student_profile_id
+     and sp.user_id = (select auth.uid())
+    where e.course_id = p_course_id
+      and e.status = 'active'
   );
 $$;
 
@@ -273,9 +285,15 @@ as $$
       and (
         (select private.can_manage_course(q.course_id))
         or (
-          (select private.parent_linked_to_student(a.student_profile_id))
+          (
+            (select private.parent_linked_to_student(a.student_profile_id))
+            or (select private.student_owns_profile(a.student_profile_id))
+          )
           and q.visibility = 'published'
-          and (select private.parent_can_view_course(q.course_id))
+          and (
+            (select private.parent_can_view_course(q.course_id))
+            or (select private.student_can_view_course(q.course_id))
+          )
         )
       )
   );
@@ -310,8 +328,8 @@ declare
   question public.quiz_questions%rowtype;
   attempt_id bigint;
   autograded boolean;
-  score int := 0;
-  score_total int := 0;
+  v_score int := 0;
+  v_score_total int := 0;
   answer jsonb;
   selected_ids bigint[];
   correct_ids bigint[];
@@ -423,7 +441,7 @@ begin
         and c.id = any(selected_ids);
 
       select coalesce(string_agg(
-        chr(64 + ranked.n)::text || '. ' || ranked.text,
+        chr(64 + ranked.n::integer)::text || '. ' || ranked.text,
         ', ' order by ranked.n
       ), '')
         into summary
@@ -446,9 +464,9 @@ begin
           and c.deleted_at is null
           and btrim(c.text) <> '';
         if coalesce(cardinality(correct_ids), 0) > 0 then
-          score_total := score_total + 1;
+          v_score_total := v_score_total + 1;
           if raw_count = live_count and selected_ids = correct_ids then
-            score := score + 1;
+            v_score := v_score + 1;
           end if;
         end if;
       end if;
@@ -476,16 +494,16 @@ begin
   if autograded then
     update public.quiz_attempts
     set autograded = true,
-        score = score,
-        score_total = score_total
+        score = v_score,
+        score_total = v_score_total
     where id = attempt_id;
   end if;
 
   return jsonb_build_object(
     'attemptId', attempt_id,
     'autograded', autograded,
-    'score', case when autograded then score else null end,
-    'scoreTotal', case when autograded then score_total else null end
+    'score', case when autograded then v_score else null end,
+    'scoreTotal', case when autograded then v_score_total else null end
   );
 end;
 $$;
@@ -530,7 +548,16 @@ alter table public.quiz_attempt_answers enable row level security;
 
 create policy quizzes_select on public.quizzes
 for select to authenticated
-using (deleted_at is null and (select private.can_view_quiz(id)));
+using (
+  deleted_at is null
+  and (
+    (select private.is_org_staff(organization_id))
+    or (
+      visibility = 'published'
+      and (select private.parent_can_view_course(course_id))
+    )
+  )
+);
 
 create policy quizzes_insert on public.quizzes
 for insert to authenticated

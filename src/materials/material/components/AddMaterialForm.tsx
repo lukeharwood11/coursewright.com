@@ -19,6 +19,8 @@ export function AddMaterialForm({
   unitId,
   label,
   fromUnitPage = false,
+  formOnly = false,
+  onCancel,
 }: {
   organizationId: number;
   orgSlug: string;
@@ -26,6 +28,9 @@ export function AddMaterialForm({
   unitId: number | null;
   label: string;
   fromUnitPage?: boolean;
+  /** Skip the trigger button; parent mounts this only when the form should show. */
+  formOnly?: boolean;
+  onCancel?: () => void;
 }) {
   const add = useAddMaterial({
     organizationId,
@@ -35,7 +40,12 @@ export function AddMaterialForm({
     fromUnitPage,
   });
 
-  if (!add.open) {
+  function close() {
+    add.setOpen(false);
+    onCancel?.();
+  }
+
+  if (!formOnly && !add.open) {
     return (
       <Button variant="ghost" fullWidth onClick={() => add.setOpen(true)}>
         <PlusIcon className="h-5 w-5" aria-hidden />
@@ -129,7 +139,7 @@ export function AddMaterialForm({
         <Button
           type="button"
           variant="secondary"
-          onClick={() => add.setOpen(false)}
+          onClick={close}
           disabled={add.submitting}
         >
           Cancel

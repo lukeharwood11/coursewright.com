@@ -3,7 +3,13 @@ import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
-import { listQuizzesForCourse, quizQueryKeys } from "@/quizzes/databridge/quizzes";
+import {
+  listLinkedStudents,
+  listQuizAttemptSummariesForQuizzes,
+  listQuizzesForCourse,
+  quizQueryKeys,
+} from "@/quizzes/databridge/quizzes";
+import { latestAttemptByQuizId } from "@/quizzes/model/quiz";
 import { staffCanManageCourse } from "@/courses/model/access";
 import {
   courseQueryKeys,
@@ -125,6 +131,28 @@ export function useCourse() {
         lessonPlanIsPublished(row.visibility),
       )
     : (lessonPlansQuery.data ?? []);
+  const linkedStudentsQuery = useQuery({
+    queryKey: ["quizzes", "linked-students", courseId, user.id],
+    queryFn: () => listLinkedStudents(courseId, user.id),
+    enabled: Number.isFinite(courseId) && parentPresentation,
+  });
+  const linkedStudentIds = (linkedStudentsQuery.data ?? []).map((row) => row.id);
+  const studentKey =
+    linkedStudentIds.slice().sort((a, b) => a - b).join(",") || "none";
+  const attemptsQuery = useQuery({
+    queryKey: quizQueryKeys.attemptSummaries(courseId, studentKey),
+    queryFn: () =>
+      listQuizAttemptSummariesForQuizzes(
+        quizzes.map((quiz) => quiz.id),
+        linkedStudentIds,
+      ),
+    enabled:
+      parentPresentation &&
+      Number.isFinite(courseId) &&
+      quizzes.length > 0 &&
+      linkedStudentIds.length > 0,
+  });
+  const attemptByQuizId = latestAttemptByQuizId(attemptsQuery.data ?? []);
 
   function invalidate() {
     void queryClient.invalidateQueries({ queryKey: courseQueryKeys.detail(courseId) });
@@ -192,6 +220,7 @@ export function useCourse() {
       acc[row.unitId] = list;
       return acc;
     }, {}),
+    attemptByQuizId,
     instructors: instructorsQuery.data ?? [],
     students: (enrollmentsQuery.data ?? []).filter(
       (row) => row.status === "active",

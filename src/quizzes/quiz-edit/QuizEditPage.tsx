@@ -1,8 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { PageLoading } from "@/ui/PageLoading";
 import { useToastOnError } from "@/ui/useToastOnError";
+import {
+  quizLocationState,
+  quizOpenedFromUnit,
+} from "@/quizzes/model/navigation";
 import { QuizEditorForm } from "./components/QuizEditorForm";
 import { useQuizEdit } from "./hooks/useQuizEdit";
 
@@ -10,6 +14,9 @@ const FORM_ID = "quiz-edit-form";
 
 export function QuizEditPage() {
   const page = useQuizEdit();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const quizNavState = quizLocationState(quizOpenedFromUnit(location.state));
   useToastOnError(page.loadError);
 
   if (page.loading) return <PageLoading label="Loading quiz…" />;
@@ -24,7 +31,11 @@ export function QuizEditPage() {
           You can’t edit that quiz
         </h1>
         <p className="mt-4 text-[13px]">
-          <Link to={page.viewPath} className="font-bold text-[var(--green)]">
+          <Link
+            to={page.viewPath}
+            state={quizNavState}
+            className="font-bold text-[var(--green)]"
+          >
             Back to quiz
           </Link>
         </p>
@@ -37,6 +48,7 @@ export function QuizEditPage() {
       <DetailPageHeader
         backTo={page.viewPath}
         backLabel="Back to quiz"
+        backState={quizNavState}
         title="Edit quiz"
         actions={
           <PageFormActions
@@ -44,6 +56,12 @@ export function QuizEditPage() {
             saving={page.saving}
             hasChanges={page.hasChanges}
             cancelTo={page.viewPath}
+            onCancel={() =>
+              navigate(
+                page.viewPath,
+                quizNavState ? { state: quizNavState } : undefined,
+              )
+            }
             saveLabel={page.saving ? "Saving…" : "Save"}
           />
         }

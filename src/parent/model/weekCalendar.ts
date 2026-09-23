@@ -68,6 +68,7 @@ export function parentWeekCalendar(dashboard: ParentDashboard): ParentWeekCalend
             unitStart: null,
             unitEnd: null,
             unpublished: false,
+            itemKind: material.itemKind ?? "material",
           },
         ];
       }),

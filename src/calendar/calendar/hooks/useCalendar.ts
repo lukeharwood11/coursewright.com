@@ -7,7 +7,7 @@ import { staffCanEdit } from "@/app/layouts/model/viewMode";
 import { calendarQueryKeys, loadCalendarSource } from "@/calendar/databridge/calendar";
 import { addIsoDays, monthContaining, shiftMonth, weekdayDateHeading } from "@/calendar/model/dates";
 import { expandEventsInRange, toggleHiddenCourse } from "@/calendar/model/events";
-import { lessonPlansToDays, lessonPlansToWeekNotes, materialsToChips, plansForWeek } from "@/calendar/model/view";
+import { lessonPlansToDays, lessonPlansToWeekNotes, materialsToChips, plansForWeek, quizzesToChips } from "@/calendar/model/view";
 import { calendarWeekContaining, localIsoDate } from "@/parent/model/thisWeek";
 import { calendarPath, parseCalendarView, type CalendarView } from "@/calendar/model/paths";
 
@@ -80,7 +80,10 @@ export function useCalendar() {
     courses: source?.courses ?? [],
     weekNotes: lessonPlansToWeekNotes(weekPlans),
     lessonDays: lessonPlansToDays(source?.lessonPlans ?? []),
-    chips: materialsToChips(source?.materials ?? []),
+    chips: [
+      ...materialsToChips(source?.materials ?? []),
+      ...quizzesToChips(source?.quizzes ?? []),
+    ],
     events: expandEventsInRange(
       (source?.events ?? []).map((event) => ({
         id: event.id,

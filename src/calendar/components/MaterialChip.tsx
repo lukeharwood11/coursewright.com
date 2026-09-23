@@ -6,6 +6,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { courseColorCssVar, type CourseColorKey } from "@/courses/model/courseColor";
 import { materialPath } from "@/materials/model/paths";
+import { quizPath } from "@/quizzes/model/paths";
 import type { CalendarChipKind } from "@/calendar/model/events";
 
 export function MaterialChip({
@@ -17,6 +18,7 @@ export function MaterialChip({
   kind,
   colorKey,
   unpublished,
+  itemKind = "material",
   withIcon = false,
 }: {
   orgSlug: string;
@@ -27,6 +29,7 @@ export function MaterialChip({
   kind: CalendarChipKind | "both" | "plain";
   colorKey: CourseColorKey;
   unpublished?: boolean;
+  itemKind?: "material" | "quiz";
   /** Day view: icon cue for assigned vs due vs plan material. */
   withIcon?: boolean;
 }) {
@@ -41,10 +44,14 @@ export function MaterialChip({
         : DocumentTextIcon;
   const kindLabel =
     kind === "due" ? "Due" : kind === "assigned" ? "Assigned" : kind === "both" ? "Assigned · Due" : null;
+  const href =
+    itemKind === "quiz"
+      ? quizPath({ orgSlug, courseId, unitId, quizId: materialId })
+      : materialPath({ orgSlug, courseId, unitId, materialId });
 
   return (
     <Link
-      to={materialPath({ orgSlug, courseId, unitId, materialId })}
+      to={href}
       className={
         withIcon
           ? "flex items-center gap-2 rounded-[8px] px-2.5 py-1.5 text-[13.5px] font-bold leading-snug"

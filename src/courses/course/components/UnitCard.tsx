@@ -2,13 +2,12 @@ import { ArrowDownIcon, ArrowUpIcon, ChevronDownIcon, PrinterIcon } from "@heroi
 import { Link } from "react-router-dom";
 import { ButtonLink } from "@/ui/Button";
 import { formatDateRange } from "@/courses/model/dates";
-import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
 import type { MaterialRecord } from "@/materials/databridge/materials";
-import { AddQuizForm } from "@/quizzes/quiz/components/AddQuizForm";
 import { QuizRow } from "@/quizzes/quiz/components/QuizRow";
 import type { QuizRecord } from "@/quizzes/databridge/quizzes";
 import { mergeOutline } from "@/quizzes/model/outline";
+import { UnitAddMenu } from "@/units/unit/components/UnitAddMenu";
 import { unitPath, unitPrintPath } from "@/units/model/paths";
 import type { UnitRecord } from "@/units/databridge/units";
 
@@ -19,6 +18,7 @@ export function UnitCard({
   index,
   materials,
   quizzes,
+  attemptByQuizId,
   importantIds,
   canEdit,
   expanded,
@@ -33,6 +33,14 @@ export function UnitCard({
   index: number;
   materials: MaterialRecord[];
   quizzes: QuizRecord[];
+  attemptByQuizId?: Map<
+    number,
+    {
+      score: number | null;
+      scoreTotal: number | null;
+      ungradedAnswerCount: number;
+    }
+  >;
   importantIds: Set<number>;
   canEdit: boolean;
   expanded: boolean;
@@ -127,6 +135,10 @@ export function UnitCard({
                       title={quiz.title}
                       description={quiz.description}
                       visibility={quiz.visibility}
+                      acceptsFrom={quiz.acceptsFrom}
+                      acceptsUntil={quiz.acceptsUntil}
+                      acceptsTimezone={quiz.acceptsTimezone}
+                      attempt={attemptByQuizId?.get(quiz.id) ?? null}
                     />
                   );
                 }
@@ -156,15 +168,8 @@ export function UnitCard({
             </p>
           )}
           {canEdit ? (
-            <div className="flex flex-col gap-2 px-4 pb-4">
-              <AddMaterialForm
-                organizationId={organizationId}
-                orgSlug={orgSlug}
-                courseId={unit.courseId}
-                unitId={unit.id}
-                label="Add material to this unit"
-              />
-              <AddQuizForm
+            <div className="px-4 pb-4 pt-2">
+              <UnitAddMenu
                 organizationId={organizationId}
                 orgSlug={orgSlug}
                 courseId={unit.courseId}

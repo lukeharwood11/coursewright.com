@@ -2548,6 +2548,8 @@ export type Database = {
           attempt_id: number
           choice_ids: number[]
           id: number
+          is_correct: boolean | null
+          match_pairs: Json
           prompt_snapshot: string
           question_id: number
           selected_summary: string
@@ -2557,6 +2559,8 @@ export type Database = {
           attempt_id: number
           choice_ids?: number[]
           id?: number
+          is_correct?: boolean | null
+          match_pairs?: Json
           prompt_snapshot?: string
           question_id: number
           selected_summary?: string
@@ -2566,6 +2570,8 @@ export type Database = {
           attempt_id?: number
           choice_ids?: number[]
           id?: number
+          is_correct?: boolean | null
+          match_pairs?: Json
           prompt_snapshot?: string
           question_id?: number
           selected_summary?: string
@@ -3315,6 +3321,14 @@ export type Database = {
           p_student_profile_id: number
         }
         Returns: Json
+      }
+      grade_quiz_attempt_answer: {
+        Args: {
+          p_attempt_id: number
+          p_question_id: number
+          p_is_correct: boolean
+        }
+        Returns: undefined
       }
     }
     Enums: {

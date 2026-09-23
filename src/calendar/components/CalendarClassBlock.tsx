@@ -66,7 +66,7 @@ export function CalendarClassBlock({
         <div className="relative z-10 mt-2 flex flex-col gap-1">
           {card.chips.map((chip) => (
             <MaterialChip
-              key={`${chip.kind}-${chip.materialId}`}
+              key={`${chip.itemKind ?? "material"}-${chip.kind}-${chip.materialId}`}
               orgSlug={orgSlug}
               courseId={chip.courseId}
               unitId={chip.unitId}
@@ -75,6 +75,7 @@ export function CalendarClassBlock({
               kind={chip.kind}
               colorKey={chip.colorKey}
               unpublished={chip.unpublished}
+              itemKind={chip.itemKind ?? "material"}
               withIcon={withIcons}
             />
           ))}

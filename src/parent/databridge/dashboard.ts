@@ -7,6 +7,7 @@ import { calendarWeekContaining, localIsoDate } from "@/parent/model/thisWeek";
 import { listEventsOverlapping } from "@/events/databridge/events";
 import { buildParentDashboard } from "@/parent/model/dashboard";
 import type { ParentDashboard, ParentDashboardSource } from "@/parent/model/dashboard";
+import { quizAssignedDate, quizDueDate } from "@/quizzes/model/window";
 
 function requireSupabase() {
   if (!supabase) {
@@ -169,9 +170,36 @@ export async function loadParentDashboard(
           unitId: unit?.id ?? null,
           unitStart: unit?.start_date ?? null,
           unitEnd: unit?.end_date ?? null,
+          itemKind: "material" as const,
         },
       ];
     });
+
+    const quizzesResult = await db
+      .from("quizzes")
+      .select(
+        "id, title, accepts_from, accepts_until, accepts_timezone, course_id, unit_id, deleted_at, visibility",
+      )
+      .in("course_id", courseIds)
+      .is("deleted_at", null)
+      .eq("visibility", "published");
+    if (quizzesResult.error) throw new Error(quizzesResult.error.message);
+    materials = [
+      ...materials,
+      ...(quizzesResult.data ?? []).flatMap((row) => [
+        {
+          id: row.id,
+          title: row.title,
+          scheduledDate: quizAssignedDate(row.accepts_from, row.accepts_timezone),
+          dueDate: quizDueDate(row.accepts_until, row.accepts_timezone),
+          courseId: row.course_id,
+          unitId: row.unit_id,
+          unitStart: null,
+          unitEnd: null,
+          itemKind: "quiz" as const,
+        },
+      ]),
+    ];
   }
 
   const importantNow = (importantResult.data ?? []).flatMap((row) => {
