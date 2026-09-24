@@ -20,6 +20,7 @@ Course **Quiz**: an outline item families take in the app or print. Not a materi
 - Page quiz blocks in `src/materials/` stay a printable side element. Do not turn those nodes into this quiz.
 - Do not store quiz answers on `material_submissions`.
 - The database enforces the window, the attempt limit, and who can read the key. The browser copy is not the lock.
+- Quiz edit (questions, choices, keys, matching rows) follows `can_manage_course`: org owner or admin, or an assigned course instructor. The editor uses `staffCanManageCourse`. An org instructor with no assignment does not get a save path.
 - No drafts. Nothing is stored until Submit.
 - Short answers are stored and shown to the teacher. Autograde does not assign their points.
 - Course-from-course copies quizzes, questions, choices, keys, and matching prompts, options, and keys. It does not copy attempts.
