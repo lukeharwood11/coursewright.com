@@ -45,7 +45,7 @@ export function PricingPlanCard({ plan }: { plan: PricedPlan }) {
         </ul>
       ) : null}
 
-      <a href={mailto(contactEmails.hi)} className={`mt-6 ${contactClass}`}>
+      <a href={mailto(contactEmails.hi)} className={`mt-auto pt-6 ${contactClass}`}>
         Contact us
       </a>
     </article>

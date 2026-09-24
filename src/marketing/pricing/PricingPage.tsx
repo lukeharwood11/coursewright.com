@@ -14,7 +14,7 @@ export function PricingPage() {
         className="mt-1 text-[28px] font-semibold leading-snug text-[var(--ink)]"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        Family, Co-op, and School
+        Family, Microschool, and School
       </h1>
       <p className="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-[var(--ink-soft)]">
         Pick a size for the student profiles you expect. The course hub is the same
@@ -25,7 +25,7 @@ export function PricingPage() {
         <BillingIntervalToggle interval={interval} onChange={setInterval} />
       </div>
 
-      <ul className="mt-6 grid gap-4 lg:grid-cols-3" aria-live="polite">
+      <ul className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-live="polite">
         {plans.map((plan) => (
           <li key={plan.id}>
             <PricingPlanCard plan={plan} />
@@ -44,10 +44,6 @@ export function PricingPage() {
             Contact us
           </a>{" "}
           for a design-partner seat or early access.
-        </p>
-        <p className="mt-3">
-          Churches and ministries use the same Co-op plan. There isn’t a separate
-          church plan.
         </p>
         <p className="mt-3">
           <Link to="/" className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]">

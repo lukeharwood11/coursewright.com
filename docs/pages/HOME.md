@@ -15,35 +15,35 @@ P0 sales landing. Explain the job — this week’s materials into parents’ ha
 ## Behavior
 
 - Public, unauthenticated marketing page.
-- Primary CTAs go to signup. The hero’s secondary CTA scrolls to the feature section (`#this-week`). The closing secondary CTA goes to contact.
+- Primary hero CTA goes to signup. The hero’s secondary CTA goes to about. Opening `/#this-week` scrolls to the feature section. The closing secondary CTA goes to contact.
 - No org or course data loaded. The parent preview is a static illustration.
 
 ## Data shown
 
-- Hero headline and subhead (static)
-- Static “This week” parent preview with **Print this week**, captioned “What a linked parent sees.”
+- Hero headline and subhead (static), matching the pre-ladder homepage
+- Static parent preview with **Print this week**
 - Patchwork comparison (static). Generic words only — do not name third-party brands.
 - Four feature cards, who it’s for, and a short checklist of what the product does today
 - Links/CTAs only — no live product entities
 
 ## Contents
 
-- Brand / wordmark above the headline (not the pun tagline)
-- Headline: This week’s materials. Printed. Without another portal.
-- Subhead: course hub for homeschool co-ops and micro-schools; plan, enroll, print this week
-- Primary CTA: **Start free** → [SIGNUP](./SIGNUP.md)
-- Secondary CTA: **See how This week works** → `#this-week` on this page
+- Brand / wordmark above the headline
+- Headline: Courses, done wright.
+- Subhead: one place for homeschool co-ops and micro-schools to plan courses, share materials with students, and print what you need — without the clunky complexity of typical school software
+- Primary CTA: **Sign up** → [SIGNUP](./SIGNUP.md)
+- Secondary CTA: **See how it works** → [ABOUT](./ABOUT.md)
+- `#this-week` on this page still scrolls to the feature section (the hash is not the hero button)
 - Problem strip: eyebrow “How most co-ops run today”; left **The patchwork**; right **With Course Wright**
 - Four cards: Print this week; Parents see what students see; One course hub; Built the way co-ops actually work
 - Who it’s for (for directors and teachers; not for districts, course stores, or billing-and-SMS-only teams)
 - Checklist: print before the roster is finished; parent invite and claim; page quizzes vs course quizzes; gradebook, progress, and report cards; installable on a phone
 - Closing: **Start with one course and a handful of families.** Primary **Create your account** → [SIGNUP](./SIGNUP.md). Secondary **Talk to us about a design-partner seat** → [CONTACT](./CONTACT.md)
-- Do not use: “Courses, done wright.”; “If something isn’t intuitive, tell us — we’ll fix it.”; vague Ease of use / Built for small organizations cards
 
 ## Primary actions
 
-- Start free / Create your account
-- See how This week works
+- Sign up / Create your account
+- See how it works
 - Talk to us about a design-partner seat
 - Navigate to About / Pricing / Help
 

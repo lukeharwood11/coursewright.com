@@ -30,14 +30,6 @@ export function ParentPreviewCard() {
         </span>
       </div>
 
-      <div className="mt-3 border-l-4 border-[var(--amber)] bg-[var(--amber-tint)] py-2 pr-2.5 pl-2.5">
-        <p className="inline-flex items-center gap-1.5 text-[12px] font-extrabold text-[var(--amber-deep)]">
-          <ExclamationTriangleIcon className="h-4 w-4" />
-          Important now
-        </p>
-        <p className="mt-1 text-[14px] text-[var(--ink)]">Bring your nature journal on Friday.</p>
-      </div>
-
       <div className="mt-3">
         <p className="text-[12px] font-bold text-[var(--ink-faint)]">Coming up</p>
         <div className="mt-1.5 border-y border-[var(--line-soft)] py-2">
@@ -54,6 +46,14 @@ export function ParentPreviewCard() {
           </p>
           <p className="text-[12px] font-bold text-[var(--amber-deep)]">Due Sun, Sep 7</p>
         </div>
+      </div>
+
+      <div className="mt-3 border-l-4 border-[var(--amber)] bg-[var(--amber-tint)] py-2 pr-2.5 pl-2.5">
+        <p className="inline-flex items-center gap-1.5 text-[12px] font-extrabold text-[var(--amber-deep)]">
+          <ExclamationTriangleIcon className="h-4 w-4" />
+          Important now
+        </p>
+        <p className="mt-1 text-[14px] text-[var(--ink)]">Bring your nature journal on Friday.</p>
       </div>
 
       <div className="mt-3">
