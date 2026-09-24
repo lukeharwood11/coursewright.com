@@ -1,15 +1,19 @@
+import { useEffect, useId, useState } from "react";
+import {
+  AcademicCapIcon,
+  UserGroupIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { useSidebarStore } from "@/app/layouts/stores/sidebar";
 import { Button } from "@/ui/Button";
-
-const selectClass = [
-  "min-w-0 flex-1 rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
-  "focus:border-[var(--green)] focus:shadow-[0_0_0_3px_var(--green-tint)]",
-  "disabled:bg-[var(--paper)] disabled:text-[var(--ink-soft)]",
-].join(" ");
+import { Select } from "@/ui/Select";
 
 export type DestinationOption = {
   id: number;
   title: string;
 };
+
+type AssignmentKind = "class" | "course";
 
 export function AssignSelectedBar({
   selectedCount,
@@ -38,93 +42,207 @@ export function AssignSelectedBar({
   onEnrollInCourse: () => void;
   onClear: () => void;
 }) {
+  const collapsed = useSidebarStore((state) => state.collapsed);
+  const [assignmentKind, setAssignmentKind] = useState<AssignmentKind | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (selectedCount === 0) setAssignmentKind(null);
+  }, [selectedCount]);
+
   if (selectedCount === 0) return null;
 
+  function closeDialog() {
+    if (saving) return;
+    if (assignmentKind === "class") onClassIdChange("");
+    if (assignmentKind === "course") onCourseIdChange("");
+    setAssignmentKind(null);
+  }
+
   return (
-    <section className="mt-3 rounded-[10px] border border-[var(--line-soft)] bg-[var(--green-tint)] p-3">
-      <div className="grid gap-3 xl:grid-cols-[auto_minmax(15rem,1fr)_minmax(15rem,1fr)] xl:items-end">
-        <div className="flex min-h-10 items-center justify-between gap-4 xl:min-w-40">
-          <p className="text-[14px] font-extrabold text-[var(--ink)]">
-            {selectedCount === 1
-              ? "1 student selected"
-              : `${selectedCount} students selected`}
+    <>
+      <div
+        className={[
+          "pointer-events-none fixed z-30 flex",
+          "inset-x-0 bottom-0 justify-stretch pb-[env(safe-area-inset-bottom)]",
+          "md:bottom-4 md:justify-center md:pb-0 md:pr-4",
+          collapsed ? "md:left-[4.25rem] md:pl-20" : "md:left-[16.5rem] md:pl-20",
+        ].join(" ")}
+      >
+        <section className="pointer-events-auto w-full border-t border-[var(--line)] bg-[var(--surface)] px-3 py-2 shadow-[0_-8px_24px_rgba(28,25,23,0.08)] md:w-auto md:max-w-full md:rounded-[12px] md:border md:shadow-[var(--shadow)]">
+          <div className="flex items-center gap-2">
+            <p className="mr-auto shrink-0 text-[14px] font-extrabold text-[var(--ink)]">
+              {selectedCount === 1
+                ? "1 student selected"
+                : `${selectedCount} students selected`}
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              className="max-sm:shrink-0 max-sm:!px-2.5 max-sm:!py-2"
+              disabled={saving}
+              aria-label="Add to class"
+              onClick={() => setAssignmentKind("class")}
+            >
+              <UserGroupIcon className="h-5 w-5" aria-hidden />
+              <span className="max-sm:sr-only">Add to class</span>
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className="max-sm:shrink-0 max-sm:!px-2.5 max-sm:!py-2"
+              disabled={saving}
+              aria-label="Enroll in course"
+              onClick={() => setAssignmentKind("course")}
+            >
+              <AcademicCapIcon className="h-5 w-5" aria-hidden />
+              <span className="max-sm:sr-only">Enroll in course</span>
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className="max-sm:shrink-0 max-sm:!px-2.5 max-sm:!py-2"
+              disabled={saving}
+              aria-label="Clear selection"
+              onClick={onClear}
+            >
+              <XMarkIcon className="h-5 w-5" aria-hidden />
+              <span className="max-sm:sr-only">Clear</span>
+            </Button>
+          </div>
+        </section>
+      </div>
+
+      <AssignDestinationDialog
+        kind={assignmentKind}
+        selectedCount={selectedCount}
+        options={assignmentKind === "class" ? classes : courses}
+        value={assignmentKind === "class" ? classId : courseId}
+        saving={saving}
+        error={error}
+        onChange={
+          assignmentKind === "class" ? onClassIdChange : onCourseIdChange
+        }
+        onConfirm={
+          assignmentKind === "class" ? onAddToClass : onEnrollInCourse
+        }
+        onClose={closeDialog}
+      />
+    </>
+  );
+}
+
+function AssignDestinationDialog({
+  kind,
+  selectedCount,
+  options,
+  value,
+  saving,
+  error,
+  onChange,
+  onConfirm,
+  onClose,
+}: {
+  kind: AssignmentKind | null;
+  selectedCount: number;
+  options: DestinationOption[];
+  value: string;
+  saving: boolean;
+  error: string | null;
+  onChange: (value: string) => void;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  const titleId = useId();
+
+  useEffect(() => {
+    if (!kind) return;
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [kind, onClose]);
+
+  if (!kind) return null;
+
+  const isClass = kind === "class";
+  const noun = selectedCount === 1 ? "student" : "students";
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+      <button
+        type="button"
+        className="absolute inset-0 bg-[var(--ink)]/30"
+        aria-label="Dismiss"
+        disabled={saving}
+        onClick={onClose}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="relative w-full max-w-md rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow)]"
+      >
+        <h2 id={titleId} className="text-[15.5px] font-extrabold text-[var(--ink)]">
+          {isClass ? "Add to class" : "Enroll in course"}
+        </h2>
+        <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
+          {selectedCount} {noun} selected. Choose{" "}
+          {isClass ? "the class to add them to." : "the course to enroll them in."}
+        </p>
+
+        <label className="mt-4 flex flex-col gap-1">
+          <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+            {isClass ? "Class" : "Course"}
+          </span>
+          <Select
+            wrapperClassName="w-full"
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            disabled={saving || options.length === 0}
+            autoFocus
+          >
+            <option value="">
+              {options.length === 0
+                ? `No ${isClass ? "classes" : "courses"} yet`
+                : `Choose a ${isClass ? "class" : "course"}`}
+            </option>
+            {options.map((item) => (
+              <option key={item.id} value={String(item.id)}>
+                {item.title}
+              </option>
+            ))}
+          </Select>
+        </label>
+
+        {error ? (
+          <p className="mt-2 text-[13px] text-[var(--amber-deep)]" role="alert">
+            {error}
           </p>
-          <button
+        ) : null}
+
+        <div className="mt-5 flex justify-end gap-2">
+          <Button
             type="button"
-            className="text-[13px] font-bold text-[var(--green-deep)] hover:text-[var(--green)] disabled:opacity-60"
+            variant="secondary"
             disabled={saving}
-            onClick={onClear}
+            onClick={onClose}
           >
-            Clear
-          </button>
-        </div>
-
-        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end">
-          <label className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-              Add to class
-            </span>
-            <select
-              className={selectClass}
-              value={classId}
-              onChange={(event) => onClassIdChange(event.target.value)}
-              disabled={saving || classes.length === 0}
-            >
-              <option value="">
-                {classes.length === 0 ? "No classes yet" : "Choose a class"}
-              </option>
-              {classes.map((item) => (
-                <option key={item.id} value={String(item.id)}>
-                  {item.title}
-                </option>
-              ))}
-            </select>
-          </label>
-          <Button
-            type="button"
-            disabled={saving || !classId}
-            onClick={onAddToClass}
-          >
-            {saving ? "Saving…" : "Add"}
+            Cancel
           </Button>
-        </div>
-
-        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end">
-          <label className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="text-[13px] font-bold text-[var(--ink-soft)]">
-              Enroll in course
-            </span>
-            <select
-              className={selectClass}
-              value={courseId}
-              onChange={(event) => onCourseIdChange(event.target.value)}
-              disabled={saving || courses.length === 0}
-            >
-              <option value="">
-                {courses.length === 0 ? "No courses yet" : "Choose a course"}
-              </option>
-              {courses.map((item) => (
-                <option key={item.id} value={String(item.id)}>
-                  {item.title}
-                </option>
-              ))}
-            </select>
-          </label>
           <Button
             type="button"
-            disabled={saving || !courseId}
-            onClick={onEnrollInCourse}
+            disabled={saving || !value}
+            onClick={onConfirm}
           >
-            {saving ? "Saving…" : "Enroll"}
+            {saving ? "Saving…" : isClass ? "Add to class" : "Enroll"}
           </Button>
         </div>
       </div>
-
-      {error ? (
-        <p className="mt-2 text-[13px] text-[var(--amber-deep)]" role="alert">
-          {error}
-        </p>
-      ) : null}
-    </section>
+    </div>
   );
 }
