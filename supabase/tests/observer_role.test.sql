@@ -1,6 +1,6 @@
 -- Observer browses like staff and cannot write. Writers stay writers.
 begin;
-select plan(16);
+select plan(18);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -104,11 +104,16 @@ select results_eq(
   'observer can select an unpublished course'
 );
 
-select throws_ok(
-  $$update courses set title = 'Observer Hack' where title = 'Observer Draft'$$,
-  '42501',
-  null,
-  'observer cannot update a course'
+select results_eq(
+  $$with updated as (
+      update courses
+         set title = 'Observer Hack'
+       where title = 'Observer Draft'
+      returning id
+    )
+    select count(*)::int from updated$$,
+  array[0],
+  'observer update is a silent deny'
 );
 
 select throws_ok(
@@ -125,6 +130,12 @@ select throws_ok(
   '42501',
   null,
   'observer cannot delete a course'
+);
+
+select results_eq(
+  $$select title from courses where title = 'Observer Draft'$$,
+  array['Observer Draft'::text],
+  'observer writes leave the unpublished course in place'
 );
 
 select throws_ok(

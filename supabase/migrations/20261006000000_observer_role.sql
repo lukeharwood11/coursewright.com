@@ -162,10 +162,6 @@ begin
   def := replace(def, 'is_org_staff(', 'can_browse_as_staff(');
   execute def;
 
-  def := pg_get_functiondef('private.org_resource_mode_allows_read(bigint, text)'::regprocedure);
-  def := replace(def, 'is_org_staff(', 'can_browse_as_staff(');
-  execute def;
-
   def := pg_get_functiondef('private.memberships_preserve_additive_roles()'::regprocedure);
   def := replace(
     def,
