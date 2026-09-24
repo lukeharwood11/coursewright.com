@@ -41,7 +41,7 @@ const marketingPages: PublicSeoPage[] = [
     path: "/pricing",
     title: "Pricing",
     description:
-      "Course Wright is free for now. Create an organization and invite your co-op or micro-school — pricing may change later.",
+      "Family is free. Family Pro is $5 a month or $49 a year. Microschool is $79 a month, or $695 a month on the yearly tab. School is $99 a month or $990 a year. Billing isn’t live yet. Contact us.",
     changefreq: "monthly",
     priority: 0.9,
   },

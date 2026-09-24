@@ -1,9 +1,9 @@
-import type { ComponentType, SVGProps } from "react";
+import { useEffect, type ComponentType, type SVGProps } from "react";
 import {
-  BuildingOffice2Icon,
-  FolderIcon,
+  BookOpenIcon,
   PrinterIcon,
-  SparklesIcon,
+  UserGroupIcon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
 import { IconWell } from "./IconWell";
 
@@ -11,35 +11,42 @@ type OutlineIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 const props: { title: string; body: string; icon: OutlineIcon }[] = [
   {
-    title: "Ease of use",
-    body: "If something isn’t intuitive, tell us — we’ll fix it.",
-    icon: SparklesIcon,
-  },
-  {
-    title: "Built for small organizations",
-    body: "Made for co-ops and micro-schools — and shaped with the people who run them.",
-    icon: BuildingOffice2Icon,
-  },
-  {
-    title: "One place for materials",
-    body: "Materials, files, quizzes, and communication — all in one application.",
-    icon: FolderIcon,
-  },
-  {
-    title: "Paper when you need it",
-    body: "Print a material, a unit, or this week in one tap. Sharing isn’t an afterthought.",
+    title: "Print this week",
+    body: "One tap for this week’s packet — or a single material, unit, or quiz. Paper is a first-class output, not a buried export.",
     icon: PrinterIcon,
+  },
+  {
+    title: "Parents see what students see",
+    body: "Linked parents land on the same This week home. No second portal to learn, no app training night before Monday.",
+    icon: UsersIcon,
+  },
+  {
+    title: "One course hub",
+    body: "Units, pages, files, and quizzes in one org. Turn on announcements, discussions, calendar, or an org resource library when you need them — turn them off when you don’t.",
+    icon: BookOpenIcon,
+  },
+  {
+    title: "Built the way co-ops actually work",
+    body: "Access follows course enrollment and parent–student links. Classes stay simple roster tools. Roles match volunteer orgs: owner, admin, instructor, parent, student.",
+    icon: UserGroupIcon,
   },
 ];
 
 export function HomeValueProps() {
+  useEffect(() => {
+    // The section is not in the static HTML, and the app resets window
+    // scroll on first paint. A direct visit to /#this-week needs this.
+    if (window.location.hash !== "#this-week") return;
+    document.getElementById("this-week")?.scrollIntoView({ block: "start" });
+  }, []);
+
   return (
-    <section className="mx-auto max-w-5xl px-5 pb-12">
+    <section id="this-week" className="scroll-mt-6 mx-auto max-w-5xl px-5 py-12">
       <h2
         className="text-[22px] font-semibold text-[var(--ink)]"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        Why Course Wright?
+        What it does
       </h2>
       <ul className="mt-6 grid gap-4 sm:grid-cols-2">
         {props.map((item) => {

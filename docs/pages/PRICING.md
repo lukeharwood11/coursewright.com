@@ -5,51 +5,55 @@
 
 ## Audience
 
-Org decision-makers (admins) checking cost before signup.
+Org decision-makers checking cost before they write in.
 
 ## Purpose
 
-Say that Course Wright is **Free (for now)**. Pricing may change later; today we’re polishing with a handful of small organizations. No plan cards or dollar amounts.
+Show the public plan ladder so people can plan. Billing is **not** live. This page does not check out.
 
 
 ## Behavior
 
-- Public marketing page.
-- Does not process payment in P0 (in-app billing is P1).
-- CTA to signup; partnership interest → email.
-- No live subscription data.
+- Public marketing page. No subscription data. No payment form.
+- **Monthly | Yearly** segmented control. **Yearly is the default.**
+- Yearly shows savings versus monthly × 12 when both amounts are plain dollar totals. Family stays **Free** on both. Microschool’s yearly label is **$695/mo** (no savings line).
+- Every plan action is **Contact us** (`mailto:hi@coursewright.com`) at the bottom of the card. Do not add Buy, Checkout, or Stripe.
+- Footer states that the prices are for planning and billing is not live yet. No church-plan line.
 
 ## Data shown
 
-- **Free (for now)** — no plans, packaging options, or prices
-- Note that pricing may change in the future
-- Working with a handful of small organizations to polish the product
-- CTA to signup / reach out to partner
-- Do not invent dollar amounts
+Display-only ladder (four cards).
+
+| Plan | Monthly | Yearly | Limits called out |
+|------|---------|--------|-------------------|
+| **Family** | Free | Free | Up to 6 student profiles, up to 2 collaborators, 2 GB storage |
+| **Family Pro** | $5 | $49 (vs $60 — save $11) | Up to 12 student profiles, up to 3 collaborators, 10 GB storage |
+| **Microschool** | $79 | **$695/mo** | Up to 60 student profiles, multiple staff, 50 GB. Highlights: full roles, announcements and discussions, Org Grading and report cards, branding |
+| **School** | $99 | $990 (vs $1,188 — save $198, about 2 months) | Up to 200 student profiles, 200 GB, priority support and early access. Includes the Microschool plan |
+
+Amounts live in `src/marketing/model/pricingPlans.ts`. Do not invent extra tiers or prices. Family Pro was not in git before this ladder; those figures are the previously specified Family Pro row ($5/mo · $49/yr, 12 profiles, 3 seats, 10 GB).
 
 ## Contents
 
-- Heading: Free (for now)
-- Short explanation: pricing may change; currently polishing with a handful of small orgs
-- Interested in partnering? Reach out
-- CTA → [SIGNUP](./SIGNUP.md)
-- Link to [ABOUT](./ABOUT.md), [HOME](./HOME.md)
-- Partnership interest → email `hi@coursewright.com` (see [CONTACT](./CONTACT.md))
-- In-app billing UI is **P1**; this page does **not** show per-teacher / per-course options
+- Heading: Family, Microschool, and School
+- Monthly / Yearly control (yearly selected on load)
+- Four plan cards (Family, Family Pro, Microschool, School), each ending in **Contact us**
+- Honest note: prices are for planning; billing isn’t live; no self-serve checkout; contact for a design-partner seat or early access
+- Links back to [HOME](./HOME.md) and [CONTACT](./CONTACT.md)
+- In-app billing stays **P1** (Stripe stub). This page does not start a subscription
 
 ## Primary actions
 
-- Sign up
-- Email `hi@coursewright.com` for partnership interest
+- Switch Monthly / Yearly
+- Contact us (`hi@coursewright.com`)
 
 ## Links to
 
-- [SIGNUP](./SIGNUP.md) — CTA
-- [ABOUT](./ABOUT.md) — about
-- [HOME](./HOME.md) — home
-- [CONTACT](./CONTACT.md) — email directory (mailto `hi@`)
+- [HOME](./HOME.md) — back to home
+- [CONTACT](./CONTACT.md) — contact page
+- mailto `hi@coursewright.com` — plan CTA (see [CONTACT](./CONTACT.md))
 - via marketing footer: [HOME](./HOME.md), [ABOUT](./ABOUT.md), [PRICING](./PRICING.md), [DOCS](./DOCS.md), [LOGIN](./LOGIN.md), [SIGNUP](./SIGNUP.md), [CONTACT](./CONTACT.md), [PRIVACY](./PRIVACY.md), [TERMS](./TERMS.md), [COOKIES](./COOKIES.md)
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) (P1 billing), [BRANDING.md](../BRANDING.md). Do not invent specific dollar amounts or plan cards.
+[FEATURES.md](../FEATURES.md) (P1 billing). Public list prices are for planning only until in-app billing ships.
