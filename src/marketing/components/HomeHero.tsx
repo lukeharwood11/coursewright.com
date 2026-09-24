@@ -9,25 +9,31 @@ export function HomeHero() {
       <div>
         <Wordmark size="hero" />
         <h1
-          className="mt-3 text-[26px] font-semibold leading-snug text-[var(--green)] sm:text-[30px]"
+          className="mt-3 text-[26px] font-semibold leading-snug text-[var(--green)] sm:text-[32px]"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          Courses, done wright.
+          This week’s materials. Printed. Without another portal.
         </h1>
-        <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[var(--ink-soft)]">
-          One place for homeschool co-ops and micro-schools to plan courses, share
-          materials with students, and print what you need — without the clunky
-          complexity of typical school software.
+        <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-[var(--ink-soft)]">
+          Course Wright is the course hub for homeschool co-ops and micro-schools.
+          Plan the course, enroll families, and print what parents need this week —
+          built for volunteer-run groups and tech-averse parents, not district
+          software.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <ButtonLink to="/signup">Sign up</ButtonLink>
-          <ButtonLink to="/about" variant="secondary">
-            See how it works
+          <ButtonLink to="/signup">Start free</ButtonLink>
+          <ButtonLink to="/#this-week" variant="secondary">
+            See how This week works
             <ArrowRightIcon className="h-5 w-5" aria-hidden />
           </ButtonLink>
         </div>
       </div>
-      <ParentPreviewCard />
+      <figure>
+        <ParentPreviewCard />
+        <figcaption className="mt-2 text-center text-[12.5px] text-[var(--ink-faint)]">
+          What a linked parent sees.
+        </figcaption>
+      </figure>
     </section>
   );
 }

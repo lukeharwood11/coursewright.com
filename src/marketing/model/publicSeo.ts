@@ -2,11 +2,11 @@ import { helpDocPath, helpDocTopics } from "./helpDocs.ts";
 
 /** Default meta description for the site and home (BRANDING elevator pitch, plain). */
 export const SITE_DESCRIPTION =
-  "Course Wright gives homeschool co-ops and micro-schools one place to plan courses, share materials with students, and print what you need — without the clunky complexity of typical school software.";
+  "Course Wright is the course hub for homeschool co-ops and micro-schools. Plan the course, enroll families, and print what parents need this week — built for volunteer-run groups and tech-averse parents, not district software.";
 
 export const SITE_NAME = "Course Wright";
 
-export const SITE_TAGLINE = "Courses, done wright.";
+export const SITE_TAGLINE = "This week’s materials. Printed. Without another portal.";
 
 /** Social / PWA share image (served from public/). */
 export const SITE_OG_IMAGE_PATH = "/logo-course-wright.png";
@@ -41,7 +41,7 @@ const marketingPages: PublicSeoPage[] = [
     path: "/pricing",
     title: "Pricing",
     description:
-      "Course Wright is free for now. Create an organization and invite your co-op or micro-school — pricing may change later.",
+      "Family is free. Co-op is $79 a month or $790 a year. School is $99 a month or $990 a year. Prices are for planning — billing isn’t live yet. Contact us.",
     changefreq: "monthly",
     priority: 0.9,
   },

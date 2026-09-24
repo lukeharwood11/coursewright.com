@@ -3,7 +3,7 @@ export { HomePage } from "./pages/HomePage";
 export { AboutPage } from "./pages/AboutPage";
 export { ContactPage } from "./pages/ContactPage";
 export { CookiesPage } from "./pages/CookiesPage";
-export { PricingPage } from "./pages/PricingPage";
+export { PricingPage } from "./pricing/PricingPage";
 export { PrivacyPage } from "./pages/PrivacyPage";
 export { TermsPage } from "./pages/TermsPage";
 export { ConstructionPage } from "./pages/ConstructionPage";

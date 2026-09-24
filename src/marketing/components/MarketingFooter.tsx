@@ -12,7 +12,9 @@ export function MarketingFooter() {
       <div className="mx-auto grid max-w-5xl gap-8 px-5 py-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <Wordmark to="/" size="login" />
-          <p className="mt-1 text-[12.5px] text-[var(--ink-faint)]">Courses, done wright.</p>
+          <p className="mt-1 text-[12.5px] text-[var(--ink-faint)]">
+            The course hub for homeschool co-ops and micro-schools.
+          </p>
         </div>
         {footerColumns.map((column) => (
           <nav key={column.heading} className="flex flex-col gap-2" aria-label={column.heading}>
