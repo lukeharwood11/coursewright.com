@@ -2,7 +2,7 @@ import { helpDocPath, helpDocTopics } from "./helpDocs.ts";
 
 /** Default meta description for the site and home (BRANDING elevator pitch, plain). */
 export const SITE_DESCRIPTION =
-  "Course Wright gives homeschool co-ops and micro-schools one place to plan courses, share materials with students, and print what you need — without the clunky complexity of typical school software.";
+  "Course Wright helps families, co-ops, and small schools plan courses, organize materials, and print the whole week in one tap.";
 
 export const SITE_NAME = "Course Wright";
 
@@ -33,7 +33,7 @@ const marketingPages: PublicSeoPage[] = [
     path: "/about",
     title: "About",
     description:
-      "Who Course Wright is for — homeschool co-ops and micro-schools that need one simple hub for courses, materials, and students.",
+      "Who Course Wright is for — families, co-ops, and small schools that need one simple hub for courses and materials.",
     changefreq: "monthly",
     priority: 0.9,
   },
@@ -41,7 +41,7 @@ const marketingPages: PublicSeoPage[] = [
     path: "/pricing",
     title: "Pricing",
     description:
-      "Family is free. Family Pro is $5 a month or $49 a year. Microschool is $79 a month, or $695 a month on the yearly tab. School is $99 a month or $990 a year. Billing isn’t live yet. Contact us.",
+      "Compare Course Wright plans: Family is free, Family Pro is $6 a month or $60 a year, Microschool is $72 a month or $720 a year, and School is $102 a month or $1,020 a year.",
     changefreq: "monthly",
     priority: 0.9,
   },
@@ -80,7 +80,7 @@ const marketingPages: PublicSeoPage[] = [
     path: "/signup",
     title: "Sign up",
     description:
-      "Create a Course Wright account and start an organization for your co-op or micro-school.",
+      "Create a Course Wright account and start a workspace for your family, co-op, or small school.",
     changefreq: "monthly",
     priority: 0.8,
   },

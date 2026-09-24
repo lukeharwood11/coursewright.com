@@ -5,7 +5,7 @@ import { Mark } from "@/ui/Wordmark";
 export function ParentPreviewCard() {
   return (
     <div
-      className="w-full rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-3"
+      className="min-w-0 w-full overflow-hidden rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-3"
       style={{ boxShadow: "var(--shadow)" }}
       aria-hidden
     >
@@ -19,12 +19,12 @@ export function ParentPreviewCard() {
       >
         Hi, Maya
       </h2>
-      <div className="mt-1 flex items-center justify-between gap-3">
-        <p className="inline-flex items-center gap-1.5 text-[12.5px] text-[var(--ink-faint)]">
+      <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+        <p className="inline-flex min-w-0 items-center gap-1.5 text-[12.5px] text-[var(--ink-faint)]">
           <CalendarDaysIcon className="h-4 w-4" />
           Week of Sep 1 – Sep 7
         </p>
-        <span className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-2.5 py-1 text-[12px] font-bold text-[var(--ink)]">
+        <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-2.5 py-1 text-[12px] font-bold text-[var(--ink)]">
           <PrinterIcon className="h-4 w-4" />
           Print this week
         </span>
@@ -59,7 +59,7 @@ export function ParentPreviewCard() {
       <div className="mt-3">
         <p className="text-[12px] font-bold text-[var(--ink-faint)]">This week</p>
         <p className="mt-1.5 text-[13.5px] font-extrabold text-[var(--ink)]">Science</p>
-        <div className="mt-1.5 flex items-start justify-between gap-2.5 border-y border-[var(--line-soft)] py-2">
+        <div className="mt-1.5 flex min-w-0 items-start justify-between gap-2.5 border-y border-[var(--line-soft)] py-2">
           <div className="flex min-w-0 items-start gap-2">
             <DocumentTextIcon className="mt-0.5 h-5 w-5 shrink-0 text-[var(--green)]" />
             <div>
@@ -70,7 +70,7 @@ export function ParentPreviewCard() {
               </p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--line)] px-2.5 py-1 text-[12px] font-bold text-[var(--ink)]">
+          <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-[6px] border border-[var(--line)] px-2.5 py-1 text-[12px] font-bold text-[var(--ink)]">
             <PrinterIcon className="h-4 w-4" />
             Print
           </span>

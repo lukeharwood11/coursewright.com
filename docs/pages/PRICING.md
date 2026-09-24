@@ -16,9 +16,8 @@ Show the public plan ladder so people can plan. Billing is **not** live. This pa
 
 - Public marketing page. No subscription data. No payment form.
 - **Monthly | Yearly** segmented control. **Yearly is the default.**
-- Yearly shows savings versus monthly × 12 when both amounts are plain dollar totals. Family stays **Free** on both. Microschool’s yearly label is **$695/mo** (no savings line).
-- Every plan action is **Contact us** (`mailto:hi@coursewright.com`) at the bottom of the card. Do not add Buy, Checkout, or Stripe.
-- Footer states that the prices are for planning and billing is not live yet. No church-plan line.
+- Yearly leads with a lower whole-dollar effective monthly rate and shows the 10× annual charge below it, then savings versus monthly × 12. Family stays **Free** on both.
+- Every card has **Details**, which scrolls to that plan’s full explanation below the comparison grid, plus **Contact us** (`mailto:hi@coursewright.com`). Do not add Buy, Checkout, or Stripe.
 
 ## Data shown
 
@@ -26,25 +25,33 @@ Display-only ladder (four cards).
 
 | Plan | Monthly | Yearly | Limits called out |
 |------|---------|--------|-------------------|
-| **Family** | Free | Free | Up to 6 student profiles, up to 2 collaborators, 2 GB storage |
-| **Family Pro** | $5 | $49 (vs $60 — save $11) | Up to 12 student profiles, up to 3 collaborators, 10 GB storage |
-| **Microschool** | $79 | **$695/mo** | Up to 60 student profiles, multiple staff, 50 GB. Highlights: full roles, announcements and discussions, Org Grading and report cards, branding |
-| **School** | $99 | $990 (vs $1,188 — save $198, about 2 months) | Up to 200 student profiles, 200 GB, priority support and early access. Includes the Microschool plan |
+| **Family** | Free | Free | Up to 2 student profiles, 1 collaborator, 1 GB storage |
+| **Family Pro** | $6 | $5/mo ($60 billed yearly; vs $72 — save $12, 2 months) | Up to 12 student profiles, up to 3 collaborators, 10 GB storage |
+| **Microschool** | $72 | $60/mo ($720 billed yearly; vs $864 — save $144, 2 months) | Up to 60 student profiles, multiple staff, 50 GB. Highlights: full roles, announcements and discussions, Org Grading and report cards, branding |
+| **School** | $102 | $85/mo ($1,020 billed yearly; vs $1,224 — save $204, 2 months) | Up to 200 student profiles, 200 GB, priority support and early access. Includes the Microschool plan |
 
-Amounts live in `src/marketing/model/pricingPlans.ts`. Do not invent extra tiers or prices. Family Pro was not in git before this ladder; those figures are the previously specified Family Pro row ($5/mo · $49/yr, 12 profiles, 3 seats, 10 GB).
+Amounts live in `src/marketing/model/pricingPlans.ts`. Paid yearly prices are 10× monthly prices. Do not invent extra tiers or prices.
+
+Detailed feature explanations:
+
+- **Family:** course builder; weekly planning; signed-in sharing and print; create a course from a previous course
+- **Family Pro:** everything in Family, with more student profiles, collaborators, and storage
+- **Microschool:** everything in Family Pro; owner/admin/instructor/parent/student roles; announcements and discussions; organization grading, gradebooks, progress, and report cards; organization icon and accent color
+- **School:** everything in Microschool; larger capacity; priority support; early access
 
 ## Contents
 
 - Heading: Family, Microschool, and School
 - Monthly / Yearly control (yearly selected on load)
-- Four plan cards (Family, Family Pro, Microschool, School), each ending in **Contact us**
-- Honest note: prices are for planning; billing isn’t live; no self-serve checkout; contact for a design-partner seat or early access
+- Four plan cards (Family, Family Pro, Microschool, School), each ending in **Details** and **Contact us**
+- Full, visible plan-detail sections below the cards; each explains the audience, limits, inherited tier, and included features
 - Links back to [HOME](./HOME.md) and [CONTACT](./CONTACT.md)
 - In-app billing stays **P1** (Stripe stub). This page does not start a subscription
 
 ## Primary actions
 
 - Switch Monthly / Yearly
+- Open plan details
 - Contact us (`hi@coursewright.com`)
 
 ## Links to

@@ -5,6 +5,7 @@ import {
   BookOpenIcon,
   BuildingOfficeIcon,
   CalendarDaysIcon,
+  HomeIcon,
   PrinterIcon,
   Square2StackIcon,
   UserGroupIcon,
@@ -16,6 +17,11 @@ import { IconWell } from "../components/IconWell";
 type OutlineIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 const audience: { title: string; body: string; icon: OutlineIcon }[] = [
+  {
+    title: "Families",
+    body: "Plan courses, keep materials together, and print what you need. Start without a roster or school-sized setup.",
+    icon: HomeIcon,
+  },
   {
     title: "Admins",
     body: "Run the organization: people, roles, and the shape of your program — without district-scale software.",
@@ -48,15 +54,15 @@ export function AboutPage() {
         className="mt-1 text-[28px] font-semibold leading-snug text-[var(--ink)]"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        For homeschool co-ops and micro-schools
+        For families, co-ops, and small schools
       </h1>
       <p className="mt-4 text-[15.5px] leading-relaxed text-[var(--ink-soft)]">
-        Course Wright gives you one place to plan courses, share materials with
-        students, and run your program. It is meant to feel obvious — especially
-        for anyone opening a link on a phone.
+        Course Wright gives families and small learning organizations one place to
+        plan courses, organize materials, and share or print the week. It is meant
+        to feel obvious — especially for anyone opening a link on a phone.
       </p>
 
-      <ul className="mt-10 grid gap-4 sm:grid-cols-3">
+      <ul className="mt-10 grid gap-4 sm:grid-cols-2">
         {audience.map((item) => {
           const Icon = item.icon;
           return (
@@ -104,9 +110,9 @@ export function AboutPage() {
         </h2>
         <p className="mt-3 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
           Course work often lives in a mix of shared folders, group chats, and
-          email — or in school software that feels like too much for a co-op.
-          Course Wright is built around the jobs you actually need done, and
-          does them simply.
+          email — or in school software that feels like too much for a family or
+          small organization. Course Wright is built around the jobs you actually
+          need done, and does them simply.
         </p>
       </section>
 

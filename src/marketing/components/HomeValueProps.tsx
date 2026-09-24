@@ -11,23 +11,23 @@ type OutlineIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 const props: { title: string; body: string; icon: OutlineIcon }[] = [
   {
-    title: "Print this week",
-    body: "One tap for this week’s packet — or a single material, unit, or quiz. Paper is a first-class output, not a buried export.",
+    title: "Print the whole week in one tap",
+    body: "Print a material, a unit, a quiz, or the full week without hunting through downloads and folders.",
     icon: PrinterIcon,
   },
   {
-    title: "Parents see what students see",
-    body: "Linked parents land on the same This week home. No second portal to learn, no app training night before Monday.",
+    title: "Keep every family on the same page",
+    body: "Parents and students open the same clear week, with what is assigned, what is due, and what matters now.",
     icon: UsersIcon,
   },
   {
-    title: "One course hub",
-    body: "Units, pages, files, and quizzes in one org. Turn on announcements, discussions, calendar, or an org resource library when you need them — turn them off when you don’t.",
+    title: "Everything for the course, together",
+    body: "Keep plans, pages, files, quizzes, announcements, and the calendar beside the course they belong to.",
     icon: BookOpenIcon,
   },
   {
-    title: "Built the way co-ops actually work",
-    body: "Access follows course enrollment and parent–student links. Classes stay simple roster tools. Roles match volunteer orgs: owner, admin, instructor, parent, student.",
+    title: "Built for small, flexible programs",
+    body: "Start with one course and add people, classes, and school-wide tools as your family or organization grows.",
     icon: UserGroupIcon,
   },
 ];
@@ -41,26 +41,28 @@ export function HomeValueProps() {
   }, []);
 
   return (
-    <section id="this-week" className="scroll-mt-6 mx-auto max-w-5xl px-5 py-12">
+    <section id="this-week" className="scroll-mt-6 mx-auto max-w-5xl px-5 py-14">
+      <p className="text-[13px] font-bold text-[var(--ink-faint)]">Why Course Wright</p>
       <h2
-        className="text-[22px] font-semibold text-[var(--ink)]"
+        className="mt-1 text-[26px] font-semibold text-[var(--ink)]"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        What it does
+        The school week, made simpler.
       </h2>
-      <ul className="mt-6 grid gap-4 sm:grid-cols-2">
+      <ul className="mt-8 grid gap-x-10 gap-y-8 sm:grid-cols-2">
         {props.map((item) => {
           const Icon = item.icon;
           return (
-            <li
-              key={item.title}
-              className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
-            >
+            <li key={item.title} className="flex items-start gap-4">
               <IconWell>
                 <Icon className="h-5 w-5" aria-hidden />
               </IconWell>
-              <h3 className="mt-3 text-[15px] font-extrabold text-[var(--ink)]">{item.title}</h3>
-              <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink-soft)]">{item.body}</p>
+              <div>
+                <h3 className="text-[15.5px] font-extrabold text-[var(--ink)]">{item.title}</h3>
+                <p className="mt-2 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
+                  {item.body}
+                </p>
+              </div>
             </li>
           );
         })}

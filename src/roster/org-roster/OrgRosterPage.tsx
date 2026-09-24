@@ -120,7 +120,7 @@ export function OrgRosterPage() {
       </div>
 
       {tab === "students" ? (
-        <section>
+        <section className={roster.selectedIds.length > 0 ? "pb-24" : undefined}>
           <div className="flex flex-col gap-3 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-3 sm:flex-row sm:items-end">
             <label className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-md">
               <span className="text-[13px] font-bold text-[var(--ink-soft)]">

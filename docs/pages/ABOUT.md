@@ -19,13 +19,13 @@ Explain who Course Wright is for and what problem it solves — without LMS jarg
 
 ## Data shown
 
-- Narrative about co-ops / micro-schools and product jobs (static)
+- Narrative about families, co-ops, small schools, and product jobs (static)
 - Links to home, pricing, signup
 - TBD: full copy
 
 ## Contents
 
-- Audience: homeschool co-ops and micro-schools (admins, instructors, parents)
+- Audience: families managing their own courses and materials, plus co-ops and small schools (admins, instructors, students, and parents)
 - Jobs: plan courses, reuse by copying a course (templates later), share/print materials, run the org with clear roles
 - Contrast with scattered folders, chats, and email, and with heavy classroom software — **do not name specific third-party tools** (that patchwork example is internal inspiration only)
 - Link to [HOME](./HOME.md), [PRICING](./PRICING.md), [SIGNUP](./SIGNUP.md)
