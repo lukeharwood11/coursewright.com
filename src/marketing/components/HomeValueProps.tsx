@@ -1,4 +1,4 @@
-import type { ComponentType, SVGProps } from "react";
+import { useEffect, type ComponentType, type SVGProps } from "react";
 import {
   BookOpenIcon,
   PrinterIcon,
@@ -33,6 +33,13 @@ const props: { title: string; body: string; icon: OutlineIcon }[] = [
 ];
 
 export function HomeValueProps() {
+  useEffect(() => {
+    // The section is not in the static HTML, and the app resets window
+    // scroll on first paint. A direct visit to /#this-week needs this.
+    if (window.location.hash !== "#this-week") return;
+    document.getElementById("this-week")?.scrollIntoView({ block: "start" });
+  }, []);
+
   return (
     <section id="this-week" className="scroll-mt-6 mx-auto max-w-5xl px-5 py-12">
       <h2

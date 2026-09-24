@@ -67,12 +67,18 @@ export function ButtonLink({
   to: string;
   state?: unknown;
 }) {
+  const classes = buttonClassName(variant, fullWidth, className);
+  // Router links cancel the click and set the hash without scrolling.
+  // A same-page fragment needs the browser's own anchor behavior.
+  if (to.startsWith("#")) {
+    return (
+      <a href={to} className={classes}>
+        {children}
+      </a>
+    );
+  }
   return (
-    <Link
-      to={to}
-      state={state}
-      className={buttonClassName(variant, fullWidth, className)}
-    >
+    <Link to={to} state={state} className={classes}>
       {children}
     </Link>
   );

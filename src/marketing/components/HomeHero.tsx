@@ -22,7 +22,7 @@ export function HomeHero() {
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <ButtonLink to="/signup">Start free</ButtonLink>
-          <ButtonLink to="/#this-week" variant="secondary">
+          <ButtonLink to="#this-week" variant="secondary">
             See how This week works
             <ArrowRightIcon className="h-5 w-5" aria-hidden />
           </ButtonLink>
