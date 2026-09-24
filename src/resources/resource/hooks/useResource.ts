@@ -26,7 +26,7 @@ import type { ResourceVisibility } from "@/resources/model/kinds";
 export function useResource() {
   const params = useParams();
   const itemId = params.itemId ? Number(params.itemId) : NaN;
-  const { organization, role } = useOrgShell();
+  const { organization, role, isParent, isStudent } = useOrgShell();
   const user = useAuthedUser();
   const queryClient = useQueryClient();
   const isStaff = role ? isStaffRole(role) : false;
@@ -88,8 +88,8 @@ export function useResource() {
         actor: {
           userId: user.id,
           isStaff,
-          isParent: role === "parent",
-          isStudent: role === "student",
+          isParent: role === "parent" || isParent,
+          isStudent: role === "student" || isStudent,
         },
         visibility: item.visibility,
         archived: Boolean(item.archivedAt),

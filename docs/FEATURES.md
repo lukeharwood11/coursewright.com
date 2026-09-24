@@ -150,8 +150,8 @@ Keep **Course.enrollment → student_profile** as the access gate for parents.
 | **Admins** | Same org management as owners (name, permalink, grade scheme, school days, profile, staff) except **billing**, **branding**, and **customizations** |
 | **More admins** | Owner/any admin adds **emails**; those people **claim** the seat with an account on that email. Course Wright **emails** the invite (Resend `organization-invite`, HN-015) and still offers a copyable `/invite/<token>` link. The claim page names that email and prefills signup/login; pending requests also show after login |
 | **Multiple admins** | Yes — no single-admin limit |
-| **Change staff roles** | Owners and admins can change roles for existing collaborators (including **parents** already in the org). **Owners** may assign instructor, admin, or **owner**. **Admins** may assign instructor or admin. Either may set **parent** when the person has a linked student in the org (no new invite — update `memberships.role` only). Does **not** gate course materials or roster on staff role — families still see content via **enrollment** (and `parent_student_links` where applicable) |
-| **Remove staff** | Owners and admins can **remove** admins and instructors from the org (end that membership) when they have **no** linked student. If they have a linked student, demote to **parent** instead of removing. Does **not** rewrite materials/roster RLS |
+| **Change staff roles** | Owners and admins change the **exclusive** role (instructor, admin, or owner) for collaborators, including **parents** already in the org. Promoting a parent **keeps parent** (`is_parent` / `parent_student_links`) and adds the exclusive role. A newer exclusive role replaces the previous one. **Parent** and **student** are additive and are not chosen as replacements. **Students do not appear** in Collaborators and cannot be promoted there. Does **not** add a second content gate — families still see content via **enrollment** (and `parent_student_links` or `student_profiles.user_id`) |
+| **Remove staff** | Owners and admins can **remove** the exclusive admin or instructor role (not the last owner/admin). If that person is also a parent or student, the membership **stays** as that additive role. Otherwise the membership ends. Suspending or removing a staff membership also drops their `course_instructors` rows. Does **not** rewrite materials/roster RLS |
 | **Last owner/admin** | Cannot remove or demote the **last remaining owner or admin** (org lockout guard) |
 | **Org permalink** | On create, generate a unique **`slug`** used as the org’s permalink URL. Owners and admins may change it later; the UI **must warn** that changing the slug **breaks existing links** (no automatic redirect required in P0) |
 | **Branding** | **Owners only.** Optional small icon and one accent color used as that org’s primary color (buttons, links, sidebar). The color must be dark enough for white text. Admins do not edit it. See P1 **Org white labelling** |
@@ -163,10 +163,10 @@ Students are represented as **`student_profile`** records. A **student account**
 
 | Rule | Detail |
 |------|--------|
-| **Student role** | Membership `role = student` is separate from parent. Claim links that one profile via `user_id` (not `parent_student_links`). One account per profile in an org |
+| **Student role** | Membership `is_student` is additive and can sit on the same row as parent and as one exclusive role (owner, admin, or instructor). Claim links that one profile via `user_id` (not `parent_student_links`). One account per profile in an org. The exclusive role governs privileges |
 | **Created on first enrollment** | When an instructor adds a student to a course and they don't exist in the org yet, a `student_profile` is created automatically |
-| **Same student home** | A student account sees the parent presentation for that one profile (published courses they are enrolled in). Staff can promote a student to staff without a new invite, and demote back to student only when `user_id` is set |
-| **Email changes** | Changing `student_email` invalidates any pending student invite and emails a fresh invite to the new address. If the invite was already claimed, the profile’s `user_id` link and student-role membership are removed instead; a promoted staff membership is kept |
+| **Same student home** | A student account sees the parent presentation for that one profile (published courses they are enrolled in). Students are **not** promoted from Collaborators. A staff invite claim can add an exclusive role and keeps the student flag |
+| **Email changes** | Changing `student_email` invalidates any pending student invite and emails a fresh invite to the new address. If the invite was already claimed, the profile’s `user_id` link is cleared and a student-only membership ends. A parent membership stays and `is_student` clears. An exclusive staff membership is kept and `is_student` clears |
 
 **Fields:**
 
@@ -771,7 +771,7 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | Course visibility published / unpublished | **Decided** | Unpublished = instructors/admins; published = enrolled parents (students later). New courses start unpublished. Parents need active + published |
 | File sharing minimum in P0 | **Decided** | File upload, Material attachments, parent access |
 | Product analytics: PostHog | **Decided** | STACK.md; HUMAN_NEEDED for project keys |
-| Parent ↔ staff role change (no re-invite) | **Decided** | One membership row per user/org. Promote parent → staff by updating `memberships.role`. Demote staff → parent only with a `parent_student_links` row for a student in that org. Remove staff only when they have no linked student. |
+| Parent ↔ staff role change (no re-invite) | **Decided** | One membership row per user/org. Promoting a parent adds an exclusive role and keeps `is_parent`. Removing the exclusive role leaves parent when they are linked to a student, otherwise student when `is_student`, otherwise the membership ends. Students are not changed from Collaborators. |
 | Admin manages accounts in P0 | **Decided** | Invite; **change admin ↔ instructor**; **remove** admins/instructors; cannot remove/demote last owner or admin |
 | Org permalink slug on create | **Decided** | Unique `Organization.slug`; changing it warns that existing links break (no auto-redirect in P0) |
 | Parents invited by email in P0 | **Decided** | ParentInvite, auth |

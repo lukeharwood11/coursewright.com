@@ -266,6 +266,8 @@ Multiple instructors per course (co-teaching). **P0.**
 
 **On create:** membership role `instructor` is auto-inserted as a teacher for the new course (so they can see and manage it). Org **owner / admin** creators are **not** auto-added — they assign teachers (including themselves) from course settings / roster. Owners/admins already SELECT every course via org admin RLS.
 
+**Edit access:** `can_manage_course` / `is_course_instructor` count a `course_instructors` row only when that user has an **active** membership in the course’s org with exclusive role `owner`, `admin`, or `instructor`. Removing or suspending that membership deletes their `course_instructors` rows for the org. A leftover row alone cannot PATCH the course.
+
 ---
 
 ## File sharing (P0 minimum)
@@ -403,14 +405,16 @@ Authenticated users only: admins, instructors, parents. **Not students** (P0/P1)
 
 ### Membership
 
-Org staff and parent or student memberships. One active membership per user per org (single `role`). Owners and admins may **change** roles among `admin` ↔ `instructor` ↔ `parent` ↔ `student` (and owners may assign `owner`) and **remove** admin/instructor memberships that have no linked student and no student account. Setting `role = parent` requires an existing `ParentStudentLink` to a `StudentProfile` in that org. Setting `role = student` requires `StudentProfile.user_id` for that user in the org. **Cannot** remove or demote the last remaining `owner` or `admin`. These writes touch **`memberships` only**. Course materials and roster stay **enrollment-gated** (and `ParentStudentLink` or `StudentProfile.user_id` where applicable) — do **not** add a second staff-role gate on content RLS.
+Org staff and family memberships. One active membership per user per org. `role` is the **governing** role: at most one exclusive role (`owner`, `admin`, or `instructor`). **Parent** and **student** are additive (`is_parent`, `is_student`) and can stack with each other and with that exclusive role. Exclusive role governs privileges; additive flags layer on the existing parent-link and student-profile gates. Owners and admins change the exclusive role from Collaborators (parents can gain one without a new invite; the parent flag stays). **Students are not in that list** and that UI cannot change them to parent, instructor, admin, or owner. Removing an exclusive role leaves additive flags: the row becomes `parent` if `is_parent`, otherwise `student` if `is_student`, otherwise the membership ends. Setting `role = parent` still requires a `ParentStudentLink` in the org. Setting `role = student` still requires `StudentProfile.user_id` in the org. **Cannot** remove or demote the last remaining `owner` or `admin`. These writes touch **`memberships` only** (plus clearing `course_instructors` when staff standing is lost). Course materials and roster stay **enrollment-gated** — do **not** add a second staff-role gate on content RLS.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
 | user_id | uuid | FK → User, **nullable** until invite is claimed |
-| role | text | owner · admin · instructor · parent · student |
+| role | text | Governing role: owner · admin · instructor · parent · student. Exclusive roles are owner, admin, instructor |
+| is_parent | boolean | Additive parent. Kept when `role` becomes an exclusive role |
+| is_student | boolean | Additive student. Kept when `role` becomes an exclusive role |
 | status | text | active · invited · suspended |
 
 ### AdminInvite
@@ -435,7 +439,7 @@ Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor
 
 **Who can invite parents:** owners, admins, and instructors. Parent invites are created from roster / student profile (copy `/invite/<token>`). Same email for another student attaches to the existing pending invite (no second email). The Families directory, when routed, attaches chosen students to one pending invite when linking an email with no account.
 
-**Who can invite students:** owners, admins, and instructors. One profile per invite. Claim sets `student_profiles.user_id` and creates membership `role = student` unless the person is already staff (staff role is kept; `user_id` is still set).
+**Who can invite students:** owners, admins, and instructors. One profile per invite. Claim sets `student_profiles.user_id` and `is_student`. A new membership is `role = student`. If they already have a membership, that governing role stays (including parent or staff) and `is_student` is set. A parent can also claim a student invite.
 
 ---
 
@@ -457,9 +461,9 @@ Org-level student record. Optional **student account**: `user_id` is set when a 
 
 No other student-profile fields in P0 besides optional parent/student emails and grade.
 
-Changing `student_email` invalidates every pending `role = student` invite for the profile. If one was pending and the new email is non-null, create a replacement with a fresh token and send it to the new address. If `user_id` was already set, clear it and end that account’s student-role membership instead; do not create a replacement invite automatically. A staff membership on the same account is kept.
+Changing `student_email` invalidates every pending `role = student` invite for the profile. If one was pending and the new email is non-null, create a replacement with a fresh token and send it to the new address. If `user_id` was already set, clear it and do not create a replacement invite. A student-only membership ends. If that account is also a parent, the membership stays as parent and `is_student` clears. An exclusive staff membership is kept and `is_student` clears.
 
-Staff may **delete** a profile. Class membership, enrollments, parent links, and invites cascade. If `user_id` has a `role = student` membership in the org, that membership ends. A staff role on the same account is kept.
+Staff may **delete** a profile. Class membership, enrollments, parent links, and invites cascade. If `user_id` has a student-only membership in the org, that membership ends. If they are also a parent, the membership stays as parent and `is_student` clears. An exclusive staff role on the same account is kept and `is_student` clears.
 
 ### Family
 
@@ -582,7 +586,7 @@ Leads are notified in **Activity** when someone posts in a discussion for that c
 | status | text | **active** · archived — offering is running vs archived |
 | visibility | text | **unpublished** (owners/admins, and instructors who teach the course) · **published** (those staff, plus enrolled parents; students when that role exists). New courses default unpublished |
 
-**Who can SELECT:** org owner/admin (`is_org_admin` on `organization_id`), or `course_instructors` for this course, or `parent_can_view_course` (linked student enrolled in an **active + published** course), or org staff when the course has no other instructors (covers create `INSERT … RETURNING` / orphans). Same intent as `can_view_course`, but the `courses` SELECT policy must not re-read `courses` by id. Membership **role need not be `parent`** — an instructor who parents a student still sees that published course, read-only in the app. Instructors do **not** see other instructors’ courses they neither teach nor parent in.
+**Who can SELECT:** org owner/admin (`is_org_admin` on `organization_id`), or `course_instructors` for this course **with an active owner/admin/instructor membership**, or `parent_can_view_course` (linked student enrolled in an **active + published** course), or org staff when the course has no other instructors (covers create `INSERT … RETURNING` / orphans). Same intent as `can_view_course`, but the `courses` SELECT policy must not re-read `courses` by id. Membership **role need not be `parent`** — an instructor who parents a student still sees that published course, read-only in the app (`is_parent` stays set). Instructors do **not** see other instructors’ courses they neither teach nor parent in. A removed or suspended membership does not keep course edit access through a leftover `course_instructors` row.
 
 **Grade levels:** `text[]` of scheme values (exact grades and/or range labels). Same model on `CourseTemplate`.
 

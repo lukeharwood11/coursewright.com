@@ -14,7 +14,7 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 - **School days** (default Mon–Fri) — owners/admins edit; lesson-plan compose uses them as the default day set
 - Admin invites (email via Resend `organization-invite` + copyable claim link)
 - Parent invites use the **same** `/invite/<token>` claim path (`role = parent`); student invites use that path with `role = student`. Create UI lives in `roster/`. The claim page loads unsigned so the invited email is obvious before signup/login.
-- **Collaborators** (staff membership) — change admin ↔ instructor ↔ parent (parent only when linked to a student); promote parents to staff without a new invite; remove admins/instructors with no linked student (not the last owner or admin). **Membership table only** — do not wire staff role into materials/roster RLS
+- **Collaborators** (staff membership) — one exclusive role (owner, admin, or instructor) plus additive parent and student flags. Promote a parent by adding an exclusive role; parent stays. Newest exclusive replaces the previous one. Removing the exclusive role leaves parent or student. **Students are not in this list** and cannot be promoted here. Not the last owner or admin. **Membership table only** — do not wire staff role into materials/roster RLS
 - Not: course builder, roster details (those are sibling domains)
 
 ## Rules

@@ -17,6 +17,14 @@ export const PARENT_ROLE_NEEDS_STUDENT_MESSAGE =
 export const STUDENT_ROLE_NEEDS_ACCOUNT_MESSAGE =
   "That person can only become a student if their account is linked to a student profile in this organization.";
 
+export const STUDENTS_NOT_IN_COLLABORATORS_MESSAGE =
+  "Students aren’t changed from the collaborators list.";
+
+export const ADDITIVE_ROLE_NOT_EXCLUSIVE_MESSAGE =
+  "Choose instructor, admin, or owner. Parent and student stay alongside that role.";
+
+export type ExclusiveRelease = "parent" | "student" | null;
+
 export const REMOVE_LINKED_PARENT_MESSAGE =
   "This person is linked to a student. Change their role to Parent instead of removing them.";
 
@@ -30,12 +38,17 @@ export function isOrgManagerRole(role: OrgRole): boolean {
 export function isEditableMembershipRole(
   role: OrgRole,
 ): role is EditableMembershipRole {
-  return (
-    role === "admin" ||
-    role === "instructor" ||
-    role === "parent" ||
-    role === "student"
-  );
+  return role === "admin" || role === "instructor" || role === "parent";
+}
+
+/** Where Remove leaves someone who still has an additive role. Parent wins. */
+export function exclusiveReleaseTarget(input: {
+  hasLinkedStudent: boolean;
+  hasStudentAccount?: boolean;
+}): ExclusiveRelease {
+  if (input.hasLinkedStudent) return "parent";
+  if (input.hasStudentAccount) return "student";
+  return null;
 }
 
 export function isEditableStaffRole(
@@ -66,15 +79,8 @@ export function assignableMembershipRoles(input: {
   hasLinkedStudent: boolean;
   hasStudentAccount?: boolean;
 }): AssignableMembershipRole[] {
-  const staffRoles = assignableStaffRoles(input.actorRole);
-  if (input.currentRole === "parent" || input.currentRole === "student") {
-    return staffRoles;
-  }
-  if (!isEditableStaffRole(input.currentRole)) return staffRoles;
-  const family: AssignableMembershipRole[] = [];
-  if (input.hasLinkedStudent) family.push("parent");
-  if (input.hasStudentAccount) family.push("student");
-  return [...staffRoles, ...family];
+  if (input.currentRole === "student") return [];
+  return assignableStaffRoles(input.actorRole);
 }
 
 export function staffMemberActions(input: {
@@ -91,11 +97,13 @@ export function staffMemberActions(input: {
   canRemove: boolean;
   changeRoles: AssignableMembershipRole[];
   lastManagerGuard: boolean;
+  releaseTo: ExclusiveRelease;
 } {
   const lastManagerGuard = isLastOrgManager(
     input.members,
     input.member.membershipId,
   );
+  const releaseTo = exclusiveReleaseTarget(input.member);
   const changeRoles = input.actorRole
     ? assignableMembershipRoles({
         actorRole: input.actorRole,
@@ -111,6 +119,7 @@ export function staffMemberActions(input: {
       canRemove: false,
       changeRoles: [],
       lastManagerGuard,
+      releaseTo,
     };
   }
 
@@ -128,13 +137,10 @@ export function staffMemberActions(input: {
 
   return {
     canChangeRole: editableTarget && changeRoles.length > 0 && !wouldDemoteLastManager,
-    canRemove:
-      isEditableStaffRole(input.member.role) &&
-      !input.member.hasLinkedStudent &&
-      !input.member.hasStudentAccount &&
-      !wouldDemoteLastManager,
+    canRemove: isEditableStaffRole(input.member.role) && !wouldDemoteLastManager,
     changeRoles: rolesForSelect,
     lastManagerGuard,
+    releaseTo,
   };
 }
 
@@ -152,13 +158,25 @@ export function validateChangeStaffRole(input: {
     return { ok: false, error: "You don’t have permission to change collaborator roles." };
   }
 
+  if (input.currentRole === "student") {
+    return { ok: false, error: STUDENTS_NOT_IN_COLLABORATORS_MESSAGE };
+  }
+
   if (!isEditableMembershipRole(input.currentRole)) {
     return { ok: false, error: "Owner roles can’t be changed here." };
   }
 
   const nextRole = parseAssignableMembershipRole(input.nextRole);
   if (!nextRole) {
-    return { ok: false, error: "Choose instructor, admin, owner, parent, or student." };
+    return { ok: false, error: "Choose instructor, admin, or owner." };
+  }
+
+  if (nextRole === input.currentRole) {
+    return { ok: true, value: nextRole };
+  }
+
+  if (nextRole === "parent" || nextRole === "student") {
+    return { ok: false, error: ADDITIVE_ROLE_NOT_EXCLUSIVE_MESSAGE };
   }
 
   const allowed = assignableMembershipRoles({
@@ -168,12 +186,6 @@ export function validateChangeStaffRole(input: {
     hasStudentAccount: input.hasStudentAccount,
   });
   if (!allowed.includes(nextRole)) {
-    if (nextRole === "parent") {
-      return { ok: false, error: PARENT_ROLE_NEEDS_STUDENT_MESSAGE };
-    }
-    if (nextRole === "student") {
-      return { ok: false, error: STUDENT_ROLE_NEEDS_ACCOUNT_MESSAGE };
-    }
     return {
       ok: false,
       error:
@@ -200,28 +212,27 @@ export function validateRemoveStaffMember(input: {
   isLastManager: boolean;
   hasLinkedStudent: boolean;
   hasStudentAccount?: boolean;
-}): { ok: true } | { ok: false; error: string } {
+}): { ok: true; releaseTo: ExclusiveRelease } | { ok: false; error: string } {
   if (!canManageStaff(input.actorRole)) {
     return { ok: false, error: "You don’t have permission to remove collaborators." };
+  }
+
+  if (input.targetRole === "student") {
+    return { ok: false, error: STUDENTS_NOT_IN_COLLABORATORS_MESSAGE };
   }
 
   if (!isEditableStaffRole(input.targetRole)) {
     return { ok: false, error: "Owners can’t be removed here." };
   }
 
-  if (input.hasLinkedStudent) {
-    return { ok: false, error: REMOVE_LINKED_PARENT_MESSAGE };
-  }
-
-  if (input.hasStudentAccount) {
-    return { ok: false, error: REMOVE_LINKED_STUDENT_MESSAGE };
-  }
-
   if (input.isLastManager && isOrgManagerRole(input.targetRole)) {
     return { ok: false, error: LAST_OWNER_ADMIN_MESSAGE };
   }
 
-  return { ok: true };
+  return {
+    ok: true,
+    releaseTo: exclusiveReleaseTarget(input),
+  };
 }
 
 export function staffMembershipWriteErrorMessage(error: {
@@ -241,6 +252,9 @@ export function staffMembershipWriteErrorMessage(error: {
     message.includes("can only become a student if their account is linked")
   ) {
     return STUDENT_ROLE_NEEDS_ACCOUNT_MESSAGE;
+  }
+  if (message.includes("can't be changed from the collaborators list")) {
+    return STUDENTS_NOT_IN_COLLABORATORS_MESSAGE;
   }
   if (
     error.code === "42501" ||

@@ -102,7 +102,7 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
     .select("id, user_id, role, profile:profiles!memberships_user_id_fkey(name, email)")
     .eq("organization_id", organizationId)
     .eq("status", "active")
-    .in("role", ["owner", "admin", "instructor", "parent", "student"]);
+    .in("role", ["owner", "admin", "instructor", "parent"]);
 
   if (error) throw new Error(error.message);
 

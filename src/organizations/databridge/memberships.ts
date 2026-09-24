@@ -6,8 +6,13 @@ import {
   DEFAULT_ORG_FEATURES,
   type OrgFeatures,
 } from "@/organizations/model/features";
-import type { AssignableMembershipRole, OrgRole } from "@/organizations/model/role";
-import { EDITABLE_MEMBERSHIP_ROLES, EDITABLE_STAFF_ROLES, parseOrgRole } from "@/organizations/model/role";
+import {
+  EDITABLE_MEMBERSHIP_ROLES,
+  EDITABLE_STAFF_ROLES,
+  parseOrgRole,
+  type OrgRole,
+  type StaffInviteRole,
+} from "@/organizations/model/role";
 import { parseOrgTypeOrDefault, type OrgType } from "@/organizations/model/orgType";
 import { DEFAULT_SCHOOL_DAYS, parseSchoolDays, type SchoolDay } from "@/organizations/model/schoolDays";
 import { staffMembershipWriteErrorMessage } from "@/organizations/model/staffAccount";
@@ -94,12 +99,16 @@ function brandingIconUrl(branding: BrandingEmbed | null): string | null {
 export type OrgMembership = {
   membershipId: number;
   role: OrgRole;
+  isParent: boolean;
+  isStudent: boolean;
   organization: OrganizationSummary;
 };
 
 type MembershipRow = {
   id: number;
   role: string;
+  is_parent?: boolean | null;
+  is_student?: boolean | null;
   organization: OrganizationSummaryRow | OrganizationSummaryRow[] | null;
 };
 
@@ -118,6 +127,8 @@ function toMembership(row: MembershipRow): OrgMembership | null {
   return {
     membershipId: row.id,
     role,
+    isParent: Boolean(row.is_parent) || role === "parent",
+    isStudent: Boolean(row.is_student) || role === "student",
     organization,
   };
 }
@@ -143,7 +154,7 @@ export async function listMyMemberships(userId: string): Promise<OrgMembership[]
   const db = requireSupabase();
   const { data, error } = await db
     .from("memberships")
-    .select(`id, role, organization:organizations(${ORG_SUMMARY_SELECT})`)
+    .select(`id, role, is_parent, is_student, organization:organizations(${ORG_SUMMARY_SELECT})`)
     .eq("user_id", userId)
     .eq("status", "active")
     .order("created_at", { ascending: true });
@@ -171,7 +182,7 @@ export async function getMembershipByOrgSlug(
 
   const { data: membership, error: membershipError } = await db
     .from("memberships")
-    .select("id, role")
+    .select("id, role, is_parent, is_student")
     .eq("user_id", userId)
     .eq("organization_id", org.id)
     .eq("status", "active")
@@ -186,6 +197,8 @@ export async function getMembershipByOrgSlug(
   return {
     membershipId: membership.id,
     role,
+    isParent: Boolean(membership.is_parent) || role === "parent",
+    isStudent: Boolean(membership.is_student) || role === "student",
     organization: toOrganizationSummary(org),
   };
 }
@@ -220,7 +233,7 @@ export async function listOrgPeople(
 
 export async function updateStaffMembershipRole(input: {
   membershipId: number;
-  role: AssignableMembershipRole;
+  role: StaffInviteRole;
 }): Promise<void> {
   if (!Number.isFinite(input.membershipId)) {
     throw new Error("That staff member couldn’t be updated. Refresh and try again.");
@@ -232,6 +245,30 @@ export async function updateStaffMembershipRole(input: {
     .eq("id", input.membershipId)
     .eq("status", "active")
     .in("role", [...EDITABLE_MEMBERSHIP_ROLES])
+    .select("id")
+    .maybeSingle();
+
+  if (error) throw new Error(staffMembershipWriteErrorMessage(error));
+  if (!data) {
+    throw new Error("You don’t have permission to change that person’s role.");
+  }
+}
+
+/** Drop the exclusive role and leave the additive parent or student membership. */
+export async function releaseExclusiveMembershipRole(input: {
+  membershipId: number;
+  role: "parent" | "student";
+}): Promise<void> {
+  if (!Number.isFinite(input.membershipId)) {
+    throw new Error("That staff member couldn’t be updated. Refresh and try again.");
+  }
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("memberships")
+    .update({ role: input.role })
+    .eq("id", input.membershipId)
+    .eq("status", "active")
+    .in("role", [...EDITABLE_STAFF_ROLES])
     .select("id")
     .maybeSingle();
 

@@ -5,11 +5,11 @@ export const STAFF_INVITE_ROLES = ["owner", "admin", "instructor"] as const;
 export type StaffInviteRole = (typeof STAFF_INVITE_ROLES)[number];
 
 /**
- * Existing memberships that owners/admins may edit or remove.
- * Owner rows stay badge-only (invite or promote someone else to owner).
- * Parent rows are editable so they can be promoted to staff without a new invite.
+ * Existing memberships that owners/admins may edit from Collaborators.
+ * Owner rows stay badge-only. Parent rows can gain an exclusive role.
+ * Students are not in this list.
  */
-export const EDITABLE_MEMBERSHIP_ROLES = ["admin", "instructor", "parent", "student"] as const;
+export const EDITABLE_MEMBERSHIP_ROLES = ["admin", "instructor", "parent"] as const;
 export type EditableMembershipRole = (typeof EDITABLE_MEMBERSHIP_ROLES)[number];
 
 /** @deprecated Prefer EDITABLE_MEMBERSHIP_ROLES. */
@@ -113,9 +113,8 @@ export function inviteableStaffRoles(actor: OrgRole): StaffInviteRole[] {
 }
 
 /**
- * Staff roles an actor may assign when changing an existing collaborator.
- * Owners can promote to owner; admins cannot. Parent is added separately when
- * the target has a linked student.
+ * Exclusive roles an actor may assign on an existing collaborator.
+ * Parent and student are additive and are not chosen here.
  */
 export function assignableStaffRoles(actor: OrgRole): StaffInviteRole[] {
   return inviteableStaffRoles(actor);
