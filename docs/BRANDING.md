@@ -22,15 +22,15 @@ Domain: **coursewright.com** (owned). Testing: **beta.coursewright.com**.
 
 ## Positioning
 
-**Category:** Learning management for **homeschool co-ops and micro-schools**, with a path to full family and student participation.
+**Category:** Course and material management for **families and small learning organizations**, including homeschool co-ops, micro-schools, and small schools.
 
 **Elevator pitch:**
 
-> Course Wright gives homeschool co-ops and micro-schools one place to plan courses, reuse materials (copy a course; templates later), share with students, and run their programs — without the clunky complexity of typical school software. Built materials should be **one tap from paper**. Plan wright. Share wright. Course Wright.
+> Course Wright gives families and small learning organizations one place to plan courses, organize and reuse materials, share with students, and print what they need — without the clunky complexity of typical school software. Built materials should be **one tap from paper**. Plan wright. Share wright. Course Wright.
 
 **Differentiation:**
 
-Course Wright is built around jobs co-ops and micro-schools actually need done — and does them **simply**:
+Course Wright is built around the course and material jobs families and small learning organizations actually need done — and does them **simply**:
 
 1. **One hub** for lesson materials and planning
 2. **Clear communication** with students on materials and progress
@@ -49,11 +49,11 @@ Today, co-ops stitch together **Microsoft for files**, **WhatsApp for chatter**,
 
 | Attribute | Direction |
 |-----------|-----------|
-| **Primary audience (now)** | Co-op and micro-school admins and instructors |
+| **Primary audience (now)** | Families managing their own courses and materials; co-op, micro-school, and small-school admins and instructors |
 | **Usability anchor** | **Tech-averse people on the student experience** — if it works for them, it works for everyone |
-| **Secondary audience (P0)** | **Students** (and parents who inherit student privileges via invite + link). Account required (Google or email). Also people who **create** materials and print |
+| **Secondary audience (P0)** | **Students** and linked parents using the shared student experience. Account required (Google or email) |
 | **Secondary audience (P1)** | Students (and linked parents) viewing progress (grades, notes, checklists) |
-| **Primary audience (later)** | Parents managing families; students with their own accounts using materials and quizzes |
+| **Primary audience (later)** | Broader family and student participation across organizations |
 | **Voice** | Clear, warm, plain-spoken — guide users without talking down to them |
 | **Avoid** | Corporate edu-jargon, district-scale complexity, dense UI copy, feature-dump onboarding, Google Classroom-style heaviness |
 
@@ -120,12 +120,12 @@ Other drafts kept for reference (not in use):
 2. **One place instead of five** — replaces scattered Microsoft folders, WhatsApp threads, and Outlook chains for everyday course stuff.
 3. **Share wright — including paper** — print a material, a unit, or this week in one tap. No export wizard.
 4. **Lighter than Google Classroom** — co-ops don't need enterprise classroom software.
-5. **Built for co-ops and micro-schools** — not bloated district tools.
+5. **Built for families and small learning organizations** — not bloated district tools.
 6. **Students stay in the loop** — parents are invited by email and inherit the student view (P0). Magic links later. Progress and auto-summaries in P1.
 7. **Reuse without rework** — P0: create a course from another course. **P1:** templates with linked copies and optional promote.
 8. **We bill the org** — Course Wright charges organizations so they can serve students. Parent-pay is later.
 
-**Public site:** Keep this positioning, but do **not** paste the Microsoft / WhatsApp / Outlook (or SharePoint) example onto marketing pages — that’s one person’s inspiration, not customer-facing copy. Talk about scattered folders, chats, and email in general. Pricing is an invite-only pilot; do not show plan options.
+**Public site:** Keep this positioning, but do **not** paste the Microsoft / WhatsApp / Outlook (or SharePoint) example onto marketing pages — that’s one person’s inspiration, not customer-facing copy. Talk about scattered folders, chats, and email in general. Public pricing is display-only; paid plans use **Contact us**, with no self-serve checkout.
 
 ---
 

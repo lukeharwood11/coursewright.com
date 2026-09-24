@@ -30,7 +30,7 @@ export const helpDocTopics: HelpDocTopic[] = [
     body: [
       {
         type: "p",
-        text: "Course Wright helps homeschool co-ops and micro-schools plan courses, share materials with students, and run the program from one place. This short guide covers the basics.",
+        text: "Course Wright helps families, co-ops, and small schools plan courses, organize materials, and share or print the week from one place. This short guide covers the basics.",
       },
       { type: "h2", text: "Create an account" },
       {
@@ -109,7 +109,7 @@ export const helpDocTopics: HelpDocTopic[] = [
       {
         type: "ul",
         items: [
-          "Name and organization type (co-op or micro-school)",
+          "Name and organization type (family, co-op, micro-school, or other)",
           "Permalink slug — changing it breaks existing links; confirm before you save",
           "Grade scheme — how student grades are labeled (for example K–12 or custom labels)",
           "Staff — invite people and manage roles (see Staff & roles)",

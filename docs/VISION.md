@@ -2,7 +2,7 @@
 
 ## One-liner
 
-Course Wright is an intuitive LMS for **homeschool co-ops and micro-schools** — a course builder with org management and role-based access, so admins run the org, instructors teach, and students can **use the materials** (on screen or printed) without the clunky complexity of typical school software. Linked parents inherit student privileges.
+Course Wright is intuitive course and material management for **families and small learning organizations** — including homeschool co-ops, micro-schools, and small schools. Families can build and print without a roster; organizations can add roles, students, and sharing without the clunky complexity of typical school software.
 
 **Tagline:** Plan wright. Share wright. Course Wright.  
 **Short:** Courses, done wright.
@@ -34,7 +34,7 @@ Course Wright is an intuitive LMS for **homeschool co-ops and micro-schools** �
 | **Instructors** | P0 | Build courses, enroll students, invite parents, share and **print** materials |
 | **Students (experience)** | P0 | Enrolled students’ materials, this week, print. **Design anchor:** tech-averse people opening this view. |
 | **Parents (role)** | P0 | Invited by email; **must have an account**. Same email as invite. Inherit the **student** experience for linked students. |
-| **People creating materials** | P0 | Anyone can create an org, build a course, and **print** — roster optional. Smallest valuable loop |
+| **Families / independent creators** | P0 | Anyone can create a family organization, build a course, and **print** — roster optional. Smallest valuable loop |
 | **Students (progress)** | P1 | Grades, instructor notes, completion checklists, homework tracking |
 | **Student profiles** | P0 | Org-level records (`student_profile`) — no login; created on first course enrollment |
 | **Students (accounts)** | P2 | User accounts linked to existing student profiles |
@@ -72,7 +72,7 @@ Course Wright is an intuitive LMS for **homeschool co-ops and micro-schools** �
 
 **Goal:** Ship a **course builder** with **organizational management**, **roster management**, **RBAC**, **file sharing**, **student access** (parents inherit), and **extreme shareability** (print + links) that co-ops, micro-schools, and someone making materials at home can run on day one.
 
-**Primary users:** Admins, instructors, and students (with parent invites for family access).
+**Primary users:** Families and independent course creators; admins, instructors, and students in small learning organizations (with parent invites for family access).
 
 **Focus areas:**
 
