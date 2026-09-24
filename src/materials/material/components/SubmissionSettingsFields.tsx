@@ -5,6 +5,7 @@ import {
   submissionFileTypeLabel,
   type SubmissionFileType,
 } from "@/submissions/model/fileTypes";
+import { DEFAULT_MATERIAL_POINTS } from "@/submissions/model/grade";
 import {
   MAX_SUBMISSION_LIMIT,
   MIN_SUBMISSION_LIMIT,
@@ -13,19 +14,27 @@ import {
 export function SubmissionSettingsFields({
   acceptSubmissions,
   allowPastDue,
+  gradable,
+  pointsText,
   submissionLimit,
   fileTypes,
   onAcceptChange,
   onAllowPastDueChange,
+  onGradableChange,
+  onPointsChange,
   onLimitChange,
   onToggleType,
 }: {
   acceptSubmissions: boolean;
   allowPastDue: boolean;
+  gradable: boolean;
+  pointsText: string;
   submissionLimit: number;
   fileTypes: readonly SubmissionFileType[];
   onAcceptChange: (value: boolean) => void;
   onAllowPastDueChange: (value: boolean) => void;
+  onGradableChange: (value: boolean) => void;
+  onPointsChange: (value: string) => void;
   onLimitChange: (value: number) => void;
   onToggleType: (kind: SubmissionFileType) => void;
 }) {
@@ -94,6 +103,41 @@ export function SubmissionSettingsFields({
             />
             Allow submissions past due date
           </label>
+          <label className="flex items-start gap-2 text-[14px] text-[var(--ink)]">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--green)]"
+              checked={gradable}
+              onChange={(event) => onGradableChange(event.target.checked)}
+            />
+            <span>
+              <span className="font-bold">Gradable</span>
+              <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
+                Points count in the gradebook. Turn this off to leave feedback only.
+              </span>
+            </span>
+          </label>
+          <div>
+            <label
+              htmlFor="material-points"
+              className="text-[13px] font-bold text-[var(--ink-soft)]"
+            >
+              Possible points
+            </label>
+            <Input
+              id="material-points"
+              className="mt-1 max-w-[8rem]"
+              type="number"
+              min={0.01}
+              max={9999.99}
+              step={0.01}
+              inputMode="decimal"
+              disabled={!gradable}
+              value={gradable ? pointsText : ""}
+              placeholder={String(DEFAULT_MATERIAL_POINTS)}
+              onChange={(event) => onPointsChange(event.target.value)}
+            />
+          </div>
         </div>
       ) : null}
     </div>

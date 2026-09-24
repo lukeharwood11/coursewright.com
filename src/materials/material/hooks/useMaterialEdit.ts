@@ -14,6 +14,11 @@ import {
   type SubmissionFileType,
 } from "@/submissions/model/fileTypes";
 import {
+  DEFAULT_MATERIAL_POINTS,
+  materialPointsAreValid,
+  parseMaterialPoints,
+} from "@/submissions/model/grade";
+import {
   DEFAULT_SUBMISSION_LIMIT,
   submissionLimitValid,
 } from "@/submissions/model/submission";
@@ -32,6 +37,8 @@ type PlacementSeed = {
   dueTimezone: string | null;
   acceptSubmissions: boolean;
   allowSubmissionsPastDue: boolean;
+  gradable: boolean;
+  pointsPossible: number | null;
   submissionLimit: number;
   submissionFileTypes: string[];
 };
@@ -47,6 +54,8 @@ export function useMaterialEdit() {
   const [dueTime, setDueTime] = useState(DEFAULT_DUE_TIME);
   const [dueTimezone, setDueTimezone] = useState(browserTimeZone);
   const [acceptSubmissions, setAcceptSubmissions] = useState(false);
+  const [gradable, setGradable] = useState(false);
+  const [pointsText, setPointsText] = useState(String(DEFAULT_MATERIAL_POINTS));
   const [allowPastDue, setAllowPastDue] = useState(true);
   const [submissionLimit, setSubmissionLimit] = useState(DEFAULT_SUBMISSION_LIMIT);
   const [fileTypes, setFileTypes] = useState<SubmissionFileType[]>([]);
@@ -79,6 +88,12 @@ export function useMaterialEdit() {
       setDueTimezone(material.dueTimezone ?? browserTimeZone());
     }
     setAcceptSubmissions(material.acceptSubmissions);
+    setGradable(material.gradable);
+    setPointsText(
+      material.pointsPossible != null
+        ? String(material.pointsPossible)
+        : String(DEFAULT_MATERIAL_POINTS),
+    );
     setAllowPastDue(material.allowSubmissionsPastDue);
     setSubmissionLimit(material.submissionLimit);
     setFileTypes(parseSubmissionFileTypes(material.submissionFileTypes));
@@ -112,6 +127,8 @@ export function useMaterialEdit() {
 
   const submissionsInvalid = acceptSubmissions && fileTypes.length === 0;
   const limitInvalid = !submissionLimitValid(submissionLimit);
+  const pointsInvalid = acceptSubmissions && gradable && parseMaterialPoints(pointsText) == null;
+  const pointsPossible = gradable ? parseMaterialPoints(pointsText) : null;
 
   // Title is saved on blur / Enter / leave, so it must not enable Save.
   const placementChanged = Boolean(
@@ -123,6 +140,8 @@ export function useMaterialEdit() {
         (dueDate !== "" && dueTime !== baselineTime) ||
         (dueDate !== "" && dueTimezone !== baselineZone) ||
         acceptSubmissions !== page.material.acceptSubmissions ||
+        gradable !== page.material.gradable ||
+        (gradable && pointsPossible !== page.material.pointsPossible) ||
         allowPastDue !== page.material.allowSubmissionsPastDue ||
         submissionLimit !== page.material.submissionLimit ||
         fileTypes.join(",") !== baselineTypes),
@@ -191,11 +210,13 @@ export function useMaterialEdit() {
     const titleOk = await commitTitle();
     if (!titleOk) return false;
     if (!placementChanged && !contentChanged) return true;
-    if (submissionsInvalid || limitInvalid) {
+    if (submissionsInvalid || limitInvalid || pointsInvalid) {
       setError(
         submissionsInvalid
           ? "Choose at least one kind of file families can turn in."
-          : "Submissions allowed must be from 1 to 10.",
+          : pointsInvalid
+            ? "Possible points must be greater than 0."
+            : "Submissions allowed must be from 1 to 10.",
       );
       return false;
     }
@@ -222,6 +243,8 @@ export function useMaterialEdit() {
               dueTimezone: dueDate ? dueTimezone : null,
               acceptSubmissions,
               allowSubmissionsPastDue: allowPastDue,
+              gradable: acceptSubmissions && gradable,
+              pointsPossible: acceptSubmissions && gradable ? pointsPossible : null,
               submissionLimit,
               submissionFileTypes: fileTypes,
             }
@@ -258,6 +281,8 @@ export function useMaterialEdit() {
     dueTime,
     dueTimezone,
     acceptSubmissions,
+    gradable,
+    pointsText,
     allowPastDue,
     submissionLimit,
     fileTypes,
@@ -267,7 +292,17 @@ export function useMaterialEdit() {
     setScheduledDate,
     setDueDate,
     setDueTime,
-    setAcceptSubmissions,
+    setAcceptSubmissions(value: boolean) {
+      setAcceptSubmissions(value);
+      if (!value) setGradable(false);
+    },
+    setGradable(value: boolean) {
+      setGradable(value);
+      if (value && !materialPointsAreValid(Number(pointsText))) {
+        setPointsText(String(DEFAULT_MATERIAL_POINTS));
+      }
+    },
+    setPointsText,
     setAllowPastDue,
     setSubmissionLimit,
     toggleFileType(kind: SubmissionFileType) {
@@ -280,7 +315,7 @@ export function useMaterialEdit() {
     saving: saving || savingTitle,
     error,
     hasChanges: placementChanged || contentChanged,
-    canSave: !submissionsInvalid && !limitInvalid,
+    canSave: !submissionsInvalid && !limitInvalid && !pointsInvalid,
     editorEpoch,
     onDraftChange,
     commitTitle,

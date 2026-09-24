@@ -21,6 +21,6 @@ Students (and linked parents on their behalf) submit files on a course material 
 
 ## Don’t
 
-- Add grades, comments, Activity, or a Late badge here.
+- Add a Late badge here. Grades and feedback are the material grading walkthrough (`grade_material_submission`), not a second score table.
 - Let a family append files to a submission after it is submitted.
 - Copy submitted files when copying a course.

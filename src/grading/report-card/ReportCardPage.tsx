@@ -75,7 +75,7 @@ export function ReportCardPage() {
           ) : (
             <ul className="mt-3 divide-y divide-[var(--line-soft)]">
               {snapshot.items.map((item) => (
-                <li key={item.quizId} className="flex items-center justify-between gap-3 py-2">
+                <li key={item.key} className="flex items-center justify-between gap-3 py-2">
                   <span className="text-[14.5px] text-[var(--ink)]">{item.title}</span>
                   <span className="text-[14px] font-bold text-[var(--ink)]">
                     {item.locked

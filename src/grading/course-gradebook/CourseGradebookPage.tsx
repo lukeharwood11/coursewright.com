@@ -10,6 +10,7 @@ import { coursePath } from "@/courses/model/paths";
 import type { GradebookRow } from "@/grading/databridge/gradebook";
 import { AssignmentGradeForm } from "./components/AssignmentGradeForm";
 import { GradebookStudents } from "./components/GradebookStudents";
+import { MaterialGradeForm } from "./components/MaterialGradeForm";
 import { useCourseGradebook } from "./hooks/useCourseGradebook";
 
 export function CourseGradebookPage() {
@@ -91,7 +92,7 @@ export function CourseGradebookPage() {
             <ul className="mt-2 divide-y divide-[var(--line-soft)] rounded-[10px] border border-[var(--line-soft)]">
               {book.needsGrade.map((item) => (
                 <li
-                  key={item.attemptId}
+                  key={item.key}
                   className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
                 >
                   <span className="min-w-0 break-words text-[14.5px] text-[var(--ink)]">
@@ -103,7 +104,10 @@ export function CourseGradebookPage() {
                     type="button"
                     variant="secondary"
                     className="w-full shrink-0 sm:w-auto"
-                    onClick={() => book.openAttempt(item.attemptId)}
+                    onClick={() => {
+                      if (item.submissionId != null) book.openSubmission(item.submissionId);
+                      else if (item.attemptId != null) book.openAttempt(item.attemptId);
+                    }}
                   >
                     Save grade
                   </Button>
@@ -129,11 +133,59 @@ export function CourseGradebookPage() {
           )
         ) : null}
 
+        {book.submissionId != null ? (
+          book.materialDraftLoading || book.materialsLoading || !book.materialDraft ? (
+            <PageLoading embedded label="Loading submission…" />
+          ) : (
+            <MaterialGradeForm
+              key={book.submissionId}
+              title={
+                book.needsGrade.find((item) => item.submissionId === book.submissionId)?.title ??
+                book.materials.find((material) =>
+                  book.rows.some((row) =>
+                    row.items.some(
+                      (item) =>
+                        item.submissionId === book.submissionId && item.materialId === material.id,
+                    ),
+                  ),
+                )?.title ??
+                "Material"
+              }
+              gradable={
+                book.materials.some((material) =>
+                  book.rows.some((row) =>
+                    row.items.some(
+                      (item) =>
+                        item.submissionId === book.submissionId && item.materialId === material.id,
+                    ),
+                  ),
+                )
+              }
+              possible={
+                book.materials.find((material) =>
+                  book.rows.some((row) =>
+                    row.items.some(
+                      (item) =>
+                        item.submissionId === book.submissionId && item.materialId === material.id,
+                    ),
+                  ),
+                )?.pointsPossible ?? book.materialDraft.pointsPossible
+              }
+              earned={book.materialDraft.pointsEarned}
+              feedback={book.materialDraft.feedback}
+              saving={book.savingMaterial}
+              onClose={book.closeSubmission}
+              onSave={book.saveMaterial}
+            />
+          )
+        ) : null}
+
         <section>
           <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Students</h2>
           <GradebookStudents
             rows={book.rows}
             quizzes={book.quizzes}
+            materials={book.materials}
             scale={scale}
             studentPathFor={(studentProfileId) => studentPath(slug, studentProfileId)}
             draftFor={draftFor}
@@ -144,6 +196,7 @@ export function CourseGradebookPage() {
             onSaveFinal={(row, label, note) => book.saveFinal(row, label, note)}
             onClearFinal={(row) => book.clearFinal(row)}
             onOpenAttempt={book.openAttempt}
+            onOpenSubmission={book.openSubmission}
           />
         </section>
 

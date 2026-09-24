@@ -649,6 +649,8 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 | due_at | timestamptz | **optional** — due instant for submissions. Null until the due date is saved with a time. Default wall time is 11:59 PM |
 | due_timezone | text | **optional** — IANA zone captured when the due time is saved. Display the deadline in this zone |
 | accept_submissions | boolean | default false. The student account or a linked parent may turn in files for an enrolled student |
+| gradable | boolean | default false. Only when `accept_submissions`. Points count in the gradebook. Off means feedback only |
+| points_possible | numeric | Possible points when `gradable`. Null otherwise. Greater than 0. Fractions such as 4.5 are allowed |
 | allow_submissions_past_due | boolean | default true. When false, turn-in stops after `due_at` |
 | submission_limit | int | 1–10, default 2. How many times one student may turn work in |
 | submission_file_types | text[] | `pdf` · `image` · `document` · `audio` · `video`. At least one when accept submissions is on |
@@ -676,7 +678,7 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 
 A student (or a linked parent on their behalf) turns work in on a **course** material with `accept_submissions`. Not a quiz attempt (`quiz_attempts`). Not a separate assignment object.
 
-One `material_submissions` row per student per material (unique while not deleted). The student’s account and any parent linked to that student upload into the same slot.
+One `material_submissions` row per student per material (unique while not deleted). The student’s account and any parent linked to that student upload into the same slot. A teacher saves one grade on that slot: `points_earned` / snapshotted `points_possible` when the material is gradable, or `feedback` only when it is not. `graded_at` is set when that save happens. Feedback-only rows stay out of the gradebook. Gradable rows with points join the course final (unweighted mean with locked quiz percents).
 
 | Field | Type | Notes |
 |-------|------|-------|

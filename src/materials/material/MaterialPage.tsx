@@ -12,6 +12,7 @@ import { useToastOnError } from "@/ui/useToastOnError";
 import { formatIsoDate } from "@/courses/model/dates";
 import { formatDueDeadline } from "@/submissions/model/dueInstant";
 import { MaterialSubmissionsSection } from "@/submissions";
+import { SubmissionGrading } from "@/submissions/turn-in/components/SubmissionGrading";
 import { coursePath } from "@/courses/model/paths";
 import { materialKindLabel } from "@/materials/model/kind";
 import {
@@ -225,6 +226,10 @@ export function MaterialPage() {
                 </Button>
               ) : null}
             </div>
+          ) : null}
+
+          {page.canEdit && !page.material.deletedAt ? (
+            <SubmissionGrading material={page.material} courseId={page.material.courseId} />
           ) : null}
 
           {!page.material.deletedAt ? (

@@ -7,9 +7,12 @@ import { getCourse, courseQueryKeys } from "@/courses/databridge/courses";
 import {
   gradebookQueryKeys,
   listAttemptAnswerDrafts,
+  listCourseGradableMaterials,
   listCourseQuizzes,
   loadCourseGradebook,
+  loadMaterialGradeDraft,
   saveAssignmentGrade,
+  saveMaterialGrade,
   setCourseFinalOverride,
   type GradebookRow,
 } from "@/grading/databridge/gradebook";
@@ -31,6 +34,7 @@ export function useCourseGradebook() {
   const queryClient = useQueryClient();
   const [classId, setClassId] = useState<number | null>(null);
   const [attemptId, setAttemptId] = useState<number | null>(null);
+  const [submissionId, setSubmissionId] = useState<number | null>(null);
   const [note, setNote] = useState("");
 
   const courseQuery = useQuery({
@@ -52,6 +56,11 @@ export function useCourseGradebook() {
     queryFn: () => listCourseQuizzes(courseId),
     enabled: ready,
   });
+  const materialsQuery = useQuery({
+    queryKey: ["gradebook-materials", courseId],
+    queryFn: () => listCourseGradableMaterials(courseId),
+    enabled: ready,
+  });
   const classesQuery = useQuery({
     queryKey: classQueryKeys.list(organization.id),
     queryFn: () => listClasses(organization.id),
@@ -70,6 +79,11 @@ export function useCourseGradebook() {
     queryKey: gradebookQueryKeys.attempt(attemptId ?? 0),
     queryFn: () => listAttemptAnswerDrafts(attemptId!),
     enabled: attemptId != null,
+  });
+  const materialGradeQuery = useQuery({
+    queryKey: ["gradebook-material-grade", submissionId ?? 0],
+    queryFn: () => loadMaterialGradeDraft(submissionId!),
+    enabled: submissionId != null,
   });
 
   const classStudentIds = useMemo(() => {
@@ -132,11 +146,26 @@ export function useCourseGradebook() {
     onError: (error: Error) => toast(caughtErrorMessage(error)),
   });
 
+  const saveMaterial = useMutation({
+    mutationFn: (input: { points: number | null; feedback: string }) => {
+      if (submissionId == null) throw new Error("Pick a submission first.");
+      return saveMaterialGrade({ submissionId, ...input });
+    },
+    onSuccess: async () => {
+      toast("Grade saved.");
+      setSubmissionId(null);
+      await refreshBook();
+    },
+    onError: (error: Error) => toast(caughtErrorMessage(error)),
+  });
+
   const needsGrade = rows.flatMap((row) =>
     row.items
       .filter((item) => !item.locked)
       .map((item) => ({
+        key: item.kind === "material" ? `material-${item.submissionId}` : `quiz-${item.attemptId}`,
         attemptId: item.attemptId,
+        submissionId: item.submissionId,
         studentName: row.studentName,
         title: item.title,
       })),
@@ -149,6 +178,8 @@ export function useCourseGradebook() {
     missing: ready && !courseQuery.isLoading && !courseQuery.data,
     scale,
     quizzes: quizzesQuery.data ?? [],
+    materials: materialsQuery.data ?? [],
+    materialsLoading: materialsQuery.isLoading,
     rows,
     classes: classesQuery.data ?? [],
     classId,
@@ -158,10 +189,21 @@ export function useCourseGradebook() {
     cards: cardsQuery.data ?? [],
     attemptId,
     openAttempt: (id: number) => {
+      setSubmissionId(null);
       setAttemptId(id);
       setNote("");
     },
     closeAttempt: () => setAttemptId(null),
+    submissionId,
+    openSubmission: (id: number) => {
+      setAttemptId(null);
+      setSubmissionId(id);
+    },
+    closeSubmission: () => setSubmissionId(null),
+    materialDraft: materialGradeQuery.data ?? null,
+    materialDraftLoading: materialGradeQuery.isLoading,
+    savingMaterial: saveMaterial.isPending,
+    saveMaterial: (input: { points: number | null; feedback: string }) => saveMaterial.mutate(input),
     answers: answersQuery.data ?? [],
     answersLoading: answersQuery.isLoading,
     note,

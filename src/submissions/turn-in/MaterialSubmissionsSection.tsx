@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
+import { formatPoints } from "@/quizzes/model/quiz";
 import { Button } from "@/ui/Button";
 import type { MaterialRecord } from "@/materials/databridge/materials";
 import {
@@ -427,6 +428,23 @@ function FamilyTurnIn({
             ))}
           </select>
         </label>
+      ) : null}
+
+      {submission?.gradedAt ? (
+        <div className="mb-4 rounded-[8px] border border-[var(--line-soft)] bg-[var(--paper)] px-3 py-2">
+          <p className="text-[13px] font-bold text-[var(--ink)]">
+            {material.gradable &&
+            submission.pointsEarned != null &&
+            submission.pointsPossible != null
+              ? `Grade ${formatPoints(submission.pointsEarned)}/${formatPoints(submission.pointsPossible)}`
+              : "Feedback"}
+          </p>
+          {submission.feedback.trim() ? (
+            <p className="mt-1 whitespace-pre-wrap text-[14px] text-[var(--ink-soft)]">
+              {submission.feedback}
+            </p>
+          ) : null}
+        </div>
       ) : null}
 
       {versions.map((version) => (

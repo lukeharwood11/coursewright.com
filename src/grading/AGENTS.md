@@ -13,7 +13,7 @@ Org grading: one scale, derived labels, course finals, and report-card workflow.
 ## Rules
 
 - Do not overload `grade_scheme` / `grade_labels`.
-- Quiz points stay on the attempt (`auto_points` / `teacher_points`).
+- Quiz points stay on the attempt (`auto_points` / `teacher_points`). Gradable material points stay on `material_submissions`. Feedback-only materials stay out of the mean.
 - Report card rows are `draft` | `submitted` | `sent`. The snapshot is a copy for the issued card, not a second score store.
 - Class is not a grade container.
 - Tier 1 View / Tier 2 View+Actions: parents view linked students; staff act on courses they can manage; owners and admins edit the scale.
