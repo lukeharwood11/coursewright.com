@@ -8,8 +8,12 @@ export const gradebookQueryKeys = {
 };
 
 export type GradebookItem = {
-  quizId: number;
-  attemptId: number;
+  kind: "quiz" | "material";
+  quizId: number | null;
+  attemptId: number | null;
+  materialId: number | null;
+  unitId: number | null;
+  submissionId: number | null;
   title: string;
   locked: boolean;
   earned: number | null;
@@ -53,17 +57,40 @@ function asNumber(value: unknown): number | null {
 
 function asItem(value: Json): GradebookItem | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const quizId = asNumber(value.quiz_id);
-  const attemptId = asNumber(value.attempt_id);
-  if (quizId == null || attemptId == null) return null;
-  return {
-    quizId,
-    attemptId,
-    title: typeof value.title === "string" ? value.title : "Quiz",
+  const shared = {
+    title: typeof value.title === "string" ? value.title : "Grade",
     locked: value.locked === true,
     earned: asNumber(value.earned),
     possible: asNumber(value.possible),
     percent: asNumber(value.percent),
+  };
+  if (value.kind === "material") {
+    const materialId = asNumber(value.material_id);
+    const submissionId = asNumber(value.submission_id);
+    if (materialId == null || submissionId == null) return null;
+    return {
+      kind: "material",
+      quizId: null,
+      attemptId: null,
+      materialId,
+      unitId: asNumber(value.unit_id),
+      submissionId,
+      ...shared,
+      title: typeof value.title === "string" ? value.title : "Material",
+    };
+  }
+  const quizId = asNumber(value.quiz_id);
+  const attemptId = asNumber(value.attempt_id);
+  if (quizId == null || attemptId == null) return null;
+  return {
+    kind: "quiz",
+    quizId,
+    attemptId,
+    materialId: null,
+    unitId: null,
+    submissionId: null,
+    ...shared,
+    title: typeof value.title === "string" ? value.title : "Quiz",
   };
 }
 
@@ -73,6 +100,46 @@ function asItems(value: Json | undefined): GradebookItem[] {
     const parsed = asItem(item);
     return parsed ? [parsed] : [];
   });
+}
+
+export async function listCourseGradableMaterials(
+  courseId: number,
+): Promise<Array<{ id: number; title: string; unitId: number | null; pointsPossible: number | null }>> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("materials")
+    .select("id, title, unit_id, points_possible")
+    .eq("course_id", courseId)
+    .eq("gradable", true)
+    .eq("accept_submissions", true)
+    .is("deleted_at", null)
+    .order("title");
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    title: row.title,
+    unitId: row.unit_id,
+    pointsPossible: row.points_possible,
+  }));
+}
+
+export async function loadMaterialGradeDraft(submissionId: number): Promise<{
+  pointsEarned: number | null;
+  pointsPossible: number | null;
+  feedback: string;
+}> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("material_submissions")
+    .select("points_earned, points_possible, feedback")
+    .eq("id", submissionId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return {
+    pointsEarned: data?.points_earned ?? null,
+    pointsPossible: data?.points_possible ?? null,
+    feedback: data?.feedback ?? "",
+  };
 }
 
 export async function listCourseQuizzes(
@@ -201,6 +268,20 @@ export async function saveAssignmentGrade(args: {
     p_attempt_id: args.attemptId,
     p_points: args.points,
     p_note: args.note,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function saveMaterialGrade(args: {
+  submissionId: number;
+  points: number | null;
+  feedback: string;
+}): Promise<void> {
+  const db = requireSupabase();
+  const { error } = await db.rpc("grade_material_submission", {
+    p_submission_id: args.submissionId,
+    p_points: args.points,
+    p_feedback: args.feedback,
   });
   if (error) throw new Error(error.message);
 }

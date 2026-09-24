@@ -19,6 +19,8 @@ export type MaterialPagePlacement = {
   dueTimezone: string | null;
   acceptSubmissions: boolean;
   allowSubmissionsPastDue: boolean;
+  gradable: boolean;
+  pointsPossible: number | null;
   submissionLimit: number;
   submissionFileTypes: string[];
 };
@@ -73,6 +75,8 @@ export async function saveMaterialPage(args: {
                 due_timezone: args.placement.dueTimezone,
                 accept_submissions: args.placement.acceptSubmissions,
                 allow_submissions_past_due: args.placement.allowSubmissionsPastDue,
+                gradable: args.placement.gradable,
+                points_possible: args.placement.pointsPossible,
                 submission_limit: args.placement.submissionLimit,
                 submission_file_types: args.placement.submissionFileTypes,
               }
@@ -170,6 +174,8 @@ async function saveMaterialPageFallback(args: {
       dueTimezone: args.placement.dueTimezone,
       acceptSubmissions: args.placement.acceptSubmissions,
       allowSubmissionsPastDue: args.placement.allowSubmissionsPastDue,
+      gradable: args.placement.gradable,
+      pointsPossible: args.placement.pointsPossible,
       submissionLimit: args.placement.submissionLimit,
       submissionFileTypes: args.placement.submissionFileTypes,
     });

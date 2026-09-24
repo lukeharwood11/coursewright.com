@@ -250,10 +250,14 @@ export function MaterialEditPage() {
               <SubmissionSettingsFields
                 acceptSubmissions={edit.acceptSubmissions}
                 allowPastDue={edit.allowPastDue}
+                gradable={edit.gradable}
+                pointsText={edit.pointsText}
                 submissionLimit={edit.submissionLimit}
                 fileTypes={edit.fileTypes}
                 onAcceptChange={edit.setAcceptSubmissions}
                 onAllowPastDueChange={edit.setAllowPastDue}
+                onGradableChange={edit.setGradable}
+                onPointsChange={edit.setPointsText}
                 onLimitChange={edit.setSubmissionLimit}
                 onToggleType={edit.toggleFileType}
               />

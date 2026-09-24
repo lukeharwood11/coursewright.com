@@ -1,6 +1,6 @@
 # AGENTS — `src/notifications/`
 
-In-app **Activity**: stored notifications for the signed-in person. Discussion posts notify course instructors or class leads, people who started or posted on the thread (one row per discussion — further posts update that row; an **@mention** upgrades that row instead of stacking), and staff **Notify everyone** on create. Announcement **Send notification** writes one Activity row per claimed family (a later send updates it). A quiz **Save grade** or course final override writes one Activity row for that student’s account and each linked parent (a later save refreshes it). Report cards notify on submit only. Sidebar announcement unread (`announcement_reads`) stays separate.
+In-app **Activity**: stored notifications for the signed-in person. Discussion posts notify course instructors or class leads, people who started or posted on the thread (one row per discussion — further posts update that row; an **@mention** upgrades that row instead of stacking), and staff **Notify everyone** on create. Announcement **Send notification** writes one Activity row per claimed family (a later send updates it). A quiz **Save grade**, a material grade or feedback save, or a course final override writes one Activity row for that student’s account and each linked parent (a later save refreshes it). Report cards notify on submit only. Sidebar announcement unread (`announcement_reads`) stays separate.
 
 ## Scope
 

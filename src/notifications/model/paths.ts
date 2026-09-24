@@ -18,7 +18,7 @@ export function activityItemPath(
   },
   options?: { learner?: boolean },
 ): string | null {
-  if (item.kind === "quiz_grade" || item.kind === "course_final") {
+  if (item.kind === "quiz_grade" || item.kind === "course_final" || item.kind === "material_grade") {
     if (options?.learner || item.studentProfileId == null) {
       return progressPath(orgSlug);
     }

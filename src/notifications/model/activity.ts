@@ -9,7 +9,8 @@ export type ActivityKind =
   | "announcement"
   | "report_card"
   | "quiz_grade"
-  | "course_final";
+  | "course_final"
+  | "material_grade";
 
 export type ActivityItem = {
   id: number;
@@ -38,7 +39,8 @@ export function parseActivityKind(value: string): ActivityKind | null {
     value === "announcement" ||
     value === "report_card" ||
     value === "quiz_grade" ||
-    value === "course_final"
+    value === "course_final" ||
+    value === "material_grade"
   ) {
     return value;
   }
@@ -133,8 +135,8 @@ export function activityHeadline(args: {
   if (args.kind === "report_card") {
     return audience ? `Report card in ${audience}` : "Report card";
   }
-  if (args.kind === "quiz_grade") {
-    const name = args.title.trim() || "Quiz";
+  if (args.kind === "quiz_grade" || args.kind === "material_grade") {
+    const name = args.title.trim() || (args.kind === "material_grade" ? "Material" : "Quiz");
     return audience ? `Grade saved: ${name} in ${audience}` : `Grade saved: ${name}`;
   }
   if (args.kind === "course_final") {

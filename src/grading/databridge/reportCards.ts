@@ -11,7 +11,8 @@ export const reportCardQueryKeys = {
 export type ReportCardStatus = "draft" | "submitted" | "sent";
 
 export type ReportCardItem = {
-  quizId: number;
+  key: string;
+  quizId: number | null;
   title: string;
   locked: boolean;
   earned: number | null;
@@ -86,11 +87,13 @@ export function parseSnapshot(value: Json): ReportCardSnapshot {
     ? value.items.flatMap((item) => {
         if (!item || typeof item !== "object" || Array.isArray(item)) return [];
         const quizId = asNumber(item.quiz_id);
-        if (quizId == null) return [];
+        const materialId = asNumber(item.material_id);
+        if (quizId == null && materialId == null) return [];
         return [
           {
+            key: quizId != null ? `quiz-${quizId}` : `material-${materialId}`,
             quizId,
-            title: typeof item.title === "string" ? item.title : "Quiz",
+            title: typeof item.title === "string" ? item.title : quizId != null ? "Quiz" : "Material",
             locked: item.locked === true,
             earned: asNumber(item.earned),
             possible: asNumber(item.possible),

@@ -33,6 +33,10 @@ export type MaterialSubmissionRecord = {
   id: number;
   studentProfileId: number;
   studentName: string;
+  pointsEarned: number | null;
+  pointsPossible: number | null;
+  feedback: string;
+  gradedAt: string | null;
   versions: SubmissionVersionRecord[];
 };
 
@@ -65,6 +69,10 @@ type VersionEmbed = {
 type SubmissionEmbed = {
   id: number;
   student_profile_id: number;
+  points_earned: number | null;
+  points_possible: number | null;
+  feedback: string | null;
+  graded_at: string | null;
   student: { id: number; name: string } | { id: number; name: string }[] | null;
   versions: VersionEmbed[] | null;
 };
@@ -109,6 +117,10 @@ function toSubmission(row: SubmissionEmbed): MaterialSubmissionRecord {
     id: row.id,
     studentProfileId: row.student_profile_id,
     studentName: student?.name ?? "",
+    pointsEarned: row.points_earned,
+    pointsPossible: row.points_possible,
+    feedback: row.feedback ?? "",
+    gradedAt: row.graded_at,
     versions,
   };
 }
@@ -116,9 +128,27 @@ function toSubmission(row: SubmissionEmbed): MaterialSubmissionRecord {
 const SUBMISSION_EMBED = [
   "id",
   "student_profile_id",
+  "points_earned",
+  "points_possible",
+  "feedback",
+  "graded_at",
   "student:student_profiles!material_submissions_student_profile_id_fkey(id, name)",
   "versions:material_submission_versions(id, version, submitted_at, submitted_by, submitter:profiles!material_submission_versions_submitted_by_fkey(name), files:material_submission_files(position, file:files!material_submission_files_file_id_fkey(id, filename, mime_type, storage_ref)))",
 ].join(", ");
+
+export async function gradeMaterialSubmission(args: {
+  submissionId: number;
+  points: number | null;
+  feedback: string;
+}): Promise<void> {
+  const db = requireSupabase();
+  const { error } = await db.rpc("grade_material_submission", {
+    p_submission_id: args.submissionId,
+    p_points: args.points,
+    p_feedback: args.feedback,
+  });
+  if (error) throw new Error(error.message);
+}
 
 export async function listMaterialSubmissions(
   materialId: number,

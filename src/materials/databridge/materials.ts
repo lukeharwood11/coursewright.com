@@ -24,6 +24,8 @@ export type MaterialRecord = {
   dueTimezone: string | null;
   acceptSubmissions: boolean;
   allowSubmissionsPastDue: boolean;
+  gradable: boolean;
+  pointsPossible: number | null;
   submissionLimit: number;
   submissionFileTypes: string[];
   position: number;
@@ -41,7 +43,7 @@ export const materialQueryKeys = {
 };
 
 const MATERIAL_COLUMNS =
-  "id, organization_id, course_id, unit_id, title, description, kind, url, file_id, scheduled_date, due_date, due_at, due_timezone, accept_submissions, allow_submissions_past_due, submission_limit, submission_file_types, position, current_version, visibility, deleted_at";
+  "id, organization_id, course_id, unit_id, title, description, kind, url, file_id, scheduled_date, due_date, due_at, due_timezone, accept_submissions, allow_submissions_past_due, gradable, points_possible, submission_limit, submission_file_types, position, current_version, visibility, deleted_at";
 
 type MaterialRow = {
   id: number;
@@ -59,6 +61,8 @@ type MaterialRow = {
   due_timezone: string | null;
   accept_submissions: boolean;
   allow_submissions_past_due: boolean;
+  gradable: boolean;
+  points_possible: number | null;
   submission_limit: number;
   submission_file_types: string[];
   position: number;
@@ -86,6 +90,8 @@ function toMaterial(row: MaterialRow): MaterialRecord | null {
     dueTimezone: row.due_timezone,
     acceptSubmissions: row.accept_submissions,
     allowSubmissionsPastDue: row.allow_submissions_past_due,
+    gradable: row.gradable,
+    pointsPossible: row.points_possible,
     submissionLimit: row.submission_limit,
     submissionFileTypes: row.submission_file_types ?? [],
     position: row.position,
@@ -197,6 +203,8 @@ export async function updateMaterial(
     dueTimezone?: string | null;
     acceptSubmissions?: boolean;
     allowSubmissionsPastDue?: boolean;
+    gradable?: boolean;
+    pointsPossible?: number | null;
     submissionLimit?: number;
     submissionFileTypes?: string[];
     position?: number;
@@ -219,6 +227,8 @@ export async function updateMaterial(
       due_timezone: patch.dueTimezone,
       accept_submissions: patch.acceptSubmissions,
       allow_submissions_past_due: patch.allowSubmissionsPastDue,
+      gradable: patch.gradable,
+      points_possible: patch.pointsPossible,
       submission_limit: patch.submissionLimit,
       submission_file_types: patch.submissionFileTypes,
       position: patch.position,
@@ -339,6 +349,11 @@ export async function revertMaterialToVersion(
         typeof material.allow_submissions_past_due === "boolean"
           ? material.allow_submissions_past_due
           : undefined,
+      gradable: material.gradable === true,
+      points_possible:
+        material.gradable === true && typeof material.points_possible === "number"
+          ? material.points_possible
+          : null,
       submission_limit:
         typeof material.submission_limit === "number" ? material.submission_limit : undefined,
       submission_file_types: Array.isArray(material.submission_file_types)

@@ -24,6 +24,7 @@ test("parseActivityKind accepts activity kinds", () => {
   assert.equal(parseActivityKind("report_card"), "report_card");
   assert.equal(parseActivityKind("quiz_grade"), "quiz_grade");
   assert.equal(parseActivityKind("course_final"), "course_final");
+  assert.equal(parseActivityKind("material_grade"), "material_grade");
   assert.equal(parseActivityKind("other"), null);
 });
 

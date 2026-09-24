@@ -28,7 +28,7 @@ function ActivityTypeIcon({ kind }: { kind: ActivityKind }) {
   if (kind === "report_card") {
     return <AcademicCapIcon className={className} aria-hidden />;
   }
-  if (kind === "quiz_grade" || kind === "course_final") {
+  if (kind === "quiz_grade" || kind === "course_final" || kind === "material_grade") {
     return <CheckCircleIcon className={className} aria-hidden />;
   }
   return <ChatBubbleLeftRightIcon className={className} aria-hidden />;

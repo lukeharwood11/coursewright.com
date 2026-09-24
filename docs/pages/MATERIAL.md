@@ -24,6 +24,7 @@ View (and edit) a single material placement — the thing parents open from this
 - **Unpublished:** amber warning banner + Publish; unpublished badge next to title.
 - Students: read + print + play media for **published** materials; unpublished is not listed and not openable (RLS); no builder chrome; account required (P0). Staff **Student view** matches that presentation (quizzes show questions only). When the material **accepts submissions**, a linked parent turns in one or more files for an enrolled student.
 - **Accept submissions** (edit): off by default. When on, the teacher chooses allowed file groups (at least one), how many submissions a student may make (1–10, default 2), and whether submissions are allowed past the due time (on by default).
+- **Gradable** (edit, only while accepting submissions): off by default. On enables **Possible points** (default 10, fractions such as 4.5 allowed) and the saved grade counts in the course gradebook. Off disables points; the teacher saves feedback only, and the submission stays out of the gradebook.
 - A submission is one turn-in: one or more files, one timestamp, labeled **"<Parent name> on behalf of <child name>"** (or the student name when they submit themselves). The family and the teacher both see every submission in a **right side panel** on the material view (allowed file kinds listed there). There is no separate submissions URL. Submitted files offer **Download**; **Open** appears only when the browser can render the file (PDF, photo, audio, video, plain text) and shows it in a fullscreen view portal.
 - View URL is the material path without `/edit`; edit appends `/edit`.
 - Print → [PRINT](./PRINT.md) (`…/print`) → generated PDF in-app preview → Download / Print; no export wizard.
@@ -118,6 +119,7 @@ Word-like layout (same condensed chrome as resource / quiz edit): compact header
 ## Staff submissions
 
 - On the material view, course managers see a **Submissions** side panel on the right (with allowed file kinds when accept submissions is on): each active student, or **Not submitted**, and every version with the same attribution line, timestamp, and files. Students who already submitted stay listed after they leave the course. File rows: **Open** (in-app portal when the type is viewable) and **Download**; no Open for types the browser cannot render (e.g. Word, HEIC).
+- Staff also see a **Grading** list (waiting, then saved). **Grade next** opens one student’s files, points when the material is gradable, and feedback. **Save and next** stores that grade and opens the next waiting submission. Families see the saved points or feedback on their Submit panel.
 
 ## Links to
 

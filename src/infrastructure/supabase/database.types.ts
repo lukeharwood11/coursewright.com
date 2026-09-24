@@ -1691,27 +1691,42 @@ export type Database = {
           course_id: number
           created_at: string
           deleted_at: string | null
+          feedback: string
+          graded_at: string | null
+          graded_by: string | null
           id: number
           material_id: number
           organization_id: number
+          points_earned: number | null
+          points_possible: number | null
           student_profile_id: number
         }
         Insert: {
           course_id: number
           created_at?: string
           deleted_at?: string | null
+          feedback?: string
+          graded_at?: string | null
+          graded_by?: string | null
           id?: number
           material_id: number
           organization_id: number
+          points_earned?: number | null
+          points_possible?: number | null
           student_profile_id: number
         }
         Update: {
           course_id?: number
           created_at?: string
           deleted_at?: string | null
+          feedback?: string
+          graded_at?: string | null
+          graded_by?: string | null
           id?: number
           material_id?: number
           organization_id?: number
+          points_earned?: number | null
+          points_possible?: number | null
           student_profile_id?: number
         }
         Relationships: [
@@ -1773,6 +1788,8 @@ export type Database = {
           submission_limit: number
           accept_submissions: boolean
           allow_submissions_past_due: boolean
+          gradable: boolean
+          points_possible: number | null
           template_id: number | null
           title: string
           unit_id: number | null
@@ -1807,6 +1824,8 @@ export type Database = {
           submission_limit?: number
           accept_submissions?: boolean
           allow_submissions_past_due?: boolean
+          gradable?: boolean
+          points_possible?: number | null
           template_id?: number | null
           title: string
           unit_id?: number | null
@@ -1841,6 +1860,8 @@ export type Database = {
           submission_limit?: number
           accept_submissions?: boolean
           allow_submissions_past_due?: boolean
+          gradable?: boolean
+          points_possible?: number | null
           template_id?: number | null
           title?: string
           unit_id?: number | null
@@ -1971,6 +1992,7 @@ export type Database = {
           kind: string
           organization_id: number
           enrollment_id: number | null
+          material_submission_id: number | null
           preview: string
           quiz_attempt_id: number | null
           read_at: string | null
@@ -1990,6 +2012,7 @@ export type Database = {
           kind: string
           organization_id: number
           enrollment_id?: number | null
+          material_submission_id?: number | null
           preview?: string
           quiz_attempt_id?: number | null
           read_at?: string | null
@@ -2009,6 +2032,7 @@ export type Database = {
           kind?: string
           organization_id?: number
           enrollment_id?: number | null
+          material_submission_id?: number | null
           preview?: string
           quiz_attempt_id?: number | null
           read_at?: string | null
@@ -3605,6 +3629,14 @@ export type Database = {
       }
       grade_quiz_attempt_noted: {
         Args: { p_attempt_id: number; p_note: string; p_points: Json }
+        Returns: undefined
+      }
+      grade_material_submission: {
+        Args: {
+          p_feedback: string
+          p_points: number | null
+          p_submission_id: number
+        }
         Returns: undefined
       }
       course_gradebook: { Args: { p_course_id: number }; Returns: Json }
