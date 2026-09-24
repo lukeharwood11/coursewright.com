@@ -233,48 +233,21 @@ export function previewResourceAudience(args: {
   };
 }
 
-function personLine(grant: NamedResourceGrant): string {
-  const verb = grant.permission === "write" ? "edit" : "view";
-  return `${grant.name} can ${verb}.`;
-}
-
-function audienceLines(
-  label: "Parents" | "Students",
-  canView: boolean,
-  grants: NamedResourceGrant[],
-): string[] {
-  const extras = grants.filter((grant) => !canView || grant.permission === "write");
-  return [`${label} ${canView ? "can" : "cannot"} see this.`, ...extras.map(personLine)];
-}
-
-/** Plain-language result for the access dialog. Stays the same on either tab. */
-export function resourceAccessSummary(args: {
+/** Short footer cards for who can open this. Staff are omitted — they always can. */
+export function resourceAccessCards(args: {
   kind: "folder" | "item";
-  followsName: string | null;
-  unresolved: boolean;
   audience: ResourceAudience;
   grants: NamedResourceGrant[];
-  unpublished: boolean;
-}): { title: string; lines: string[] } {
-  const title = args.kind === "folder" ? "Access for this folder" : "Access for this resource";
-  if (args.unresolved) {
-    return {
-      title,
-      lines: ["This follows its folder. The folder’s access is still loading."],
-    };
-  }
-  const parents = args.grants.filter((grant) => grant.audience === "parent");
-  const students = args.grants.filter((grant) => grant.audience === "student");
-  const others = args.grants.filter((grant) => grant.audience === "other");
-  const lines = [
-    ...(args.followsName ? [`Follows “${args.followsName}”.`] : []),
-    ...audienceLines("Parents", args.audience.parentsCanView, parents),
-    ...audienceLines("Students", args.audience.studentsCanView, students),
-    ...others.map(personLine),
-    "Staff can always open and edit this.",
-  ];
-  if (args.unpublished) {
-    lines.push("This isn’t published, so only editors can open it until you publish.");
-  }
-  return { title, lines };
+}): string[] {
+  const noun = args.kind === "folder" ? "folder" : "resource";
+  const parents =
+    args.audience.parentsCanView ||
+    args.grants.some((grant) => grant.audience === "parent");
+  const students =
+    args.audience.studentsCanView ||
+    args.grants.some((grant) => grant.audience === "student");
+  const cards: string[] = [];
+  if (parents) cards.push(`Parents can access this ${noun}`);
+  if (students) cards.push(`Students can access this ${noun}`);
+  return cards;
 }

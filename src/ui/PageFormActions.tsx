@@ -29,7 +29,7 @@ export function PageFormActions({
   /** View URL to open when Cancel is not handled locally. */
   cancelTo: string;
   /** When set, Cancel leaves edit mode here instead of navigating. */
-  onCancel?: () => void;
+  onCancel?: () => void | Promise<void>;
   /**
    * Desktop-only: save then leave edit. When unchanged, just leaves.
    * Omit on pages that should not offer this action.
@@ -47,9 +47,9 @@ export function PageFormActions({
   const leaveLabel =
     closeWhenUnchanged && !hasChanges ? "Close" : "Cancel";
 
-  function leave() {
+  async function leave() {
     if (onCancel) {
-      onCancel();
+      await onCancel();
       return;
     }
     navigate(cancelTo);
@@ -61,7 +61,7 @@ export function PageFormActions({
       setConfirmOpen(true);
       return;
     }
-    leave();
+    void leave();
   }
 
   return (
@@ -108,7 +108,7 @@ export function PageFormActions({
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => {
           setConfirmOpen(false);
-          leave();
+          void leave();
         }}
       />
     </>

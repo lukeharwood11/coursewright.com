@@ -28,6 +28,8 @@ import { $findMatchingParent, mergeRegister } from "@lexical/utils";
 import {
   ArrowUturnLeftIcon,
   ArrowUturnRightIcon,
+  ClockIcon,
+  EllipsisHorizontalIcon,
   LinkIcon,
   MicrophoneIcon,
   MinusCircleIcon,
@@ -60,7 +62,13 @@ function modKey(shortcut: string): string {
   return IS_APPLE ? `⌘${shortcut}` : `Ctrl+${shortcut}`;
 }
 
-export function PageEditorToolbar() {
+export function PageEditorToolbar({
+  onVersionHistory,
+  versionHistoryDisabled = false,
+}: {
+  onVersionHistory?: () => void;
+  versionHistoryDisabled?: boolean;
+} = {}) {
   const [editor] = useLexicalComposerContext();
   const actions = usePageEditorActions();
   const [bold, setBold] = useState(false);
@@ -324,6 +332,35 @@ export function PageEditorToolbar() {
             }}
           />
         </ToolbarDropdown>
+      ) : null}
+      {onVersionHistory ? (
+        <div className="ml-auto flex shrink-0 items-center gap-0.5 border-l border-[var(--line-soft)] pl-1.5">
+          <button
+            type="button"
+            className="cw-editor-toolbar-item hidden md:inline-flex"
+            aria-label="Version history"
+            title="Version history"
+            disabled={versionHistoryDisabled}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={onVersionHistory}
+          >
+            <ClockIcon className="h-4 w-4" aria-hidden />
+            <span className="text-[12px] font-bold">Version history</span>
+          </button>
+          <div className="md:hidden">
+            <ToolbarDropdown
+              label="More"
+              icon={<EllipsisHorizontalIcon className="h-4 w-4" />}
+            >
+              <DropdownItem
+                icon={<ClockIcon className="h-4 w-4" />}
+                label="Version history"
+                disabled={versionHistoryDisabled}
+                onClick={onVersionHistory}
+              />
+            </ToolbarDropdown>
+          </div>
+        </div>
       ) : null}
     </div>
   );

@@ -1,24 +1,20 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { showOrgSettingsFormActions } from "./role.ts";
+import {
+  canManageBranding,
+  canManageCustomizations,
+  canManageOrgSettings,
+} from "./role.ts";
 
-test("owners keep Save/Cancel on Customizations", () => {
-  assert.equal(showOrgSettingsFormActions("owner", "customizations"), true);
-  assert.equal(showOrgSettingsFormActions("owner", "organization"), true);
-  assert.equal(showOrgSettingsFormActions("owner", "branding"), true);
+test("owners and admins can edit organization settings", () => {
+  assert.equal(canManageOrgSettings("owner"), true);
+  assert.equal(canManageOrgSettings("admin"), true);
+  assert.equal(canManageOrgSettings("instructor"), false);
 });
 
-test("admins do not see Save/Cancel on Customizations", () => {
-  assert.equal(showOrgSettingsFormActions("admin", "customizations"), false);
-  assert.equal(showOrgSettingsFormActions("admin", "organization"), true);
-  assert.equal(showOrgSettingsFormActions("admin", "profile"), true);
-  assert.equal(showOrgSettingsFormActions("admin", "branding"), true);
-  assert.equal(showOrgSettingsFormActions("admin", "collaborators"), true);
-  assert.equal(showOrgSettingsFormActions("admin", "grading"), false);
-  assert.equal(showOrgSettingsFormActions("owner", "grading"), false);
-});
-
-test("instructors never see org settings Save/Cancel", () => {
-  assert.equal(showOrgSettingsFormActions("instructor", "customizations"), false);
-  assert.equal(showOrgSettingsFormActions("instructor", "organization"), false);
+test("branding and customizations are owner-only", () => {
+  assert.equal(canManageBranding("owner"), true);
+  assert.equal(canManageBranding("admin"), false);
+  assert.equal(canManageCustomizations("owner"), true);
+  assert.equal(canManageCustomizations("admin"), false);
 });

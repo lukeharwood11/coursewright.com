@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  LETTER_BAND_PRESETS,
   STARTER_LETTER_BANDS,
   finalOverrideNeedsConfirm,
   formatGradeDisplay,
+  formatLetterBandRange,
+  letterBandRanges,
+  matchingLetterPresetId,
   percentOf,
   percentToLabel,
   unweightedMean,
@@ -68,6 +72,36 @@ test("letter bands must cover zero without duplicate cuts", () => {
     bands: STARTER_LETTER_BANDS,
   });
   assert.equal(ok.ok, true);
+});
+
+test("letter presets validate and cover zero", () => {
+  assert.equal(LETTER_BAND_PRESETS.length, 3);
+  for (const preset of LETTER_BAND_PRESETS) {
+    const result = validateScaleDraft({
+      mode: "letter",
+      passThreshold: "",
+      bands: preset.bands,
+    });
+    assert.equal(result.ok, true, preset.id);
+    assert.equal(percentToLabel(100, { mode: "letter", passThreshold: null, bands: preset.bands }), preset.bands[0]?.label);
+    assert.equal(percentToLabel(0, { mode: "letter", passThreshold: null, bands: preset.bands }), "F");
+  }
+});
+
+test("letter band ranges are inclusive display cuts", () => {
+  const ranges = letterBandRanges(STARTER_LETTER_BANDS);
+  assert.deepEqual(
+    ranges.map((range) => formatLetterBandRange(range)),
+    ["A 92–100", "B 84–91", "C 76–83", "D 68–75", "F 0–67"],
+  );
+  assert.equal(matchingLetterPresetId(STARTER_LETTER_BANDS), "classic_abcdf");
+  assert.equal(
+    matchingLetterPresetId([
+      { label: "A", minPercent: 90 },
+      { label: "F", minPercent: 0 },
+    ]),
+    null,
+  );
 });
 
 test("a final override stays but asks for confirmation after the scale changes", () => {

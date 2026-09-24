@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { CheckIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, CheckIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { Input } from "@/ui/Input";
@@ -118,13 +118,13 @@ export function BrandingSection({
                 </span>
               </label>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
                 <Button
                   onClick={branding.onSave}
                   disabled={!branding.hasChanges || branding.saving || branding.removing}
                 >
                   <CheckIcon className="h-4 w-4" aria-hidden />
-                  {branding.saving ? "Saving…" : "Save branding"}
+                  {branding.saving ? "Saving…" : "Save"}
                 </Button>
                 {branding.canRemove ? (
                   <Button
@@ -136,6 +136,14 @@ export function BrandingSection({
                     Remove branding
                   </Button>
                 ) : null}
+                <Button
+                  variant="secondary"
+                  onClick={branding.onReset}
+                  disabled={!branding.isDirty || branding.saving || branding.removing}
+                >
+                  <ArrowPathIcon className="h-4 w-4" aria-hidden />
+                  Reset
+                </Button>
               </div>
             </div>
           ) : null}

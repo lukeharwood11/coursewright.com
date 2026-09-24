@@ -18,7 +18,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 - Instructors see the same fields, disabled.
 - Students (and staff **Student view**; linked parents inherit) are sent back to [ORG_HOME](./ORG_HOME.md).
 - Save org name/metadata; changing **permalink slug** shows a warning that existing links break (no auto-redirect in P0) and requires an explicit confirmation.
-- **Save** and **Cancel** sit at the top-right of the content panel (aligned with that column). Save is disabled when nothing changed; Cancel goes back (confirms first if there are unsaved changes).
+- Each editable panel has its **own Save** at the bottom (no shared Save/Cancel chrome). Save is disabled when that panel has nothing changed.
 - Set **organization type** (other / co-op / school / family; new orgs default to **other**), optional **profile** (about, location, website, contact email, phone), **school days** (which weekdays the org operates; default Mon–Fri), and **grade scheme** (K–12 / custom labels). Family is for households making materials at home. At least one school day must stay selected.
 - Collaborators section on this page: invite owner / admin / instructor by email (Resend `organization-invite`) and **copy a claim link**, list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). The list includes **parents** already in the org so owners/admins can **promote** them to instructor/admin/owner **without a new invite**. Owners and admins **change roles** (including demote to **parent** when the person has a linked student) and **remove** admins/instructors who have no linked student; the last remaining owner or admin cannot be removed or demoted. Those writes update **org membership** (who can run settings and invites). They do **not** change who can see course content — materials and roster stay **enrollment-gated** (and `parent_student_links` where applicable).
 - Billing section shows Free plan, **owners only**.
@@ -40,7 +40,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 
 ## Contents
 
-Left **settings menu** (icons + labels) with one active panel on the right on desktop. On small screens the menu is a **Section** dropdown above the panel. Active section is reflected in `?tab=` (`organization` default / omitted; `profile`; `grading`; `branding`; `customizations`; `collaborators`; `billing` when shown). Save / Cancel sit at the top-right of the content panel (aligned with that column’s right edge) whenever the viewer can edit organization or profile settings, and on Customizations when the viewer is an owner. Non-owners on Customizations do not see that Save or Cancel. Grading, Branding, and Customizations keep their own Save actions. The shared panel Save is hidden on Grading.
+Left **settings menu** (icons + labels) with one active panel on the right on desktop. On small screens the menu is a **Section** dropdown above the panel. Active section is reflected in `?tab=` (`organization` default / omitted; `profile`; `grading`; `branding`; `customizations`; `collaborators`; `billing` when shown). Every editable panel owns its Save at the bottom of that panel. Collaborators and Billing have no Save — their actions are inline (invite, change role, remove).
 
 ### Organization
 
@@ -49,6 +49,7 @@ Left **settings menu** (icons + labels) with one active panel on the right on de
 - Organization type: co-op, school, or family
 - **School days** — circle toggles Sunday–Saturday under web address; info hint: days this organization usually operates. Default Monday–Friday. Lesson-plan compose uses these days; staff can still add another weekday on a plan
 - **Grade scheme** — K–12 or custom labels (same panel)
+- **Save organization** — owners and admins; disabled when unchanged
 
 ### Grading
 
@@ -56,7 +57,7 @@ Owners and admins edit one org-wide score scale. Instructors see the same fields
 
 - Mode: **Points only** (`none`, the default for a new org), **Letters**, or **Pass / fail**
 - Pass / fail: one inclusive percent
-- Letters: label plus “at or above” percent. **Use A 92 starter** fills A 92, B 84, C 76, D 68, F 0. One band must start at 0. **Save grading** writes the scale
+- Letters: pick a **preset** (Classic A–F at 92, A/AB/B…, or A+/A/A-…), see the scale as **range chips**, and open **Customize** for a compact letter / min-% table when needed. One band must start at 0. **Save grading** writes the scale
 - Teachers consume the scale on quizzes, the gradebook, and report cards. They do not edit it
 
 ### Profile
@@ -66,6 +67,7 @@ Owners and admins edit one org-wide score scale. Instructors see the same fields
 - Optional **website** (external URL)
 - Optional **contact email** (org inbox, not a login)
 - Optional **phone**
+- **Save profile** — owners and admins; disabled when unchanged
 
 Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing page.
 
@@ -84,12 +86,12 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 - Small icon upload (PNG, JPEG, or WebP, under 256 KB) and remove icon
 - One accent color (`#RRGGBB`) or blank for Wright Green
 - Preview of the sidebar mark and an active nav chip
-- **Save branding** and **Remove branding** — separate from the panel Save for Organization / Profile
+- **Save**, **Remove branding**, and **Reset** (Reset discards queued icon/color changes; enabled only when something changed). Action buttons stay on one row.
 
 ### Customizations (owners only)
 
 - Toggle **Discussions**, **Announcements**, **Resources**, **Lesson plans**, **Events**, **Calendar view**
-- **Save customizations** — separate from the panel Save for Organization / Profile. Non-owners do not see Save or Cancel on this panel
+- **Save customizations**. Non-owners do not see Save on this panel
 - Turning a feature off hides it in the product; it does not delete existing content
 
 ### Billing (P1)
@@ -98,14 +100,12 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 
 ## Primary actions
 
-- Save org settings / slug (with warning) — panel Save disabled when unchanged; Cancel leaves (confirm if dirty)
-- Cancel — discard unsaved changes
-- Set profile fields
-- Set school days
-- Set grade scheme
-- Save grading (owners and admins; own button on the Grading tab)
-- Save branding or remove branding (owners only)
-- Save customizations (owners only). Non-owners on this panel do not see Save or Cancel
+- Save organization (owners and admins; disabled when unchanged)
+- Save profile (owners and admins; disabled when unchanged)
+- Set school days / grade scheme (via Save organization)
+- Save grading (owners and admins)
+- Save, remove branding, or reset queued branding changes (owners only)
+- Save customizations (owners only)
 - Invite collaborators (email + copy the claim link); cancel a pending invite; resend the email
 - Change roles for existing collaborators (including promote parent → staff and demote staff → parent when linked to a student)
 - Remove an admin or instructor with no linked student (blocked when they are the last owner/admin)

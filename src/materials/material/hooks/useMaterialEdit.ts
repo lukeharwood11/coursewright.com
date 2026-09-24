@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { SerializedEditorState } from "lexical";
+import { updateMaterial } from "@/materials/databridge/materials";
 import { saveMaterialPage } from "@/materials/databridge/saveMaterialPage";
 import { editorStateToBlocks } from "@/materials/model/pageContent";
 import {
@@ -21,9 +22,24 @@ import { useMaterial } from "./useMaterial";
 
 const MATERIAL_EDIT_FORM_ID = "material-edit-form";
 
+type PlacementSeed = {
+  title: string;
+  description: string;
+  url: string | null;
+  scheduledDate: string | null;
+  dueDate: string | null;
+  dueAt: string | null;
+  dueTimezone: string | null;
+  acceptSubmissions: boolean;
+  allowSubmissionsPastDue: boolean;
+  submissionLimit: number;
+  submissionFileTypes: string[];
+};
+
 export function useMaterialEdit() {
   const page = useMaterial();
   const [title, setTitle] = useState("");
+  const [savedTitle, setSavedTitle] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
   const [scheduledDate, setScheduledDate] = useState("");
@@ -35,11 +51,38 @@ export function useMaterialEdit() {
   const [submissionLimit, setSubmissionLimit] = useState(DEFAULT_SUBMISSION_LIMIT);
   const [fileTypes, setFileTypes] = useState<SubmissionFileType[]>([]);
   const [saving, setSaving] = useState(false);
+  const [savingTitle, setSavingTitle] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [contentBaseline, setContentBaseline] = useState<string | null>(null);
   const [contentDraft, setContentDraft] = useState<string | null>(null);
   const [editorEpoch, setEditorEpoch] = useState(0);
   const [baselineReady, setBaselineReady] = useState(false);
+  const resyncPlacement = useRef(false);
+  const titleCommitRef = useRef<Promise<boolean> | null>(null);
+  const titleRef = useRef(title);
+  const savedTitleRef = useRef(savedTitle);
+  titleRef.current = title;
+  savedTitleRef.current = savedTitle;
+
+  function seedPlacement(material: PlacementSeed) {
+    setTitle(material.title);
+    setSavedTitle(material.title);
+    setDescription(material.description);
+    setUrl(material.url ?? "");
+    setScheduledDate(material.scheduledDate ?? "");
+    setDueDate(material.dueDate ?? "");
+    if (material.dueAt && material.dueTimezone) {
+      setDueTime(wallTimeInZone(material.dueAt, material.dueTimezone));
+      setDueTimezone(material.dueTimezone);
+    } else {
+      setDueTime(DEFAULT_DUE_TIME);
+      setDueTimezone(material.dueTimezone ?? browserTimeZone());
+    }
+    setAcceptSubmissions(material.acceptSubmissions);
+    setAllowPastDue(material.allowSubmissionsPastDue);
+    setSubmissionLimit(material.submissionLimit);
+    setFileTypes(parseSubmissionFileTypes(material.submissionFileTypes));
+  }
 
   useEffect(() => {
     setBaselineReady(false);
@@ -47,24 +90,17 @@ export function useMaterialEdit() {
     setContentDraft(null);
   }, [page.material?.id]);
 
+  // Seed once per material id (title blur must not wipe other staged fields).
   useEffect(() => {
     if (!page.material) return;
-    setTitle(page.material.title);
-    setDescription(page.material.description);
-    setUrl(page.material.url ?? "");
-    setScheduledDate(page.material.scheduledDate ?? "");
-    setDueDate(page.material.dueDate ?? "");
-    if (page.material.dueAt && page.material.dueTimezone) {
-      setDueTime(wallTimeInZone(page.material.dueAt, page.material.dueTimezone));
-      setDueTimezone(page.material.dueTimezone);
-    } else {
-      setDueTime(DEFAULT_DUE_TIME);
-      setDueTimezone(page.material.dueTimezone ?? browserTimeZone());
-    }
-    setAcceptSubmissions(page.material.acceptSubmissions);
-    setAllowPastDue(page.material.allowSubmissionsPastDue);
-    setSubmissionLimit(page.material.submissionLimit);
-    setFileTypes(parseSubmissionFileTypes(page.material.submissionFileTypes));
+    seedPlacement(page.material);
+  }, [page.material?.id]);
+
+  // After version restore, re-seed when the refreshed material arrives.
+  useEffect(() => {
+    if (!resyncPlacement.current || !page.material) return;
+    resyncPlacement.current = false;
+    seedPlacement(page.material);
   }, [page.material]);
 
   const baselineTime =
@@ -77,10 +113,10 @@ export function useMaterialEdit() {
   const submissionsInvalid = acceptSubmissions && fileTypes.length === 0;
   const limitInvalid = !submissionLimitValid(submissionLimit);
 
+  // Title is saved on blur / Enter / leave, so it must not enable Save.
   const placementChanged = Boolean(
     page.material &&
-      (title !== page.material.title ||
-        description !== page.material.description ||
+      (description !== page.material.description ||
         (page.material.kind === "link" && url !== (page.material.url ?? "")) ||
         scheduledDate !== (page.material.scheduledDate ?? "") ||
         dueDate !== (page.material.dueDate ?? "") ||
@@ -109,9 +145,51 @@ export function useMaterialEdit() {
     setContentDraft(json);
   }
 
+  /**
+   * Saves the name on blur, Enter, or leave. Coalesces overlapping calls.
+   * Empty names revert to the last saved title.
+   */
+  async function commitTitle(): Promise<boolean> {
+    if (titleCommitRef.current) return titleCommitRef.current;
+    const run = (async () => {
+      if (!page.material || saving) return true;
+      const next = titleRef.current.trim();
+      const previous = savedTitleRef.current;
+      if (!next) {
+        setError("Give the material a title.");
+        setTitle(previous);
+        return false;
+      }
+      if (next === previous) {
+        setTitle(previous);
+        return true;
+      }
+      setSavingTitle(true);
+      setError(null);
+      try {
+        await updateMaterial(page.material.id, { title: next });
+        setTitle(next);
+        setSavedTitle(next);
+        await page.invalidate();
+        return true;
+      } catch (caught: unknown) {
+        setError(isNetworkError(caught) ? "Failed to fetch" : "Couldn’t save the title.");
+        return false;
+      } finally {
+        setSavingTitle(false);
+      }
+    })();
+    titleCommitRef.current = run.finally(() => {
+      titleCommitRef.current = null;
+    });
+    return titleCommitRef.current;
+  }
+
   /** Returns true when save succeeded or there was nothing to save. */
   async function save(): Promise<boolean> {
     if (!page.material) return false;
+    const titleOk = await commitTitle();
+    if (!titleOk) return false;
     if (!placementChanged && !contentChanged) return true;
     if (submissionsInvalid || limitInvalid) {
       setError(
@@ -133,7 +211,7 @@ export function useMaterialEdit() {
         materialId: page.material.id,
         placement: placementChanged
           ? {
-              title: title.trim() || page.material.title,
+              title: savedTitleRef.current,
               description,
               url: page.material.kind === "link" ? url.trim() : page.material.url,
               scheduledDate: scheduledDate || null,
@@ -162,6 +240,7 @@ export function useMaterialEdit() {
   }
 
   function afterRestore() {
+    resyncPlacement.current = true;
     setBaselineReady(false);
     setContentBaseline(null);
     setContentDraft(null);
@@ -198,12 +277,13 @@ export function useMaterialEdit() {
         ),
       );
     },
-    saving,
+    saving: saving || savingTitle,
     error,
     hasChanges: placementChanged || contentChanged,
     canSave: !submissionsInvalid && !limitInvalid,
     editorEpoch,
     onDraftChange,
+    commitTitle,
     save,
     afterRestore,
   };

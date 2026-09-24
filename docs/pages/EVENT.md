@@ -22,7 +22,7 @@ A calendar event for one course, several classes, or the whole organization, wit
 - **Location** is optional. **Starts** is required. **Ends** is optional (blank means that one day). **Start time** and **end time** are optional. On one day, the end time is at or after the start time.
 - Owners and admins can pick any course or class in the org, and can make an organization event. An instructor can pick a course they manage. Any teacher can pick classes in the org or make an organization event.
 - The write-up uses the same page editor as a lesson (text, files, links, video, quizzes). It is stored with the event, not as a course material.
-- Staff can also link existing course materials. A course event only links materials from that course.
+- Staff can also link existing course materials via **Link materials** (modal multi-select with search; linked materials show as removable rows). A course event only links materials from that course.
 - Saving puts the event on the calendar for people it applies to (then opens the event). On edit, **Cancel** reads **Close** when nothing is staged. Remove is a soft delete and takes it off every course or class it was shared with.
 - Editing from any of those courses or classes edits the same event.
 - Students and staff **Student view** can read and print. They cannot add or edit.

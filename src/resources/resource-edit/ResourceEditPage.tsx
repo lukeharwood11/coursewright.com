@@ -1,12 +1,15 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { Input } from "@/ui/Input";
-import { PageFormActions } from "@/ui/PageFormActions";
 import { PageLoading } from "@/ui/PageLoading";
+import { useSaveShortcut } from "@/ui/useSaveShortcut";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { PageEditorMediaProvider } from "@/materials/material/components/PageEditorMediaContext";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useResourceEdit } from "./hooks/useResourceEdit";
+import { ResourceDescriptionDialog } from "./components/ResourceDescriptionDialog";
+import { ResourceEditHeaderActions } from "./components/ResourceEditHeaderActions";
 import { resourceItemPath } from "@/resources/model/paths";
 
 const PageContentEditor = lazy(async () => {
@@ -14,12 +17,24 @@ const PageContentEditor = lazy(async () => {
   return { default: module.PageContentEditor };
 });
 
+const titleInputClass = [
+  "min-w-0 flex-1 truncate rounded-[6px] border border-transparent bg-transparent px-2 py-1.5 text-left text-[18px] font-semibold text-[var(--ink)] outline-none md:text-[20px]",
+  "placeholder:text-[var(--ink-faint)]",
+  "hover:bg-[var(--paper)]",
+  "focus:border-[var(--green)] focus:bg-[var(--surface)] focus:shadow-[0_0_0_3px_var(--green-tint)]",
+].join(" ");
+
 export function ResourceEditPage() {
   const edit = useResourceEdit();
   const page = edit.page;
   const user = useAuthedUser();
   const navigate = useNavigate();
+  const [descriptionOpen, setDescriptionOpen] = useState(false);
   useToastOnError(edit.error ?? page.error);
+  useSaveShortcut(() => {
+    if (edit.saving || !edit.hasChanges) return;
+    void edit.save();
+  });
 
   useEffect(() => {
     document.title = page.item
@@ -51,99 +66,120 @@ export function ResourceEditPage() {
   }
 
   const viewHref = resourceItemPath(page.organization.slug, page.item.id);
+  const descriptionLabel = edit.description.trim()
+    ? "Edit description"
+    : "Add description";
 
   return (
-    <div className="px-5 py-8 md:px-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1
-            className="text-[24px] font-semibold text-[var(--ink)]"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            Edit {page.item.title}
-          </h1>
-          <p className="mt-2 text-[13px]">
-            <Link
-              to={viewHref}
-              className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
-            >
-              Back
-            </Link>
-          </p>
-        </div>
-        <PageFormActions
-          formId={edit.formId}
-          saving={edit.saving}
-          hasChanges={edit.hasChanges}
-          cancelTo={viewHref}
-          closeWhenUnchanged
-          onSaveAndClose={async () => {
-            const ok = await edit.save();
-            if (!ok) return;
-            navigate(viewHref);
-          }}
-        />
-      </div>
-
+    <>
       <form
         id={edit.formId}
-        className="mt-6 max-w-3xl"
+        className="flex min-h-full flex-col"
         onSubmit={(event) => {
           event.preventDefault();
           void edit.save();
         }}
       >
-        <label className="block text-[13px] font-bold text-[var(--ink-soft)]">
-          Name
-          <Input
-            className="mt-1 w-full"
-            value={edit.title}
-            onChange={(event) => edit.setTitle(event.target.value)}
-          />
-        </label>
-        <label className="mt-4 block text-[13px] font-bold text-[var(--ink-soft)]">
-          Description
-          <Input
-            className="mt-1 w-full"
-            value={edit.description}
-            onChange={(event) => edit.setDescription(event.target.value)}
-          />
-        </label>
-        {page.item.type === "link" ? (
-          <label className="mt-4 block text-[13px] font-bold text-[var(--ink-soft)]">
-            Web address
+        <header className="shrink-0 border-b border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 md:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-2">
+            <Link
+              to={viewHref}
+              className="inline-flex shrink-0 items-center justify-center rounded-[6px] p-1 text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+              aria-label="Back"
+              title="Back"
+              onClick={(event) => {
+                event.preventDefault();
+                void edit.commitTitle().then(() => navigate(viewHref));
+              }}
+            >
+              <ChevronLeftIcon className="h-5 w-5" aria-hidden />
+            </Link>
             <Input
-              className="mt-1 w-full"
-              value={edit.url}
-              onChange={(event) => edit.setUrl(event.target.value)}
+              className={titleInputClass}
+              style={{ fontFamily: "var(--font-display)" }}
+              value={edit.title}
+              aria-label="Name"
+              placeholder="Untitled"
+              onChange={(event) => edit.setTitle(event.target.value)}
+              onBlur={() => {
+                void edit.commitTitle();
+              }}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter") return;
+                event.preventDefault();
+                void edit.commitTitle().then(() => {
+                  (event.target as HTMLInputElement).blur();
+                });
+              }}
             />
-          </label>
+            <ResourceEditHeaderActions
+              formId={edit.formId}
+              saving={edit.saving}
+              hasChanges={edit.hasChanges}
+              cancelTo={viewHref}
+              descriptionLabel={descriptionLabel}
+              onDescription={() => setDescriptionOpen(true)}
+              commitTitle={edit.commitTitle}
+              onSaveAndClose={async () => {
+                const ok = await edit.save();
+                if (!ok) return;
+                navigate(viewHref);
+              }}
+            />
+          </div>
+          {page.item.type === "link" ? (
+            <label className="mt-2 block pl-7 text-[12px] font-bold text-[var(--ink-soft)]">
+              Web address
+              <Input
+                className="mt-1 w-full max-w-xl text-[13.5px]"
+                value={edit.url}
+                placeholder="https://"
+                onChange={(event) => edit.setUrl(event.target.value)}
+              />
+            </label>
+          ) : null}
+        </header>
+
+        {page.item.type === "document" ? (
+          <div className="flex min-h-0 flex-1 flex-col px-3 py-3 md:px-6 md:py-4 lg:px-8">
+            <PageEditorMediaProvider
+              value={{ organizationId: page.organization.id, userId: user.id }}
+            >
+              <Suspense fallback={<PageLoading embedded label="Loading editor…" />}>
+                <div className="min-h-[calc(100dvh-10rem)] flex-1 [&_.cw-editor-shell]:min-h-[calc(100dvh-10rem)] [&_.cw-editor-input]:min-h-[calc(100dvh-14rem)]">
+                  <PageContentEditor
+                    blocks={page.blocks}
+                    editorKey={`resource-edit-${page.item.id}`}
+                    editable
+                    onDraftChange={edit.onDraftChange}
+                  />
+                </div>
+              </Suspense>
+            </PageEditorMediaProvider>
+          </div>
+        ) : null}
+
+        {page.item.type === "file" ? (
+          <p className="px-5 py-6 text-[14px] text-[var(--ink-soft)] md:px-8">
+            This name is what people see in Resources. The file itself keeps its original
+            filename.
+          </p>
+        ) : null}
+
+        {page.item.type === "link" ? (
+          <p className="px-5 py-6 text-[14px] text-[var(--ink-soft)] md:px-8">
+            People open this web address from Resources. Save when the name or address is
+            ready.
+          </p>
         ) : null}
       </form>
 
-      {page.item.type === "document" ? (
-        <div className="mt-8 max-w-3xl">
-          <PageEditorMediaProvider
-            value={{ organizationId: page.organization.id, userId: user.id }}
-          >
-            <Suspense fallback={<PageLoading embedded label="Loading editor…" />}>
-              <PageContentEditor
-                blocks={page.blocks}
-                editorKey={`resource-edit-${page.item.id}`}
-                editable
-                onDraftChange={edit.onDraftChange}
-              />
-            </Suspense>
-          </PageEditorMediaProvider>
-        </div>
-      ) : null}
-
-      {page.item.type === "file" ? (
-        <p className="mt-6 max-w-xl text-[14px] text-[var(--ink-soft)]">
-          This name is what people see in Resources. The file itself keeps its original
-          filename.
-        </p>
-      ) : null}
-    </div>
+      <ResourceDescriptionDialog
+        open={descriptionOpen}
+        value={edit.description}
+        onClose={() => setDescriptionOpen(false)}
+        onSave={edit.setDescription}
+      />
+    </>
   );
 }

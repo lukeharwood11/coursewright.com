@@ -108,7 +108,11 @@ export function useQuiz() {
   });
   const windowState = quiz
     ? quizWindowState(
-        { acceptsFrom: quiz.acceptsFrom, acceptsUntil: quiz.acceptsUntil },
+        {
+          acceptEntries: quiz.acceptEntries,
+          acceptsFrom: quiz.acceptsFrom,
+          acceptsUntil: quiz.acceptsUntil,
+        },
         new Date(),
       )
     : "download_only";

@@ -22,7 +22,7 @@ Org-scoped **Resources** home: a folder view of top-level folders and unfiled it
 - Right-click the empty pane (editors) for the same create actions. Drag-drop or the upload action adds files (titles from filenames; unpublished; progress panel).
 - Opening a folder goes to [RESOURCE_FOLDER](./RESOURCE_FOLDER.md). Opening an item goes to [RESOURCE](./RESOURCE.md).
 - Checkboxes select folders and items (including inside an expanded folder). **Select all** covers this view’s top-level rows. The selection bar offers **Publish**, **Unpublish**, **Print**, **Download**, **Move**, and **Remove** when they apply. **Move** opens an outline folder picker (expandable tree, plus top-level Resources). Print opens one packet. One file downloads on its own; several files download as a zip. Folders in the selection can move or be removed; publish, print, and download apply to selected items only.
-- Right-click a folder or item, or use its **⋯** (editors): **Open**, **Rename**, **Move**, **Manage access** (staff; gear — Parents and Students tabs, with a summary of both), **Publish** or **Unpublish** (items), **Print** (not links), **Download** (files), **Remove**.
+- Right-click a folder or item, or use its **⋯** (editors): **Open**, **Rename**, **Move**, **Manage access** (staff; gear — Parents and Students tabs, with small cards for each audience that can open it), **Publish** or **Unpublish** (items), **Print** (not links), **Download** (files), **Remove**.
 - Empty: explain the next step for editors (add a folder or drop files); for students, that nothing is shared here yet. A type filter with no matches says so.
 
 ## Data shown

@@ -457,6 +457,8 @@ Org-level student record. Optional **student account**: `user_id` is set when a 
 
 No other student-profile fields in P0 besides optional parent/student emails and grade.
 
+Changing `student_email` invalidates every pending `role = student` invite for the profile. If one was pending and the new email is non-null, create a replacement with a fresh token and send it to the new address. If `user_id` was already set, clear it and end that account’s student-role membership instead; do not create a replacement invite automatically. A staff membership on the same account is kept.
+
 Staff may **delete** a profile. Class membership, enrollments, parent links, and invites cascade. If `user_id` has a `role = student` membership in the org, that membership ends. A staff role on the same account is kept.
 
 ### Family
@@ -808,7 +810,7 @@ A **page quiz** is a Lexical `quiz` node inside rich-text `body.lexical`. Print 
 
 ### Quiz
 
-A **course quiz** is an outline item on a unit (or, in the database, with `unit_id` null). Families take it in the app when an accepting window is set. Otherwise they print it. Not a material and not `material_submissions`.
+A **course quiz** is an outline item on a unit (or, in the database, with `unit_id` null). Families take it in the app when **Accept entries** is on (optional start/end window; neither date means open whenever the quiz is published). Otherwise they print it. Not a material and not `material_submissions`.
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -820,11 +822,12 @@ A **course quiz** is an outline item on a unit (or, in the database, with `unit_
 | description | text | |
 | position | int | Shared outline order with materials in the unit. A material wins a tie |
 | visibility | text | `unpublished` (default) · `published` |
-| accepts_from | timestamptz | Optional open. Missing means already open when an end is set |
+| accept_entries | boolean | Default false. Off = print only. On = families can submit |
+| accepts_from | timestamptz | Optional open. Missing means already open when accept entries is on |
 | accepts_until | timestamptz | Optional close. At or after this instant, submit is rejected |
 | accepts_timezone | text | IANA zone captured with the window |
 | allow_multiple_attempts | boolean | Default false. Off = one entry per student |
-| autograde_and_show | boolean | Default false. On = freeze a multiple-choice, number, and matching score on the entry |
+| autograde_and_show | boolean | Default false. On = freeze a multiple-choice, number, and matching score on the entry (**Show results immediately** in the editor) |
 | share_answer_key_with_parents | boolean | Default false. Students never see the key |
 | copied_from_id | bigint | FK → Quiz, nullable |
 | deleted_at | timestamptz | Soft delete |
@@ -1165,9 +1168,9 @@ Per-user **Activity** row. Discussion rows are written by a trigger on `discussi
 | audience_label | text | Course title, class name, or announcement targets |
 | created_at | timestamptz | |
 | read_at | timestamptz | nullable — set when the person acks (click Activity). Opening the thread acks `discussion_message` only. Opening the announcement acks `announcement` |
-| unique | (user_id, discussion_message_id); one `discussion_message` row per (user_id, discussion_id); one `announcement` row per (user_id, announcement_id) | |
+| unique | (user_id, discussion_message_id); one discussion Activity row per (user_id, discussion_id) for `discussion_message` / `discussion_mention`; one `announcement` row per (user_id, announcement_id) | |
 
-**Who is notified:** course **instructors** for a course thread; class **leads** for a class thread; the person who **started** the thread; anyone who **already posted** in it; **@mentioned** people who can currently see the thread; never the author. One `discussion_message` Activity row per person per discussion (later posts update that row, including `discussion_message_id` → latest post, and clear `read_at`). If `discussions.notify_all` is true on the opening post and the starter is staff, also notify everyone `discussion_audience_people` returns (org staff + qualifying parents). An **@mention** on a post or edit writes (or upgrades) a `discussion_mention` row for that person when they are on the thread. **Send notification** on an announcement writes one `announcement` row per claimed family account for the affected students (active org membership; not the sender). A later send updates that row.
+**Who is notified:** course **instructors** for a course thread; class **leads** for a class thread; the person who **started** the thread; anyone who **already posted** in it; **@mentioned** people who can currently see the thread; never the author. One discussion Activity row per person per discussion (later posts update that row, including `discussion_message_id` → latest post, and clear `read_at`). If `discussions.notify_all` is true on the opening post and the starter is staff, also notify everyone `discussion_audience_people` returns (org staff + qualifying parents). An **@mention** on a post or edit writes (or upgrades) that same thread row to `discussion_mention` when they are on the thread — a class lead who is also @mentioned gets one mention row, not a post plus a mention. Posts go through `post_discussion_message` so mentions are written before post fan-out (mentioned people are skipped on the post pass). **Send notification** on an announcement writes one `announcement` row per claimed family account for the affected students (active org membership; not the sender). A later send updates that row.
 
 **Who can read/update:** `user_id = auth.uid()`. Client update may only change `read_at`. A mention trigger may upgrade `kind` from `discussion_message` to `discussion_mention` and clear `read_at` so the mention is unread.
 

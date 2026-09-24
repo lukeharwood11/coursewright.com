@@ -152,8 +152,8 @@ function sameWebsite(draft: string, saved: string | null): boolean {
   return parsed.value === saved;
 }
 
-/** True when the draft would persist a different identity, type, profile, school days, or grade scheme. */
-export function orgSettingsHaveChanges(
+/** True when organization identity / type / school days / grade scheme differ. */
+export function orgIdentityHaveChanges(
   draft: OrgSettingsDraft,
   saved: OrgSettingsSaved,
 ): boolean {
@@ -162,15 +162,31 @@ export function orgSettingsHaveChanges(
   if (draft.orgType !== saved.orgType) return true;
   if (draft.gradeScheme !== saved.gradeScheme) return true;
   if (!sameSchoolDays(draft.schoolDays, saved.schoolDays)) return true;
+  if (draft.gradeScheme === "custom") {
+    return !sameLabels(parseGradeLabels(draft.gradeLabelsText), saved.gradeLabels);
+  }
+  return false;
+}
+
+/** True when optional profile fields differ. */
+export function orgProfileHaveChanges(
+  draft: OrgSettingsDraft,
+  saved: OrgSettingsSaved,
+): boolean {
   if (!sameOptionalText(draft.about, saved.about)) return true;
   if (!sameOptionalText(draft.address, saved.address)) return true;
   if (!sameWebsite(draft.website, saved.website)) return true;
   if (!sameOptionalText(draft.contactEmail.toLowerCase(), saved.contactEmail)) return true;
   if (!sameOptionalText(draft.phone, saved.phone)) return true;
-  if (draft.gradeScheme === "custom") {
-    return !sameLabels(parseGradeLabels(draft.gradeLabelsText), saved.gradeLabels);
-  }
   return false;
+}
+
+/** True when the draft would persist a different identity, type, profile, school days, or grade scheme. */
+export function orgSettingsHaveChanges(
+  draft: OrgSettingsDraft,
+  saved: OrgSettingsSaved,
+): boolean {
+  return orgIdentityHaveChanges(draft, saved) || orgProfileHaveChanges(draft, saved);
 }
 
 export function organizationWriteErrorMessage(

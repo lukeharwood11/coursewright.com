@@ -41,20 +41,25 @@ export function AssignSelectedBar({
   if (selectedCount === 0) return null;
 
   return (
-    <section className="mt-4 rounded-[10px] border border-[var(--line-soft)] bg-[var(--green-tint)] p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[14px] font-extrabold text-[var(--ink)]">
-          {selectedCount === 1
-            ? "1 student selected"
-            : `${selectedCount} students selected`}
-        </p>
-        <Button type="button" variant="secondary" disabled={saving} onClick={onClear}>
-          Clear
-        </Button>
-      </div>
+    <section className="mt-3 rounded-[10px] border border-[var(--line-soft)] bg-[var(--green-tint)] p-3">
+      <div className="grid gap-3 xl:grid-cols-[auto_minmax(15rem,1fr)_minmax(15rem,1fr)] xl:items-end">
+        <div className="flex min-h-10 items-center justify-between gap-4 xl:min-w-40">
+          <p className="text-[14px] font-extrabold text-[var(--ink)]">
+            {selectedCount === 1
+              ? "1 student selected"
+              : `${selectedCount} students selected`}
+          </p>
+          <button
+            type="button"
+            className="text-[13px] font-bold text-[var(--green-deep)] hover:text-[var(--green)] disabled:opacity-60"
+            disabled={saving}
+            onClick={onClear}
+          >
+            Clear
+          </button>
+        </div>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end">
           <label className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="text-[13px] font-bold text-[var(--ink-soft)]">
               Add to class
@@ -84,7 +89,7 @@ export function AssignSelectedBar({
           </Button>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end">
           <label className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="text-[13px] font-bold text-[var(--ink-soft)]">
               Enroll in course

@@ -5,15 +5,10 @@ import { GradingSection } from "@/grading";
 import {
   canManageBranding,
   canManageCustomizations,
-  showOrgSettingsFormActions,
 } from "@/organizations/model/role";
-import { PageFormActions } from "@/ui/PageFormActions";
 import { PageLoading } from "@/ui/PageLoading";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import {
-  ORG_SETTINGS_FORM_ID,
-  OrgSettingsForm,
-} from "./components/OrgSettingsForm";
+import { OrgSettingsForm } from "./components/OrgSettingsForm";
 import { BrandingSection } from "./components/BrandingSection";
 import { CustomizationsSection } from "./components/CustomizationsSection";
 import {
@@ -89,9 +84,6 @@ export function OrgSettingsPage() {
     );
   }
 
-  const formSection = isFormTab(activeTab) ? activeTab : "organization";
-  const showSettingsActions = showOrgSettingsFormActions(settings.role, activeTab);
-
   return (
     <div className="px-5 py-4 md:px-8">
       <div>
@@ -118,25 +110,9 @@ export function OrgSettingsPage() {
         </aside>
 
         <div className="min-w-0">
-          {showSettingsActions ? (
-            <div className="mb-4 flex min-h-10 justify-end">
-              <PageFormActions
-                formId={ORG_SETTINGS_FORM_ID}
-                saving={settings.saving}
-                hasChanges={settings.hasChanges}
-                cancelTo={`/my/${settings.organization.slug}`}
-              />
-            </div>
-          ) : null}
-
-          {/* Keep the settings form mounted on every tab so Save still has a
-              target when the viewer can edit those fields. */}
-          <div
-            className={isFormTab(activeTab) ? undefined : "hidden"}
-            aria-hidden={!isFormTab(activeTab)}
-          >
+          {isFormTab(activeTab) ? (
             <OrgSettingsForm
-              section={formSection}
+              section={activeTab}
               canEdit={settings.canEdit}
               name={settings.name}
               slug={settings.slug}
@@ -151,6 +127,12 @@ export function OrgSettingsPage() {
               phone={settings.phone}
               confirmPermalinkChange={settings.confirmPermalinkChange}
               slugChanged={settings.slugChanged}
+              hasChanges={
+                activeTab === "organization"
+                  ? settings.organizationHasChanges
+                  : settings.profileHasChanges
+              }
+              saving={settings.saving}
               error={settings.formError}
               onNameChange={settings.onNameChange}
               onSlugChange={settings.onSlugChange}
@@ -166,7 +148,7 @@ export function OrgSettingsPage() {
               onConfirmPermalinkChange={settings.onConfirmPermalinkChange}
               onSubmit={settings.onSubmit}
             />
-          </div>
+          ) : null}
 
           {activeTab === "grading" ? (
             <div role="tabpanel">

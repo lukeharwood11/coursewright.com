@@ -21,6 +21,8 @@ import {
 import { DEFAULT_SCHOOL_DAYS, sameSchoolDays, toggleSchoolDay, type SchoolDay } from "@/organizations/model/schoolDays";
 import { formatSlugInput } from "@/organizations/model/slug";
 import {
+  orgIdentityHaveChanges,
+  orgProfileHaveChanges,
   orgSettingsHaveChanges,
   validateUpdateOrganization,
 } from "@/organizations/model/updateOrganization";
@@ -111,7 +113,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
       const saved = await updateOrganization(organization.id, parsed.value);
       return { saved, previousSlug: organization.slug };
     },
-    onSuccess: async ({ saved, previousSlug }) => {
+    onSuccess: async ({ saved, previousSlug }, section: "organization" | "profile") => {
       setFormError(null);
       setConfirmPermalinkChange(false);
       await queryClient.invalidateQueries({
@@ -129,7 +131,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
         });
         navigate(`/my/${saved.slug}/settings`, { replace: true });
       }
-      toast("Organization saved.");
+      toast(section === "profile" ? "Profile saved." : "Organization saved.");
     },
     onError: (error: Error) => {
       toastCaughtError(error);
@@ -158,30 +160,36 @@ export function useOrgSettings(orgSlug: string | undefined) {
   }
 
   const slugChanged = Boolean(organization && slug !== organization.slug);
+  const draft = {
+    name,
+    slug,
+    orgType,
+    gradeScheme,
+    gradeLabelsText,
+    schoolDays,
+    about,
+    address,
+    website,
+    contactEmail,
+    phone,
+  };
   const hasChanges = organization
-    ? orgSettingsHaveChanges(
-        {
-          name,
-          slug,
-          orgType,
-          gradeScheme,
-          gradeLabelsText,
-          schoolDays,
-          about,
-          address,
-          website,
-          contactEmail,
-          phone,
-        },
-        organization,
-      )
+    ? orgSettingsHaveChanges(draft, organization)
+    : false;
+  const organizationHasChanges = organization
+    ? orgIdentityHaveChanges(draft, organization)
+    : false;
+  const profileHasChanges = organization
+    ? orgProfileHaveChanges(draft, organization)
     : false;
 
-  function onSubmit(event: FormEvent) {
+  function onSubmit(event: FormEvent, section: "organization" | "profile") {
     event.preventDefault();
-    if (!canEdit || !hasChanges) return;
+    const sectionDirty =
+      section === "organization" ? organizationHasChanges : profileHasChanges;
+    if (!canEdit || !sectionDirty) return;
     setFormError(null);
-    saveMutation.mutate();
+    saveMutation.mutate(section);
   }
 
   function onCancel() {
@@ -216,6 +224,8 @@ export function useOrgSettings(orgSlug: string | undefined) {
     confirmPermalinkChange,
     slugChanged,
     hasChanges,
+    organizationHasChanges,
+    profileHasChanges,
     formError,
     saving: saveMutation.isPending,
     onNameChange,

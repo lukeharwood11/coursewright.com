@@ -1,6 +1,7 @@
 -- Student role: claim sets student_profiles.user_id; published courses only.
+-- Changing student_email rotates a pending invite or revokes a claimed login.
 begin;
-select plan(6);
+select plan(14);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -67,7 +68,55 @@ select lives_ok(
   'staff can create a student invite'
 );
 
+select set_config(
+  'test.pending_student_invite_token',
+  (
+    select token
+    from admin_invites
+    where email = 'student-role-kid@example.com' and role = 'student'
+  ),
+  true
+);
+
+select lives_ok(
+  $$update student_profiles
+    set student_email = 'student-role-new@example.com'
+    where name = 'Kid Student Role'$$,
+  'staff can change the email while a student invite is pending'
+);
+
+select is_empty(
+  $$select id from admin_invites
+    where email = 'student-role-kid@example.com'
+      and role = 'student'
+      and accepted_at is null$$,
+  'changing the email invalidates the old pending invite'
+);
+
+select results_eq(
+  $$select email from admin_invites
+    where email = 'student-role-new@example.com'
+      and role = 'student'
+      and accepted_at is null$$,
+  array['student-role-new@example.com'::text],
+  'changing the email creates a replacement invite'
+);
+
+select isnt(
+  (
+    select token
+    from admin_invites
+    where email = 'student-role-new@example.com' and role = 'student'
+  ),
+  current_setting('test.pending_student_invite_token'),
+  'the replacement invite has a fresh token'
+);
+
 reset role;
+update auth.users
+set email = 'student-role-new@example.com'
+where id = 'ffff2222-2222-2222-2222-222222222222';
+
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'ffff2222-2222-2222-2222-222222222222', true);
 select set_config(
@@ -79,9 +128,9 @@ select set_config(
 select lives_ok(
   $$select claim_invite((
     select token from admin_invites
-    where email = 'student-role-kid@example.com' and role = 'student'
+    where email = 'student-role-new@example.com' and role = 'student'
   ))$$,
-  'student claims their invite'
+  'student claims the replacement invite'
 );
 
 select results_eq(
@@ -117,6 +166,49 @@ select results_eq(
   $$select title from courses where title = 'Student Role Offering'$$,
   array['Student Role Offering'::text],
   'student can read a published enrolled course'
+);
+
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'eeee1111-1111-1111-1111-111111111111', true);
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"eeee1111-1111-1111-1111-111111111111","role":"authenticated"}',
+  true
+);
+
+select lives_ok(
+  $$update student_profiles
+    set student_email = 'student-role-final@example.com'
+    where name = 'Kid Student Role'$$,
+  'staff can change the email after the student account is linked'
+);
+
+select is(
+  (select user_id from student_profiles where name = 'Kid Student Role'),
+  null::uuid,
+  'changing a linked email clears the student account link'
+);
+
+select is_empty(
+  $$select id from memberships
+    where user_id = 'ffff2222-2222-2222-2222-222222222222'
+      and role = 'student'$$,
+  'changing a linked email removes the student membership'
+);
+
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'ffff2222-2222-2222-2222-222222222222', true);
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"ffff2222-2222-2222-2222-222222222222","role":"authenticated"}',
+  true
+);
+
+select is_empty(
+  $$select title from courses where title = 'Student Role Offering'$$,
+  'the former student account can no longer read the published course'
 );
 
 select * from finish();

@@ -12,7 +12,11 @@ import {
   quizNumberValue,
   quizPossiblePoints,
 } from "@/quizzes/model/quiz";
-import type { WindowFields } from "@/quizzes/model/window";
+import {
+  applyWindowFromDate,
+  applyWindowUntilDate,
+  type WindowFields,
+} from "@/quizzes/model/window";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -41,30 +45,26 @@ function blankQuestion(): QuizQuestionDraft {
 }
 
 export function QuizEditorForm({
-  title,
-  description,
+  acceptEntries,
   windowFields,
   allowMultiple,
   autograde,
   shareKey,
   questions,
-  onTitle,
-  onDescription,
+  onAcceptEntries,
   onWindow,
   onAllowMultiple,
   onAutograde,
   onShareKey,
   onQuestions,
 }: {
-  title: string;
-  description: string;
+  acceptEntries: boolean;
   windowFields: WindowFields;
   allowMultiple: boolean;
   autograde: boolean;
   shareKey: boolean;
   questions: QuizQuestionDraft[];
-  onTitle: (value: string) => void;
-  onDescription: (value: string) => void;
+  onAcceptEntries: (value: boolean) => void;
   onWindow: (value: WindowFields) => void;
   onAllowMultiple: (value: boolean) => void;
   onAutograde: (value: boolean) => void;
@@ -77,100 +77,97 @@ export function QuizEditorForm({
 
   const possible = quizPossiblePoints(questions);
   return (
-    <div className="flex max-w-3xl flex-col gap-4">
-      <div className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3">
-        <p className="text-[13px] font-bold text-[var(--ink-soft)]">Possible points</p>
-        <p
-          className="text-[28px] font-semibold text-[var(--ink)]"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          {formatPoints(possible)}
-        </p>
-        <p className="text-[12.5px] text-[var(--ink-faint)]">
-          Each question starts at 1 point. Change a question to weight it.
-        </p>
-      </div>
-      <label className="flex flex-col gap-1">
-        <span className="text-[13px] font-bold text-[var(--ink-soft)]">Title</span>
-        <Input className="w-full" required value={title} onChange={(event) => onTitle(event.target.value)} />
-      </label>
-      <label className="flex flex-col gap-1">
-        <span className="text-[13px] font-bold text-[var(--ink-soft)]">Description</span>
-        <textarea
-          className={`${controlClass} min-h-[4.5rem] resize-y`}
-          value={description}
-          onChange={(event) => onDescription(event.target.value)}
-        />
-      </label>
-      <fieldset className="rounded-[10px] border border-[var(--line-soft)] p-4">
-        <legend className="px-1 text-[13px] font-bold text-[var(--ink-soft)]">
-          Accept entries
-        </legend>
-        <p className="text-[12.5px] text-[var(--ink-faint)]">
-          Leave both blank to print and download only. Families can submit only while the window is open.
-        </p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <WindowBound
-            label="Starting"
-            date={windowFields.fromDate}
-            time={windowFields.fromTime}
-            onDate={(fromDate) => onWindow({ ...windowFields, fromDate })}
-            onTime={(fromTime) => onWindow({ ...windowFields, fromTime })}
-          />
-          <WindowBound
-            label="Until"
-            date={windowFields.untilDate}
-            time={windowFields.untilTime}
-            onDate={(untilDate) => onWindow({ ...windowFields, untilDate })}
-            onTime={(untilTime) => onWindow({ ...windowFields, untilTime })}
-          />
+    <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:gap-6">
+      <aside className="flex w-full flex-col gap-4 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 xl:order-2 xl:sticky xl:top-4 xl:w-[20rem] xl:shrink-0">
+        <div>
+          <p className="text-[13px] font-bold text-[var(--ink-soft)]">Possible points</p>
+          <p
+            className="text-[28px] font-semibold text-[var(--ink)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {formatPoints(possible)}
+          </p>
         </div>
-      </fieldset>
-      <label className="flex items-start gap-2 text-[14.5px]">
-        <input
-          type="checkbox"
-          className="mt-1 h-4 w-4 accent-[var(--green)]"
-          checked={allowMultiple}
-          onChange={(event) => onAllowMultiple(event.target.checked)}
-        />
-        <span>
-          <span className="font-bold">Allow more than one attempt</span>
-          <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
-            Off means one entry per student.
+
+        <div className="border-t border-[var(--line-soft)] pt-3">
+          <label className="flex items-start gap-2 text-[14.5px]">
+            <input
+              type="checkbox"
+              className="mt-1 h-4 w-4 shrink-0 accent-[var(--green)]"
+              checked={acceptEntries}
+              onChange={(event) => onAcceptEntries(event.target.checked)}
+            />
+            <span className="font-bold">Accept entries</span>
+          </label>
+          {acceptEntries ? (
+            <div className="mt-3 flex flex-col gap-3 pl-6">
+              <p className="text-[12.5px] text-[var(--ink-faint)]">
+                Leave both blank to accept whenever this quiz is published.
+              </p>
+              <WindowBound
+                label="Starting"
+                date={windowFields.fromDate}
+                time={windowFields.fromTime}
+                onDate={(fromDate) => onWindow(applyWindowFromDate(windowFields, fromDate))}
+                onTime={(fromTime) => onWindow({ ...windowFields, fromTime })}
+              />
+              <WindowBound
+                label="Until"
+                date={windowFields.untilDate}
+                time={windowFields.untilTime}
+                onDate={(untilDate) => onWindow(applyWindowUntilDate(windowFields, untilDate))}
+                onTime={(untilTime) => onWindow({ ...windowFields, untilTime })}
+              />
+            </div>
+          ) : (
+            <p className="mt-1.5 pl-6 text-[12.5px] text-[var(--ink-faint)]">
+              Families can print and download only.
+            </p>
+          )}
+        </div>
+
+        <label className="flex items-start gap-2 border-t border-[var(--line-soft)] pt-3 text-[14.5px]">
+          <input
+            type="checkbox"
+            className="mt-1 h-4 w-4 shrink-0 accent-[var(--green)]"
+            checked={allowMultiple}
+            onChange={(event) => onAllowMultiple(event.target.checked)}
+          />
+          <span>
+            <span className="font-bold">Allow more than one attempt</span>
+            <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
+              Off means one entry per student.
+            </span>
           </span>
-        </span>
-      </label>
-      <label className="flex items-start gap-2 text-[14.5px]">
-        <input
-          type="checkbox"
-          className="mt-1 h-4 w-4 accent-[var(--green)]"
-          checked={autograde}
-          onChange={(event) => onAutograde(event.target.checked)}
-        />
-        <span>
-          <span className="font-bold">
-            Grade questions automatically and show the score right away
+        </label>
+
+        <label className="flex items-start gap-2 text-[14.5px]">
+          <input
+            type="checkbox"
+            className="mt-1 h-4 w-4 shrink-0 accent-[var(--green)]"
+            checked={autograde}
+            onChange={(event) => onAutograde(event.target.checked)}
+          />
+          <span className="font-bold">Show results immediately</span>
+        </label>
+
+        <label className="flex items-start gap-2 text-[14.5px]">
+          <input
+            type="checkbox"
+            className="mt-1 h-4 w-4 shrink-0 accent-[var(--green)]"
+            checked={shareKey}
+            onChange={(event) => onShareKey(event.target.checked)}
+          />
+          <span>
+            <span className="font-bold">Share answer key with parents</span>
+            <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
+              Students never see the answer key.
+            </span>
           </span>
-          <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
-            A correct number answer gets full points. Multiple choice splits points across the correct choices and subtracts a share for each wrong choice. Matching gives an equal share for each correct pair. Short answer and long answer wait for you.
-          </span>
-        </span>
-      </label>
-      <label className="flex items-start gap-2 text-[14.5px]">
-        <input
-          type="checkbox"
-          className="mt-1 h-4 w-4 accent-[var(--green)]"
-          checked={shareKey}
-          onChange={(event) => onShareKey(event.target.checked)}
-        />
-        <span>
-          <span className="font-bold">Share answer key with parents</span>
-          <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
-            Students never see the answer key.
-          </span>
-        </span>
-      </label>
-      <div className="flex flex-col gap-3">
+        </label>
+      </aside>
+
+      <div className="flex min-w-0 max-w-3xl flex-1 flex-col gap-3 xl:order-1">
         <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Questions</h2>
         {questions.map((question, index) => (
           <div key={`${question.id ?? "new"}-${index}`} className="rounded-[10px] border border-[var(--line-soft)] p-4">
@@ -192,49 +189,53 @@ export function QuizEditorForm({
                 onChange={(event) => patchQuestion(index, { prompt: event.target.value })}
               />
             </label>
-            <label className="mt-3 flex max-w-[10rem] flex-col gap-1">
-              <span className="text-[13px] font-bold text-[var(--ink-soft)]">Points</span>
-              <Input
-                type="number"
-                min={0.01}
-                step={0.01}
-                required
-                value={Number.isFinite(question.points) ? question.points : ""}
-                onChange={(event) =>
-                  patchQuestion(index, {
-                    points: event.target.value === "" ? Number.NaN : Number(event.target.value),
-                  })
-                }
-              />
-            </label>
-            <label className="mt-3 flex flex-col gap-1">
-              <span className="text-[13px] font-bold text-[var(--ink-soft)]">Kind</span>
-              <select
-                className={controlClass}
-                value={question.kind}
-                onChange={(event) => {
-                  const kind = parseCourseQuizKind(event.target.value);
-                  patchQuestion(index, {
-                    kind,
-                    answerLines:
-                      kind === "long_answer" ? clampAnswerLines(question.answerLines || 4) : question.answerLines,
-                    pairs:
-                      kind === "matching" && question.pairs.length === 0
-                        ? [
-                            { promptId: null, optionId: null, left: "", right: "" },
-                            { promptId: null, optionId: null, left: "", right: "" },
-                          ]
-                        : question.pairs,
-                  });
-                }}
-              >
-                <option value="multiple_choice">Multiple choice</option>
-                <option value="short_answer">Short answer</option>
-                <option value="number">Number</option>
-                <option value="matching">Matching</option>
-                <option value="long_answer">Long answer</option>
-              </select>
-            </label>
+            <div className="mt-3 flex flex-wrap items-end gap-3">
+              <label className="flex min-w-[12rem] flex-1 flex-col gap-1">
+                <span className="text-[13px] font-bold text-[var(--ink-soft)]">Kind</span>
+                <select
+                  className={controlClass}
+                  value={question.kind}
+                  onChange={(event) => {
+                    const kind = parseCourseQuizKind(event.target.value);
+                    patchQuestion(index, {
+                      kind,
+                      answerLines:
+                        kind === "long_answer"
+                          ? clampAnswerLines(question.answerLines || 4)
+                          : question.answerLines,
+                      pairs:
+                        kind === "matching" && question.pairs.length === 0
+                          ? [
+                              { promptId: null, optionId: null, left: "", right: "" },
+                              { promptId: null, optionId: null, left: "", right: "" },
+                            ]
+                          : question.pairs,
+                    });
+                  }}
+                >
+                  <option value="multiple_choice">Multiple choice</option>
+                  <option value="short_answer">Short answer</option>
+                  <option value="number">Number</option>
+                  <option value="matching">Matching</option>
+                  <option value="long_answer">Long answer</option>
+                </select>
+              </label>
+              <label className="flex w-[6.5rem] shrink-0 flex-col gap-1">
+                <span className="text-[13px] font-bold text-[var(--ink-soft)]">Points</span>
+                <Input
+                  type="number"
+                  min={0.01}
+                  step={0.01}
+                  required
+                  value={Number.isFinite(question.points) ? question.points : ""}
+                  onChange={(event) =>
+                    patchQuestion(index, {
+                      points: event.target.value === "" ? Number.NaN : Number(event.target.value),
+                    })
+                  }
+                />
+              </label>
+            </div>
             <QuestionFields
               question={question}
               onChange={(patch) => patchQuestion(index, patch)}
@@ -426,7 +427,7 @@ function WindowBound({
   return (
     <div>
       <p className="text-[13px] font-bold text-[var(--ink-soft)]">{label}</p>
-      <div className="mt-1 flex gap-2">
+      <div className="mt-1 flex flex-col gap-2">
         <Input type="date" value={date} onChange={(event) => onDate(event.target.value)} />
         <Input type="time" value={time} onChange={(event) => onTime(event.target.value)} />
       </div>

@@ -22,6 +22,7 @@ export type QuizRecord = {
   acceptsFrom: string | null;
   acceptsUntil: string | null;
   acceptsTimezone: string | null;
+  acceptEntries: boolean;
   allowMultipleAttempts: boolean;
   autogradeAndShow: boolean;
   shareAnswerKeyWithParents: boolean;
@@ -154,6 +155,7 @@ type QuizRow = {
   accepts_from: string | null;
   accepts_until: string | null;
   accepts_timezone: string | null;
+  accept_entries: boolean;
   allow_multiple_attempts: boolean;
   autograde_and_show: boolean;
   share_answer_key_with_parents: boolean;
@@ -173,6 +175,7 @@ function mapQuiz(row: QuizRow): QuizRecord {
     acceptsFrom: row.accepts_from,
     acceptsUntil: row.accepts_until,
     acceptsTimezone: row.accepts_timezone,
+    acceptEntries: row.accept_entries,
     allowMultipleAttempts: row.allow_multiple_attempts,
     autogradeAndShow: row.autograde_and_show,
     shareAnswerKeyWithParents: row.share_answer_key_with_parents,
@@ -181,7 +184,7 @@ function mapQuiz(row: QuizRow): QuizRecord {
 }
 
 const quizColumns =
-  "id, organization_id, course_id, unit_id, title, description, position, visibility, accepts_from, accepts_until, accepts_timezone, allow_multiple_attempts, autograde_and_show, share_answer_key_with_parents, deleted_at";
+  "id, organization_id, course_id, unit_id, title, description, position, visibility, accepts_from, accepts_until, accepts_timezone, accept_entries, allow_multiple_attempts, autograde_and_show, share_answer_key_with_parents, deleted_at";
 
 export async function listQuizzesForCourse(courseId: number): Promise<QuizRecord[]> {
   const db = requireSupabase();
@@ -283,6 +286,7 @@ export async function updateQuiz(
     title?: string;
     description?: string;
     visibility?: MaterialVisibility;
+    acceptEntries?: boolean;
     acceptsFrom?: string | null;
     acceptsUntil?: string | null;
     acceptsTimezone?: string | null;
@@ -300,6 +304,7 @@ export async function updateQuiz(
       title: patch.title,
       description: patch.description,
       visibility: patch.visibility,
+      accept_entries: patch.acceptEntries,
       accepts_from: patch.acceptsFrom,
       accepts_until: patch.acceptsUntil,
       accepts_timezone: patch.acceptsTimezone,

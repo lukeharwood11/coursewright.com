@@ -436,39 +436,25 @@ export async function createDiscussionMessage(args: {
   mentionedUserIds?: string[];
 }): Promise<void> {
   const db = requireSupabase();
-  const { data, error } = await db
-    .from("discussion_messages")
-    .insert({
-      discussion_id: args.discussionId,
-      author_id: args.authorId,
-      body: args.body,
-    })
-    .select("id")
-    .maybeSingle();
+  // One RPC so @mentions and class-lead/instructor post fan-out share a
+  // transaction — mentioned people get one Activity row, not a post + mention.
+  const mentionIds = uniqueMentionIds(args.mentionedUserIds, args.authorId);
+  const { data, error } = await db.rpc("post_discussion_message", {
+    p_discussion_id: args.discussionId,
+    p_body: args.body,
+    p_mentioned_user_ids: mentionIds,
+  });
 
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("The message was posted but couldn’t be opened yet.");
-
-  try {
-    await insertMessageMentions({
-      messageId: data.id,
-      authorId: args.authorId,
-      mentionedUserIds: args.mentionedUserIds,
-    });
-  } catch (cause) {
-    await abandonPostedMessage({
-      messageId: data.id,
-      authorId: args.authorId,
-    });
-    throw cause instanceof Error
-      ? cause
-      : new Error("Couldn’t mention people on that message.");
+  const messageId = typeof data === "number" ? data : Number(data);
+  if (!Number.isFinite(messageId) || messageId <= 0) {
+    throw new Error("The message was posted but couldn’t be opened yet.");
   }
 
   if (args.attachments.length === 0) return;
 
   const rows = args.attachments.map((attachment, index) => ({
-    message_id: data.id,
+    message_id: messageId,
     kind: attachment.kind,
     file_id: attachment.kind === "file" ? (attachment.fileId ?? null) : null,
     material_id:
@@ -495,7 +481,7 @@ export async function createDiscussionMessage(args: {
           deleted_at: new Date().toISOString(),
           deleted_by: args.authorId,
         })
-        .eq("id", data.id);
+        .eq("id", messageId);
     }
     throw new Error(attachmentError.message);
   }
@@ -779,15 +765,4 @@ async function insertMessageMentions(args: {
     { onConflict: "message_id,user_id", ignoreDuplicates: true },
   );
   if (error) throw new Error(error.message);
-}
-
-async function abandonPostedMessage(args: {
-  messageId: number;
-  authorId: string;
-}): Promise<void> {
-  try {
-    await softDeleteDiscussionMessage(args.messageId, args.authorId);
-  } catch {
-    // Keep the original post error.
-  }
 }

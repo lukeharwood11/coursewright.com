@@ -8,6 +8,11 @@ import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import { getOrganization } from "@/organizations/databridge/organizations";
 import {
+  listOrgPendingStudentInvites,
+  sendOrganizationInviteEmail,
+  staffInviteQueryKeys,
+} from "@/organizations/databridge/staffInvites";
+import {
   classQueryKeys,
   listClassesForStudent,
 } from "@/roster/databridge/classes";
@@ -89,17 +94,70 @@ export function useStudentProfile() {
         gradeLabels: organizationQuery.data?.gradeLabels ?? [],
       });
       if (!parsed.ok) throw new Error(parsed.error);
-      return updateStudent(student.id, parsed.value);
+      const emailChanged = parsed.value.studentEmail !== student.studentEmail;
+      const hadLinkedAccount = Boolean(student.userId);
+      const saved = await updateStudent(student.id, parsed.value);
+
+      if (!emailChanged || !saved.studentEmail) {
+        return {
+          saved,
+          emailChanged,
+          hadLinkedAccount,
+          replacementInvite: null,
+          inviteEmailSent: null,
+        };
+      }
+
+      const pending = await listOrgPendingStudentInvites(organization.id);
+      const replacementInvite =
+        pending.find(
+          (invite) =>
+            invite.email === saved.studentEmail &&
+            invite.studentProfileIds.includes(saved.id),
+        ) ?? null;
+      const inviteEmail = replacementInvite
+        ? await sendOrganizationInviteEmail(replacementInvite.id)
+        : null;
+
+      return {
+        saved,
+        emailChanged,
+        hadLinkedAccount,
+        replacementInvite,
+        inviteEmailSent: inviteEmail?.sent ?? null,
+      };
     },
-    onSuccess: async (saved) => {
+    onSuccess: async (result) => {
       setFormError(null);
-      await queryClient.invalidateQueries({
-        queryKey: studentQueryKeys.detail(saved.id),
-      });
-      await queryClient.invalidateQueries({
-        queryKey: studentQueryKeys.list(organization.id),
-      });
-      toast("Student saved.");
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: studentQueryKeys.detail(result.saved.id),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: studentQueryKeys.list(organization.id),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: staffInviteQueryKeys.students(organization.id),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: staffInviteQueryKeys.staff(organization.id),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["student-account", result.saved.id],
+        }),
+      ]);
+
+      if (result.replacementInvite) {
+        toast(
+          result.inviteEmailSent
+            ? `Student saved. New invite sent to ${result.replacementInvite.email}.`
+            : "Student saved and the old invite was canceled, but the new invite email didn’t send.",
+        );
+      } else if (result.emailChanged && result.hadLinkedAccount) {
+        toast("Student saved. The previous account is no longer linked to this student.");
+      } else {
+        toast("Student saved.");
+      }
     },
     onError: (error: Error) => {
       setFormError(caughtErrorMessage(error));

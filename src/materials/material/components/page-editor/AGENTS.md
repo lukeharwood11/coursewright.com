@@ -4,7 +4,7 @@ Lexical page editor chrome: icon toolbar, slash menu, insert dialogs, floating f
 
 ## Scope
 
-- Playground-style **icon** toolbar (not word buttons)
+- Playground-style **icon** toolbar (not word buttons); optional trailing **Version history** (material edit)
 - Notion-like **/** slash commands and markdown shortcuts
 - Popups for table size, link URL, video URL, and **audio** (upload or record via `AudioSnippetRecorder`)
 - Paste image → upload via `materials/databridge` (same path as `/file`)

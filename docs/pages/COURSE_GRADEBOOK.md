@@ -17,7 +17,7 @@ One workbench for a course: see who still needs a grade, set quiz points, and se
 - One score path. Quiz points stay on the attempt (`auto_points` / `teacher_points`). **Save grade** uses the same lock as the quiz page (`teacher_graded_at`), with an optional note stored only on the override audit.
 - Display labels are derived from the org grading scale. Mode `none` shows percents and hides the letter override controls.
 - **Needs a grade** lists attempts that are not teacher-locked. Opening one loads the answers and **Save grade**.
-- The matrix is one row per active enrollment. Cells open the same Save grade form.
+- The student list is one collapsed row per active enrollment. Each row shows quiz progress and the course final. Expanding it shows every course quiz and the final controls; attempted quizzes open the same Save grade form.
 - **Final** is the unweighted mean of locked percents (points possible 0 and unlocked attempts stay out). When mode is letter or pass/fail, the teacher can save an override label plus a note. The row shows who saved it and when. **Use the average** clears the override.
 - A class filter only hides rows. It does not store a class grade.
 - If the scale changes after an override, a banner asks the teacher to confirm. Overrides are not wiped.
@@ -28,7 +28,8 @@ One workbench for a course: see who still needs a grade, set quiz points, and se
 - Course title
 - Class filter (roster convenience)
 - Needs-a-grade queue: student, quiz title
-- Matrix: student, each quiz (points label or “Needs grade”), final percent or override
+- Student rows: student, attempted quiz count, needs-grade count, final percent or override
+- Expanded student details: every course quiz (grade, “Needs grade,” or no-attempt dash) and final controls
 - Override stamp: actor name and time
 - Report card drafts: student, status
 
@@ -36,7 +37,7 @@ One workbench for a course: see who still needs a grade, set quiz points, and se
 
 - Needs a grade
 - Save grade form (points + optional note)
-- Student matrix
+- Expandable student rows
 - Report card drafts
 
 ## Primary actions

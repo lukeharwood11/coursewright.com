@@ -29,24 +29,45 @@ import {
 
 const now = new Date("2026-09-23T15:00:00.000Z");
 
-test("no accepting window is download only", () => {
+test("accept entries off is download only", () => {
   assert.equal(
-    quizWindowState({ acceptsFrom: null, acceptsUntil: null }, now),
+    quizWindowState(
+      { acceptEntries: false, acceptsFrom: null, acceptsUntil: null },
+      now,
+    ),
     "download_only",
+  );
+});
+
+test("accept entries on with no dates is open", () => {
+  assert.equal(
+    quizWindowState(
+      { acceptEntries: true, acceptsFrom: null, acceptsUntil: null },
+      now,
+    ),
+    "open",
   );
 });
 
 test("window bounds reject early and late instants", () => {
   assert.equal(
     quizWindowState(
-      { acceptsFrom: "2026-09-23T16:00:00.000Z", acceptsUntil: null },
+      {
+        acceptEntries: true,
+        acceptsFrom: "2026-09-23T16:00:00.000Z",
+        acceptsUntil: null,
+      },
       now,
     ),
     "not_yet",
   );
   assert.equal(
     quizWindowState(
-      { acceptsFrom: null, acceptsUntil: "2026-09-23T15:00:00.000Z" },
+      {
+        acceptEntries: true,
+        acceptsFrom: null,
+        acceptsUntil: "2026-09-23T15:00:00.000Z",
+      },
       now,
     ),
     "closed",
@@ -54,6 +75,7 @@ test("window bounds reject early and late instants", () => {
   assert.equal(
     quizWindowState(
       {
+        acceptEntries: true,
         acceptsFrom: "2026-09-23T14:00:00.000Z",
         acceptsUntil: "2026-09-23T16:00:00.000Z",
       },

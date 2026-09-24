@@ -4,11 +4,19 @@ export { Badge } from "./Badge";
 export { PublishedBadge } from "./PublishedBadge";
 export { Button, ButtonLink } from "./Button";
 export { ConfirmDialog } from "./ConfirmDialog";
+export { DescriptionDialog } from "./DescriptionDialog";
 export { DetailPageHeader } from "./DetailPageHeader";
 export { InfoHint } from "./InfoHint";
 export { Input } from "./Input";
 export { PageFormActions } from "./PageFormActions";
 export { PageLoading } from "./PageLoading";
+export {
+  SegmentButton,
+  SegmentGroup,
+  Tab,
+  TabList,
+  segmentButtonClass,
+} from "./Tabs";
 export { isNetworkError } from "./networkError";
 export {
   caughtErrorMessage,

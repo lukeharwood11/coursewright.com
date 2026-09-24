@@ -34,11 +34,15 @@ export function useOrgBranding(organizationId: number | undefined) {
   const [formError, setFormError] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
 
-  useEffect(() => {
+  function resetDraft() {
     setAccentText(saved?.accentColor ?? "");
     setIconFile(null);
     setRemoveIcon(false);
     setFormError(null);
+  }
+
+  useEffect(() => {
+    resetDraft();
   }, [saved?.accentColor, saved?.iconPath, saved?.updatedAt]);
 
   useEffect(() => {
@@ -53,7 +57,7 @@ export function useOrgBranding(organizationId: number | undefined) {
 
   const savedAccent = saved?.accentColor ?? "";
   const draftAccent = accentText.trim() === "" ? "" : (parseDraft(accentText) ?? accentText.trim());
-  const hasChanges = draftAccent !== savedAccent || iconFile != null || removeIcon;
+  const dirty = draftAccent !== savedAccent || iconFile != null || removeIcon;
   const accentCheck = validateAccentInput(accentText);
   const accentError = accentText.trim() && !accentCheck.ok ? accentCheck.error : null;
 
@@ -160,7 +164,8 @@ export function useOrgBranding(organizationId: number | undefined) {
     iconFileName: iconFile?.name ?? null,
     preview,
     formError: accentError ?? formError,
-    hasChanges: hasChanges && !accentError,
+    hasChanges: dirty && !accentError,
+    isDirty: dirty,
     saving: saveMutation.isPending,
     removing: removeMutation.isPending,
     confirmRemove,
@@ -169,6 +174,7 @@ export function useOrgBranding(organizationId: number | undefined) {
     onIconChange,
     onRemoveIcon,
     onSave: () => saveMutation.mutate(),
+    onReset: resetDraft,
     onAskRemove: () => setConfirmRemove(true),
     onCancelRemove: () => setConfirmRemove(false),
     onConfirmRemove: () => removeMutation.mutate(),

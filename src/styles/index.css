@@ -287,6 +287,16 @@ body {
   color: var(--green-deep);
 }
 
+.cw-editor-menu-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.cw-editor-menu-item:disabled:hover {
+  background: transparent;
+  color: var(--ink);
+}
+
 .cw-editor-menu-icon {
   display: inline-flex;
   height: 28px;

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { Button, ButtonLink } from "@/ui/Button";
 import { formatGradeDisplay } from "@/grading/model/scale";
@@ -21,8 +22,9 @@ export function StudentGradesSection({ studentId }: { studentId: number }) {
           {canEditGradingScale(role) && grades.canAct ? (
             <Link
               to={gradingSettingsPath(slug)}
-              className="text-[13px] font-bold text-[var(--green)]"
+              className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[var(--green)]"
             >
+              <Cog6ToothIcon className="h-4 w-4" aria-hidden />
               Grading settings
             </Link>
           ) : null}

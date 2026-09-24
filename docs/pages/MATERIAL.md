@@ -53,7 +53,7 @@ View (and edit) a single material placement — the thing parents open from this
 **Derived / chrome**
 
 - Print and Share controls
-- Version history entry (who/when) when exposed — TBD UX
+- Version history entry (who/when) — **Version history** dialog on edit: browse versions, preview, restore
 
 ## Contents
 
@@ -84,11 +84,16 @@ View (and edit) a single material placement — the thing parents open from this
 
 ### Edit
 
+Word-like layout (same condensed chrome as resource / quiz edit): compact header; page editor fills most of the viewport.
+
 - **Edit URL:** `…/materials/<material_id>/edit` (locked — [URLS.md](../URLS.md))
-- Placement fields + page content: **Save** / **Cancel** (reads **Close** when unchanged) in the page header; on desktop also **Save & close** (primary; saves then returns to the material view; when unchanged, just closes). Save disabled when unchanged; Cancel returns to the material view (confirms if dirty)
-- **page:** [Lexical](https://lexical.dev/) WYSIWYG with a playground-style **icon** toolbar (not word buttons). Headings, lists, quotes, tables, links, video URL embeds, in-page files, **audio** insert (upload or record), **quizzes** with marked correct answers. Type `/` to insert a block. Table insert asks for rows and columns. Audio insert opens the same recorder UI used on file materials. A version is stored only when the instructor saves and something changed — not per keystroke.
+- No “Edit …” page title. One header row: back, editable **title** beside it, quiet **Add description** / **Edit description** (small dialog), **Save** / **Cancel** (reads **Close** when unchanged); on desktop also **Save & close** (primary; saves then returns to the material view). **Cmd/Ctrl+S** saves when there are changes. Below the `md` breakpoint those actions collapse into a header **⋯** menu. Leaving the title field, pressing **Enter**, or leaving the editor (back / Close / Cancel) saves the title on its own.
+- Description via the header button (not an always-visible field).
+- Link URL when kind is link (slim field under the header).
+- Assignment / due dates and **Accept submissions** settings sit below the content (page editor / file / link note).
+- **page:** Lexical editor fills most of the viewport (same chrome as resource document edit). A version is stored only when the instructor saves and something changed — not per keystroke.
 - **link / file:** edit URL or replace file (file replace → new FileVersion)
-- Versioning / who changed what / revert dangerous actions
+- **Version history** sits in the page editor toolbar (labeled on desktop; **⋯** on small screens). Link/file materials expose it in the edit header instead. The dialog browses past versions with preview; **Restore this version** confirms before applying.
 - Soft deletes only
 - **P1:** Instance vs template: promote opt-in; overrides block template sync for that resource
 
@@ -99,11 +104,11 @@ View (and edit) a single material placement — the thing parents open from this
 - **Download** (file materials)
 - **Preview** (PDF — fullscreen) / **Expand** (image)
 - Play audio (custom player) / video (native)
-- **Edit** → `…/edit` (editors); on edit: **Save**, **Cancel**/**Close**, and (desktop) **Save & close**
+- **Edit** → `…/edit` (editors); on edit: compact header with **Save**, **Cancel**/**Close**, (desktop) **Save & close**, and description dialog; title saves on blur
 - Toggle important now
 - **Accept submissions** (and allowed files, submissions allowed, past-due rule)
 - **Publish / unpublish**
-- Revert version (when exposed)
+- **Version history** (edit — browse / preview / restore)
 
 ## Parent variant
 

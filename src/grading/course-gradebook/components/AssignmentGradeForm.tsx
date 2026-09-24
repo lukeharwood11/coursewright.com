@@ -41,9 +41,9 @@ export function AssignmentGradeForm({
 
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Save grade</h2>
-        <Button type="button" variant="secondary" onClick={onClose}>
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="min-w-0 text-[15.5px] font-extrabold text-[var(--ink)]">Save grade</h2>
+        <Button type="button" variant="secondary" className="shrink-0" onClick={onClose}>
           Close
         </Button>
       </div>

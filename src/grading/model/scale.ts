@@ -22,14 +22,114 @@ export const EMPTY_GRADING_SCALE: GradingScale = {
   updatedAt: null,
 };
 
-/** Example from the product lock. One band starts at 0. */
-export const STARTER_LETTER_BANDS: LetterBand[] = [
+export type LetterBandPreset = {
+  id: string;
+  /** Short control label in Org Settings → Grading. */
+  label: string;
+  bands: LetterBand[];
+};
+
+/** Classic A–F with A at 92. One band starts at 0. */
+export const CLASSIC_ABCDF_BANDS: LetterBand[] = [
   { label: "A", minPercent: 92 },
   { label: "B", minPercent: 84 },
   { label: "C", minPercent: 76 },
   { label: "D", minPercent: 68 },
   { label: "F", minPercent: 0 },
 ];
+
+/** Dual letters (A, AB, B, …) with no D. One band starts at 0. */
+export const AB_DUAL_BANDS: LetterBand[] = [
+  { label: "A", minPercent: 93 },
+  { label: "AB", minPercent: 88 },
+  { label: "B", minPercent: 83 },
+  { label: "BC", minPercent: 78 },
+  { label: "C", minPercent: 73 },
+  { label: "CD", minPercent: 68 },
+  { label: "F", minPercent: 0 },
+];
+
+/** Plus/minus letters. One band starts at 0. */
+export const PLUS_MINUS_BANDS: LetterBand[] = [
+  { label: "A+", minPercent: 97 },
+  { label: "A", minPercent: 93 },
+  { label: "A-", minPercent: 90 },
+  { label: "B+", minPercent: 87 },
+  { label: "B", minPercent: 83 },
+  { label: "B-", minPercent: 80 },
+  { label: "C+", minPercent: 77 },
+  { label: "C", minPercent: 73 },
+  { label: "C-", minPercent: 70 },
+  { label: "D+", minPercent: 67 },
+  { label: "D", minPercent: 63 },
+  { label: "D-", minPercent: 60 },
+  { label: "F", minPercent: 0 },
+];
+
+export const LETTER_BAND_PRESETS: LetterBandPreset[] = [
+  { id: "classic_abcdf", label: "Classic A–F (92)", bands: CLASSIC_ABCDF_BANDS },
+  { id: "ab_dual", label: "A / AB / B…", bands: AB_DUAL_BANDS },
+  { id: "plus_minus", label: "A+ / A / A-…", bands: PLUS_MINUS_BANDS },
+];
+
+/** Default when switching into Letters with an empty band list. */
+export const STARTER_LETTER_BANDS: LetterBand[] = CLASSIC_ABCDF_BANDS;
+
+function bandKey(band: LetterBand): string {
+  return `${band.label.trim()}\0${Math.round(band.minPercent * 100) / 100}`;
+}
+
+export function letterBandsMatch(a: readonly LetterBand[], b: readonly LetterBand[]): boolean {
+  if (a.length !== b.length) return false;
+  const left = [...a].map(bandKey).sort();
+  const right = [...b].map(bandKey).sort();
+  return left.every((key, index) => key === right[index]);
+}
+
+/** Which preset matches the current bands, if any. */
+export function matchingLetterPresetId(bands: readonly LetterBand[]): string | null {
+  const preset = LETTER_BAND_PRESETS.find((entry) => letterBandsMatch(bands, entry.bands));
+  return preset?.id ?? null;
+}
+
+export type LetterBandRange = {
+  label: string;
+  minPercent: number;
+  /** Inclusive upper bound for display (higher band wins the shared cut). */
+  maxPercent: number;
+};
+
+function inclusiveMaxBelow(nextMin: number): number {
+  const stepped = Math.round(nextMin * 100) / 100;
+  if (Number.isInteger(stepped)) return stepped - 1;
+  return Math.round((stepped - 0.01) * 100) / 100;
+}
+
+/** Display ranges from floors. Sorted high → low. */
+export function letterBandRanges(bands: readonly LetterBand[]): LetterBandRange[] {
+  const sorted = [...bands].sort((a, b) => b.minPercent - a.minPercent);
+  return sorted.map((band, index) => {
+    const higher = sorted[index - 1];
+    const maxPercent = higher ? inclusiveMaxBelow(higher.minPercent) : 100;
+    return {
+      label: band.label.trim() || "—",
+      minPercent: Math.round(band.minPercent * 100) / 100,
+      maxPercent,
+    };
+  });
+}
+
+export function formatPercentNumber(percent: number): string {
+  const rounded = Math.round(percent * 100) / 100;
+  return rounded.toFixed(2).replace(/\.?0+$/, "");
+}
+
+export function formatLetterBandRange(range: LetterBandRange): string {
+  if (range.minPercent === range.maxPercent) {
+    return `${range.label} ${formatPercentNumber(range.minPercent)}`;
+  }
+  return `${range.label} ${formatPercentNumber(range.minPercent)}–${formatPercentNumber(range.maxPercent)}`;
+}
 
 export function parseGradingMode(value: string | null | undefined): GradingMode {
   if (value === "pass_fail" || value === "letter" || value === "none") return value;

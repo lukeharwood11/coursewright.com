@@ -11,7 +11,7 @@ Two-way **discussions**: a thread for **one course** or **one class**. Title, fl
 - Composer: plain textarea by default; **T** activates the same Lexical chrome as page materials (toolbar, `/`, floating format) without quiz / in-page file upload; **@** mentions a person on the thread; file icon; **+** opens modal for material or link
 - Parent list of threads that apply to linked students (same URL; student chrome / Student view)
 - Sidebar unread count (red) of threads with new activity since `last_read_at`
-- Staff compose: optional **Notify everyone** (Activity notifications). Course instructors / class leads, plus people who started or posted on the thread, are notified of posts (one Activity item per discussion). **@mentions** also notify that person.
+- Staff compose: optional **Notify everyone** (Activity notifications). Course instructors / class leads, plus people who started or posted on the thread, are notified of posts (one Activity item per discussion). **@mentions** upgrade that same row when the person is also a lead/instructor — they do not get a second ping.
 - Realtime: `databridge/` subscribes via the shared Supabase client; page hooks update TanStack Query
 
 ## Rules

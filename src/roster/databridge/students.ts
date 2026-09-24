@@ -9,6 +9,7 @@ export type StudentSummary = {
   gradeLevel: string | null;
   parentEmail: string | null;
   studentEmail: string | null;
+  userId?: string | null;
 };
 
 export const studentQueryKeys = {
@@ -23,6 +24,7 @@ export type StudentRow = {
   grade_level: string | null;
   parent_email: string | null;
   student_email: string | null;
+  user_id: string | null;
 };
 
 export function toStudentSummary(row: StudentRow): StudentSummary {
@@ -33,11 +35,12 @@ export function toStudentSummary(row: StudentRow): StudentSummary {
     gradeLevel: row.grade_level,
     parentEmail: row.parent_email,
     studentEmail: row.student_email,
+    userId: row.user_id,
   };
 }
 
 export const STUDENT_COLUMNS =
-  "id, organization_id, name, grade_level, parent_email, student_email";
+  "id, organization_id, name, grade_level, parent_email, student_email, user_id";
 
 export async function listStudents(
   organizationId: number,

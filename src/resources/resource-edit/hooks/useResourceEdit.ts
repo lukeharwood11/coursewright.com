@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { SerializedEditorState } from "lexical";
 import { saveResourceDocument } from "@/resources/databridge/blocks";
+import { updateResourceItem } from "@/resources/databridge/items";
 import { editorStateToBlocks } from "@/materials/model/pageContent";
 import { useResource } from "@/resources/resource/hooks/useResource";
 import { validateResourceLinkUrl, validateResourceTitle } from "@/resources/model/validate";
@@ -13,11 +14,18 @@ export function useResourceEdit() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
+  const [savedTitle, setSavedTitle] = useState("");
   const [saving, setSaving] = useState(false);
+  const [savingTitle, setSavingTitle] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [contentBaseline, setContentBaseline] = useState<string | null>(null);
   const [contentDraft, setContentDraft] = useState<string | null>(null);
   const [baselineReady, setBaselineReady] = useState(false);
+  const titleCommitRef = useRef<Promise<boolean> | null>(null);
+  const titleRef = useRef(title);
+  const savedTitleRef = useRef(savedTitle);
+  titleRef.current = title;
+  savedTitleRef.current = savedTitle;
 
   useEffect(() => {
     setBaselineReady(false);
@@ -28,16 +36,17 @@ export function useResourceEdit() {
   useEffect(() => {
     if (!page.item) return;
     setTitle(page.item.title);
+    setSavedTitle(page.item.title);
     setDescription(page.item.description);
     setUrl(page.item.url ?? "");
-  }, [page.item]);
+  }, [page.item?.id]);
 
   const placementChanged = Boolean(
     page.item &&
-      (title !== page.item.title ||
-        description !== page.item.description ||
+      (description !== page.item.description ||
         (page.item.type === "link" && url !== (page.item.url ?? ""))),
   );
+  // Name is saved on blur / Enter / leave, so it must not enable Save.
   const contentChanged =
     page.item?.type === "document" &&
     baselineReady &&
@@ -55,14 +64,58 @@ export function useResourceEdit() {
     setContentDraft(json);
   }
 
+  /**
+   * Saves the name on blur, Enter, or leave. Coalesces overlapping calls.
+   * Invalid names revert to the last saved title.
+   */
+  async function commitTitle(): Promise<boolean> {
+    if (titleCommitRef.current) return titleCommitRef.current;
+    const run = (async () => {
+      if (!page.item || saving) return true;
+      const next = titleRef.current.trim();
+      const previous = savedTitleRef.current;
+      if (next === previous) {
+        setTitle(previous);
+        return true;
+      }
+      const titleError = validateResourceTitle(next);
+      if (titleError) {
+        setError(titleError);
+        setTitle(previous);
+        return false;
+      }
+      setSavingTitle(true);
+      setError(null);
+      try {
+        const updated = await updateResourceItem(page.item.id, { title: next });
+        setTitle(updated.title);
+        setSavedTitle(updated.title);
+        page.invalidate();
+        return true;
+      } catch (caught: unknown) {
+        setError(
+          isNetworkError(caught)
+            ? "Failed to fetch"
+            : caught instanceof Error
+              ? caught.message
+              : "Couldn’t save.",
+        );
+        return false;
+      } finally {
+        setSavingTitle(false);
+      }
+    })();
+    titleCommitRef.current = run.finally(() => {
+      titleCommitRef.current = null;
+    });
+    return titleCommitRef.current;
+  }
+
   /** Returns true when save succeeded or there was nothing to save. */
   async function save(): Promise<boolean> {
     if (!page.item) return false;
-    const titleError = validateResourceTitle(title);
-    if (titleError) {
-      setError(titleError);
-      return false;
-    }
+    const titleOk = await commitTitle();
+    if (!titleOk) return false;
     if (page.item.type === "link") {
       const urlError = validateResourceLinkUrl(url);
       if (urlError) {
@@ -81,7 +134,7 @@ export function useResourceEdit() {
       }
       await saveResourceDocument({
         itemId: page.item.id,
-        title: title.trim(),
+        title: savedTitleRef.current || titleRef.current.trim(),
         description,
         url: page.item.type === "link" ? url.trim() : undefined,
         blocks,
@@ -110,11 +163,12 @@ export function useResourceEdit() {
     formId: FORM_ID,
     title,
     setTitle,
+    commitTitle,
     description,
     setDescription,
     url,
     setUrl,
-    saving,
+    saving: saving || savingTitle,
     error,
     hasChanges: placementChanged || contentChanged,
     onDraftChange,

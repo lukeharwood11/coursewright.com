@@ -3105,6 +3105,7 @@ export type Database = {
       }
       quizzes: {
         Row: {
+          accept_entries: boolean
           accepts_from: string | null
           accepts_timezone: string | null
           accepts_until: string | null
@@ -3127,6 +3128,7 @@ export type Database = {
           visibility: string
         }
         Insert: {
+          accept_entries?: boolean
           accepts_from?: string | null
           accepts_timezone?: string | null
           accepts_until?: string | null
@@ -3149,6 +3151,7 @@ export type Database = {
           visibility?: string
         }
         Update: {
+          accept_entries?: boolean
           accepts_from?: string | null
           accepts_timezone?: string | null
           accepts_until?: string | null
@@ -3556,6 +3559,14 @@ export type Database = {
           role: string
           user_id: string
         }[]
+      }
+      post_discussion_message: {
+        Args: {
+          p_body: string
+          p_discussion_id: number
+          p_mentioned_user_ids?: string[]
+        }
+        Returns: number
       }
       begin_material_submission: {
         Args: {

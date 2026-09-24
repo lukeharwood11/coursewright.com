@@ -9,6 +9,7 @@ import {
 } from "@/grading/databridge/scales";
 import { canEditGradingScale } from "@/grading/model/access";
 import {
+  LETTER_BAND_PRESETS,
   STARTER_LETTER_BANDS,
   validateScaleDraft,
   type GradingMode,
@@ -75,6 +76,7 @@ export function useOrgGrading() {
     passThreshold,
     setPassThreshold,
     bands,
+    presets: LETTER_BAND_PRESETS,
     error,
     saving: save.isPending,
     setModeAndDefaults: (next: GradingMode) => {
@@ -85,7 +87,10 @@ export function useOrgGrading() {
     removeBand: (index: number) =>
       setBands((current) => current.filter((_, i) => i !== index)),
     updateBand,
-    useStarterBands: () => setBands(STARTER_LETTER_BANDS),
+    applyPreset: (presetId: string) => {
+      const preset = LETTER_BAND_PRESETS.find((entry) => entry.id === presetId);
+      if (preset) setBands(preset.bands.map((band) => ({ ...band })));
+    },
     onSave: () => save.mutate(),
   };
 }

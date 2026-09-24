@@ -17,9 +17,9 @@ Same screen as [RESOURCES](./RESOURCES.md) scoped to this folder.
 
 - Path bar: Resources / ancestor folders (links) / this folder (plain text).
 - Click a folder **icon** to expand its contents in place. Click a name to open that folder or item.
-- Editors who can edit this folder: **+ New** (Folder / Document / Link / Upload files); right-click the pane to create; bulk upload into this folder. Staff: **Manage access** (gear) on the right of the title — **Parents** and **Students** tabs (each has its own “can see” setting and specific people). A summary at the bottom states both audiences. **⋯** beside it: **Rename** and **Move** (outline folder picker).
+- Editors who can edit this folder: **+ New** (Folder / Document / Link / Upload files); right-click the pane to create; bulk upload into this folder. Staff: **Manage access** (gear) on the right of the title — **Parents** and **Students** tabs (each has its own “can see” setting and specific people). Small cards at the bottom name each audience that can open it. **⋯** beside it: **Rename** and **Move** (outline folder picker).
 - Checkboxes and **Select all** match [RESOURCES](./RESOURCES.md).
-- Right-click a folder or item, or use its **⋯** beside the name (editors): **Open**, **Rename** (inline), **Move**, **Manage access** (staff; gear icon — Parents and Students tabs plus a summary), **Publish** or **Unpublish** (items), **Print** (not links), **Download** (files), **Remove**. Remove hides it (soft-archive) after confirm.
+- Right-click a folder or item, or use its **⋯** beside the name (editors): **Open**, **Rename** (inline), **Move**, **Manage access** (staff; gear icon — Parents and Students tabs, with small cards for each audience that can open it), **Publish** or **Unpublish** (items), **Print** (not links), **Download** (files), **Remove**. Remove hides it (soft-archive) after confirm.
 - Drop files here to upload into this folder.
 - Unpublished items are editors-only. Parents see published items their ACL allows. Parents get the path, title, filter, and list — no create toolbar and no editor menus.
 

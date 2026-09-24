@@ -158,10 +158,14 @@ export function matchingIsCorrect(
 export type QuizWindowState = "download_only" | "not_yet" | "open" | "closed";
 
 export function quizWindowState(
-  quiz: { acceptsFrom: string | null; acceptsUntil: string | null },
+  quiz: {
+    acceptEntries: boolean;
+    acceptsFrom: string | null;
+    acceptsUntil: string | null;
+  },
   now: Date,
 ): QuizWindowState {
-  if (!quiz.acceptsFrom && !quiz.acceptsUntil) return "download_only";
+  if (!quiz.acceptEntries) return "download_only";
   const at = now.getTime();
   if (quiz.acceptsFrom) {
     const start = new Date(quiz.acceptsFrom).getTime();

@@ -37,12 +37,16 @@ export function PageContentEditor({
   editable,
   showAnswers = editable,
   onDraftChange,
+  onVersionHistory,
+  versionHistoryDisabled = false,
 }: {
   blocks: BlockRecord[];
   editorKey: string;
   editable: boolean;
   showAnswers?: boolean;
   onDraftChange?: (json: string) => void;
+  onVersionHistory?: () => void;
+  versionHistoryDisabled?: boolean;
 }) {
   return (
     <PageQuizViewProvider value={showAnswers}>
@@ -64,7 +68,10 @@ export function PageContentEditor({
       <div className={editable ? "cw-editor-shell" : "cw-editor-view"}>
         {editable ? (
           <PageEditorActionsProvider>
-            <PageEditorToolbar />
+            <PageEditorToolbar
+              onVersionHistory={onVersionHistory}
+              versionHistoryDisabled={versionHistoryDisabled}
+            />
             <FileUploadStatus />
             <div className="relative">
               <RichTextPlugin

@@ -8,6 +8,7 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import type { ResourceTypeFilter } from "@/resources/model/paths";
+import { SegmentButton, SegmentGroup } from "@/ui/Tabs";
 import {
   ResourceContextMenu,
   type ResourceMenuEntry,
@@ -19,15 +20,6 @@ const FILTERS: Array<{ id: ResourceTypeFilter; label: string }> = [
   { id: "file", label: "Files" },
   { id: "link", label: "Links" },
 ];
-
-const segmentIdle =
-  "inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-bold text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)] motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-60";
-
-const segmentActive =
-  "inline-flex items-center gap-1.5 bg-[var(--green-tint)] px-3 py-2 text-[13px] font-bold text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)]";
-
-const segmentShell =
-  "inline-flex overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--surface)]";
 
 export function ResourceToolbar({
   canEdit,
@@ -83,21 +75,22 @@ export function ResourceToolbar({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       {canEdit ? (
-        <div className={segmentShell}>
-          <button
-            ref={newButtonRef}
-            type="button"
-            className={newMenuOpen ? segmentActive : segmentIdle}
-            aria-haspopup="menu"
-            aria-expanded={newMenuOpen}
-            aria-controls={newMenuOpen ? menuId : undefined}
-            disabled={documentPending}
-            onClick={() => setNewMenuOpen((open) => !open)}
-          >
-            <PlusIcon className="h-4 w-4" aria-hidden />
-            New
-            <ChevronDownIcon className="h-3.5 w-3.5 opacity-70" aria-hidden />
-          </button>
+        <>
+          <SegmentGroup>
+            <SegmentButton
+              ref={newButtonRef}
+              pressed={newMenuOpen}
+              aria-haspopup="menu"
+              aria-expanded={newMenuOpen}
+              aria-controls={newMenuOpen ? menuId : undefined}
+              disabled={documentPending}
+              onClick={() => setNewMenuOpen((open) => !open)}
+            >
+              <PlusIcon className="h-4 w-4" aria-hidden />
+              New
+              <ChevronDownIcon className="h-3.5 w-3.5 opacity-70" aria-hidden />
+            </SegmentButton>
+          </SegmentGroup>
           <ResourceContextMenu
             id={menuId}
             open={newMenuOpen}
@@ -106,24 +99,19 @@ export function ResourceToolbar({
             anchorRef={newButtonRef}
             onClose={() => setNewMenuOpen(false)}
           />
-        </div>
+        </>
       ) : null}
-      <div className={`ml-auto ${segmentShell}`} role="group" aria-label="Filter by type">
-        {FILTERS.map((filter, index) => (
-          <button
+      <SegmentGroup className="ml-auto" label="Filter by type">
+        {FILTERS.map((filter) => (
+          <SegmentButton
             key={filter.id}
-            type="button"
-            className={[
-              typeFilter === filter.id ? segmentActive : segmentIdle,
-              index > 0 ? "border-l border-[var(--line)]" : "",
-            ].join(" ")}
-            aria-pressed={typeFilter === filter.id}
+            pressed={typeFilter === filter.id}
             onClick={() => onTypeFilter(filter.id)}
           >
             {filter.label}
-          </button>
+          </SegmentButton>
         ))}
-      </div>
+      </SegmentGroup>
     </div>
   );
 }

@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
@@ -14,10 +13,6 @@ import {
   updateQuiz,
   type QuizQuestionDraft,
 } from "@/quizzes/databridge/quizzes";
-import {
-  quizLocationState,
-  quizOpenedFromUnit,
-} from "@/quizzes/model/navigation";
 import { quizPath } from "@/quizzes/model/paths";
 import { questionPointsAreValid, roundPoints } from "@/quizzes/model/quiz";
 import {
@@ -59,10 +54,7 @@ export function useQuizEdit() {
   const quizId = params.quizId ? Number(params.quizId) : NaN;
   const { organization, role, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
-  const navigate = useNavigate();
-  const location = useLocation();
   const queryClient = useQueryClient();
-  const quizNavState = quizLocationState(quizOpenedFromUnit(location.state));
 
   const quizQuery = useQuery({
     queryKey: quizQueryKeys.detail(quizId),
@@ -93,19 +85,30 @@ export function useQuizEdit() {
 
   const quiz = quizQuery.data ?? null;
   const [title, setTitle] = useState("");
+  const [savedTitle, setSavedTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [acceptEntries, setAcceptEntries] = useState(false);
   const [windowFields, setWindowFields] = useState<WindowFields>(emptyWindowFields());
   const [allowMultiple, setAllowMultiple] = useState(false);
   const [autograde, setAutograde] = useState(false);
   const [shareKey, setShareKey] = useState(false);
   const [questions, setQuestions] = useState<QuizQuestionDraft[]>([]);
   const [ready, setReady] = useState(false);
+  const [savingTitle, setSavingTitle] = useState(false);
+  const [titleError, setTitleError] = useState<string | null>(null);
+  const titleCommitRef = useRef<Promise<boolean> | null>(null);
+  const titleRef = useRef(title);
+  const savedTitleRef = useRef(savedTitle);
+  titleRef.current = title;
+  savedTitleRef.current = savedTitle;
 
   useEffect(() => {
     if (!quiz || ready) return;
     const zone = viewerTimeZone(quiz.acceptsTimezone);
     setTitle(quiz.title);
+    setSavedTitle(quiz.title);
     setDescription(quiz.description);
+    setAcceptEntries(quiz.acceptEntries);
     setWindowFields(windowFieldsFromInstants(quiz.acceptsFrom, quiz.acceptsUntil, zone));
     setAllowMultiple(quiz.allowMultipleAttempts);
     setAutograde(quiz.autogradeAndShow);
@@ -121,14 +124,21 @@ export function useQuizEdit() {
     quizId,
   });
 
+  async function invalidateQuizCaches() {
+    await queryClient.invalidateQueries({ queryKey: quizQueryKeys.detail(quizId) });
+    await queryClient.invalidateQueries({ queryKey: quizQueryKeys.questions(quizId) });
+    await queryClient.invalidateQueries({ queryKey: quizQueryKeys.list(courseId) });
+  }
+
   const save = useMutation({
     mutationFn: async () => {
       if (!quiz) throw new Error("We couldn’t find that quiz.");
-      const trimmed = title.trim();
+      const trimmed = titleRef.current.trim() || savedTitleRef.current;
       if (!trimmed) throw new Error("Give the quiz a title.");
       const zone = viewerTimeZone(quiz.acceptsTimezone);
       const instants = instantsFromWindowFields(windowFields, zone);
       if (
+        acceptEntries &&
         instants.acceptsFrom &&
         instants.acceptsUntil &&
         new Date(instants.acceptsUntil) <= new Date(instants.acceptsFrom)
@@ -141,6 +151,7 @@ export function useQuizEdit() {
       await updateQuiz(quizId, {
         title: trimmed,
         description: description.trim(),
+        acceptEntries,
         acceptsFrom: instants.acceptsFrom,
         acceptsUntil: instants.acceptsUntil,
         acceptsTimezone: instants.acceptsFrom || instants.acceptsUntil ? zone : null,
@@ -152,14 +163,68 @@ export function useQuizEdit() {
         quizId,
         questions.map((question) => ({ ...question, points: roundPoints(question.points) })),
       );
+      setTitle(trimmed);
+      setSavedTitle(trimmed);
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: quizQueryKeys.detail(quizId) });
-      await queryClient.invalidateQueries({ queryKey: quizQueryKeys.questions(quizId) });
-      await queryClient.invalidateQueries({ queryKey: quizQueryKeys.list(courseId) });
-      navigate(viewPath, quizNavState ? { state: quizNavState } : undefined);
+      await invalidateQuizCaches();
     },
   });
+
+  /**
+   * Saves the name on blur, Enter, or leave. Coalesces overlapping calls.
+   * Empty names revert to the last saved title.
+   */
+  async function commitTitle(): Promise<boolean> {
+    if (titleCommitRef.current) return titleCommitRef.current;
+    const run = (async () => {
+      if (!quiz || save.isPending) return true;
+      const next = titleRef.current.trim();
+      const previous = savedTitleRef.current;
+      if (!next) {
+        setTitleError("Give the quiz a title.");
+        setTitle(previous);
+        return false;
+      }
+      if (next === previous) {
+        setTitle(previous);
+        setTitleError(null);
+        return true;
+      }
+      setSavingTitle(true);
+      setTitleError(null);
+      try {
+        await updateQuiz(quizId, { title: next });
+        setTitle(next);
+        setSavedTitle(next);
+        await invalidateQuizCaches();
+        return true;
+      } catch (caught: unknown) {
+        setTitleError(
+          caught instanceof Error ? caught.message : "Couldn’t save the title.",
+        );
+        return false;
+      } finally {
+        setSavingTitle(false);
+      }
+    })();
+    titleCommitRef.current = run.finally(() => {
+      titleCommitRef.current = null;
+    });
+    return titleCommitRef.current;
+  }
+
+  /** Returns true when save succeeded. */
+  async function saveQuiz(): Promise<boolean> {
+    const titleOk = await commitTitle();
+    if (!titleOk) return false;
+    try {
+      await save.mutateAsync();
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
   const belongsHere = courseQuery.data?.organizationId === organization.id;
 
@@ -177,8 +242,11 @@ export function useQuizEdit() {
     viewPath,
     title,
     setTitle,
+    commitTitle,
     description,
     setDescription,
+    acceptEntries,
+    setAcceptEntries,
     windowFields,
     setWindowFields,
     allowMultiple,
@@ -189,9 +257,9 @@ export function useQuizEdit() {
     setShareKey,
     questions,
     setQuestions,
-    saving: save.isPending,
-    saveError: save.error?.message ?? null,
+    saving: save.isPending || savingTitle,
+    saveError: save.error?.message ?? titleError,
     hasChanges: ready,
-    save: () => save.mutate(),
+    save: saveQuiz,
   };
 }

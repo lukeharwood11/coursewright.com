@@ -196,7 +196,10 @@ select is_empty(
 
 reset role;
 update quizzes
-set accepts_from = null, accepts_until = null, autograde_and_show = true
+set accept_entries = false,
+    accepts_from = null,
+    accepts_until = null,
+    autograde_and_show = true
 where title = 'Hidden quiz';
 
 set local role authenticated;
@@ -217,12 +220,43 @@ select throws_ok(
   $$,
   'P0001',
   'This quiz is for printing, not turning in here.',
-  'submit is rejected when no accepting window is set'
+  'submit is rejected when accept entries is off'
 );
 
 reset role;
 update quizzes
-set accepts_from = now() + interval '1 day'
+set accept_entries = true,
+    accepts_from = null,
+    accepts_until = null
+where title = 'Hidden quiz';
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'c2222222-2222-2222-2222-222222222222', true);
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"c2222222-2222-2222-2222-222222222222","role":"authenticated"}',
+  true
+);
+
+select ok(
+  (
+    select public.submit_quiz_attempt(
+      (select id from quizzes where title = 'Hidden quiz'),
+      (select id from student_profiles where name = 'Ava Quiz'),
+      '[]'::jsonb
+    ) ->> 'attemptId'
+  ) is not null,
+  'submit is allowed when accept entries is on with no dates'
+);
+
+reset role;
+delete from quiz_attempts
+where quiz_id = (select id from quizzes where title = 'Hidden quiz');
+
+update quizzes
+set accept_entries = true,
+    accepts_from = now() + interval '1 day',
+    accepts_until = null
 where title = 'Hidden quiz';
 
 set local role authenticated;
@@ -248,7 +282,8 @@ select throws_ok(
 
 reset role;
 update quizzes
-set accepts_from = now() - interval '2 days',
+set accept_entries = true,
+    accepts_from = now() - interval '2 days',
     accepts_until = now()
 where title = 'Hidden quiz';
 
@@ -275,7 +310,8 @@ select throws_ok(
 
 reset role;
 update quizzes
-set accepts_from = now() - interval '1 day',
+set accept_entries = true,
+    accepts_from = now() - interval '1 day',
     accepts_until = now() + interval '1 day',
     allow_multiple_attempts = false,
     autograde_and_show = true
@@ -327,10 +363,10 @@ select throws_ok(
 reset role;
 insert into quizzes (
   organization_id, course_id, title, visibility, created_by,
-  accepts_from, accepts_until, autograde_and_show, share_answer_key_with_parents
+  accept_entries, accepts_from, accepts_until, autograde_and_show, share_answer_key_with_parents
 )
 select o.id, c.id, 'Unscored quiz', 'published', 'c1111111-1111-1111-1111-111111111111',
-  now() - interval '1 hour', now() + interval '1 hour', false, false
+  true, now() - interval '1 hour', now() + interval '1 hour', false, false
 from organizations o
 join courses c on c.organization_id = o.id
 where o.name = 'Quiz Co-op';
@@ -357,10 +393,10 @@ select ok(
 reset role;
 insert into quizzes (
   organization_id, course_id, title, visibility, created_by,
-  accepts_from, accepts_until, autograde_and_show
+  accept_entries, accepts_from, accepts_until, autograde_and_show
 )
 select o.id, c.id, 'Number quiz', 'published', 'c1111111-1111-1111-1111-111111111111',
-  now() - interval '1 hour', now() + interval '1 hour', true
+  true, now() - interval '1 hour', now() + interval '1 hour', true
 from organizations o
 join courses c on c.organization_id = o.id
 where o.name = 'Quiz Co-op';
@@ -436,10 +472,10 @@ select ok(
 reset role;
 insert into quizzes (
   organization_id, course_id, title, visibility, created_by,
-  accepts_from, accepts_until, autograde_and_show
+  accept_entries, accepts_from, accepts_until, autograde_and_show
 )
 select o.id, c.id, 'Match quiz', 'published', 'c1111111-1111-1111-1111-111111111111',
-  now() - interval '1 hour', now() + interval '1 hour', true
+  true, now() - interval '1 hour', now() + interval '1 hour', true
 from organizations o
 join courses c on c.organization_id = o.id
 where o.name = 'Quiz Co-op';
@@ -594,10 +630,10 @@ select is(
 reset role;
 insert into quizzes (
   organization_id, course_id, title, visibility, created_by,
-  accepts_from, accepts_until, autograde_and_show
+  accept_entries, accepts_from, accepts_until, autograde_and_show
 )
 select o.id, c.id, 'Partial quiz', 'published', 'c1111111-1111-1111-1111-111111111111',
-  now() - interval '1 hour', now() + interval '1 hour', true
+  true, now() - interval '1 hour', now() + interval '1 hour', true
 from organizations o
 join courses c on c.organization_id = o.id
 where o.name = 'Quiz Co-op';

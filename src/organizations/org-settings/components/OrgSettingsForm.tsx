@@ -1,4 +1,5 @@
 import type { FormEvent } from "react";
+import { Button } from "@/ui/Button";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { Input } from "@/ui/Input";
 import { Select } from "@/ui/Select";
@@ -19,8 +20,6 @@ import {
   type SchoolDay,
 } from "@/organizations/model/schoolDays";
 import type { OrgSettingsTabId } from "./OrgSettingsNav";
-
-export const ORG_SETTINGS_FORM_ID = "org-settings-form";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -44,6 +43,8 @@ type OrgSettingsFormProps = {
   phone: string;
   confirmPermalinkChange: boolean;
   slugChanged: boolean;
+  hasChanges: boolean;
+  saving: boolean;
   error: string | null;
   onNameChange: (value: string) => void;
   onSlugChange: (value: string) => void;
@@ -57,20 +58,48 @@ type OrgSettingsFormProps = {
   onContactEmailChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
   onConfirmPermalinkChange: (value: boolean) => void;
-  onSubmit: (event: FormEvent) => void;
+  onSubmit: (
+    event: FormEvent,
+    section: Extract<OrgSettingsTabId, "organization" | "profile">,
+  ) => void;
 };
 
 export function OrgSettingsForm(props: OrgSettingsFormProps) {
   useToastOnError(props.error);
 
   return (
-    <form id={ORG_SETTINGS_FORM_ID} onSubmit={props.onSubmit}>
+    <form
+      onSubmit={(event) => {
+        props.onSubmit(event, props.section);
+      }}
+    >
       {props.section === "organization" ? (
         <OrganizationSection {...props} />
       ) : (
         <ProfileSection {...props} />
       )}
     </form>
+  );
+}
+
+function SectionSave({
+  canEdit,
+  hasChanges,
+  saving,
+  label,
+}: {
+  canEdit: boolean;
+  hasChanges: boolean;
+  saving: boolean;
+  label: string;
+}) {
+  if (!canEdit) return null;
+  return (
+    <div className="mt-5">
+      <Button type="submit" disabled={!hasChanges || saving}>
+        {saving ? "Saving…" : label}
+      </Button>
+    </div>
   );
 }
 
@@ -84,6 +113,8 @@ function OrganizationSection({
   schoolDays,
   confirmPermalinkChange,
   slugChanged,
+  hasChanges,
+  saving,
   onNameChange,
   onSlugChange,
   onOrgTypeChange,
@@ -249,6 +280,13 @@ function OrganizationSection({
           </label>
         )}
       </div>
+
+      <SectionSave
+        canEdit={canEdit}
+        hasChanges={hasChanges}
+        saving={saving}
+        label="Save organization"
+      />
     </section>
   );
 }
@@ -261,6 +299,8 @@ function ProfileSection({
   website,
   contactEmail,
   phone,
+  hasChanges,
+  saving,
   onAboutChange,
   onAddressChange,
   onWebsiteChange,
@@ -340,6 +380,13 @@ function ProfileSection({
           />
         </label>
       </div>
+
+      <SectionSave
+        canEdit={canEdit}
+        hasChanges={hasChanges}
+        saving={saving}
+        label="Save profile"
+      />
     </section>
   );
 }

@@ -19,16 +19,18 @@ Open one org resource: a **document** (Lexical page), **link**, or **file**.
 - Document: read-only Lexical page (same chrome as course page materials).
 - Link: title + URL.
 - File: in-app preview/download via org File (same players as file materials).
-- Editors: **Edit** and **Print** (document and file) in the header on wide screens; on smaller screens they live under the header **⋯** menu with **Move** and **Manage access** (staff: inherit folder access, or Parents and Students tabs with a summary of both; gear icon). **Publish** / **Unpublish** and **Remove** (archive) stay on the page body.
+- Editors: **Edit** and **Print** (document and file) in the header on wide screens; on smaller screens they live under the header **⋯** menu with **Move** and **Manage access** (staff: inherit folder access, or Parents and Students tabs; small cards name each audience that can open it; gear icon). **Publish** / **Unpublish** and **Remove** (archive) stay on the page body.
 - Unpublished: editors only. Families/parents do not see it until published.
 
 ### Edit
 
-- Name (all types — file **resource title**, not the Storage blob name).
-- Description.
-- Link URL when type is link.
-- **Save** / **Cancel** (reads **Close** when unchanged) in the header; on desktop also **Save & close** (primary; saves then returns to the resource view).
-- Document: Lexical editor for the body.
+Word-like layout: compact header chrome; the document editor fills most of the page.
+
+- No “Edit …” page title. One header row: back, editable **name** beside it, then a quiet **Add description** / **Edit description** (opens a small dialog), **Save** / **Cancel** (reads **Close** when unchanged); on desktop also **Save & close** (primary; saves then returns to the resource view). **Cmd/Ctrl+S** saves when there are changes. Below the `md` breakpoint those actions collapse into a header **⋯** menu.
+- Name (all types — file **resource title**, not the Storage blob name). Leaving the name field, pressing **Enter**, or leaving the editor (back / Close / Cancel) saves it on its own.
+- Description via the header button (not a always-visible field).
+- Link URL when type is link (slim field under the header).
+- Document: Lexical editor for the body (majority of the viewport).
 - Cancel with unsaved changes confirms.
 
 Not found: back to Resources.
@@ -41,10 +43,11 @@ Not found: back to Resources.
 
 ## Contents
 
-- Detail header (back to folder, actions)
-- Visibility banner when unpublished
+- View: detail header (back to folder, actions)
+- Edit: compact header (back, name field, description button, save actions); document editor fills the page
+- Visibility banner when unpublished (view)
 - Body by type
-- Unpublish at the bottom when published (editors)
+- Unpublish at the bottom when published (editors, view)
 
 ## Primary actions
 

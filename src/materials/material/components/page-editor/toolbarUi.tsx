@@ -124,12 +124,14 @@ export function DropdownItem({
   label,
   hint,
   active,
+  disabled,
   onClick,
 }: {
   icon: ReactNode;
   label: string;
   hint?: string;
   active?: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }) {
   const closeMenu = useContext(CloseMenuContext);
@@ -137,8 +139,10 @@ export function DropdownItem({
     <button
       type="button"
       role="menuitem"
+      disabled={disabled}
       onMouseDown={(event) => event.preventDefault()}
       onClick={() => {
+        if (disabled) return;
         onClick();
         closeMenu();
       }}

@@ -5,7 +5,7 @@ import {
   folderCapabilities,
   itemCapabilities,
   previewResourceAudience,
-  resourceAccessSummary,
+  resourceAccessCards,
   type FolderAclSource,
 } from "./access.ts";
 
@@ -225,41 +225,21 @@ test("an unfiled item that inherits is closed to parents and students", () => {
   assert.equal(preview.unresolved, false);
 });
 
-test("access summary lists both audiences even when only one is being edited", () => {
-  const summary = resourceAccessSummary({
-    kind: "folder",
-    followsName: null,
-    unresolved: false,
-    audience: { parentsCanView: true, studentsCanView: false },
-    grants: [
-      { name: "Sam Lee", permission: "write", audience: "student" },
-      { name: "Alex Rivera", permission: "read", audience: "parent" },
-    ],
-    unpublished: false,
-  });
-  assert.deepEqual(summary.lines, [
-    "Parents can see this.",
-    "Students cannot see this.",
-    "Sam Lee can edit.",
-    "Staff can always open and edit this.",
-  ]);
-});
-
-test("access summary names the folder being followed and unpublished items", () => {
-  const summary = resourceAccessSummary({
-    kind: "item",
-    followsName: "Handbooks",
-    unresolved: false,
-    audience: { parentsCanView: false, studentsCanView: true },
-    grants: [],
-    unpublished: true,
-  });
-  assert.equal(summary.title, "Access for this resource");
-  assert.deepEqual(summary.lines, [
-    "Follows “Handbooks”.",
-    "Parents cannot see this.",
-    "Students can see this.",
-    "Staff can always open and edit this.",
-    "This isn’t published, so only editors can open it until you publish.",
-  ]);
+test("access cards name only audiences who can open it", () => {
+  assert.deepEqual(
+    resourceAccessCards({
+      kind: "folder",
+      audience: { parentsCanView: true, studentsCanView: false },
+      grants: [{ name: "Sam Lee", permission: "write", audience: "student" }],
+    }),
+    ["Parents can access this folder", "Students can access this folder"],
+  );
+  assert.deepEqual(
+    resourceAccessCards({
+      kind: "item",
+      audience: { parentsCanView: false, studentsCanView: true },
+      grants: [],
+    }),
+    ["Students can access this resource"],
+  );
 });

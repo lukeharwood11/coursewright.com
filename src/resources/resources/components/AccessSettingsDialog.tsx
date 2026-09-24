@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { Select } from "@/ui/Select";
+import { Tab, TabList } from "@/ui/Tabs";
 import { listOrgPeople } from "@/organizations/databridge/memberships";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import type { OrgRole } from "@/organizations/model/role";
@@ -21,7 +22,7 @@ import {
 import { updateResourceItem } from "@/resources/databridge/items";
 import {
   previewResourceAudience,
-  resourceAccessSummary,
+  resourceAccessCards,
   type FolderAclSource,
   type NamedResourceGrant,
   type ResourceAudience,
@@ -43,7 +44,7 @@ export function AccessSettingsDialog({
   aclInherit,
   parentId,
   folderId,
-  unpublished,
+  unpublished: _unpublished,
   onClose,
   onSaved,
 }: {
@@ -101,11 +102,6 @@ export function AccessSettingsDialog({
   const foldersById = useMemo(() => {
     const map = new Map<number, FolderAclSource>();
     for (const folder of chainQuery.data ?? []) map.set(folder.id, folder);
-    return map;
-  }, [chainQuery.data]);
-  const folderNames = useMemo(() => {
-    const map = new Map<number, string>();
-    for (const folder of chainQuery.data ?? []) map.set(folder.id, folder.name);
     return map;
   }, [chainQuery.data]);
 
@@ -230,17 +226,10 @@ export function AccessSettingsDialog({
       person.role === tabRole &&
       !ownGrants.some((grant) => grant.granteeUserId === person.userId),
   );
-  const followsName =
-    followsSource && preview.sourceFolderId != null
-      ? (folderNames.get(preview.sourceFolderId) ?? null)
-      : null;
-  const summary = resourceAccessSummary({
+  const accessCards = resourceAccessCards({
     kind: target.kind,
-    followsName,
-    unresolved: !custom && (preview.unresolved || chainQuery.isLoading),
     audience: shownAudience,
     grants: peopleQuery.isSuccess || namedGrants.length === 0 ? namedGrants : [],
-    unpublished: target.kind === "item" && unpublished,
   });
 
   function turnOffInherit() {
@@ -263,7 +252,7 @@ export function AccessSettingsDialog({
         aria-labelledby="resource-access-title"
         className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] shadow-[var(--shadow)]"
       >
-        <div className="overflow-y-auto px-5 pt-5">
+        <div className="overflow-y-auto px-5 pb-5 pt-5">
           <h2
             id="resource-access-title"
             className="text-[15.5px] font-extrabold text-[var(--ink)]"
@@ -299,12 +288,8 @@ export function AccessSettingsDialog({
             </label>
           ) : null}
 
-          <div
-            role="tablist"
-            aria-label="Audience"
-            className="mt-4 grid grid-cols-2 border-b border-[var(--line-soft)]"
-          >
-            <AudienceTabButton
+          <TabList label="Audience" className="mt-4">
+            <Tab
               selected={tab === "parents"}
               onSelect={() => {
                 setTab("parents");
@@ -312,8 +297,8 @@ export function AccessSettingsDialog({
               }}
             >
               Parents
-            </AudienceTabButton>
-            <AudienceTabButton
+            </Tab>
+            <Tab
               selected={tab === "students"}
               onSelect={() => {
                 setTab("students");
@@ -321,8 +306,8 @@ export function AccessSettingsDialog({
               }}
             >
               Students
-            </AudienceTabButton>
-          </div>
+            </Tab>
+          </TabList>
 
           <div role="tabpanel" className="pt-4">
             <label className="flex cursor-pointer items-start gap-2">
@@ -448,20 +433,19 @@ export function AccessSettingsDialog({
         </div>
 
         <div className="border-t border-[var(--line-soft)] bg-[var(--surface)] px-5 py-4">
-          <div className="rounded-[8px] border border-[var(--line-soft)] bg-[var(--green-tint)] px-3 py-3">
-            <p className="text-[13px] font-bold text-[var(--ink)]">{summary.title}</p>
-            <ul className="mt-1.5 space-y-1">
-              {summary.lines.map((line, index) => (
-                <li
-                  key={`${index}-${line}`}
-                  className="text-[13px] leading-snug text-[var(--ink)]"
+          {accessCards.length > 0 ? (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {accessCards.map((label) => (
+                <p
+                  key={label}
+                  className="rounded-[8px] border border-[var(--line-soft)] bg-[var(--paper)] px-2.5 py-1.5 text-[12.5px] font-semibold text-[var(--ink)]"
                 >
-                  {line}
-                </li>
+                  {label}
+                </p>
               ))}
-            </ul>
-          </div>
-          <div className="mt-4 flex justify-end gap-2">
+            </div>
+          ) : null}
+          <div className="flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={onClose}>
               <XMarkIcon className="h-4 w-4" aria-hidden />
               Cancel
@@ -478,34 +462,6 @@ export function AccessSettingsDialog({
         </div>
       </div>
     </div>
-  );
-}
-
-function AudienceTabButton({
-  selected,
-  onSelect,
-  children,
-}: {
-  selected: boolean;
-  onSelect: () => void;
-  children: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={selected}
-      onClick={onSelect}
-      className={[
-        "-mb-px border-b-2 px-3 py-2 text-[14px] font-bold",
-        "focus:outline-none focus-visible:bg-[var(--green-tint)]",
-        selected
-          ? "border-[var(--green)] text-[var(--green-deep)]"
-          : "border-transparent text-[var(--ink-soft)] hover:text-[var(--ink)]",
-      ].join(" ")}
-    >
-      {children}
-    </button>
   );
 }
 

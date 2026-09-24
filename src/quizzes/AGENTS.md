@@ -6,8 +6,8 @@ Course **Quiz**: an outline item families take in the app or print. Not a materi
 
 - Quizzes sit on a unit, ordered with materials by `position` (a material wins a tie).
 - New quizzes start **unpublished**. Families see one only when the course is active and published, the quiz is published, and their student is enrolled.
-- Optional accepting window (`accepts_from` / `accepts_until`). Neither set → print only. One or both set → Submit only while now is inside the bounds that are set.
-- **Allow more than one attempt** (default off). **Grade questions automatically and show the score right away** (default off) covers multiple choice, number, and matching. **Share answer key with parents** (default off).
+- **Accept entries** (default off). Off → print only. On with no start/end → take whenever published. On with optional `accepts_from` / `accepts_until` → Submit only while now is inside the bounds that are set.
+- **Allow more than one attempt** (default off). **Show results immediately** (default off; `autograde_and_show`) covers multiple choice, number, and matching. **Share answer key with parents** (default off).
 - Kinds: multiple choice, short answer, number, matching, long answer. A long answer has a line count (1–20). Each question has `points` (default 1). Short answer and long answer are not autograded; the teacher assigns their points.
 - Answer keys live in `quiz_answer_keys`. Matching links live in `quiz_match_keys` (prompts and options are separate rows families can read). A student login (account email matches that student’s `student_email`) never sees the key. Staff Teacher view always does.
 - Attempts are `quiz_attempts`, not `material_submissions`. Submit goes through `submit_quiz_attempt`. A teacher saves points for the whole entry with `grade_quiz_attempt`. `auto_points` is the first pass. `teacher_points` replaces it. `autograded` stays true after that override. `teacher_graded_at` marks a teacher grade.

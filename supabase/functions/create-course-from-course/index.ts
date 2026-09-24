@@ -211,7 +211,7 @@ Deno.serve(async (request) => {
     const { data: quizzes, error: quizzesError } = await db
       .from("quizzes")
       .select(
-        "id, unit_id, title, description, position, visibility, accepts_from, accepts_until, accepts_timezone, allow_multiple_attempts, autograde_and_show, share_answer_key_with_parents",
+        "id, unit_id, title, description, position, visibility, accepts_from, accepts_until, accepts_timezone, accept_entries, allow_multiple_attempts, autograde_and_show, share_answer_key_with_parents",
       )
       .eq("course_id", source.id)
       .is("deleted_at", null)
@@ -235,6 +235,7 @@ Deno.serve(async (request) => {
           accepts_from: quiz.accepts_from,
           accepts_until: quiz.accepts_until,
           accepts_timezone: quiz.accepts_timezone,
+          accept_entries: quiz.accept_entries,
           allow_multiple_attempts: quiz.allow_multiple_attempts,
           autograde_and_show: quiz.autograde_and_show,
           share_answer_key_with_parents: quiz.share_answer_key_with_parents,
