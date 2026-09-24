@@ -10,6 +10,10 @@ export type AppShellValue = {
   navLabel: string;
   organization: OrganizationSummary | null;
   role: OrgRole | null;
+  /** Additive parent flag. Exclusive role still governs chrome. */
+  isParent: boolean;
+  /** Additive student flag. Exclusive role still governs chrome. */
+  isStudent: boolean;
   profileName: string;
   profileEmail: string;
   navSections: NavSection[];

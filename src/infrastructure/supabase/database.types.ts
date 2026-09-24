@@ -1940,6 +1940,8 @@ export type Database = {
           created_at: string
           id: number
           organization_id: number
+          is_parent: boolean
+          is_student: boolean
           role: string
           status: string
           updated_at: string
@@ -1948,6 +1950,8 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: number
+          is_parent?: boolean
+          is_student?: boolean
           organization_id: number
           role: string
           status?: string
@@ -1957,6 +1961,8 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
+          is_parent?: boolean
+          is_student?: boolean
           organization_id?: number
           role?: string
           status?: string

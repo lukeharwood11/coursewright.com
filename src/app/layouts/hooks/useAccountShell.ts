@@ -31,6 +31,8 @@ export function useAccountShellData(): AppShellValue {
     navLabel: "Account",
     organization: null,
     role: null,
+    isParent: false,
+    isStudent: false,
     profileName: profileQuery.data?.name ?? "",
     profileEmail: profileQuery.data?.email ?? user.email ?? "",
     navSections: buildAccountNav(organizations),

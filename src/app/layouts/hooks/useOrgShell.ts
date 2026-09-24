@@ -181,6 +181,8 @@ export function useOrgShellData(orgSlug: string | undefined) {
     navLabel: "Organization",
     organization,
     role,
+    isParent: Boolean(membershipQuery.data?.isParent),
+    isStudent: Boolean(membershipQuery.data?.isStudent),
     profileName,
     profileEmail,
     navSections,

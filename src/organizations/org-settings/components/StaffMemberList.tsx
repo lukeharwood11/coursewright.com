@@ -64,25 +64,33 @@ export function StaffMemberList({
                 ) : null}
               </div>
 
-              {member.canChangeRole ? (
-                <label>
-                  <span className="sr-only">Role for {displayName}</span>
-                  <Select
-                    size="compact"
-                    value={member.role}
-                    disabled={busy}
-                    onChange={(event) => onChangeRole(member, event.target.value)}
-                  >
-                    {member.changeRoles.map((option) => (
-                      <option key={option} value={option}>
-                        {roleLabel(option)}
-                      </option>
-                    ))}
-                  </Select>
-                </label>
-              ) : (
-                <Badge variant={roleBadgeVariant(member.role)}>{roleLabel(member.role)}</Badge>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                {member.canChangeRole ? (
+                  <label>
+                    <span className="sr-only">Role for {displayName}</span>
+                    <Select
+                      size="compact"
+                      value={member.role}
+                      disabled={busy}
+                      onChange={(event) => onChangeRole(member, event.target.value)}
+                    >
+                      {member.changeRoles.map((option) => (
+                        <option key={option} value={option}>
+                          {roleLabel(option)}
+                        </option>
+                      ))}
+                    </Select>
+                  </label>
+                ) : (
+                  <Badge variant={roleBadgeVariant(member.role)}>{roleLabel(member.role)}</Badge>
+                )}
+                {member.hasLinkedStudent && member.role !== "parent" ? (
+                  <Badge variant="neutral">Parent</Badge>
+                ) : null}
+                {member.hasStudentAccount && member.role !== "student" ? (
+                  <Badge variant="neutral">Student</Badge>
+                ) : null}
+              </div>
 
               {member.canRemove ? (
                 <Button
@@ -102,9 +110,13 @@ export function StaffMemberList({
         open={Boolean(pendingRemove)}
         title="Remove collaborator?"
         body={
-          pendingRemove?.isYou
-            ? "You’ll no longer be a collaborator in this organization until someone invites you again."
-            : `${pendingName} will no longer be a collaborator in this organization until you invite them again.`
+          pendingRemove?.releaseTo === "parent"
+            ? `${pendingName} will no longer be staff. They stay a parent.`
+            : pendingRemove?.releaseTo === "student"
+              ? `${pendingName} will no longer be staff. They stay a student.`
+              : pendingRemove?.isYou
+                ? "You’ll no longer be a collaborator in this organization until someone invites you again."
+                : `${pendingName} will no longer be a collaborator in this organization until you invite them again.`
         }
         confirmLabel="Remove"
         cancelLabel="Keep them"

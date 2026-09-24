@@ -20,7 +20,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 - Save org name/metadata; changing **permalink slug** shows a warning that existing links break (no auto-redirect in P0) and requires an explicit confirmation.
 - Each editable panel has its **own Save** at the bottom (no shared Save/Cancel chrome). Save is disabled when that panel has nothing changed.
 - Set **organization type** (other / co-op / school / family; new orgs default to **other**), optional **profile** (about, location, website, contact email, phone), **school days** (which weekdays the org operates; default Mon–Fri), and **grade scheme** (K–12 / custom labels). Family is for households making materials at home. At least one school day must stay selected.
-- Collaborators section on this page: invite owner / admin / instructor by email (Resend `organization-invite`) and **copy a claim link**, list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). The list includes **parents** already in the org so owners/admins can **promote** them to instructor/admin/owner **without a new invite**. Owners and admins **change roles** (including demote to **parent** when the person has a linked student) and **remove** admins/instructors who have no linked student; the last remaining owner or admin cannot be removed or demoted. Those writes update **org membership** (who can run settings and invites). They do **not** change who can see course content — materials and roster stay **enrollment-gated** (and `parent_student_links` where applicable).
+- Collaborators section on this page: invite owner / admin / instructor by email (Resend `organization-invite`) and **copy a claim link**, list pending invites. Parent invites use the same `/invite/<token>` path from [STUDENT_PROFILE](./STUDENT_PROFILE.md) / [COURSE_ROSTER](./COURSE_ROSTER.md). The list includes **parents** (not **students**) so owners/admins can **add** instructor/admin/owner **without a new invite**. That keeps parent. The role menu only offers exclusive roles. **Remove** drops the exclusive role: a parent or student membership stays; otherwise the membership ends. The last remaining owner or admin cannot be removed or demoted. Those writes update **org membership**. They do **not** change who can see course content — materials and roster stay **enrollment-gated** (and `parent_student_links` / student `user_id` where applicable).
 - Billing section shows Free plan, **owners only**.
 - **Branding** (owners only): optional small icon and one accent color used as the primary color inside this organization (buttons, links, sidebar). Admins and instructors see a preview and “Only owners can change branding.” Blank color keeps Wright Green. Colors that are too light for white button text, or for link text on the page background, are rejected. Remove branding restores the CW mark and Wright Green. Login, the account home, emails, and print stay Course Wright.
 - **Customizations** (owners only): toggles for Discussions, Announcements, Resources, Lesson plans, Events, and Calendar view. Off hides those surfaces in nav, routes, and compose buttons; existing data stays. Admins and instructors see the list read-only (“Only owners can change customizations.”) and do not see Save or Cancel on that panel. Defaults: all on.
@@ -31,7 +31,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 - Profile: **about**, **address**, **website**, **contact email**, **phone** (optional)
 - **School days** (Sun–Sat toggles; default Mon–Fri)
 - Current **grade scheme** and labels (K–12 preset or custom)
-- Collaborators list: person **name** / **email**, **role** (owner | admin | instructor | parent); name opens [USER_PROFILE](./USER_PROFILE.md); owners and admins see change-role (and remove when allowed)
+- Collaborators list: person **name** / **email**, governing **role** (owner | admin | instructor | parent), plus a Parent or Student badge when that additive role is also on; name opens [USER_PROFILE](./USER_PROFILE.md); owners and admins see change-role (and remove when allowed). Students are not listed
 - Last owner/admin rows explain why they can’t be removed or demoted
 - Pending collaborator invites: **email**, **role**, copyable `/invite/<token>` link, **Resend email**, cancel
 - Billing status — Free plan (owners only)
@@ -73,11 +73,11 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 
 ### Collaborators / roles
 
-- List owners, admins, instructors, and parents
+- List owners, admins, instructors, and parents. Do not list students
 - Invite owners / admins / instructors by email; Course Wright emails the claim link and you can copy it again
 - Pending invites: copy link again, **Resend email**, or cancel
-- Change **roles** for existing members: owners may set instructor / admin / owner; admins may set instructor / admin; either may set **parent** only when that person has a linked student in the org. Promote parent → staff with no new invite. Membership role only — not a materials/roster access gate
-- Remove admins/instructors who have **no** linked student (membership only; confirm). If they have a linked student, demote to parent instead
+- Change the **exclusive** role: owners may set instructor / admin / owner; admins may set instructor / admin. Promoting a parent adds that role and keeps parent. Do not offer parent or student as replacements, and do not promote students from this list
+- Remove drops the exclusive role (confirm). Parent or student stays when that flag is set; otherwise the membership ends
 - Guard: cannot remove or demote the **last remaining owner or admin**
 - Existing **owner** rows stay badge-only (promote others to owner; don’t demote owners from this list)
 
@@ -107,8 +107,8 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 - Save, remove branding, or reset queued branding changes (owners only)
 - Save customizations (owners only)
 - Invite collaborators (email + copy the claim link); cancel a pending invite; resend the email
-- Change roles for existing collaborators (including promote parent → staff and demote staff → parent when linked to a student)
-- Remove an admin or instructor with no linked student (blocked when they are the last owner/admin)
+- Change the exclusive role for existing collaborators (promoting a parent keeps parent)
+- Remove an admin or instructor (blocked when they are the last owner/admin). A parent or student membership stays
 
 ## Links to
 

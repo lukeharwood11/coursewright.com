@@ -58,7 +58,7 @@ export function useResourcesBrowse() {
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const folderId = params.folderId ? Number(params.folderId) : null;
-  const { organization, role, parentPresentation } = useOrgShell();
+  const { organization, role, parentPresentation, isParent, isStudent } = useOrgShell();
   const user = useAuthedUser();
   const queryClient = useQueryClient();
   const isStaff = role ? isStaffRole(role) : false;
@@ -117,8 +117,8 @@ export function useResourcesBrowse() {
   const actor = {
     userId: user.id,
     isStaff,
-    isParent: role === "parent",
-    isStudent: role === "student",
+    isParent: role === "parent" || isParent,
+    isStudent: role === "student" || isStudent,
   };
   const grants = grantsQuery.data ?? [];
   const currentFolder = folderQuery.data ?? null;

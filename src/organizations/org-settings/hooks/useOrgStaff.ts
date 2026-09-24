@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { caughtErrorMessage, toastCaughtError } from "@/ui/toast";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import {
+  releaseExclusiveMembershipRole,
   removeStaffMembership,
   updateStaffMembershipRole,
 } from "@/organizations/databridge/memberships";
@@ -49,6 +50,7 @@ export type StaffMemberRow = OrgStaffMember & {
   canRemove: boolean;
   changeRoles: AssignableMembershipRole[];
   lastManagerGuard: boolean;
+  releaseTo: "parent" | "student" | null;
 };
 
 export function useOrgStaff(organizationId: number | undefined, role: OrgRole | null) {
@@ -183,6 +185,9 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
       });
       if (!parsed.ok) throw new Error(parsed.error);
       if (parsed.value === input.member.role) return input;
+      if (parsed.value === "parent" || parsed.value === "student") {
+        throw new Error("Choose instructor, admin, or owner.");
+      }
       await updateStaffMembershipRole({
         membershipId: input.member.membershipId,
         role: parsed.value,
@@ -191,7 +196,13 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     },
     onSuccess: async (input) => {
       const name = input.member.name || input.member.email;
-      toast(`Changed ${name} to ${roleLabel(input.nextRole).toLowerCase()}.`);
+      const kept = [
+        input.member.hasLinkedStudent ? "parent" : null,
+        input.member.hasStudentAccount ? "student" : null,
+      ].filter((label): label is string => Boolean(label));
+      const keptNote =
+        kept.length > 0 ? ` They stay a ${kept.join(" and ")}.` : "";
+      toast(`Changed ${name} to ${roleLabel(input.nextRole).toLowerCase()}.${keptNote}`);
       await invalidateStaff();
     },
     onError: (error: Error) => {
@@ -210,19 +221,32 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
         hasStudentAccount: member.hasStudentAccount,
       });
       if (!parsed.ok) throw new Error(parsed.error);
-      await removeStaffMembership(member.membershipId);
-      return member;
+      if (parsed.releaseTo) {
+        await releaseExclusiveMembershipRole({
+          membershipId: member.membershipId,
+          role: parsed.releaseTo,
+        });
+      } else {
+        await removeStaffMembership(member.membershipId);
+      }
+      return { member, releaseTo: parsed.releaseTo };
     },
-    onSuccess: async (member) => {
+    onSuccess: async ({ member, releaseTo }) => {
       const removedSelf = member.userId === user.id;
-      if (removedSelf) {
+      const name = member.name || member.email;
+      if (removedSelf && !releaseTo) {
         toast("You were removed as a collaborator in this organization.");
         await invalidateStaff();
         navigate("/my");
         return;
       }
-      const name = member.name || member.email;
-      toast(`Removed ${name} as a collaborator.`);
+      if (releaseTo === "parent") {
+        toast(`${name} is no longer staff. They stay a parent.`);
+      } else if (releaseTo === "student") {
+        toast(`${name} is no longer staff. They stay a student.`);
+      } else {
+        toast(`Removed ${name} as a collaborator.`);
+      }
       await invalidateStaff();
     },
     onError: (error: Error) => {
