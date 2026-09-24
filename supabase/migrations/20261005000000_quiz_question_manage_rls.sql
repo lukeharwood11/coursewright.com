@@ -1,12 +1,24 @@
 -- Quiz question writes must not re-read public.quizzes under quizzes_select.
 --
--- INSERT/UPDATE policies used EXISTS (select from quizzes … can_manage_course).
--- That nested read is the caller's quizzes_select policy (org staff, or a
--- published quiz for a family). PostgREST then reports
+-- This is older than the membership-role change. Before that migration,
+-- quiz_questions_insert was already:
+--   exists (
+--     select 1 from quizzes q
+--     where q.id = quiz_id and q.deleted_at is null
+--       and can_manage_course(q.course_id)
+--   )
+-- The quizzes read is the caller's quizzes_select, not can_manage_course.
+-- quizzes_select and the INSERT … RETURNING policy (can_view_quiz) both
+-- require is_org_staff(quiz.organization_id) or a published family audience.
+-- can_manage_course is is_org_admin(course.organization_id) or
+-- is_course_instructor(course). Those are not the same check.
+--
+-- An active org owner is both is_org_admin and is_org_staff, so this shape
+-- allows that insert. It still raises
 -- "new row violates row-level security policy for table quiz_questions"
--- when the manage check would pass but the nested SELECT does not see the
--- parent row — including INSERT … RETURNING, which is how the editor saves
--- a new question.
+-- when the nested quizzes read or can_view_quiz is false while
+-- can_manage_course is true (the parent row is hidden). The membership
+-- migration did not change this insert policy.
 --
 -- can_manage_course stays: active org owner/admin (no course_instructors row
 -- required) OR an assigned course instructor.

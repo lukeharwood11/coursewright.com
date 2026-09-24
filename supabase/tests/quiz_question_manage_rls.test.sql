@@ -1,7 +1,10 @@
 -- Adding a quiz question must succeed for anyone who can manage the course,
--- including when quizzes_select would hide the parent quiz.
+-- including an owner who is also a course instructor, and including when
+-- quizzes_select hides the parent quiz. The pre-#49 EXISTS policy raises the
+-- production RLS toast in that hidden-parent case. This does not depend on
+-- the membership-role migration.
 begin;
-select plan(24);
+select plan(26);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -229,6 +232,30 @@ select results_eq(
 );
 
 reset role;
+insert into course_instructors (course_id, user_id)
+select course_id, 'a7111111-1111-1111-1111-111111111111'
+from quiz_manage_ids;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'a7111111-1111-1111-1111-111111111111', true);
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"a7111111-1111-1111-1111-111111111111","role":"authenticated"}',
+  true
+);
+
+select results_eq(
+  $$
+    insert into quiz_questions (quiz_id, position, prompt, kind)
+    select unpublished_id, 6, 'Owner and instructor', 'short_answer'
+    from quiz_manage_ids
+    returning prompt
+  $$,
+  array['Owner and instructor'::text],
+  'owner who is also a course instructor inserts a question and reads it back'
+);
+
+reset role;
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'a7222222-2222-2222-2222-222222222222', true);
 select set_config(
@@ -355,13 +382,54 @@ select throws_ok(
   'parent cannot add a question'
 );
 
--- Nested quizzes_select must not be what allows the write. Deny every
--- quizzes read, then insert with a literal quiz id the way the editor does.
+-- Pre-#49 quiz_questions_insert reads quizzes under quizzes_select. Hide
+-- every quiz, put that old WITH CHECK back, and the owner gets the prod
+-- toast even though can_manage_course is true. Then restore the definer
+-- check: the same insert returns the new row.
 reset role;
 drop policy quizzes_select on public.quizzes;
 create policy quizzes_select on public.quizzes
 for select to authenticated
 using (false);
+
+drop policy quiz_questions_insert on public.quiz_questions;
+create policy quiz_questions_insert on public.quiz_questions
+for insert to authenticated
+with check (
+  exists (
+    select 1
+    from public.quizzes q
+    where q.id = quiz_id
+      and q.deleted_at is null
+      and (select private.can_manage_course(q.course_id))
+  )
+);
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'a7111111-1111-1111-1111-111111111111', true);
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"a7111111-1111-1111-1111-111111111111","role":"authenticated"}',
+  true
+);
+
+select throws_ok(
+  $$
+    insert into quiz_questions (quiz_id, position, prompt, kind)
+    select unpublished_id, 5, 'Old policy hidden', 'short_answer'
+    from quiz_manage_ids
+    returning prompt
+  $$,
+  '42501',
+  'new row violates row-level security policy for table "quiz_questions"',
+  'pre-#49 insert policy rejects an owner when quizzes_select hides the quiz'
+);
+
+reset role;
+drop policy quiz_questions_insert on public.quiz_questions;
+create policy quiz_questions_insert on public.quiz_questions
+for insert to authenticated
+with check ((select private.can_manage_quiz(quiz_id)));
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'a7111111-1111-1111-1111-111111111111', true);
