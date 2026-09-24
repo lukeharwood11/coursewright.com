@@ -19,12 +19,14 @@ export function StaffHome({
   dashboard,
   loading,
   error: _error,
+  canCreate,
 }: {
   organization: OrganizationSummary;
   orgSlug: string;
   dashboard: StaffDashboard | null;
   loading: boolean;
   error: string | null;
+  canCreate: boolean;
 }) {
   return (
     <div className="px-5 py-4 md:px-8">
@@ -40,10 +42,12 @@ export function StaffHome({
             {dashboard?.week.label ?? "Organization overview"}
           </p>
         </div>
-        <ButtonLink to={newCoursePath(orgSlug)}>
-          <PlusIcon className="h-5 w-5" aria-hidden />
-          Create course
-        </ButtonLink>
+        {canCreate ? (
+          <ButtonLink to={newCoursePath(orgSlug)}>
+            <PlusIcon className="h-5 w-5" aria-hidden />
+            Create course
+          </ButtonLink>
+        ) : null}
       </div>
 
       <OrgAboutCard
@@ -65,6 +69,7 @@ export function StaffHome({
               orgSlug={orgSlug}
               needsCourse={dashboard.setup.needsCourse}
               needsStudents={dashboard.setup.needsStudents}
+              canCreate={canCreate}
             />
           ) : null}
           <StaffAttentionList orgSlug={orgSlug} items={dashboard.attention} />

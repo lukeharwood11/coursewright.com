@@ -1,19 +1,35 @@
-export const ORG_ROLES = ["owner", "admin", "instructor", "parent", "student"] as const;
+export const ORG_ROLES = [
+  "owner",
+  "admin",
+  "instructor",
+  "observer",
+  "parent",
+  "student",
+] as const;
 export type OrgRole = (typeof ORG_ROLES)[number];
 
-export const STAFF_INVITE_ROLES = ["owner", "admin", "instructor"] as const;
+/** Lowest privilege first so the invite default is Observer. */
+export const STAFF_INVITE_ROLES = ["observer", "instructor", "admin", "owner"] as const;
 export type StaffInviteRole = (typeof STAFF_INVITE_ROLES)[number];
+
+export const OBSERVER_VIEW_ONLY_LABEL = "Observer · View only";
+export const OBSERVER_VIEW_ONLY_HINT = "Observers can view but not edit.";
 
 /**
  * Existing memberships that owners/admins may edit from Collaborators.
  * Owner rows stay badge-only. Parent rows can gain an exclusive role.
- * Students are not in this list.
+ * Students are not in this list. Observers are staff collaborators.
  */
-export const EDITABLE_MEMBERSHIP_ROLES = ["admin", "instructor", "parent"] as const;
+export const EDITABLE_MEMBERSHIP_ROLES = [
+  "observer",
+  "admin",
+  "instructor",
+  "parent",
+] as const;
 export type EditableMembershipRole = (typeof EDITABLE_MEMBERSHIP_ROLES)[number];
 
 /** @deprecated Prefer EDITABLE_MEMBERSHIP_ROLES. */
-export const EDITABLE_STAFF_ROLES = ["admin", "instructor"] as const;
+export const EDITABLE_STAFF_ROLES = ["observer", "admin", "instructor"] as const;
 export type EditableStaffRole = (typeof EDITABLE_STAFF_ROLES)[number];
 
 /** @deprecated Prefer EDITABLE_MEMBERSHIP_ROLES. */
@@ -28,6 +44,7 @@ export function parseOrgRole(value: string): OrgRole | null {
     value === "owner" ||
     value === "admin" ||
     value === "instructor" ||
+    value === "observer" ||
     value === "parent" ||
     value === "student"
   ) {
@@ -36,8 +53,14 @@ export function parseOrgRole(value: string): OrgRole | null {
   return null;
 }
 
+/** Writers: owner, admin, instructor. Observer is not a writer. */
 export function isStaffRole(role: OrgRole): boolean {
   return role === "owner" || role === "admin" || role === "instructor";
+}
+
+/** Staff chrome and org-wide read. Mirrors private.can_browse_as_staff. */
+export function browsesAsStaff(role: OrgRole): boolean {
+  return isStaffRole(role) || role === "observer";
 }
 
 /** Parent and student memberships use the student presentation. */
@@ -75,13 +98,18 @@ export function canManageStaff(role: OrgRole): boolean {
   return canInviteStaff(role);
 }
 
-/** Owners, admins, and instructors invite parents. */
+/** Owners, admins, and instructors invite parents. Observers cannot. */
 export function canInviteParent(role: OrgRole): boolean {
   return isStaffRole(role);
 }
 
 export function parseStaffInviteRole(value: string): StaffInviteRole | null {
-  if (value === "owner" || value === "admin" || value === "instructor") {
+  if (
+    value === "observer" ||
+    value === "owner" ||
+    value === "admin" ||
+    value === "instructor"
+  ) {
     return value;
   }
   return null;
@@ -95,7 +123,7 @@ export function parseAssignableMembershipRole(
 }
 
 export function parseEditableStaffRole(value: string): EditableStaffRole | null {
-  if (value === "admin" || value === "instructor") return value;
+  if (value === "observer" || value === "admin" || value === "instructor") return value;
   return null;
 }
 
@@ -104,11 +132,11 @@ export function parseChangeableStaffRole(value: string): EditableStaffRole | nul
   return parseEditableStaffRole(value);
 }
 
-/** Admins may invite admin or instructor. Only owners may invite an owner.
- * Instructor first so the invite default stays the lowest privilege. */
+/** Admins may invite observer, instructor, or admin. Only owners may invite an owner.
+ * Observer is first so the invite default stays the lowest privilege. */
 export function inviteableStaffRoles(actor: OrgRole): StaffInviteRole[] {
-  if (actor === "owner") return ["instructor", "admin", "owner"];
-  if (actor === "admin") return ["instructor", "admin"];
+  if (actor === "owner") return ["observer", "instructor", "admin", "owner"];
+  if (actor === "admin") return ["observer", "instructor", "admin"];
   return [];
 }
 
@@ -126,13 +154,19 @@ export function changeableStaffRoles(actor: OrgRole): StaffInviteRole[] {
 }
 
 export function isStaffInviteRole(role: OrgRole): role is StaffInviteRole {
-  return role === "owner" || role === "admin" || role === "instructor";
+  return (
+    role === "observer" ||
+    role === "owner" ||
+    role === "admin" ||
+    role === "instructor"
+  );
 }
 
 export function roleLabel(role: OrgRole): string {
   if (role === "owner") return "Owner";
   if (role === "admin") return "Admin";
   if (role === "instructor") return "Instructor";
+  if (role === "observer") return "Observer";
   if (role === "student") return "Student";
   return "Parent";
 }
@@ -141,6 +175,6 @@ export function roleBadgeVariant(
   role: OrgRole,
 ): "green" | "slate" | "neutral" {
   if (role === "owner" || role === "admin") return "green";
-  if (role === "instructor") return "slate";
+  if (role === "instructor" || role === "observer") return "slate";
   return "neutral";
 }

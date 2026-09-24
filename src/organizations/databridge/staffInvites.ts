@@ -102,7 +102,7 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
     .select("id, user_id, role, profile:profiles!memberships_user_id_fkey(name, email)")
     .eq("organization_id", organizationId)
     .eq("status", "active")
-    .in("role", ["owner", "admin", "instructor", "parent"]);
+    .in("role", ["owner", "admin", "instructor", "observer", "parent"]);
 
   if (error) throw new Error(error.message);
 
@@ -198,7 +198,7 @@ export async function listOrgPendingInvites(
     .select(INVITE_COLUMNS)
     .eq("organization_id", organizationId)
     .is("accepted_at", null)
-    .in("role", ["owner", "admin", "instructor"])
+    .in("role", ["owner", "admin", "instructor", "observer"])
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);

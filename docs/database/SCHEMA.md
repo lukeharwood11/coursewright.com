@@ -15,7 +15,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | OrganizationBranding | `organization_branding` | Owner-only writes. Members read the row. Icon file and path are public via `organization_icons`. |
 | OrganizationFeatures | `organization_features` | Owner-only writes. Members read. Missing row means all features on. |
 | Membership | `memberships` | |
-| AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `parent`. Claimed via emailed `/invite/<token>` (Resend `organization-invite`) or pending-request inbox after login. Copy-link remains. Membership is created on claim. |
+| AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `observer` / `parent` / `student`. Claimed via emailed `/invite/<token>` (Resend `organization-invite`) or pending-request inbox after login. Copy-link remains. Membership is created on claim. |
 | StudentProfile | `student_profiles` | |
 | Family | `families` | |
 | FamilyMember | `family_members` | |
@@ -105,6 +105,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | `owner` | Yes — create org (first owner), everything an admin can do, plus **billing** (P1) |
 | `admin` | Yes — invite more admins, **change admin ↔ instructor**, **remove** admins/instructors (not last owner/admin), manage org + permalink slug. **Cannot** manage billing |
 | `instructor` | Yes — course builder, enroll student profiles, invite parents, add students via course |
+| `observer` | Yes — staff chrome and org-wide read. No writes, invites, billing, or branding. Not counted as owner/admin |
 | `parent` | Yes — view **and print** shared content for linked enrolled student profile(s) |
 
 **Note:** Students do **not** have user accounts in P0/P1. They exist as `student_profile` records only.
@@ -405,28 +406,28 @@ Authenticated users only: admins, instructors, parents. **Not students** (P0/P1)
 
 ### Membership
 
-Org staff and family memberships. One active membership per user per org. `role` is the **governing** role: at most one exclusive role (`owner`, `admin`, or `instructor`). **Parent** and **student** are additive (`is_parent`, `is_student`) and can stack with each other and with that exclusive role. Exclusive role governs privileges; additive flags layer on the existing parent-link and student-profile gates. Owners and admins change the exclusive role from Collaborators (parents can gain one without a new invite; the parent flag stays). **Students are not in that list** and that UI cannot change them to parent, instructor, admin, or owner. Removing an exclusive role leaves additive flags: the row becomes `parent` if `is_parent`, otherwise `student` if `is_student`, otherwise the membership ends. Setting `role = parent` still requires a `ParentStudentLink` in the org. Setting `role = student` still requires `StudentProfile.user_id` in the org. **Cannot** remove or demote the last remaining `owner` or `admin`. These writes touch **`memberships` only** (plus clearing `course_instructors` when staff standing is lost). Course materials and roster stay **enrollment-gated** — do **not** add a second staff-role gate on content RLS.
+Org staff and family memberships. One active membership per user per org. `role` is the **governing** role: at most one exclusive role (`owner`, `admin`, `instructor`, or `observer`). `is_org_staff` is writers only (owner, admin, instructor). `can_browse_as_staff` adds observer for SELECT. **Parent** and **student** are additive (`is_parent`, `is_student`) and can stack with each other and with that exclusive role. Exclusive role governs privileges; additive flags layer on the existing parent-link and student-profile gates. Owners and admins change the exclusive role from Collaborators (parents can gain one without a new invite; the parent flag stays). **Students are not in that list** and that UI cannot change them to parent, instructor, admin, or owner. Removing an exclusive role leaves additive flags: the row becomes `parent` if `is_parent`, otherwise `student` if `is_student`, otherwise the membership ends. Setting `role = parent` still requires a `ParentStudentLink` in the org. Setting `role = student` still requires `StudentProfile.user_id` in the org. **Cannot** remove or demote the last remaining `owner` or `admin`. These writes touch **`memberships` only** (plus clearing `course_instructors` when staff standing is lost). Course materials and roster stay **enrollment-gated** — do **not** add a second staff-role gate on content RLS.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
 | user_id | uuid | FK → User, **nullable** until invite is claimed |
-| role | text | Governing role: owner · admin · instructor · parent · student. Exclusive roles are owner, admin, instructor |
+| role | text | Governing role: owner · admin · instructor · observer · parent · student. Exclusive roles are owner, admin, instructor, observer |
 | is_parent | boolean | Additive parent. Kept when `role` becomes an exclusive role |
 | is_student | boolean | Additive student. Kept when `role` becomes an exclusive role |
 | status | text | active · invited · suspended |
 
 ### AdminInvite
 
-Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` (staff), `parent`, or `student`. Claimed by opening `/invite/<token>` or by signing in with that email and accepting a pending request. **Anyone with the token can preview** org name, role, and invited email via `get_invite` (unsigned `email_matches` is false). **Claim still requires** a signed-in account on that email. **Membership is created on claim.** Family course access still requires enrollment (see Parent access gate). Student claim also sets `StudentProfile.user_id`.
+Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor` / `observer` (staff), `parent`, or `student`. Observer invites have a null `student_profile_id`. Only owners and admins create them. Claimed by opening `/invite/<token>` or by signing in with that email and accepting a pending request. **Anyone with the token can preview** org name, role, and invited email via `get_invite` (unsigned `email_matches` is false). **Claim still requires** a signed-in account on that email. **Membership is created on claim.** Family course access still requires enrollment (see Parent access gate). Student claim also sets `StudentProfile.user_id`.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
 | email | text | Lowercased — must match the account that claims |
-| role | text | `owner` · `admin` · `instructor` · `parent` · `student` |
+| role | text | `owner` · `admin` · `instructor` · `observer` · `parent` · `student` |
 | student_profile_id | bigint | FK → StudentProfile, **required when `role` is `parent` or `student`** (anchor student), else null |
 | invited_by | uuid | FK → User |
 | token | text | Unique invite token (returned on insert; used in `/invite/<token>`) |

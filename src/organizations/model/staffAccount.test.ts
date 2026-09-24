@@ -5,6 +5,7 @@ import {
   STUDENTS_NOT_IN_COLLABORATORS_MESSAGE,
   assignableMembershipRoles,
   exclusiveReleaseTarget,
+  isLastOrgManager,
   staffMemberActions,
   validateChangeStaffRole,
   validateRemoveStaffMember,
@@ -17,7 +18,7 @@ test("assignableMembershipRoles promotes parents by adding an exclusive role", (
       currentRole: "parent",
       hasLinkedStudent: true,
     }),
-    ["instructor", "admin", "owner"],
+    ["observer", "instructor", "admin", "owner"],
   );
 });
 
@@ -29,7 +30,7 @@ test("assignableMembershipRoles does not replace a teacher with parent or studen
       hasLinkedStudent: true,
       hasStudentAccount: true,
     }),
-    ["instructor", "admin"],
+    ["observer", "instructor", "admin"],
   );
   assert.deepEqual(
     assignableMembershipRoles({
@@ -54,7 +55,7 @@ test("staffMemberActions lets owners promote parents and hides remove", () => {
   });
   assert.equal(actions.canChangeRole, true);
   assert.equal(actions.canRemove, false);
-  assert.deepEqual(actions.changeRoles, ["parent", "instructor", "admin", "owner"]);
+  assert.deepEqual(actions.changeRoles, ["parent", "observer", "instructor", "admin", "owner"]);
   assert.equal(actions.changeRoles.includes("student"), false);
 });
 
@@ -93,7 +94,7 @@ test("staffMemberActions keeps parent and student off the exclusive role menu", 
   });
   assert.equal(actions.canRemove, true);
   assert.equal(actions.releaseTo, "parent");
-  assert.deepEqual(actions.changeRoles, ["instructor", "admin"]);
+  assert.deepEqual(actions.changeRoles, ["instructor", "observer", "admin"]);
   assert.equal(actions.changeRoles.includes("parent"), false);
   assert.equal(actions.changeRoles.includes("student"), false);
 });
@@ -115,7 +116,7 @@ test("student plus admin stays in the collaborator list as an exclusive admin", 
   assert.equal(actions.canChangeRole, true);
   assert.equal(actions.canRemove, true);
   assert.equal(actions.releaseTo, "student");
-  assert.deepEqual(actions.changeRoles, ["admin", "instructor", "owner"]);
+  assert.deepEqual(actions.changeRoles, ["admin", "observer", "instructor", "owner"]);
   assert.equal(actions.changeRoles.includes("student"), false);
 });
 
@@ -172,6 +173,48 @@ test("exclusiveReleaseTarget prefers parent when both additive roles exist", () 
     exclusiveReleaseTarget({ hasLinkedStudent: false, hasStudentAccount: false }),
     null,
   );
+});
+
+test("an observer is not the last manager", () => {
+  assert.equal(
+    isLastOrgManager(
+      [
+        { membershipId: 1, role: "owner" },
+        { membershipId: 2, role: "observer" },
+      ],
+      1,
+    ),
+    true,
+  );
+  assert.equal(
+    isLastOrgManager(
+      [
+        { membershipId: 1, role: "owner" },
+        { membershipId: 2, role: "observer" },
+      ],
+      2,
+    ),
+    false,
+  );
+});
+
+test("owners can change and remove an observer", () => {
+  const actions = staffMemberActions({
+    actorRole: "owner",
+    member: {
+      membershipId: 2,
+      role: "observer",
+      hasLinkedStudent: false,
+    },
+    members: [
+      { membershipId: 1, role: "owner" },
+      { membershipId: 2, role: "observer" },
+    ],
+  });
+  assert.equal(actions.canChangeRole, true);
+  assert.equal(actions.canRemove, true);
+  assert.equal(actions.lastManagerGuard, false);
+  assert.deepEqual(actions.changeRoles, ["observer", "instructor", "admin", "owner"]);
 });
 
 test("validateRemoveStaffMember drops the exclusive role when a parent link remains", () => {

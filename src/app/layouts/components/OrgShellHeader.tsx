@@ -3,7 +3,12 @@ import { Bars3Icon } from "@heroicons/react/24/outline";
 import { AccountMenu } from "@/auth/components/AccountMenu";
 import { ActivityMenu } from "@/notifications";
 import { chromeAccentVars } from "@/organizations/model/brand";
-import { roleBadgeVariant, roleLabel } from "@/organizations/model/role";
+import {
+  OBSERVER_VIEW_ONLY_HINT,
+  OBSERVER_VIEW_ONLY_LABEL,
+  roleBadgeVariant,
+  roleLabel,
+} from "@/organizations/model/role";
 import { OrgSearchBar } from "@/search";
 import { useAppShell } from "../OrgShellContext";
 import { useSidebarStore } from "../stores/sidebar";
@@ -55,6 +60,14 @@ export function OrgShellHeader() {
         <div className="hidden min-w-0 flex-1 md:block" />
       )}
       <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+        {role === "observer" ? (
+          <span
+            className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-2.5 py-1 text-[12px] font-bold text-[var(--ink-soft)]"
+            title={OBSERVER_VIEW_ONLY_HINT}
+          >
+            {OBSERVER_VIEW_ONLY_LABEL}
+          </span>
+        ) : null}
         {showStaffViewToggle ? (
           <StaffViewToggle mode={staffViewMode} onChange={setStaffViewMode} />
         ) : null}

@@ -17,7 +17,7 @@ import {
   orgQueryKeys,
 } from "@/organizations/databridge/memberships";
 import { DEFAULT_ORG_FEATURES } from "@/organizations/model/features";
-import { isStaffRole } from "@/organizations/model/role";
+import { browsesAsStaff } from "@/organizations/model/role";
 import { loadParentDashboard, parentQueryKeys } from "@/parent/databridge/dashboard";
 import { orgHasVisibleResources } from "@/resources/databridge/folders";
 import { resourceItemQueryKeys } from "@/resources/databridge/items";
@@ -53,7 +53,7 @@ export function useOrgShellData(orgSlug: string | undefined) {
 
   const baseOrganization = membershipQuery.data?.organization ?? null;
   const role = membershipQuery.data?.role ?? null;
-  const isStaff = role ? isStaffRole(role) : false;
+  const browsesStaff = role ? browsesAsStaff(role) : false;
   const organizationId = baseOrganization?.id;
 
   const featuresQuery = useQuery({
@@ -79,7 +79,7 @@ export function useOrgShellData(orgSlug: string | undefined) {
   const classesQuery = useQuery({
     queryKey: classQueryKeys.list(organizationId ?? 0),
     queryFn: () => listClasses(organizationId!),
-    enabled: isStaff && Boolean(organizationId) && !parentPresentation,
+    enabled: browsesStaff && Boolean(organizationId) && !parentPresentation,
   });
 
   const parentDashboardQuery = useQuery({
@@ -160,16 +160,17 @@ export function useOrgShellData(orgSlug: string | undefined) {
     unreadDiscussions,
     showResources: Boolean(visibleResourcesQuery.data),
   };
+  const staffChrome = browsesStaff && !parentPresentation;
   const navSections =
     organization && role
-      ? hubTier === "learner"
-        ? buildLearnerNav(organization.slug, lists, navOptions)
-        : hubTier === "view"
-          ? buildParentNav(organization.slug, lists, navOptions)
-          : buildStaffNav(organization.slug, lists, {
-              ...featureFlags,
-              unreadDiscussions,
-            })
+      ? staffChrome
+        ? buildStaffNav(organization.slug, lists, {
+            ...featureFlags,
+            unreadDiscussions,
+          })
+        : hubTier === "learner"
+          ? buildLearnerNav(organization.slug, lists, navOptions)
+          : buildParentNav(organization.slug, lists, navOptions)
       : [];
 
   const profileName = profileQuery.data?.name ?? "";
@@ -186,7 +187,7 @@ export function useOrgShellData(orgSlug: string | undefined) {
     profileName,
     profileEmail,
     navSections,
-    showSearch: isStaff && !parentPresentation,
+    showSearch: browsesStaff && !parentPresentation,
     parentPresentation,
     showStaffViewToggle,
     staffViewMode,

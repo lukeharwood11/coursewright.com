@@ -233,6 +233,7 @@ export function DiscussionPage() {
         ) : null}
       </div>
 
+      {page.canPost ? (
       <div className="cw-discussion-composer-bar shrink-0 border-t border-[var(--line-soft)] bg-[var(--surface)] max-md:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:border-t-0 md:bg-transparent md:px-6 md:pb-4 md:pt-3 lg:px-8">
         <div className="mx-auto w-full max-w-2xl">
           <MessageComposer
@@ -260,6 +261,7 @@ export function DiscussionPage() {
           />
         </div>
       </div>
+      ) : null}
       </div>
 
       <ConfirmDialog

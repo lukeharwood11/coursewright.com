@@ -138,6 +138,7 @@ export function useCourseList() {
     loading: listQuery.isLoading,
     error: listQuery.error ? listQuery.error.message : null,
     canCreate,
+    parentPresentation,
     query: queryText,
     setQuery,
     subject,

@@ -21,7 +21,7 @@ export const STUDENTS_NOT_IN_COLLABORATORS_MESSAGE =
   "Students aren’t changed from the collaborators list.";
 
 export const ADDITIVE_ROLE_NOT_EXCLUSIVE_MESSAGE =
-  "Choose instructor, admin, or owner. Parent and student stay alongside that role.";
+  "Choose observer, instructor, admin, or owner. Parent and student stay alongside that role.";
 
 export type ExclusiveRelease = "parent" | "student" | null;
 
@@ -38,7 +38,12 @@ export function isOrgManagerRole(role: OrgRole): boolean {
 export function isEditableMembershipRole(
   role: OrgRole,
 ): role is EditableMembershipRole {
-  return role === "admin" || role === "instructor" || role === "parent";
+  return (
+    role === "observer" ||
+    role === "admin" ||
+    role === "instructor" ||
+    role === "parent"
+  );
 }
 
 /** Where Remove leaves someone who still has an additive role. Parent wins. */
@@ -54,7 +59,7 @@ export function exclusiveReleaseTarget(input: {
 export function isEditableStaffRole(
   role: OrgRole,
 ): role is EditableStaffRole {
-  return role === "admin" || role === "instructor";
+  return role === "observer" || role === "admin" || role === "instructor";
 }
 
 /** @deprecated Prefer isEditableStaffRole. */
@@ -168,7 +173,7 @@ export function validateChangeStaffRole(input: {
 
   const nextRole = parseAssignableMembershipRole(input.nextRole);
   if (!nextRole) {
-    return { ok: false, error: "Choose instructor, admin, or owner." };
+    return { ok: false, error: "Choose observer, instructor, admin, or owner." };
   }
 
   if (nextRole === input.currentRole) {

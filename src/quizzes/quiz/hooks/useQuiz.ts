@@ -100,7 +100,7 @@ export function useQuiz() {
     if (!viewerIsStudent) return true;
     return student.studentEmail?.trim().toLowerCase() === accountEmail;
   });
-  const teacherView = canEdit;
+  const teacherView = canEdit || role === "observer";
   const showKey = canShowAnswerKey({
     teacherView,
     shareWithParents: Boolean(quiz?.shareAnswerKeyWithParents),

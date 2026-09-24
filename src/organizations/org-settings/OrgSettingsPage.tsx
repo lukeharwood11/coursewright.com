@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { BillingPlaceholder } from "@/billing";
+import { OBSERVER_VIEW_ONLY_HINT } from "@/organizations/model/role";
 import { GradingSection } from "@/grading";
 import {
   canManageBranding,
@@ -95,7 +96,9 @@ export function OrgSettingsPage() {
         </h1>
         {!settings.canEdit ? (
           <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
-            Only owners and admins can change these settings.
+            {settings.role === "observer"
+              ? OBSERVER_VIEW_ONLY_HINT
+              : "Only owners and admins can change these settings."}
           </p>
         ) : null}
       </div>

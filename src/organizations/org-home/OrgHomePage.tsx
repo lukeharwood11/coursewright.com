@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { staffCanEdit } from "@/app/layouts/model/viewMode";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { ParentHome } from "./components/ParentHome";
 import { StaffHome } from "./components/StaffHome";
@@ -38,6 +39,7 @@ export function OrgHomePage() {
       dashboard={home.staffDashboard}
       loading={home.staffDashboardLoading}
       error={home.staffDashboardError}
+      canCreate={staffCanEdit(shell.role, shell.parentPresentation)}
     />
   );
 }

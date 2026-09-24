@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { staffCanEdit } from "@/app/layouts/model/viewMode";
+import { staffBrowsesContent, staffCanEdit } from "@/app/layouts/model/viewMode";
 import {
   announcementQueryKeys,
   listAnnouncementsForOrganization,
@@ -13,12 +13,13 @@ export function useAnnouncements() {
   const { organization, role, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
   const canEdit = staffCanEdit(role, parentPresentation);
+  const browses = staffBrowsesContent(role, parentPresentation);
   const today = localIsoDate();
 
   const staffListQuery = useQuery({
     queryKey: announcementQueryKeys.org(organization.id),
     queryFn: () => listAnnouncementsForOrganization(organization.id),
-    enabled: canEdit,
+    enabled: browses,
   });
 
   const parentDashboardQuery = useQuery({
@@ -46,7 +47,7 @@ export function useAnnouncements() {
 
   return {
     organization,
-    canEdit: true as const,
+    canEdit,
     isParent: false as const,
     today,
     announcements: staffListQuery.data ?? [],

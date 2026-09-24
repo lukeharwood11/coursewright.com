@@ -3,7 +3,7 @@ import { getProfile, profileQueryKeys } from "@/auth/api/profiles";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { firstNameFrom } from "@/auth/model/displayName";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { isStaffRole } from "@/organizations/model/role";
+import { browsesAsStaff } from "@/organizations/model/role";
 import {
   loadStaffDashboard,
   staffDashboardQueryKey,
@@ -13,7 +13,7 @@ import { loadParentDashboard, parentQueryKeys } from "@/parent/databridge/dashbo
 export function useOrgHome() {
   const user = useAuthedUser();
   const { organization, role, parentPresentation } = useOrgShell();
-  const staffView = isStaffRole(role);
+  const staffView = browsesAsStaff(role);
 
   const profileQuery = useQuery({
     queryKey: profileQueryKeys.detail(user.id),

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { PageLoading } from "@/ui/PageLoading";
 import { discussionsPath } from "@/discussions/model/paths";
+import { OBSERVER_VIEW_ONLY_HINT } from "@/organizations/model/role";
 import { MessageComposer } from "@/discussions/discussion/components/MessageComposer";
 import { DiscussionNewFormFields } from "./components/DiscussionNewFormFields";
 import {
@@ -20,6 +21,30 @@ export function DiscussionNewPage() {
   if (page.loading || page.redirectHome) {
     return (
       <PageLoading label="Loading…" />
+    );
+  }
+
+  if (!page.canEdit) {
+    return (
+      <div className="px-5 py-8 md:px-8">
+        <h1
+          className="text-[24px] font-semibold text-[var(--ink)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          New discussion
+        </h1>
+        <p className="mt-2 text-[14.5px] text-[var(--ink-soft)]">
+          {OBSERVER_VIEW_ONLY_HINT}
+        </p>
+        <p className="mt-4 text-[13px]">
+          <Link
+            to={discussionsPath(page.organization.slug)}
+            className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+          >
+            Back to discussions
+          </Link>
+        </p>
+      </div>
     );
   }
 

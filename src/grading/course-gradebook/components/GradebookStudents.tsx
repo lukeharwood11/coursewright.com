@@ -15,6 +15,7 @@ export function GradebookStudents({
   quizzes,
   materials,
   scale,
+  canGrade,
   studentPathFor,
   draftFor,
   savingFinal,
@@ -28,6 +29,7 @@ export function GradebookStudents({
   quizzes: QuizColumn[];
   materials: MaterialColumn[];
   scale: GradingScale;
+  canGrade: boolean;
   studentPathFor: (studentProfileId: number) => string;
   draftFor: (row: GradebookRow) => FinalDraft;
   savingFinal: boolean;
@@ -186,22 +188,33 @@ export function GradebookStudents({
                         const cell = item.locked
                           ? formatGradeDisplay({ percent: item.percent, scale })
                           : "Needs grade";
+                        const quizCell = (
+                          <>
+                            <span className="min-w-0 break-words text-[var(--ink-soft)]">
+                              {quiz.title}
+                            </span>
+                            <span className="shrink-0 font-semibold text-[var(--ink)]">
+                              {cell}
+                            </span>
+                          </>
+                        );
                         return (
                           <li key={quiz.id}>
-                            <button
-                              type="button"
-                              className="flex w-full items-center justify-between gap-3 rounded-[4px] py-3 text-left text-[14px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
-                              onClick={() => {
-                                if (item.attemptId != null) onOpenAttempt(item.attemptId);
-                              }}
-                            >
-                              <span className="min-w-0 break-words text-[var(--ink-soft)]">
-                                {quiz.title}
-                              </span>
-                              <span className="shrink-0 font-semibold text-[var(--ink)] hover:text-[var(--green-deep)]">
-                                {cell}
-                              </span>
-                            </button>
+                            {canGrade ? (
+                              <button
+                                type="button"
+                                className="flex w-full items-center justify-between gap-3 rounded-[4px] py-3 text-left text-[14px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+                                onClick={() => {
+                                  if (item.attemptId != null) onOpenAttempt(item.attemptId);
+                                }}
+                              >
+                                {quizCell}
+                              </button>
+                            ) : (
+                              <div className="flex w-full items-center justify-between gap-3 py-3 text-left text-[14px]">
+                                {quizCell}
+                              </div>
+                            )}
                           </li>
                         );
                       })}
@@ -224,20 +237,31 @@ export function GradebookStudents({
                         const cell = item.locked
                           ? formatGradeDisplay({ percent: item.percent, scale })
                           : "Needs grade";
+                        const materialCell = (
+                          <>
+                            <span className="min-w-0 break-words text-[var(--ink-soft)]">
+                              {material.title}
+                            </span>
+                            <span className="shrink-0 font-semibold text-[var(--ink)]">
+                              {cell}
+                            </span>
+                          </>
+                        );
                         return (
                           <li key={`material-${material.id}`}>
-                            <button
-                              type="button"
-                              className="flex w-full items-center justify-between gap-3 rounded-[4px] py-3 text-left text-[14px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
-                              onClick={() => onOpenSubmission(submissionId)}
-                            >
-                              <span className="min-w-0 break-words text-[var(--ink-soft)]">
-                                {material.title}
-                              </span>
-                              <span className="shrink-0 font-semibold text-[var(--ink)] hover:text-[var(--green-deep)]">
-                                {cell}
-                              </span>
-                            </button>
+                            {canGrade ? (
+                              <button
+                                type="button"
+                                className="flex w-full items-center justify-between gap-3 rounded-[4px] py-3 text-left text-[14px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+                                onClick={() => onOpenSubmission(submissionId)}
+                              >
+                                {materialCell}
+                              </button>
+                            ) : (
+                              <div className="flex w-full items-center justify-between gap-3 py-3 text-left text-[14px]">
+                                {materialCell}
+                              </div>
+                            )}
                           </li>
                         );
                       })}
@@ -250,16 +274,20 @@ export function GradebookStudents({
                     <h3 className="mb-2 text-[13px] font-bold text-[var(--ink-soft)]">
                       Final grade
                     </h3>
-                    <FinalOverrideControls
-                      studentName={row.studentName}
-                      scale={scale}
-                      draft={draft}
-                      hasOverride={Boolean(row.overrideLabel)}
-                      saving={savingFinal}
-                      onDraftChange={(next) => onDraftChange(row.enrollmentId, next)}
-                      onSave={() => onSaveFinal(row, draft.label, draft.note)}
-                      onClear={() => onClearFinal(row)}
-                    />
+                    {canGrade ? (
+                      <FinalOverrideControls
+                        studentName={row.studentName}
+                        scale={scale}
+                        draft={draft}
+                        hasOverride={Boolean(row.overrideLabel)}
+                        saving={savingFinal}
+                        onDraftChange={(next) => onDraftChange(row.enrollmentId, next)}
+                        onSave={() => onSaveFinal(row, draft.label, draft.note)}
+                        onClear={() => onClearFinal(row)}
+                      />
+                    ) : (
+                      <p className="text-[14.5px] text-[var(--ink)]">{shown}</p>
+                    )}
                   </div>
                 )}
               </div>

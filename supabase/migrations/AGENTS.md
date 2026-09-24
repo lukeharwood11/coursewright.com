@@ -5,7 +5,7 @@ Versioned SQL: tables, indexes, RLS, Storage policies.
 ## Scope
 
 - Timestamped `*.sql` migrations
-- Policies matching owner / admin / instructor / parent rules
+- Policies matching owner / admin / instructor / observer / parent rules. `is_org_staff` is writers only. `can_browse_as_staff` adds observer for SELECT.
 
 ## Rules
 

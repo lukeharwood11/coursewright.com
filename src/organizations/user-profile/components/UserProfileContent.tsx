@@ -4,7 +4,7 @@ import { Badge } from "@/ui/Badge";
 import { coursePath } from "@/courses/model/paths";
 import type { OrgPersonProfile } from "@/organizations/databridge/people";
 import type { OrgRole } from "@/organizations/model/role";
-import { isStaffRole, roleBadgeVariant, roleLabel } from "@/organizations/model/role";
+import { browsesAsStaff, roleBadgeVariant, roleLabel } from "@/organizations/model/role";
 import { ProfileLinkList } from "./ProfileLinkList";
 
 export function UserProfileContent({
@@ -21,7 +21,7 @@ export function UserProfileContent({
   compact?: boolean;
   headingId?: string;
 }) {
-  const staff = role != null && isStaffRole(role);
+  const staff = role != null && browsesAsStaff(role);
   const avatarSize = compact ? 48 : 56;
   const titleClass = compact
     ? "text-[20px] font-semibold text-[var(--ink)]"

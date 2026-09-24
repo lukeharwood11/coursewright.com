@@ -74,10 +74,12 @@ export function AnnouncementsPage() {
             Announcements
           </h1>
         </div>
-        <ButtonLink to={newAnnouncementPath(page.organization.slug)}>
-          <MegaphoneIcon className="h-5 w-5" aria-hidden />
-          New announcement
-        </ButtonLink>
+        {page.canEdit ? (
+          <ButtonLink to={newAnnouncementPath(page.organization.slug)}>
+            <MegaphoneIcon className="h-5 w-5" aria-hidden />
+            New announcement
+          </ButtonLink>
+        ) : null}
       </div>
 
       {page.announcements.length === 0 ? (

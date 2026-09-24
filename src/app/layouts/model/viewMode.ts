@@ -1,4 +1,4 @@
-import { isStaffRole, type OrgRole } from "@/organizations/model/role";
+import { browsesAsStaff, isStaffRole, type OrgRole } from "@/organizations/model/role";
 
 export const STAFF_VIEW_MODES = ["teacher", "parent"] as const;
 export type StaffViewMode = (typeof STAFF_VIEW_MODES)[number];
@@ -10,12 +10,17 @@ export function parseStaffViewMode(value: string | null | undefined): StaffViewM
   return value === "parent" ? "parent" : "teacher";
 }
 
-/** Parent-role members always see student chrome. Staff follow the header toggle. */
+/**
+ * Parent and student always see student chrome.
+ * Observer always sees staff chrome. The header toggle does not apply.
+ * Writers follow the header toggle.
+ */
 export function staffShowsParentPresentation(
   role: OrgRole | null,
   viewMode: StaffViewMode,
 ): boolean {
   if (!role) return false;
+  if (role === "observer") return false;
   if (!isStaffRole(role)) return true;
   return viewMode === "parent";
 }
@@ -29,6 +34,14 @@ export function staffCanEdit(
   parentPresentation: boolean,
 ): boolean {
   return Boolean(role && isStaffRole(role) && !parentPresentation);
+}
+
+/** Drafts, unpublished rows, and answer keys. Does not grant a write. */
+export function staffBrowsesContent(
+  role: OrgRole | null,
+  parentPresentation: boolean,
+): boolean {
+  return Boolean(role && browsesAsStaff(role) && !parentPresentation);
 }
 
 export function familyVisibleCourses<

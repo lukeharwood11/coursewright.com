@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { staffCanEdit } from "@/app/layouts/model/viewMode";
+import { staffBrowsesContent } from "@/app/layouts/model/viewMode";
 import { calendarQueryKeys, loadCalendarSource } from "@/calendar/databridge/calendar";
 import { addIsoDays, monthContaining, shiftMonth, weekdayDateHeading } from "@/calendar/model/dates";
 import { expandEventsInRange, toggleHiddenCourse } from "@/calendar/model/events";
@@ -20,7 +20,7 @@ export function useCalendar() {
   const focusDate = dateParam || localIsoDate();
   const week = calendarWeekContaining(new Date(`${focusDate}T12:00:00`));
   const month = monthContaining(focusDate);
-  const parentMode = parentPresentation || !staffCanEdit(role, parentPresentation);
+  const parentMode = !staffBrowsesContent(role, parentPresentation);
   const rangeStart =
     view === "day" ? focusDate : view === "week" ? week.start : month.gridStart;
   const rangeEnd =

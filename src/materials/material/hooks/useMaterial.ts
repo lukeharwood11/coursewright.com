@@ -7,7 +7,7 @@ import {
   getCourse,
   listCourseInstructors,
 } from "@/courses/databridge/courses";
-import { staffCanEdit } from "@/app/layouts/model/viewMode";
+import { staffBrowsesContent, staffCanEdit } from "@/app/layouts/model/viewMode";
 import { staffCanManageCourse } from "@/courses/model/access";
 import { listBlocks } from "@/materials/databridge/blocks";
 import { fileSignedUrl, getFile } from "@/materials/databridge/files";
@@ -37,6 +37,7 @@ export function useMaterial() {
   const user = useAuthedUser();
   const queryClient = useQueryClient();
   const staffEdit = staffCanEdit(role, parentPresentation);
+  const seesStaffContent = staffBrowsesContent(role, parentPresentation);
 
   const materialQuery = useQuery({
     queryKey: materialQueryKeys.detail(materialId),
@@ -175,6 +176,7 @@ export function useMaterial() {
   return {
     organization,
     canEdit: canManage,
+    seesStaffContent,
     isParent: parentPresentation,
     courseId,
     unitId: unitId && Number.isFinite(unitId) ? unitId : material?.unitId ?? null,

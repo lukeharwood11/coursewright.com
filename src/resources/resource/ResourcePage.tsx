@@ -153,7 +153,7 @@ export function ResourcePage() {
               <PageContentView
                 blocks={page.blocks}
                 viewKey={`resource-${page.item.id}`}
-                showAnswers={page.canEdit}
+                showAnswers={page.isStaff}
               />
             </div>
           </Suspense>

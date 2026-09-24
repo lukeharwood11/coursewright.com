@@ -316,7 +316,9 @@ export function ResourceBrowser({
             ? "Nothing here matches that filter."
             : canEditHere
               ? "Nothing in this folder yet. Add a folder, or drop files here."
-              : "Nothing shared with you here yet."}
+              : isStaff
+                ? "Nothing in this folder yet."
+                : "Nothing shared with you here yet."}
         </p>
       ) : (
         <ul className="divide-y divide-[var(--line-soft)]">

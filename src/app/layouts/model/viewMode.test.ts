@@ -6,6 +6,7 @@ import {
   familyVisibleCourses,
   familyVisibleMaterials,
   parseStaffViewMode,
+  staffBrowsesContent,
   staffCanEdit,
   staffShowsParentPresentation,
 } from "./viewMode.ts";
@@ -31,6 +32,17 @@ test("staff default to teacher presentation until Student view is on", () => {
     assert.equal(staffCanEdit(role, false), true);
     assert.equal(staffCanEdit(role, true), false);
   }
+});
+
+test("observers stay in staff chrome with no toggle and no edit", () => {
+  assert.equal(canUseStaffViewToggle("observer"), false);
+  assert.equal(staffShowsParentPresentation("observer", "teacher"), false);
+  assert.equal(staffShowsParentPresentation("observer", "parent"), false);
+  assert.equal(staffCanEdit("observer", false), false);
+  assert.equal(staffCanEdit("observer", true), false);
+  assert.equal(staffBrowsesContent("observer", false), true);
+  assert.equal(staffBrowsesContent("instructor", false), true);
+  assert.equal(staffBrowsesContent("instructor", true), false);
 });
 
 test("parseStaffViewMode only treats parent as parent view", () => {

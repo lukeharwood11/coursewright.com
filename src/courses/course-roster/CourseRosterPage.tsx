@@ -30,7 +30,7 @@ export function CourseRosterPage() {
     );
   }
 
-  if (!roster.canEdit || roster.notFound || !roster.course) {
+  if (!roster.canView || roster.notFound || !roster.course) {
     return (
       <div className="px-5 py-8 md:px-8">
         <h1
@@ -103,7 +103,7 @@ export function CourseRosterPage() {
           <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">
             Enrolled
           </h2>
-          {!roster.panelOpen ? (
+          {roster.canEdit && !roster.panelOpen ? (
             <Button type="button" onClick={roster.openPanel}>
               <UserPlusIcon className="h-5 w-5" aria-hidden />
               Enroll students
@@ -152,7 +152,7 @@ export function CourseRosterPage() {
                       : "Invite parent"}
                   </Button>
                 ) : null}
-                {enrollmentId ? (
+                {roster.canEdit && enrollmentId ? (
                   <Button
                     variant="secondary"
                     onClick={() => roster.onUnenroll(enrollmentId)}
@@ -167,6 +167,7 @@ export function CourseRosterPage() {
         />
       </section>
 
+      {roster.canEdit ? (
       <AddStudentsPanel
         open={roster.panelOpen}
         onClose={roster.closePanel}
@@ -209,6 +210,7 @@ export function CourseRosterPage() {
         onApplyPaste={roster.onApplyPaste}
         onSubmitNew={roster.onSubmitNew}
       />
+      ) : null}
       </div>
     </div>
   );

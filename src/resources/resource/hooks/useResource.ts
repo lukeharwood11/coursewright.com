@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { isStaffRole } from "@/organizations/model/role";
+import { staffBrowsesContent, staffCanEdit } from "@/app/layouts/model/viewMode";
 import { fileSignedUrl, getFile } from "@/materials/databridge/files";
 import { listResourceBlocks, resourceBlockQueryKeys } from "@/resources/databridge/blocks";
 import {
@@ -26,10 +26,11 @@ import type { ResourceVisibility } from "@/resources/model/kinds";
 export function useResource() {
   const params = useParams();
   const itemId = params.itemId ? Number(params.itemId) : NaN;
-  const { organization, role, isParent, isStudent } = useOrgShell();
+  const { organization, role, isParent, isStudent, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
   const queryClient = useQueryClient();
-  const isStaff = role ? isStaffRole(role) : false;
+  const isStaff = staffBrowsesContent(role, parentPresentation);
+  const canWrite = staffCanEdit(role, parentPresentation);
 
   const itemQuery = useQuery({
     queryKey: resourceItemQueryKeys.detail(itemId),
@@ -88,6 +89,7 @@ export function useResource() {
         actor: {
           userId: user.id,
           isStaff,
+          canWrite,
           isParent: role === "parent" || isParent,
           isStudent: role === "student" || isStudent,
         },

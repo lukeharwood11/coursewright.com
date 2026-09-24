@@ -62,7 +62,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
   const roles = role ? inviteableStaffRoles(role) : [];
 
   const [email, setEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<StaffInviteRole>("instructor");
+  const [inviteRole, setInviteRole] = useState<StaffInviteRole>("observer");
   const [formError, setFormError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [lastInviteId, setLastInviteId] = useState<number | null>(null);
@@ -70,9 +70,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
 
   const selectedRole = roles.includes(inviteRole)
     ? inviteRole
-    : roles.includes("instructor")
-      ? "instructor"
-      : (roles[0] ?? "instructor");
+    : (roles[0] ?? "observer");
 
   const staffQuery = useQuery({
     queryKey: staffInviteQueryKeys.staff(organizationId ?? 0),

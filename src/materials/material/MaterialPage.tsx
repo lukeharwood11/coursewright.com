@@ -116,7 +116,7 @@ export function MaterialPage() {
               <Badge variant="amberSolid">Important now</Badge>
             ) : null}
             {isPublished(page.material.visibility) ? (
-              page.canEdit ? <PublishedBadge /> : null
+              page.canEdit || page.seesStaffContent ? <PublishedBadge /> : null
             ) : (
               <Badge variant="amber">Unpublished</Badge>
             )}
@@ -246,7 +246,7 @@ export function MaterialPage() {
           <MaterialSubmissionsSection
             material={page.material}
             courseId={page.material.courseId}
-            mode={page.isParent || !page.canEdit ? "family" : "staff"}
+            mode={page.seesStaffContent ? "staff" : "family"}
           />
         ) : null}
       </div>
@@ -323,7 +323,7 @@ function MaterialBody({
       <PageContentView
         blocks={page.blocks}
         viewKey={`${material.id}-${page.blocks.map((block) => block.id).join("-")}`}
-        showAnswers={page.canEdit}
+        showAnswers={page.seesStaffContent}
       />
     </Suspense>
   );

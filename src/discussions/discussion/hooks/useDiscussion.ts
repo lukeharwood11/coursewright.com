@@ -56,12 +56,13 @@ import type {
 export function useDiscussion() {
   const params = useParams();
   const discussionId = params.discussionId ? Number(params.discussionId) : NaN;
-  const { organization, role, parentPresentation } = useOrgShell();
+  const { organization, role, parentPresentation, isParent } = useOrgShell();
   const user = useAuthedUser();
   const queryClient = useQueryClient();
   useAckNotificationFromSearch();
   const canEdit = staffCanEdit(role, parentPresentation);
   const isStaff = role ? isStaffRole(role) : false;
+  const canPost = canEdit || parentPresentation || (role === "observer" && isParent);
 
   const [mode, setMode] = useState<ComposerMode>("plain");
   const [body, setBody] = useState("");
@@ -360,6 +361,7 @@ export function useDiscussion() {
     discussion: belongsHere ? discussion : null,
     messages: discussion?.messages ?? [],
     canEdit,
+    canPost,
     canMarkAnswered:
       belongsHere && discussion
         ? canMarkDiscussionAnswered({
