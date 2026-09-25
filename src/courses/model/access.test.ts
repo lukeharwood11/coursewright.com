@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { staffCanManageCourse } from "./access.ts";
+import { staffCanManageCourse, staffCanViewCourse } from "./access.ts";
 
 const teacher = {
   userId: "teacher-1",
@@ -45,6 +45,27 @@ test("instructors can edit only courses they teach", () => {
       instructorUserIds: ["someone-else"],
     }),
     false,
+  );
+});
+
+test("observers can open any course and cannot edit it", () => {
+  assert.equal(
+    staffCanManageCourse({
+      role: "observer",
+      parentPresentation: false,
+      userId: "observer-1",
+      instructorUserIds: [],
+    }),
+    false,
+  );
+  assert.equal(
+    staffCanViewCourse({
+      role: "observer",
+      parentPresentation: false,
+      userId: "observer-1",
+      instructorUserIds: [],
+    }),
+    true,
   );
 });
 

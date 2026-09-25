@@ -62,6 +62,8 @@ export function useDiscussion() {
   useAckNotificationFromSearch();
   const canEdit = staffCanEdit(role, parentPresentation);
   const isStaff = role ? isStaffRole(role) : false;
+  // Observers stay mute, including additive parent. Families and writers post.
+  const canPost = role !== "observer" && (canEdit || parentPresentation);
 
   const [mode, setMode] = useState<ComposerMode>("plain");
   const [body, setBody] = useState("");
@@ -360,6 +362,7 @@ export function useDiscussion() {
     discussion: belongsHere ? discussion : null,
     messages: discussion?.messages ?? [],
     canEdit,
+    canPost,
     canMarkAnswered:
       belongsHere && discussion
         ? canMarkDiscussionAnswered({

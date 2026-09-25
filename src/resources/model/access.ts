@@ -68,10 +68,17 @@ export function audienceAllowsRead(args: {
 
 export type ResourceActor = {
   userId: string;
+  /** Sees unpublished rows. Writers and observers. */
   isStaff: boolean;
+  /** Defaults to isStaff. Observers browse with canWrite false. */
+  canWrite?: boolean;
   isParent: boolean;
   isStudent: boolean;
 };
+
+function actorCanWrite(actor: ResourceActor): boolean {
+  return actor.canWrite ?? actor.isStaff;
+}
 
 export function folderCapabilities(args: {
   actor: ResourceActor;
@@ -82,9 +89,10 @@ export function folderCapabilities(args: {
 }): { canView: boolean; canEdit: boolean } {
   const source = aclSourceFolder(args.folder, args.foldersById);
   const canEdit =
-    args.actor.isStaff ||
+    actorCanWrite(args.actor) ||
     grantMatches(args.grants, args.actor.userId, source.id, null, true);
   if (canEdit) return { canView: true, canEdit: true };
+  if (args.actor.isStaff && !args.archived) return { canView: true, canEdit: false };
   if (args.archived) return { canView: false, canEdit: false };
   const canView =
     grantMatches(args.grants, args.actor.userId, source.id, null, false) ||
@@ -107,7 +115,7 @@ export function itemCapabilities(args: {
   foldersById: Map<number, FolderAclSource>;
   grants: ResourceGrantRecord[];
 }): { canView: boolean; canEdit: boolean } {
-  let canEdit = args.actor.isStaff;
+  let canEdit = actorCanWrite(args.actor);
   if (!canEdit && !args.aclInherit) {
     canEdit = grantMatches(args.grants, args.actor.userId, null, args.itemId, true);
   } else if (!canEdit && args.folderId != null) {
@@ -118,6 +126,7 @@ export function itemCapabilities(args: {
     }
   }
   if (canEdit) return { canView: true, canEdit: true };
+  if (args.actor.isStaff && !args.archived) return { canView: true, canEdit: false };
   if (args.archived || args.visibility !== "published") {
     return { canView: false, canEdit: false };
   }

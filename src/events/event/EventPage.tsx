@@ -109,7 +109,7 @@ export function EventPage() {
           <PageContentView
             blocks={event.blocks}
             viewKey={`event-${event.id}`}
-            showAnswers={page.canEdit}
+            showAnswers={page.seesStaffContent}
           />
         </Suspense>
 

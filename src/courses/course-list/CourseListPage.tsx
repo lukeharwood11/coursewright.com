@@ -93,7 +93,9 @@ export function CourseListPage() {
         <p className="mt-6 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
           {list.canCreate
             ? "No courses yet. Create one from scratch, or copy units and materials from another course. You don’t need a roster to print."
-            : "No courses to show yet. When you’re enrolled in a published course, it will show up here."}
+            : list.parentPresentation
+              ? "No courses to show yet. When you’re enrolled in a published course, it will show up here."
+              : "No courses yet."}
         </p>
       ) : null}
 

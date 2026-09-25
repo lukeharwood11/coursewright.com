@@ -100,24 +100,26 @@ export function CourseGradebookPage() {
                     {" · "}
                     {item.title}
                   </span>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="w-full shrink-0 sm:w-auto"
-                    onClick={() => {
-                      if (item.submissionId != null) book.openSubmission(item.submissionId);
-                      else if (item.attemptId != null) book.openAttempt(item.attemptId);
-                    }}
-                  >
-                    Save grade
-                  </Button>
+                  {book.canGrade ? (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="w-full shrink-0 sm:w-auto"
+                      onClick={() => {
+                        if (item.submissionId != null) book.openSubmission(item.submissionId);
+                        else if (item.attemptId != null) book.openAttempt(item.attemptId);
+                      }}
+                    >
+                      Save grade
+                    </Button>
+                  ) : null}
                 </li>
               ))}
             </ul>
           )}
         </section>
 
-        {book.attemptId != null ? (
+        {book.canGrade && book.attemptId != null ? (
           book.answersLoading ? (
             <PageLoading embedded label="Loading answers…" />
           ) : (
@@ -133,7 +135,7 @@ export function CourseGradebookPage() {
           )
         ) : null}
 
-        {book.submissionId != null ? (
+        {book.canGrade && book.submissionId != null ? (
           book.materialDraftLoading || book.materialsLoading || !book.materialDraft ? (
             <PageLoading embedded label="Loading submission…" />
           ) : (
@@ -187,6 +189,7 @@ export function CourseGradebookPage() {
             quizzes={book.quizzes}
             materials={book.materials}
             scale={scale}
+            canGrade={book.canGrade}
             studentPathFor={(studentProfileId) => studentPath(slug, studentProfileId)}
             draftFor={draftFor}
             savingFinal={book.savingFinal}
@@ -203,14 +206,16 @@ export function CourseGradebookPage() {
         <section>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Report card drafts</h2>
-            <Button
-              type="button"
-              className="w-full sm:w-auto"
-              disabled={book.drafting}
-              onClick={book.draftAll}
-            >
-              {book.drafting ? "Drafting…" : "Draft report cards"}
-            </Button>
+            {book.canGrade ? (
+              <Button
+                type="button"
+                className="w-full sm:w-auto"
+                disabled={book.drafting}
+                onClick={book.draftAll}
+              >
+                {book.drafting ? "Drafting…" : "Draft report cards"}
+              </Button>
+            ) : null}
           </div>
           <p className="mt-1 text-[13.5px] text-[var(--ink-soft)]">
             Drafts update from the gradebook. Send one card at a time.

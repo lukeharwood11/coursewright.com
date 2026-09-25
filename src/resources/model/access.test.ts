@@ -33,6 +33,28 @@ test("acl inherit walks to the nearest non-inheriting ancestor", () => {
   assert.equal(aclSourceFolder(child, byId).id, 1);
 });
 
+test("observers can view unpublished items and cannot edit them", () => {
+  const observer = {
+    userId: "observer",
+    isStaff: true,
+    canWrite: false,
+    isParent: false,
+    isStudent: false,
+  };
+  const caps = itemCapabilities({
+    actor: observer,
+    visibility: "unpublished",
+    archived: false,
+    aclInherit: true,
+    audience: { parentsCanView: false, studentsCanView: false },
+    folderId: null,
+    itemId: 9,
+    foldersById: new Map(),
+    grants: [],
+  });
+  assert.deepEqual(caps, { canView: true, canEdit: false });
+});
+
 test("staff can edit unpublished items; parents cannot without a grant", () => {
   const caps = itemCapabilities({
     actor: staff,

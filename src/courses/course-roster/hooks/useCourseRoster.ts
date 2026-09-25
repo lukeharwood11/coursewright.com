@@ -19,7 +19,7 @@ import {
   listOrgStaffForPicker,
   removeCourseInstructor,
 } from "@/courses/databridge/courses";
-import { staffCanManageCourse } from "@/courses/model/access";
+import { staffCanManageCourse, staffCanViewCourse } from "@/courses/model/access";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import { getOrganization } from "@/organizations/databridge/organizations";
 import { canManageOrgSettings } from "@/organizations/model/role";
@@ -74,17 +74,24 @@ export function useCourseRoster() {
 
   const course = courseQuery.data ?? null;
   const belongsHere = course?.organizationId === organization.id;
+  const instructorUserIds = (instructorsQuery.data ?? []).map((row) => row.userId);
   const canEdit = staffCanManageCourse({
     role,
     parentPresentation,
     userId: user.id,
-    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+    instructorUserIds,
+  });
+  const canView = staffCanViewCourse({
+    role,
+    parentPresentation,
+    userId: user.id,
+    instructorUserIds,
   });
 
   const enrollmentsQuery = useQuery({
     queryKey: enrollmentQueryKeys.course(courseId),
     queryFn: () => listCourseEnrollments(courseId),
-    enabled: courseReady && belongsHere && canEdit,
+    enabled: courseReady && belongsHere && canView,
   });
 
   const studentsQuery = useQuery({
@@ -96,7 +103,7 @@ export function useCourseRoster() {
   const classesQuery = useQuery({
     queryKey: classQueryKeys.list(organization.id),
     queryFn: () => listClasses(organization.id),
-    enabled: canEdit,
+    enabled: canView,
   });
 
   const organizationQuery = useQuery({
@@ -279,6 +286,7 @@ export function useCourseRoster() {
   return {
     organization,
     canEdit,
+    canView,
     canManageInstructors,
     course: belongsHere ? course : null,
     enrollments,

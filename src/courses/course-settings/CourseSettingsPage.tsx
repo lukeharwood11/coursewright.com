@@ -18,6 +18,7 @@ import {
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { Badge } from "@/ui/Badge";
 import { isCoursePublished } from "@/courses/model/visibility";
+import { OBSERVER_VIEW_ONLY_HINT } from "@/organizations/model/role";
 import { useToastOnError } from "@/ui/useToastOnError";
 
 const controlClass = [
@@ -41,23 +42,7 @@ export function CourseSettingsPage() {
     );
   }
 
-  if (!settings.canEdit) {
-    return (
-      <div className="px-5 py-8 md:px-8">
-        <h1
-          className="text-[24px] font-semibold text-[var(--ink)]"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Course settings
-        </h1>
-        <p className="mt-2 text-[14.5px] text-[var(--ink-soft)]">
-          Only instructors and admins can change course settings.
-        </p>
-      </div>
-    );
-  }
-
-  if (settings.notFound || !settings.course) {
+  if (settings.notFound || !settings.course || !settings.canView) {
     return (
       <div className="px-5 py-8 md:px-8">
         <p className="text-[14.5px] text-[var(--ink-soft)]">
@@ -93,14 +78,21 @@ export function CourseSettingsPage() {
               This course was copied from another course. Edits stay on this copy.
             </p>
           ) : null}
+          {!settings.canEdit ? (
+            <p className="mt-2 text-[14px] text-[var(--ink-soft)]">
+              {OBSERVER_VIEW_ONLY_HINT}
+            </p>
+          ) : null}
         </div>
-        <PageFormActions
-          formId={COURSE_SETTINGS_FORM_ID}
-          saving={settings.saving}
-          hasChanges={settings.hasChanges}
-          cancelTo={coursePath(settings.organization.slug, settings.course.id)}
-          saveLabel="Save settings"
-        />
+        {settings.canEdit ? (
+          <PageFormActions
+            formId={COURSE_SETTINGS_FORM_ID}
+            saving={settings.saving}
+            hasChanges={settings.hasChanges}
+            cancelTo={coursePath(settings.organization.slug, settings.course.id)}
+            saveLabel="Save settings"
+          />
+        ) : null}
       </div>
 
       <CourseVisibilityBanner
@@ -112,8 +104,12 @@ export function CourseSettingsPage() {
 
       <form
         id={COURSE_SETTINGS_FORM_ID}
-        className="mt-6 grid items-start gap-4 lg:grid-cols-2"
+        className="mt-6"
         onSubmit={settings.onSubmit}
+      >
+      <fieldset
+        disabled={!settings.canEdit}
+        className="grid items-start gap-4 border-0 p-0 lg:grid-cols-2"
       >
         <div className="grid gap-4">
           <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
@@ -287,6 +283,7 @@ export function CourseSettingsPage() {
             addError={null}
           />
         </div>
+      </fieldset>
       </form>
     </div>
   );

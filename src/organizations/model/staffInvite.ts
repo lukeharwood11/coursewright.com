@@ -43,7 +43,7 @@ export function validateCreateStaffInvite(input: {
 
   const role = parseStaffInviteRole(input.role);
   if (!role) {
-    return { ok: false, error: "Choose owner, admin, or instructor." };
+    return { ok: false, error: "Choose observer, instructor, admin, or owner." };
   }
 
   if (!inviteableStaffRoles(input.actorRole).includes(role)) {
@@ -127,8 +127,9 @@ const MEMBER_ROLE_ORDER: Record<OrgRole, number> = {
   owner: 0,
   admin: 1,
   instructor: 2,
-  parent: 3,
-  student: 4,
+  observer: 3,
+  parent: 4,
+  student: 5,
 };
 
 export function compareStaffRole(a: OrgRole, b: OrgRole): number {

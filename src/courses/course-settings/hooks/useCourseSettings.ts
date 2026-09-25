@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { staffCanManageCourse } from "@/courses/model/access";
+import { staffCanManageCourse, staffCanViewCourse } from "@/courses/model/access";
 import {
   caughtErrorMessage,
   formOrMutationError,
@@ -64,11 +64,18 @@ export function useCourseSettings() {
 
   const course = courseQuery.data ?? null;
   const belongsHere = course?.organizationId === organization.id;
+  const instructorUserIds = (instructorsQuery.data ?? []).map((row) => row.userId);
   const canEdit = staffCanManageCourse({
     role,
     parentPresentation,
     userId: user.id,
-    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+    instructorUserIds,
+  });
+  const canView = staffCanViewCourse({
+    role,
+    parentPresentation,
+    userId: user.id,
+    instructorUserIds,
   });
 
   const [title, setTitle] = useState("");
@@ -194,7 +201,7 @@ export function useCourseSettings() {
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!hasChanges) return;
+    if (!canEdit || !hasChanges) return;
     setFormError(null);
     save.mutate();
   }
@@ -204,6 +211,7 @@ export function useCourseSettings() {
   return {
     organization,
     canEdit,
+    canView,
     canManageInstructors,
     course: belongsHere ? course : null,
     loading: courseQuery.isLoading || instructorsQuery.isLoading,

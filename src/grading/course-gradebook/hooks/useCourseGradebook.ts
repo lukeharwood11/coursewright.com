@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { staffCanEdit } from "@/app/layouts/model/viewMode";
 import { getCourse, courseQueryKeys } from "@/courses/databridge/courses";
 import {
   gradebookQueryKeys,
@@ -30,7 +31,8 @@ export function useCourseGradebook() {
   const { courseId: courseIdParam } = useParams();
   const courseId = courseIdParam ? Number(courseIdParam) : NaN;
   const ready = Number.isFinite(courseId);
-  const { organization } = useOrgShell();
+  const { organization, role, parentPresentation } = useOrgShell();
+  const canGrade = staffCanEdit(role, parentPresentation);
   const queryClient = useQueryClient();
   const [classId, setClassId] = useState<number | null>(null);
   const [attemptId, setAttemptId] = useState<number | null>(null);
@@ -173,6 +175,7 @@ export function useCourseGradebook() {
 
   return {
     organization,
+    canGrade,
     course: courseQuery.data ?? null,
     loading: courseQuery.isLoading || bookQuery.isLoading,
     missing: ready && !courseQuery.isLoading && !courseQuery.data,

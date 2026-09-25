@@ -310,6 +310,8 @@ export function useDiscussionNew() {
 
   return {
     organization,
+    canEdit,
+    viewOnly: role === "observer",
     title: draft.title,
     body: draft.body,
     mode,

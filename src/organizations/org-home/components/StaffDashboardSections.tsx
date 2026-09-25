@@ -24,10 +24,12 @@ export function StaffGettingStarted({
   orgSlug,
   needsCourse,
   needsStudents,
+  canCreate,
 }: {
   orgSlug: string;
   needsCourse: boolean;
   needsStudents: boolean;
+  canCreate: boolean;
 }) {
   const rosterPath = `/my/${orgSlug}/roster`;
   return (
@@ -41,10 +43,16 @@ export function StaffGettingStarted({
       <ol className="mt-3 flex flex-col gap-2 text-[14px] text-[var(--ink)]">
         {needsCourse ? (
           <li className="flex flex-wrap items-center gap-2">
-            <span>1. Create a course — you can print without a roster.</span>
-            <ButtonLink to={newCoursePath(orgSlug)} className="px-2.5 py-1 text-[12.5px]">
-              Create course
-            </ButtonLink>
+            <span>
+              {canCreate
+                ? "1. Create a course — you can print without a roster."
+                : "1. No courses yet."}
+            </span>
+            {canCreate ? (
+              <ButtonLink to={newCoursePath(orgSlug)} className="px-2.5 py-1 text-[12.5px]">
+                Create course
+              </ButtonLink>
+            ) : null}
           </li>
         ) : (
           <li className="text-[var(--ink-soft)]">1. Course ready</li>

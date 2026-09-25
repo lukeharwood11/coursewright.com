@@ -3,8 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { staffCanEdit } from "@/app/layouts/model/viewMode";
-import { isStaffRole } from "@/organizations/model/role";
+import { staffBrowsesContent, staffCanEdit } from "@/app/layouts/model/viewMode";
 import {
   archiveResourceFolder,
   createResourceFolder,
@@ -61,8 +60,9 @@ export function useResourcesBrowse() {
   const { organization, role, parentPresentation, isParent, isStudent } = useOrgShell();
   const user = useAuthedUser();
   const queryClient = useQueryClient();
-  const isStaff = role ? isStaffRole(role) : false;
-  const canCreateStaff = staffCanEdit(role, parentPresentation);
+  const isStaff = staffBrowsesContent(role, parentPresentation);
+  const canWrite = staffCanEdit(role, parentPresentation);
+  const canCreateStaff = canWrite;
   const typeFilter = parseResourceTypeFilter(searchParams.get("type"));
   // Parents and students cannot select staff-only ancestors. At the library
   // root, load every row RLS already allows and surface ones whose folder
@@ -117,6 +117,7 @@ export function useResourcesBrowse() {
   const actor = {
     userId: user.id,
     isStaff,
+    canWrite,
     isParent: role === "parent" || isParent,
     isStudent: role === "student" || isStudent,
   };
@@ -124,7 +125,7 @@ export function useResourcesBrowse() {
   const currentFolder = folderQuery.data ?? null;
   const folderCaps =
     currentFolder == null
-      ? { canView: true, canEdit: canCreateStaff || isStaff }
+      ? { canView: true, canEdit: canCreateStaff }
       : folderCapabilities({
           actor,
           folder: currentFolder,

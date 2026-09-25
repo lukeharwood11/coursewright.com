@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { toastCaughtError } from "@/ui/toast";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { staffCanEdit } from "@/app/layouts/model/viewMode";
+import { staffBrowsesContent, staffCanEdit } from "@/app/layouts/model/viewMode";
 import {
   eventQueryKeys,
   getEvent,
@@ -24,6 +24,7 @@ export function useEvent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const staffEditing = staffCanEdit(role, parentPresentation);
+  const seesStaffContent = staffBrowsesContent(role, parentPresentation);
   const canPickAnyCourse = role ? canManageOrgSettings(role) : false;
   const [confirmRemove, setConfirmRemove] = useState(false);
 
@@ -72,6 +73,7 @@ export function useEvent() {
     loading: eventQuery.isLoading,
     notFound: eventQuery.isSuccess && !loaded,
     canEdit,
+    seesStaffContent,
     confirmRemove,
     setConfirmRemove,
     removing: remove.isPending,
