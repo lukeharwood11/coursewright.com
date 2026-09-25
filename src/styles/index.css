@@ -377,6 +377,12 @@ body {
     font-size: 16px;
     padding: 10px 12px;
     min-height: calc(1.5em + 20px);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .cw-editor-input-discussion::-webkit-scrollbar {
+    display: none;
   }
 
   .cw-editor-shell-embedded .cw-editor-placeholder {
@@ -386,13 +392,14 @@ body {
     font-size: 16px;
   }
 
-  .cw-discussion-composer-bar .cw-editor-shell-embedded {
-    border: none;
-    border-radius: 0;
+  .cw-editor-shell-embedded {
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--surface);
   }
 
-  .cw-discussion-composer-bar .cw-editor-shell-embedded:focus-within {
-    box-shadow: none;
+  .cw-editor-shell-embedded .cw-editor-toolbar {
+    border-radius: 10px 10px 0 0;
   }
 }
 

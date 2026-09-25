@@ -234,7 +234,7 @@ export function DiscussionPage() {
       </div>
 
       {page.canPost ? (
-      <div className="cw-discussion-composer-bar shrink-0 border-t border-[var(--line-soft)] bg-[var(--surface)] max-md:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:border-t-0 md:bg-transparent md:px-6 md:pb-4 md:pt-3 lg:px-8">
+      <div className="cw-discussion-composer-bar shrink-0 border-t border-[var(--line-soft)] bg-[var(--paper)] max-md:border-t-0 max-md:px-3 max-md:pt-2 max-md:pb-[calc(env(safe-area-inset-bottom)+0.625rem)] md:border-t-0 md:bg-transparent md:px-6 md:pb-4 md:pt-3 lg:px-8">
         <div className="mx-auto w-full max-w-2xl">
           <MessageComposer
             variant="plain"
