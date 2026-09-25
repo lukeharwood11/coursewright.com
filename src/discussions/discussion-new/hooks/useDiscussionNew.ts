@@ -311,6 +311,7 @@ export function useDiscussionNew() {
   return {
     organization,
     canEdit,
+    viewOnly: role === "observer",
     title: draft.title,
     body: draft.body,
     mode,
@@ -356,7 +357,6 @@ export function useDiscussionNew() {
     redirectHome,
     onSubmit: (event: FormEvent) => {
       event.preventDefault();
-      if (!canEdit) return;
       save.mutate();
     },
     start: () => save.mutate(),

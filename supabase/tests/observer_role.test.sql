@@ -1,6 +1,6 @@
 -- Observer browses like staff and cannot write. Writers stay writers.
 begin;
-select plan(18);
+select plan(23);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -58,6 +58,13 @@ insert into course_instructors (course_id, user_id)
 select c.id, '22222222-2222-2222-2222-222222222276'
 from courses c
 where c.title = 'Observer Draft';
+
+insert into discussions (organization_id, audience, course_id, title, created_by)
+select o.id, 'course', c.id, 'Observer Thread', '22222222-2222-2222-2222-222222222276'
+from organizations o
+join courses c on c.organization_id = o.id
+where o.name = 'Observer Co-op'
+  and c.title = 'Observer Draft';
 
 select set_config('request.jwt.claim.sub', '33333333-3333-3333-3333-333333333376', true);
 select set_config(
@@ -138,6 +145,46 @@ select results_eq(
   'observer writes leave the unpublished course in place'
 );
 
+select results_eq(
+  $$select title from discussions where title = 'Observer Thread'$$,
+  array['Observer Thread'::text],
+  'observer can read a discussion'
+);
+
+select throws_ok(
+  $$select public.post_discussion_message(
+      (select id from discussions where title = 'Observer Thread'),
+      'Observer reply',
+      array[]::uuid[]
+    )$$,
+  '42501',
+  null,
+  'observer cannot post a discussion message'
+);
+
+select results_eq(
+  $$select count(*)::int
+      from discussion_messages m
+      join discussions d on d.id = m.discussion_id
+     where d.title = 'Observer Thread'
+       and m.author_id = '33333333-3333-3333-3333-333333333376'$$,
+  array[0],
+  'observer post leaves no message'
+);
+
+select throws_ok(
+  $$insert into discussions (organization_id, audience, course_id, title, created_by)
+    select o.id, 'course', c.id, 'Observer Started',
+           '33333333-3333-3333-3333-333333333376'
+    from organizations o
+    join courses c on c.organization_id = o.id
+    where o.name = 'Observer Co-op'
+      and c.title = 'Observer Draft'$$,
+  '42501',
+  null,
+  'observer cannot start a discussion'
+);
+
 select throws_ok(
   $$insert into admin_invites (organization_id, email, role, invited_by)
     select id, 'someone@example.com', 'instructor', '33333333-3333-3333-3333-333333333376'
@@ -173,6 +220,15 @@ set local role authenticated;
 select lives_ok(
   $$update courses set description = 'still taught' where title = 'Observer Draft'$$,
   'instructor can still update a course they teach'
+);
+
+select lives_ok(
+  $$select public.post_discussion_message(
+      (select id from discussions where title = 'Observer Thread'),
+      'Teachers can still post',
+      array[]::uuid[]
+    )$$,
+  'instructor can post a discussion message'
 );
 
 reset role;

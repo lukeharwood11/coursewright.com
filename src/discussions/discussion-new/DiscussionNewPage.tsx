@@ -24,7 +24,7 @@ export function DiscussionNewPage() {
     );
   }
 
-  if (!page.canEdit) {
+  if (page.viewOnly) {
     return (
       <div className="px-5 py-8 md:px-8">
         <h1

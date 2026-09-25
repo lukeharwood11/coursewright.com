@@ -189,7 +189,7 @@ export function DiscussionPage() {
                 isOwn={isOwn}
                 showGroupMeta={showGroupMeta}
                 canEdit={page.canEditMessage(message)}
-                canQuote={message.deletedAt == null}
+                canQuote={page.canPost && message.deletedAt == null}
                 canRemove={page.canRemoveMessage(message.authorId)}
                 isEditing={page.editingMessageId === message.id}
                 editMode={page.editMode}

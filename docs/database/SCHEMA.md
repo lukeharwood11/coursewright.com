@@ -105,7 +105,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | `owner` | Yes — create org (first owner), everything an admin can do, plus **billing** (P1) |
 | `admin` | Yes — invite more admins, **change admin ↔ instructor**, **remove** admins/instructors (not last owner/admin), manage org + permalink slug. **Cannot** manage billing |
 | `instructor` | Yes — course builder, enroll student profiles, invite parents, add students via course |
-| `observer` | Yes — staff chrome and org-wide read. No writes, invites, billing, or branding. Not counted as owner/admin |
+| `observer` | Yes — staff chrome and org-wide read. No writes, including discussion start or reply. No invites, billing, or branding. Not counted as owner/admin |
 | `parent` | Yes — view **and print** shared content for linked enrolled student profile(s) |
 
 **Note:** Students do **not** have user accounts in P0/P1. They exist as `student_profile` records only.

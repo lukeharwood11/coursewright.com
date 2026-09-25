@@ -56,13 +56,14 @@ import type {
 export function useDiscussion() {
   const params = useParams();
   const discussionId = params.discussionId ? Number(params.discussionId) : NaN;
-  const { organization, role, parentPresentation, isParent } = useOrgShell();
+  const { organization, role, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
   const queryClient = useQueryClient();
   useAckNotificationFromSearch();
   const canEdit = staffCanEdit(role, parentPresentation);
   const isStaff = role ? isStaffRole(role) : false;
-  const canPost = canEdit || parentPresentation || (role === "observer" && isParent);
+  // Observers stay mute, including additive parent. Families and writers post.
+  const canPost = role !== "observer" && (canEdit || parentPresentation);
 
   const [mode, setMode] = useState<ComposerMode>("plain");
   const [body, setBody] = useState("");

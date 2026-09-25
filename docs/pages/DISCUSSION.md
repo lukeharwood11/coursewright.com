@@ -8,7 +8,7 @@ Optional query on **new:** `audience=course|class` plus `courseId` or `classId` 
 
 ## Audience
 
-Staff compose in Teacher view for courses they teach / classes they manage (owners and admins: any in the org). Students compose for a course they are enrolled in or a class they are in. Anyone who can see the thread can post and quote. Staff **Student view** uses the student presentation; opening still marks the thread read for that person.
+Staff compose in Teacher view for courses they teach / classes they manage (owners and admins: any in the org). Students compose for a course they are enrolled in or a class they are in. Anyone who can see the thread can post and quote, except an **Observer**: they can read the thread and cannot start, reply, or quote, even when they are also a parent. Staff **Student view** uses the student presentation; opening still marks the thread read for that person.
 
 ## Purpose
 

@@ -18,7 +18,7 @@ Two-way **discussions**: a thread for **one course** or **one class**. Title, fl
 
 - Audience is **one course or one class** — not mixed, not a list of students in this slice.
 - Families start a thread only for a course their child is enrolled in (active + published) or a class their child is in.
-- Everyone who can see the thread can post. Timeline is **flat**; **Quote** is body content, not nested replies / quote columns.
+- Everyone who can see the thread can post, except an **Observer** (view-only, including additive parent). Timeline is **flat**; **Quote** is body content, not nested replies / quote columns.
 - Author of the thread or staff who can see it mark **answered** (and unmark). Answered does not lock posting.
 - Soft-delete only. Course-from-course copy does **not** copy discussions.
 - Page folders: `discussions/` (list), `discussion/` (view), `discussion-new/` (compose). Shared `model/` + `databridge/`.
