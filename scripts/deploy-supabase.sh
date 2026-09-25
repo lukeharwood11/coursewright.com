@@ -53,7 +53,10 @@ fi
 step "Supabase migrations (${TIER} → ${PROJECT_REF})"
 cd "$REPO_ROOT"
 supabase link --project-ref "$PROJECT_REF" --yes
-supabase db push --linked --yes
+# --include-all: allow a local migration whose timestamp sorts before the
+# remote tip (e.g. prod applied 20261004000001 before 20261004000000 existed).
+# No-op when history is already linear — safe for testing.
+supabase db push --linked --yes --include-all
 
 step "Deploy Edge Functions (${TIER} → ${PROJECT_REF})"
 FUNCTIONS_DIR="${REPO_ROOT}/supabase/functions"
