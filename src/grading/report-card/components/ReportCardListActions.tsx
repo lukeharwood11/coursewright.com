@@ -18,7 +18,7 @@ import {
   reportCardQueryKeys,
 } from "@/grading/databridge/reportCards";
 import { gradebookPath, reportCardPath } from "@/grading/model/paths";
-import { caughtErrorMessage } from "@/ui/toast";
+import { toastCaughtError } from "@/ui/toast";
 
 const itemClassName =
   "flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[13px] font-bold text-[var(--ink)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:bg-[var(--green-tint)] focus-visible:outline-none disabled:pointer-events-none disabled:opacity-60";
@@ -65,7 +65,7 @@ export function ReportCardListActions({
       toast("Grades refreshed from the gradebook.");
       await invalidateLists();
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   const discard = useMutation({
@@ -74,7 +74,7 @@ export function ReportCardListActions({
       toast("Draft discarded.");
       await invalidateLists();
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   const busy = refresh.isPending || discard.isPending;

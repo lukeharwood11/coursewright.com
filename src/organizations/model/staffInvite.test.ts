@@ -20,8 +20,9 @@ test("inviteCreatedMessage notes when an org member was linked as a parent", () 
       emailSent: false,
       linkCopied: false,
       linked: true,
+      linkedParentName: "Alex Smith",
     }),
-    "alex@example.com is already in this organization — linked as a parent.",
+    "Linked Alex Smith as parent",
   );
 });
 

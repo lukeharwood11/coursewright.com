@@ -2,11 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import {
-  formOrMutationError,
-  toastCheckNetworkConnection,
-} from "@/ui/toast";
-import { isNetworkError } from "@/ui/networkError";
+import { formOrMutationError, toastCaughtError } from "@/ui/toast";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
@@ -197,15 +193,13 @@ export function useAnnouncementEdit() {
     onSuccess: (result) => {
       invalidate(result.id);
       if (result.email?.error) {
-        toast(result.email.error);
+        toastCaughtError(result.email.error);
       } else if (result.email && result.email.sent > 0) {
         toast("Notification emailed to students.");
       }
       navigate(announcementPath(organization.slug, result.id));
     },
-    onError: (error: Error) => {
-      if (isNetworkError(error)) toastCheckNetworkConnection();
-    },
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   const belongsHere =

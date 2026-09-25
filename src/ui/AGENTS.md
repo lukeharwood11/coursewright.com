@@ -8,7 +8,7 @@ Design-system primitives from [STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md).
 - **DetailPageHeader** — shared detail-screen chrome (surface bar, compact title + inline back, meta, actions)
 - `AnchoredPopup` — viewport-aware menus / tooltips (flip and stay in frame)
 - `InfoHint` — information-circle button + anchored tooltip (lesson plans, class leads, …)
-- `toastNotImplemented` / `toastSomethingWentWrong` / `toastCheckNetworkConnection` / `toastCaughtError` / `caughtErrorMessage` (sonner); `isNetworkError`; `useToastOnError` for load/mutation failures instead of page error copy (network failures toast “Check your network connection…”)
+- `toastNotImplemented` / `toastSomethingWentWrong` / `toastCheckNetworkConnection` / `toastCaughtError` / `caughtErrorMessage` / `reportCaughtError` (sonner); `isNetworkError`; `useToastOnError` for load/mutation failures instead of page error copy (network failures toast “Check your network connection…”; other failures toast generic copy + log/PostHog)
 - `useSaveShortcut` — Cmd/Ctrl+S on an editor page (blocks the browser save dialog)
 - Storybook stories colocated as `*.stories.tsx`
 - No product flows

@@ -11,7 +11,7 @@ import {
 } from "@/grading/databridge/reportCards";
 import { getGradingScale, gradingScaleQueryKeys } from "@/grading/databridge/scales";
 import { reportCardPath } from "@/grading/model/paths";
-import { caughtErrorMessage } from "@/ui/toast";
+import { toastCaughtError } from "@/ui/toast";
 
 export function useStudentGrades(studentId: number | null) {
   const { organization, role, parentPresentation } = useOrgShell();
@@ -43,7 +43,7 @@ export function useStudentGrades(studentId: number | null) {
       });
       navigate(reportCardPath(organization.slug, cardId));
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   return {

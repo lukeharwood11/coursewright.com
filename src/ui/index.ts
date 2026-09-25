@@ -22,6 +22,8 @@ export { isNetworkError } from "./networkError";
 export {
   caughtErrorMessage,
   formOrMutationError,
+  GENERIC_ERROR_TOAST_MESSAGE,
+  reportCaughtError,
   toastCaughtError,
   toastCheckNetworkConnection,
   toastNotImplemented,

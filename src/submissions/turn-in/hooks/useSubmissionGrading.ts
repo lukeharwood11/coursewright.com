@@ -5,7 +5,7 @@ import {
   gradeMaterialSubmission,
   submissionQueryKeys,
 } from "@/submissions/databridge/submissions";
-import { caughtErrorMessage } from "@/ui/toast";
+import { toastCaughtError } from "@/ui/toast";
 import { useMaterialSubmissions } from "./useMaterialSubmissions";
 
 export function useSubmissionGrading(args: {
@@ -28,7 +28,7 @@ export function useSubmissionGrading(args: {
         queryKey: gradebookQueryKeys.course(args.courseId),
       });
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   return {

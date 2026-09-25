@@ -103,6 +103,7 @@ export function useParentInvite(studentId: number | null) {
           linkCopied: copied,
           attached: !result.linked && result.attached,
           linked: result.linked,
+          linkedParentName: result.linked ? result.linkedParent.name : undefined,
         }),
       );
       await queryClient.invalidateQueries({

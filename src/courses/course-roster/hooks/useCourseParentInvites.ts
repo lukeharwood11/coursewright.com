@@ -84,6 +84,7 @@ export function useCourseParentInvites(students: StudentSummary[]) {
           linkCopied: copied,
           attached: wasAttached,
           linked: wasLinked,
+          linkedParentName: result.linked ? result.linkedParent.name : undefined,
         }),
       );
       await queryClient.invalidateQueries({

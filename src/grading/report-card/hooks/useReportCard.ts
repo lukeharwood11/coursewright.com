@@ -16,7 +16,7 @@ import {
   submitReportCard,
 } from "@/grading/databridge/reportCards";
 import { studentPath } from "@/grading/model/paths";
-import { caughtErrorMessage } from "@/ui/toast";
+import { toastCaughtError } from "@/ui/toast";
 
 export function useReportCard() {
   const { cardId: cardIdParam } = useParams();
@@ -53,7 +53,7 @@ export function useReportCard() {
       toast("Comment saved.");
       await reload();
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   const refresh = useMutation({
@@ -62,7 +62,7 @@ export function useReportCard() {
       toast("Grades refreshed from the gradebook.");
       await reload();
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   const submit = useMutation({
@@ -75,7 +75,7 @@ export function useReportCard() {
         await sendReportCardEmail(cardId);
         return true;
       } catch (error) {
-        toast(caughtErrorMessage(error));
+        toastCaughtError(error);
         return false;
       }
     },
@@ -87,7 +87,7 @@ export function useReportCard() {
       );
       await reload();
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   const resend = useMutation({
@@ -99,7 +99,7 @@ export function useReportCard() {
       toast("Email queued again.");
       await reload();
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   const remove = useMutation({
@@ -117,7 +117,7 @@ export function useReportCard() {
       }
       navigate(studentPath(organization.slug, studentId ?? 0));
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   return {

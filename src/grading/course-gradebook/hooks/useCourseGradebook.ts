@@ -26,7 +26,7 @@ import { getGradingScale, gradingScaleQueryKeys } from "@/grading/databridge/sca
 import { reportCardPath } from "@/grading/model/paths";
 import { finalOverrideNeedsConfirm } from "@/grading/model/scale";
 import { classQueryKeys, listClassMembers, listClasses } from "@/roster/databridge/classes";
-import { caughtErrorMessage } from "@/ui/toast";
+import { toastCaughtError } from "@/ui/toast";
 
 export function useCourseGradebook() {
   const { courseId: courseIdParam } = useParams();
@@ -124,7 +124,7 @@ export function useCourseGradebook() {
       toast("Final saved.");
       await refreshBook();
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   const savePoints = useMutation({
@@ -138,7 +138,7 @@ export function useCourseGradebook() {
       setNote("");
       await refreshBook();
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   const draftCard = useMutation({
@@ -147,7 +147,7 @@ export function useCourseGradebook() {
       await queryClient.invalidateQueries({ queryKey: reportCardQueryKeys.course(courseId) });
       navigate(reportCardPath(organization.slug, cardId));
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   const saveMaterial = useMutation({
@@ -160,7 +160,7 @@ export function useCourseGradebook() {
       setSubmissionId(null);
       await refreshBook();
     },
-    onError: (error: Error) => toast(caughtErrorMessage(error)),
+    onError: (error: Error) => toastCaughtError(error),
   });
 
   const needsGrade = rows.flatMap((row) =>
