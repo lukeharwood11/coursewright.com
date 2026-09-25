@@ -714,8 +714,8 @@ export async function listDiscussionAudienceMembers(args: {
   const { data, error } = await db.rpc("list_discussion_audience_members", {
     p_organization_id: args.organizationId,
     p_audience: args.audience,
-    p_course_id: args.courseId,
-    p_class_id: args.classId,
+    p_course_id: args.courseId ?? 0,
+    p_class_id: args.classId ?? 0,
   });
   if (error) throw new Error(error.message);
 

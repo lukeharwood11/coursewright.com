@@ -56,12 +56,13 @@ export function useStudentInvite(studentId: number | null, studentEmail: string 
         invitedBy: user.id,
       });
     },
-    onSuccess: async ({ invite, email: emailStatus }) => {
-      const copied = await copyInvite(invite, { toast: false });
+    onSuccess: async (result) => {
+      if (result.linked) return;
+      const copied = await copyInvite(result.invite, { toast: false });
       toast(
         inviteCreatedMessage({
-          recipientEmail: invite.email,
-          emailSent: emailStatus.sent,
+          recipientEmail: result.invite.email,
+          emailSent: result.email.sent,
           linkCopied: copied,
         }),
       );

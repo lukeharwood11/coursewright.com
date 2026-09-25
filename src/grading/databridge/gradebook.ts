@@ -225,7 +225,7 @@ export async function setCourseFinalOverride(args: {
   const db = requireSupabase();
   const { error } = await db.rpc("set_course_final_override", {
     p_enrollment_id: args.enrollmentId,
-    p_label: args.label,
+    p_label: args.label ?? "",
     p_note: args.note,
   });
   if (error) throw new Error(error.message);

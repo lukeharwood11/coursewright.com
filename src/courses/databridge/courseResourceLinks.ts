@@ -199,10 +199,21 @@ export async function createCourseResourceLink(args: {
   const nextSort =
     existing && existing.length > 0 ? Number(existing[0].sort_order) + 1 : 0;
 
+  const { data: courseRow, error: courseError } = await db
+    .from("courses")
+    .select("organization_id")
+    .eq("id", args.courseId)
+    .maybeSingle();
+  if (courseError) throw new Error(courseError.message);
+  if (!courseRow?.organization_id) {
+    throw new Error("That course wasn’t found.");
+  }
+
   const { data, error } = await db
     .from("course_resource_links")
     .insert({
       course_id: args.courseId,
+      organization_id: courseRow.organization_id,
       folder_id: folderId,
       item_id: itemId,
       sort_order: nextSort,

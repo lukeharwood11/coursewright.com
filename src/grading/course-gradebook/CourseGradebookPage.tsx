@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
-import { Button, ButtonLink } from "@/ui/Button";
+import { Button } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
 import { Select } from "@/ui/Select";
 import { Badge } from "@/ui/Badge";
@@ -36,6 +36,7 @@ export function CourseGradebookPage() {
   }
 
   const scale = book.scale;
+  const course = book.course;
   const slug = book.organization.slug;
 
   function draftFor(row: GradebookRow) {
@@ -50,9 +51,9 @@ export function CourseGradebookPage() {
   return (
     <div>
       <DetailPageHeader
-        backTo={coursePath(slug, book.course.id)}
+        backTo={coursePath(slug, course.id)}
         backLabel="Back to course"
-        title={`${book.course.title} gradebook`}
+        title={`${course.title} gradebook`}
       />
       <div className="space-y-6 px-5 py-4 md:px-8">
         {book.bandsChanged ? (
@@ -235,7 +236,7 @@ export function CourseGradebookPage() {
                             orgSlug={slug}
                             card={sent}
                             canManage={book.canGrade}
-                            courseId={book.course.id}
+                            courseId={course.id}
                           />
                         </>
                       ) : draft ? (
@@ -246,7 +247,7 @@ export function CourseGradebookPage() {
                             card={draft}
                             openLabel="Review"
                             canManage={book.canGrade}
-                            courseId={book.course.id}
+                            courseId={course.id}
                           />
                         </>
                       ) : book.canGrade ? (
