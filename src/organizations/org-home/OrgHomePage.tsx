@@ -34,7 +34,6 @@ export function OrgHomePage() {
 
   return (
     <StaffHome
-      organization={shell.organization}
       orgSlug={shell.organization.slug}
       dashboard={home.staffDashboard}
       loading={home.staffDashboardLoading}

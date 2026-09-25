@@ -462,6 +462,75 @@ export type Database = {
           },
         ]
       }
+      course_resource_links: {
+        Row: {
+          course_id: number
+          created_at: string
+          created_by: string | null
+          folder_id: number | null
+          id: number
+          item_id: number | null
+          organization_id: number
+          sort_order: number
+        }
+        Insert: {
+          course_id: number
+          created_at?: string
+          created_by?: string | null
+          folder_id?: number | null
+          id?: number
+          item_id?: number | null
+          organization_id?: number
+          sort_order?: number
+        }
+        Update: {
+          course_id?: number
+          created_at?: string
+          created_by?: string | null
+          folder_id?: number | null
+          id?: number
+          item_id?: number | null
+          organization_id?: number
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_resource_links_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_resource_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_resource_links_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "org_resource_folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_resource_links_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "org_resource_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_resource_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_templates: {
         Row: {
           created_at: string
@@ -1691,42 +1760,27 @@ export type Database = {
           course_id: number
           created_at: string
           deleted_at: string | null
-          feedback: string
-          graded_at: string | null
-          graded_by: string | null
           id: number
           material_id: number
           organization_id: number
-          points_earned: number | null
-          points_possible: number | null
           student_profile_id: number
         }
         Insert: {
           course_id: number
           created_at?: string
           deleted_at?: string | null
-          feedback?: string
-          graded_at?: string | null
-          graded_by?: string | null
           id?: number
           material_id: number
           organization_id: number
-          points_earned?: number | null
-          points_possible?: number | null
           student_profile_id: number
         }
         Update: {
           course_id?: number
           created_at?: string
           deleted_at?: string | null
-          feedback?: string
-          graded_at?: string | null
-          graded_by?: string | null
           id?: number
           material_id?: number
           organization_id?: number
-          points_earned?: number | null
-          points_possible?: number | null
           student_profile_id?: number
         }
         Relationships: [
@@ -1788,8 +1842,6 @@ export type Database = {
           submission_limit: number
           accept_submissions: boolean
           allow_submissions_past_due: boolean
-          gradable: boolean
-          points_possible: number | null
           template_id: number | null
           title: string
           unit_id: number | null
@@ -1824,8 +1876,6 @@ export type Database = {
           submission_limit?: number
           accept_submissions?: boolean
           allow_submissions_past_due?: boolean
-          gradable?: boolean
-          points_possible?: number | null
           template_id?: number | null
           title: string
           unit_id?: number | null
@@ -1860,8 +1910,6 @@ export type Database = {
           submission_limit?: number
           accept_submissions?: boolean
           allow_submissions_past_due?: boolean
-          gradable?: boolean
-          points_possible?: number | null
           template_id?: number | null
           title?: string
           unit_id?: number | null
@@ -1940,8 +1988,6 @@ export type Database = {
           created_at: string
           id: number
           organization_id: number
-          is_parent: boolean
-          is_student: boolean
           role: string
           status: string
           updated_at: string
@@ -1950,8 +1996,6 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: number
-          is_parent?: boolean
-          is_student?: boolean
           organization_id: number
           role: string
           status?: string
@@ -1961,8 +2005,6 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
-          is_parent?: boolean
-          is_student?: boolean
           organization_id?: number
           role?: string
           status?: string
@@ -1998,7 +2040,6 @@ export type Database = {
           kind: string
           organization_id: number
           enrollment_id: number | null
-          material_submission_id: number | null
           preview: string
           quiz_attempt_id: number | null
           read_at: string | null
@@ -2018,7 +2059,6 @@ export type Database = {
           kind: string
           organization_id: number
           enrollment_id?: number | null
-          material_submission_id?: number | null
           preview?: string
           quiz_attempt_id?: number | null
           read_at?: string | null
@@ -2038,7 +2078,6 @@ export type Database = {
           kind?: string
           organization_id?: number
           enrollment_id?: number | null
-          material_submission_id?: number | null
           preview?: string
           quiz_attempt_id?: number | null
           read_at?: string | null
@@ -3635,14 +3674,6 @@ export type Database = {
       }
       grade_quiz_attempt_noted: {
         Args: { p_attempt_id: number; p_note: string; p_points: Json }
-        Returns: undefined
-      }
-      grade_material_submission: {
-        Args: {
-          p_feedback: string
-          p_points: number | null
-          p_submission_id: number
-        }
         Returns: undefined
       }
       course_gradebook: { Args: { p_course_id: number }; Returns: Json }

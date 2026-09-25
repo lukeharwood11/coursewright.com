@@ -56,6 +56,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 |------|-----|-------|
 | [ORG_PICKER](./pages/ORG_PICKER.md) | `/my` | Org picker + create org |
 | [ORG_HOME](./pages/ORG_HOME.md) | `/my/<org-slug>` | Role-aware dashboard (parent “this week” calendar lives here) |
+| [ORG_PROFILE](./pages/ORG_PROFILE.md) | `/my/<org-slug>/profile` | Organization identity + contact profile (all members); owners edit via settings |
 | [CALENDAR](./pages/CALENDAR.md) | `/my/<org-slug>/calendar` | Month/week/day calendar (`?view=month\|week\|day`, `?date=YYYY-MM-DD`) |
 | [EVENT](./pages/EVENT.md) (view) | `/my/<org-slug>/events/<event_id>` | Course, class, or organization event |
 | [EVENT](./pages/EVENT.md) (new) | `/my/<org-slug>/events/new` | Staff compose. Optional `?audience=course\|class\|organization`, `courseId` / `classId`, `date` |

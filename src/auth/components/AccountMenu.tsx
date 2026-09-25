@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { signOut } from "@/auth/api/session";
 import { feedbackPath } from "@/feedback/model/paths";
+import { orgProfilePath } from "@/organizations/model/paths";
 import { AnchoredPopup } from "@/ui/AnchoredPopup";
 import { Avatar } from "@/ui/Avatar";
 import { Badge } from "@/ui/Badge";
@@ -139,7 +140,12 @@ export function AccountMenu({
               <p className="text-[11px] font-bold text-[var(--ink-faint)]">
                 Organization
               </p>
-              <div className="mt-2 flex items-start gap-3">
+              <Link
+                role="menuitem"
+                to={orgProfilePath(orgSlug!)}
+                className="mt-2 flex items-start gap-3 rounded-[6px] border border-transparent px-2 py-2 -mx-1 hover:border-[var(--green)] focus-visible:border-[var(--green)] focus-visible:outline-none"
+                onClick={() => setOpen(false)}
+              >
                 <span
                   className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-sm)] bg-[var(--green-tint)] text-[var(--green-deep)]"
                   aria-hidden
@@ -157,7 +163,7 @@ export function AccountMenu({
                     <Badge variant={roleBadgeVariant}>{roleLabel}</Badge>
                   </div>
                 </div>
-              </div>
+              </Link>
             </div>
             <div className="py-1">
               {showOrgSettings ? (

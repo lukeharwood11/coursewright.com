@@ -8,6 +8,7 @@ export { DescriptionDialog } from "./DescriptionDialog";
 export { DetailPageHeader } from "./DetailPageHeader";
 export { InfoHint } from "./InfoHint";
 export { Input } from "./Input";
+export { ListCardLink } from "./ListCardLink";
 export { PageFormActions } from "./PageFormActions";
 export { PageLoading } from "./PageLoading";
 export {

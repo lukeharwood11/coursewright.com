@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom";
 import {
   BellAlertIcon,
   CheckCircleIcon,
 } from "@heroicons/react/24/solid";
+import { Badge } from "@/ui/Badge";
+import { ListCardLink } from "@/ui/ListCardLink";
 import {
   announcementAudienceLabel,
   announcementTargetName,
@@ -40,61 +41,63 @@ export function ParentAnnouncementsList({
           ? bulletinForStudentsLabel(item.students)
           : null;
         const meta = announcementMetaParts({
-          audienceLabel: announcementAudienceLabel(item.audience),
           authorName: item.authorName,
           createdAt: item.createdAt,
           dateRange: dates,
         }).join(" · ");
         return (
           <li key={item.id}>
-            <Link
+            <ListCardLink
               to={announcementPath(orgSlug, item.id)}
-              className={`flex items-start gap-2.5 rounded-[10px] border px-3.5 py-3 ${
-                item.read
-                  ? "border-[var(--line)] bg-[var(--surface)]"
-                  : "border-[var(--green)] bg-[var(--green-tint)]"
-              }`}
+              highlighted={!item.read}
+              leading={
+                item.read ? (
+                  <CheckCircleIcon
+                    className="mt-0.5 h-5 w-5 shrink-0 text-[var(--green)]"
+                    aria-hidden
+                  />
+                ) : (
+                  <BellAlertIcon
+                    className="mt-0.5 h-5 w-5 shrink-0 text-[var(--green)]"
+                    aria-hidden
+                  />
+                )
+              }
             >
-              {item.read ? (
-                <CheckCircleIcon
-                  className="mt-0.5 h-5 w-5 shrink-0 text-[var(--green)]"
-                  aria-hidden
-                />
-              ) : (
-                <BellAlertIcon
-                  className="mt-0.5 h-5 w-5 shrink-0 text-[var(--green)]"
-                  aria-hidden
-                />
-              )}
-              <span className="min-w-0 flex-1">
-                <span className="flex flex-wrap items-center gap-2">
-                  <span className="text-[15px] font-extrabold text-[var(--ink)]">
-                    {item.title}
-                  </span>
-                  {item.read ? (
-                    <span className="sr-only">Seen</span>
-                  ) : (
-                    <span className="sr-only">New</span>
-                  )}
+              <span className="flex flex-wrap items-center gap-2">
+                <span className="text-[15px] font-extrabold text-[var(--ink)]">
+                  {item.title}
                 </span>
-                {item.body ? (
-                  <span className="mt-1 block line-clamp-2 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-                    {item.body}
-                  </span>
-                ) : null}
-                <span className="mt-1.5 block text-[14px] font-extrabold text-[var(--green-deep)]">
+                {item.read ? (
+                  <span className="sr-only">Seen</span>
+                ) : (
+                  <span className="sr-only">New</span>
+                )}
+              </span>
+              {item.body ? (
+                <span className="mt-1 block line-clamp-2 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
+                  {item.body}
+                </span>
+              ) : null}
+              <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                <Badge variant="slate">
+                  {announcementAudienceLabel(item.audience)}
+                </Badge>
+                <span className="text-[13px] font-bold text-[var(--green-deep)]">
                   {announcementTargetName(item)}
                 </span>
-                {forLabel ? (
-                  <span className="mt-0.5 block text-[13px] font-bold text-[var(--ink)]">
-                    {forLabel}
-                  </span>
-                ) : null}
+              </span>
+              {forLabel ? (
+                <span className="mt-0.5 block text-[13px] font-bold text-[var(--ink)]">
+                  {forLabel}
+                </span>
+              ) : null}
+              {meta ? (
                 <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
                   {meta}
                 </span>
-              </span>
-            </Link>
+              ) : null}
+            </ListCardLink>
           </li>
         );
       })}

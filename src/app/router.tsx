@@ -45,6 +45,7 @@ import {
   ClaimInvitePage,
   OrgHomePage,
   OrgPickerPage,
+  OrgProfilePage,
   OrgSettingsPage,
   UserProfilePage,
 } from "@/organizations";
@@ -115,6 +116,7 @@ export function AppRoutes() {
         <Route path="/my/:orgSlug" element={<OrgLayout />}>
           <Route element={<OrgChrome />}>
             <Route index element={<OrgHomePage />} />
+            <Route path="profile" element={<OrgProfilePage />} />
             <Route path="feedback" element={<FeedbackPage />} />
             <Route
               path="settings"

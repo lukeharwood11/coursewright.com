@@ -71,3 +71,9 @@ export function isOrgSchoolDay(
 ): boolean {
   return schoolDays.includes(weekdayOfIsoDate(isoDate));
 }
+
+export function schoolDaysLabel(days: readonly SchoolDay[]): string {
+  return normalizeSchoolDays(days)
+    .map((day) => WEEKDAY_NAMES[day])
+    .join(", ");
+}

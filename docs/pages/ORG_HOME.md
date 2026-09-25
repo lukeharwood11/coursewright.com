@@ -45,8 +45,6 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 
 ### Student
 
-- Org **name**
-- Optional **About this organization** (about, address, website, contact email, phone) when any profile field is set
 - Week range label (Sun–Sat dates)
 - **Student tags** when more than one linked student (active / inactive)
 - **Announcements:** current one-way notices (title, optional note excerpt, audience name, dates when set). Unread items show a **notification icon**. Courses of active students, classes the child is in, or that student. Student tags filter which notices show. Class/student announcements can still appear when the child has no course enrollment.
@@ -57,8 +55,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 
 ### Instructor / owner / admin
 
-- Org **name** + current week label
-- Optional **About this organization** when profile fields are set
+- **Overview** heading + current week label
 - Setup flags: needs course / needs students
 - Attention rows: course title + reason
 - Course previews: title, icon, subject, status, visibility, active enrollment count
@@ -74,7 +71,6 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Top: org context + account affordance ([STYLE_GUIDE.md](../STYLE_GUIDE.md) parent pattern) → [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); **Activity** bell to the right of the avatar → [ACTIVITY](./ACTIVITY.md)
 - Desktop: simpler collapsible sidebar (This week, Calendar, Announcements, Discussions (**P1**), their courses). Body uses remaining width — not a centered narrow column.
 - Greeting + **current calendar week** (Sunday–Saturday) + **Print this week**
-- **About this organization** (when profile fields are set on [ORG_SETTINGS](./ORG_SETTINGS.md))
 - **Student tags** (multi-student parents only) — tap to include/exclude a student
 - **Announcements** — current one-way notices (when any). Unread cards show a notification icon; opening [ANNOUNCEMENT](./ANNOUNCEMENT.md) marks it read. Above the week calendar.
 - Two columns on large screens: **week cards** | **Focus** (Important now + Coming up). Stacks on small screens (calendar first). Day cards wrap so two or three fit across instead of seven skinny columns.
@@ -89,8 +85,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 ### Instructor / owner / admin view
 
 - Collapsible **org sidebar** for Home, Calendar, Announcements, Discussions (**P1**), Courses, Roster (nested class names when they exist), Settings (course names nested when present)
-- Header: org name, week label, **Create course**; **Activity** bell (right of the avatar)
-- **About this organization** when profile fields are set
+- Header: **Overview**, week label, **Create course**; **Activity** bell (right of the avatar)
 - **Teacher / Student view** (staff only) in org chrome
 - Getting started (when needed)
 - Needs attention (when needed)
@@ -98,7 +93,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - This week (important now + dated counts)
 - People snapshot (roster)
 - Switch org → [ORG_PICKER](./ORG_PICKER.md)
-- Account menu (avatar) → User (Settings / **Send feedback** / Sign out) and Organization (Org settings / Switch → [ORG_PICKER](./ORG_PICKER.md)) — [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md), [FEEDBACK](./FEEDBACK.md), [ORG_SETTINGS](./ORG_SETTINGS.md)
+- Account menu (avatar) → User (Settings / **Send feedback** / Sign out) and Organization (org card → [ORG_PROFILE](./ORG_PROFILE.md); Org settings / Switch → [ORG_PICKER](./ORG_PICKER.md)) — [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md), [FEEDBACK](./FEEDBACK.md), [ORG_SETTINGS](./ORG_SETTINGS.md)
 - **Search** in chrome (staff overlay: pages / courses / materials; dedicated route TBD)
 
 ## Primary actions
@@ -137,6 +132,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - [UNIT](./UNIT.md) — open a unit when linked from materials
 - [COURSE](./COURSE.md) — open course context (read-focused)
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — account affordance
+- [ORG_PROFILE](./ORG_PROFILE.md) — organization card (account menu)
 - [FEEDBACK](./FEEDBACK.md) — Send feedback (account menu)
 - [ORG_PICKER](./ORG_PICKER.md) — switch org (when multi-org)
 - [PRINT](./PRINT.md) — **Print this week** → `/my/<org-slug>/print-this-week`; per-material **Print** → material `…/print`
@@ -156,6 +152,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - [ORG_SETTINGS](./ORG_SETTINGS.md) — via chrome / account menu
 - [ORG_PICKER](./ORG_PICKER.md) — switch org
 - [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) — account
+- [ORG_PROFILE](./ORG_PROFILE.md) — organization card (account menu)
 - [FEEDBACK](./FEEDBACK.md) — Send feedback (account menu)
 - Search — staff chrome overlay (pages / courses / materials); dedicated route still TBD
 - **P1:** [TEMPLATE_LIST](./TEMPLATE_LIST.md) — templates

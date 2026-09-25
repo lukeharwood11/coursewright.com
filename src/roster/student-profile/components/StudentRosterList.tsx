@@ -124,7 +124,9 @@ export function StudentRosterList({
                   {classes}
                 </span>
                 {student.gradeLevel ? (
-                  <Badge variant="neutral">{student.gradeLevel}</Badge>
+                  <span className="w-fit shrink-0 justify-self-start">
+                    <Badge variant="neutral">{student.gradeLevel}</Badge>
+                  </span>
                 ) : (
                   <span className="hidden text-[13px] text-[var(--ink-faint)] lg:block">
                     —
@@ -182,7 +184,9 @@ export function StudentRosterList({
                 </span>
               </Link>
               {student.gradeLevel ? (
-                <Badge variant="neutral">{student.gradeLevel}</Badge>
+                <span className="w-fit shrink-0">
+                  <Badge variant="neutral">{student.gradeLevel}</Badge>
+                </span>
               ) : null}
               {trailing ? (
                 <span className="shrink-0">{trailing(student)}</span>

@@ -313,7 +313,7 @@ function ProfileSection({
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
       <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Profile</h2>
       <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
-        Optional details students see on your organization home.
+        Optional details members see on your organization profile.
       </p>
 
       <label className="mt-3 flex flex-col gap-1">

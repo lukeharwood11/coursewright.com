@@ -38,6 +38,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - **Instructors** (sidebar)
 - **Lesson plans** (title, week range, published/unpublished for staff; published only for students)
 - **Events** for this course (title, when, location)
+- **Linked resources** (folder or item title, kind)
 - Parent variant: same structure without edit controls; **unpublished courses 404**; **unpublished materials are omitted**; only **published** lesson plans
 
 ## Contents
@@ -49,6 +50,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Top-level materials list (above units) with **title**, **description**, kind, **Print** when any exist; add material into a unit
 - Units list (ordered) → [UNIT](./UNIT.md); add unit
 - Materials under units: **title**, **description**, kind/badge, dates, print affordance
+- **Linked resources** (bottom of course content): shortcuts to org [RESOURCES](./RESOURCES.md) folders or items; staff who can edit the course add or remove links
 - Sidebar / secondary: teachers, link to [COURSE_ROSTER](./COURSE_ROSTER.md)
 - Actions: Add unit then **Add** (Material / Quiz) on the unit, **Add lesson plan**, Create Announcement / **Start a discussion** (**P1**) / Settings (header on `md+`; those three also under **More** on small screens), **More** menu (Share / Duplicate), Print entry points; **Create course from this course** (copy → new independent course)
 - Versioning / soft-delete awareness for dangerous actions (TBD exact UX)
@@ -58,6 +60,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Add / open unit or material
 - Add / open a lesson plan
 - Add / open an event
+- Link / open org Resources folders or items (bottom of content)
 - Create Announcement
 - Start a discussion (**P1**)
 - Open roster / settings
@@ -81,6 +84,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - [QUIZ](./QUIZ.md) — open a quiz from the unit outline
 - [LESSON_PLAN](./LESSON_PLAN.md) — open / add lesson plan
 - [EVENT](./EVENT.md) — open / add an event for this course
+- [RESOURCES](./RESOURCES.md) — linked folders and items open in the org library
 - [ANNOUNCEMENT](./ANNOUNCEMENT.md) — Create Announcement for this course
 - [DISCUSSION](./DISCUSSION.md) — Start a discussion for this course (**P1**)
 - [CALENDAR](./CALENDAR.md) — via org chrome

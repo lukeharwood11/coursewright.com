@@ -60,6 +60,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | OrgResourceItem | `org_resource_items` | **P1a** — document · link · file; not a course material |
 | OrgResourceBlock | `org_resource_blocks` | **P1a** — Lexical body on document items |
 | OrgResourceGrant | `org_resource_grants` | **P1a** — extra read/write for a person on a folder or item |
+| CourseResourceLink | `course_resource_links` | Shortcut from a course to an org Resource folder or item |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates + published lesson plans (Sunday–Saturday). |
 | Page quiz | `blocks` body | Lexical `quiz` node on a page. Print only. Not a material kind |
 | Quiz | `quizzes` | Course outline item. Take in the app or print. Not a material |
@@ -359,7 +360,7 @@ UI map: [URLS.md](../URLS.md), [PRINT](../pages/PRINT.md).
 
 **School days:** owners and admins set which weekdays school operates. Instructors see the setting read-only. Calendar week view and parent This week stay Sunday–Saturday; empty days still omit on This week.
 
-**Profile:** optional about / address / website / contact email / phone. Owners and admins edit in org settings. When any field is set, org home (staff and parent) shows a compact About this organization card.
+**Profile:** optional about / address / website / contact email / phone. Owners and admins edit in org settings. All members view at `/my/<org-slug>/profile`.
 
 ### OrganizationBranding
 
@@ -590,6 +591,26 @@ Leads are notified in **Activity** when someone posts in a discussion for that c
 **Who can SELECT:** org owner/admin (`is_org_admin` on `organization_id`), or `course_instructors` for this course **with an active owner/admin/instructor membership**, or `parent_can_view_course` (linked student enrolled in an **active + published** course), or org staff when the course has no other instructors (covers create `INSERT … RETURNING` / orphans). Same intent as `can_view_course`, but the `courses` SELECT policy must not re-read `courses` by id. Membership **role need not be `parent`** — an instructor who parents a student still sees that published course, read-only in the app (`is_parent` stays set). Instructors do **not** see other instructors’ courses they neither teach nor parent in. A removed or suspended membership does not keep course edit access through a leftover `course_instructors` row.
 
 **Grade levels:** `text[]` of scheme values (exact grades and/or range labels). Same model on `CourseTemplate`.
+
+### CourseResourceLink
+
+Shortcut on a **course** to one org **Resource** folder or item (not a `materials` row). Families who can view the course see the links; opening the folder or item still follows org Resource ACL.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| course_id | bigint | FK → Course |
+| organization_id | bigint | FK → Organization — denormalized from course for RLS |
+| folder_id | bigint | FK → OrgResourceFolder, nullable |
+| item_id | bigint | FK → OrgResourceItem, nullable |
+| sort_order | int | display order on the course page |
+| created_by | uuid | FK → User, nullable |
+
+Exactly one of `folder_id` or `item_id` is set. Target must be in the same org as the course and not archived.
+
+**Who can read:** anyone who `can_view_course` for that course.
+
+**Who can write:** `can_manage_course` (org owner/admin or instructor on that course).
 
 ### CourseTemplate
 

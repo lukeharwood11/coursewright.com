@@ -10,7 +10,7 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 - **Permalink `slug`** — generated on create; changing it must warn that existing links break
 - Grade scheme (K–12 / Custom) and organization type (other / co-op / school / family; default **other**)
 - **Grading** tab (`?tab=grading`) is the org score scale (`none` / letter / pass/fail). Owners and admins save it. It is not `grade_scheme` / `grade_labels`. UI lives in `src/grading/`
-- Optional org **profile** (about, address, website, contact email, phone) shown on org home when set
+- Optional org **profile** (about, address, website, contact email, phone) on `/my/<org-slug>/profile` for all members; owners edit via org settings
 - **School days** (default Mon–Fri) — owners/admins edit; lesson-plan compose uses them as the default day set
 - Admin invites (email via Resend `organization-invite` + copyable claim link)
 - Parent invites use the **same** `/invite/<token>` claim path (`role = parent`); student invites use that path with `role = student`. Create UI lives in `roster/`. The claim page loads unsigned so the invited email is obvious before signup/login.
@@ -19,7 +19,7 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 
 ## Rules
 
-- Page folders per screen (`org-picker/`, `org-home/`, `org-settings/`, `claim-invite/`, `user-profile/`). Shared `model/` and `databridge/`. User cards live in `user-card/`.
+- Page folders per screen (`org-picker/`, `org-home/`, `org-profile/`, `org-settings/`, `claim-invite/`, `user-profile/`). Shared `model/` and `databridge/`. User cards live in `user-card/`.
 - PostgREST + RLS for normal org CRUD; Functions only if invite claim needs privileged writes.
 - Anyone can create an org ([FEATURES.md](../../docs/FEATURES.md)).
 - Slug uniqueness is enforced in the DB; never invent redirects for old slugs unless FEATURES says so.

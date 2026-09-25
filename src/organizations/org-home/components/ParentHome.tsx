@@ -9,7 +9,6 @@ import {
 } from "@/parent/model/dashboard";
 import { printThisWeekPath } from "@/print/model/paths";
 import { ParentDashboardBody } from "./ParentDashboardBody";
-import { OrgAboutCard } from "./OrgAboutCard";
 import type { OrganizationSummary } from "@/organizations/databridge/memberships";
 
 export function ParentHome({
@@ -68,14 +67,6 @@ export function ParentHome({
           </span>
         )}
       </header>
-
-      <OrgAboutCard
-        about={organization.about}
-        address={organization.address}
-        website={organization.website}
-        contactEmail={organization.contactEmail}
-        phone={organization.phone}
-      />
 
       {preview ? (
         <p className="mt-4 rounded-[10px] border border-[var(--slate)] bg-[var(--slate-tint)] px-3.5 py-3 text-[13.5px] leading-relaxed text-[var(--ink)]">

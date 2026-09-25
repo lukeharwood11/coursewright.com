@@ -1,30 +1,12 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
 import { MegaphoneIcon } from "@heroicons/react/24/outline";
-import { Badge } from "@/ui/Badge";
 import { PageLoading } from "@/ui/PageLoading";
 import { ButtonLink } from "@/ui/Button";
 import { useToastOnError } from "@/ui/useToastOnError";
-import {
-  announcementAudienceLabel,
-  announcementTargetNames,
-  announcementTargetSummary,
-} from "@/announcements/model/audience";
-import {
-  announcementAvailability,
-  announcementAvailabilityLabel,
-  groupAnnouncementsByAvailability,
-} from "@/announcements/model/availability";
-import {
-  announcementPath,
-  newAnnouncementPath,
-} from "@/announcements/model/paths";
-import { announcementMetaParts } from "@/announcements/model/postedAt";
-import { formatDateRange } from "@/courses/model/dates";
+import { newAnnouncementPath } from "@/announcements/model/paths";
 import { ParentAnnouncementsList } from "./components/ParentAnnouncementsList";
+import { StaffAnnouncementList } from "./components/StaffAnnouncementList";
 import { useAnnouncements } from "./hooks/useAnnouncements";
-
-const GROUP_ORDER = ["available", "upcoming", "ended"] as const;
 
 export function AnnouncementsPage() {
   const page = useAnnouncements();
@@ -61,8 +43,6 @@ export function AnnouncementsPage() {
     );
   }
 
-  const groups = groupAnnouncementsByAvailability(page.announcements, page.today);
-
   return (
     <div className="px-5 py-4 md:px-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -87,62 +67,11 @@ export function AnnouncementsPage() {
           There are no announcements at this time.
         </p>
       ) : (
-        <div className="mt-6 flex max-w-2xl flex-col gap-5">
-          {GROUP_ORDER.map((key) =>
-            groups[key].length === 0 ? null : (
-              <section key={key}>
-                <h2 className="text-[13px] font-bold text-[var(--ink-faint)]">
-                  {announcementAvailabilityLabel(key)}
-                </h2>
-                <ul className="mt-1 divide-y divide-[var(--line-soft)] rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]">
-                  {groups[key].map((item) => {
-                    const dates = formatDateRange(item.startDate, item.endDate);
-                    const meta = announcementMetaParts({
-                      authorName: item.authorName,
-                      createdAt: item.createdAt,
-                      dateRange: dates,
-                    }).join(" · ");
-                    const status = announcementAvailability(
-                      page.today,
-                      item.startDate,
-                      item.endDate,
-                    );
-                    return (
-                      <li key={item.id}>
-                        <Link
-                          to={announcementPath(page.organization.slug, item.id)}
-                          className="flex flex-col gap-1 px-4 py-3 hover:bg-[var(--green-tint)]"
-                        >
-                          <span className="text-[14.5px] font-semibold text-[var(--ink)]">
-                            {item.title}
-                          </span>
-                          <span className="flex flex-wrap items-center gap-1.5">
-                            <Badge
-                              variant={status === "available" ? "green" : "neutral"}
-                            >
-                              {announcementAudienceLabel(item.audience)}
-                            </Badge>
-                            <span className="text-[12.5px] text-[var(--ink-soft)]">
-                              {announcementTargetSummary(
-                                announcementTargetNames(item),
-                                announcementAudienceLabel(item.audience),
-                              )}
-                            </span>
-                            {meta ? (
-                              <span className="text-[12.5px] text-[var(--ink-faint)]">
-                                {meta}
-                              </span>
-                            ) : null}
-                          </span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </section>
-            ),
-          )}
-        </div>
+        <StaffAnnouncementList
+          orgSlug={page.organization.slug}
+          items={page.announcements}
+          today={page.today}
+        />
       )}
     </div>
   );

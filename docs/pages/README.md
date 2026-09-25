@@ -22,6 +22,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md) | `/my/settings` |
 | [FEEDBACK](./FEEDBACK.md) | `/my/feedback` · `/my/<org-slug>/feedback` |
 | [ORG_HOME](./ORG_HOME.md) | `/my/<org-slug>` |
+| [ORG_PROFILE](./ORG_PROFILE.md) | `/my/<org-slug>/profile` |
 | [CALENDAR](./CALENDAR.md) | `/my/<org-slug>/calendar` |
 | [EVENT](./EVENT.md) | `/my/<org-slug>/events/<event_id>` (new `…/events/new`; edit `…/edit`; print `…/print`) |
 | [USER_PROFILE](./USER_PROFILE.md) | `/my/<org-slug>/people/<user_id>` |
