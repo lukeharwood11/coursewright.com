@@ -21,7 +21,7 @@ One workbench for a course: see who still needs a grade, set quiz points and gra
 - **Final** is the unweighted mean of locked quiz percents and locked gradable-material percents (points possible 0 and unlocked work stay out). When mode is letter or pass/fail, the teacher can save an override label plus a note. The row shows who saved it and when. **Use the average** clears the override.
 - A class filter only hides rows. It does not store a class grade.
 - If the scale changes after an override, a banner asks the teacher to confirm. Overrides are not wiped.
-- **Draft report cards** creates one draft per active enrollment (Pattern B). Review opens [REPORT_CARD](./REPORT_CARD.md). Send happens one card at a time from that page.
+- **Draft report card** on a student row creates one draft for that enrollment in this course (Pattern B). **Review** opens [REPORT_CARD](./REPORT_CARD.md). Send happens one card at a time from that page.
 
 ## Data shown
 
@@ -45,7 +45,7 @@ One workbench for a course: see who still needs a grade, set quiz points and gra
 - Filter by class
 - Save grade
 - Save final / use the average
-- Draft report cards
+- Draft report card (per student)
 - Open a draft to review
 - Open the student
 

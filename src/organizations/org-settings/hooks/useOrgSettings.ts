@@ -13,6 +13,8 @@ import {
   getMembershipByOrgSlug,
   orgQueryKeys,
 } from "@/organizations/databridge/memberships";
+import { courseQueryKeys } from "@/courses/databridge/courses";
+import { studentQueryKeys } from "@/roster/databridge/students";
 import { gradeLabelsToText, parseGradeLabels } from "@/organizations/model/gradeScheme";
 import {
   canManageBilling,
@@ -122,6 +124,21 @@ export function useOrgSettings(orgSlug: string | undefined) {
       await queryClient.invalidateQueries({
         queryKey: orgQueryKeys.detail(saved.id),
       });
+      if (
+        section === "organization" &&
+        organization &&
+        saved.gradeScheme !== organization.gradeScheme
+      ) {
+        await queryClient.invalidateQueries({
+          queryKey: studentQueryKeys.list(saved.id),
+        });
+        await queryClient.invalidateQueries({
+          queryKey: courseQueryKeys.list(saved.id),
+        });
+        await queryClient.invalidateQueries({
+          queryKey: courseQueryKeys.listWithCatalog(saved.id),
+        });
+      }
       await queryClient.invalidateQueries({
         queryKey: orgQueryKeys.bySlug(previousSlug, user.id),
       });

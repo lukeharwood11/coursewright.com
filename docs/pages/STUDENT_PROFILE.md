@@ -17,13 +17,13 @@ View/edit one org-level **student profile**, including an optional student accou
 
 - View/edit one `student_profile`.
 - Edit name, optional student email, optional grade (must match org grade scheme when set).
-- **Parents:** add **one or more** parent emails; each is emailed an `/invite/<token>` (copy-link remains). Linked parents and pending invites are listed.
+- **Parents:** add **one or more** parent emails. If the address already belongs to someone in the organization, link them as a parent (no invite). Otherwise email an `/invite/<token>` (copy-link remains). Linked parents and pending invites are listed.
 - **Student account:** optional student email. Invite uses `admin_invites.role = student` (not a parent invite). Claim sets `user_id` so that person sees this one student’s work.
 - **Save** / **Cancel** in the page header; Save disabled when nothing changed; Cancel goes back (confirms if dirty).
 - **Remove** (confirm) deletes the profile. They leave classes and courses. A student-account membership ends; a staff role is kept.
 - Show course enrollments and class membership. A class link opens the same [CLASS](./CLASS.md) page as the Students **Classes** tab.
 - **Grades** lists each active course the viewer may read (teachers: courses they teach; owners/admins: all; parents: linked published courses). The label is derived from the org scale. A final override shows that label and the stamp.
-- Staff who can act see **Gradebook** on a course row and a **Report cards** list. **Generate** (Pattern A) drafts one card per course they can manage and opens the first draft.
+- Staff who can act see **Gradebook** and **Report card** on each course row they can manage (Pattern A). **Report card** drafts one enrollment at a time and opens the draft. **Draft** appears when a draft already exists for that course.
 - Parents do not edit the profile, remove the student, or generate cards. They see classes and grades.
 - Activity for a saved quiz grade or a final override opens this page for a linked parent. A device notification uses `?activity=` and marks that row read.
 - **Announce** (staff) → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.

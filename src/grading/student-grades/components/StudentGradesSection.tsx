@@ -3,6 +3,7 @@ import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { Button, ButtonLink } from "@/ui/Button";
 import { formatGradeDisplay } from "@/grading/model/scale";
+import { ReportCardListActions } from "@/grading/report-card/components/ReportCardListActions";
 import { gradebookPath, gradingSettingsPath, reportCardPath } from "@/grading/model/paths";
 import { canEditGradingScale } from "@/grading/model/access";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
@@ -13,6 +14,9 @@ export function StudentGradesSection({ studentId }: { studentId: number }) {
   const grades = useStudentGrades(studentId);
   if (!grades.scale) return null;
   const slug = grades.organization.slug;
+  const draftByCourseId = new Map(
+    grades.cards.filter((card) => card.status === "draft").map((card) => [card.courseId, card]),
+  );
 
   return (
     <div className="space-y-4">
@@ -52,9 +56,30 @@ export function StudentGradesSection({ studentId }: { studentId: number }) {
                   ) : null}
                 </div>
                 {grades.canAct ? (
-                  <ButtonLink variant="secondary" to={gradebookPath(slug, grade.courseId)}>
-                    Gradebook
-                  </ButtonLink>
+                  <span className="flex flex-wrap items-center gap-2">
+                    <ButtonLink variant="secondary" to={gradebookPath(slug, grade.courseId)}>
+                      Gradebook
+                    </ButtonLink>
+                    {draftByCourseId.has(grade.courseId) ? (
+                      <ButtonLink
+                        variant="secondary"
+                        to={reportCardPath(slug, draftByCourseId.get(grade.courseId)!.id)}
+                      >
+                        Draft
+                      </ButtonLink>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        disabled={grades.generatingEnrollmentId === grade.enrollmentId}
+                        onClick={() => grades.generateForEnrollment(grade.enrollmentId)}
+                      >
+                        {grades.generatingEnrollmentId === grade.enrollmentId
+                          ? "Generating…"
+                          : "Report card"}
+                      </Button>
+                    )}
+                  </span>
                 ) : null}
               </li>
             ))}
@@ -64,14 +89,12 @@ export function StudentGradesSection({ studentId }: { studentId: number }) {
 
       {grades.canAct ? (
         <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Report cards</h2>
-            <Button type="button" disabled={grades.generating} onClick={grades.generate}>
-              {grades.generating ? "Generating…" : "Generate"}
-            </Button>
-          </div>
+          <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Report cards</h2>
+          <p className="mt-1 text-[13px] text-[var(--ink-faint)]">
+            Draft one course at a time from a grade row above.
+          </p>
           {grades.cards.length === 0 ? (
-            <p className="mt-2 text-[14px] text-[var(--ink-soft)]">Generate report card</p>
+            <p className="mt-2 text-[14px] text-[var(--ink-soft)]">No report cards yet.</p>
           ) : (
             <ul className="mt-3 divide-y divide-[var(--line-soft)]">
               {grades.cards.map((card) => (
@@ -79,11 +102,14 @@ export function StudentGradesSection({ studentId }: { studentId: number }) {
                   <span className="text-[14.5px] font-extrabold text-[var(--ink)]">
                     {card.snapshot.courseTitle}
                   </span>
-                  <span className="flex items-center gap-2">
+                  <span className="flex flex-wrap items-center gap-2">
                     <Badge variant={card.status === "draft" ? "neutral" : "green"}>{card.status}</Badge>
-                    <ButtonLink variant="secondary" to={reportCardPath(slug, card.id)}>
-                      Open
-                    </ButtonLink>
+                    <ReportCardListActions
+                      orgSlug={slug}
+                      card={card}
+                      canManage={grades.canAct}
+                      studentProfileId={studentId}
+                    />
                   </span>
                 </li>
               ))}

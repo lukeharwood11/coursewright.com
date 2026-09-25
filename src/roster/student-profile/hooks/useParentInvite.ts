@@ -13,11 +13,17 @@ import {
   staffInviteQueryKeys,
   type PendingOrgInvite,
 } from "@/organizations/databridge/staffInvites";
+import {
+  listOrgPeople,
+  orgQueryKeys,
+  type OrgPerson,
+} from "@/organizations/databridge/memberships";
 import { canInviteParent } from "@/organizations/model/role";
 import {
   inviteCreatedMessage,
   inviteEmailResultMessage,
   inviteUrl,
+  normalizeInviteEmail,
   validateCreateParentInvite,
 } from "@/organizations/model/staffInvite";
 import {
@@ -46,6 +52,12 @@ export function useParentInvite(studentId: number | null) {
     enabled: canInvite && studentId != null,
   });
 
+  const orgPeopleQuery = useQuery({
+    queryKey: orgQueryKeys.people(organization.id),
+    queryFn: () => listOrgPeople(organization.id),
+    enabled: canInvite,
+  });
+
   const pending = (pendingQuery.data ?? []).filter((invite) =>
     studentId != null && invite.studentProfileIds.includes(studentId),
   );
@@ -58,7 +70,7 @@ export function useParentInvite(studentId: number | null) {
       const parsed = validateCreateParentInvite({ email });
       if (!parsed.ok) throw new Error(parsed.error);
       if (studentId == null) throw new Error("Student isn’t loaded yet.");
-      const { invite, email: emailStatus, attached } = await createParentInvite({
+      const result = await createParentInvite({
         organizationId: organization.id,
         studentProfileId: studentId,
         email: parsed.value.email,
@@ -73,25 +85,33 @@ export function useParentInvite(studentId: number | null) {
           gradeLevel: student.gradeLevel,
         });
       }
-      return { invite, emailStatus, attached: attached ?? false };
+      return result;
     },
-    onSuccess: async ({ invite, emailStatus, attached }) => {
+    onSuccess: async (result) => {
       setAddEmail("");
-      const copied = attached
-        ? false
-        : await copyInvite(invite, { toast: false });
+      const recipientEmail = result.linked
+        ? result.linkedParent.email
+        : result.invite?.email ?? inviteMutation.variables ?? "";
+      const copied =
+        result.linked || result.attached || !result.invite
+          ? false
+          : await copyInvite(result.invite, { toast: false });
       toast(
         inviteCreatedMessage({
-          recipientEmail: invite.email,
-          emailSent: emailStatus.sent,
+          recipientEmail,
+          emailSent: result.email.sent,
           linkCopied: copied,
-          attached,
+          attached: !result.linked && result.attached,
+          linked: result.linked,
         }),
       );
       await queryClient.invalidateQueries({
         queryKey: staffInviteQueryKeys.parents(organization.id),
       });
       if (studentId != null) {
+        await queryClient.invalidateQueries({
+          queryKey: staffInviteQueryKeys.parentLinks([studentId]),
+        });
         await queryClient.invalidateQueries({
           queryKey: studentQueryKeys.detail(studentId),
         });
@@ -156,9 +176,21 @@ export function useParentInvite(studentId: number | null) {
     }
   }
 
+  function orgMemberForEmail(rawEmail: string): OrgPerson | null {
+    const parsed = validateCreateParentInvite({ email: rawEmail });
+    if (!parsed.ok) return null;
+    const normalized = parsed.value.email;
+    return (
+      (orgPeopleQuery.data ?? []).find(
+        (person) => normalizeInviteEmail(person.email) === normalized,
+      ) ?? null
+    );
+  }
+
   return {
     canInvite,
-    loading: pendingQuery.isLoading || linksQuery.isLoading,
+    loading:
+      pendingQuery.isLoading || linksQuery.isLoading || orgPeopleQuery.isLoading,
     loadError: pendingQuery.error
       ? pendingQuery.error.message
       : linksQuery.error
@@ -178,6 +210,7 @@ export function useParentInvite(studentId: number | null) {
       : null,
     copiedId,
     origin: typeof window === "undefined" ? "" : window.location.origin,
+    orgMemberForEmail,
     setAddEmail,
     onInvite: (email: string) => inviteMutation.mutate(email),
     onCopy: (invite: PendingOrgInvite) => {

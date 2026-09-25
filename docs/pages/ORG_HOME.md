@@ -93,7 +93,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - This week (important now + dated counts)
 - People snapshot (roster)
 - Switch org → [ORG_PICKER](./ORG_PICKER.md)
-- Account menu (avatar) → User (Settings / **Send feedback** / Sign out) and Organization (org card → [ORG_PROFILE](./ORG_PROFILE.md); Org settings / Switch → [ORG_PICKER](./ORG_PICKER.md)) — [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md), [FEEDBACK](./FEEDBACK.md), [ORG_SETTINGS](./ORG_SETTINGS.md)
+- Account menu (avatar) → User (Settings / **Send feedback** / Sign out) and Organization (identity block; **Organization profile** → [ORG_PROFILE](./ORG_PROFILE.md); Org settings / Switch → [ORG_PICKER](./ORG_PICKER.md)) — [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md), [FEEDBACK](./FEEDBACK.md), [ORG_SETTINGS](./ORG_SETTINGS.md)
 - **Search** in chrome (staff overlay: pages / courses / materials; dedicated route TBD)
 
 ## Primary actions

@@ -254,13 +254,22 @@ function OrganizationSection({
           >
             {GRADE_SCHEMES.map((scheme) => (
               <option key={scheme} value={scheme}>
-                {scheme === "k12" ? "K–12" : "Custom"}
+                {scheme === "none"
+                  ? "None"
+                  : scheme === "k12"
+                    ? "K–12"
+                    : "Custom"}
               </option>
             ))}
           </Select>
         </label>
 
-        {gradeScheme === "k12" ? (
+        {gradeScheme === "none" ? (
+          <p className="mt-3 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
+            Grade levels won’t appear on student profiles or courses. Any existing student and
+            course grades are cleared when you save.
+          </p>
+        ) : gradeScheme === "k12" ? (
           <p className="mt-3 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
             K–12 includes K, 1–12, and common bands (K–2, 3–5, 6–8, 9–12).
           </p>

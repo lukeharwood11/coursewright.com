@@ -14,8 +14,9 @@ Review one course report card, edit the comment, and send it. Grades on the card
 
 ## Behavior
 
-- Pattern A starts from [STUDENT_PROFILE](./STUDENT_PROFILE.md) **Generate** (one draft per course that person can manage, then this page).
-- Pattern B starts from [COURSE_GRADEBOOK](./COURSE_GRADEBOOK.md) **Draft report cards**, then **Review** opens this page. Submit is still one card at a time.
+- Pattern A starts from [STUDENT_PROFILE](./STUDENT_PROFILE.md) **Report card** on one course row (staff who manage that course), then this page.
+- Pattern B starts from [COURSE_GRADEBOOK](./COURSE_GRADEBOOK.md) **Draft report card** for one student, then **Review** opens this page. Submit is still one card at a time.
+- Staff can **Delete draft** while the card is still a draft.
 - While the card is a **draft**, the teacher can edit the comment only. **Refresh grades** rewrites the snapshot from the gradebook and keeps the comment.
 - **Submit and send** saves a pending comment, marks the card submitted, enqueues deliveries, writes in-app Activity when the recipient has an account, then marks the card sent. The button does not wait on SMTP.
 - Email always includes the student when an address exists, and each linked parent. A missing student email records a failed student delivery and does not block submit.
@@ -35,7 +36,7 @@ Review one course report card, edit the comment, and send it. Grades on the card
 
 - Grades (read-only on the card)
 - Comment
-- Draft actions: save comment, refresh grades, submit and send
+- Draft actions: save comment, refresh grades, submit and send, delete draft
 - Email status after send
 
 ## Primary actions
@@ -43,6 +44,7 @@ Review one course report card, edit the comment, and send it. Grades on the card
 - Save comment
 - Refresh grades
 - Submit and send
+- Delete draft
 - Resend a failed email
 - Print
 - Open the gradebook (staff)

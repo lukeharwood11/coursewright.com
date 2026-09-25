@@ -165,6 +165,7 @@ export function StudentProfilePage() {
         sendingId={parentInvite.sendingId}
         copiedId={parentInvite.copiedId}
         origin={parentInvite.origin}
+        orgMemberForEmail={parentInvite.orgMemberForEmail}
         onAddEmailChange={parentInvite.setAddEmail}
         onInvite={parentInvite.onInvite}
         onCopy={parentInvite.onCopy}

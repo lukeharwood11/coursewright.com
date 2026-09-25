@@ -140,12 +140,7 @@ export function AccountMenu({
               <p className="text-[11px] font-bold text-[var(--ink-faint)]">
                 Organization
               </p>
-              <Link
-                role="menuitem"
-                to={orgProfilePath(orgSlug!)}
-                className="mt-2 flex items-start gap-3 rounded-[6px] border border-transparent px-2 py-2 -mx-1 hover:border-[var(--green)] focus-visible:border-[var(--green)] focus-visible:outline-none"
-                onClick={() => setOpen(false)}
-              >
+              <div className="mt-2 flex items-start gap-3">
                 <span
                   className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-sm)] bg-[var(--green-tint)] text-[var(--green-deep)]"
                   aria-hidden
@@ -163,9 +158,18 @@ export function AccountMenu({
                     <Badge variant={roleBadgeVariant}>{roleLabel}</Badge>
                   </div>
                 </div>
-              </Link>
+              </div>
             </div>
             <div className="py-1">
+              <Link
+                role="menuitem"
+                to={orgProfilePath(orgSlug!)}
+                className={itemClassName}
+                onClick={() => setOpen(false)}
+              >
+                <BuildingOffice2Icon className="h-4 w-4 shrink-0" aria-hidden />
+                Organization profile
+              </Link>
               {showOrgSettings ? (
                 <Link
                   role="menuitem"

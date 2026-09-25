@@ -5,7 +5,7 @@ import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
 import { gradebookQueryKeys, loadStudentCourseGrades } from "@/grading/databridge/gradebook";
 import {
-  generateStudentReportCards,
+  generateReportCard,
   listStudentReportCards,
   reportCardQueryKeys,
 } from "@/grading/databridge/reportCards";
@@ -36,14 +36,12 @@ export function useStudentGrades(studentId: number | null) {
   });
 
   const generate = useMutation({
-    mutationFn: () => generateStudentReportCards(studentId!),
-    onSuccess: async (ids) => {
+    mutationFn: (enrollmentId: number) => generateReportCard(enrollmentId),
+    onSuccess: async (cardId) => {
       await queryClient.invalidateQueries({
         queryKey: reportCardQueryKeys.student(studentId ?? 0),
       });
-      const first = ids[0];
-      if (first != null) navigate(reportCardPath(organization.slug, first));
-      else toast("No course is ready for a report card.");
+      navigate(reportCardPath(organization.slug, cardId));
     },
     onError: (error: Error) => toast(caughtErrorMessage(error)),
   });
@@ -54,7 +52,7 @@ export function useStudentGrades(studentId: number | null) {
     scale: scaleQuery.data,
     grades: gradesQuery.data ?? [],
     cards: cardsQuery.data ?? [],
-    generating: generate.isPending,
-    generate: () => generate.mutate(),
+    generatingEnrollmentId: generate.isPending ? generate.variables : null,
+    generateForEnrollment: (enrollmentId: number) => generate.mutate(enrollmentId),
   };
 }

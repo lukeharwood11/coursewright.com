@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PrinterIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { Button } from "@/ui/Button";
+import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { formatPercent } from "@/grading/model/scale";
@@ -12,6 +13,7 @@ import { useReportCard } from "./hooks/useReportCard";
 export function ReportCardPage() {
   const cardPage = useReportCard();
   const card = cardPage.card;
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     document.title = card
@@ -124,8 +126,28 @@ export function ReportCardPage() {
             <Button type="button" disabled={cardPage.submitting} onClick={cardPage.submitCard}>
               {cardPage.submitting ? "Sending…" : "Submit and send"}
             </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className="border-[#e8b4b4] text-[#c42b2b] hover:border-[#d88a8a] hover:bg-[#fde8e8] hover:text-[#a82424]"
+              onClick={() => setConfirmDelete(true)}
+            >
+              Delete draft
+            </Button>
           </div>
         ) : null}
+
+        <ConfirmDialog
+          open={confirmDelete}
+          title="Delete this draft?"
+          body="The comment and grade snapshot for this draft will be removed. You can draft a new report card later."
+          confirmLabel={cardPage.deleting ? "Deleting…" : "Delete"}
+          onConfirm={() => {
+            setConfirmDelete(false);
+            cardPage.deleteDraft();
+          }}
+          onCancel={() => setConfirmDelete(false)}
+        />
 
         {cardPage.canEdit && card.status !== "draft" ? (
           <section>

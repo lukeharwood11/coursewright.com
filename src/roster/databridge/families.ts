@@ -363,14 +363,24 @@ export async function createParentInvites(input: {
   const firstStudentId = input.studentIds[0];
   if (firstStudentId == null) return;
 
-  const { invite } = await createParentInvite({
+  const result = await createParentInvite({
     organizationId: input.organizationId,
     studentProfileId: firstStudentId,
     email,
     invitedBy: input.invitedBy,
   });
 
+  if (result.linked) {
+    await ensureParentStudentLinks(
+      result.linkedParent.userId,
+      input.studentIds.slice(1),
+    );
+    return;
+  }
+
+  if (!result.invite) return;
+
   for (const studentProfileId of input.studentIds.slice(1)) {
-    await attachStudentToParentInvite(invite.id, studentProfileId);
+    await attachStudentToParentInvite(result.invite.id, studentProfileId);
   }
 }

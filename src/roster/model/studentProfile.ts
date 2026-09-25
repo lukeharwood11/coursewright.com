@@ -74,10 +74,13 @@ export function validateStudentProfile(
   const gradeLevelRaw = input.gradeLevel.trim();
   let gradeLevel: string | null = null;
   if (gradeLevelRaw) {
-    if (!input.gradeLabels.includes(gradeLevelRaw)) {
+    if (input.gradeLabels.length === 0) {
+      gradeLevel = null;
+    } else if (!input.gradeLabels.includes(gradeLevelRaw)) {
       return { ok: false, error: "Pick a grade from this organization’s list." };
+    } else {
+      gradeLevel = gradeLevelRaw;
     }
-    gradeLevel = gradeLevelRaw;
   }
 
   return {

@@ -345,7 +345,7 @@ UI map: [URLS.md](../URLS.md), [PRINT](../pages/PRINT.md).
 | name | text | |
 | slug | text | **Unique permalink** — generated on create; changeable with UX warning that links will break |
 | org_type | text | `other` (default for new orgs) · `coop` · `micro_school` · `family` |
-| grade_scheme | text | `k12` · `custom` |
+| grade_scheme | text | `none` · `k12` · `custom` |
 | grade_labels | text[] | Allowed labels for student `grade_level` and course/template `grade_levels`. K–12 preset includes K, 1–12, and common bands (K-2, 3-5, 6-8, 9-12). Custom is org-defined. |
 | school_days | smallint[] | Weekdays the org operates. Values match JS `Date.getDay()` (`0` Sunday … `6` Saturday). Default `{1,2,3,4,5}` (Mon–Fri). At least one unique value in `0..6`. Lesson-plan compose defaults to these days; the Sunday–Saturday week model is unchanged. |
 | about | text | Optional in-app about blurb (max 4000). Shown on org home when set. Not a public marketing page. |

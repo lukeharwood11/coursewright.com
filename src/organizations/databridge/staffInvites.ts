@@ -1,11 +1,16 @@
 import type { OrgRole, StaffInviteRole } from "@/organizations/model/role";
 import { parseOrgRole, parseStaffInviteRole } from "@/organizations/model/role";
-import { inviteWriteErrorMessage } from "@/organizations/model/staffInvite";
+import {
+  inviteWriteErrorMessage,
+  normalizeInviteEmail,
+} from "@/organizations/model/staffInvite";
 import { requireSupabase } from "./client";
 import {
+  listOrgPeople,
   toOrganizationSummary,
   type OrganizationSummary,
   type OrganizationSummaryRow,
+  type OrgPerson,
 } from "./memberships";
 
 export type OrgStaffMember = {
@@ -279,11 +284,19 @@ export type InviteEmailStatus = {
   error: string | null;
 };
 
-export type CreatedOrgInvite<T> = {
-  invite: T;
-  email: InviteEmailStatus;
-  attached?: boolean;
-};
+export type CreatedOrgInvite<T> =
+  | {
+      invite: T;
+      email: InviteEmailStatus;
+      attached?: boolean;
+      linked?: false;
+    }
+  | {
+      invite: null;
+      email: InviteEmailStatus;
+      linked: true;
+      linkedParent: Pick<OrgPerson, "userId" | "name" | "email">;
+    };
 
 export async function sendOrganizationInviteEmail(
   inviteId: number,
@@ -307,7 +320,7 @@ export async function createStaffInvite(input: {
   email: string;
   role: StaffInviteRole;
   invitedBy: string;
-}): Promise<CreatedOrgInvite<PendingStaffInvite>> {
+}): Promise<{ invite: PendingStaffInvite; email: InviteEmailStatus }> {
   const invite = await insertInvite({
     organizationId: input.organizationId,
     email: input.email,
@@ -323,6 +336,31 @@ export async function createStaffInvite(input: {
   return { invite: staff, email };
 }
 
+export async function findOrgPersonByEmail(
+  organizationId: number,
+  email: string,
+): Promise<OrgPerson | null> {
+  const normalized = normalizeInviteEmail(email);
+  if (!normalized) return null;
+  const people = await listOrgPeople(organizationId);
+  return people.find((person) => normalizeInviteEmail(person.email) === normalized) ?? null;
+}
+
+async function ensureParentStudentLink(
+  parentUserId: string,
+  studentProfileId: number,
+): Promise<void> {
+  const db = requireSupabase();
+  const { error } = await db.from("parent_student_links").insert({
+    parent_user_id: parentUserId,
+    student_profile_id: studentProfileId,
+  });
+  if (error) {
+    if (error.code === "23505") return;
+    throw new Error(inviteWriteErrorMessage(error));
+  }
+}
+
 export async function createParentInvite(input: {
   organizationId: number;
   studentProfileId: number;
@@ -330,6 +368,25 @@ export async function createParentInvite(input: {
   invitedBy: string;
 }): Promise<CreatedOrgInvite<PendingOrgInvite>> {
   const email = input.email.trim().toLowerCase();
+  const orgMember = await findOrgPersonByEmail(input.organizationId, email);
+  if (orgMember) {
+    await ensureParentStudentLink(orgMember.userId, input.studentProfileId);
+    const staleInvite = await findPendingParentInvite(input.organizationId, email);
+    if (staleInvite) {
+      await cancelInvite(staleInvite.id);
+    }
+    return {
+      invite: null,
+      email: { sent: false, error: null },
+      linked: true,
+      linkedParent: {
+        userId: orgMember.userId,
+        name: orgMember.name,
+        email: orgMember.email,
+      },
+    };
+  }
+
   const existing = await findPendingParentInvite(input.organizationId, email);
   if (existing) {
     return attachToExistingParentInvite(existing, input.studentProfileId);

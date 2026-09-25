@@ -61,9 +61,9 @@ A person who signs up to make their own materials is the org **owner** (anyone c
 | **Account settings** | Cross-org account page (`/my/settings`) | shipped | View + **edit display name** (`profiles.name`) + sign-out. Email is read-only (auth-owned). **Org-visible profiles** at `/my/<org-slug>/people/<user_id>` for other members (name, role, courses they teach / lead / are on). Installed-app **Notifications** (on or off for this device, or how to install). Avatar, Google link management, and other preferences still TBD |
 | **Organizations** | Anyone can create an org; creator is first **owner**; org picker (`/my`) | shipped | Create + list + `/my/:orgSlug` home + org settings (identity, permalink, organization type incl. **family**, grade scheme, **school days**, **profile**, **branding**, **customizations**); **collapsible org sidebar**; staff home dashboard; **collaborators** invite email + copy link; **change/remove collaborators** in org settings. Billing remains P1 |
 | **Org permalink** | Stable org URL (`slug`) created with the org | shipped | Create + settings change with break-links warning |
-| **Org grade scheme** | Org chooses how grades work (exact / range / custom; presets K–12, Custom) | shipped | Defaults on create; owners/admins edit in org settings |
+| **Org grade scheme** | Org chooses how grades work (exact / range / custom; presets K–12, Custom, or **None**) | shipped | Defaults on create; owners/admins edit in org settings. **None** hides grade levels on students and courses and clears existing labels on save |
 | **Org school days** | Org chooses which weekdays school operates | shipped | Default Mon–Fri. Owners/admins edit circle toggles in org settings; instructors read-only. Lesson-plan compose defaults to those days, with a dropdown to add another weekday |
-| **Org profile** | Optional about, address, website, contact email, and phone | shipped | Owners/admins edit in org settings. All members read at `/my/<org-slug>/profile` (account menu org card). Not a public `/about` page |
+| **Org profile** | Optional about, address, website, contact email, and phone | shipped | Owners/admins edit in org settings. All members read at `/my/<org-slug>/profile` (account menu **Organization profile**). Not a public `/about` page |
 | **Admin invites** | Add other admins by email; those emails can be **claimed** by accounts | shipped | Invite owner/admin/instructor; **email via Resend** `organization-invite` (HN-015) plus copyable `/invite/<token>`; unsigned claim page names the invited email and prefills signup/login (HN-016) |
 | **Student profiles** | Org-level student records; optional student login | shipped | Org roster create/edit + profile page; **multiple parent invites** (one pending token per email; siblings share it) + optional **student email** on a distinct **student** invite. Changing that email revokes a claimed student login; a pending invite is invalidated, replaced, and emailed to the new address. Parent invite email + copy-link on profile and course roster. Created when first added to a course or class |
 | **Classes** | Org-scoped **group of students** — separate from a Course | shipped | Create class + batch add/remove members. Class is a **batch preset** into course enroll (not a live link). Owners/admins assign optional **class leads** (zero or more owners/admins/instructors) |
@@ -186,8 +186,9 @@ Each organization **chooses how student grade levels work**. Course Wright provi
 | **Exact grade** | 3rd, 7th, 11th | Single discrete level |
 | **Grade range** | K–2, 3–5, 6–8 | Band instead of one grade |
 | **Custom** | Org-defined labels | Can include ranges (e.g. K–2) or other bands |
+| **None** | — | No student or course grade metadata |
 
-**Shipped presets:** **K–12** and **Custom**. Org must choose.
+**Shipped presets:** **None**, **K–12**, and **Custom**. Org must choose.
 
 Student profile `grade_level` is optional and must match the org's chosen scheme when set.
 

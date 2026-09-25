@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
 import {
+  deleteReportCard,
   getReportCard,
   listReportCardDeliveries,
   refreshReportCard,
@@ -14,6 +15,7 @@ import {
   sendReportCardEmail,
   submitReportCard,
 } from "@/grading/databridge/reportCards";
+import { studentPath } from "@/grading/model/paths";
 import { caughtErrorMessage } from "@/ui/toast";
 
 export function useReportCard() {
@@ -22,6 +24,7 @@ export function useReportCard() {
   const ready = Number.isFinite(cardId);
   const { organization, role, parentPresentation } = useOrgShell();
   const canEdit = staffCanEdit(role, parentPresentation);
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const cardQuery = useQuery({
     queryKey: reportCardQueryKeys.detail(cardId),
@@ -99,6 +102,24 @@ export function useReportCard() {
     onError: (error: Error) => toast(caughtErrorMessage(error)),
   });
 
+  const remove = useMutation({
+    mutationFn: () => deleteReportCard(cardId),
+    onSuccess: async () => {
+      const studentId = cardQuery.data?.studentProfileId;
+      toast("Draft deleted.");
+      await queryClient.invalidateQueries({ queryKey: reportCardQueryKeys.detail(cardId) });
+      if (studentId != null) {
+        await queryClient.invalidateQueries({ queryKey: reportCardQueryKeys.student(studentId) });
+      }
+      const courseId = cardQuery.data?.courseId;
+      if (courseId != null) {
+        await queryClient.invalidateQueries({ queryKey: reportCardQueryKeys.course(courseId) });
+      }
+      navigate(studentPath(organization.slug, studentId ?? 0));
+    },
+    onError: (error: Error) => toast(caughtErrorMessage(error)),
+  });
+
   return {
     organization,
     canEdit,
@@ -115,5 +136,7 @@ export function useReportCard() {
     refreshGrades: () => refresh.mutate(),
     submitCard: () => submit.mutate(),
     resendDelivery: (id: number) => resend.mutate(id),
+    deleting: remove.isPending,
+    deleteDraft: () => remove.mutate(),
   };
 }

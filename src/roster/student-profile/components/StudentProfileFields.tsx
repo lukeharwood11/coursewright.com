@@ -72,22 +72,24 @@ export function StudentProfileFields({
           />
         </label>
       ) : null}
-      <label className="flex flex-col gap-1">
-        <span className="text-[13px] font-bold text-[var(--ink-soft)]">Grade</span>
-        <select
-          className={selectClass}
-          value={gradeLevel}
-          onChange={(event) => onGradeLevelChange(event.target.value)}
-          disabled={disabled}
-        >
-          <option value="">No grade</option>
-          {gradeLabels.map((label) => (
-            <option key={label} value={label}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </label>
+      {gradeLabels.length > 0 ? (
+        <label className="flex flex-col gap-1">
+          <span className="text-[13px] font-bold text-[var(--ink-soft)]">Grade</span>
+          <select
+            className={selectClass}
+            value={gradeLevel}
+            onChange={(event) => onGradeLevelChange(event.target.value)}
+            disabled={disabled}
+          >
+            <option value="">No grade</option>
+            {gradeLabels.map((label) => (
+              <option key={label} value={label}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
     </div>
   );
 }

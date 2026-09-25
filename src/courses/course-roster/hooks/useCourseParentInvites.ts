@@ -68,21 +68,29 @@ export function useCourseParentInvites(students: StudentSummary[]) {
         invitedBy: user.id,
       });
     },
-    onSuccess: async ({ invite, email: emailStatus, attached }) => {
-      const wasAttached = attached ?? false;
-      const copied = wasAttached
-        ? false
-        : await copyInvite(invite, { toast: false });
+    onSuccess: async (result) => {
+      const wasAttached = !result.linked && (result.attached ?? false);
+      const wasLinked = result.linked ?? false;
+      const copied =
+        wasAttached || wasLinked || !result.invite
+          ? false
+          : await copyInvite(result.invite, { toast: false });
       toast(
         inviteCreatedMessage({
-          recipientEmail: invite.email,
-          emailSent: emailStatus.sent,
+          recipientEmail: result.linked
+            ? result.linkedParent.email
+            : result.invite?.email ?? "",
+          emailSent: result.email.sent,
           linkCopied: copied,
           attached: wasAttached,
+          linked: wasLinked,
         }),
       );
       await queryClient.invalidateQueries({
         queryKey: staffInviteQueryKeys.parents(organization.id),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: staffInviteQueryKeys.parentLinks(studentIds),
       });
     },
     onError: (error: Error) => {

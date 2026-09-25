@@ -76,7 +76,11 @@ export function inviteCreatedMessage(input: {
   emailSent: boolean;
   linkCopied: boolean;
   attached?: boolean;
+  linked?: boolean;
 }): string {
+  if (input.linked) {
+    return `${input.recipientEmail} is already in this organization — linked as a parent.`;
+  }
   if (input.attached) {
     return "Already invited — this student was added to the existing invite.";
   }

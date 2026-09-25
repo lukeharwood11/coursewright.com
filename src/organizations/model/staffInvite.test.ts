@@ -13,6 +13,18 @@ test("inviteCreatedMessage celebrates a sent email without a copied link", () =>
   );
 });
 
+test("inviteCreatedMessage notes when an org member was linked as a parent", () => {
+  assert.equal(
+    inviteCreatedMessage({
+      recipientEmail: "alex@example.com",
+      emailSent: false,
+      linkCopied: false,
+      linked: true,
+    }),
+    "alex@example.com is already in this organization — linked as a parent.",
+  );
+});
+
 test("inviteCreatedMessage notes when a student was attached to an existing invite", () => {
   assert.equal(
     inviteCreatedMessage({

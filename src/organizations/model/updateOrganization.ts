@@ -35,7 +35,7 @@ export type ValidatedUpdateOrganization = {
   name: string;
   slug: string;
   orgType: OrgType;
-  gradeScheme: "k12" | "custom";
+  gradeScheme: "none" | "k12" | "custom";
   gradeLabels: string[];
   schoolDays: SchoolDay[];
   about: string | null;
@@ -84,9 +84,13 @@ export function validateUpdateOrganization(
   }
 
   const gradeLabels =
-    gradeScheme === "k12" ? [...K12_GRADE_LABELS] : input.gradeLabels.map((label) => label.trim()).filter(Boolean);
+    gradeScheme === "none"
+      ? []
+      : gradeScheme === "k12"
+        ? [...K12_GRADE_LABELS]
+        : input.gradeLabels.map((label) => label.trim()).filter(Boolean);
 
-  if (gradeLabels.length < 1) {
+  if (gradeScheme !== "none" && gradeLabels.length < 1) {
     return { ok: false, error: "Add at least one grade label." };
   }
 

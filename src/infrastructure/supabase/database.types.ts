@@ -3690,6 +3690,7 @@ export type Database = {
       generate_course_report_cards: { Args: { p_course_id: number }; Returns: Json }
       refresh_report_card: { Args: { p_id: number }; Returns: undefined }
       submit_report_card: { Args: { p_id: number }; Returns: undefined }
+      delete_report_card: { Args: { p_id: number }; Returns: undefined }
       resend_report_card_delivery: { Args: { p_delivery_id: number }; Returns: undefined }
     }
     Enums: {

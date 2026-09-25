@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
@@ -18,11 +18,12 @@ import {
   type GradebookRow,
 } from "@/grading/databridge/gradebook";
 import {
-  generateCourseReportCards,
+  generateReportCard,
   listCourseReportCards,
   reportCardQueryKeys,
 } from "@/grading/databridge/reportCards";
 import { getGradingScale, gradingScaleQueryKeys } from "@/grading/databridge/scales";
+import { reportCardPath } from "@/grading/model/paths";
 import { finalOverrideNeedsConfirm } from "@/grading/model/scale";
 import { classQueryKeys, listClassMembers, listClasses } from "@/roster/databridge/classes";
 import { caughtErrorMessage } from "@/ui/toast";
@@ -33,6 +34,7 @@ export function useCourseGradebook() {
   const ready = Number.isFinite(courseId);
   const { organization, role, parentPresentation } = useOrgShell();
   const canGrade = staffCanEdit(role, parentPresentation);
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [classId, setClassId] = useState<number | null>(null);
   const [attemptId, setAttemptId] = useState<number | null>(null);
@@ -139,11 +141,11 @@ export function useCourseGradebook() {
     onError: (error: Error) => toast(caughtErrorMessage(error)),
   });
 
-  const batch = useMutation({
-    mutationFn: () => generateCourseReportCards(courseId),
-    onSuccess: async (ids) => {
-      toast(ids.length === 0 ? "No students to draft." : "Drafts are ready. Send them one at a time.");
+  const draftCard = useMutation({
+    mutationFn: (enrollmentId: number) => generateReportCard(enrollmentId),
+    onSuccess: async (cardId) => {
       await queryClient.invalidateQueries({ queryKey: reportCardQueryKeys.course(courseId) });
+      navigate(reportCardPath(organization.slug, cardId));
     },
     onError: (error: Error) => toast(caughtErrorMessage(error)),
   });
@@ -218,7 +220,7 @@ export function useCourseGradebook() {
       saveFinal.mutate({ enrollmentId: row.enrollmentId, label, note: finalNote }),
     clearFinal: (row: GradebookRow) =>
       saveFinal.mutate({ enrollmentId: row.enrollmentId, label: null, note: "" }),
-    drafting: batch.isPending,
-    draftAll: () => batch.mutate(),
+    draftingEnrollmentId: draftCard.isPending ? draftCard.variables : null,
+    draftForEnrollment: (enrollmentId: number) => draftCard.mutate(enrollmentId),
   };
 }

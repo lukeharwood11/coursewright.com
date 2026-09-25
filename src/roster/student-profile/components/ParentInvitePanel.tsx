@@ -1,6 +1,11 @@
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import type { PendingOrgInvite, ParentLinkStatus } from "@/organizations/databridge/staffInvites";
+import type { OrgPerson } from "@/organizations/databridge/memberships";
+import {
+  isValidInviteEmail,
+  normalizeInviteEmail,
+} from "@/organizations/model/staffInvite";
 
 export function ParentInvitePanel({
   parentEmail,
@@ -15,6 +20,7 @@ export function ParentInvitePanel({
   sendingId,
   copiedId,
   origin,
+  orgMemberForEmail,
   onAddEmailChange,
   onInvite,
   onCopy,
@@ -33,6 +39,7 @@ export function ParentInvitePanel({
   sendingId: number | null;
   copiedId: number | null;
   origin: string;
+  orgMemberForEmail: (email: string) => OrgPerson | null;
   onAddEmailChange: (value: string) => void;
   onInvite: (email: string) => void;
   onCopy: (invite: PendingOrgInvite) => void;
@@ -41,15 +48,45 @@ export function ParentInvitePanel({
 }) {
   if (!canInvite) return null;
 
-  const pendingEmails = new Set(pending.map((invite) => invite.email));
+  const pendingEmails = new Set(
+    pending.map((invite) => normalizeInviteEmail(invite.email)),
+  );
   const linkedEmails = new Set(
     linked.map((row) => row.email.trim().toLowerCase()).filter(Boolean),
   );
+  const normalizedParentEmail = parentEmail
+    ? normalizeInviteEmail(parentEmail)
+    : "";
+  const savedParentLinked = normalizedParentEmail
+    ? linkedEmails.has(normalizedParentEmail)
+    : false;
+  const savedParentPending = normalizedParentEmail
+    ? pendingEmails.has(normalizedParentEmail)
+    : false;
+  const savedParentOrgMember =
+    parentEmail && !savedParentLinked && !savedParentPending
+      ? orgMemberForEmail(parentEmail)
+      : null;
   const savedParentReady =
-    Boolean(parentEmail) &&
-    !pendingEmails.has(parentEmail ?? "") &&
-    !linkedEmails.has(parentEmail ?? "");
+    Boolean(parentEmail) && !savedParentPending && !savedParentLinked;
   const hasParents = linked.length > 0 || pending.length > 0 || Boolean(parentEmail);
+
+  const addEmailTrimmed = addEmail.trim();
+  const addEmailNormalized = isValidInviteEmail(addEmailTrimmed)
+    ? normalizeInviteEmail(addEmailTrimmed)
+    : "";
+  const addEmailLinked = addEmailNormalized
+    ? linkedEmails.has(addEmailNormalized)
+    : false;
+  const addEmailPending = addEmailNormalized
+    ? pending.some((invite) => normalizeInviteEmail(invite.email) === addEmailNormalized)
+    : false;
+  const addEmailOrgMember =
+    addEmailTrimmed && !addEmailLinked && !addEmailPending
+      ? orgMemberForEmail(addEmailTrimmed)
+      : null;
+  const canSubmitAddEmail =
+    Boolean(addEmailTrimmed) && !addEmailLinked && invitingEmail == null;
 
   return (
     <section className="max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
@@ -107,13 +144,23 @@ export function ParentInvitePanel({
 
       {!loading && savedParentReady && parentEmail ? (
         <div className="mt-4">
+          {savedParentOrgMember ? (
+            <p className="mb-2 text-[13px] text-[var(--ink-soft)]">
+              {savedParentOrgMember.name} is already in this organization — link them
+              as a parent.
+            </p>
+          ) : null}
           <Button
             onClick={() => onInvite(parentEmail)}
-            disabled={invitingEmail === parentEmail}
+            disabled={invitingEmail === normalizeInviteEmail(parentEmail)}
           >
-            {invitingEmail === parentEmail
-              ? "Creating…"
-              : `Invite ${parentEmail}`}
+            {invitingEmail === normalizeInviteEmail(parentEmail)
+              ? savedParentOrgMember
+                ? "Linking…"
+                : "Creating…"
+              : savedParentOrgMember
+                ? `Link ${parentEmail}`
+                : `Invite ${parentEmail}`}
           </Button>
         </div>
       ) : null}
@@ -139,12 +186,27 @@ export function ParentInvitePanel({
                 placeholder="parent@email.com"
                 autoComplete="off"
               />
-              <Button type="submit" disabled={!addEmail.trim() || invitingEmail != null}>
-                {invitingEmail && invitingEmail === addEmail.trim().toLowerCase()
-                  ? "Creating…"
-                  : "Invite"}
+              <Button type="submit" disabled={!canSubmitAddEmail}>
+                {invitingEmail && invitingEmail === addEmailNormalized
+                  ? addEmailOrgMember
+                    ? "Linking…"
+                    : "Creating…"
+                  : addEmailOrgMember
+                    ? "Link"
+                    : "Invite"}
               </Button>
             </div>
+            {addEmailOrgMember ? (
+              <p className="text-[13px] text-[var(--ink-soft)]">
+                {addEmailOrgMember.name} is already in this organization — link them as a
+                parent.
+              </p>
+            ) : null}
+            {addEmailLinked ? (
+              <p className="text-[13px] text-[var(--ink-soft)]">
+                That parent is already linked to this student.
+              </p>
+            ) : null}
           </label>
         </form>
       ) : null}

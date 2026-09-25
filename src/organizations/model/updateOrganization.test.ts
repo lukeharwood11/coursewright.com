@@ -22,6 +22,19 @@ const baseInput = {
   confirmPermalinkChange: false,
 };
 
+test("validateUpdateOrganization allows none grade scheme with empty labels", () => {
+  const parsed = validateUpdateOrganization({
+    ...baseInput,
+    gradeScheme: "none",
+    gradeLabels: [],
+  });
+  assert.equal(parsed.ok, true);
+  if (parsed.ok) {
+    assert.equal(parsed.value.gradeScheme, "none");
+    assert.deepEqual(parsed.value.gradeLabels, []);
+  }
+});
+
 test("validateUpdateOrganization requires at least one school day", () => {
   const parsed = validateUpdateOrganization({ ...baseInput, schoolDays: [] });
   assert.equal(parsed.ok, false);

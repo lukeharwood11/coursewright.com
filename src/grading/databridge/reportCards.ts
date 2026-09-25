@@ -226,30 +226,21 @@ export async function listReportCardDeliveries(
   });
 }
 
-function asIds(value: Json): number[] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((item) => {
-    const id = asNumber(item);
-    return id == null ? [] : [id];
-  });
-}
-
-export async function generateStudentReportCards(studentProfileId: number): Promise<number[]> {
+export async function generateReportCard(enrollmentId: number): Promise<number> {
   const db = requireSupabase();
-  const { data, error } = await db.rpc("generate_student_report_cards", {
-    p_student_profile_id: studentProfileId,
+  const { data, error } = await db.rpc("generate_report_card", {
+    p_enrollment_id: enrollmentId,
   });
   if (error) throw new Error(error.message);
-  return asIds(data);
+  const id = asNumber(data);
+  if (id == null) throw new Error("Couldn’t create that report card.");
+  return id;
 }
 
-export async function generateCourseReportCards(courseId: number): Promise<number[]> {
+export async function deleteReportCard(id: number): Promise<void> {
   const db = requireSupabase();
-  const { data, error } = await db.rpc("generate_course_report_cards", {
-    p_course_id: courseId,
-  });
+  const { error } = await db.rpc("delete_report_card", { p_id: id });
   if (error) throw new Error(error.message);
-  return asIds(data);
 }
 
 export async function refreshReportCard(id: number): Promise<void> {
