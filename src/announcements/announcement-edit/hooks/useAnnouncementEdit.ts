@@ -163,7 +163,7 @@ export function useAnnouncementEdit() {
       queryKey: announcementQueryKeys.detail(id),
     });
     void queryClient.invalidateQueries({
-      queryKey: parentQueryKeys.dashboard(organization.id, user.id),
+      queryKey: parentQueryKeys.dashboardPrefix(organization.id, user.id),
     });
   }
 

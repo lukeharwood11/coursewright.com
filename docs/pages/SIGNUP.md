@@ -15,6 +15,7 @@ Create an account with **email + password** or **Google**. When Auth returns a s
 ## Behavior
 
 - Unauthenticated account creation (email + password or Google).
+- Email + password: step 1 collects email and password (**Continue**) and creates the Auth account (or shows “already has an account” there); step 2 collects first and last name (**Create account**). Google stays on step 1 only.
 - Password sign-up calls Supabase `signUp` and **keeps the session** when Auth returns one (email confirmation is off in local `supabase/config.toml`; remote projects may require confirmation).
 - When Auth requires email confirmation (no session yet), replace the form with a calm success state: **Account created!** — check your mailbox to verify, then continue. Do not show “email not confirmed” as an error.
 - If that email already has an account, tell them to sign in — do not send them to login automatically after a successful create.
@@ -33,7 +34,7 @@ Create an account with **email + password** or **Google**. When Auth returns a s
 
 - Wordmark + clear “create account” framing
 - Google sign-up
-- Email + password sign-up
+- Email + password sign-up is **two steps** on the same card: (1) email and password → **Continue**; (2) **first name** and **last name** → **Create account** (saved as display name on the profile). **Back** returns to step 1.
 - Link to [LOGIN](./LOGIN.md)
 - Invite-aware copy when arriving from invite (claim seat / parent access with the invited email prefilled)
 - Anyone can create an org after signup (creator = first owner) via [ORG_PICKER](./ORG_PICKER.md)
@@ -41,7 +42,7 @@ Create an account with **email + password** or **Google**. When Auth returns a s
 ## Primary actions
 
 - Sign up with Google
-- Sign up with email and password
+- Continue with email and password, then create account with first and last name
 - Go to sign in
 
 ## After success

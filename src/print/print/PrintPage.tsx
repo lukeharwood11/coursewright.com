@@ -1,9 +1,21 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { PdfPreview } from "./components/PdfPreview";
 import { PrintActionBar } from "./components/PrintActionBar";
+import { PrintOptionsModal } from "./components/PrintOptionsModal";
+import {
+  PrintOptionsPanel,
+  type PrintOptionsPanelProps,
+} from "./components/PrintOptionsPanel";
+import {
+  SingleQuizPrintOptionsPanel,
+  UnitQuizPrintOptionsPanel,
+} from "./components/QuizPrintOptionsPanel";
+import { QuizPrintOptionsModal } from "./components/QuizPrintOptionsModal";
 import { PrintStatus } from "./components/PrintStatus";
 import { PageLoading } from "@/ui/PageLoading";
 import { usePrint } from "./hooks/usePrint";
+import { useQuizPrintOptions } from "./hooks/useQuizPrintOptions";
+import { useUnitPrintOptions } from "./hooks/useUnitPrintOptions";
 import type { PrintGrainKind } from "@/print/model/paths";
 
 function emptyCopy(grain: PrintGrainKind | null): {
@@ -13,7 +25,7 @@ function emptyCopy(grain: PrintGrainKind | null): {
   if (grain === "unit") {
     return {
       title: "Nothing to print",
-      body: "This unit doesn’t have any materials to print yet.",
+      body: "This unit doesn’t have any materials or quizzes to print yet.",
     };
   }
   if (grain === "resource") {
@@ -34,13 +46,85 @@ function emptyCopy(grain: PrintGrainKind | null): {
   };
 }
 
+function thisWeekPanelProps(
+  thisWeek: NonNullable<ReturnType<typeof usePrint>["thisWeek"]>,
+): PrintOptionsPanelProps {
+  return {
+    studentGroups: thisWeek.studentGroups,
+    pack: thisWeek.selection.pack,
+    studentBreaks: thisWeek.selection.studentBreaks,
+    included: thisWeek.isIncluded,
+    hasPageBreak: thisWeek.hasPageBreak,
+    setIncluded: thisWeek.setIncluded,
+    setKeysIncluded: thisWeek.setKeysIncluded,
+    setPageBreak: thisWeek.setPageBreak,
+    setPack: thisWeek.setPack,
+    setStudentBreaks: thisWeek.setStudentBreaks,
+    quizKeyModeForItem: thisWeek.quizKeyModeForItem,
+    setQuizKeyMode: thisWeek.setQuizKeyMode,
+    itemCanShowQuizKey: thisWeek.itemCanShowQuizKey,
+  };
+}
+
 export function PrintPage() {
   const print = usePrint();
+  const quizOptions = useQuizPrintOptions(
+    print.grain === "quiz" ? print.quizId : null,
+  );
+  const unitOptions = useUnitPrintOptions(
+    print.grain === "unit" ? print.unitId : null,
+  );
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const showThisWeekOptions = print.grain === "thisWeek" && print.thisWeek?.catalog;
+  const showQuizOptions = print.grain === "quiz" && quizOptions.canShowKey;
+  const showUnitOptions = print.grain === "unit" && unitOptions.hasKeyOptions;
+  const panelProps = print.thisWeek ? thisWeekPanelProps(print.thisWeek) : null;
+  const hasPrintOptions = showThisWeekOptions || showQuizOptions || showUnitOptions;
 
   useEffect(() => {
     const title = print.packet?.title ?? "Print";
     document.title = `${title} · Print · Course Wright`;
   }, [print.packet?.title]);
+
+  const openOptions = hasPrintOptions ? () => setOptionsOpen(true) : undefined;
+
+  const optionsSidebar = showThisWeekOptions && panelProps ? (
+    <PrintOptionsPanel {...panelProps} />
+  ) : showQuizOptions ? (
+    <SingleQuizPrintOptionsPanel
+      mode={quizOptions.mode}
+      onModeChange={quizOptions.setMode}
+    />
+  ) : showUnitOptions ? (
+    <UnitQuizPrintOptionsPanel
+      quizzes={unitOptions.quizzes}
+      onModeChange={unitOptions.setQuizMode}
+    />
+  ) : null;
+
+  const optionsModal = showThisWeekOptions && panelProps ? (
+    <PrintOptionsModal
+      open={optionsOpen}
+      onClose={() => setOptionsOpen(false)}
+      {...panelProps}
+    />
+  ) : showQuizOptions ? (
+    <QuizPrintOptionsModal
+      open={optionsOpen}
+      onClose={() => setOptionsOpen(false)}
+      variant="quiz"
+      mode={quizOptions.mode}
+      onModeChange={quizOptions.setMode}
+    />
+  ) : showUnitOptions ? (
+    <QuizPrintOptionsModal
+      open={optionsOpen}
+      onClose={() => setOptionsOpen(false)}
+      variant="unit"
+      unitQuizzes={unitOptions.quizzes}
+      onUnitQuizModeChange={unitOptions.setQuizMode}
+    />
+  ) : null;
 
   if (print.loading && !print.blob) {
     return (
@@ -50,8 +134,15 @@ export function PrintPage() {
           filename="print.pdf"
           blob={null}
           disabled
+          onOpenOptions={openOptions}
         />
-        <PageLoading embedded label="Making your PDF…" />
+        <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+          {optionsSidebar}
+          <div className="flex min-h-0 min-w-0 flex-1 items-center justify-center">
+            <PageLoading embedded label="Making your PDF…" />
+          </div>
+        </div>
+        {optionsModal}
       </div>
     );
   }
@@ -67,9 +158,36 @@ export function PrintPage() {
   }
 
   if (print.empty) {
-    const copy = emptyCopy(print.grain);
+    const copy =
+      print.grain === "thisWeek" && print.thisWeek?.selectionEmpty
+        ? {
+            title: "Nothing selected",
+            body: "Choose at least one item in the list to print.",
+          }
+        : emptyCopy(print.grain);
     return (
-      <PrintStatus title={copy.title} body={copy.body} backTo={print.backTo} />
+      <div className="flex h-dvh flex-col">
+        {hasPrintOptions ? (
+          <>
+            <PrintActionBar
+              backTo={print.backTo}
+              filename="print.pdf"
+              blob={null}
+              disabled
+              onOpenOptions={openOptions}
+            />
+            <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+              {optionsSidebar}
+              <div className="flex min-h-0 flex-1 items-center justify-center p-6">
+                <p className="text-[15px] text-[var(--ink-soft)]">{copy.body}</p>
+              </div>
+            </div>
+            {optionsModal}
+          </>
+        ) : (
+          <PrintStatus title={copy.title} body={copy.body} backTo={print.backTo} />
+        )}
+      </div>
     );
   }
 
@@ -90,10 +208,20 @@ export function PrintPage() {
         backTo={print.backTo}
         filename={print.filename}
         blob={print.blob}
+        onOpenOptions={openOptions}
       />
-      <div className="min-h-0 flex-1">
-        <PdfPreview blob={print.blob} />
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+        {optionsSidebar}
+        <div className="relative min-h-0 min-w-0 flex-1">
+          {print.updatingPreview ? (
+            <p className="absolute left-4 top-3 z-10 rounded-[6px] bg-[var(--surface)] px-2 py-1 text-[12px] text-[var(--ink-soft)] shadow-sm">
+              Updating PDF…
+            </p>
+          ) : null}
+          <PdfPreview blob={print.blob} />
+        </div>
       </div>
+      {optionsModal}
     </div>
   );
 }

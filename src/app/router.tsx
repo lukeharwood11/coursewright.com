@@ -1,6 +1,10 @@
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { AccountSettingsPage, LoginPage, SignupPage } from "@/auth";
-import { RedirectIfAuthed, RequireAuth } from "@/app/gates/RequireAuth";
+import {
+  RedirectIfAuthed,
+  RequireAuth,
+  SignupRedirectIfAuthed,
+} from "@/app/gates/RequireAuth";
 import { RequireOrgFeature } from "@/app/gates/RequireOrgFeature";
 import { RequireStaff } from "@/app/gates/RequireStaff";
 import { AccountLayout } from "@/app/layouts/AccountLayout";
@@ -101,9 +105,9 @@ export function AppRoutes() {
       <Route
         path="/signup"
         element={
-          <RedirectIfAuthed>
+          <SignupRedirectIfAuthed>
             <SignupPage />
-          </RedirectIfAuthed>
+          </SignupRedirectIfAuthed>
         }
       />
       <Route path="/invite/:token" element={<ClaimInvitePage />} />

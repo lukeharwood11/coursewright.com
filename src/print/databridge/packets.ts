@@ -9,9 +9,24 @@ import {
   getMaterial,
   listMaterialsForUnit,
 } from "@/materials/databridge/materials";
+import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
 import { getUnit } from "@/units/databridge/units";
-import { loadParentDashboard } from "@/parent/databridge/dashboard";
-import { thisWeekPrintRefs, printMaterialFromLessonPlan } from "@/print/model/thisWeekPacket";
+import { mergeOutline } from "@/quizzes/model/outline";
+import { listQuizzesForUnit } from "@/quizzes/databridge/quizzes";
+import { pushCourseQuizPrintMaterials } from "@/print/model/courseQuizPrintRows";
+import {
+  defaultQuizKeyPrintMode,
+  quizKeyModeForQuiz,
+  type QuizKeyPrintMode,
+} from "@/print/model/quizKeyPrintMode";
+import { loadDashboardForStaffViewMode, loadParentDashboard } from "@/parent/databridge/dashboard";
+import {
+  thisWeekPrintRefs,
+  printMaterialFromLessonPlan,
+  type ThisWeekPrintRef,
+} from "@/print/model/thisWeekPacket";
+import { accountIsStudentOnCourse, canShowAnswerKey } from "@/quizzes/model/quiz";
+import { presentCourseQuizPrint } from "@/quizzes/model/print";
 import type { PrintMaterial, PrintPacket } from "@/print/model/packet";
 import type { CourseQuizPrintSource } from "@/quizzes/model/print";
 import {
@@ -136,16 +151,67 @@ export async function loadResourcePrintPacket(
   };
 }
 
-export async function loadUnitPrintPacket(unitId: number): Promise<PrintPacket | null> {
-  const unit = await getUnit(unitId);
+export async function loadUnitPrintPacket(args: {
+  unitId: number;
+  userId: string;
+  userEmail: string | null;
+  parentPresentation: boolean;
+  quizKeyModes?: Map<number, QuizKeyPrintMode>;
+}): Promise<PrintPacket | null> {
+  const unit = await getUnit(args.unitId);
   if (!unit) return null;
   const course = await getCourse(unit.courseId);
-  const materials = await listMaterialsForUnit(unitId);
+  const materialRows = args.parentPresentation
+    ? familyVisibleMaterials(await listMaterialsForUnit(args.unitId))
+    : await listMaterialsForUnit(args.unitId);
+  const quizRows = args.parentPresentation
+    ? familyVisibleMaterials(await listQuizzesForUnit(args.unitId))
+    : await listQuizzesForUnit(args.unitId);
+  const outline = mergeOutline(materialRows, quizRows);
   const printed: PrintMaterial[] = [];
-  for (const material of materials) {
-    const item = await toPrintMaterial(material);
-    if (item) printed.push(item);
+  const modes = args.quizKeyModes ?? new Map();
+
+  for (const entry of outline) {
+    if (entry.kind === "material") {
+      const material = materialRows.find((row) => row.id === entry.id);
+      if (!material) continue;
+      const item = await toPrintMaterial(material);
+      if (item) printed.push(item);
+      continue;
+    }
+    const contextLines = course?.title ? [course.title] : [];
+    const quizPacket = await loadQuizPrintPacket({ quizId: entry.id, userId: args.userId });
+    if (!quizPacket) continue;
+    const viewerIsStudent = accountIsStudentOnCourse(
+      args.userEmail,
+      quizPacket.linkedStudents,
+    );
+    const canShowKey = canShowAnswerKey({
+      teacherView: !args.parentPresentation,
+      shareWithParents: quizPacket.shareAnswerKeyWithParents,
+      viewerIsStudent,
+    });
+    const mode = quizKeyModeForQuiz(entry.id, modes, canShowKey);
+    const row = {
+      id: entry.id,
+      title: quizPacket.packet.title,
+      description: quizPacket.packet.subtitle ?? "",
+      kind: "page" as const,
+      url: null,
+      scheduledDate: null,
+      contextLines,
+      blocks: [] as PrintMaterial["blocks"],
+      file: null,
+    };
+    const worksheet = quizPacket.questions.map((question) =>
+      presentCourseQuizPrint(question, false),
+    );
+    const keyed = quizPacket.questions.map((question) =>
+      presentCourseQuizPrint(question, true),
+    );
+    pushCourseQuizPrintMaterials(printed, row, worksheet, keyed, mode);
   }
+
   return {
     title: unit.title,
     subtitle: course?.title ?? null,
@@ -179,17 +245,92 @@ export async function loadEventPrintPacket(eventId: number): Promise<PrintPacket
   };
 }
 
+async function courseQuizPrintMaterials(
+  ref: ThisWeekPrintRef,
+  userId: string,
+  userEmail: string | null,
+  parentPresentation: boolean,
+): Promise<PrintMaterial[]> {
+  const quizPacket = await loadQuizPrintPacket({ quizId: ref.id, userId });
+  if (!quizPacket) return [];
+  const viewerIsStudent = accountIsStudentOnCourse(
+    userEmail,
+    quizPacket.linkedStudents,
+  );
+  const canShowKey = canShowAnswerKey({
+    teacherView: !parentPresentation,
+    shareWithParents: quizPacket.shareAnswerKeyWithParents,
+    viewerIsStudent,
+  });
+  const mode =
+    ref.quizKeyMode ?? defaultQuizKeyPrintMode(canShowKey);
+  const effectiveMode = canShowKey ? mode : "worksheet";
+  const row = {
+    id: ref.id,
+    title: quizPacket.packet.title,
+    description: quizPacket.packet.subtitle ?? "",
+    kind: "page" as const,
+    url: null,
+    scheduledDate: null,
+    contextLines: ref.contextLines,
+    sectionKey: ref.sectionKey,
+    sectionTitle: ref.sectionTitle,
+    pageBreakBefore: ref.pageBreakBefore,
+    blocks: [] as PrintMaterial["blocks"],
+    file: null,
+  };
+  const worksheet = quizPacket.questions.map((question) =>
+    presentCourseQuizPrint(question, false),
+  );
+  const keyed = quizPacket.questions.map((question) =>
+    presentCourseQuizPrint(question, true),
+  );
+  const printed: PrintMaterial[] = [];
+  pushCourseQuizPrintMaterials(printed, row, worksheet, keyed, effectiveMode);
+  return printed;
+}
+
 export async function loadWeekPrintPacket(args: {
   organizationId: number;
   userId: string;
+  userEmail: string | null;
+  parentPresentation: boolean;
+  staffViewMode?: "teacher" | "preview" | "parent" | "student";
   studentIds?: number[] | null;
+  weekStart?: string | null;
+  refs?: ThisWeekPrintRef[];
 }): Promise<PrintPacket> {
-  const dashboard = await loadParentDashboard(args.organizationId, args.userId);
-  const refs = thisWeekPrintRefs(dashboard, args.studentIds);
+  const mode = args.staffViewMode ?? "teacher";
+  const loadOptions = { weekStart: args.weekStart ?? null };
+  const dashboard =
+    args.parentPresentation && mode !== "teacher"
+      ? await loadDashboardForStaffViewMode(
+          args.organizationId,
+          args.userId,
+          mode,
+          "Preview",
+          loadOptions,
+        )
+      : await loadParentDashboard(args.organizationId, args.userId, loadOptions);
+  const refs =
+    args.refs ?? thisWeekPrintRefs(dashboard, args.studentIds);
   const printed: PrintMaterial[] = [];
   for (const ref of refs) {
     if (ref.source === "lesson_plan") {
-      printed.push(printMaterialFromLessonPlan(ref));
+      printed.push({
+        ...printMaterialFromLessonPlan(ref),
+        pageBreakBefore: ref.pageBreakBefore,
+      });
+      continue;
+    }
+    if (ref.source === "quiz" || ref.itemKind === "quiz") {
+      const quizItems = await courseQuizPrintMaterials(
+        ref,
+        args.userId,
+        args.userEmail,
+        args.parentPresentation,
+      );
+      printed.push(...quizItems);
       continue;
     }
     const material = await getMaterial(ref.id);
@@ -200,6 +341,7 @@ export async function loadWeekPrintPacket(args: {
         contextLines: ref.contextLines,
         sectionKey: ref.sectionKey,
         sectionTitle: ref.sectionTitle,
+        pageBreakBefore: ref.pageBreakBefore,
       });
     }
   }
@@ -221,13 +363,15 @@ export async function loadQuizPrintPacket(args: {
 } | null> {
   const quiz = await getQuiz(args.quizId);
   if (!quiz) return null;
-  const [questions, linkedStudents] = await Promise.all([
+  const [questions, linkedStudents, course] = await Promise.all([
     listQuizQuestions(args.quizId),
     listLinkedStudents(quiz.courseId, args.userId),
+    getCourse(quiz.courseId),
   ]);
   const quizQuestions: CourseQuizPrintSource[] = questions.map((question) => ({
     id: question.id,
     prompt: question.prompt,
+    points: question.points,
     kind: question.kind,
     choices: question.choices.map((choice) => ({
       id: String(choice.id),
@@ -252,6 +396,7 @@ export async function loadQuizPrintPacket(args: {
     packet: {
       title: quiz.title,
       subtitle: quiz.description || null,
+      courseTitle: course?.title ?? null,
       materials: [],
     },
     questions: quizQuestions,

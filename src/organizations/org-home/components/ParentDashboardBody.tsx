@@ -21,6 +21,8 @@ export function ParentDashboardBody({
   visible,
   selectedIds,
   preview = false,
+  previewKind = null,
+  isCurrentWeek = true,
   onToggleStudent,
   schoolDays,
   orgType,
@@ -30,6 +32,8 @@ export function ParentDashboardBody({
   visible: ParentDashboard;
   selectedIds: number[];
   preview?: boolean;
+  previewKind?: "instructor" | "empty-family" | null;
+  isCurrentWeek?: boolean;
   onToggleStudent: (id: number) => void;
   schoolDays: readonly SchoolDay[];
   orgType: OrgType;
@@ -49,11 +53,11 @@ export function ParentDashboardBody({
   };
 
   if (!full.hasActiveEnrollment && fullAnnouncements.length === 0) {
-    if (preview) {
+    if (previewKind === "instructor" || preview) {
       return (
         <p className="mt-4 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-          Open a published course in the sidebar to see it the way a student
-          would — without editing tools.
+          Open a published course you teach in the sidebar to see it the way a
+          student would — without editing tools.
         </p>
       );
     }
@@ -121,8 +125,9 @@ export function ParentDashboardBody({
           />
           {!hasContent ? (
             <p className="mt-4 text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-              Nothing on the calendar this week. Check back soon, or open a
-              course when something’s ready.
+              {isCurrentWeek
+                ? "Nothing on the calendar this week. Check back soon, or open a course when something’s ready."
+                : "Nothing scheduled for this week. Try another week, or open a course when something’s ready."}
             </p>
           ) : (
             <div className="mt-4">

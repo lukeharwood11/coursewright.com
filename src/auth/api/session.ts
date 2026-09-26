@@ -1,3 +1,4 @@
+import { applyPendingProfileNameIfNeeded } from "@/auth/model/signUpPending";
 import { isSupabaseConfigured, supabase } from "@/infrastructure/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 
@@ -16,7 +17,11 @@ export function subscribeToAuthSession(
   }
 
   const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-    onChange(session?.user ?? null);
+    const user = session?.user ?? null;
+    if (user) {
+      void applyPendingProfileNameIfNeeded(user.id);
+    }
+    onChange(user);
   });
 
   return () => data.subscription.unsubscribe();

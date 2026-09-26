@@ -27,7 +27,7 @@ export function MarketingFooter() {
       </div>
       <div className="border-t border-[var(--line-soft)]">
         <p className="mx-auto max-w-5xl px-5 py-4 text-[12.5px] text-[var(--ink-faint)]">
-          © {year} Course Wright. All rights reserved.
+          © {year} Violet Fields Software. All rights reserved.
         </p>
       </div>
     </footer>

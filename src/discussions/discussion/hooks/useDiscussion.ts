@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { SerializedEditorState } from "lexical";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 import {
   formOrMutationError,
   toastCheckNetworkConnection,
@@ -9,7 +10,11 @@ import {
 import { isNetworkError } from "@/ui/networkError";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { staffCanEdit } from "@/app/layouts/model/viewMode";
+import {
+  isStaffInstructorPreview,
+  STAFF_PREVIEW_DISCUSSION_HINT,
+  staffCanEdit,
+} from "@/app/layouts/model/viewMode";
 import { isStaffRole } from "@/organizations/model/role";
 import {
   createDiscussionMessage,
@@ -56,12 +61,14 @@ import type {
 export function useDiscussion() {
   const params = useParams();
   const discussionId = params.discussionId ? Number(params.discussionId) : NaN;
-  const { organization, role, parentPresentation } = useOrgShell();
+  const { organization, role, parentPresentation, staffViewMode } =
+    useOrgShell();
   const user = useAuthedUser();
   const queryClient = useQueryClient();
   useAckNotificationFromSearch();
   const canEdit = staffCanEdit(role, parentPresentation);
   const isStaff = role ? isStaffRole(role) : false;
+  const instructorPreview = isStaffInstructorPreview(role, staffViewMode);
   // Observers stay mute, including additive parent. Families and writers post.
   const canPost = role !== "observer" && (canEdit || parentPresentation);
 
@@ -234,6 +241,14 @@ export function useDiscussion() {
       if (isNetworkError(error)) toastCheckNetworkConnection();
     },
   });
+
+  function tryPost() {
+    if (instructorPreview) {
+      toast(STAFF_PREVIEW_DISCUSSION_HINT);
+      return;
+    }
+    post.mutate();
+  }
 
   const answered = useMutation({
     mutationFn: (next: boolean) =>
@@ -412,7 +427,7 @@ export function useDiscussion() {
     canSubmit: validatePost(draftBody, attachmentContent) == null,
     formError: formOrMutationError(formError, post.error),
     posting: post.isPending,
-    post: () => post.mutate(),
+    post: tryPost,
     answered,
     removeDiscussion,
     removeMessage,

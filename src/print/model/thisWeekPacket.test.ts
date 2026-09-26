@@ -123,7 +123,7 @@ test("this-week print lists each student's materials separately", () => {
         source: "material",
         id: 100,
         sectionTitle: "Emma Caldwell",
-        context: "Science · Important now",
+        context: "Science · On lesson plan · Important now",
       },
       {
         source: "material",
@@ -141,7 +141,7 @@ test("this-week print lists each student's materials separately", () => {
         source: "material",
         id: 100,
         sectionTitle: "Noah Caldwell",
-        context: "Science · Important now",
+        context: "Science · On lesson plan · Important now",
       },
     ],
   );
@@ -191,6 +191,19 @@ test("packet sections pack the same student and page-break the next", () => {
       ["Emma Caldwell", "Emma Caldwell", "Emma Caldwell"],
       ["Noah Caldwell", "Noah Caldwell"],
     ],
+  );
+});
+
+test("groupPacketSections breaks when pageBreakBefore is set", () => {
+  const sections = groupPacketSections([
+    { id: 1, sectionKey: "student-1" },
+    { id: 2, sectionKey: "student-1", pageBreakBefore: true },
+    { id: 3, sectionKey: "student-1" },
+  ]);
+  assert.equal(sections.length, 2);
+  assert.deepEqual(
+    sections.map((section) => section.map((item) => item.id)),
+    [[1], [2, 3]],
   );
 });
 

@@ -1,3 +1,5 @@
+import { addIsoDays } from "@/calendar/model/dates";
+
 function toIsoDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -22,19 +24,39 @@ export type CalendarWeek = {
   label: string;
 };
 
-export function calendarWeekContaining(now = new Date()): CalendarWeek {
-  const start = new Date(now);
-  start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() - start.getDay());
-
+function calendarWeekFromStart(start: Date): CalendarWeek {
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
-
   return {
     start: toIsoDate(start),
     end: toIsoDate(end),
     label: `Week of ${formatShort(start)} – ${formatShort(end)}`,
   };
+}
+
+export function calendarWeekContaining(now = new Date()): CalendarWeek {
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - start.getDay());
+  return calendarWeekFromStart(start);
+}
+
+/** Calendar week containing an ISO calendar date (local noon parse). */
+export function calendarWeekForIsoDate(isoDate: string): CalendarWeek {
+  return calendarWeekContaining(new Date(`${isoDate}T12:00:00`));
+}
+
+export function shiftCalendarWeek(weekStart: string, deltaWeeks: number): string {
+  return addIsoDays(weekStart, deltaWeeks * 7);
+}
+
+export function isCurrentCalendarWeek(week: CalendarWeek, now = new Date()): boolean {
+  return week.start === calendarWeekContaining(now).start;
+}
+
+/** “As-of” date for announcements and Coming up on the This week home. */
+export function effectiveViewAsOfDate(week: CalendarWeek, now = new Date()): string {
+  return isCurrentCalendarWeek(week, now) ? localIsoDate(now) : week.start;
 }
 
 export function formatMaterialDate(isoDate: string): string {

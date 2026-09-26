@@ -85,6 +85,16 @@ begin
     new.id,
     lower(coalesce(new.email, '')),
     coalesce(
+      nullif(
+        trim(
+          concat_ws(
+            ' ',
+            new.raw_user_meta_data ->> 'first_name',
+            new.raw_user_meta_data ->> 'last_name'
+          )
+        ),
+        ''
+      ),
       new.raw_user_meta_data ->> 'full_name',
       new.raw_user_meta_data ->> 'name',
       new.raw_user_meta_data ->> 'display_name',

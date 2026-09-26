@@ -82,8 +82,12 @@ export const resourceItemQueryKeys = {
   list: (organizationId: number, folderId: number | null) =>
     ["org-resources", "items", organizationId, folderId] as const,
   detail: (id: number) => ["org-resources", "item", id] as const,
+  /** Full list of items the actor can select (family root browse). */
   visible: (organizationId: number) =>
     ["org-resources", "visible", organizationId] as const,
+  /** Boolean existence check for sidebar Resources nav — not the item list. */
+  hasVisible: (organizationId: number) =>
+    ["org-resources", "has-visible", organizationId] as const,
 };
 
 export async function listResourceItems(args: {

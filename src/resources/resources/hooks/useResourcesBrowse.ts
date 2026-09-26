@@ -136,8 +136,8 @@ export function useResourcesBrowse() {
   const canEditHere = folderId == null ? canCreateStaff : folderCaps.canEdit;
 
   const listed = useMemo(() => {
-    const folders = foldersQuery.data ?? [];
-    const items = itemsQuery.data ?? [];
+    const folders = Array.isArray(foldersQuery.data) ? foldersQuery.data : [];
+    const items = Array.isArray(itemsQuery.data) ? itemsQuery.data : [];
     if (!listSharedAtRoot) return { folders, items };
     const placed = resourceBrowseChildren({
       folders,

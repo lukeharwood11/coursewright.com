@@ -86,7 +86,7 @@ export const helpDocTopics: HelpDocTopic[] = [
       { type: "h2", text: "Organization home" },
       {
         type: "p",
-        text: "Staff home is a dashboard for running the program. The student experience is a simpler “this week” view once someone is invited and enrolled. Staff can preview it with Student view in the header.",
+        text: "Staff home is a dashboard for running the program. The student experience is a simpler “this week” view once someone is invited and enrolled. Staff can try it with Preview in the header (courses they teach), or Parent / Student when those roles apply.",
       },
       { type: "h2", text: "Sidebar" },
       {
@@ -280,10 +280,10 @@ export const helpDocTopics: HelpDocTopic[] = [
           "Parent — membership for someone linked to a student. They see the student experience (view and print shared content for linked, enrolled students) after claiming an invite. A parent who created an organization is an owner for that org, not the parent role.",
         ],
       },
-      { type: "h2", text: "Teacher / Student view" },
+      { type: "h2", text: "Teacher / Preview / Parent / Student" },
       {
         type: "p",
-        text: "Owners, admins, and instructors can switch most organization pages to the student presentation with Teacher / Student view in the header. Parent-only accounts do not see that control — they always see the student experience.",
+        text: "Owners, admins, and instructors can switch most organization pages with Teacher / Preview in the header. Preview shows courses you teach as a student would see them. If you are also a parent or student in the org, Parent and Student tabs show your real family or self. Parent-only accounts do not see that control — they always see the student experience.",
       },
     ],
   },

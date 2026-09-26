@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProfile, profileQueryKeys } from "@/auth/api/profiles";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
+import { firstNameFrom } from "@/auth/model/displayName";
 import { courseQueryKeys, listCourses } from "@/courses/databridge/courses";
 import {
   discussionQueryKeys,
@@ -18,7 +19,13 @@ import {
 } from "@/organizations/databridge/memberships";
 import { DEFAULT_ORG_FEATURES } from "@/organizations/model/features";
 import { browsesAsStaff } from "@/organizations/model/role";
-import { loadParentDashboard, parentQueryKeys } from "@/parent/databridge/dashboard";
+import {
+  loadDashboardForStaffViewMode,
+  loadParentDashboard,
+  listTaughtPublishedCourses,
+  parentQueryKeys,
+  type FamilyDashboardScope,
+} from "@/parent/databridge/dashboard";
 import { orgHasVisibleResources } from "@/resources/databridge/folders";
 import { resourceItemQueryKeys } from "@/resources/databridge/items";
 import {
@@ -35,15 +42,34 @@ import {
 import type { AppShellValue } from "../OrgShellContext";
 import { useStaffViewMode } from "../stores/viewMode";
 
+function dashboardScope(
+  staffViewMode: AppShellValue["staffViewMode"],
+  parentPresentation: boolean,
+  browsesStaff: boolean,
+): FamilyDashboardScope {
+  if (browsesStaff && parentPresentation) {
+    if (staffViewMode === "parent") return "parent";
+    if (staffViewMode === "student") return "student";
+    return "preview";
+  }
+  return "family";
+}
+
 export function useOrgShellData(orgSlug: string | undefined) {
   const user = useAuthedUser();
   const queryClient = useQueryClient();
-  const { staffViewMode, setStaffViewMode } = useStaffViewMode(orgSlug);
 
   const membershipQuery = useQuery({
     queryKey: orgQueryKeys.bySlug(orgSlug ?? "", user.id),
     queryFn: () => getMembershipByOrgSlug(user.id, orgSlug ?? ""),
     enabled: Boolean(orgSlug),
+  });
+
+  const isParent = Boolean(membershipQuery.data?.isParent);
+  const isStudent = Boolean(membershipQuery.data?.isStudent);
+  const { staffViewMode, setStaffViewMode } = useStaffViewMode(orgSlug, {
+    isParent,
+    isStudent,
   });
 
   const profileQuery = useQuery({
@@ -69,11 +95,22 @@ export function useOrgShellData(orgSlug: string | undefined) {
 
   const parentPresentation = staffShowsParentPresentation(role, staffViewMode);
   const showStaffViewToggle = canUseStaffViewToggle(role);
+  const scope = dashboardScope(staffViewMode, parentPresentation, browsesStaff);
+
+  const profileName = profileQuery.data?.name ?? "";
+  const profileEmail = profileQuery.data?.email ?? user.email ?? "";
+  const firstName = firstNameFrom(profileName, profileEmail);
 
   const coursesQuery = useQuery({
     queryKey: courseQueryKeys.list(organizationId ?? 0),
     queryFn: () => listCourses(organizationId!),
     enabled: Boolean(organizationId),
+  });
+
+  const taughtCoursesQuery = useQuery({
+    queryKey: parentQueryKeys.taughtCourses(organizationId ?? 0, user.id),
+    queryFn: () => listTaughtPublishedCourses(organizationId!, user.id),
+    enabled: Boolean(organizationId) && browsesStaff && staffViewMode === "preview",
   });
 
   const classesQuery = useQuery({
@@ -83,8 +120,18 @@ export function useOrgShellData(orgSlug: string | undefined) {
   });
 
   const parentDashboardQuery = useQuery({
-    queryKey: parentQueryKeys.dashboard(organizationId ?? 0, user.id),
-    queryFn: () => loadParentDashboard(organizationId!, user.id),
+    queryKey: parentQueryKeys.dashboard(organizationId ?? 0, user.id, scope),
+    queryFn: () => {
+      if (browsesStaff && parentPresentation) {
+        return loadDashboardForStaffViewMode(
+          organizationId!,
+          user.id,
+          staffViewMode === "teacher" ? "preview" : staffViewMode,
+          firstName || "Preview",
+        );
+      }
+      return loadParentDashboard(organizationId!, user.id);
+    },
     enabled: parentPresentation && Boolean(organizationId),
   });
 
@@ -113,9 +160,27 @@ export function useOrgShellData(orgSlug: string | undefined) {
   }, [organizationId, user.id, queryClient]);
 
   const courseRows = Array.isArray(coursesQuery.data) ? coursesQuery.data : [];
-  const navCourses = parentPresentation
+  let navCourses = parentPresentation
     ? familyVisibleCourses(courseRows)
     : courseRows;
+
+  if (staffViewMode === "preview" && browsesStaff) {
+    const taughtIds = new Set((taughtCoursesQuery.data ?? []).map((row) => row.id));
+    navCourses = familyVisibleCourses(courseRows).filter((course) =>
+      taughtIds.has(course.id),
+    );
+  } else if (
+    parentPresentation &&
+    browsesStaff &&
+    (staffViewMode === "parent" || staffViewMode === "student")
+  ) {
+    const enrolledIds = new Set(
+      (parentDashboardQuery.data?.courses ?? []).map((course) => course.id),
+    );
+    navCourses = familyVisibleCourses(courseRows).filter((course) =>
+      enrolledIds.has(course.id),
+    );
+  }
 
   const lists = {
     courses: navCourses.map((course) => ({
@@ -136,7 +201,7 @@ export function useOrgShellData(orgSlug: string | undefined) {
     : 0;
 
   const visibleResourcesQuery = useQuery({
-    queryKey: resourceItemQueryKeys.visible(organizationId ?? 0),
+    queryKey: resourceItemQueryKeys.hasVisible(organizationId ?? 0),
     queryFn: () => orgHasVisibleResources(organizationId!),
     enabled:
       parentPresentation &&
@@ -153,12 +218,18 @@ export function useOrgShellData(orgSlug: string | undefined) {
       }
     : undefined;
 
-  const hubTier = studentsHubTier(role, parentPresentation);
+  // Parent tab uses family Students hub; Preview/Student use learner Progress
+  // (Preview omits Progress — no linked student account).
+  const hubTier =
+    browsesStaff && staffViewMode === "parent"
+      ? "view"
+      : studentsHubTier(role, parentPresentation);
   const navOptions = {
     ...featureFlags,
     unreadAnnouncements,
     unreadDiscussions,
     showResources: Boolean(visibleResourcesQuery.data),
+    showProgress: !(browsesStaff && staffViewMode === "preview"),
   };
   const staffChrome = browsesStaff && !parentPresentation;
   const navSections =
@@ -173,17 +244,14 @@ export function useOrgShellData(orgSlug: string | undefined) {
           : buildParentNav(organization.slug, lists, navOptions)
       : [];
 
-  const profileName = profileQuery.data?.name ?? "";
-  const profileEmail = profileQuery.data?.email ?? user.email ?? "";
-
   const value: AppShellValue = {
     brandLabel: organization?.name ?? "Course Wright",
     brandHref: organization ? `/my/${organization.slug}` : "/my",
     navLabel: "Organization",
     organization,
     role,
-    isParent: Boolean(membershipQuery.data?.isParent),
-    isStudent: Boolean(membershipQuery.data?.isStudent),
+    isParent,
+    isStudent,
     profileName,
     profileEmail,
     navSections,

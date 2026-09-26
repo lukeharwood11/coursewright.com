@@ -235,3 +235,13 @@ test("learners get Progress and parents get Students", () => {
   assert.equal(parent.find((section) => section.id === "students")?.label, "Students");
   assert.equal(parent.find((section) => section.id === "progress"), undefined);
 });
+
+test("learner nav can omit Progress for staff Preview", () => {
+  const preview = buildLearnerNav(
+    "coop",
+    { courses: [], classes: [] },
+    { showProgress: false },
+  );
+  assert.equal(preview.find((section) => section.id === "progress"), undefined);
+  assert.ok(preview.find((section) => section.id === "courses"));
+});

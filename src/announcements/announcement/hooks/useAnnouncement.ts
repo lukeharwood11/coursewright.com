@@ -66,7 +66,7 @@ export function useAnnouncement() {
         queryKey: announcementQueryKeys.org(organization.id),
       });
       void queryClient.invalidateQueries({
-        queryKey: parentQueryKeys.dashboard(organization.id, user.id),
+        queryKey: parentQueryKeys.dashboardPrefix(organization.id, user.id),
       });
     });
   }, [
@@ -86,7 +86,7 @@ export function useAnnouncement() {
         queryKey: announcementQueryKeys.org(organization.id),
       });
       void queryClient.invalidateQueries({
-        queryKey: parentQueryKeys.dashboard(organization.id, user.id),
+        queryKey: parentQueryKeys.dashboardPrefix(organization.id, user.id),
       });
     },
   });

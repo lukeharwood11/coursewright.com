@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { presentCourseQuizPrint } from "./print";
+import { courseQuizPrintPrompt, presentCourseQuizPrint } from "./print";
 import {
   accountIsStudentOnCourse,
   canShowAnswerKey,
@@ -372,10 +372,14 @@ test("matching is an exact pairing and the right column stays stable", () => {
     stableShuffle([1, 2, 3], 9),
     stableShuffle([1, 2, 3], 9),
   );
+  assert.equal(courseQuizPrintPrompt("What comes next?", 5), "What comes next? (5 points)");
+  assert.equal(courseQuizPrintPrompt("Solo", 1), "Solo (1 point)");
+  assert.equal(courseQuizPrintPrompt("Solo", 1, 1), "1. Solo (1 point)");
   const hidden = presentCourseQuizPrint(
     {
       id: 9,
       prompt: "Animals",
+      points: 2,
       kind: "matching",
       choices: [],
       answer: "3.5",
@@ -386,13 +390,30 @@ test("matching is an exact pairing and the right column stays stable", () => {
     },
     false,
   );
-  assert.equal(hidden.matchLeft[0]?.letter, "");
+  assert.equal(hidden.matchLeft[0]?.matchAnswer, "");
   assert.equal(hidden.answer, "");
   assert.equal(hidden.matchRight.length, 3);
+  const matchingKey = presentCourseQuizPrint(
+    {
+      id: 9,
+      prompt: "Animals",
+      points: 2,
+      kind: "matching",
+      choices: [],
+      answer: "",
+      answerLines: 40,
+      prompts,
+      options,
+      matchKeys: [{ promptId: 1, optionId: 10 }],
+    },
+    true,
+  );
+  assert.equal(matchingKey.matchLeft[0]?.matchAnswer, "canine");
   const shown = presentCourseQuizPrint(
     {
       id: 4,
       prompt: "Explain",
+      points: 3,
       kind: "long_answer",
       choices: [],
       answer: "A sample",

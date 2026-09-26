@@ -41,7 +41,7 @@ const marketingPages: PublicSeoPage[] = [
     path: "/pricing",
     title: "Pricing",
     description:
-      "Compare Course Wright plans: Family is free, Family Pro is $6 a month or $60 a year, Microschool is $72 a month or $720 a year, and School is $102 a month or $1,020 a year.",
+      "Compare Course Wright plans: Family is free, Family Pro is $10 a month or $100 a year, Microschool is $80 a month or $800 a year, and School is $150 a month or $1,500 a year.",
     changefreq: "monthly",
     priority: 0.9,
   },

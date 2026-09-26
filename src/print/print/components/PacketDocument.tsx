@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   Document,
   Image,
@@ -12,7 +13,10 @@ import {
 import { isPdfMime } from "@/print/model/fileKind";
 import { pageHasQuiz, printSegmentsFromBlocks } from "@/materials/model/pageContent";
 import { quizPrintLines, type QuizBody } from "@/materials/model/quiz";
-import type { CourseQuizPrintView } from "@/quizzes/model/print";
+import {
+  courseQuizPointsLabel,
+  type CourseQuizPrintView,
+} from "@/quizzes/model/print";
 import { groupPacketSections } from "@/print/model/packet";
 import type { PrintMaterialView, PrintPacketView } from "@/print/model/previewAssets";
 
@@ -82,6 +86,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 8,
   },
+  bold: {
+    fontFamily: "Helvetica-Bold",
+  },
   label: {
     fontFamily: "Helvetica-Bold",
     fontSize: 12,
@@ -100,15 +107,12 @@ const styles = StyleSheet.create({
   spacer: {
     height: 8,
   },
-  quiz: {
-    marginTop: 8,
-    marginBottom: 12,
-    paddingTop: 8,
-    paddingBottom: 8,
+  quiz: {},
+  quizSeparator: {
+    marginTop: 12,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: "#DEDACB",
-    borderBottomWidth: 1,
-    borderBottomColor: "#DEDACB",
   },
   choiceRow: {
     flexDirection: "row",
@@ -130,6 +134,78 @@ const styles = StyleSheet.create({
   correctLabel: {
     color: FAINT,
     fontSize: 11,
+  },
+  keyAnswer: {
+    color: FAINT,
+    fontFamily: "Helvetica-Oblique",
+    fontSize: 10.5,
+    lineHeight: 1.35,
+    marginBottom: 8,
+  },
+  matchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 6,
+    gap: 6,
+  },
+  matchPrompt: {
+    fontSize: 12,
+  },
+  matchArrow: {
+    width: 16,
+    height: 10,
+  },
+  matchKeyValue: {
+    color: FAINT,
+    fontFamily: "Helvetica-Oblique",
+    fontSize: 12,
+  },
+  quizHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 14,
+  },
+  quizHeaderText: {
+    flexGrow: 1,
+    flexShrink: 1,
+    paddingRight: 16,
+  },
+  courseTitle: {
+    fontSize: 12,
+    marginBottom: 6,
+  },
+  identityStack: {
+    width: 188,
+    flexShrink: 0,
+    gap: 10,
+  },
+  identityField: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 6,
+  },
+  identityLabel: {
+    fontSize: 11,
+    width: 32,
+  },
+  identityLine: {
+    flexGrow: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: INK,
+    height: 14,
+  },
+  matchOptionsLabel: {
+    color: FAINT,
+    fontSize: 11,
+    marginTop: 4,
+    marginBottom: 6,
+  },
+  longAnswerLine: {
+    borderBottomWidth: 1,
+    borderBottomColor: INK,
+    height: 26,
+    width: "100%",
   },
 });
 
@@ -242,20 +318,202 @@ function courseQuizBody(quiz: CourseQuizPrintView): QuizBody | null {
   };
 }
 
-function CourseQuizPrint({
+function quizBlockStyle(separatedFromPrevious: boolean) {
+  return separatedFromPrevious ? [styles.quiz, styles.quizSeparator] : styles.quiz;
+}
+
+/** Drawn arrow — Helvetica has no arrow glyph. */
+function MatchArrow() {
+  return (
+    <View style={styles.matchArrow}>
+      <Svg width="16" height="10" viewBox="0 0 16 10">
+        <Path
+          d="M1 5 H10.5 M7.2 1.6 L12.4 5 L7.2 8.4"
+          stroke={INK}
+          strokeWidth="1.25"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </Svg>
+    </View>
+  );
+}
+
+function MatchPromptRow({
+  text,
+  answer,
+}: {
+  text: string;
+  answer: string | null;
+}) {
+  return (
+    <View style={styles.matchRow} wrap={false}>
+      <Text style={styles.matchPrompt}>{text}</Text>
+      <MatchArrow />
+      {answer ? <Text style={styles.matchKeyValue}>{answer}</Text> : null}
+    </View>
+  );
+}
+
+function WorksheetIdentity() {
+  return (
+    <View style={styles.identityStack} wrap={false}>
+      <View style={styles.identityField}>
+        <Text style={styles.identityLabel}>Name</Text>
+        <View style={styles.identityLine} />
+      </View>
+      <View style={styles.identityField}>
+        <Text style={styles.identityLabel}>Date</Text>
+        <View style={styles.identityLine} />
+      </View>
+    </View>
+  );
+}
+
+function QuizPageHeading({
+  title,
+  courseTitle,
+  subtitle,
+  showKey,
+}: {
+  title: string;
+  courseTitle: string | null;
+  subtitle: string | null;
+  showKey: boolean;
+}) {
+  return (
+    <View style={styles.quizHeader} wrap={false}>
+      <View style={styles.quizHeaderText}>
+        <Text style={styles.title}>{title}</Text>
+        {courseTitle ? <Text style={styles.courseTitle}>{courseTitle}</Text> : null}
+        {subtitle ? <Text style={styles.meta}>{subtitle}</Text> : null}
+        {showKey ? <Text style={styles.label}>Answer key</Text> : null}
+      </View>
+      {showKey ? null : <WorksheetIdentity />}
+    </View>
+  );
+}
+
+function CourseQuizPrompt({
+  number,
+  prompt,
+  points,
+}: {
+  number: number;
+  prompt: string;
+  points: number;
+}) {
+  const title = prompt.trim() || "Question";
+  return (
+    <Text style={styles.body}>
+      <Text style={styles.bold}>{number}. </Text>
+      {title} <Text style={styles.bold}>{courseQuizPointsLabel(points)}</Text>
+    </Text>
+  );
+}
+
+function MatchingCourseQuizPrint({
   quiz,
+  number,
   includeAnswerKey,
 }: {
   quiz: CourseQuizPrintView;
+  number: number;
   includeAnswerKey: boolean;
 }) {
+  return (
+    <>
+      <CourseQuizPrompt number={number} prompt={quiz.prompt} points={quiz.points} />
+      {quiz.matchLeft.map((item, index) => (
+        <MatchPromptRow
+          key={`row-${index}`}
+          text={item.text}
+          answer={
+            includeAnswerKey ? item.matchAnswer.trim() || "—" : null
+          }
+        />
+      ))}
+      {includeAnswerKey ? null : (
+        <>
+          <Text style={styles.matchOptionsLabel}>Options</Text>
+          {quiz.matchRight.map((item) => (
+            <Text key={item.letter} style={styles.meta}>
+              {item.letter}. {item.text}
+            </Text>
+          ))}
+        </>
+      )}
+    </>
+  );
+}
+
+function CourseQuizPrint({
+  quiz,
+  number,
+  includeAnswerKey,
+  separatedFromPrevious = false,
+}: {
+  quiz: CourseQuizPrintView;
+  number: number;
+  includeAnswerKey: boolean;
+  separatedFromPrevious?: boolean;
+}) {
+  const prompt = (
+    <CourseQuizPrompt number={number} prompt={quiz.prompt} points={quiz.points} />
+  );
   const pageQuiz = courseQuizBody(quiz);
-  if (pageQuiz) return <QuizPrint quiz={pageQuiz} includeAnswerKey={includeAnswerKey} />;
+  if (pageQuiz) {
+    return (
+      <QuizPrint
+        quiz={pageQuiz}
+        includeAnswerKey={includeAnswerKey}
+        separatedFromPrevious={separatedFromPrevious}
+        questionPrompt={prompt}
+      />
+    );
+  }
+  if (quiz.kind === "matching") {
+    return (
+      <View style={quizBlockStyle(separatedFromPrevious)} wrap={false}>
+        <MatchingCourseQuizPrint
+          quiz={quiz}
+          number={number}
+          includeAnswerKey={includeAnswerKey}
+        />
+      </View>
+    );
+  }
+  if (quiz.kind === "long_answer") {
+    const answer = includeAnswerKey ? quiz.answer.trim() : "";
+    return (
+      <View style={quizBlockStyle(separatedFromPrevious)} wrap>
+        {prompt}
+        {answer ? (
+          <Text style={styles.keyAnswer}>{`Answer: ${answer}`}</Text>
+        ) : (
+          Array.from({ length: quiz.answerLines }, (_, index) => (
+            <View key={`line-${index}`} style={styles.longAnswerLine} />
+          ))
+        )}
+      </View>
+    );
+  }
   const lines = courseQuizLines(quiz, includeAnswerKey);
   return (
-    <View style={styles.quiz} wrap={quiz.kind === "long_answer"}>
+    <View style={quizBlockStyle(separatedFromPrevious)} wrap={false}>
+      {prompt}
       {lines.map((line) => (
-        <Text key={line.id} style={line.tone === "meta" ? styles.meta : styles.body}>
+        <Text
+          key={line.id}
+          style={
+            line.tone === "meta"
+              ? styles.meta
+              : line.tone === "keyAnswer"
+                ? styles.keyAnswer
+                : styles.body
+          }
+        >
           {line.text}
         </Text>
       ))}
@@ -266,10 +524,8 @@ function CourseQuizPrint({
 function courseQuizLines(
   quiz: CourseQuizPrintView,
   includeAnswerKey: boolean,
-): { id: string; tone: "body" | "meta"; text: string }[] {
-  const lines: { id: string; tone: "body" | "meta"; text: string }[] = [
-    { id: "prompt", tone: "body", text: quiz.prompt.trim() || "Question" },
-  ];
+): { id: string; tone: "body" | "meta" | "keyAnswer"; text: string }[] {
+  const lines: { id: string; tone: "body" | "meta" | "keyAnswer"; text: string }[] = [];
   if (quiz.kind === "number") {
     lines.push({
       id: "answer",
@@ -280,34 +536,22 @@ function courseQuizLines(
     });
     return lines;
   }
-  if (quiz.kind === "long_answer") {
-    if (includeAnswerKey && quiz.answer.trim()) {
-      lines.push({ id: "answer", tone: "body", text: quiz.answer.trim() });
-    }
-    for (let index = 0; index < quiz.answerLines; index += 1) {
-      lines.push({ id: `line-${index}`, tone: "body", text: "________________________________" });
-    }
-    return lines;
-  }
-  quiz.matchLeft.forEach((item, index) => {
-    const blank = includeAnswerKey && item.letter ? item.letter : "____";
-    lines.push({ id: `left-${index}`, tone: "body", text: `${index + 1}. ${item.text}    ${blank}` });
-  });
-  quiz.matchRight.forEach((item) => {
-    lines.push({ id: `right-${item.letter}`, tone: "meta", text: `${item.letter}. ${item.text}` });
-  });
   return lines;
 }
 
 function QuizPrint({
   quiz,
   includeAnswerKey,
+  separatedFromPrevious = false,
+  questionPrompt,
 }: {
   quiz: QuizBody;
   includeAnswerKey: boolean;
+  separatedFromPrevious?: boolean;
+  questionPrompt?: ReactNode;
 }) {
   return (
-    <View style={styles.quiz} wrap={false}>
+    <View style={quizBlockStyle(separatedFromPrevious)} wrap={false}>
       {quizPrintLines(quiz, includeAnswerKey).map((line) => {
         if (line.kind === "choice") {
           return (
@@ -321,6 +565,9 @@ function QuizPrint({
               </Text>
             </View>
           );
+        }
+        if (line.id === "prompt" && questionPrompt) {
+          return <View key={line.id}>{questionPrompt}</View>;
         }
         return (
           <Text
@@ -348,6 +595,21 @@ function MaterialBody({
   material: PrintMaterialView;
   includeAnswerKey: boolean;
 }) {
+  if (material.courseQuizQuestions && material.courseQuizQuestions.length > 0) {
+    return (
+      <View>
+        {material.courseQuizQuestions.map((quiz, index) => (
+          <CourseQuizPrint
+            key={index}
+            quiz={quiz}
+            number={index + 1}
+            includeAnswerKey={material.courseQuizShowsKey ?? false}
+            separatedFromPrevious={index > 0}
+          />
+        ))}
+      </View>
+    );
+  }
   if (material.itemRole === "lesson_plan" && material.blocks.length === 0) {
     return null;
   }
@@ -393,6 +655,7 @@ function MaterialBody({
   }
 
   let videoIndex = 0;
+  let quizSegmentIndex = 0;
   return (
     <View>
       {segments.map((segment, index) => {
@@ -414,11 +677,14 @@ function MaterialBody({
           );
         }
         if (segment.type === "quiz") {
+          const separatedFromPrevious = quizSegmentIndex > 0;
+          quizSegmentIndex += 1;
           return (
             <QuizPrint
               key={index}
               quiz={segment.quiz}
               includeAnswerKey={includeAnswerKey}
+              separatedFromPrevious={separatedFromPrevious}
             />
           );
         }
@@ -437,14 +703,66 @@ function MaterialBody({
 export function PacketDocument({ packet }: { packet: PrintPacketView }) {
   const includeAnswerKey = Boolean(packet.includeAnswerKey);
   if (packet.quizQuestions && packet.quizQuestions.length > 0 && packet.materials.length === 0) {
+    const mode =
+      packet.quizKeyMode ?? (includeAnswerKey ? "key" : "worksheet");
+    if (mode === "both" && packet.quizQuestionsKey?.length) {
+      return (
+        <Document title={packet.title} author="Course Wright" producer="Course Wright">
+          <Page size="LETTER" wrap style={styles.page}>
+            <QuizPageHeading
+              title={packet.title}
+              courseTitle={packet.courseTitle ?? null}
+              subtitle={packet.subtitle}
+              showKey={false}
+            />
+            {packet.quizQuestions.map((quiz, index) => (
+              <CourseQuizPrint
+                key={`w-${index}`}
+                quiz={quiz}
+                number={index + 1}
+                includeAnswerKey={false}
+                separatedFromPrevious={index > 0}
+              />
+            ))}
+          </Page>
+          <Page size="LETTER" wrap style={styles.page}>
+            <QuizPageHeading
+              title={packet.title}
+              courseTitle={packet.courseTitle ?? null}
+              subtitle={packet.subtitle}
+              showKey
+            />
+            {packet.quizQuestionsKey.map((quiz, index) => (
+              <CourseQuizPrint
+                key={`k-${index}`}
+                quiz={quiz}
+                number={index + 1}
+                includeAnswerKey={true}
+                separatedFromPrevious={index > 0}
+              />
+            ))}
+          </Page>
+        </Document>
+      );
+    }
+    const showKey = mode === "key";
     return (
       <Document title={packet.title} author="Course Wright" producer="Course Wright">
         <Page size="LETTER" wrap style={styles.page}>
-          <Text style={styles.title}>{packet.title}</Text>
-          {packet.subtitle ? <Text style={styles.meta}>{packet.subtitle}</Text> : null}
-          {includeAnswerKey ? <Text style={styles.label}>Answer key</Text> : null}
+          <QuizPageHeading
+            title={packet.title}
+            courseTitle={packet.courseTitle ?? null}
+            subtitle={packet.subtitle}
+            showKey={showKey}
+          />
           {packet.quizQuestions.map((quiz, index) => (
-            <CourseQuizPrint key={index} quiz={quiz} includeAnswerKey={includeAnswerKey} />
+            <CourseQuizPrint
+              key={index}
+              quiz={quiz}
+              number={index + 1}
+              includeAnswerKey={showKey}
+              separatedFromPrevious={index > 0}
+            />
           ))}
         </Page>
       </Document>

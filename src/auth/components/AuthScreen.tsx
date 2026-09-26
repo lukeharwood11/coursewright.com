@@ -11,7 +11,12 @@ import { GoogleMark } from "./GoogleMark";
 import { signInWithEmail } from "@/auth/api/signInWithEmail";
 import { signInWithPassword } from "@/auth/api/signInWithPassword";
 import { signInWithGoogle } from "@/auth/api/signInWithGoogle";
-import { signUpWithPassword } from "@/auth/api/signUpWithPassword";
+import {
+  beginPasswordSignUp,
+  completePasswordSignUp,
+} from "@/auth/api/signUpWithPassword";
+import { isSignUpPendingNameStep } from "@/auth/model/signUpPending";
+import { validateSignUpName } from "@/auth/model/signUpName";
 import { safeNextPath } from "@/auth/model/safeNext";
 import { isSupabaseConfigured } from "@/infrastructure/supabase/client";
 
@@ -55,11 +60,17 @@ export function AuthScreen({
   const location = useLocation();
   const nextPath = safeNextPath(new URLSearchParams(location.search).get("next"));
   const [email, setEmail] = useState(initialEmail);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [awaitingEmailVerification, setAwaitingEmailVerification] = useState(false);
+  const [signUpStep, setSignUpStep] = useState<"credentials" | "name">(() =>
+    passwordSignUp && isSignUpPendingNameStep() ? "name" : "credentials",
+  );
   const showPassword = passwordSignIn || passwordSignUp;
+  const onSignUpNameStep = passwordSignUp && signUpStep === "name";
 
   function showError(error: string) {
     if (isNetworkError(error)) {
@@ -93,13 +104,28 @@ export function AuthScreen({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (passwordSignUp) {
-      if (!password) {
-        setMessage("Choose a password to create your account.");
+      if (signUpStep === "credentials") {
+        if (!password) {
+          setMessage("Choose a password to create your account.");
+          return;
+        }
+        setBusy(true);
+        setMessage(null);
+        const beginResult = await beginPasswordSignUp(email.trim(), password, nextPath);
+        if (beginResult.error) showError(beginResult.error);
+        else setSignUpStep("name");
+        setBusy(false);
+        return;
+      }
+
+      const nameResult = validateSignUpName({ firstName, lastName });
+      if (!nameResult.ok) {
+        setMessage(nameResult.error);
         return;
       }
       setBusy(true);
       setMessage(null);
-      const result = await signUpWithPassword(email.trim(), password, nextPath);
+      const result = await completePasswordSignUp(nameResult.value);
       if (result.error) showError(result.error);
       else if (result.needsEmailVerification) setAwaitingEmailVerification(true);
       setBusy(false);
@@ -160,11 +186,15 @@ export function AuthScreen({
               className="mb-1 text-center text-2xl font-semibold text-[var(--ink)]"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              {heading}
+              {onSignUpNameStep ? "Your name" : heading}
             </h1>
-            <p className="mb-5 text-center text-[13.5px] text-[var(--ink-soft)]">{subcopy}</p>
+            <p className="mb-5 text-center text-[13.5px] text-[var(--ink-soft)]">
+              {onSignUpNameStep
+                ? "We’ll use this as your display name across Course Wright."
+                : subcopy}
+            </p>
 
-            {invitedEmail ? (
+            {invitedEmail && !onSignUpNameStep ? (
               <p className="mb-4 rounded-[6px] bg-[var(--green-tint)] px-3 py-2 text-center text-[13px] leading-relaxed text-[var(--green-deep)]">
                 This invite is for{" "}
                 <span className="font-bold">{invitedEmail}</span>.{" "}
@@ -182,55 +212,106 @@ export function AuthScreen({
               </p>
             )}
 
-            <Button variant="google" disabled={busy} onClick={onGoogle} fullWidth>
-              <GoogleMark />
-              {googleLabel}
-            </Button>
-            {googleHint ? (
-              <p className="mt-2 text-center text-[12.5px] leading-relaxed text-[var(--ink-soft)]">
-                {googleHint}
-              </p>
-            ) : null}
+            {!onSignUpNameStep && (
+              <>
+                <Button variant="google" disabled={busy} onClick={onGoogle} fullWidth>
+                  <GoogleMark />
+                  {googleLabel}
+                </Button>
+                {googleHint ? (
+                  <p className="mt-2 text-center text-[12.5px] leading-relaxed text-[var(--ink-soft)]">
+                    {googleHint}
+                  </p>
+                ) : null}
 
-            <div className="my-4 flex items-center gap-3 text-[12px] text-[var(--ink-faint)]">
-              <span className="h-px flex-1 bg-[var(--line)]" />
-              or
-              <span className="h-px flex-1 bg-[var(--line)]" />
-            </div>
+                <div className="my-4 flex items-center gap-3 text-[12px] text-[var(--ink-faint)]">
+                  <span className="h-px flex-1 bg-[var(--line)]" />
+                  or
+                  <span className="h-px flex-1 bg-[var(--line)]" />
+                </div>
+              </>
+            )}
 
             <form onSubmit={onSubmit} className="flex flex-col gap-3">
-              <label className="flex flex-col gap-1">
-                <span className="text-[13px] font-bold text-[var(--ink-soft)]">Email</span>
-                <Input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                />
-                {invitedEmail ? (
-                  <span className="text-[12.5px] leading-relaxed text-[var(--ink-soft)]">
-                    Use {invitedEmail} — the address on the invite.
-                  </span>
-                ) : null}
-              </label>
-              {showPassword && (
-                <label className="flex flex-col gap-1">
-                  <span className="text-[13px] font-bold text-[var(--ink-soft)]">Password</span>
-                  <Input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete={passwordSignUp ? "new-password" : "current-password"}
-                    minLength={passwordSignUp ? 6 : undefined}
-                  />
-                </label>
+              {onSignUpNameStep ? (
+                <>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+                      First name
+                    </span>
+                    <Input
+                      type="text"
+                      required
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      autoComplete="given-name"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+                      Last name
+                    </span>
+                    <Input
+                      type="text"
+                      required
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      autoComplete="family-name"
+                    />
+                  </label>
+                </>
+              ) : (
+                <>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-[13px] font-bold text-[var(--ink-soft)]">Email</span>
+                    <Input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                    />
+                    {invitedEmail ? (
+                      <span className="text-[12.5px] leading-relaxed text-[var(--ink-soft)]">
+                        Use {invitedEmail} — the address on the invite.
+                      </span>
+                    ) : null}
+                  </label>
+                  {showPassword && (
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+                        Password
+                      </span>
+                      <Input
+                        type="password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        autoComplete={passwordSignUp ? "new-password" : "current-password"}
+                        minLength={passwordSignUp ? 6 : undefined}
+                      />
+                    </label>
+                  )}
+                </>
               )}
               <Button type="submit" disabled={busy} fullWidth>
-                {submitLabel}
+                {passwordSignUp && signUpStep === "credentials" ? "Continue" : submitLabel}
               </Button>
+              {onSignUpNameStep && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={busy}
+                  fullWidth
+                  onClick={() => {
+                    setMessage(null);
+                    setSignUpStep("credentials");
+                  }}
+                >
+                  Back
+                </Button>
+              )}
               {passwordSignIn && (
                 <Button
                   type="button"

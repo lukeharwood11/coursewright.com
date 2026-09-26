@@ -55,7 +55,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | Page | URL | Notes |
 |------|-----|-------|
 | [ORG_PICKER](./pages/ORG_PICKER.md) | `/my` | Org picker + create org |
-| [ORG_HOME](./pages/ORG_HOME.md) | `/my/<org-slug>` | Role-aware dashboard (parent “this week” calendar lives here) |
+| [ORG_HOME](./pages/ORG_HOME.md) | `/my/<org-slug>` | Role-aware dashboard (parent “this week” calendar lives here). Optional `?week=<sunday-iso>` on the student home selects another Sunday–Saturday week |
 | [ORG_PROFILE](./pages/ORG_PROFILE.md) | `/my/<org-slug>/profile` | Organization identity + contact profile (all members); owners edit via settings |
 | [CALENDAR](./pages/CALENDAR.md) | `/my/<org-slug>/calendar` | Month/week/day calendar (`?view=month\|week\|day`, `?date=YYYY-MM-DD`) |
 | [EVENT](./pages/EVENT.md) (view) | `/my/<org-slug>/events/<event_id>` | Course, class, or organization event |
@@ -183,9 +183,9 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 |------|-----|-------|
 | [PRINT](./pages/PRINT.md) (material, top-level) | `/my/<org-slug>/courses/<course_id>/materials/<material_id>/print` | Same on template tree (**P1**) |
 | [PRINT](./pages/PRINT.md) (material, in unit) | `…/units/<unit_id>/materials/<material_id>/print` | |
-| [PRINT](./pages/PRINT.md) (unit) | `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print` | Packet in material order |
-| [PRINT](./pages/PRINT.md) (quiz) | `…/units/<unit_id>/quizzes/<quiz_id>/print` | Blank quiz, or with the answer key when this person may see it |
-| [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Student home grain; Sun–Sat + important now. Optional `?students=` limits to active students |
+| [PRINT](./pages/PRINT.md) (unit) | `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print` | Materials + course quizzes in outline order; optional `?qid=` per-quiz worksheet/key/both |
+| [PRINT](./pages/PRINT.md) (quiz) | `…/units/<unit_id>/quizzes/<quiz_id>/print` | Worksheet, answer key, or both (`?quizKey=`) when this person may see the key |
+| [PRINT](./pages/PRINT.md) (this week) | `/my/<org-slug>/print-this-week` | Student home grain; Sun–Sat + important now. Optional `?week=<sunday-iso>` matches a week chosen on org home. Optional `?students=` limits to active students. Optional `?omit=`, `?break=`, `?pack=0`, `?studentBreaks=0` — see [PRINT](./pages/PRINT.md) |
 | [PRINT](./pages/PRINT.md) (event) | `/my/<org-slug>/events/<event_id>/print` | Event write-up |
 | [PRINT](./pages/PRINT.md) (resource) | `/my/<org-slug>/resources/items/<item_id>/print` | Document or file |
 | [PRINT](./pages/PRINT.md) (resources) | `/my/<org-slug>/resources/print?items=<id>,<id>` | Selected documents and files |

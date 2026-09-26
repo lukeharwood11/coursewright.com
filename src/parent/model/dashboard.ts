@@ -5,7 +5,13 @@ import { lessonPlanIsPublished } from "@/lesson-plans/model/visibility";
 import { isAnnouncementAvailable } from "@/announcements/model/availability";
 import type { AnnouncementAudience } from "@/announcements/model/audience";
 import type { CalendarWeek } from "./thisWeek";
-import { isDueInCalendarWeek, isInCalendarWeek, localIsoDate } from "./thisWeek";
+import {
+  effectiveViewAsOfDate,
+  isCurrentCalendarWeek,
+  isDueInCalendarWeek,
+  isInCalendarWeek,
+  localIsoDate,
+} from "./thisWeek";
 
 export type ParentDashboardMaterial = {
   id: number;
@@ -15,6 +21,7 @@ export type ParentDashboardMaterial = {
   dueDate: string | null;
   unitId: number | null;
   itemKind?: "material" | "quiz";
+  shareAnswerKeyWithParents?: boolean;
 };
 
 export type ParentDashboardCourse = {
@@ -152,6 +159,7 @@ export type ParentDashboardSource = {
     unitStart: string | null;
     unitEnd: string | null;
     itemKind?: "material" | "quiz";
+    shareAnswerKeyWithParents?: boolean;
   }>;
   importantNow: Array<{
     id: number;
@@ -233,6 +241,7 @@ function toDashboardMaterial(
     dueDate: material.dueDate,
     unitId: material.unitId,
     itemKind: material.itemKind ?? "material",
+    shareAnswerKeyWithParents: material.shareAnswerKeyWithParents,
   };
 }
 
@@ -248,6 +257,9 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
       .filter((row) => row.courseStatus === "active")
       .map((row) => row.courseId),
   );
+  const asNow = new Date(`${source.today || localIsoDate()}T12:00:00`);
+  const viewAsOf = effectiveViewAsOfDate(source.week, asNow);
+  const showImportantNow = isCurrentCalendarWeek(source.week, asNow);
 
   const students = [...source.students]
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -286,9 +298,9 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
       };
     });
 
-  const importantNow = source.importantNow.filter((item) =>
-    activeCourseIds.has(item.courseId),
-  );
+  const importantNow = showImportantNow
+    ? source.importantNow.filter((item) => activeCourseIds.has(item.courseId))
+    : [];
 
   const lessonPlans = (source.lessonPlans ?? [])
     .filter((item) => {
@@ -324,7 +336,7 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
   const seenAnnouncements = new Set<number>();
   const announcements = (source.announcements ?? [])
     .filter((item) => {
-      if (!isAnnouncementAvailable(source.today, item.startDate, item.endDate)) {
+      if (!isAnnouncementAvailable(viewAsOf, item.startDate, item.endDate)) {
         return false;
       }
       if (seenAnnouncements.has(item.id)) return false;
@@ -369,8 +381,8 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
     ];
   });
 
-  const nextAssigned = collectNextByDate(source, "assigned");
-  const nextDue = collectNextByDate(source, "due");
+  const nextAssigned = collectNextByDate(source, "assigned", viewAsOf);
+  const nextDue = collectNextByDate(source, "due", viewAsOf);
 
   return {
     week: source.week,
@@ -594,8 +606,9 @@ function compareWeekMaterials(
 function collectNextByDate(
   source: ParentDashboardSource,
   kind: "assigned" | "due",
+  viewAsOf: string,
 ): ParentDashboardNextItem[] {
-  const today = source.today || localIsoDate();
+  const floor = viewAsOf || source.today || localIsoDate();
   const items: ParentDashboardNextItem[] = [];
 
   for (const student of source.students) {
@@ -613,7 +626,7 @@ function collectNextByDate(
                 material.unitEnd,
               )
             : material.dueDate;
-        if (!sortDate || sortDate < today) continue;
+        if (!sortDate || sortDate < floor) continue;
         items.push({
           studentId: student.id,
           studentName: student.name,

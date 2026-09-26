@@ -12,7 +12,7 @@ Month and week **calendar** of assigned/due materials, lesson plans, and shared 
 ## Rules
 
 - Week is Sunday–Saturday ([FEATURES.md](../../docs/FEATURES.md)).
-- Parent mode: published materials and published lesson plans for enrolled courses. Course and class events only when a linked student is in a target. Organization events always show — including staff Student view.
+- Parent mode: published materials and published lesson plans for enrolled courses. Course and class events only when a linked student is in a target. Organization events always show — including staff Preview / Parent / Student modes. Staff **Preview** uses taught published courses instead of enrollments.
 - Staff Teacher view: courses they can manage, including unpublished (draft cue).
 - Databridge loads the visible range; model builds chips. Page hook owns React.
 

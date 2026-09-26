@@ -1,4 +1,9 @@
-import { ArrowLeftIcon, ArrowDownTrayIcon, PrinterIcon } from "@heroicons/react/24/outline";
+import {
+  AdjustmentsHorizontalIcon,
+  ArrowLeftIcon,
+  ArrowDownTrayIcon,
+  PrinterIcon,
+} from "@heroicons/react/24/outline";
 import { Button, ButtonLink } from "@/ui/Button";
 
 export function downloadBlob(blob: Blob, filename: string) {
@@ -34,11 +39,13 @@ export function PrintActionBar({
   filename,
   blob,
   disabled,
+  onOpenOptions,
 }: {
   backTo: string;
   filename: string;
   blob: Blob | null;
   disabled?: boolean;
+  onOpenOptions?: () => void;
 }) {
   return (
     <header className="sticky top-0 z-10 flex flex-wrap items-center gap-2 border-b border-[var(--line)] bg-[var(--surface)] px-4 py-3">
@@ -47,6 +54,17 @@ export function PrintActionBar({
         Back
       </ButtonLink>
       <div className="ml-auto flex flex-wrap gap-2">
+        {onOpenOptions ? (
+          <Button
+            type="button"
+            variant="secondary"
+            className="md:hidden"
+            onClick={onOpenOptions}
+          >
+            <AdjustmentsHorizontalIcon className="h-5 w-5" aria-hidden />
+            Options
+          </Button>
+        ) : null}
         <Button
           variant="secondary"
           disabled={disabled || !blob}

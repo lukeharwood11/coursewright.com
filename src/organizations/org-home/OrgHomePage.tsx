@@ -28,6 +28,18 @@ export function OrgHomePage() {
         loading={home.dashboardLoading}
         error={home.dashboardError}
         preview={home.parentViewIsPreview}
+        previewKind={
+          home.isInstructorPreview
+            ? "instructor"
+            : home.parentViewIsPreview
+              ? "empty-family"
+              : null
+        }
+        weekStartParam={home.weekStartParam}
+        isCurrentWeek={home.isCurrentWeek}
+        onPrevWeek={home.goPrevWeek}
+        onNextWeek={home.goNextWeek}
+        onThisWeek={home.goThisWeek}
       />
     );
   }

@@ -262,6 +262,8 @@ export function buildLearnerNav(
     unreadAnnouncements?: number;
     unreadDiscussions?: number;
     showResources?: boolean;
+    /** Defaults true. Staff Preview omits Progress (no linked student account). */
+    showProgress?: boolean;
   },
 ): NavSection[] {
   const base = `/my/${orgSlug}`;
@@ -270,6 +272,7 @@ export function buildLearnerNav(
   const showCalendar = options?.calendar !== false;
   const showAnnouncements = options?.announcements !== false;
   const showDiscussions = options?.discussions !== false;
+  const showProgress = options?.showProgress !== false;
   const sections: NavSection[] = [
     {
       id: "home",
@@ -310,26 +313,27 @@ export function buildLearnerNav(
     });
   }
 
-  sections.push(
-    {
+  if (showProgress) {
+    sections.push({
       id: "progress",
       label: "Progress",
       href: `${base}/progress`,
       match: "prefix",
       children: [],
-    },
-    {
-      id: "courses",
-      label: "Courses",
-      href: `${base}/courses`,
-      match: "prefix",
-      children: childLinks(
-        lists.courses.map((course) => ({ id: course.id, label: course.title })),
-        (id) => `${base}/courses/${id}`,
-        `${base}/courses`,
-      ),
-    },
-  );
+    });
+  }
+
+  sections.push({
+    id: "courses",
+    label: "Courses",
+    href: `${base}/courses`,
+    match: "prefix",
+    children: childLinks(
+      lists.courses.map((course) => ({ id: course.id, label: course.title })),
+      (id) => `${base}/courses/${id}`,
+      `${base}/courses`,
+    ),
+  });
 
   if (options?.showResources && options?.resources !== false) {
     sections.push({

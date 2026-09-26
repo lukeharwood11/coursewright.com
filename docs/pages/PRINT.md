@@ -6,7 +6,7 @@
 **URL (material, course, in unit):** `/my/<org-slug>/courses/<course_id>/units/<unit_id>/materials/<material_id>/print`  
 **URL (quiz):** `/my/<org-slug>/courses/<course_id>/units/<unit_id>/quizzes/<quiz_id>/print`  
 **URL (unit, course):** `/my/<org-slug>/courses/<course_id>/units/<unit_id>/print`  
-**URL (this week):** `/my/<org-slug>/print-this-week` (optional `?students=<id>,<id>` for active students on the student home)  
+**URL (this week):** `/my/<org-slug>/print-this-week` (optional `?students=<id>,<id>` for active students on the student home; optional `?omit=`, `?break=`, `?pack=0`, `?studentBreaks=0` — see **This week options** below)  
 **URL (event):** `/my/<org-slug>/events/<event_id>/print`  
 **URL (resource):** `/my/<org-slug>/resources/items/<item_id>/print`  
 **URL (resources, several):** `/my/<org-slug>/resources/print?items=<id>,<id>`  
@@ -19,7 +19,7 @@ Anyone who can already **view** that material, unit, course quiz, parent “this
 
 ## Purpose
 
-One composition: **generate a PDF** of the grain, **preview that PDF** in the page (exact pages the user will get), then **Download** or **Print**. No format wizard. No stored print job.
+One composition: **generate a PDF** of the grain, **preview that PDF** in the page (exact pages the user will get), then **Download** or **Print**. Entry from the student home stays **one tap** with everything included; **this week** also offers an on-screen options list (not a separate export product). No stored print job.
 
 ## Behavior
 
@@ -29,16 +29,19 @@ One composition: **generate a PDF** of the grain, **preview that PDF** in the pa
 - Sticky action bar: **Download** (`.pdf` blob), **Print** (print that PDF via browser/system), **Back** to the source page.
 - **Never** label the product surface Export / Generate PDF as the primary nav action — entry points stay **Print** / **Print unit** / **Print this week**.
 - Empty: unit with no materials, or week with no dated / important-now / lesson-plan items — plain language + back.
-- Generation should feel fast for a single material; large unit / week packets may need a brief wait — still no format picker.
+- Generation should feel fast for a single material; large unit / week packets may need a brief wait.
+- **This week only:** a **What to print** panel beside the preview lists lesson-plan notes and linked materials, important now, assigned and due work (including course quizzes), plus layout switches (pack assignments, page break between students, per-item **Start on new page**). Course-quiz rows also offer **Worksheet**, **Answer key**, or **Both** when this person may see the key. Choices persist in the URL (`omit`, `break`, `pack`, `studentBreaks`, `qid`) so a link can be bookmarked or shared. Defaults include the full week.
+- **Course quiz** (`/quizzes/…/print`) and **Print unit** when the unit has quizzes: same worksheet / answer key / both control when the viewer may see the key (`quizKey=` on a single quiz; `qid=` on unit and this week). Default when the key is allowed: **Answer key** (matches prior teacher behavior).
+- **Page materials** (including page-quiz blocks inside a lesson): always print as a **worksheet** — the answer key never appears on material, unit, or this-week packets.
 
 ### By grain
 
 | Grain | PDF content |
 |-------|-------------|
-| **Material** | One material by kind — **page:** blocks in order (quizzes print on the whole page: **parents** and staff **Student view** see questions only; **staff Teacher view** see the answer key from block data; multiple-choice choices use drawn checkbox squares, not bracket text); **link:** title + URL/QR; **file:** if the attached file is already a PDF/image, prefer previewing **that file**; otherwise a cover sheet (title, description). Video blocks → title + URL/QR, not a player frame. No quiz-block-only print in P0. |
-| **Unit** | Materials in `position` order as one packet; page breaks **between** materials. |
-| **Quiz** | One course quiz. Questions only unless this person may see the answer key (Teacher view, or a parent when **Share answer key with parents** is on). A student login never gets the key. Multiple-choice choices use the same drawn checkbox squares as a page quiz. A number prints one blank. Matching prints the left column and a mixed right column. A long answer prints the number of blank lines the teacher chose. |
-| **This week** | Current Sunday–Saturday dated materials (+ important now, if any) **and published lesson plans** for **active** students on student home, grouped like [ORG_HOME](./ORG_HOME.md) **by student**. Each student: **lesson plans first** (week note + day notes), then materials. Includes assigned and due work for the week. One student at a time; **page break before the next student**. Pack that student’s items onto a page when they fit, separated by a rule; if there isn’t enough room to start the next assignment cleanly, it starts on the next page. Optional `?students=` filters the packet. |
+| **Material** | One material by kind — **page:** blocks in order (embedded page quizzes print as worksheets only — no answer key); **link:** title + URL/QR; **file:** if the attached file is already a PDF/image, prefer previewing **that file**; otherwise a cover sheet (title, description). Video blocks → title + URL/QR, not a player frame. No quiz-block-only print in P0. |
+| **Unit** | Published **materials** and **course quizzes** in shared `position` order (material wins a tie). Page breaks **between** items. Materials are worksheets only; each course quiz follows the worksheet / answer key / both choice when allowed. |
+| **Quiz** | One course quiz. Worksheet, answer key, or both when this person may see the key (Teacher view, or a parent when **Share answer key with parents** is on). A student login never gets the key. The worksheet has **Name** and **Date** lines stacked in the upper right; the answer key does not. The course name sits under the quiz title. Each question is numbered in bold, with the point value in bold after the prompt. Multiple-choice choices use the same drawn checkbox squares as a page quiz; the key checks the correct ones. A number prints one blank, or the answer on the key. Matching prints each prompt with an arrow (and the mixed right column on the worksheet); the key fills the answer after the arrow. A long answer prints the number of blank lines the teacher chose, each a full-width rule, or the answer on the key. Short answer prints one blank, or the answer on the key. |
+| **This week** | Current Sunday–Saturday dated materials (+ important now, if any) **and published lesson plans** for **active** students on student home, grouped like [ORG_HOME](./ORG_HOME.md) **by student**. Each student: **lesson plans first** (week note + day notes, then materials linked on that plan in day order), then remaining important-now and dated work (materials and course quizzes). One student at a time; **page break before the next student** (unless `studentBreaks=0`). Pack that student’s items onto a page when they fit (`pack=0` gives each item its own page), separated by a rule when packed; optional per-item page breaks via `break=` or the panel. Optional `?students=` filters students; `?omit=` excludes item keys from the PDF. |
 | **Resource** | One org resource by type — **document:** Lexical blocks (same page layout as a page material; no quizzes in P1a); **file:** same as a file material; **link:** not printed from this screen. Several selected documents and files use `?items=` as one packet (links skipped). |
 | **Event** | The event write-up (same page layout as a page material), with when, location, and linked material titles |
 
@@ -48,13 +51,15 @@ One composition: **generate a PDF** of the grain, **preview that PDF** in the pa
 
 - In-app **PDF viewer** showing the generated (or attached) PDF pages
 - Action bar: Download · Print · Back
+- **This week:** checkbox tree of printable items (by student) and layout toggles; preview refreshes when options change
 - Loading / error states for generation failures (plain language + retry + back)
 
 ## Contents
 
 - Full-bleed (or near full-bleed) PDF preview region
-- Screen-only action bar above or beside the viewer
-- Loading state while the PDF is built
+- **This week:** options panel (left on desktop; scrollable above preview on small screens) + preview
+- Screen-only action bar above the viewer
+- Loading state while the PDF is built; brief “Updating preview…” when options change
 
 ## Primary actions
 

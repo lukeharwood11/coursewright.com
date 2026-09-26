@@ -184,7 +184,7 @@ export function useEventEdit() {
     onSuccess: async (id) => {
       await queryClient.invalidateQueries({ queryKey: ["events"] });
       await queryClient.invalidateQueries({ queryKey: ["calendar"] });
-      await queryClient.invalidateQueries({ queryKey: parentQueryKeys.dashboard(organization.id, user.id) });
+      await queryClient.invalidateQueries({ queryKey: parentQueryKeys.dashboardPrefix(organization.id, user.id) });
       toast.success(isNew ? "Event added" : "Event saved");
       navigate(eventPath(organization.slug, id));
     },

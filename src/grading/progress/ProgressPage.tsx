@@ -11,12 +11,17 @@ import { useProgress } from "./hooks/useProgress";
 export function ProgressPage() {
   const progress = useProgress();
   useAckNotificationFromSearch();
-  const { role, parentPresentation } = useOrgShell();
+  const { role, parentPresentation, staffViewMode } = useOrgShell();
   const tier = studentsHubTier(role, parentPresentation);
 
   useEffect(() => {
     document.title = `Progress · ${progress.organization.name} · Course Wright`;
   }, [progress.organization.name]);
+
+  // Staff Preview has no linked student — send them home.
+  if (staffViewMode === "preview" && parentPresentation) {
+    return <Navigate to={`/my/${progress.organization.slug}`} replace />;
+  }
 
   if (tier !== "learner") {
     return <Navigate to={studentsPath(progress.organization.slug)} replace />;

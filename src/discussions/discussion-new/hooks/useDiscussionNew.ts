@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { SerializedEditorState } from "lexical";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import {
   formOrMutationError,
   toastCheckNetworkConnection,
@@ -9,7 +10,11 @@ import {
 import { isNetworkError } from "@/ui/networkError";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { staffCanEdit } from "@/app/layouts/model/viewMode";
+import {
+  isStaffInstructorPreview,
+  STAFF_PREVIEW_DISCUSSION_HINT,
+  staffCanEdit,
+} from "@/app/layouts/model/viewMode";
 import { canManageOrgSettings, isStaffRole } from "@/organizations/model/role";
 import { courseQueryKeys, listCourses } from "@/courses/databridge/courses";
 import { classQueryKeys, listClasses } from "@/roster/databridge/classes";
@@ -47,7 +52,8 @@ export const DISCUSSION_FORM_ID = "discussion-form";
 
 export function useDiscussionNew() {
   const [searchParams] = useSearchParams();
-  const { organization, role, parentPresentation } = useOrgShell();
+  const { organization, role, parentPresentation, staffViewMode } =
+    useOrgShell();
   const user = useAuthedUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -147,8 +153,18 @@ export function useDiscussionNew() {
     return all;
   }, [classesQuery.data, parentPresentation, parentContext]);
 
+  const instructorPreview = isStaffInstructorPreview(role, staffViewMode);
   const redirectHome =
-    isStaff && parentPresentation && (parentContext?.students.length ?? 0) === 0;
+    isStaff &&
+    parentPresentation &&
+    !instructorPreview &&
+    (parentContext?.students.length ?? 0) === 0;
+
+  function blockIfInstructorPreview(): boolean {
+    if (!instructorPreview) return false;
+    toast(STAFF_PREVIEW_DISCUSSION_HINT);
+    return true;
+  }
 
   useEffect(() => {
     if (!parentPresentation || parentContextQuery.isLoading) return;
@@ -357,9 +373,13 @@ export function useDiscussionNew() {
     redirectHome,
     onSubmit: (event: FormEvent) => {
       event.preventDefault();
+      if (blockIfInstructorPreview()) return;
       save.mutate();
     },
-    start: () => save.mutate(),
+    start: () => {
+      if (blockIfInstructorPreview()) return;
+      save.mutate();
+    },
     cancelTo: discussionsPath(organization.slug),
   };
 }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { PrinterIcon } from "@heroicons/react/24/outline";
+import { PrinterIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ButtonLink } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@/parent/model/dashboard";
 import { printThisWeekPath } from "@/print/model/paths";
 import { ParentDashboardBody } from "./ParentDashboardBody";
+import { WeekStepper } from "./WeekStepper";
 import type { OrganizationSummary } from "@/organizations/databridge/memberships";
 
 export function ParentHome({
@@ -19,6 +20,12 @@ export function ParentHome({
   loading,
   error: _error,
   preview = false,
+  previewKind = null,
+  weekStartParam = null,
+  isCurrentWeek = true,
+  onPrevWeek,
+  onNextWeek,
+  onThisWeek,
 }: {
   firstName: string;
   organization: OrganizationSummary;
@@ -27,8 +34,16 @@ export function ParentHome({
   loading: boolean;
   error: string | null;
   preview?: boolean;
+  /** instructor = taught-course synthetic; empty-family = Parent/Student tab with no links */
+  previewKind?: "instructor" | "empty-family" | null;
+  weekStartParam?: string | null;
+  isCurrentWeek?: boolean;
+  onPrevWeek: () => void;
+  onNextWeek: () => void;
+  onThisWeek: () => void;
 }) {
   const [activeIds, setActiveIds] = useState<number[] | null>(null);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   const weekLabel = dashboard?.week.label ?? "This week";
   const allStudentIds = useMemo(
     () => dashboard?.students.map((student) => student.id) ?? [],
@@ -38,10 +53,21 @@ export function ParentHome({
   const visible = dashboard
     ? filterParentDashboard(dashboard, selectedIds)
     : null;
+  const printOptions = { weekStart: weekStartParam };
   const printTo =
     selectedIds.length > 0 && selectedIds.length < allStudentIds.length
-      ? printThisWeekPath(orgSlug, selectedIds)
-      : printThisWeekPath(orgSlug);
+      ? printThisWeekPath(orgSlug, selectedIds, undefined, printOptions)
+      : printThisWeekPath(orgSlug, undefined, undefined, printOptions);
+
+  const banner =
+    previewKind === "instructor"
+      ? dashboard?.hasActiveEnrollment
+        ? "Preview shows this week the way a student enrolled in the courses you teach would see it — not your family’s home."
+        : "Preview shows this week the way a student enrolled in the courses you teach would see it. You’re not teaching any published courses yet, so the list is empty."
+      : previewKind === "empty-family"
+        ? "This is what your family home looks like. You don’t have a linked student in this organization yet, so the list is empty."
+        : null;
+  const showBanner = Boolean(banner) && !bannerDismissed;
 
   return (
     <div className="px-5 py-4 md:px-8">
@@ -54,6 +80,14 @@ export function ParentHome({
             Hi, {firstName}
           </h1>
           <p className="mt-1 text-[14px] text-[var(--ink-soft)]">{weekLabel}</p>
+          <div className="mt-2">
+            <WeekStepper
+              onPrev={onPrevWeek}
+              onNext={onNextWeek}
+              onThisWeek={onThisWeek}
+              showThisWeek={!isCurrentWeek}
+            />
+          </div>
         </div>
         {selectedIds.length > 0 ? (
           <ButtonLink variant="secondary" to={printTo}>
@@ -68,12 +102,21 @@ export function ParentHome({
         )}
       </header>
 
-      {preview ? (
-        <p className="mt-4 rounded-[10px] border border-[var(--slate)] bg-[var(--slate-tint)] px-3.5 py-3 text-[13.5px] leading-relaxed text-[var(--ink)]">
-          This is a preview of the parent home. Families with enrolled students
-          see this week’s work here. You don’t have a linked student in this
-          organization yet, so the list is empty.
-        </p>
+      {showBanner && banner ? (
+        <div
+          role="status"
+          className="mt-4 flex items-start gap-3 rounded-[10px] border border-[var(--slate)] bg-[var(--slate-tint)] px-3.5 py-3 text-[13.5px] leading-relaxed text-[var(--ink)]"
+        >
+          <p className="min-w-0 flex-1">{banner}</p>
+          <button
+            type="button"
+            className="shrink-0 rounded-[6px] p-1 text-[var(--ink-soft)] hover:bg-[var(--paper)] hover:text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+            aria-label="Dismiss"
+            onClick={() => setBannerDismissed(true)}
+          >
+            <XMarkIcon className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
       ) : null}
 
       {loading ? (
@@ -87,6 +130,8 @@ export function ParentHome({
           visible={visible}
           selectedIds={selectedIds}
           preview={preview}
+          previewKind={previewKind}
+          isCurrentWeek={isCurrentWeek}
           schoolDays={organization.schoolDays}
           orgType={organization.orgType}
           onToggleStudent={(id) =>

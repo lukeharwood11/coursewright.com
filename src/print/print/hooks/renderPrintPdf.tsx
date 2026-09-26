@@ -15,9 +15,12 @@ async function renderPacket(materials: PrintMaterialView[], packet: PrintPacket)
       packet={{
         title: packet.title,
         subtitle: packet.subtitle,
+        courseTitle: packet.courseTitle,
         includeAnswerKey: packet.includeAnswerKey,
         materials,
         quizQuestions: packet.quizQuestions,
+        quizKeyMode: packet.quizKeyMode,
+        quizQuestionsKey: packet.quizQuestionsKey,
       }}
     />,
   ).toBlob();

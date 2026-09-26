@@ -1,6 +1,7 @@
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useId, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useAuthSession } from "@/auth/hooks/useAuthSession";
 import { ButtonLink } from "@/ui/Button";
 import { Wordmark } from "@/ui/Wordmark";
 
@@ -17,10 +18,27 @@ function navClass({ isActive }: { isActive: boolean }) {
   ].join(" ");
 }
 
+function MarketingAccountActions({ signedIn }: { signedIn: boolean }) {
+  if (signedIn) {
+    return <ButtonLink to="/my">My Account</ButtonLink>;
+  }
+
+  return (
+    <>
+      <NavLink to="/login" className={navClass}>
+        Sign in
+      </NavLink>
+      <ButtonLink to="/signup">Sign up</ButtonLink>
+    </>
+  );
+}
+
 export function MarketingHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
   const location = useLocation();
+  const { status, user } = useAuthSession();
+  const signedIn = status === "ready" && user != null;
 
   useEffect(() => {
     setMenuOpen(false);
@@ -40,20 +58,14 @@ export function MarketingHeader() {
                 {link.label}
               </NavLink>
             ))}
-            <NavLink to="/login" className={navClass}>
-              Sign in
-            </NavLink>
-            <ButtonLink to="/signup">Sign up</ButtonLink>
+            <MarketingAccountActions signedIn={signedIn} />
           </nav>
 
           <nav
             className="flex items-center gap-x-3 sm:gap-x-4 md:hidden"
             aria-label="Account"
           >
-            <NavLink to="/login" className={navClass}>
-              Sign in
-            </NavLink>
-            <ButtonLink to="/signup">Sign up</ButtonLink>
+            <MarketingAccountActions signedIn={signedIn} />
             <button
               type="button"
               className="shrink-0 rounded-[6px] p-1.5 text-[var(--ink-soft)] hover:bg-[var(--green-tint)] hover:text-[var(--green)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"

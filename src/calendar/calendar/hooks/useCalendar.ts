@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { staffBrowsesContent } from "@/app/layouts/model/viewMode";
+import { staffBrowsesContent, canUseStaffViewToggle } from "@/app/layouts/model/viewMode";
 import { calendarQueryKeys, loadCalendarSource } from "@/calendar/databridge/calendar";
 import { addIsoDays, monthContaining, shiftMonth, weekdayDateHeading } from "@/calendar/model/dates";
 import { expandEventsInRange, toggleHiddenCourse } from "@/calendar/model/events";
@@ -12,7 +12,7 @@ import { calendarWeekContaining, localIsoDate } from "@/parent/model/thisWeek";
 import { calendarPath, parseCalendarView, type CalendarView } from "@/calendar/model/paths";
 
 export function useCalendar() {
-  const { organization, role, parentPresentation } = useOrgShell();
+  const { organization, role, parentPresentation, staffViewMode } = useOrgShell();
   const user = useAuthedUser();
   const [search, setSearch] = useSearchParams();
   const view = parseCalendarView(search.get("view"));
@@ -21,6 +21,8 @@ export function useCalendar() {
   const week = calendarWeekContaining(new Date(`${focusDate}T12:00:00`));
   const month = monthContaining(focusDate);
   const parentMode = !staffBrowsesContent(role, parentPresentation);
+  const scopedViewMode =
+    parentMode && canUseStaffViewToggle(role) ? staffViewMode : "teacher";
   const rangeStart =
     view === "day" ? focusDate : view === "week" ? week.start : month.gridStart;
   const rangeEnd =
@@ -33,6 +35,7 @@ export function useCalendar() {
       rangeStart,
       rangeEnd,
       parentMode,
+      scopedViewMode,
     ),
     queryFn: () =>
       loadCalendarSource({
@@ -41,6 +44,7 @@ export function useCalendar() {
         rangeStart,
         rangeEnd,
         parentMode,
+        staffViewMode: scopedViewMode,
       }),
   });
 

@@ -1,6 +1,6 @@
 # ORG_HOME
 
-**URL:** `/my/<org-slug>`  
+**URL:** `/my/<org-slug>` (student home optional `?week=<sunday-iso>` — another Sunday–Saturday week)  
 **URL map:** [URLS.md](../URLS.md)
 
 ## Audience
@@ -13,17 +13,18 @@ Organization home / dashboard. For the student experience this **is** the P0 hom
 
 ## Behavior
 
-Same URL for all roles; chrome and body switch by membership role. Owners, admins, and instructors also get a **Teacher / Student view** toggle in org chrome. **Student view** shows this student home (real this-week if they have linked students; otherwise a preview). Parent-only users do not see the toggle.
+Same URL for all roles; chrome and body switch by membership role. Owners, admins, and instructors also get a **Teacher / Preview** toggle in org chrome (plus **Parent** and/or **Student** when those additive roles apply). **Preview** shows student home as if enrolled in published courses they teach. **Parent** / **Student** show real family or self. Parent-only / student-only users do not see the toggle.
 
 ### Student
 
 - Usability bar: understand child, course, and what’s needed immediately — no LMS jargon.
 - **Current announcements** sit above the week calendar when any apply. Unread cards show a notification icon; opening one marks it read.
-- Main body is the **current Sunday–Saturday week** (same chips, colors, and week notes as [CALENDAR](./CALENDAR.md)): days with work are **cards** that wrap (about two or three across). Empty days are omitted. One card per day: **events** for the active students, including organization events (title chip), then each class’s plan text and its linked materials stay together inside that card (after a divider), assigned = outline / due = filled, course colors. An event-only day still shows.
-- **Focus** column on the right (stacks below on small screens): **Important now** and **Coming up** (**Assigned next** + **Due next**).
+- Main body is the **selected Sunday–Saturday week** (default: the real current week). **Previous week** / **Next week** step the calendar; **This week** (when viewing another week) clears the query and returns to today’s week. Same chips, colors, and week notes as [CALENDAR](./CALENDAR.md): days with work are **cards** that wrap (about two or three across). Empty days are omitted. One card per day: **events** for the active students, including organization events (title chip), then each class’s plan text and its linked materials stay together inside that card (after a divider), assigned = outline / due = filled, course colors. An event-only day still shows.
+- When viewing **another** week, announcements and **Coming up** use that week’s **Sunday** as the as-of date (what would have been visible then). **Important now** appears only on the real current week.
+- **Focus** column on the right (stacks below on small screens): **Important now** (current week only) and **Coming up** (**Assigned next** + **Due next**).
 - When more than one student is linked, **tags** at the top toggle who is active. Deselecting a student hides their work (calendar, Focus, announcements). One student skips the tags.
 - Week notes for published lesson plans sit as a colored bar per course above the grid.
-- **Print this week** prints only **active** students’ **full** week (published lesson plans first, then due and assigned materials, plus important now for their courses), **one student at a time** with a page break before the next student. Per-material **Print** stays first-class — both land on [PRINT](./PRINT.md).
+- **Print this week** opens [PRINT](./PRINT.md) for the **visible** week with the **active** students’ **full** week selected by default (published lesson plans first, then due and assigned materials and quizzes, plus important now on the current week only). On that screen, people can turn items on or off and adjust page breaks before downloading or printing. Per-material **Print** stays first-class.
 - Parent org access requires linked student enrolled in a course with `status = active` **and** `visibility = published` (dates informational only).
 - Parent summary layer / Progress (B) is **P1**, not P0 — not in chrome until then.
 - Empty: no dated work and no published lesson plan this week, or not yet on an active enrollment — plain-language next step. Class/student announcements can still show without an enrollment.
@@ -37,7 +38,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 - **This week**: week label; **Important now** and dated-material counts for courses they can see (staff sees those materials, including unpublished).
 - **People**: student + class counts → [ORG_ROSTER](./ORG_ROSTER.md).
 - Switch org returns to org picker.
-- **Teacher / Student view** in the header: Student view swaps this dashboard for the student home (and student chrome). Staff-only pages (roster, settings) return here while Student view is on; **Courses** stays available as the family list.
+- **Teacher / Preview / Parent / Student** in the header: non-Teacher modes swap this dashboard for the student home (and student chrome). Preview uses taught published courses; Parent/Student use real links when those tabs exist. Staff-only pages (roster, settings) return here while a non-Teacher mode is on; **Courses** stays available as the matching family/preview list.
 - **Search** in product chrome (staff, Teacher view): Postgres FTS for courses and materials, plus staff pages by title; overlay only; dedicated route still TBD.
 - **P1:** templates in chrome.
 
@@ -70,7 +71,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 - Top: org context + account affordance ([STYLE_GUIDE.md](../STYLE_GUIDE.md) parent pattern) → [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); **Activity** bell to the right of the avatar → [ACTIVITY](./ACTIVITY.md)
 - Desktop: simpler collapsible sidebar (This week, Calendar, Announcements, Discussions (**P1**), their courses). Body uses remaining width — not a centered narrow column.
-- Greeting + **current calendar week** (Sunday–Saturday) + **Print this week**
+- Greeting + **calendar week** label (Sunday–Saturday) + week stepper + **Print this week**
 - **Student tags** (multi-student parents only) — tap to include/exclude a student
 - **Announcements** — current one-way notices (when any). Unread cards show a notification icon; opening [ANNOUNCEMENT](./ANNOUNCEMENT.md) marks it read. Above the week calendar.
 - Two columns on large screens: **week cards** | **Focus** (Important now + Coming up). Stacks on small screens (calendar first). Day cards wrap so two or three fit across instead of seven skinny columns.
@@ -86,7 +87,8 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 - Collapsible **org sidebar** for Home, Calendar, Announcements, Discussions (**P1**), Courses, Roster (nested class names when they exist), Settings (course names nested when present)
 - Header: **Overview**, week label, **Create course**; **Activity** bell (right of the avatar)
-- **Teacher / Student view** (staff only) in org chrome
+- **Teacher / Preview** (staff only; plus **Parent** / **Student** when applicable) in org chrome
+  - On mobile, 3+ modes use a Select instead of tabs
 - Getting started (when needed)
 - Needs attention (when needed)
 - Courses preview + View all
@@ -100,7 +102,8 @@ Tech-averse parents must understand what’s going on immediately — which chil
 
 ### Student
 
-- Print this week (active students)
+- Previous week / Next week / This week (when not on the current week)
+- Print this week (active students; visible week)
 - Toggle which students are active (when more than one)
 - Filter courses on the week calendar legend
 - Open / print a material
@@ -116,7 +119,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - Open attention targets (course or course roster)
 - Open roster / settings / calendar
 - Search org pages, courses, materials
-- Switch **Teacher / Student view** (header)
+- Switch **Teacher / Preview / Parent / Student** (header)
 
 ## Links to
 

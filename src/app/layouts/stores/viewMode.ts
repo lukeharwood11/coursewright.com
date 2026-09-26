@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import {
   parseStaffViewMode,
+  resolveStaffViewMode,
   type StaffViewMode,
 } from "../model/viewMode";
 
@@ -10,12 +11,12 @@ function storageKey(orgSlug: string): string {
   return `${STORAGE_PREFIX}${orgSlug}`;
 }
 
-function readStored(orgSlug: string): StaffViewMode {
-  if (!orgSlug || typeof window === "undefined") return "teacher";
+function readStoredRaw(orgSlug: string): string | null {
+  if (!orgSlug || typeof window === "undefined") return null;
   try {
-    return parseStaffViewMode(window.localStorage.getItem(storageKey(orgSlug)));
+    return window.localStorage.getItem(storageKey(orgSlug));
   } catch {
-    return "teacher";
+    return null;
   }
 }
 
@@ -43,7 +44,13 @@ export const useStaffViewStore = create<ViewModeStore>((set) => ({
   },
 }));
 
-export function useStaffViewMode(orgSlug: string | undefined): {
+export function useStaffViewMode(
+  orgSlug: string | undefined,
+  flags: { isParent: boolean; isStudent: boolean } = {
+    isParent: false,
+    isStudent: false,
+  },
+): {
   staffViewMode: StaffViewMode;
   setStaffViewMode: (mode: StaffViewMode) => void;
 } {
@@ -51,9 +58,13 @@ export function useStaffViewMode(orgSlug: string | undefined): {
     orgSlug ? state.remembered[orgSlug] : undefined,
   );
   const setMode = useStaffViewStore((state) => state.setMode);
-  const staffViewMode = orgSlug
-    ? (remembered ?? readStored(orgSlug))
+  const raw = orgSlug
+    ? (remembered ?? readStoredRaw(orgSlug) ?? "teacher")
     : "teacher";
+  const staffViewMode = resolveStaffViewMode(
+    typeof raw === "string" ? raw : parseStaffViewMode(raw),
+    flags,
+  );
 
   return {
     staffViewMode,

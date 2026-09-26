@@ -65,8 +65,11 @@ export async function toPrintPacketView(
   return {
     title: packet.title,
     subtitle: packet.subtitle,
+    courseTitle: packet.courseTitle,
     includeAnswerKey: packet.includeAnswerKey,
     materials,
     quizQuestions: packet.quizQuestions,
+    quizKeyMode: packet.quizKeyMode,
+    quizQuestionsKey: packet.quizQuestionsKey,
   };
 }

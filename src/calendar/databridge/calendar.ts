@@ -5,7 +5,13 @@ import { eventAppliesToFamily } from "@/events/model/audience";
 import { listLessonPlansInRange, type LessonPlanDetail } from "@/lesson-plans/databridge/lessonPlans";
 import { isPublished } from "@/materials/model/visibility";
 import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
-import { loadFamilyStudentIds } from "@/parent/databridge/dashboard";
+import type { StaffViewMode } from "@/app/layouts/model/viewMode";
+import {
+  listTaughtPublishedCourses,
+  loadFamilyStudentIds,
+  loadLinkedParentStudentIds,
+  loadOwnStudentProfileIds,
+} from "@/parent/databridge/dashboard";
 import { quizAssignedDate, quizDueDate } from "@/quizzes/model/window";
 
 export type CalendarSourceMaterial = {
@@ -54,7 +60,9 @@ export const calendarQueryKeys = {
     start: string,
     end: string,
     parentMode: boolean,
-  ) => ["calendar", organizationId, userId, start, end, parentMode] as const,
+    staffViewMode: StaffViewMode = "teacher",
+  ) =>
+    ["calendar", organizationId, userId, start, end, parentMode, staffViewMode] as const,
 };
 
 export async function loadCalendarSource(args: {
@@ -63,6 +71,8 @@ export async function loadCalendarSource(args: {
   rangeStart: string;
   rangeEnd: string;
   parentMode: boolean;
+  /** When parentMode and this is a staff writer mode, scopes family vs preview data. */
+  staffViewMode?: StaffViewMode;
 }): Promise<CalendarSource> {
   const db = requireSupabase();
   const [lessonPlans, events] = await Promise.all([
@@ -202,10 +212,33 @@ async function loadParentCalendar(
     userId: string;
     rangeStart: string;
     rangeEnd: string;
+    staffViewMode?: StaffViewMode;
   },
   lessonPlans: LessonPlanDetail[],
 ): Promise<CalendarSource & { studentIds: number[] }> {
-  const studentIds = await loadFamilyStudentIds(args.organizationId, args.userId);
+  const mode = args.staffViewMode ?? "teacher";
+
+  if (mode === "preview") {
+    const taught = await listTaughtPublishedCourses(args.organizationId, args.userId);
+    return loadPublishedCoursesCalendar(
+      db,
+      taught.map((course) => ({
+        id: course.id,
+        title: course.title,
+        colorKey: parseCourseColorKey(course.colorKey),
+      })),
+      lessonPlans,
+      [],
+    );
+  }
+
+  const studentIds =
+    mode === "parent"
+      ? await loadLinkedParentStudentIds(args.userId)
+      : mode === "student"
+        ? await loadOwnStudentProfileIds(args.organizationId, args.userId)
+        : await loadFamilyStudentIds(args.organizationId, args.userId);
+
   if (studentIds.length === 0) {
     return { courses: [], materials: [], quizzes: [], lessonPlans: [], events: [], studentIds: [] };
   }
@@ -230,8 +263,17 @@ async function loadParentCalendar(
     ];
   });
   const uniqueCourses = [...new Map(courses.map((course) => [course.id, course])).values()];
-  const courseIds = uniqueCourses.map((course) => course.id);
-  const courseById = new Map(uniqueCourses.map((course) => [course.id, course]));
+  return loadPublishedCoursesCalendar(db, uniqueCourses, lessonPlans, studentIds);
+}
+
+async function loadPublishedCoursesCalendar(
+  db: ReturnType<typeof requireSupabase>,
+  courses: Array<{ id: number; title: string; colorKey: CourseColorKey }>,
+  lessonPlans: LessonPlanDetail[],
+  studentIds: number[],
+): Promise<CalendarSource & { studentIds: number[] }> {
+  const courseIds = courses.map((course) => course.id);
+  const courseById = new Map(courses.map((course) => [course.id, course]));
 
   let materials: CalendarSourceMaterial[] = [];
   let quizzes: CalendarSourceQuiz[] = [];
@@ -307,7 +349,7 @@ async function loadParentCalendar(
     }));
 
   return {
-    courses: uniqueCourses,
+    courses,
     materials,
     quizzes,
     lessonPlans: publishedPlans,

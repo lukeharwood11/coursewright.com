@@ -14,7 +14,7 @@ export type PublicPlanFeature = {
  *
  * Family Pro was never committed on main (pricing there was “Free (for now)”).
  * Its price and caps are the previously specified Family Pro row:
- * $6/mo · $60/yr, up to 12 student profiles, up to 3 seats, 10 GB.
+ * $10/mo · $100/yr, up to 12 student profiles, up to 3 seats, 10 GB.
  */
 export type PublicPlan = {
   id: PublicPlanId;
@@ -68,8 +68,8 @@ export const publicPlans: PublicPlan[] = [
   {
     id: "family-pro",
     name: "Family Pro",
-    monthlyUsd: 6,
-    yearlyUsd: 60,
+    monthlyUsd: 10,
+    yearlyUsd: 100,
     caps: ["Up to 12 student profiles", "Up to 3 collaborators", "10 GB storage"],
     highlights: [],
     detailIntro:
@@ -91,8 +91,8 @@ export const publicPlans: PublicPlan[] = [
   {
     id: "microschool",
     name: "Microschool",
-    monthlyUsd: 72,
-    yearlyUsd: 720,
+    monthlyUsd: 80,
+    yearlyUsd: 800,
     caps: ["Up to 60 student profiles", "Multiple staff", "50 GB storage"],
     highlights: [
       "Full roles: owner, admin, instructor, parent, student",
@@ -134,8 +134,8 @@ export const publicPlans: PublicPlan[] = [
   {
     id: "school",
     name: "School",
-    monthlyUsd: 102,
-    yearlyUsd: 1020,
+    monthlyUsd: 150,
+    yearlyUsd: 1500,
     caps: [
       "Up to 200 student profiles",
       "200 GB storage",
@@ -174,8 +174,6 @@ export type YearlySavings = {
   yearlyUsd: number;
   monthlyTimesTwelveUsd: number;
   saveUsd: number;
-  /** Whole months of the monthly price covered by the yearly discount. */
-  monthsSaved: number;
 };
 
 export function formatUsd(amount: number): string {
@@ -228,15 +226,9 @@ export function yearlySavings(plan: PublicPlan): YearlySavings | null {
     yearlyUsd: plan.yearlyUsd,
     monthlyTimesTwelveUsd,
     saveUsd,
-    monthsSaved: Math.round(saveUsd / plan.monthlyUsd),
   };
 }
 
 export function savingsLabel(savings: YearlySavings): string {
-  const months = savings.monthsSaved === 1 ? "month" : "months";
-  return `Save ${formatUsd(savings.saveUsd)} (${savings.monthsSaved} ${months})`;
-}
-
-export function savingsCompareLabel(savings: YearlySavings): string {
-  return `${formatUsd(savings.monthlyTimesTwelveUsd)} if paid monthly`;
+  return `Save ${formatUsd(savings.saveUsd)}`;
 }

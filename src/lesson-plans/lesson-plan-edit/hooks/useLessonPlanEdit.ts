@@ -146,7 +146,7 @@ export function useLessonPlanEdit() {
     void queryClient.invalidateQueries({ queryKey: lessonPlanQueryKeys.course(courseId) });
     void queryClient.invalidateQueries({ queryKey: lessonPlanQueryKeys.org(organization.id) });
     void queryClient.invalidateQueries({
-      queryKey: parentQueryKeys.dashboard(organization.id, user.id),
+      queryKey: parentQueryKeys.dashboardPrefix(organization.id, user.id),
     });
     void queryClient.invalidateQueries({ queryKey: ["calendar", organization.id] });
     const detailId = id ?? (Number.isFinite(lessonPlanId) ? lessonPlanId : null);

@@ -81,7 +81,7 @@ export function useLessonPlan() {
       queryKey: lessonPlanQueryKeys.detail(lessonPlanId),
     });
     void queryClient.invalidateQueries({
-      queryKey: parentQueryKeys.dashboard(organization.id, user.id),
+      queryKey: parentQueryKeys.dashboardPrefix(organization.id, user.id),
     });
   }
 

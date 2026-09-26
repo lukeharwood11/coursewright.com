@@ -16,6 +16,8 @@ const detailsClass = [
 ].join(" ");
 
 export function PricingPlanCard({ plan }: { plan: PricedPlan }) {
+  const isFree = plan.monthlyUsd == null && plan.yearlyUsd == null;
+
   return (
     <article className="flex h-full flex-col rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
       <header>
@@ -50,8 +52,7 @@ export function PricingPlanCard({ plan }: { plan: PricedPlan }) {
         ) : null}
         {plan.savingsText ? (
           <p className="text-[13px] leading-relaxed text-[var(--ink-soft)]">
-            {plan.savingsCompare ? <span className="block">{plan.savingsCompare}</span> : null}
-            <span className="mt-1 inline-flex rounded-full bg-[var(--green-tint)] px-2.5 py-1 font-extrabold text-[var(--green-deep)]">
+            <span className="inline-flex rounded-full bg-[var(--green-tint)] px-2.5 py-1 font-extrabold text-[var(--green-deep)]">
               {plan.savingsText}
             </span>
           </p>
@@ -84,7 +85,9 @@ export function PricingPlanCard({ plan }: { plan: PricedPlan }) {
         </ul>
       ) : null}
 
-      <div className="mt-auto grid grid-cols-2 gap-2 pt-6">
+      <div
+        className={`mt-auto grid gap-2 pt-6 ${isFree ? "grid-cols-1" : "grid-cols-2"}`}
+      >
         <a
           href={`#${plan.id}-details`}
           className={detailsClass}
@@ -92,9 +95,11 @@ export function PricingPlanCard({ plan }: { plan: PricedPlan }) {
         >
           Details
         </a>
-        <a href={mailto(contactEmails.hi)} className={contactClass}>
-          Contact us
-        </a>
+        {isFree ? null : (
+          <a href={mailto(contactEmails.hi)} className={contactClass}>
+            Contact us
+          </a>
+        )}
       </div>
     </article>
   );

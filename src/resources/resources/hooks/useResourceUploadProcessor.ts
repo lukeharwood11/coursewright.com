@@ -47,6 +47,9 @@ export function useResourceUploadProcessor() {
             queryKey: resourceItemQueryKeys.visible(job.organizationId),
           });
           void queryClient.invalidateQueries({
+            queryKey: resourceItemQueryKeys.hasVisible(job.organizationId),
+          });
+          void queryClient.invalidateQueries({
             queryKey: resourceFolderQueryKeys.children(
               job.organizationId,
               job.folderId,

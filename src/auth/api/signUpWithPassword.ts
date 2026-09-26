@@ -1,3 +1,10 @@
+import { signInWithPassword } from "@/auth/api/signInWithPassword";
+import { updateProfile } from "@/auth/api/profiles";
+import {
+  setSignUpPendingNameStep,
+  stashPendingProfileName,
+} from "@/auth/model/signUpPending";
+import type { ValidatedSignUpName } from "@/auth/model/signUpName";
 import { isSupabaseConfigured, supabase } from "@/infrastructure/supabase/client";
 
 export type SignUpResult = {
@@ -6,10 +13,13 @@ export type SignUpResult = {
   needsEmailVerification?: boolean;
 };
 
+export const SIGN_UP_EMAIL_TAKEN_MESSAGE =
+  "That email already has an account. Sign in instead.";
+
 function friendlySignUpError(message: string): string {
   const lower = message.toLowerCase();
   if (lower.includes("already registered") || lower.includes("already been registered")) {
-    return "That email already has an account. Sign in instead.";
+    return SIGN_UP_EMAIL_TAKEN_MESSAGE;
   }
   if (lower.includes("password") && lower.includes("at least")) {
     return "Use a password with at least 6 characters.";
@@ -23,8 +33,10 @@ function friendlySignUpError(message: string): string {
   return message;
 }
 
-/** Email + password sign-up. Signs the user in when Auth returns a session. */
-export async function signUpWithPassword(
+export type SignUpName = ValidatedSignUpName;
+
+/** Step 1: create the account (or detect a duplicate email) before collecting a name. */
+export async function beginPasswordSignUp(
   email: string,
   password: string,
   nextPath = "/my",
@@ -36,13 +48,22 @@ export async function signUpWithPassword(
     };
   }
 
+  const signIn = await signInWithPassword(email, password);
+  if (!signIn.error) {
+    await supabase.auth.signOut();
+    return { error: SIGN_UP_EMAIL_TAKEN_MESSAGE };
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      // Confirmation emails (when enabled) land here. Default `/my`; invite
-      // flows pass `/invite/<token>` via `next` so that takes priority.
       emailRedirectTo: `${window.location.origin}${nextPath}`,
+      data: {
+        first_name: "",
+        last_name: "",
+        full_name: "",
+      },
     },
   });
   if (error) {
@@ -51,13 +72,51 @@ export async function signUpWithPassword(
 
   const identities = data.user?.identities ?? [];
   if (data.user && identities.length === 0) {
-    return { error: "That email already has an account. Sign in instead." };
+    return { error: SIGN_UP_EMAIL_TAKEN_MESSAGE };
   }
 
-  if (data.session) {
+  setSignUpPendingNameStep(true);
+
+  return { error: null };
+}
+
+/** Step 2: save the display name after credentials sign-up began on step 1. */
+export async function completePasswordSignUp(name: SignUpName): Promise<SignUpResult> {
+  if (!isSupabaseConfigured || !supabase) {
+    return {
+      error:
+        "Sign-up isn’t connected yet. Add Supabase URL and anon key to .env.testing.",
+    };
+  }
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (session?.user) {
+    const { error: metaError } = await supabase.auth.updateUser({
+      data: {
+        first_name: name.firstName,
+        last_name: name.lastName,
+        full_name: name.fullName,
+      },
+    });
+    if (metaError) {
+      return { error: friendlySignUpError(metaError.message) };
+    }
+
+    try {
+      await updateProfile(session.user.id, { name: name.fullName });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Could not save your name.";
+      return { error: message };
+    }
+
+    setSignUpPendingNameStep(false);
     return { error: null };
   }
 
-  // Confirmations on: account exists, no session until they open the email link.
+  stashPendingProfileName(name);
+  setSignUpPendingNameStep(false);
   return { error: null, needsEmailVerification: true };
 }

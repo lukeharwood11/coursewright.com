@@ -57,7 +57,7 @@ export function useEvent() {
       await queryClient.invalidateQueries({ queryKey: ["events"] });
       await queryClient.invalidateQueries({ queryKey: ["calendar"] });
       await queryClient.invalidateQueries({
-        queryKey: parentQueryKeys.dashboard(organization.id, user.id),
+        queryKey: parentQueryKeys.dashboardPrefix(organization.id, user.id),
       });
       toast.success("Event removed");
       navigate(`/my/${organization.slug}/calendar`);

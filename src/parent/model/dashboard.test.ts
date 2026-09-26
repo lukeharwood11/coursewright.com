@@ -595,3 +595,66 @@ test("dashboard surfaces current announcements for matching students", () => {
   );
 });
 
+test("future week view uses Sunday as-of for announcements and coming up", () => {
+  const futureWeek = {
+    start: "2026-09-20",
+    end: "2026-09-26",
+    label: "Week of Sep 20 – Sep 26",
+  };
+  const dashboard = buildParentDashboard(
+    source({
+      week: futureWeek,
+      today: "2026-09-15",
+      materials: [
+        {
+          id: 1,
+          title: "Next week lab",
+          scheduledDate: "2026-09-22",
+          dueDate: null,
+          courseId: 10,
+          unitId: null,
+          unitStart: null,
+          unitEnd: null,
+        },
+      ],
+      importantNow: [
+        {
+          id: 1,
+          materialId: 99,
+          materialTitle: "Urgent",
+          materialDescription: "",
+          courseId: 10,
+          courseTitle: "Science",
+          unitId: null,
+        },
+      ],
+      announcements: [
+        {
+          id: 3,
+          title: "Next week only",
+          body: "",
+          startDate: "2026-09-20",
+          endDate: "2026-09-26",
+          createdAt: "2026-09-18T09:00:00.000Z",
+          authorName: "Ms. Rivera",
+          audience: "student",
+          courseIds: [],
+          classIds: [],
+          studentIds: [1],
+          courseTitles: [],
+          classTitles: [],
+          studentNames: ["Maya"],
+          read: false,
+        },
+      ],
+    }),
+  );
+
+  assert.equal(dashboard.importantNow.length, 0);
+  assert.deepEqual(
+    dashboard.announcements.map((row) => row.title),
+    ["Next week only"],
+  );
+  assert.equal(dashboard.nextAssignedItem?.material.title, "Next week lab");
+});
+

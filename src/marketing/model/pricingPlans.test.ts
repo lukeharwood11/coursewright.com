@@ -6,7 +6,6 @@ import {
   planPriceLabel,
   planYearlyTotalLabel,
   publicPlans,
-  savingsCompareLabel,
   savingsLabel,
   yearlySavings,
 } from "./pricingPlans.ts";
@@ -37,11 +36,10 @@ test("every plan explains its audience and included features", () => {
   assert.equal(publicPlans[3].features[0]?.title, "Everything in Microschool");
 });
 
-test("every paid yearly plan costs ten months and saves two", () => {
+test("every paid yearly plan costs ten months of the monthly price", () => {
   for (const plan of publicPlans) {
     if (plan.monthlyUsd == null || plan.yearlyUsd == null) continue;
     assert.equal(plan.yearlyUsd, plan.monthlyUsd * 10);
-    assert.equal(yearlySavings(plan)?.monthsSaved, 2);
   }
 });
 
@@ -60,40 +58,38 @@ test("Family is free with two students, one collaborator, and 1 GB", () => {
 
 test("Family Pro shows its monthly rate and yearly total", () => {
   const pro = publicPlans[1];
-  assert.equal(planPriceLabel(pro, "monthly"), "$6");
+  assert.equal(planPriceLabel(pro, "monthly"), "$10");
   assert.equal(planPeriodLabel(pro, "monthly"), "per month");
-  assert.equal(planPriceLabel(pro, "yearly"), "$5");
+  assert.equal(planPriceLabel(pro, "yearly"), "$8.33");
   assert.equal(planPeriodLabel(pro, "yearly"), "per month");
-  assert.equal(planYearlyTotalLabel(pro, "yearly"), "$60 billed yearly");
+  assert.equal(planYearlyTotalLabel(pro, "yearly"), "$100 billed yearly");
   const savings = yearlySavings(pro);
   assert.ok(savings);
-  assert.equal(savings.monthlyTimesTwelveUsd, 72);
-  assert.equal(savings.saveUsd, 12);
+  assert.equal(savings.monthlyTimesTwelveUsd, 120);
+  assert.equal(savings.saveUsd, 20);
 });
 
-test("Microschool is $72/mo and $60/mo billed yearly", () => {
+test("Microschool is $80/mo and $66.67/mo billed yearly", () => {
   const microschool = publicPlans[2];
-  assert.equal(planPriceLabel(microschool, "monthly"), "$72");
+  assert.equal(planPriceLabel(microschool, "monthly"), "$80");
   assert.equal(planPeriodLabel(microschool, "monthly"), "per month");
-  assert.equal(planPriceLabel(microschool, "yearly"), "$60");
+  assert.equal(planPriceLabel(microschool, "yearly"), "$66.67");
   assert.equal(planPeriodLabel(microschool, "yearly"), "per month");
-  assert.equal(planYearlyTotalLabel(microschool, "yearly"), "$720 billed yearly");
+  assert.equal(planYearlyTotalLabel(microschool, "yearly"), "$800 billed yearly");
   const savings = yearlySavings(microschool);
   assert.ok(savings);
-  assert.equal(savings.monthlyTimesTwelveUsd, 864);
-  assert.equal(savings.saveUsd, 144);
+  assert.equal(savings.monthlyTimesTwelveUsd, 960);
+  assert.equal(savings.saveUsd, 160);
 });
 
-test("yearly School shows $85/mo and saves two months", () => {
+test("yearly School shows $125/mo and dollar savings", () => {
   const school = publicPlans[3];
-  assert.equal(planPriceLabel(school, "monthly"), "$102");
-  assert.equal(planPriceLabel(school, "yearly"), "$85");
-  assert.equal(planYearlyTotalLabel(school, "yearly"), "$1,020 billed yearly");
+  assert.equal(planPriceLabel(school, "monthly"), "$150");
+  assert.equal(planPriceLabel(school, "yearly"), "$125");
+  assert.equal(planYearlyTotalLabel(school, "yearly"), "$1,500 billed yearly");
   const savings = yearlySavings(school);
   assert.ok(savings);
-  assert.equal(formatUsd(savings.monthlyTimesTwelveUsd), "$1,224");
-  assert.equal(savings.saveUsd, 204);
-  assert.equal(savings.monthsSaved, 2);
-  assert.equal(savingsLabel(savings), "Save $204 (2 months)");
-  assert.equal(savingsCompareLabel(savings), "$1,224 if paid monthly");
+  assert.equal(formatUsd(savings.monthlyTimesTwelveUsd), "$1,800");
+  assert.equal(savings.saveUsd, 300);
+  assert.equal(savingsLabel(savings), "Save $300");
 });

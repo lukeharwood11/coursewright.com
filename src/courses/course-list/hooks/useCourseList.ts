@@ -2,6 +2,7 @@ import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
   familyVisibleCourses,
@@ -29,6 +30,10 @@ import { allowedGradeLevels, toggleGradeLevel } from "@/courses/model/gradeLevel
 import { coursePath } from "@/courses/model/paths";
 import { getOrganization, orgQueryKeys } from "@/organizations/databridge/organizations";
 import { staffDashboardQueryKey } from "@/organizations/databridge/staffDashboard";
+import {
+  listTaughtPublishedCourses,
+  parentQueryKeys,
+} from "@/parent/databridge/dashboard";
 import { caughtErrorMessage } from "@/ui/toast";
 
 function parseGradesParam(raw: string | null): string[] {
@@ -44,7 +49,8 @@ function serializeGradesParam(grades: string[]): string | null {
 }
 
 export function useCourseList() {
-  const { organization, role, parentPresentation } = useOrgShell();
+  const { organization, role, parentPresentation, staffViewMode } = useOrgShell();
+  const user = useAuthedUser();
   const [searchParams, setSearchParams] = useSearchParams();
   const canCreate = staffCanEdit(role, parentPresentation);
 
@@ -64,14 +70,27 @@ export function useCourseList() {
     },
   });
 
+  const taughtCoursesQuery = useQuery({
+    queryKey: parentQueryKeys.taughtCourses(organization.id, user.id),
+    queryFn: () => listTaughtPublishedCourses(organization.id, user.id),
+    enabled: staffViewMode === "preview",
+  });
+
   const organizationQuery = useQuery({
     queryKey: orgQueryKeys.detail(organization.id),
     queryFn: () => getOrganization(organization.id),
   });
 
-  const visibleCourses = parentPresentation
+  let visibleCourses = parentPresentation
     ? familyVisibleCourses(listQuery.data?.courses ?? [])
     : (listQuery.data?.courses ?? []);
+
+  if (staffViewMode === "preview") {
+    const taughtIds = new Set((taughtCoursesQuery.data ?? []).map((row) => row.id));
+    visibleCourses = familyVisibleCourses(listQuery.data?.courses ?? []).filter(
+      (course) => taughtIds.has(course.id),
+    );
+  }
   const allCourses = visibleCourses;
   const filteredCourses = filterCourses(allCourses, {
     query: queryText,

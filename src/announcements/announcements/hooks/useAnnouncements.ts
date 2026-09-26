@@ -2,19 +2,31 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffBrowsesContent, staffCanEdit } from "@/app/layouts/model/viewMode";
+import { browsesAsStaff } from "@/organizations/model/role";
 import {
   announcementQueryKeys,
   listAnnouncementsForOrganization,
 } from "@/announcements/databridge/announcements";
-import { loadParentDashboard, parentQueryKeys } from "@/parent/databridge/dashboard";
+import {
+  loadDashboardForStaffViewMode,
+  loadParentDashboard,
+  parentQueryKeys,
+} from "@/parent/databridge/dashboard";
 import { localIsoDate } from "@/parent/model/thisWeek";
 
 export function useAnnouncements() {
-  const { organization, role, parentPresentation } = useOrgShell();
+  const { organization, role, parentPresentation, staffViewMode } = useOrgShell();
   const user = useAuthedUser();
   const canEdit = staffCanEdit(role, parentPresentation);
   const browses = staffBrowsesContent(role, parentPresentation);
+  const staff = role ? browsesAsStaff(role) : false;
   const today = localIsoDate();
+  const scope =
+    staff && parentPresentation
+      ? staffViewMode === "parent" || staffViewMode === "student"
+        ? staffViewMode
+        : ("preview" as const)
+      : ("family" as const);
 
   const staffListQuery = useQuery({
     queryKey: announcementQueryKeys.org(organization.id),
@@ -23,8 +35,17 @@ export function useAnnouncements() {
   });
 
   const parentDashboardQuery = useQuery({
-    queryKey: parentQueryKeys.dashboard(organization.id, user.id),
-    queryFn: () => loadParentDashboard(organization.id, user.id),
+    queryKey: parentQueryKeys.dashboard(organization.id, user.id, scope),
+    queryFn: () => {
+      if (staff && parentPresentation) {
+        return loadDashboardForStaffViewMode(
+          organization.id,
+          user.id,
+          staffViewMode === "teacher" ? "preview" : staffViewMode,
+        );
+      }
+      return loadParentDashboard(organization.id, user.id);
+    },
     enabled: parentPresentation,
   });
 

@@ -25,6 +25,8 @@ export function OrgShellHeader() {
     showStaffViewToggle,
     staffViewMode,
     setStaffViewMode,
+    isParent,
+    isStudent,
     parentPresentation,
   } = useAppShell();
   const mobileOpen = useSidebarStore((state) => state.mobileOpen);
@@ -69,7 +71,12 @@ export function OrgShellHeader() {
           </span>
         ) : null}
         {showStaffViewToggle ? (
-          <StaffViewToggle mode={staffViewMode} onChange={setStaffViewMode} />
+          <StaffViewToggle
+            mode={staffViewMode}
+            onChange={setStaffViewMode}
+            isParent={isParent}
+            isStudent={isStudent}
+          />
         ) : null}
         <div className="flex shrink-0 items-center gap-1.5">
           <AccountMenu
