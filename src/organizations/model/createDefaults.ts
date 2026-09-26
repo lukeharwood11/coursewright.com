@@ -1,3 +1,4 @@
+import { DEFAULT_HOME_DAYS } from "./homeDays";
 import { DEFAULT_SCHOOL_DAYS } from "./schoolDays";
 
 export const K12_GRADE_LABELS = [
@@ -26,4 +27,5 @@ export const CREATE_ORG_DEFAULTS = {
   gradeScheme: "k12" as const,
   gradeLabels: [...K12_GRADE_LABELS],
   schoolDays: DEFAULT_SCHOOL_DAYS,
+  homeDays: DEFAULT_HOME_DAYS,
 };

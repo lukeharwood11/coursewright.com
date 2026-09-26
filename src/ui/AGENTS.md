@@ -6,6 +6,7 @@ Design-system primitives from [STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md).
 
 - Button, ButtonLink, Input, Select, Wordmark, Badge, PublishedBadge, Avatar, PageFormActions (optional desktop **Save & close**; optional **Close** when unchanged), ConfirmDialog, DescriptionDialog (Add / Edit description on editor headers), InfoHint, **ListCardLink** (shared feed-row card chrome for announcements / discussions), **PageLoading** (animated mark + optional label), **TabList** / **Tab** / **SegmentGroup** / **SegmentButton** (segmented control — same pattern as Resources All / Documents / Files / Links)
 - **DetailPageHeader** — shared detail-screen chrome (surface bar, compact title + inline back, meta, actions)
+- **VerticalReorderList** / **DragHandle** — Framer Motion drag-to-reorder lists (handle-only drag so links stay clickable)
 - `AnchoredPopup` — viewport-aware menus / tooltips (flip and stay in frame)
 - `InfoHint` — information-circle button + anchored tooltip (lesson plans, class leads, …)
 - `toastNotImplemented` / `toastSomethingWentWrong` / `toastCheckNetworkConnection` / `toastCaughtError` / `caughtErrorMessage` / `reportCaughtError` (sonner); `isNetworkError`; `useToastOnError` for load/mutation failures instead of page error copy (network failures toast “Check your network connection…”; other failures toast generic copy + log/PostHog)

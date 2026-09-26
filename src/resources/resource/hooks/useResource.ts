@@ -20,6 +20,11 @@ import {
   resourceItemQueryKeys,
   updateResourceItem,
 } from "@/resources/databridge/items";
+import {
+  listResourceVersions,
+  resourceVersionQueryKeys,
+  revertResourceToVersion,
+} from "@/resources/databridge/versions";
 import { itemCapabilities, type FolderAclSource } from "@/resources/model/access";
 import type { ResourceVisibility } from "@/resources/model/kinds";
 
@@ -107,6 +112,24 @@ export function useResource() {
       })
     : { canView: false, canEdit: false };
 
+  const versionsQuery = useQuery({
+    queryKey: resourceVersionQueryKeys.list(itemId),
+    queryFn: () => listResourceVersions(itemId),
+    enabled: Number.isFinite(itemId) && caps.canEdit,
+  });
+
+  function invalidateAll() {
+    void queryClient.invalidateQueries({
+      queryKey: resourceItemQueryKeys.detail(itemId),
+    });
+    void queryClient.invalidateQueries({
+      queryKey: resourceBlockQueryKeys.list(itemId),
+    });
+    void queryClient.invalidateQueries({
+      queryKey: resourceVersionQueryKeys.list(itemId),
+    });
+  }
+
   const visibility = useMutation({
     mutationFn: (next: ResourceVisibility) =>
       updateResourceItem(itemId, { visibility: next }),
@@ -125,9 +148,7 @@ export function useResource() {
     mutationFn: (folderId: number | null) =>
       updateResourceItem(itemId, { folderId }),
     onSuccess: (_updated, folderId) => {
-      void queryClient.invalidateQueries({
-        queryKey: resourceItemQueryKeys.detail(itemId),
-      });
+      invalidateAll();
       void queryClient.invalidateQueries({
         queryKey: resourceItemQueryKeys.list(organization.id, folderId),
       });
@@ -138,6 +159,11 @@ export function useResource() {
         queryKey: resourceFolderQueryKeys.all(organization.id),
       });
     },
+  });
+
+  const revert = useMutation({
+    mutationFn: (snapshot: unknown) => revertResourceToVersion(itemId, snapshot),
+    onSuccess: invalidateAll,
   });
 
   return {
@@ -152,6 +178,7 @@ export function useResource() {
     ancestors: ancestorsQuery.data ?? [],
     canEdit: caps.canEdit,
     isStaff,
+    versions: versionsQuery.data ?? [],
     loading: itemQuery.isLoading || folderPending,
     notFound: !itemQuery.isLoading && !item,
     error:
@@ -166,10 +193,7 @@ export function useResource() {
     visibilityPending: visibility.isPending,
     archive,
     move,
-    invalidate: () => {
-      void queryClient.invalidateQueries({
-        queryKey: resourceItemQueryKeys.detail(itemId),
-      });
-    },
+    revert,
+    invalidate: invalidateAll,
   };
 }

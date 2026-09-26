@@ -28,7 +28,10 @@ import {
   uploadDiscussionFile,
 } from "@/discussions/databridge/discussions";
 import { discussionPath, discussionsPath } from "@/discussions/model/paths";
-import type { DiscussionAudience } from "@/discussions/model/audience";
+import type {
+  DiscussionAudience,
+  DiscussionFamilyAudience,
+} from "@/discussions/model/audience";
 import { mentionedUserIdsFromDraft } from "@/discussions/model/mentions";
 import {
   composerStateToBody,
@@ -107,6 +110,7 @@ export function useDiscussionNew() {
       draft.audience,
       draft.courseId,
       draft.classId,
+      draft.familyAudience,
     ),
     queryFn: () =>
       listDiscussionAudienceMembers({
@@ -114,8 +118,10 @@ export function useDiscussionNew() {
         audience: draft.audience ?? "course",
         courseId: draft.courseId,
         classId: draft.classId,
+        familyAudience: draft.familyAudience,
       }),
     enabled:
+      draft.audience === "organization" ||
       (draft.audience === "course" && draft.courseId != null) ||
       (draft.audience === "class" && draft.classId != null),
   });
@@ -207,6 +213,7 @@ export function useDiscussionNew() {
     draft.audience !== initial.audience ||
     draft.courseId !== initial.courseId ||
     draft.classId !== initial.classId ||
+    draft.familyAudience !== initial.familyAudience ||
     draft.title !== initial.title ||
     draft.body !== initial.body ||
     notifyAll ||
@@ -215,8 +222,9 @@ export function useDiscussionNew() {
 
   const canSave =
     Boolean(draft.audience) &&
-    (draft.audience !== "course" || draft.courseId != null) &&
-    (draft.audience !== "class" || draft.classId != null) &&
+    (draft.audience === "organization" ||
+      (draft.audience === "course" && draft.courseId != null) ||
+      (draft.audience === "class" && draft.classId != null)) &&
     Boolean(draft.title.trim()) &&
     messageBodyHasContent(openingBody, attachmentContent) &&
     attachmentContent.every(
@@ -233,10 +241,19 @@ export function useDiscussionNew() {
     }));
   }
 
+  function setFamilyAudience(familyAudience: DiscussionFamilyAudience) {
+    setDraft((current) => ({ ...current, familyAudience }));
+  }
+
   const save = useMutation({
     mutationFn: async () => {
       if (!draft.audience) {
-        const message = "Choose a course or a class.";
+        const message = "Choose who this discussion is for.";
+        setFormError(message);
+        throw new Error(message);
+      }
+      if (draft.audience === "organization" && !canEdit) {
+        const message = "Only staff can start an organization discussion.";
         setFormError(message);
         throw new Error(message);
       }
@@ -335,11 +352,15 @@ export function useDiscussionNew() {
     lexical,
     setLexical,
     audience: draft.audience,
+    familyAudience: draft.familyAudience,
     courseId: draft.courseId,
     classId: draft.classId,
+    showOrganization: canEdit,
+    showFamilyAudience: canEdit,
     setTitle: (title: string) => setDraft((current) => ({ ...current, title })),
     setBody: (body: string) => setDraft((current) => ({ ...current, body })),
     setAudience,
+    setFamilyAudience,
     setCourseId: (courseId: number | null) =>
       setDraft((current) => ({ ...current, courseId })),
     setClassId: (classId: number | null) =>

@@ -1,6 +1,10 @@
 import type { SerializedEditorState } from "lexical";
 import type { BlockKind } from "./blocks";
 import { parseRichTextBody, parseVideoBody } from "./blocks";
+import {
+  type PageEditorSettings,
+  hasStoredPageEditorSettings,
+} from "./pageEditorSettings";
 import { parseQuizBody, type QuizBody } from "./quiz";
 
 export type LexicalJson = {
@@ -13,9 +17,14 @@ export type LexicalJson = {
   [key: string]: unknown;
 };
 
+export type RichTextBlockBody = {
+  lexical: SerializedEditorState;
+  editorSettings?: PageEditorSettings;
+};
+
 export type PageBlockDraft = {
   kind: BlockKind;
-  body: { lexical: SerializedEditorState } | { url: string };
+  body: RichTextBlockBody | { url: string };
   position: number;
   fileId: number | null;
 };
@@ -241,7 +250,10 @@ function flattenNonVideoNode(node: LexicalJson): PagePrintSegment[] {
   return [];
 }
 
-export function editorStateToBlocks(state: SerializedEditorState): PageBlockDraft[] {
+export function editorStateToBlocks(
+  state: SerializedEditorState,
+  editorSettings?: PageEditorSettings,
+): PageBlockDraft[] {
   const root = asLexicalJson(state.root);
   if (!root) return [];
   const drafts: PageBlockDraft[] = [];
@@ -280,6 +292,19 @@ export function editorStateToBlocks(state: SerializedEditorState): PageBlockDraf
     buffer.push(part.node);
   }
   flush();
+  if (
+    editorSettings &&
+    hasStoredPageEditorSettings(editorSettings) &&
+    drafts.length > 0
+  ) {
+    const firstRich = drafts.find((block) => block.kind === "rich_text");
+    if (firstRich && "lexical" in firstRich.body) {
+      firstRich.body = {
+        ...firstRich.body,
+        editorSettings,
+      };
+    }
+  }
   return drafts;
 }
 

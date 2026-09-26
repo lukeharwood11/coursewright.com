@@ -1,13 +1,13 @@
-import { ArrowDownIcon, ArrowUpIcon, ChevronDownIcon, PrinterIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, PrinterIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { ButtonLink } from "@/ui/Button";
+import { DragHandle, type DragHandleProps } from "@/ui/DragHandle";
 import { formatDateRange } from "@/courses/model/dates";
-import { MaterialRow } from "@/materials/material/components/MaterialRow";
 import type { MaterialRecord } from "@/materials/databridge/materials";
-import { QuizRow } from "@/quizzes/quiz/components/QuizRow";
 import type { QuizRecord } from "@/quizzes/databridge/quizzes";
-import { mergeOutline } from "@/quizzes/model/outline";
+import type { OutlineItem } from "@/quizzes/model/outline";
 import { UnitAddMenu } from "@/units/unit/components/UnitAddMenu";
+import { UnitOutlineList } from "@/units/unit/components/UnitOutlineList";
 import { unitPath, unitPrintPath } from "@/units/model/paths";
 import type { UnitRecord } from "@/units/databridge/units";
 
@@ -23,9 +23,8 @@ export function UnitCard({
   canEdit,
   expanded,
   onToggle,
-  onMoveUp,
-  onMoveDown,
-  isLast,
+  dragHandleProps,
+  onOutlineReorder,
 }: {
   orgSlug: string;
   organizationId: number;
@@ -45,20 +44,17 @@ export function UnitCard({
   canEdit: boolean;
   expanded: boolean;
   onToggle: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  isLast: boolean;
+  dragHandleProps: DragHandleProps | null;
+  onOutlineReorder: (ordered: OutlineItem[]) => void;
 }) {
   const dates = formatDateRange(unit.startDate, unit.endDate);
-  const outline = mergeOutline(materials, quizzes);
-  const materialById = new Map(materials.map((material) => [material.id, material]));
-  const quizById = new Map(quizzes.map((quiz) => [quiz.id, quiz]));
   const href = unitPath(orgSlug, unit.courseId, unit.id);
   const printHref = unitPrintPath(orgSlug, unit.courseId, unit.id);
+  const hasOutline = materials.length > 0 || quizzes.length > 0;
 
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]">
-      <div className="flex items-center gap-3 px-4 py-3">
+      <div className="flex items-center gap-2 px-2 py-3 sm:gap-3 sm:px-4">
         <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--green-tint)] text-[13px] font-extrabold text-[var(--green-deep)]">
           {index + 1}
         </span>
@@ -74,28 +70,6 @@ export function UnitCard({
             <span className="text-[12px] text-[var(--ink-faint)]">{dates}</span>
           ) : null}
         </button>
-        {canEdit ? (
-          <div className="flex shrink-0 flex-col">
-            <button
-              type="button"
-              className="text-[var(--ink-faint)] disabled:opacity-30"
-              disabled={index === 0}
-              onClick={onMoveUp}
-              aria-label="Move unit up"
-            >
-              <ArrowUpIcon className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              className="text-[var(--ink-faint)] disabled:opacity-30"
-              disabled={isLast}
-              onClick={onMoveDown}
-              aria-label="Move unit down"
-            >
-              <ArrowDownIcon className="h-4 w-4" />
-            </button>
-          </div>
-        ) : null}
         <ButtonLink
           variant="secondary"
           to={printHref}
@@ -104,6 +78,9 @@ export function UnitCard({
           <PrinterIcon className="h-4 w-4" aria-hidden />
           Print unit
         </ButtonLink>
+        {dragHandleProps ? (
+          <DragHandle {...dragHandleProps} label="Drag to reorder unit" />
+        ) : null}
         <ChevronDownIcon
           className={`h-5 w-5 shrink-0 text-[var(--ink-faint)] ${expanded ? "rotate-180" : ""} motion-reduce:transition-none`}
           aria-hidden
@@ -119,49 +96,20 @@ export function UnitCard({
               Open unit
             </Link>
           </p>
-          {outline.length > 0 ? (
-            <ul>
-              {outline.map((item) => {
-                if (item.kind === "quiz") {
-                  const quiz = quizById.get(item.id);
-                  if (!quiz) return null;
-                  return (
-                    <QuizRow
-                      key={`quiz-${quiz.id}`}
-                      orgSlug={orgSlug}
-                      courseId={unit.courseId}
-                      unitId={unit.id}
-                      quizId={quiz.id}
-                      title={quiz.title}
-                      description={quiz.description}
-                      visibility={quiz.visibility}
-                      acceptsFrom={quiz.acceptsFrom}
-                      acceptsUntil={quiz.acceptsUntil}
-                      acceptsTimezone={quiz.acceptsTimezone}
-                      attempt={attemptByQuizId?.get(quiz.id) ?? null}
-                    />
-                  );
-                }
-                const material = materialById.get(item.id);
-                if (!material) return null;
-                return (
-                  <MaterialRow
-                    key={material.id}
-                    orgSlug={orgSlug}
-                    courseId={unit.courseId}
-                    unitId={unit.id}
-                    materialId={material.id}
-                    title={material.title}
-                    description={material.description}
-                    kind={material.kind}
-                    scheduledDate={material.scheduledDate}
-                    dueDate={material.dueDate}
-                    importantNow={importantIds.has(material.id)}
-                    visibility={material.visibility}
-                  />
-                );
-              })}
-            </ul>
+          {hasOutline ? (
+            <div className="px-4 pb-2 pt-2">
+              <UnitOutlineList
+                orgSlug={orgSlug}
+                courseId={unit.courseId}
+                unitId={unit.id}
+                materials={materials}
+                quizzes={quizzes}
+                attemptByQuizId={attemptByQuizId}
+                importantIds={importantIds}
+                canEdit={canEdit}
+                onReorder={onOutlineReorder}
+              />
+            </div>
           ) : (
             <p className="px-4 py-3 text-[13.5px] text-[var(--ink-faint)]">
               No materials in this unit yet.

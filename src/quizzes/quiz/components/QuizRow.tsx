@@ -29,6 +29,8 @@ export function QuizRow({
   acceptsTimezone,
   attempt,
   fromUnitPage = false,
+  as: Root = "li",
+  className,
 }: {
   orgSlug: string;
   courseId: number;
@@ -46,15 +48,25 @@ export function QuizRow({
     ungradedAnswerCount: number;
   } | null;
   fromUnitPage?: boolean;
+  /** Use `div` when already inside an outer `<li>` (e.g. unit reorder row). */
+  as?: "li" | "div";
+  className?: string;
 }) {
   const href = quizPath({ orgSlug, courseId, unitId, quizId });
   const printHref = quizPrintPath({ orgSlug, courseId, unitId, quizId });
-  const assigned = quizAssignedDate(acceptsFrom ?? null, acceptsTimezone ?? null);
+  const opens = quizAssignedDate(acceptsFrom ?? null, acceptsTimezone ?? null);
   const due = quizDueDate(acceptsUntil ?? null, acceptsTimezone ?? null);
   const progress = quizOutlineProgress(attempt);
 
   return (
-    <li className="flex items-center gap-2 border-t border-[var(--line-soft)] px-4 py-2.5">
+    <Root
+      className={[
+        "flex items-center gap-2 border-t border-[var(--line-soft)] px-4 py-2.5",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <ClipboardDocumentCheckIcon className="h-5 w-5 shrink-0 text-[var(--ink-faint)]" aria-hidden />
       <Link
         to={href}
@@ -69,9 +81,9 @@ export function QuizRow({
           <Badge variant="slate">Quiz</Badge>
           {!isPublished(visibility) ? <Badge variant="amber">Unpublished</Badge> : null}
           <QuizProgressCue progress={progress} />
-          {assigned ? (
+          {opens ? (
             <span className="text-[12px] font-bold text-[var(--slate)]">
-              Assigned {formatIsoDate(assigned)}
+              Opens {formatIsoDate(opens)}
             </span>
           ) : null}
           {due ? (
@@ -89,7 +101,7 @@ export function QuizRow({
         <PrinterIcon className="h-4 w-4" aria-hidden />
         Print
       </ButtonLink>
-    </li>
+    </Root>
   );
 }
 

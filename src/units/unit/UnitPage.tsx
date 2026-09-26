@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDownIcon, ArrowUpIcon, PrinterIcon } from "@heroicons/react/24/outline";
+import { PrinterIcon } from "@heroicons/react/24/outline";
 import { Button, ButtonLink } from "@/ui/Button";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
@@ -10,9 +10,8 @@ import { PageFormActions } from "@/ui/PageFormActions";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { formatDateRange } from "@/courses/model/dates";
 import { coursePath } from "@/courses/model/paths";
-import { MaterialRow } from "@/materials/material/components/MaterialRow";
-import { QuizRow } from "@/quizzes/quiz/components/QuizRow";
 import { UnitAddMenu } from "./components/UnitAddMenu";
+import { UnitOutlineList } from "./components/UnitOutlineList";
 import { unitPath, unitPrintPath } from "@/units/model/paths";
 import { useUnit } from "./hooks/useUnit";
 
@@ -210,85 +209,26 @@ export function UnitPage() {
 
       <section className="mt-6">
         <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Materials</h2>
-        {page.materials.length > 0 ? (
-          <ul className="mt-2 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]">
-            {page.materials.map((material, index) => (
-              <li key={material.id} className="flex items-stretch">
-                {page.canEdit && !unit.deletedAt ? (
-                  <div className="flex flex-col justify-center gap-1 border-t border-[var(--line-soft)] px-2 first:border-t-0">
-                    <button
-                      type="button"
-                      className="text-[var(--ink-faint)] disabled:opacity-30"
-                      disabled={index === 0}
-                      onClick={() =>
-                        page.reorderMaterial.mutate({ id: material.id, direction: "up" })
-                      }
-                      aria-label="Move up"
-                    >
-                      <ArrowUpIcon className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      className="text-[var(--ink-faint)] disabled:opacity-30"
-                      disabled={index === page.materials.length - 1}
-                      onClick={() =>
-                        page.reorderMaterial.mutate({
-                          id: material.id,
-                          direction: "down",
-                        })
-                      }
-                      aria-label="Move down"
-                    >
-                      <ArrowDownIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : null}
-                <div className="min-w-0 flex-1">
-                  <MaterialRow
-                    as="div"
-                    orgSlug={page.organization.slug}
-                    courseId={course.id}
-                    unitId={unit.id}
-                    fromUnitPage
-                    materialId={material.id}
-                    title={material.title}
-                    description={material.description}
-                    kind={material.kind}
-                    scheduledDate={material.scheduledDate}
-                    dueDate={material.dueDate}
-                    importantNow={page.importantIds.has(material.id)}
-                    visibility={material.visibility}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
+        {page.materials.length > 0 || page.quizzes.length > 0 ? (
+          <div className="mt-2">
+            <UnitOutlineList
+              orgSlug={page.organization.slug}
+              courseId={course.id}
+              unitId={unit.id}
+              materials={page.materials}
+              quizzes={page.quizzes}
+              attemptByQuizId={page.attemptByQuizId}
+              importantIds={page.importantIds}
+              canEdit={page.canEdit && !unit.deletedAt}
+              fromUnitPage
+              onReorder={(ordered) => page.reorderOutline.mutate({ ordered })}
+            />
+          </div>
         ) : (
           <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">
             No materials in this unit yet.
           </p>
         )}
-        {page.quizzes.length > 0 ? (
-          <ul className="mt-3 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]">
-            {page.quizzes.map((quiz) => (
-              <QuizRow
-                key={quiz.id}
-                orgSlug={page.organization.slug}
-                courseId={course.id}
-                unitId={unit.id}
-                fromUnitPage
-                quizId={quiz.id}
-                title={quiz.title}
-                description={quiz.description}
-                visibility={quiz.visibility}
-                acceptsFrom={quiz.acceptsFrom}
-                acceptsUntil={quiz.acceptsUntil}
-                acceptsTimezone={quiz.acceptsTimezone}
-                attempt={page.attemptByQuizId.get(quiz.id) ?? null}
-              />
-            ))}
-          </ul>
-        ) : null}
         {page.canEdit && !unit.deletedAt ? (
           <div className="mt-3">
             <UnitAddMenu

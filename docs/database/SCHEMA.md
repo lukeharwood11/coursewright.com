@@ -49,7 +49,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | EventMaterial | `event_materials` | Existing course materials linked from an event |
 | Announcement | `announcements` | One-way notice to one or more courses, classes, or students (same kind) |
 | AnnouncementRead | `announcement_reads` | Per-user read receipt (clears the notification icon) |
-| Discussion | `discussions` | **P1** — two-way thread for one course or one class |
+| Discussion | `discussions` | **P1** — two-way thread for one course, one class, or the organization |
 | DiscussionMessage | `discussion_messages` | **P1** — flat post; body plain or Lexical (+ optional quote in body) |
 | DiscussionMessageAttachment | `discussion_message_attachments` | **P1** — file / material / url on a message |
 | DiscussionRead | `discussion_reads` | **P1** — per-user last read (unread badge) |
@@ -60,6 +60,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | OrgResourceItem | `org_resource_items` | **P1a** — document · link · file; not a course material |
 | OrgResourceBlock | `org_resource_blocks` | **P1a** — Lexical body on document items |
 | OrgResourceGrant | `org_resource_grants` | **P1a** — extra read/write for a person on a folder or item |
+| OrgResourceVersion | `org_resource_versions` | **P1a** — snapshot includes item row + blocks array |
 | CourseResourceLink | `course_resource_links` | Shortcut from a course to an org Resource folder or item |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates + published lesson plans (Sunday–Saturday). |
 | Page quiz | `blocks` body | Lexical `quiz` node on a page. Print only. Not a material kind |
@@ -348,6 +349,7 @@ UI map: [URLS.md](../URLS.md), [PRINT](../pages/PRINT.md).
 | grade_scheme | text | `none` · `k12` · `custom` |
 | grade_labels | text[] | Allowed labels for student `grade_level` and course/template `grade_levels`. K–12 preset includes K, 1–12, and common bands (K-2, 3-5, 6-8, 9-12). Custom is org-defined. |
 | school_days | smallint[] | Weekdays the org operates. Values match JS `Date.getDay()` (`0` Sunday … `6` Saturday). Default `{1,2,3,4,5}` (Mon–Fri). At least one unique value in `0..6`. Lesson-plan compose defaults to these days; the Sunday–Saturday week model is unchanged. |
+| home_days | smallint[] | Weekdays students usually learn at home. Same encoding as `school_days`. Default `{}` (unset). Optional; calendar and lesson plans show a home icon on matching days. |
 | about | text | Optional in-app about blurb (max 4000). Shown on org home when set. Not a public marketing page. |
 | address | text | Optional free-text location / mailing address (max 500). |
 | website | text | Optional external URL (max 200). |
@@ -1060,7 +1062,7 @@ Parents and students insert their own row when they open the notice. That clears
 
 CourseSummary, Grade, InstructorNote, ChecklistItem. **OrgSubscription** = Course Wright charging the org.
 
-**Discussions** (in progress — product rules in [FEATURES.md](../FEATURES.md)): a two-way thread for **one course** or **one class**. Distinct from announcements.
+**Discussions** (in progress — product rules in [FEATURES.md](../FEATURES.md)): a two-way thread for **one course**, **one class**, or the **organization**. Distinct from announcements.
 
 ### Discussion
 
@@ -1068,7 +1070,8 @@ CourseSummary, Grade, InstructorNote, ChecklistItem. **OrgSubscription** = Cours
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
-| audience | text | `course` · `class` |
+| audience | text | `course` · `class` · `organization` |
+| family_audience | text | `parents` · `students` · `both` — which family roles can see and post (staff always see org threads). Default `both` |
 | course_id | bigint | FK → Course when `audience = course`; else null |
 | class_id | bigint | FK → Class when `audience = class`; else null |
 | title | text | required |
@@ -1082,7 +1085,7 @@ CourseSummary, Grade, InstructorNote, ChecklistItem. **OrgSubscription** = Cours
 | deleted_at | timestamptz | soft delete |
 | deleted_by | uuid | FK → User, nullable |
 
-**Audience:** exactly one kind, with exactly **one** matching FK and the other null. The course or class must belong to the same organization. Audience cannot change after insert.
+**Audience:** exactly one kind. **Course** or **class** sets the matching FK; **organization** leaves both null. The course or class must belong to the same organization. Audience cannot change after insert. **Organization** threads may be started by org staff only; `family_audience` limits parents and/or student accounts (e.g. parents-only staff discussion).
 
 **Answered:** `answered_at` / `answered_by` set together; cleared together to unmark. Does **not** lock posting. Who may update these columns: `created_by`, or org staff who can see the row.
 
@@ -1285,7 +1288,7 @@ Course ──< ShareLink
 **P1 (additive):**
 
 ```
-Organization ──< Discussion (one course | one class)
+Organization ──< Discussion (one course | one class | organization)
 Discussion ──< DiscussionMessage (flat; body may include Teams-style quote)
 DiscussionMessage ──< DiscussionMessageAttachment >── File | Material | url
 DiscussionMessage ──< DiscussionMessageMention >── User

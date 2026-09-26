@@ -210,7 +210,7 @@ export function chipsForMaterials(
   return chips;
 }
 
-/** Assigned = accepts_from wall date; due = accepts_until wall date. */
+/** Due only on the calendar (`accepts_until` wall date). Opens is not shown as a chip. */
 export function chipsForQuizzes(
   quizzes: Array<{
     id: number;
@@ -218,7 +218,6 @@ export function chipsForQuizzes(
     courseId: number;
     courseTitle: string;
     colorKey: CourseColorKey;
-    assignedDate: string | null;
     dueDate: string | null;
     unitId: number | null;
     unpublished: boolean;
@@ -226,20 +225,6 @@ export function chipsForQuizzes(
 ): CalendarMaterialChip[] {
   const chips: CalendarMaterialChip[] = [];
   for (const quiz of quizzes) {
-    if (quiz.assignedDate) {
-      chips.push({
-        itemKind: "quiz",
-        materialId: quiz.id,
-        title: quiz.title,
-        courseId: quiz.courseId,
-        courseTitle: quiz.courseTitle,
-        colorKey: quiz.colorKey,
-        date: quiz.assignedDate,
-        kind: "assigned",
-        unitId: quiz.unitId,
-        unpublished: quiz.unpublished,
-      });
-    }
     if (quiz.dueDate) {
       chips.push({
         itemKind: "quiz",

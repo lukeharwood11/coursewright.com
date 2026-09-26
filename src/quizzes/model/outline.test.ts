@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mergeOutline, nextOutlinePosition } from "./outline";
+import { mergeOutline, nextOutlinePosition, outlinePositionPatches } from "./outline";
 
 test("outline mixes materials and quizzes by position", () => {
   assert.deepEqual(
@@ -23,5 +23,20 @@ test("outline mixes materials and quizzes by position", () => {
       [{ id: 9, position: 4 }],
     ),
     5,
+  );
+});
+
+test("outline position patches reindex after drag", () => {
+  assert.deepEqual(
+    outlinePositionPatches([
+      { kind: "material", id: 2, position: 1 },
+      { kind: "quiz", id: 9, position: 0 },
+      { kind: "material", id: 1, position: 0 },
+    ]),
+    [
+      { kind: "material", id: 2, position: 0 },
+      { kind: "quiz", id: 9, position: 1 },
+      { kind: "material", id: 1, position: 2 },
+    ],
   );
 });

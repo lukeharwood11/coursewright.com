@@ -23,6 +23,7 @@ export function MaterialRow({
   visibility,
   fromUnitPage = false,
   as: Root = "li",
+  className,
 }: {
   orgSlug: string;
   courseId: number;
@@ -38,6 +39,7 @@ export function MaterialRow({
   visibility: MaterialVisibility;
   /** Use `div` when already inside an outer `<li>` (e.g. unit reorder row). */
   as?: "li" | "div";
+  className?: string;
 }) {
   const href = materialPath({ orgSlug, courseId, unitId, materialId });
   const printHref = materialPrintPath({ orgSlug, courseId, unitId, materialId });
@@ -45,7 +47,14 @@ export function MaterialRow({
     kind === "link" ? LinkIcon : kind === "file" ? DocumentIcon : DocumentTextIcon;
 
   return (
-    <Root className="flex items-center gap-2 border-t border-[var(--line-soft)] px-4 py-2.5 first:border-t-0">
+    <Root
+      className={[
+        "flex items-center gap-2 border-t border-[var(--line-soft)] px-4 py-2.5 first:border-t-0",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <Icon className="h-5 w-5 shrink-0 text-[var(--ink-faint)]" aria-hidden />
       <Link
         to={href}
@@ -68,7 +77,7 @@ export function MaterialRow({
           ) : null}
           {scheduledDate ? (
             <span className="text-[12px] font-bold text-[var(--slate)]">
-              Assigned {formatIsoDate(scheduledDate)}
+              For {formatIsoDate(scheduledDate)}
             </span>
           ) : null}
           {dueDate ? (

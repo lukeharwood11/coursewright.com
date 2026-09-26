@@ -1,7 +1,7 @@
 import type { ComponentType, SVGProps } from "react";
 import {
-  Bars3BottomLeftIcon,
   ChatBubbleBottomCenterTextIcon,
+  DocumentTextIcon,
   H1Icon,
   H2Icon,
   H3Icon,
@@ -23,7 +23,7 @@ export const BLOCK_LABELS: Record<PageBlockType, string> = {
 };
 
 export const BLOCK_ICONS: Record<PageBlockType, Icon> = {
-  paragraph: Bars3BottomLeftIcon,
+  paragraph: DocumentTextIcon,
   h1: H1Icon,
   h2: H2Icon,
   h3: H3Icon,

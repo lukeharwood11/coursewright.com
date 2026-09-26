@@ -9,6 +9,11 @@ import {
   type OrgProfileFields,
 } from "./orgProfile";
 import {
+  normalizeHomeDays,
+  sameHomeDays,
+  type HomeDay,
+} from "./homeDays";
+import {
   normalizeSchoolDays,
   sameSchoolDays,
   type SchoolDay,
@@ -22,6 +27,7 @@ export type UpdateOrganizationInput = {
   gradeScheme: string;
   gradeLabels: string[];
   schoolDays: number[];
+  homeDays: number[];
   about: string;
   address: string;
   website: string;
@@ -38,6 +44,7 @@ export type ValidatedUpdateOrganization = {
   gradeScheme: "none" | "k12" | "custom";
   gradeLabels: string[];
   schoolDays: SchoolDay[];
+  homeDays: HomeDay[];
   about: string | null;
   address: string | null;
   website: string | null;
@@ -99,6 +106,8 @@ export function validateUpdateOrganization(
     return { ok: false, error: "Choose at least one school day." };
   }
 
+  const homeDays = normalizeHomeDays(input.homeDays);
+
   const profile = parseOrgProfile({
     about: input.about,
     address: input.address,
@@ -117,6 +126,7 @@ export function validateUpdateOrganization(
       gradeScheme,
       gradeLabels,
       schoolDays,
+      homeDays,
       ...profile.value,
       slugChanged,
     },
@@ -130,6 +140,7 @@ export type OrgSettingsDraft = {
   gradeScheme: string;
   gradeLabelsText: string;
   schoolDays: SchoolDay[];
+  homeDays: HomeDay[];
   about: string;
   address: string;
   website: string;
@@ -144,6 +155,7 @@ export type OrgSettingsSaved = {
   gradeScheme: string;
   gradeLabels: string[];
   schoolDays: SchoolDay[];
+  homeDays: HomeDay[];
 } & OrgProfileFields;
 
 function sameLabels(left: string[], right: string[]): boolean {
@@ -166,6 +178,7 @@ export function orgIdentityHaveChanges(
   if (draft.orgType !== saved.orgType) return true;
   if (draft.gradeScheme !== saved.gradeScheme) return true;
   if (!sameSchoolDays(draft.schoolDays, saved.schoolDays)) return true;
+  if (!sameHomeDays(draft.homeDays, saved.homeDays)) return true;
   if (draft.gradeScheme === "custom") {
     return !sameLabels(parseGradeLabels(draft.gradeLabelsText), saved.gradeLabels);
   }

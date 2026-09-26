@@ -16,6 +16,7 @@ import {
   VisibilityBanner,
 } from "@/materials/material/components/VisibilityBanner";
 import { LessonPlanMaterialList } from "./components/LessonPlanMaterialList";
+import { OrgDayTypeIcons } from "@/organizations/components/OrgDayTypeIcons";
 import { useLessonPlan } from "./hooks/useLessonPlan";
 import { useToastOnError } from "@/ui/useToastOnError";
 
@@ -158,8 +159,13 @@ export function LessonPlanPage() {
               key={day.date}
               className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4"
             >
-              <h2 className="text-[14px] font-extrabold text-[var(--ink)]">
+              <h2 className="flex items-center gap-1.5 text-[14px] font-extrabold text-[var(--ink)]">
                 {weekdayDateLabel(day.date)}
+                <OrgDayTypeIcons
+                  date={day.date}
+                  schoolDays={page.organization.schoolDays}
+                  homeDays={page.organization.homeDays}
+                />
               </h2>
               {day.body ? (
                 <p className="mt-2 whitespace-pre-wrap text-[13.5px] leading-relaxed text-[var(--ink)]">

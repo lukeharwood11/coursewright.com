@@ -4,6 +4,7 @@ import {
   expandEventsInRange,
   visibleEvents,
   chipsForMaterials,
+  chipsForQuizzes,
   chipsOutsideLessonPlans,
   dayHasCalendarContent,
   filterCourses,
@@ -293,4 +294,23 @@ test("events expand onto each day and follow the course legend", () => {
     [5, 6],
   );
   assert.equal(dayHasCalendarContent("2026-09-22", [], [], chips), true);
+});
+
+test("quiz calendar chips are due only, not opens", () => {
+  const chips = chipsForQuizzes([
+    {
+      id: 9,
+      title: "Chapter quiz",
+      courseId: 10,
+      courseTitle: "Science",
+      colorKey: "moss",
+      dueDate: "2026-09-18",
+      unitId: 3,
+      unpublished: false,
+    },
+  ]);
+  assert.equal(chips.length, 1);
+  assert.equal(chips[0]?.kind, "due");
+  assert.equal(chips[0]?.itemKind, "quiz");
+  assert.equal(chips[0]?.date, "2026-09-18");
 });

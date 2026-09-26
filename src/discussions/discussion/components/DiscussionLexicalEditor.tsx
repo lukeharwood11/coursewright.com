@@ -29,6 +29,7 @@ import { FloatingFormatToolbar } from "@/materials/material/components/page-edit
 import { KeyboardShortcutsPlugin } from "@/materials/material/components/page-editor/KeyboardShortcutsPlugin";
 import { PageEditorActionsProvider } from "@/materials/material/components/page-editor/PageEditorActions";
 import { PageEditorToolbar } from "@/materials/material/components/page-editor/PageEditorToolbar";
+import { DISCUSSION_EDITOR_TEXT_DEFAULTS } from "@/materials/material/components/page-editor/textFormatting";
 import { SlashCommandPlugin } from "@/materials/material/components/page-editor/SlashCommandPlugin";
 import {
   DISCUSSION_EDITOR_NODES,
@@ -40,8 +41,6 @@ import { emptyLexicalState } from "@/discussions/model/messageBody";
 import type { MentionPerson } from "@/discussions/model/mentions";
 import { $nodesFromPlainMentionText, MentionNode } from "./MentionNode";
 import { MentionTypeaheadPlugin } from "./MentionTypeaheadPlugin";
-
-const DISCUSSION_EDITOR_FEATURES = { quiz: false } as const;
 
 function SeedPlainTextPlugin({
   text,
@@ -181,8 +180,10 @@ export function DiscussionLexicalEditor({
     >
       <div className={shellClass}>
         {editable ? (
-          <PageEditorActionsProvider features={DISCUSSION_EDITOR_FEATURES}>
-            {simple ? null : <PageEditorToolbar />}
+          <PageEditorActionsProvider>
+            {simple ? null : (
+              <PageEditorToolbar textDefaults={DISCUSSION_EDITOR_TEXT_DEFAULTS} />
+            )}
             <div className={endSlot ? "flex items-end gap-0.5" : "relative"}>
               <div className={endSlot ? "relative min-w-0 flex-1" : undefined}>
                 <RichTextPlugin

@@ -113,6 +113,8 @@ export function LessonPlanEditPage() {
           onDayBody={page.setDayBody}
           onToggleMaterial={page.toggleDayMaterial}
           onAddDay={page.addDay}
+          schoolDays={page.organization.schoolDays}
+          homeDays={page.organization.homeDays}
         />
         {page.formError ? (
           <p className="mt-4 text-[13px] text-[var(--amber-deep)]" role="alert">

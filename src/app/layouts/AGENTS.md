@@ -28,5 +28,5 @@ App chrome: collapsible sidebar + top bar for signed-in `/my` pages.
 ## Don’t
 
 - Put marketing or login in this shell.
-- Invent extra search facets here — chrome mounts `search/`’s org search bar (staff only).
+- Invent extra search facets here — chrome mounts `search/`’s org search bar for all org members.
 - Put Activity in the sidebar — chrome mounts `notifications/`’s header bell.

@@ -9,6 +9,14 @@ import { materialPath } from "@/materials/model/paths";
 import { quizPath } from "@/quizzes/model/paths";
 import type { CalendarChipKind } from "@/calendar/model/events";
 
+export function materialChipDisplayTitle(
+  title: string,
+  kind: CalendarChipKind | "both" | "plain",
+): string {
+  if (kind === "due" || kind === "both") return `Due: ${title}`;
+  return title;
+}
+
 export function MaterialChip({
   orgSlug,
   courseId,
@@ -42,6 +50,7 @@ export function MaterialChip({
       : kind === "assigned"
         ? BookmarkIcon
         : DocumentTextIcon;
+  const displayTitle = materialChipDisplayTitle(title, kind);
   const kindLabel =
     kind === "due" ? "Due" : kind === "assigned" ? "Assigned" : kind === "both" ? "Assigned · Due" : null;
   const href =
@@ -62,13 +71,13 @@ export function MaterialChip({
         background: filled ? color : "transparent",
         border: outlined ? `1.5px solid ${color}` : "1.5px solid transparent",
       }}
-      title={`${title}${kindLabel ? ` · ${kindLabel}` : ""}`}
+      title={unpublished ? `${displayTitle} · draft` : displayTitle}
     >
       {withIcon ? (
         <Icon className="h-4 w-4 shrink-0" aria-hidden />
       ) : null}
       <span className="min-w-0 truncate">
-        {title}
+        {displayTitle}
         {unpublished ? " · draft" : ""}
       </span>
       {withIcon && kindLabel ? (

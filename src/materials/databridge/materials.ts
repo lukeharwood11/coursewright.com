@@ -255,8 +255,17 @@ export type MaterialVersionRecord = {
   version: number;
   changedAt: string;
   changeType: string;
+  changedByName: string | null;
   snapshot: unknown;
 };
+
+function versionChangerName(
+  value: { name: string | null } | { name: string | null }[] | null,
+): string | null {
+  const row = Array.isArray(value) ? value[0] : value;
+  const name = row?.name?.trim();
+  return name ? name : null;
+}
 
 export async function listMaterialVersions(
   materialId: number,
@@ -264,7 +273,9 @@ export async function listMaterialVersions(
   const db = requireSupabase();
   const { data, error } = await db
     .from("material_versions")
-    .select("version, changed_at, change_type, snapshot")
+    .select(
+      "version, changed_at, change_type, snapshot, changer:profiles!material_versions_changed_by_fkey(name)",
+    )
     .eq("material_id", materialId)
     .order("version", { ascending: false });
 
@@ -273,6 +284,7 @@ export async function listMaterialVersions(
     version: row.version,
     changedAt: row.changed_at,
     changeType: row.change_type,
+    changedByName: versionChangerName(row.changer),
     snapshot: row.snapshot,
   }));
 }

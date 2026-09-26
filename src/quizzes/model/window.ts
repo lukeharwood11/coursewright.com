@@ -91,7 +91,7 @@ export function viewerTimeZone(saved: string | null): string {
   return saved || browserTimeZone();
 }
 
-/** Calendar date for Assigned (accepts_from wall date in the quiz zone). */
+/** Calendar date when the quiz opens (`accepts_from` wall date in the quiz zone). */
 export function quizAssignedDate(
   acceptsFrom: string | null,
   acceptsTimezone: string | null,

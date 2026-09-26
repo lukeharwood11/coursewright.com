@@ -26,6 +26,9 @@ export function ResourceEditHeaderActions({
   cancelTo,
   descriptionLabel,
   onDescription,
+  versionHistoryLabel = "Version history",
+  onVersionHistory,
+  versionHistoryDisabled = false,
   commitTitle,
   onSaveAndClose,
 }: {
@@ -35,6 +38,9 @@ export function ResourceEditHeaderActions({
   cancelTo: string;
   descriptionLabel: string;
   onDescription: () => void;
+  versionHistoryLabel?: string;
+  onVersionHistory?: () => void;
+  versionHistoryDisabled?: boolean;
   commitTitle: () => Promise<boolean>;
   onSaveAndClose: () => void | Promise<void>;
 }) {
@@ -67,6 +73,16 @@ export function ResourceEditHeaderActions({
         <button type="button" className={descriptionClassName} onClick={onDescription}>
           {descriptionLabel}
         </button>
+        {onVersionHistory ? (
+          <button
+            type="button"
+            className={descriptionClassName}
+            disabled={versionHistoryDisabled}
+            onClick={onVersionHistory}
+          >
+            {versionHistoryLabel}
+          </button>
+        ) : null}
         <PageFormActions
           formId={formId}
           saving={saving}
@@ -112,6 +128,20 @@ export function ResourceEditHeaderActions({
           >
             {descriptionLabel}
           </button>
+          {onVersionHistory ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={itemClassName}
+              disabled={versionHistoryDisabled}
+              onClick={() => {
+                setOpen(false);
+                onVersionHistory();
+              }}
+            >
+              {versionHistoryLabel}
+            </button>
+          ) : null}
           <button type="button" role="menuitem" className={itemClassName} onClick={onLeave}>
             <XMarkIcon className="h-4 w-4 shrink-0" aria-hidden />
             {leaveLabel}

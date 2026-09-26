@@ -1,6 +1,6 @@
 # AGENTS — `src/discussions/`
 
-Two-way **discussions**: a thread for **one course** or **one class**. Title, flat posts, Teams-style **Quote** in the message body, plain or Lexical composer (**T**), **@mentions**, attachments, answered state. Live updates while the SPA is open.
+Two-way **discussions**: a thread for **one course**, **one class**, or the **organization**. Staff may set **family visibility** (parents / students / both). Title, flat posts, Teams-style **Quote** in the message body, plain or Lexical composer (**T**), **@mentions**, attachments, answered state. Live updates while the SPA is open.
 
 **Status:** product is **P1 / in progress** — [FEATURES.md](../../docs/FEATURES.md).
 
@@ -16,7 +16,7 @@ Two-way **discussions**: a thread for **one course** or **one class**. Title, fl
 
 ## Rules
 
-- Audience is **one course or one class** — not mixed, not a list of students in this slice.
+- Audience is **one course**, **one class**, or the **organization** — not mixed targets. **family_audience** limits parents vs student accounts; staff always see org threads.
 - Families start a thread only for a course their child is enrolled in (active + published) or a class their child is in.
 - Everyone who can see the thread can post, except an **Observer** (view-only, including additive parent). Timeline is **flat**; **Quote** is body content, not nested replies / quote columns.
 - Author of the thread or staff who can see it mark **answered** (and unmark). Answered does not lock posting.

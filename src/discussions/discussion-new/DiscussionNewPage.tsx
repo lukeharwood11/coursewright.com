@@ -59,7 +59,7 @@ export function DiscussionNewPage() {
             New discussion
           </h1>
           <p className="mt-2 text-[14px] text-[var(--ink-soft)]">
-            Start a thread for one course or one class. Everyone on it can post.
+            Start a thread for a course, a class, or the whole organization.
           </p>
           <p className="mt-3 text-[13px]">
             <Link
@@ -88,6 +88,7 @@ export function DiscussionNewPage() {
         <div className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
           <DiscussionNewFormFields
             audience={page.audience}
+            familyAudience={page.familyAudience}
             courseId={page.courseId}
             classId={page.classId}
             title={page.title}
@@ -95,7 +96,10 @@ export function DiscussionNewPage() {
             classes={page.classes}
             courseEmptyHint={page.courseEmptyHint}
             classEmptyHint={page.classEmptyHint}
+            showOrganization={page.showOrganization}
+            showFamilyAudience={page.showFamilyAudience}
             onAudience={page.setAudience}
+            onFamilyAudience={page.setFamilyAudience}
             onCourseId={page.setCourseId}
             onClassId={page.setClassId}
             onTitle={page.setTitle}

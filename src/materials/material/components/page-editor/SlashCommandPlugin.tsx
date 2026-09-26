@@ -11,7 +11,6 @@ import {
   MicrophoneIcon,
   MinusIcon,
   PaperClipIcon,
-  QuestionMarkCircleIcon,
   TableCellsIcon,
   VideoCameraIcon,
 } from "@heroicons/react/24/outline";
@@ -74,17 +73,9 @@ export function SlashCommandPlugin() {
       { id: "video", title: "Video", keywords: ["embed", "youtube"] },
       { id: "divider", title: "Divider", keywords: ["line", "horizontal", "hr"] },
     ];
-    if (actions.features.quiz) {
-      extra.splice(3, 0, {
-        id: "quiz",
-        title: "Quiz",
-        keywords: ["question", "test"],
-      });
-    }
     if (actions.canAttachFile) {
-      const fileIndex = actions.features.quiz ? 4 : 3;
       extra.splice(
-        fileIndex,
+        3,
         0,
         {
           id: "file",
@@ -99,7 +90,7 @@ export function SlashCommandPlugin() {
       );
     }
     return [...blocks, ...extra];
-  }, [actions.canAttachFile, actions.features.quiz]);
+  }, [actions.canAttachFile]);
 
   const options = useMemo(() => {
     const query = queryString ?? "";
@@ -207,15 +198,6 @@ function toSlashOption(
       keywords: ["video"],
       glyph: <VideoCameraIcon className="h-4 w-4" />,
       onSelect: actions.openVideoDialog,
-    });
-  }
-  if (id === "quiz") {
-    return new SlashOption({
-      id,
-      title: "Quiz",
-      keywords: ["quiz"],
-      glyph: <QuestionMarkCircleIcon className="h-4 w-4" />,
-      onSelect: actions.insertQuiz,
     });
   }
   if (id === "file") {

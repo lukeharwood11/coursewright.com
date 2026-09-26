@@ -133,6 +133,7 @@ export function ParentHome({
           previewKind={previewKind}
           isCurrentWeek={isCurrentWeek}
           schoolDays={organization.schoolDays}
+          homeDays={organization.homeDays}
           orgType={organization.orgType}
           onToggleStudent={(id) =>
             setActiveIds(toggleStudentId(selectedIds, id))

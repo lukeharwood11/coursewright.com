@@ -1,10 +1,17 @@
 import type { ComponentType, SVGProps } from "react";
-import { BookOpenIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import {
+  BookOpenIcon,
+  BuildingOffice2Icon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
 import { Input } from "@/ui/Input";
 import { Select } from "@/ui/Select";
 import {
   discussionAudienceLabel,
+  discussionFamilyAudienceLabel,
+  DISCUSSION_FAMILY_AUDIENCES,
   type DiscussionAudience,
+  type DiscussionFamilyAudience,
 } from "@/discussions/model/audience";
 import type { CourseSummary } from "@/courses/databridge/courses";
 import type { ClassSummary } from "@/roster/databridge/classes";
@@ -17,16 +24,23 @@ const segmentActive =
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
-const audienceOptions: Array<{
+function audienceOptionsFor(showOrganization: boolean): Array<{
   value: DiscussionAudience;
   Icon: IconComponent;
-}> = [
-  { value: "course", Icon: BookOpenIcon },
-  { value: "class", Icon: UserGroupIcon },
-];
+}> {
+  const options: Array<{ value: DiscussionAudience; Icon: IconComponent }> = [
+    { value: "course", Icon: BookOpenIcon },
+    { value: "class", Icon: UserGroupIcon },
+  ];
+  if (showOrganization) {
+    options.push({ value: "organization", Icon: BuildingOffice2Icon });
+  }
+  return options;
+}
 
 export function DiscussionNewFormFields({
   audience,
+  familyAudience,
   courseId,
   classId,
   title,
@@ -34,7 +48,10 @@ export function DiscussionNewFormFields({
   classes,
   courseEmptyHint,
   classEmptyHint,
+  showOrganization,
+  showFamilyAudience,
   onAudience,
+  onFamilyAudience,
   onCourseId,
   onClassId,
   onTitle,
@@ -43,6 +60,7 @@ export function DiscussionNewFormFields({
   onNotifyAll,
 }: {
   audience: DiscussionAudience | null;
+  familyAudience: DiscussionFamilyAudience;
   courseId: number | null;
   classId: number | null;
   title: string;
@@ -50,7 +68,10 @@ export function DiscussionNewFormFields({
   classes: ClassSummary[];
   courseEmptyHint: string;
   classEmptyHint: string;
+  showOrganization: boolean;
+  showFamilyAudience: boolean;
   onAudience: (value: DiscussionAudience) => void;
+  onFamilyAudience: (value: DiscussionFamilyAudience) => void;
   onCourseId: (value: number | null) => void;
   onClassId: (value: number | null) => void;
   onTitle: (value: string) => void;
@@ -58,6 +79,7 @@ export function DiscussionNewFormFields({
   notifyAll?: boolean;
   onNotifyAll?: (value: boolean) => void;
 }) {
+  const audienceOptions = audienceOptionsFor(showOrganization);
   return (
     <>
       <fieldset>
@@ -90,6 +112,42 @@ export function DiscussionNewFormFields({
           })}
         </div>
       </fieldset>
+
+      {showFamilyAudience && audience != null ? (
+        <fieldset className="mt-4">
+          <legend className="text-[13px] font-bold text-[var(--ink-soft)]">
+            Who in families can see this?
+          </legend>
+          <div
+            className="mt-2 flex w-full overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--surface)]"
+            role="group"
+            aria-label="Family audience"
+          >
+            {DISCUSSION_FAMILY_AUDIENCES.map((value, index) => {
+              const active = familyAudience === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={active}
+                  className={`${active ? segmentActive : segmentIdle}${
+                    index < DISCUSSION_FAMILY_AUDIENCES.length - 1
+                      ? " border-r border-[var(--line)]"
+                      : ""
+                  }`}
+                  onClick={() => onFamilyAudience(value)}
+                >
+                  {discussionFamilyAudienceLabel(value)}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1.5 text-[12.5px] text-[var(--ink-faint)]">
+            Staff can always see and post. Choose parents only to keep student
+            accounts out of the thread.
+          </p>
+        </fieldset>
+      ) : null}
 
       {audience === "course" ? (
         <label className="mt-4 flex flex-col gap-1">
@@ -176,7 +234,7 @@ export function DiscussionNewFormFields({
             </span>
             <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
               Also send this first post to everyone who can see the discussion.
-              Course instructors or class leads are notified either way.
+              Course instructors, class leads, or org staff are notified either way.
             </span>
           </span>
         </label>

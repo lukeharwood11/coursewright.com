@@ -1,22 +1,49 @@
-export const DISCUSSION_AUDIENCES = ["course", "class"] as const;
+export const DISCUSSION_AUDIENCES = ["course", "class", "organization"] as const;
 export type DiscussionAudience = (typeof DISCUSSION_AUDIENCES)[number];
+
+export const DISCUSSION_FAMILY_AUDIENCES = ["parents", "students", "both"] as const;
+export type DiscussionFamilyAudience = (typeof DISCUSSION_FAMILY_AUDIENCES)[number];
 
 export function parseDiscussionAudience(
   value: string | null | undefined,
 ): DiscussionAudience | null {
-  if (value === "course" || value === "class") return value;
+  if (value === "course" || value === "class" || value === "organization") {
+    return value;
+  }
   return null;
 }
 
+export function parseDiscussionFamilyAudience(
+  value: string | null | undefined,
+): DiscussionFamilyAudience {
+  if (value === "parents" || value === "students") return value;
+  return "both";
+}
+
 export function discussionAudienceLabel(audience: DiscussionAudience): string {
-  return audience === "course" ? "Course" : "Class";
+  if (audience === "course") return "Course";
+  if (audience === "class") return "Class";
+  return "Organization";
+}
+
+export function discussionFamilyAudienceLabel(
+  familyAudience: DiscussionFamilyAudience,
+): string {
+  if (familyAudience === "parents") return "Parents";
+  if (familyAudience === "students") return "Students";
+  return "Both";
 }
 
 export function discussionTargetName(item: {
   audience: DiscussionAudience;
+  organizationName?: string | null;
   courseTitle: string | null;
   classTitle: string | null;
 }): string {
+  if (item.audience === "organization") {
+    const name = item.organizationName?.trim();
+    return name ? `Everyone in ${name}` : "Organization";
+  }
   if (item.audience === "course") {
     const title = item.courseTitle?.trim();
     return title || "Course";

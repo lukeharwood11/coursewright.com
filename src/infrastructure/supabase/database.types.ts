@@ -899,6 +899,7 @@ export type Database = {
           answered_at: string | null
           answered_by: string | null
           audience: string
+          family_audience: string
           class_id: number | null
           course_id: number | null
           created_at: string
@@ -916,6 +917,7 @@ export type Database = {
           answered_at?: string | null
           answered_by?: string | null
           audience: string
+          family_audience?: string
           class_id?: number | null
           course_id?: number | null
           created_at?: string
@@ -933,6 +935,7 @@ export type Database = {
           answered_at?: string | null
           answered_by?: string | null
           audience?: string
+          family_audience?: string
           class_id?: number | null
           course_id?: number | null
           created_at?: string
@@ -2555,6 +2558,7 @@ export type Database = {
           archived_at: string | null
           created_at: string
           created_by: string
+          current_version: number
           description: string | null
           file_id: number | null
           folder_id: number | null
@@ -2574,6 +2578,7 @@ export type Database = {
           archived_at?: string | null
           created_at?: string
           created_by: string
+          current_version?: number
           description?: string | null
           file_id?: number | null
           folder_id?: number | null
@@ -2593,6 +2598,7 @@ export type Database = {
           archived_at?: string | null
           created_at?: string
           created_by?: string
+          current_version?: number
           description?: string | null
           file_id?: number | null
           folder_id?: number | null
@@ -2634,6 +2640,51 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_resource_versions: {
+        Row: {
+          change_type: string
+          changed_at: string
+          changed_by: string | null
+          id: number
+          item_id: number
+          snapshot: Json
+          version: number
+        }
+        Insert: {
+          change_type: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: number
+          item_id: number
+          snapshot: Json
+          version: number
+        }
+        Update: {
+          change_type?: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: number
+          item_id?: number
+          snapshot?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_resource_versions_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_resource_versions_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "org_resource_items"
             referencedColumns: ["id"]
           },
         ]
@@ -2758,6 +2809,7 @@ export type Database = {
           created_at: string
           grade_labels: string[]
           grade_scheme: string
+          home_days: number[]
           id: number
           name: string
           org_type: string
@@ -2779,6 +2831,7 @@ export type Database = {
           name: string
           org_type: string
           phone?: string | null
+          home_days?: number[]
           school_days?: number[]
           search_vector?: unknown
           slug: string
@@ -2796,6 +2849,7 @@ export type Database = {
           name?: string
           org_type?: string
           phone?: string | null
+          home_days?: number[]
           school_days?: number[]
           search_vector?: unknown
           slug?: string
@@ -3925,6 +3979,7 @@ export type Database = {
           p_audience: string
           p_class_id: number
           p_course_id: number
+          p_family_audience?: string
           p_organization_id: number
         }
         Returns: {
@@ -3960,6 +4015,10 @@ export type Database = {
       }
       save_material_page: {
         Args: { p_blocks?: Json; p_material_id: number; p_placement?: Json }
+        Returns: number
+      }
+      save_resource_page: {
+        Args: { p_blocks?: Json; p_item_id: number; p_placement?: Json }
         Returns: number
       }
       set_course_final_override: {

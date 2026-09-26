@@ -40,31 +40,18 @@ import {
 import { AudioSnippetRecorder } from "../AudioSnippetRecorder";
 import { $createFileNode } from "../FileNode";
 import { usePageEditorMedia } from "../PageEditorMediaContext";
-import { $createQuizNode } from "../QuizNode";
 import { $createVideoNode } from "../VideoNode";
 import { insertDecoratorBlock } from "./insertBlock";
 import { EditorDialog, FieldLabel } from "./toolbarUi";
 
 type DialogKind = "table" | "link" | "video" | "audio" | null;
 
-/** Which insert tools appear in the toolbar / slash menu. */
-export type PageEditorFeatures = {
-  /** Quiz blocks — page materials only. */
-  quiz: boolean;
-};
-
-export const DEFAULT_PAGE_EDITOR_FEATURES: PageEditorFeatures = {
-  quiz: true,
-};
-
 type PageEditorActions = {
-  features: PageEditorFeatures;
   canAttachFile: boolean;
   uploading: boolean;
   uploadingFilename: string | null;
   uploadError: string | null;
   setBlock: (type: PageBlockType) => void;
-  insertQuiz: () => void;
   insertDivider: () => void;
   insertTable: (rows: number, columns: number) => void;
   attachFile: () => void;
@@ -85,13 +72,7 @@ export function usePageEditorActions(): PageEditorActions {
   return value;
 }
 
-export function PageEditorActionsProvider({
-  children,
-  features: featureOverrides,
-}: {
-  children: ReactNode;
-  features?: Partial<PageEditorFeatures>;
-}) {
+export function PageEditorActionsProvider({ children }: { children: ReactNode }) {
   const [editor] = useLexicalComposerContext();
   const media = usePageEditorMedia();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,11 +86,6 @@ export function PageEditorActionsProvider({
   const [uploading, setUploading] = useState(false);
   const [uploadingFilename, setUploadingFilename] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
-
-  const features = useMemo<PageEditorFeatures>(
-    () => ({ ...DEFAULT_PAGE_EDITOR_FEATURES, ...featureOverrides }),
-    [featureOverrides],
-  );
 
   const closeDialog = useCallback(() => {
     setDialog(null);
@@ -132,13 +108,6 @@ export function PageEditorActionsProvider({
   const setBlock = useCallback((type: PageBlockType) => {
     applyBlockType(editor, type);
   }, [editor]);
-
-  const insertQuiz = useCallback(() => {
-    if (!features.quiz) return;
-    editor.update(() => {
-      insertDecoratorBlock($createQuizNode());
-    });
-  }, [editor, features.quiz]);
 
   const insertDivider = useCallback(() => {
     editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined);
@@ -214,13 +183,11 @@ export function PageEditorActionsProvider({
 
   const value = useMemo<PageEditorActions>(
     () => ({
-      features,
       canAttachFile: media != null,
       uploading,
       uploadingFilename,
       uploadError,
       setBlock,
-      insertQuiz,
       insertDivider,
       insertTable,
       attachFile,
@@ -232,9 +199,7 @@ export function PageEditorActionsProvider({
     }),
     [
       attachFile,
-      features,
       insertDivider,
-      insertQuiz,
       insertTable,
       media,
       openAudioDialog,

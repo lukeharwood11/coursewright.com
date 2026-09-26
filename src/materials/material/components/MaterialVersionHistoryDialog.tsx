@@ -8,10 +8,28 @@ import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PageLoading } from "@/ui/PageLoading";
 import type { MaterialVersionRecord } from "@/materials/databridge/materials";
+import { materialForDateLabel } from "@/materials/model/materialForDateLabel";
 import {
   materialChangeTypeLabel,
   previewFromMaterialSnapshot,
+  type MaterialVersionPreview,
 } from "@/materials/model/versionSnapshot";
+import { DEFAULT_HOME_DAYS, type HomeDay } from "@/organizations/model/homeDays";
+import {
+  DEFAULT_SCHOOL_DAYS,
+  type SchoolDay,
+} from "@/organizations/model/schoolDays";
+
+export type VersionHistoryRecord = MaterialVersionRecord;
+
+function versionListMeta(version: VersionHistoryRecord): string {
+  const parts = [
+    materialChangeTypeLabel(version.changeType),
+    version.changedByName,
+    new Date(version.changedAt).toLocaleString(),
+  ].filter(Boolean);
+  return parts.join(" · ");
+}
 
 const PageContentView = lazy(async () => {
   const module = await import("./PageContentView");
@@ -24,12 +42,18 @@ export function MaterialVersionHistoryDialog({
   restoring,
   onClose,
   onRestore,
+  previewFromSnapshot = previewFromMaterialSnapshot,
+  schoolDays = DEFAULT_SCHOOL_DAYS,
+  homeDays = DEFAULT_HOME_DAYS,
 }: {
   open: boolean;
-  versions: MaterialVersionRecord[];
+  versions: VersionHistoryRecord[];
   restoring: boolean;
   onClose: () => void;
   onRestore: (snapshot: unknown) => void;
+  previewFromSnapshot?: (snapshot: unknown) => MaterialVersionPreview | null;
+  schoolDays?: readonly SchoolDay[];
+  homeDays?: readonly HomeDay[];
 }) {
   const titleId = useId();
   const [selectedVersion, setSelectedVersion] = useState<number | null>(null);
@@ -55,7 +79,7 @@ export function MaterialVersionHistoryDialog({
   const selectedIndex = selected
     ? versions.findIndex((version) => version.version === selected.version)
     : -1;
-  const preview = selected ? previewFromMaterialSnapshot(selected.snapshot) : null;
+  const preview = selected ? previewFromSnapshot(selected.snapshot) : null;
   const canPrev = selectedIndex > 0;
   const canNext = selectedIndex >= 0 && selectedIndex < versions.length - 1;
 
@@ -117,8 +141,7 @@ export function MaterialVersionHistoryDialog({
                             Version {version.version}
                           </span>
                           <span className="mt-0.5 block text-[12px] text-[var(--ink-soft)]">
-                            {materialChangeTypeLabel(version.changeType)} ·{" "}
-                            {new Date(version.changedAt).toLocaleString()}
+                            {versionListMeta(version)}
                           </span>
                         </button>
                       </li>
@@ -193,7 +216,11 @@ export function MaterialVersionHistoryDialog({
                           <p className="mt-2 text-[12.5px] text-[var(--ink-faint)]">
                             {[
                               preview.scheduledDate
-                                ? `Assignment ${preview.scheduledDate}`
+                                ? `${materialForDateLabel(
+                                    preview.scheduledDate,
+                                    schoolDays,
+                                    homeDays,
+                                  )} ${preview.scheduledDate}`
                                 : null,
                               preview.dueDate ? `Due ${preview.dueDate}` : null,
                             ]

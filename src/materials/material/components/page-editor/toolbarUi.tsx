@@ -5,6 +5,7 @@ import {
   useId,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
@@ -73,6 +74,56 @@ export function ToolbarIconButton({
   );
 }
 
+export function ToolbarLabelDropdown({
+  label,
+  display,
+  displayStyle,
+  children,
+}: {
+  label: string;
+  display: string;
+  displayStyle?: CSSProperties;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-label={label}
+        title={label}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={() => setOpen((current) => !current)}
+        className={["cw-editor-toolbar-item cw-editor-toolbar-dropdown", open ? "is-active" : ""]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <span className="cw-editor-toolbar-label" style={displayStyle}>
+          {display}
+        </span>
+        <ChevronDownIcon className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
+      </button>
+      <CloseMenuContext.Provider value={() => setOpen(false)}>
+        <AnchoredPopup
+          open={open}
+          onClose={() => setOpen(false)}
+          anchorRef={buttonRef}
+          label={label}
+          preferredAlign="start"
+          className="cw-editor-menu"
+        >
+          {children}
+        </AnchoredPopup>
+      </CloseMenuContext.Provider>
+    </>
+  );
+}
+
 export function ToolbarDropdown({
   label,
   icon,
@@ -122,6 +173,7 @@ export function ToolbarDropdown({
 export function DropdownItem({
   icon,
   label,
+  labelStyle,
   hint,
   active,
   disabled,
@@ -129,6 +181,7 @@ export function DropdownItem({
 }: {
   icon: ReactNode;
   label: string;
+  labelStyle?: CSSProperties;
   hint?: string;
   active?: boolean;
   disabled?: boolean;
@@ -149,7 +202,7 @@ export function DropdownItem({
       className={["cw-editor-menu-item", active ? "is-active" : ""].join(" ")}
     >
       <span className="cw-editor-menu-icon">{icon}</span>
-      <span className="flex-1 text-left">{label}</span>
+      <span className="flex-1 text-left" style={labelStyle}>{label}</span>
       {hint ? <span className="text-[11px] text-[var(--ink-faint)]">{hint}</span> : null}
     </button>
   );

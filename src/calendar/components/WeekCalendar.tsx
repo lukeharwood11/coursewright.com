@@ -14,11 +14,9 @@ import {
 } from "@/calendar/model/events";
 import { EventChip } from "./EventChip";
 import { weekDates } from "@/lesson-plans/model/validate";
-import {
-  DEFAULT_SCHOOL_DAYS,
-  isOrgSchoolDay,
-  type SchoolDay,
-} from "@/organizations/model/schoolDays";
+import { OrgDayTypeIcons, calendarDaySurfaceClass } from "@/organizations/components/OrgDayTypeIcons";
+import { DEFAULT_HOME_DAYS, type HomeDay } from "@/organizations/model/homeDays";
+import { DEFAULT_SCHOOL_DAYS, type SchoolDay } from "@/organizations/model/schoolDays";
 import { CalendarClassBlock } from "./CalendarClassBlock";
 
 const wrappingCardGridClass =
@@ -34,6 +32,7 @@ export function WeekCalendar({
   hiddenCourseIds,
   layout = "week",
   schoolDays = DEFAULT_SCHOOL_DAYS,
+  homeDays = DEFAULT_HOME_DAYS,
 }: {
   orgSlug: string;
   weekStart: string;
@@ -45,6 +44,7 @@ export function WeekCalendar({
   /** `cards` (This week): skip empty days and wrap. `week` (Calendar): all seven columns. */
   layout?: "week" | "cards";
   schoolDays?: readonly SchoolDay[];
+  homeDays?: readonly HomeDay[];
 }) {
   const notes = weekNotes.filter((note) => !hiddenCourseIds.has(note.courseId));
   const visibleDays = lessonDays.filter((day) => !hiddenCourseIds.has(day.courseId));
@@ -95,10 +95,7 @@ export function WeekCalendar({
       {dates.length > 0 ? (
         <div className={cards ? wrappingCardGridClass : "grid gap-2 md:grid-cols-7"}>
           {dates.map((date) => {
-            const schoolDay = isOrgSchoolDay(date, schoolDays);
-            const surfaceClass = schoolDay
-              ? "cw-calendar-school-day"
-              : "bg-[var(--surface)]";
+            const surfaceClass = calendarDaySurfaceClass(date, schoolDays, homeDays);
             return (
             <section
               key={date}
@@ -116,8 +113,8 @@ export function WeekCalendar({
               <h3
                 className={
                   cards
-                    ? "relative z-10 pointer-events-none text-[14px] font-extrabold text-[var(--ink)]"
-                    : "relative z-10 pointer-events-none text-[12px] font-bold text-[var(--ink-soft)]"
+                    ? "relative z-10 pointer-events-none flex items-center gap-1.5 text-[14px] font-extrabold text-[var(--ink)]"
+                    : "relative z-10 pointer-events-none flex items-center gap-1 text-[12px] font-bold text-[var(--ink-soft)]"
                 }
               >
                 {cards ? (
@@ -128,6 +125,11 @@ export function WeekCalendar({
                     <span className="ml-1 text-[var(--ink-faint)]">{date.slice(8)}</span>
                   </>
                 )}
+                <OrgDayTypeIcons
+                  date={date}
+                  schoolDays={schoolDays}
+                  homeDays={homeDays}
+                />
               </h3>
               <div className="relative z-10 mt-2 flex flex-col gap-2">
                 {dayEvents

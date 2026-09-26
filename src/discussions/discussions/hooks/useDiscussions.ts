@@ -65,7 +65,11 @@ export function useDiscussions() {
       return {
         ...item,
         unread: isDiscussionUnread(item),
-        forLabel: showStudent ? forStudentsLabel(students) : null,
+        forLabel:
+          item.audience === "organization" || !showStudent
+            ? null
+            : forStudentsLabel(students),
+        organizationName: organization.name,
       };
     });
   }, [listQuery.data, filter, parentPresentation, parentContext, showStudent]);

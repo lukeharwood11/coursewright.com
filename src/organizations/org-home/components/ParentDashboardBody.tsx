@@ -13,6 +13,7 @@ import { ParentFocusRail } from "./ParentFocusRail";
 import { ParentStudentTags } from "./ParentStudentTags";
 import type { OrgType } from "@/organizations/model/orgType";
 import { orgTypeYourNoun } from "@/organizations/model/orgType";
+import type { HomeDay } from "@/organizations/model/homeDays";
 import type { SchoolDay } from "@/organizations/model/schoolDays";
 
 export function ParentDashboardBody({
@@ -25,6 +26,7 @@ export function ParentDashboardBody({
   isCurrentWeek = true,
   onToggleStudent,
   schoolDays,
+  homeDays,
   orgType,
 }: {
   orgSlug: string;
@@ -36,6 +38,7 @@ export function ParentDashboardBody({
   isCurrentWeek?: boolean;
   onToggleStudent: (id: number) => void;
   schoolDays: readonly SchoolDay[];
+  homeDays: readonly HomeDay[];
   orgType: OrgType;
 }) {
   const { organization } = useOrgShell();
@@ -141,6 +144,7 @@ export function ParentDashboardBody({
                 hiddenCourseIds={hiddenCourseIds}
                 layout="cards"
                 schoolDays={schoolDays}
+                homeDays={homeDays}
               />
             </div>
           )}

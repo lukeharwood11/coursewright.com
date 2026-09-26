@@ -12,7 +12,7 @@ import {
   loadLinkedParentStudentIds,
   loadOwnStudentProfileIds,
 } from "@/parent/databridge/dashboard";
-import { quizAssignedDate, quizDueDate } from "@/quizzes/model/window";
+import { quizDueDate } from "@/quizzes/model/window";
 
 export type CalendarSourceMaterial = {
   id: number;
@@ -34,7 +34,6 @@ export type CalendarSourceQuiz = {
   courseId: number;
   courseTitle: string;
   colorKey: CourseColorKey;
-  assignedDate: string | null;
   dueDate: string | null;
   unitId: number | null;
   unpublished: boolean;
@@ -193,7 +192,6 @@ async function loadStaffCalendar(
           courseId: row.course_id,
           courseTitle: course.title,
           colorKey: course.colorKey,
-          assignedDate: quizAssignedDate(row.accepts_from, row.accepts_timezone),
           dueDate: quizDueDate(row.accepts_until, row.accepts_timezone),
           unitId: row.unit_id,
           unpublished: row.visibility !== "published",
@@ -329,7 +327,6 @@ async function loadPublishedCoursesCalendar(
           courseId: row.course_id,
           courseTitle: course.title,
           colorKey: course.colorKey,
-          assignedDate: quizAssignedDate(row.accepts_from, row.accepts_timezone),
           dueDate: quizDueDate(row.accepts_until, row.accepts_timezone),
           unitId: row.unit_id,
           unpublished: false,

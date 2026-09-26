@@ -48,6 +48,7 @@ Left **settings menu** (icons + labels) with one active panel on the right on de
 - **Permalink slug** — editable; UI **must warn** that changing it breaks existing links (no auto-redirect in P0)
 - Organization type: co-op, school, or family
 - **School days** — circle toggles Sunday–Saturday under web address; info hint: days this organization usually operates. Default Monday–Friday. Lesson-plan compose uses these days; staff can still add another weekday on a plan
+- **School days / Home days** — segmented tabs with the same weekday circle toggles. Defaults to **School days**; home days start with none selected. Calendar and lesson plans show cap / home icons on matching weekdays
 - **Grade scheme** — None, K–12, or custom labels (same panel). None removes grade fields from students and courses and clears stored grade metadata when saved
 - **Save organization** — owners and admins; disabled when unchanged
 

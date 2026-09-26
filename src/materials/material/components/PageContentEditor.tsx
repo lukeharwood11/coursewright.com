@@ -30,6 +30,13 @@ import {
   PAGE_MARKDOWN_TRANSFORMERS,
   loadBlocksIntoEditor,
 } from "./pageEditorConfig";
+import { PageEditorSettingsProvider } from "./page-editor/PageEditorSettingsContext";
+import { AlignmentBackspacePlugin } from "./page-editor/AlignmentBackspacePlugin";
+import { RestoreEditorSettingsPlugin } from "./page-editor/RestoreEditorSettingsPlugin";
+import {
+  EMPTY_PAGE_EDITOR_SETTINGS,
+  type PageEditorSettings,
+} from "@/materials/model/pageEditorSettings";
 
 export function PageContentEditor({
   blocks,
@@ -37,6 +44,8 @@ export function PageContentEditor({
   editable,
   showAnswers = editable,
   onDraftChange,
+  editorSettings = EMPTY_PAGE_EDITOR_SETTINGS,
+  onEditorSettingsChange,
   onVersionHistory,
   versionHistoryDisabled = false,
 }: {
@@ -45,6 +54,8 @@ export function PageContentEditor({
   editable: boolean;
   showAnswers?: boolean;
   onDraftChange?: (json: string) => void;
+  editorSettings?: PageEditorSettings;
+  onEditorSettingsChange?: (settings: PageEditorSettings) => void;
   onVersionHistory?: () => void;
   versionHistoryDisabled?: boolean;
 }) {
@@ -68,10 +79,16 @@ export function PageContentEditor({
       <div className={editable ? "cw-editor-shell" : "cw-editor-view"}>
         {editable ? (
           <PageEditorActionsProvider>
+            <PageEditorSettingsProvider
+              settings={editorSettings}
+              onSettingsChange={onEditorSettingsChange}
+            >
             <PageEditorToolbar
               onVersionHistory={onVersionHistory}
               versionHistoryDisabled={versionHistoryDisabled}
             />
+            <RestoreEditorSettingsPlugin settings={editorSettings} />
+            <AlignmentBackspacePlugin />
             <FileUploadStatus />
             <div className="relative">
               <RichTextPlugin
@@ -113,6 +130,7 @@ export function PageContentEditor({
                 }}
               />
             ) : null}
+            </PageEditorSettingsProvider>
           </PageEditorActionsProvider>
         ) : (
           <>

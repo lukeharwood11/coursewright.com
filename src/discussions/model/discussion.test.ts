@@ -42,15 +42,17 @@ import {
   validateUrlAttachment,
 } from "./validate.ts";
 
-test("parseDiscussionAudience accepts course or class only", () => {
+test("parseDiscussionAudience accepts course, class, or organization", () => {
   assert.equal(parseDiscussionAudience("course"), "course");
   assert.equal(parseDiscussionAudience("class"), "class");
+  assert.equal(parseDiscussionAudience("organization"), "organization");
   assert.equal(parseDiscussionAudience("student"), null);
 });
 
 test("discussion labels use product words", () => {
   assert.equal(discussionAudienceLabel("course"), "Course");
   assert.equal(discussionAudienceLabel("class"), "Class");
+  assert.equal(discussionAudienceLabel("organization"), "Organization");
   assert.equal(discussionStatusLabel(null), "Open");
   assert.equal(discussionStatusLabel("2026-01-01T00:00:00Z"), "Resolved");
   assert.equal(discussionFilterLabel("all"), "All");
@@ -77,6 +79,15 @@ test("discussionTargetName uses the matching audience title", () => {
     }),
     "Wednesday",
   );
+  assert.equal(
+    discussionTargetName({
+      audience: "organization",
+      organizationName: "Co-op",
+      courseTitle: null,
+      classTitle: null,
+    }),
+    "Everyone in Co-op",
+  );
 });
 
 test("discussion paths nest under the org", () => {
@@ -100,11 +111,21 @@ test("draftFromSearchParams prefills one audience target", () => {
   const course = draftFromSearchParams(
     new URLSearchParams("audience=course&courseId=12"),
   );
-  assert.deepEqual(course, { audience: "course", courseId: 12, classId: null });
+  assert.deepEqual(course, {
+    audience: "course",
+    courseId: 12,
+    classId: null,
+    familyAudience: "both",
+  });
   const klass = draftFromSearchParams(
     new URLSearchParams("audience=class&classId=8"),
   );
-  assert.deepEqual(klass, { audience: "class", courseId: null, classId: 8 });
+  assert.deepEqual(klass, {
+    audience: "class",
+    courseId: null,
+    classId: 8,
+    familyAudience: "both",
+  });
 });
 
 test("unread is missing last_read_at or activity after it", () => {
@@ -224,6 +245,7 @@ test("opening post needs a title, one audience, and content", () => {
     audience: "course" as const,
     courseId: 1,
     classId: null,
+    familyAudience: "both" as const,
     title: "Field trip?",
     body: "",
   };
@@ -242,7 +264,7 @@ test("opening post needs a title, one audience, and content", () => {
   );
   assert.equal(
     validateDiscussionDraft({ ...base, audience: null, title: "Hi", body: "x" }, []),
-    "Choose a course or a class.",
+    "Choose who this discussion is for.",
   );
 });
 

@@ -14,6 +14,7 @@ import { formatDueDeadline } from "@/submissions/model/dueInstant";
 import { MaterialSubmissionsSection } from "@/submissions";
 import { SubmissionGrading } from "@/submissions/turn-in/components/SubmissionGrading";
 import { coursePath } from "@/courses/model/paths";
+import { materialForDateLabel } from "@/materials/model/materialForDateLabel";
 import { materialKindLabel } from "@/materials/model/kind";
 import {
   materialBackDestination,
@@ -122,7 +123,12 @@ export function MaterialPage() {
             )}
             {page.material.scheduledDate ? (
               <span className="text-[12px] font-bold text-[var(--slate)]">
-                Assigned {formatIsoDate(page.material.scheduledDate)}
+                {materialForDateLabel(
+                  page.material.scheduledDate,
+                  page.organization.schoolDays,
+                  page.organization.homeDays,
+                )}{" "}
+                {formatIsoDate(page.material.scheduledDate)}
               </span>
             ) : null}
             {page.material.dueDate ? (

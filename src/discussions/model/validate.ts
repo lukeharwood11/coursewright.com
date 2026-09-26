@@ -1,6 +1,8 @@
 import {
   parseDiscussionAudience,
+  parseDiscussionFamilyAudience,
   type DiscussionAudience,
+  type DiscussionFamilyAudience,
 } from "./audience";
 import {
   discussionBodyHasText,
@@ -11,6 +13,7 @@ export type DiscussionDraft = {
   audience: DiscussionAudience | null;
   courseId: number | null;
   classId: number | null;
+  familyAudience: DiscussionFamilyAudience;
   title: string;
   body: string;
 };
@@ -45,18 +48,22 @@ export function parseOptionalId(value: string | null | undefined): number | null
 
 export function draftFromSearchParams(params: URLSearchParams): Pick<
   DiscussionDraft,
-  "audience" | "courseId" | "classId"
+  "audience" | "courseId" | "classId" | "familyAudience"
 > {
   const audience = parseDiscussionAudience(params.get("audience"));
+  const familyAudience = parseDiscussionFamilyAudience(params.get("familyAudience"));
   const courseId = parseOptionalId(params.get("courseId"));
   const classId = parseOptionalId(params.get("classId"));
   if (audience === "course") {
-    return { audience, courseId, classId: null };
+    return { audience, courseId, classId: null, familyAudience };
   }
   if (audience === "class") {
-    return { audience, courseId: null, classId };
+    return { audience, courseId: null, classId, familyAudience };
   }
-  return { audience: null, courseId: null, classId: null };
+  if (audience === "organization") {
+    return { audience, courseId: null, classId: null, familyAudience };
+  }
+  return { audience: null, courseId: null, classId: null, familyAudience };
 }
 
 export function emptyDiscussionDraft(): DiscussionDraft {
@@ -64,6 +71,7 @@ export function emptyDiscussionDraft(): DiscussionDraft {
     audience: null,
     courseId: null,
     classId: null,
+    familyAudience: "both",
     title: "",
     body: "",
   };
@@ -102,7 +110,7 @@ export function validateDiscussionDraft(
   draft: DiscussionDraft,
   attachments: AttachmentContent[],
 ): string | null {
-  if (!draft.audience) return "Choose a course or a class.";
+  if (!draft.audience) return "Choose who this discussion is for.";
   if (draft.audience === "course" && draft.courseId == null) {
     return "Choose a course.";
   }

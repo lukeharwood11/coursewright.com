@@ -38,8 +38,8 @@ View (and edit) a single material placement — the thing parents open from this
 
 - **Title** (all kinds)
 - **Description** (all kinds)
-- Optional **scheduled_date** (assignment date)
-- Optional **due_date** (calendar day for This week)
+- Optional **due_date** (+ time for submission cutoff)
+- Optional **scheduled_date** — UI **Focus Day** / **Focus Day (School)** / **Focus Day (Home)** from org calendar; drives This week
 - Optional **due time** (`due_at` + timezone). Default 11:59 PM when a due date is saved. Shown with the timezone abbreviation. This week still uses the calendar day.
 - **Accept submissions**, allowed file groups, submissions allowed, allow past due date
 - **Important now** flag
@@ -65,8 +65,8 @@ View (and edit) a single material placement — the thing parents open from this
 - Course context; optional **unit** name when nested (omit when top-level)
 - Kind badge: page / link / file
 - **Visibility** — unpublished: amber badge + warning banner; published: green Published badge (staff). Unpublish at bottom of page/edit
-- Optional `scheduled_date` (assignment date; wins over unit dates for “this week”; required for top-level materials to appear in “this week”)
-- Optional `due_date` — **Add due date** sits next to the assignment date label; when opened, due date + time appear **below** the assignment date (default time **11:59 PM**, timezone of the person who saves it)
+- Optional `due_date` (+ time; default **11:59 PM** in the saver’s timezone when a due date is set)
+- Optional `scheduled_date` — **Due date** is the primary field; **Add focus day** opens the This week day. Field title becomes **Focus Day (School)** or **Focus Day (Home)** when the date matches the org calendar. Wins over unit dates for This week; required for top-level materials without a unit to appear in This week
 - **Accept submissions** — allowed files, submissions allowed, allow submissions past due date
 - Important now flag (instructor)
 
@@ -94,7 +94,7 @@ Word-like layout (same condensed chrome as resource / quiz edit): compact header
 - Assignment / due dates and **Accept submissions** settings sit below the content (page editor / file / link note).
 - **page:** Lexical editor fills most of the viewport (same chrome as resource document edit). A version is stored only when the instructor saves and something changed — not per keystroke.
 - **link / file:** edit URL or replace file (file replace → new FileVersion)
-- **Version history** sits in the page editor toolbar (labeled on desktop; **⋯** on small screens). Link/file materials expose it in the edit header instead. The dialog browses past versions with preview; **Restore this version** confirms before applying.
+- **Version history** sits in the page editor toolbar (labeled on desktop; **⋯** on small screens). Link/file materials expose it in the edit header instead. The dialog lists each version with change type, **who saved**, and when; browse with preview; **Restore this version** confirms before applying.
 - Soft deletes only
 - **P1:** Instance vs template: promote opt-in; overrides block template sync for that resource
 

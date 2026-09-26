@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ComponentType } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getSelection,
+  $isElementNode,
   $isRangeSelection,
   CAN_REDO_COMMAND,
   CAN_UNDO_COMMAND,
@@ -28,6 +29,10 @@ import { $findMatchingParent, mergeRegister } from "@lexical/utils";
 import {
   ArrowUturnLeftIcon,
   ArrowUturnRightIcon,
+  ArrowsUpDownIcon,
+  Bars3BottomLeftIcon,
+  Bars3BottomRightIcon,
+  Bars3Icon,
   ClockIcon,
   EllipsisHorizontalIcon,
   LinkIcon,
@@ -37,26 +42,76 @@ import {
   PaperClipIcon,
   PlusCircleIcon,
   PlusIcon,
-  QuestionMarkCircleIcon,
   TableCellsIcon,
   TrashIcon,
   VideoCameraIcon,
   ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
+import type { ElementFormatType } from "lexical";
 import type { PageBlockType } from "@/materials/model/pageEditor";
 import { BLOCK_ICONS, BLOCK_LABELS, BLOCK_TYPES } from "./blockTypes";
 import { usePageEditorActions } from "./PageEditorActions";
+import { usePageEditorSettings } from "./PageEditorSettingsContext";
 import {
   DropdownItem,
   FormatMark,
   ToolbarDivider,
   ToolbarDropdown,
   ToolbarIconButton,
+  ToolbarLabelDropdown,
 } from "./toolbarUi";
+import {
+  applyFontFamilyAndSettings,
+  applyFontSizeAndSettings,
+  applyLineHeightAndSettings,
+  applyTextAlignmentAndSettings,
+  fontFamilyMenuLabel,
+  fontFamilyOptions,
+  fontFamilyPreviewStyle,
+  fontSizeMenuLabel,
+  fontSizeOptions,
+  lineHeightMenuLabel,
+  lineHeightOptions,
+  PAGE_EDITOR_TEXT_DEFAULTS,
+  readBlockAlignment,
+  readSelectionFontFamily,
+  readSelectionFontSize,
+  readSelectionLineHeight,
+  TEXT_ALIGNMENT_OPTIONS,
+  type EditorTextDefaults,
+} from "./textFormatting";
 
 const IS_APPLE =
   typeof navigator !== "undefined" &&
   /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+
+const ALIGNMENT_ICONS: Record<
+  ElementFormatType,
+  ComponentType<{ className?: string }>
+> = {
+  left: Bars3BottomLeftIcon,
+  start: Bars3BottomLeftIcon,
+  center: Bars3Icon,
+  right: Bars3BottomRightIcon,
+  end: Bars3BottomRightIcon,
+  justify: AlignJustifyIcon,
+  "": Bars3BottomLeftIcon,
+};
+
+function AlignJustifyIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      aria-hidden
+    >
+      <path strokeLinecap="round" d="M4 6h16M4 9.5h16M4 13h16M4 16.5h16" />
+    </svg>
+  );
+}
 
 function modKey(shortcut: string): string {
   return IS_APPLE ? `⌘${shortcut}` : `Ctrl+${shortcut}`;
@@ -65,17 +120,24 @@ function modKey(shortcut: string): string {
 export function PageEditorToolbar({
   onVersionHistory,
   versionHistoryDisabled = false,
+  textDefaults = PAGE_EDITOR_TEXT_DEFAULTS,
 }: {
   onVersionHistory?: () => void;
   versionHistoryDisabled?: boolean;
+  textDefaults?: EditorTextDefaults;
 } = {}) {
   const [editor] = useLexicalComposerContext();
   const actions = usePageEditorActions();
+  const { settings: savedSettings, patchSettings } = usePageEditorSettings();
   const [bold, setBold] = useState(false);
   const [italic, setItalic] = useState(false);
   const [underline, setUnderline] = useState(false);
   const [strikethrough, setStrikethrough] = useState(false);
   const [blockType, setBlockType] = useState<PageBlockType>("paragraph");
+  const [textAlign, setTextAlign] = useState<ElementFormatType>("left");
+  const [fontFamily, setFontFamily] = useState("");
+  const [fontSize, setFontSize] = useState("");
+  const [lineHeight, setLineHeight] = useState("");
   const [isLink, setIsLink] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [inTable, setInTable] = useState(false);
@@ -107,6 +169,18 @@ export function PageEditorToolbar({
     } else {
       setBlockType("paragraph");
     }
+    const blockFormat = $isElementNode(element) ? element.getFormatType() : "";
+    if (blockFormat && blockFormat !== "start") {
+      setTextAlign(readBlockAlignment());
+    } else {
+      setTextAlign(savedSettings.textAlign || "left");
+    }
+    const family = readSelectionFontFamily(textDefaults);
+    const size = readSelectionFontSize(textDefaults);
+    const height = readSelectionLineHeight(textDefaults);
+    setFontFamily(family !== "" ? family : savedSettings.fontFamily);
+    setFontSize(size !== "" ? size : savedSettings.fontSize);
+    setLineHeight(height !== "" ? height : savedSettings.lineHeight);
     const parent = anchor.getParent();
     const linkNode = $isLinkNode(anchor)
       ? anchor
@@ -116,7 +190,21 @@ export function PageEditorToolbar({
     setIsLink(linkNode != null);
     setLinkUrl(linkNode?.getURL() ?? "");
     setInTable($getTableCellNodeFromLexicalNode(anchor) != null);
-  }, []);
+  }, [textDefaults, savedSettings]);
+
+  useEffect(() => {
+    editor.getEditorState().read(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection) || $isTableSelection(selection)) {
+        syncToolbar();
+        return;
+      }
+      setFontFamily(savedSettings.fontFamily);
+      setFontSize(savedSettings.fontSize);
+      setLineHeight(savedSettings.lineHeight);
+      setTextAlign(savedSettings.textAlign || "left");
+    });
+  }, [editor, savedSettings, syncToolbar]);
 
   useEffect(() => {
     return mergeRegister(
@@ -157,6 +245,10 @@ export function PageEditorToolbar({
   }
 
   const BlockIcon = BLOCK_ICONS[blockType];
+  const AlignIcon = ALIGNMENT_ICONS[textAlign] ?? Bars3BottomLeftIcon;
+  const alignmentLabel =
+    TEXT_ALIGNMENT_OPTIONS.find((item) => item.value === textAlign)?.label ??
+    "Align text";
 
   return (
     <div className="cw-editor-toolbar">
@@ -189,6 +281,82 @@ export function PageEditorToolbar({
           );
         })}
       </ToolbarDropdown>
+      <ToolbarDropdown label={alignmentLabel} icon={<AlignIcon className="h-4 w-4" />}>
+        {TEXT_ALIGNMENT_OPTIONS.map((item) => {
+          const Icon = ALIGNMENT_ICONS[item.value] ?? Bars3BottomLeftIcon;
+          return (
+            <DropdownItem
+              key={item.value}
+              icon={<Icon className="h-4 w-4" />}
+              label={item.label}
+              active={textAlign === item.value}
+              onClick={() =>
+                applyTextAlignmentAndSettings(editor, item.value, patchSettings)
+              }
+            />
+          );
+        })}
+      </ToolbarDropdown>
+      <ToolbarLabelDropdown
+        label={`Font: ${fontFamilyMenuLabel(fontFamily, textDefaults)}`}
+        display={fontFamilyMenuLabel(fontFamily, textDefaults)}
+        displayStyle={fontFamilyPreviewStyle(fontFamily)}
+      >
+        {fontFamilyOptions(textDefaults).map((item) => (
+          <DropdownItem
+            key={item.label}
+            icon={<FormatMark letter="A" />}
+            label={item.label}
+            labelStyle={fontFamilyPreviewStyle(item.value)}
+            active={fontFamily === item.value}
+            onClick={() =>
+              applyFontFamilyAndSettings(editor, item.value, patchSettings)
+            }
+          />
+        ))}
+      </ToolbarLabelDropdown>
+      <ToolbarLabelDropdown
+        label={`Font size: ${fontSizeMenuLabel(fontSize, textDefaults)}`}
+        display={fontSizeMenuLabel(fontSize, textDefaults)}
+      >
+        {fontSizeOptions(textDefaults).map((item) => (
+          <DropdownItem
+            key={`${item.label}-${item.value}`}
+            icon={
+              <FormatMark
+                letter={
+                  item.value === "" ? textDefaults.fontSizeLabel : item.label
+                }
+              />
+            }
+            label={`${item.label} px`}
+            active={fontSize === item.value}
+            onClick={() =>
+              applyFontSizeAndSettings(editor, item.value, patchSettings)
+            }
+          />
+        ))}
+      </ToolbarLabelDropdown>
+      <ToolbarLabelDropdown
+        label={`Line spacing: ${lineHeightMenuLabel(lineHeight, textDefaults)}`}
+        display={lineHeightMenuLabel(lineHeight, textDefaults)}
+      >
+        {lineHeightOptions(textDefaults).map((item) => (
+          <DropdownItem
+            key={`${item.label}-${item.value}`}
+            icon={<ArrowsUpDownIcon className="h-4 w-4" />}
+            label={
+              item.value === ""
+                ? `Line ${textDefaults.lineHeightLabel}`
+                : `Line ${item.label}`
+            }
+            active={lineHeight === item.value}
+            onClick={() =>
+              applyLineHeightAndSettings(editor, item.value, patchSettings)
+            }
+          />
+        ))}
+      </ToolbarLabelDropdown>
       <ToolbarDivider />
       <ToolbarIconButton
         pressed={bold}
@@ -244,13 +412,6 @@ export function PageEditorToolbar({
           label="Video"
           onClick={actions.openVideoDialog}
         />
-        {actions.features.quiz ? (
-          <DropdownItem
-            icon={<QuestionMarkCircleIcon className="h-4 w-4" />}
-            label="Quiz"
-            onClick={actions.insertQuiz}
-          />
-        ) : null}
         {actions.canAttachFile ? (
           <>
             <DropdownItem

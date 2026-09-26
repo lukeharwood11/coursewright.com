@@ -12,12 +12,11 @@ import { calendarPath } from "@/calendar/model/paths";
 import { lessonPlanPath } from "@/lesson-plans/model/paths";
 import { materialPath } from "@/materials/model/paths";
 import { quizPath } from "@/quizzes/model/paths";
+import { materialChipDisplayTitle } from "@/calendar/components/MaterialChip";
 import { courseColorCssVar } from "@/courses/model/courseColor";
-import {
-  DEFAULT_SCHOOL_DAYS,
-  isOrgSchoolDay,
-  type SchoolDay,
-} from "@/organizations/model/schoolDays";
+import { OrgDayTypeIcons, calendarDaySurfaceClass } from "@/organizations/components/OrgDayTypeIcons";
+import { DEFAULT_HOME_DAYS, type HomeDay } from "@/organizations/model/homeDays";
+import { DEFAULT_SCHOOL_DAYS, type SchoolDay } from "@/organizations/model/schoolDays";
 
 export function MonthCalendar({
   orgSlug,
@@ -30,6 +29,7 @@ export function MonthCalendar({
   events = [],
   hiddenCourseIds,
   schoolDays = DEFAULT_SCHOOL_DAYS,
+  homeDays = DEFAULT_HOME_DAYS,
 }: {
   orgSlug: string;
   gridStart: string;
@@ -41,6 +41,7 @@ export function MonthCalendar({
   events?: CalendarEventChip[];
   hiddenCourseIds: Set<number>;
   schoolDays?: readonly SchoolDay[];
+  homeDays?: readonly HomeDay[];
 }) {
   const dates = datesInRange(gridStart, gridEnd);
   const weekCount = Math.max(1, Math.ceil(dates.length / 7));
@@ -64,7 +65,8 @@ export function MonthCalendar({
       >
         {dates.map((date) => {
           const inMonth = date >= monthStart && date <= monthEnd;
-          const schoolDay = inMonth && isOrgSchoolDay(date, schoolDays);
+          const surfaceClass =
+            inMonth ? calendarDaySurfaceClass(date, schoolDays, homeDays) : "";
           const dayPlans = visibleDays.filter((day) => day.date === date);
           const extra = leftoverChips(visibleChips, dayPlans, date);
           return (
@@ -72,9 +74,7 @@ export function MonthCalendar({
               key={date}
               className={`relative min-h-0 overflow-hidden rounded-[8px] border p-1.5 ${
                 inMonth
-                  ? schoolDay
-                    ? "cw-calendar-school-day border-[var(--line-soft)]"
-                    : "border-[var(--line-soft)] bg-[var(--surface)]"
+                  ? `${surfaceClass} border-[var(--line-soft)]`
                   : "border-transparent bg-transparent text-[var(--ink-faint)]"
               }`}
             >
@@ -83,8 +83,14 @@ export function MonthCalendar({
                 className="absolute inset-0 rounded-[8px]"
                 aria-label={`Open ${date}`}
               />
-              <p className="relative z-10 pointer-events-none text-[12px] font-bold text-[var(--ink-soft)]">
+              <p className="relative z-10 pointer-events-none flex items-center gap-0.5 text-[12px] font-bold text-[var(--ink-soft)]">
                 {dayNumber(date)}
+                <OrgDayTypeIcons
+                  date={date}
+                  schoolDays={schoolDays}
+                  homeDays={homeDays}
+                  iconClassName="h-3 w-3"
+                />
               </p>
               <div className="relative z-10 mt-1 flex flex-col gap-0.5">
                 {dayEvents
@@ -137,9 +143,13 @@ export function MonthCalendar({
                       background: chip.kind === "due" ? courseColorCssVar(chip.colorKey) : "transparent",
                       border: `1.5px solid ${courseColorCssVar(chip.colorKey)}`,
                     }}
-                    title={`${chip.title} · ${chip.kind === "due" ? "Due" : "Assigned"}`}
+                    title={
+                      chip.kind === "assigned"
+                        ? chip.title
+                        : materialChipDisplayTitle(chip.title, chip.kind)
+                    }
                   >
-                    {chip.title}
+                    {materialChipDisplayTitle(chip.title, chip.kind)}
                   </Link>
                 ))}
                 {extra.length > 4 ? (

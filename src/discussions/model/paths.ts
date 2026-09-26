@@ -18,10 +18,13 @@ export function discussionMessageElementId(messageId: number): string {
   return `message-${messageId}`;
 }
 
+import type { DiscussionFamilyAudience } from "./audience";
+
 export type NewDiscussionParams = {
-  audience?: "course" | "class";
+  audience?: "course" | "class" | "organization";
   courseId?: number;
   classId?: number;
+  familyAudience?: DiscussionFamilyAudience;
 };
 
 export function newDiscussionPath(
@@ -32,6 +35,9 @@ export function newDiscussionPath(
   if (params.audience) search.set("audience", params.audience);
   if (params.courseId != null) search.set("courseId", String(params.courseId));
   if (params.classId != null) search.set("classId", String(params.classId));
+  if (params.familyAudience && params.familyAudience !== "both") {
+    search.set("familyAudience", params.familyAudience);
+  }
   const query = search.toString();
   const base = `${discussionsPath(orgSlug)}/new`;
   return query ? `${base}?${query}` : base;

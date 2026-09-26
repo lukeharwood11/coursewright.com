@@ -293,6 +293,7 @@ export async function updateQuiz(
     allowMultipleAttempts?: boolean;
     autogradeAndShow?: boolean;
     shareAnswerKeyWithParents?: boolean;
+    position?: number;
     deletedAt?: string | null;
     deletedBy?: string | null;
   },
@@ -303,6 +304,7 @@ export async function updateQuiz(
     .update({
       title: patch.title,
       description: patch.description,
+      position: patch.position,
       visibility: patch.visibility,
       accept_entries: patch.acceptEntries,
       accepts_from: patch.acceptsFrom,

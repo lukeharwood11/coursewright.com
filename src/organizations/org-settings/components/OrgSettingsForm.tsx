@@ -1,4 +1,5 @@
 import type { FormEvent } from "react";
+import { useState } from "react";
 import { Button } from "@/ui/Button";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { Input } from "@/ui/Input";
@@ -13,13 +14,13 @@ import {
   parseOrgTypeOrDefault,
 } from "@/organizations/model/orgType";
 import { GRADE_SCHEMES } from "@/organizations/model/gradeScheme";
-import {
-  WEEKDAYS,
-  WEEKDAY_LETTERS,
-  WEEKDAY_NAMES,
-  type SchoolDay,
-} from "@/organizations/model/schoolDays";
+import { WeekdayCircleToggles } from "@/organizations/components/WeekdayCircleToggles";
+import { normalizeHomeDays, type HomeDay } from "@/organizations/model/homeDays";
+import { type SchoolDay } from "@/organizations/model/schoolDays";
+import { Tab, TabList } from "@/ui/Tabs";
 import type { OrgSettingsTabId } from "./OrgSettingsNav";
+
+type WeekdayScheduleTab = "school" | "home";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -36,6 +37,7 @@ type OrgSettingsFormProps = {
   gradeScheme: string;
   gradeLabelsText: string;
   schoolDays: SchoolDay[];
+  homeDays: HomeDay[];
   about: string;
   address: string;
   website: string;
@@ -52,6 +54,7 @@ type OrgSettingsFormProps = {
   onGradeSchemeChange: (value: string) => void;
   onGradeLabelsTextChange: (value: string) => void;
   onToggleSchoolDay: (day: SchoolDay) => void;
+  onToggleHomeDay: (day: HomeDay) => void;
   onAboutChange: (value: string) => void;
   onAddressChange: (value: string) => void;
   onWebsiteChange: (value: string) => void;
@@ -111,6 +114,7 @@ function OrganizationSection({
   gradeScheme,
   gradeLabelsText,
   schoolDays,
+  homeDays,
   confirmPermalinkChange,
   slugChanged,
   hasChanges,
@@ -121,11 +125,14 @@ function OrganizationSection({
   onGradeSchemeChange,
   onGradeLabelsTextChange,
   onToggleSchoolDay,
+  onToggleHomeDay,
   onConfirmPermalinkChange,
 }: OrgSettingsFormProps) {
+  const [weekdayTab, setWeekdayTab] = useState<WeekdayScheduleTab>("school");
   const parsedOrgType = parseOrgType(orgType);
   const orgTypeHintText = parsedOrgType ? orgTypeHint(parsedOrgType) : null;
-  const selectedDays = new Set(schoolDays);
+  const selectedSchoolDays = new Set(schoolDays);
+  const selectedHomeDays = new Set(normalizeHomeDays(homeDays));
 
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
@@ -201,40 +208,50 @@ function OrganizationSection({
       ) : null}
 
       <div className="mt-3">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[13px] font-bold text-[var(--ink-soft)]">School days</span>
-          <InfoHint label="About school days">
-            Days this organization usually operates.
+        <TabList
+          label="School and home days"
+          className="w-full [&>button]:flex-1 [&>button]:whitespace-nowrap"
+        >
+          <Tab
+            selected={weekdayTab === "school"}
+            onSelect={() => setWeekdayTab("school")}
+          >
+            School days
+          </Tab>
+          <Tab selected={weekdayTab === "home"} onSelect={() => setWeekdayTab("home")}>
+            Home days
+          </Tab>
+        </TabList>
+        <div className="mt-3 flex items-center gap-1.5">
+          <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+            {weekdayTab === "school" ? "School days" : "Home days"}
+          </span>
+          <InfoHint
+            label={
+              weekdayTab === "school" ? "About school days" : "About home days"
+            }
+          >
+            {weekdayTab === "school"
+              ? "Days this organization usually operates."
+              : "Weekdays students usually learn at home. Leave all days off if you don’t use home days."}
           </InfoHint>
         </div>
-        <div
-          className="mt-2 grid grid-cols-7 gap-1 sm:gap-2"
-          role="group"
-          aria-label="School days"
-        >
-          {WEEKDAYS.map((day) => {
-            const selected = selectedDays.has(day);
-            return (
-              <button
-                key={day}
-                type="button"
-                aria-pressed={selected}
-                aria-label={WEEKDAY_NAMES[day]}
-                disabled={!canEdit}
-                onClick={() => onToggleSchoolDay(day)}
-                className={[
-                  "flex aspect-square w-full max-h-10 items-center justify-center rounded-full border text-[clamp(11px,3.2vw,13px)] font-bold",
-                  selected
-                    ? "border-[var(--green)] bg-[var(--green)] text-[var(--surface)]"
-                    : "border-[var(--line)] bg-[var(--surface)] text-[var(--ink-soft)]",
-                  "focus:outline-none focus:shadow-[0_0_0_3px_var(--green-tint)]",
-                  "disabled:cursor-not-allowed disabled:opacity-70",
-                ].join(" ")}
-              >
-                {WEEKDAY_LETTERS[day]}
-              </button>
-            );
-          })}
+        <div className="mt-2">
+          {weekdayTab === "school" ? (
+            <WeekdayCircleToggles
+              ariaLabel="School days"
+              selectedDays={selectedSchoolDays}
+              disabled={!canEdit}
+              onToggle={onToggleSchoolDay}
+            />
+          ) : (
+            <WeekdayCircleToggles
+              ariaLabel="Home days"
+              selectedDays={selectedHomeDays}
+              disabled={!canEdit}
+              onToggle={onToggleHomeDay}
+            />
+          )}
         </div>
       </div>
 

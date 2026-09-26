@@ -36,3 +36,23 @@ export function nextOutlinePosition(
   if (positions.length === 0) return 0;
   return Math.max(...positions) + 1;
 }
+
+export type OutlinePositionPatch = {
+  kind: OutlineItem["kind"];
+  id: number;
+  position: number;
+};
+
+export function outlineItemKey(item: Pick<OutlineItem, "kind" | "id">): string {
+  return `${item.kind}:${item.id}`;
+}
+
+export function outlinePositionPatches(ordered: readonly OutlineItem[]): OutlinePositionPatch[] {
+  const patches: OutlinePositionPatch[] = [];
+  for (let index = 0; index < ordered.length; index++) {
+    const item = ordered[index];
+    if (!item || item.position === index) continue;
+    patches.push({ kind: item.kind, id: item.id, position: index });
+  }
+  return patches;
+}

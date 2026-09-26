@@ -130,7 +130,10 @@ export function DiscussionPage() {
               {discussionAudienceLabel(page.discussion.audience)}
             </Badge>
             <span className="text-[13px] font-bold text-[var(--green-deep)]">
-              {discussionTargetName(page.discussion)}
+              {discussionTargetName({
+                ...page.discussion,
+                organizationName: page.organization.name,
+              })}
             </span>
           </>
         }

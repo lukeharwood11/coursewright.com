@@ -4,6 +4,12 @@ import { updateMaterial } from "@/materials/databridge/materials";
 import { saveMaterialPage } from "@/materials/databridge/saveMaterialPage";
 import { editorStateToBlocks } from "@/materials/model/pageContent";
 import {
+  EMPTY_PAGE_EDITOR_SETTINGS,
+  pageEditorSettingsEqual,
+  pageEditorSettingsFromBlocks,
+  type PageEditorSettings,
+} from "@/materials/model/pageEditorSettings";
+import {
   browserTimeZone,
   DEFAULT_DUE_TIME,
   dueInstantIso,
@@ -66,7 +72,13 @@ export function useMaterialEdit() {
   const [contentDraft, setContentDraft] = useState<string | null>(null);
   const [editorEpoch, setEditorEpoch] = useState(0);
   const [baselineReady, setBaselineReady] = useState(false);
+  const [editorSettings, setEditorSettings] = useState<PageEditorSettings>(
+    EMPTY_PAGE_EDITOR_SETTINGS,
+  );
+  const [editorSettingsBaseline, setEditorSettingsBaseline] =
+    useState<PageEditorSettings>(EMPTY_PAGE_EDITOR_SETTINGS);
   const resyncPlacement = useRef(false);
+  const editorSettingsSeedRef = useRef("");
   const titleCommitRef = useRef<Promise<boolean> | null>(null);
   const titleRef = useRef(title);
   const savedTitleRef = useRef(savedTitle);
@@ -104,6 +116,16 @@ export function useMaterialEdit() {
     setContentBaseline(null);
     setContentDraft(null);
   }, [page.material?.id]);
+
+  useEffect(() => {
+    if (!page.material || page.material.kind !== "page") return;
+    const seed = `${page.material.id}:${editorEpoch}`;
+    if (editorSettingsSeedRef.current === seed) return;
+    editorSettingsSeedRef.current = seed;
+    const next = pageEditorSettingsFromBlocks(page.blocks);
+    setEditorSettings(next);
+    setEditorSettingsBaseline(next);
+  }, [page.material?.id, page.material?.kind, editorEpoch, page.blocks]);
 
   // Seed once per material id (title blur must not wipe other staged fields).
   useEffect(() => {
@@ -153,6 +175,10 @@ export function useMaterialEdit() {
     contentDraft !== null &&
     contentBaseline !== null &&
     contentDraft !== contentBaseline;
+
+  const settingsChanged =
+    page.material?.kind === "page" &&
+    !pageEditorSettingsEqual(editorSettings, editorSettingsBaseline);
 
   function onDraftChange(json: string) {
     if (!baselineReady) {
@@ -209,7 +235,7 @@ export function useMaterialEdit() {
     if (!page.material) return false;
     const titleOk = await commitTitle();
     if (!titleOk) return false;
-    if (!placementChanged && !contentChanged) return true;
+    if (!placementChanged && !contentChanged && !settingsChanged) return true;
     if (submissionsInvalid || limitInvalid || pointsInvalid) {
       setError(
         submissionsInvalid
@@ -224,9 +250,9 @@ export function useMaterialEdit() {
     setError(null);
     try {
       let blocks;
-      if (contentChanged && contentDraft) {
+      if ((contentChanged || settingsChanged) && contentDraft) {
         const parsed = JSON.parse(contentDraft) as SerializedEditorState;
-        blocks = editorStateToBlocks(parsed);
+        blocks = editorStateToBlocks(parsed, editorSettings);
       }
       await saveMaterialPage({
         materialId: page.material.id,
@@ -252,6 +278,7 @@ export function useMaterialEdit() {
         blocks,
       });
       if (contentDraft) setContentBaseline(contentDraft);
+      setEditorSettingsBaseline(editorSettings);
       await page.invalidate();
       return true;
     } catch (caught: unknown) {
@@ -314,9 +341,11 @@ export function useMaterialEdit() {
     },
     saving: saving || savingTitle,
     error,
-    hasChanges: placementChanged || contentChanged,
+    hasChanges: placementChanged || contentChanged || settingsChanged,
     canSave: !submissionsInvalid && !limitInvalid && !pointsInvalid,
     editorEpoch,
+    editorSettings,
+    onEditorSettingsChange: setEditorSettings,
     onDraftChange,
     commitTitle,
     save,

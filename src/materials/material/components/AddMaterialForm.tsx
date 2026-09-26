@@ -1,3 +1,4 @@
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { PlusIcon } from "@heroicons/react/24/outline";
@@ -32,6 +33,7 @@ export function AddMaterialForm({
   formOnly?: boolean;
   onCancel?: () => void;
 }) {
+  const { organization } = useOrgShell();
   const add = useAddMaterial({
     organizationId,
     orgSlug,
@@ -123,6 +125,8 @@ export function AddMaterialForm({
         dueDate={add.dueDate}
         dueTime={add.dueTime}
         timeZoneLabel={timeZoneLabel(browserTimeZone())}
+        schoolDays={organization.schoolDays}
+        homeDays={organization.homeDays}
         onScheduledChange={add.setScheduledDate}
         onDueDateChange={add.setDueDate}
         onDueTimeChange={add.setDueTime}

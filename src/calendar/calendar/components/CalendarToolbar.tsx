@@ -13,6 +13,9 @@ const segmentIdle =
 const segmentActive =
   "inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[13px] font-bold bg-[var(--green-tint)] text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)]";
 
+const navGroupClass =
+  "inline-grid grid-cols-2 overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--surface)]";
+
 const groupClass =
   "inline-flex overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--surface)]";
 
@@ -31,10 +34,10 @@ export function CalendarToolbar({
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <div className={groupClass} role="group" aria-label={`Move to previous or next ${period}`}>
+      <div className={navGroupClass} role="group" aria-label={`Move to previous or next ${period}`}>
         <button
           type="button"
-          className={`${segmentIdle} border-r border-[var(--line)]`}
+          className={`${segmentIdle} justify-center border-r border-[var(--line)]`}
           onClick={onPrev}
           aria-label={`Previous ${period}`}
         >
@@ -43,7 +46,7 @@ export function CalendarToolbar({
         </button>
         <button
           type="button"
-          className={segmentIdle}
+          className={`${segmentIdle} justify-center`}
           onClick={onNext}
           aria-label={`Next ${period}`}
         >

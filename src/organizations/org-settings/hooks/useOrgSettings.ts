@@ -20,6 +20,11 @@ import {
   canManageBilling,
   canManageOrgSettings,
 } from "@/organizations/model/role";
+import {
+  DEFAULT_HOME_DAYS,
+  toggleHomeDay,
+  type HomeDay,
+} from "@/organizations/model/homeDays";
 import { DEFAULT_SCHOOL_DAYS, sameSchoolDays, toggleSchoolDay, type SchoolDay } from "@/organizations/model/schoolDays";
 import { formatSlugInput } from "@/organizations/model/slug";
 import {
@@ -60,6 +65,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
   const [gradeScheme, setGradeScheme] = useState("k12");
   const [gradeLabelsText, setGradeLabelsText] = useState("");
   const [schoolDays, setSchoolDays] = useState<SchoolDay[]>(DEFAULT_SCHOOL_DAYS);
+  const [homeDays, setHomeDays] = useState<HomeDay[]>(DEFAULT_HOME_DAYS);
   const [about, setAbout] = useState("");
   const [address, setAddress] = useState("");
   const [website, setWebsite] = useState("");
@@ -76,6 +82,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
     setGradeScheme(organization.gradeScheme);
     setGradeLabelsText(gradeLabelsToText(organization.gradeLabels));
     setSchoolDays(organization.schoolDays);
+    setHomeDays(organization.homeDays);
     setAbout(organization.about ?? "");
     setAddress(organization.address ?? "");
     setWebsite(organization.website ?? "");
@@ -101,6 +108,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
         gradeScheme,
         gradeLabels: parseGradeLabels(gradeLabelsText),
         schoolDays,
+        homeDays,
         about,
         address,
         website,
@@ -184,6 +192,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
     gradeScheme,
     gradeLabelsText,
     schoolDays,
+    homeDays,
     about,
     address,
     website,
@@ -233,6 +242,7 @@ export function useOrgSettings(orgSlug: string | undefined) {
     gradeScheme,
     gradeLabelsText,
     schoolDays,
+    homeDays,
     about,
     address,
     website,
@@ -260,6 +270,10 @@ export function useOrgSettings(orgSlug: string | undefined) {
       setFormError(null);
     },
     onToggleSchoolDay,
+    onToggleHomeDay: (day: HomeDay) => {
+      setHomeDays(toggleHomeDay(homeDays, day));
+      setFormError(null);
+    },
     onAboutChange: (value: string) => {
       setAbout(value);
       setFormError(null);

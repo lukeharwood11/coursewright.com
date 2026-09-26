@@ -595,7 +595,7 @@ test("dashboard surfaces current announcements for matching students", () => {
   );
 });
 
-test("future week view uses Sunday as-of for announcements and coming up", () => {
+test("future week view uses Sunday as-of for announcements; coming up stays on today", () => {
   const futureWeek = {
     start: "2026-09-20",
     end: "2026-09-26",
@@ -611,6 +611,16 @@ test("future week view uses Sunday as-of for announcements and coming up", () =>
           title: "Next week lab",
           scheduledDate: "2026-09-22",
           dueDate: null,
+          courseId: 10,
+          unitId: null,
+          unitStart: null,
+          unitEnd: null,
+        },
+        {
+          id: 2,
+          title: "Due before next week starts",
+          scheduledDate: null,
+          dueDate: "2026-09-18",
           courseId: 10,
           unitId: null,
           unitStart: null,
@@ -656,5 +666,7 @@ test("future week view uses Sunday as-of for announcements and coming up", () =>
     ["Next week only"],
   );
   assert.equal(dashboard.nextAssignedItem?.material.title, "Next week lab");
+  assert.equal(dashboard.nextDueItem?.material.title, "Due before next week starts");
+  assert.equal(dashboard.nextDueItem?.sortDate, "2026-09-18");
 });
 

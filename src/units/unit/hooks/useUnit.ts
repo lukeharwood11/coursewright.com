@@ -16,7 +16,6 @@ import {
 import {
   listMaterialsForUnit,
   materialQueryKeys,
-  updateMaterial,
 } from "@/materials/databridge/materials";
 import {
   getUnit,
@@ -25,7 +24,8 @@ import {
   unitQueryKeys,
   updateUnit,
 } from "@/units/databridge/units";
-import { swapPositions } from "@/units/model/order";
+import { persistOutlinePositionPatches } from "@/units/databridge/persistOutlineOrder";
+import { outlinePositionPatches, type OutlineItem } from "@/quizzes/model/outline";
 import {
   listLinkedStudents,
   listQuizAttemptSummariesForQuizzes,
@@ -120,7 +120,9 @@ export function useUnit() {
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: unitQueryKeys.detail(unitId) });
     void queryClient.invalidateQueries({ queryKey: materialQueryKeys.unit(unitId) });
+    void queryClient.invalidateQueries({ queryKey: quizQueryKeys.unit(unitId) });
     void queryClient.invalidateQueries({ queryKey: materialQueryKeys.list(courseId) });
+    void queryClient.invalidateQueries({ queryKey: quizQueryKeys.list(courseId) });
     void queryClient.invalidateQueries({ queryKey: unitQueryKeys.list(courseId) });
   };
 
@@ -143,14 +145,9 @@ export function useUnit() {
     onSuccess: invalidate,
   });
 
-  const reorderMaterial = useMutation({
-    mutationFn: async (args: { id: number; direction: "up" | "down" }) => {
-      const items = materialsQuery.data ?? [];
-      const swaps = swapPositions(items, args.id, args.direction);
-      if (!swaps) return;
-      await Promise.all(
-        swaps.map((item) => updateMaterial(item.id, { position: item.position })),
-      );
+  const reorderOutline = useMutation({
+    mutationFn: async (args: { ordered: OutlineItem[] }) => {
+      await persistOutlinePositionPatches(outlinePositionPatches(args.ordered));
     },
     onSuccess: invalidate,
   });
@@ -187,6 +184,6 @@ export function useUnit() {
     saveUnit,
     removeUnit,
     restore,
-    reorderMaterial,
+    reorderOutline,
   };
 }

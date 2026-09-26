@@ -52,9 +52,21 @@ body {
   background: var(--paper);
 }
 
-/* Calendar: subtle cue for org-configured school days (no label). */
+/* Calendar: subtle cue for org-configured school / home days (icons in day headers). */
 .cw-calendar-school-day {
   background: color-mix(in srgb, var(--green-tint) 42%, var(--surface));
+}
+
+.cw-calendar-home-day {
+  background: color-mix(in srgb, var(--amber-tint) 38%, var(--surface));
+}
+
+.cw-calendar-school-day.cw-calendar-home-day {
+  background: color-mix(
+    in srgb,
+    var(--green-tint) 28%,
+    color-mix(in srgb, var(--amber-tint) 22%, var(--surface))
+  );
 }
 
 /* Native date fields have a large intrinsic width on mobile browsers. */
@@ -211,6 +223,16 @@ body {
 
 .cw-editor-toolbar-dropdown {
   padding-right: 4px;
+}
+
+.cw-editor-toolbar-label {
+  max-width: 5.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .cw-editor-toolbar-divider {

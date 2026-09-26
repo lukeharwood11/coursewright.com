@@ -6,6 +6,7 @@ import {
   websiteDisplay,
 } from "@/organizations/model/orgProfile";
 import { orgTypeLabel } from "@/organizations/model/orgType";
+import { homeDaysLabel } from "@/organizations/model/homeDays";
 import { schoolDaysLabel } from "@/organizations/model/schoolDays";
 import { ButtonLink } from "@/ui/Button";
 
@@ -82,6 +83,11 @@ export function OrgProfileContent({
         <ProfileField label="School days">
           {schoolDaysLabel(organization.schoolDays)}
         </ProfileField>
+        {organization.homeDays.length > 0 ? (
+          <ProfileField label="Home days">
+            {homeDaysLabel(organization.homeDays)}
+          </ProfileField>
+        ) : null}
         {organization.about ? (
           <ProfileField label="About">
             <p className="whitespace-pre-wrap">{organization.about}</p>

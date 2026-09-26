@@ -70,6 +70,7 @@ export function CalendarPage() {
               events={page.events}
               hiddenCourseIds={page.hiddenCourseIds}
               schoolDays={page.organization.schoolDays}
+              homeDays={page.organization.homeDays}
             />
           ) : page.view === "day" ? (
             <DayCalendar
@@ -80,6 +81,7 @@ export function CalendarPage() {
               events={page.events}
               hiddenCourseIds={page.hiddenCourseIds}
               schoolDays={page.organization.schoolDays}
+              homeDays={page.organization.homeDays}
             />
           ) : (
             <MonthCalendar
@@ -93,6 +95,7 @@ export function CalendarPage() {
               events={page.events}
               hiddenCourseIds={page.hiddenCourseIds}
               schoolDays={page.organization.schoolDays}
+              homeDays={page.organization.homeDays}
             />
           )}
         </div>

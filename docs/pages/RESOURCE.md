@@ -30,7 +30,7 @@ Word-like layout: compact header chrome; the document editor fills most of the p
 - Name (all types — file **resource title**, not the Storage blob name). Leaving the name field, pressing **Enter**, or leaving the editor (back / Close / Cancel) saves it on its own.
 - Description via the header button (not a always-visible field).
 - Link URL when type is link (slim field under the header).
-- Document: Lexical editor for the body (majority of the viewport).
+- Document: Lexical editor for the body (majority of the viewport). **Version history** in the editor toolbar (labeled on desktop; **⋯** on small screens). Link and file types expose it in the edit header instead. Each version lists change type, **who saved**, and when; preview and **Restore this version** match course materials.
 - Cancel with unsaved changes confirms.
 
 Not found: back to Resources.
@@ -53,6 +53,7 @@ Not found: back to Resources.
 
 - Print
 - Edit / Save / (desktop) Save & close; Cancel reads Close when unchanged
+- Version history (edit — browse / preview / restore)
 - Move / Manage access (staff) under header **⋯**
 - Publish / Unpublish
 - Remove

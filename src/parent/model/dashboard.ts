@@ -257,7 +257,8 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
       .filter((row) => row.courseStatus === "active")
       .map((row) => row.courseId),
   );
-  const asNow = new Date(`${source.today || localIsoDate()}T12:00:00`);
+  const today = source.today || localIsoDate();
+  const asNow = new Date(`${today}T12:00:00`);
   const viewAsOf = effectiveViewAsOfDate(source.week, asNow);
   const showImportantNow = isCurrentCalendarWeek(source.week, asNow);
 
@@ -381,8 +382,8 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
     ];
   });
 
-  const nextAssigned = collectNextByDate(source, "assigned", viewAsOf);
-  const nextDue = collectNextByDate(source, "due", viewAsOf);
+  const nextAssigned = collectNextByDate(source, "assigned", today);
+  const nextDue = collectNextByDate(source, "due", today);
 
   return {
     week: source.week,

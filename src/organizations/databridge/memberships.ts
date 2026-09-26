@@ -14,12 +14,13 @@ import {
   type StaffInviteRole,
 } from "@/organizations/model/role";
 import { parseOrgTypeOrDefault, type OrgType } from "@/organizations/model/orgType";
+import { parseHomeDays, type HomeDay } from "@/organizations/model/homeDays";
 import { DEFAULT_SCHOOL_DAYS, parseSchoolDays, type SchoolDay } from "@/organizations/model/schoolDays";
 import { staffMembershipWriteErrorMessage } from "@/organizations/model/staffAccount";
 import { requireSupabase } from "./client";
 
 export const ORG_SUMMARY_SELECT =
-  "id, name, slug, org_type, school_days, about, address, website, contact_email, phone, branding:organization_branding(accent_color, icon_path, updated_at)" as const;
+  "id, name, slug, org_type, school_days, home_days, about, address, website, contact_email, phone, branding:organization_branding(accent_color, icon_path, updated_at)" as const;
 
 export type OrganizationSummary = {
   id: number;
@@ -27,6 +28,7 @@ export type OrganizationSummary = {
   slug: string;
   orgType: OrgType;
   schoolDays: SchoolDay[];
+  homeDays: HomeDay[];
   about: string | null;
   address: string | null;
   website: string | null;
@@ -50,6 +52,7 @@ export type OrganizationSummaryRow = {
   slug: string;
   org_type?: string | null;
   school_days?: number[] | null;
+  home_days?: number[] | null;
   about?: string | null;
   address?: string | null;
   website?: string | null;
@@ -66,6 +69,7 @@ export function toOrganizationSummary(row: OrganizationSummaryRow): Organization
     slug: row.slug,
     orgType: parseOrgTypeOrDefault(row.org_type),
     schoolDays: parseSchoolDays(row.school_days) ?? DEFAULT_SCHOOL_DAYS,
+    homeDays: parseHomeDays(row.home_days ?? null),
     about: row.about ?? null,
     address: row.address ?? null,
     website: row.website ?? null,

@@ -40,7 +40,9 @@ import {
   unitQueryKeys,
   updateUnit,
 } from "@/units/databridge/units";
-import { swapPositions } from "@/units/model/order";
+import { persistOutlinePositionPatches } from "@/units/databridge/persistOutlineOrder";
+import { positionPatchesForOrder } from "@/units/model/order";
+import { outlinePositionPatches, type OutlineItem } from "@/quizzes/model/outline";
 import type { CourseVisibility } from "@/courses/model/visibility";
 import {
   getOrganization,
@@ -161,6 +163,9 @@ export function useCourse() {
       queryKey: materialQueryKeys.list(courseId),
     });
     void queryClient.invalidateQueries({
+      queryKey: quizQueryKeys.list(courseId),
+    });
+    void queryClient.invalidateQueries({
       queryKey: courseQueryKeys.instructors(courseId),
     });
     void queryClient.invalidateQueries({
@@ -180,13 +185,20 @@ export function useCourse() {
     onSuccess: invalidate,
   });
 
-  const reorderUnit = useMutation({
-    mutationFn: async (args: { id: number; direction: "up" | "down" }) => {
-      const swaps = swapPositions(units, args.id, args.direction);
-      if (!swaps) return;
+  const reorderUnits = useMutation({
+    mutationFn: async (orderedIds: number[]) => {
+      const patches = positionPatchesForOrder(units, orderedIds);
+      if (patches.length === 0) return;
       await Promise.all(
-        swaps.map((item) => updateUnit(item.id, { position: item.position })),
+        patches.map((item) => updateUnit(item.id, { position: item.position })),
       );
+    },
+    onSuccess: invalidate,
+  });
+
+  const reorderUnitOutline = useMutation({
+    mutationFn: async (args: { ordered: OutlineItem[] }) => {
+      await persistOutlinePositionPatches(outlinePositionPatches(args.ordered));
     },
     onSuccess: invalidate,
   });
@@ -242,14 +254,16 @@ export function useCourse() {
           : quizzesQuery.error
             ? quizzesQuery.error.message
           : addUnit.error?.message ??
-            reorderUnit.error?.message ??
+            reorderUnits.error?.message ??
+            reorderUnitOutline.error?.message ??
             setVisibility.error?.message ??
             null,
     notFound:
       !courseQuery.isLoading &&
       (!course || !belongsHere || familyCourseHidden),
     addUnit,
-    reorderUnit,
+    reorderUnits,
+    reorderUnitOutline,
     setVisibility,
     invalidate,
   };

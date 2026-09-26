@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { SerializedEditorState } from "lexical";
-import { saveResourceDocument } from "@/resources/databridge/blocks";
+import { saveResourcePage } from "@/resources/databridge/saveResourcePage";
 import { updateResourceItem } from "@/resources/databridge/items";
 import { editorStateToBlocks } from "@/materials/model/pageContent";
 import { useResource } from "@/resources/resource/hooks/useResource";
@@ -21,6 +21,8 @@ export function useResourceEdit() {
   const [contentBaseline, setContentBaseline] = useState<string | null>(null);
   const [contentDraft, setContentDraft] = useState<string | null>(null);
   const [baselineReady, setBaselineReady] = useState(false);
+  const [editorEpoch, setEditorEpoch] = useState(0);
+  const resyncPlacement = useRef(false);
   const titleCommitRef = useRef<Promise<boolean> | null>(null);
   const titleRef = useRef(title);
   const savedTitleRef = useRef(savedTitle);
@@ -40,6 +42,15 @@ export function useResourceEdit() {
     setDescription(page.item.description);
     setUrl(page.item.url ?? "");
   }, [page.item?.id]);
+
+  useEffect(() => {
+    if (!resyncPlacement.current || !page.item) return;
+    resyncPlacement.current = false;
+    setTitle(page.item.title);
+    setSavedTitle(page.item.title);
+    setDescription(page.item.description);
+    setUrl(page.item.url ?? "");
+  }, [page.item]);
 
   const placementChanged = Boolean(
     page.item &&
@@ -132,11 +143,15 @@ export function useResourceEdit() {
         const parsed = JSON.parse(contentDraft) as SerializedEditorState;
         blocks = editorStateToBlocks(parsed);
       }
-      await saveResourceDocument({
+      await saveResourcePage({
         itemId: page.item.id,
-        title: savedTitleRef.current || titleRef.current.trim(),
-        description,
-        url: page.item.type === "link" ? url.trim() : undefined,
+        placement: placementChanged
+          ? {
+              title: savedTitleRef.current || titleRef.current.trim(),
+              description,
+              url: page.item.type === "link" ? url.trim() : page.item.url,
+            }
+          : undefined,
         blocks,
       });
       if (contentDraft) {
@@ -158,6 +173,14 @@ export function useResourceEdit() {
     }
   }
 
+  function afterRestore() {
+    resyncPlacement.current = true;
+    setBaselineReady(false);
+    setContentBaseline(null);
+    setContentDraft(null);
+    setEditorEpoch((value) => value + 1);
+  }
+
   return {
     page,
     formId: FORM_ID,
@@ -173,5 +196,7 @@ export function useResourceEdit() {
     hasChanges: placementChanged || contentChanged,
     onDraftChange,
     save,
+    afterRestore,
+    editorEpoch,
   };
 }

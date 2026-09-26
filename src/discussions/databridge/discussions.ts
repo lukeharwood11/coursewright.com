@@ -5,7 +5,9 @@ import {
 } from "@/materials/databridge/files";
 import {
   parseDiscussionAudience,
+  parseDiscussionFamilyAudience,
   type DiscussionAudience,
+  type DiscussionFamilyAudience,
 } from "@/discussions/model/audience";
 import type { DiscussionDraft } from "@/discussions/model/validate";
 import { requireSupabase } from "./client";
@@ -15,6 +17,7 @@ export type DiscussionRecord = {
   id: number;
   organizationId: number;
   audience: DiscussionAudience;
+  familyAudience: DiscussionFamilyAudience;
   courseId: number | null;
   classId: number | null;
   title: string;
@@ -88,7 +91,7 @@ export type AttachmentInsert = {
 };
 
 const DISCUSSION_COLUMNS =
-  "id, organization_id, audience, course_id, class_id, title, created_by, last_message_at, answered_at, created_at, deleted_at";
+  "id, organization_id, audience, family_audience, course_id, class_id, title, created_by, last_message_at, answered_at, created_at, deleted_at";
 
 const DISCUSSION_LIST_EMBED = `${DISCUSSION_COLUMNS}, author:profiles!discussions_created_by_fkey(name), course:courses!discussions_course_id_fkey(title), class:classes!discussions_class_id_fkey(title), discussion_reads(user_id, last_read_at), discussion_messages(id, deleted_at)`;
 
@@ -101,6 +104,7 @@ type DiscussionRow = {
   id: number;
   organization_id: number;
   audience: string;
+  family_audience: string | null;
   course_id: number | null;
   class_id: number | null;
   title: string;
@@ -169,6 +173,7 @@ export const discussionQueryKeys = {
     audience: string | null,
     courseId: number | null,
     classId: number | null,
+    familyAudience: string | null,
   ) =>
     [
       "discussions",
@@ -177,6 +182,7 @@ export const discussionQueryKeys = {
       audience,
       courseId,
       classId,
+      familyAudience,
     ] as const,
 };
 
@@ -225,6 +231,7 @@ function toDiscussion(row: DiscussionRow, userId?: string): DiscussionRecord | n
     id: row.id,
     organizationId: row.organization_id,
     audience,
+    familyAudience: parseDiscussionFamilyAudience(row.family_audience),
     courseId: row.course_id,
     classId: row.class_id,
     title: row.title,
@@ -382,13 +389,14 @@ export async function createDiscussion(args: {
   mentionedUserIds?: string[];
 }): Promise<DiscussionRecord> {
   const audience = args.draft.audience;
-  if (!audience) throw new Error("Choose a course or a class.");
+  if (!audience) throw new Error("Choose who this discussion is for.");
   const db = requireSupabase();
   const { data, error } = await db
     .from("discussions")
     .insert({
       organization_id: args.organizationId,
       audience,
+      family_audience: args.draft.familyAudience,
       course_id: audience === "course" ? args.draft.courseId : null,
       class_id: audience === "class" ? args.draft.classId : null,
       title: args.draft.title.trim(),
@@ -709,13 +717,16 @@ export async function listDiscussionAudienceMembers(args: {
   audience: DiscussionAudience;
   courseId: number | null;
   classId: number | null;
+  familyAudience: DiscussionFamilyAudience;
 }): Promise<DiscussionMemberRecord[]> {
   const db = requireSupabase();
   const { data, error } = await db.rpc("list_discussion_audience_members", {
     p_organization_id: args.organizationId,
     p_audience: args.audience,
-    p_course_id: args.courseId ?? 0,
-    p_class_id: args.classId ?? 0,
+    p_course_id:
+      args.audience === "course" ? (args.courseId ?? null) : null,
+    p_class_id: args.audience === "class" ? (args.classId ?? null) : null,
+    p_family_audience: args.familyAudience,
   });
   if (error) throw new Error(error.message);
 

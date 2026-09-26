@@ -288,6 +288,8 @@ export function AccessSettingsDialog({
             </label>
           ) : null}
 
+          {custom ? (
+            <>
           <TabList label="Audience" className="mt-4">
             <Tab
               selected={tab === "parents"}
@@ -425,6 +427,8 @@ export function AccessSettingsDialog({
                 onRemove={(grant) => removeGrant.mutate(grant.id)}
               />
             </div>
+          ) : null}
+            </>
           ) : null}
 
           {error ? (

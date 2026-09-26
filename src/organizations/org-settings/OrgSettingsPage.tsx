@@ -123,6 +123,7 @@ export function OrgSettingsPage() {
               gradeScheme={settings.gradeScheme}
               gradeLabelsText={settings.gradeLabelsText}
               schoolDays={settings.schoolDays}
+              homeDays={settings.homeDays}
               about={settings.about}
               address={settings.address}
               website={settings.website}
@@ -143,6 +144,7 @@ export function OrgSettingsPage() {
               onGradeSchemeChange={settings.onGradeSchemeChange}
               onGradeLabelsTextChange={settings.onGradeLabelsTextChange}
               onToggleSchoolDay={settings.onToggleSchoolDay}
+              onToggleHomeDay={settings.onToggleHomeDay}
               onAboutChange={settings.onAboutChange}
               onAddressChange={settings.onAddressChange}
               onWebsiteChange={settings.onWebsiteChange}

@@ -208,6 +208,8 @@ export function MaterialEditPage() {
                       blocks={page.blocks}
                       editorKey={`${page.material.id}-${edit.editorEpoch}`}
                       editable
+                      editorSettings={edit.editorSettings}
+                      onEditorSettingsChange={edit.onEditorSettingsChange}
                       onDraftChange={edit.onDraftChange}
                       onVersionHistory={() => setHistoryOpen(true)}
                       versionHistoryDisabled={page.versions.length === 0}
@@ -243,6 +245,8 @@ export function MaterialEditPage() {
                 dueDate={edit.dueDate}
                 dueTime={edit.dueTime}
                 timeZoneLabel={timeZoneLabel(edit.dueTimezone)}
+                schoolDays={page.organization.schoolDays}
+                homeDays={page.organization.homeDays}
                 onScheduledChange={edit.setScheduledDate}
                 onDueDateChange={edit.setDueDate}
                 onDueTimeChange={edit.setDueTime}
@@ -287,6 +291,8 @@ export function MaterialEditPage() {
         open={historyOpen}
         versions={page.versions}
         restoring={page.revert.isPending}
+        schoolDays={page.organization.schoolDays}
+        homeDays={page.organization.homeDays}
         onClose={() => setHistoryOpen(false)}
         onRestore={(snapshot) => {
           page.revert.mutate(snapshot, {

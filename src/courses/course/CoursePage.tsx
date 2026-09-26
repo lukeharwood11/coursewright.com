@@ -21,6 +21,7 @@ import { CourseResourceLinksSection } from "./components/CourseResourceLinksSect
 import { useCourseEvents } from "./hooks/useCourseEvents";
 import { UnitCard } from "./components/UnitCard";
 import { useCourse } from "./hooks/useCourse";
+import { VerticalReorderList } from "@/ui/VerticalReorderList";
 import { coursesPath } from "@/courses/model/paths";
 
 export function CoursePage() {
@@ -43,7 +44,8 @@ export function CoursePage() {
     error,
     notFound,
     addUnit,
-    reorderUnit,
+    reorderUnits,
+    reorderUnitOutline,
     setVisibility,
   } = useCourse();
   const { organization: shellOrg } = useOrgShell();
@@ -179,36 +181,39 @@ export function CoursePage() {
 
           <section className="mt-8">
             <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Units</h2>
-            <div className="mt-2 flex flex-col gap-3">
-              {units.map((unit, index) => (
-                <UnitCard
-                  key={unit.id}
-                  orgSlug={organization.slug}
-                  organizationId={organization.id}
-                  unit={unit}
-                  index={index}
-                  materials={materialsByUnitId[unit.id] ?? []}
-                  quizzes={quizzesByUnitId[unit.id] ?? []}
-                  attemptByQuizId={attemptByQuizId}
-                  importantIds={importantIds}
-                  canEdit={canEdit}
-                  expanded={expanded[unit.id] ?? defaultExpanded[unit.id] ?? true}
-                  onToggle={() =>
-                    setExpanded((current) => ({
-                      ...current,
-                      [unit.id]: !(current[unit.id] ?? true),
-                    }))
-                  }
-                  onMoveUp={() =>
-                    reorderUnit.mutate({ id: unit.id, direction: "up" })
-                  }
-                  onMoveDown={() =>
-                    reorderUnit.mutate({ id: unit.id, direction: "down" })
-                  }
-                  isLast={index === units.length - 1}
-                />
-              ))}
-            </div>
+            <VerticalReorderList
+              className="mt-2 flex flex-col gap-3"
+              items={units}
+              getKey={(unit) => String(unit.id)}
+              disabled={!canEdit}
+              onOrderCommit={(ordered) =>
+                reorderUnits.mutate(ordered.map((unit) => unit.id))
+              }
+              renderItem={(unit, { dragHandleProps, index }) => (
+                  <UnitCard
+                    orgSlug={organization.slug}
+                    organizationId={organization.id}
+                    unit={unit}
+                    index={index}
+                    materials={materialsByUnitId[unit.id] ?? []}
+                    quizzes={quizzesByUnitId[unit.id] ?? []}
+                    attemptByQuizId={attemptByQuizId}
+                    importantIds={importantIds}
+                    canEdit={canEdit}
+                    expanded={expanded[unit.id] ?? defaultExpanded[unit.id] ?? true}
+                    onToggle={() =>
+                      setExpanded((current) => ({
+                        ...current,
+                        [unit.id]: !(current[unit.id] ?? true),
+                      }))
+                    }
+                    dragHandleProps={dragHandleProps}
+                    onOutlineReorder={(ordered) =>
+                      reorderUnitOutline.mutate({ ordered })
+                    }
+                  />
+              )}
+            />
             {units.length === 0 ? (
               <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">
                 Create a new unit to start adding material.

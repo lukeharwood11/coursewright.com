@@ -19,7 +19,7 @@ import {
 export { orgQueryKeys } from "./memberships";
 
 export const ORG_DETAILS_SELECT =
-  "id, name, slug, school_days, about, address, website, contact_email, phone, org_type, grade_scheme, grade_labels" as const;
+  "id, name, slug, school_days, home_days, about, address, website, contact_email, phone, org_type, grade_scheme, grade_labels" as const;
 
 export type OrganizationDetails = OrganizationSummary & {
   orgType: OrgType;
@@ -60,6 +60,7 @@ export async function createOrganization(
     grade_scheme: CREATE_ORG_DEFAULTS.gradeScheme,
     grade_labels: CREATE_ORG_DEFAULTS.gradeLabels,
     school_days: CREATE_ORG_DEFAULTS.schoolDays,
+    home_days: CREATE_ORG_DEFAULTS.homeDays,
   });
 
   if (insertError) {
@@ -112,6 +113,7 @@ export async function updateOrganization(
       grade_scheme: input.gradeScheme,
       grade_labels: input.gradeLabels,
       school_days: input.schoolDays,
+      home_days: input.homeDays,
       about: input.about,
       address: input.address,
       website: input.website,

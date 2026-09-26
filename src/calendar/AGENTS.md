@@ -6,7 +6,7 @@ Month and week **calendar** of assigned/due materials, lesson plans, and shared 
 
 - Calendar page (`/my/<org-slug>/calendar`) — month, week, and day (`?view=`)
 - Shared `WeekCalendar` / `MonthCalendar` / `DayCalendar` used by parent This week (`layout="cards"` there: skip empty days, wrap remaining days)
-- Assigned = outline chip; due = filled chip
+- Assigned = outline chip; due = filled chip labeled `Due: <title>` in the cell
 - Calendar items are links; tapping a day (not an item) opens day view
 
 ## Rules

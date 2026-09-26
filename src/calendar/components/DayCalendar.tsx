@@ -7,11 +7,9 @@ import {
   type CalendarMaterialChip,
 } from "@/calendar/model/events";
 import { EventChip } from "./EventChip";
-import {
-  DEFAULT_SCHOOL_DAYS,
-  isOrgSchoolDay,
-  type SchoolDay,
-} from "@/organizations/model/schoolDays";
+import { calendarDaySurfaceClass } from "@/organizations/components/OrgDayTypeIcons";
+import { DEFAULT_HOME_DAYS, type HomeDay } from "@/organizations/model/homeDays";
+import { DEFAULT_SCHOOL_DAYS, type SchoolDay } from "@/organizations/model/schoolDays";
 
 export function DayCalendar({
   orgSlug,
@@ -21,6 +19,7 @@ export function DayCalendar({
   events = [],
   hiddenCourseIds,
   schoolDays = DEFAULT_SCHOOL_DAYS,
+  homeDays = DEFAULT_HOME_DAYS,
 }: {
   orgSlug: string;
   date: string;
@@ -29,6 +28,7 @@ export function DayCalendar({
   events?: CalendarEventChip[];
   hiddenCourseIds: Set<number>;
   schoolDays?: readonly SchoolDay[];
+  homeDays?: readonly HomeDay[];
 }) {
   const visibleDays = lessonDays.filter((day) => !hiddenCourseIds.has(day.courseId));
   const visibleChips = chips.filter((chip) => !hiddenCourseIds.has(chip.courseId));
@@ -43,9 +43,7 @@ export function DayCalendar({
     );
   }
 
-  const surfaceClass = isOrgSchoolDay(date, schoolDays)
-    ? "cw-calendar-school-day"
-    : "bg-[var(--surface)]";
+  const surfaceClass = calendarDaySurfaceClass(date, schoolDays, homeDays);
 
   return (
     <div

@@ -16,6 +16,7 @@ import type { DiscussionRecord } from "@/discussions/databridge/discussions";
 export type DiscussionListRow = DiscussionRecord & {
   unread: boolean;
   forLabel: string | null;
+  organizationName: string;
 };
 
 export function DiscussionList({
@@ -58,7 +59,12 @@ export function DiscussionList({
                 {discussionAudienceLabel(item.audience)}
               </Badge>
               <span className="text-[13px] font-bold text-[var(--green-deep)]">
-                {discussionTargetName(item)}
+                {discussionTargetName({
+                  audience: item.audience,
+                  courseTitle: item.courseTitle,
+                  classTitle: item.classTitle,
+                  organizationName: item.organizationName,
+                })}
               </span>
             </span>
             {item.forLabel ? (

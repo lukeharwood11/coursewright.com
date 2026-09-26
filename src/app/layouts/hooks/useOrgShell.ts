@@ -255,7 +255,7 @@ export function useOrgShellData(orgSlug: string | undefined) {
     profileName,
     profileEmail,
     navSections,
-    showSearch: browsesStaff && !parentPresentation,
+    showSearch: Boolean(organization),
     parentPresentation,
     showStaffViewToggle,
     staffViewMode,

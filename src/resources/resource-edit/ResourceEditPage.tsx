@@ -11,6 +11,8 @@ import { useResourceEdit } from "./hooks/useResourceEdit";
 import { ResourceDescriptionDialog } from "./components/ResourceDescriptionDialog";
 import { ResourceEditHeaderActions } from "./components/ResourceEditHeaderActions";
 import { resourceItemPath } from "@/resources/model/paths";
+import { MaterialVersionHistoryDialog } from "@/materials/material/components/MaterialVersionHistoryDialog";
+import { previewFromResourceSnapshot } from "@/resources/model/versionSnapshot";
 
 const PageContentEditor = lazy(async () => {
   const module = await import("@/materials/material/components/PageContentEditor");
@@ -30,6 +32,7 @@ export function ResourceEditPage() {
   const user = useAuthedUser();
   const navigate = useNavigate();
   const [descriptionOpen, setDescriptionOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   useToastOnError(edit.error ?? page.error);
   useSaveShortcut(() => {
     if (edit.saving || !edit.hasChanges) return;
@@ -119,6 +122,12 @@ export function ResourceEditPage() {
               cancelTo={viewHref}
               descriptionLabel={descriptionLabel}
               onDescription={() => setDescriptionOpen(true)}
+              onVersionHistory={
+                page.item.type === "document"
+                  ? undefined
+                  : () => setHistoryOpen(true)
+              }
+              versionHistoryDisabled={page.versions.length === 0}
               commitTitle={edit.commitTitle}
               onSaveAndClose={async () => {
                 const ok = await edit.save();
@@ -149,9 +158,11 @@ export function ResourceEditPage() {
                 <div className="min-h-[calc(100dvh-10rem)] flex-1 [&_.cw-editor-shell]:min-h-[calc(100dvh-10rem)] [&_.cw-editor-input]:min-h-[calc(100dvh-14rem)]">
                   <PageContentEditor
                     blocks={page.blocks}
-                    editorKey={`resource-edit-${page.item.id}`}
+                    editorKey={`resource-edit-${page.item.id}-${edit.editorEpoch}`}
                     editable
                     onDraftChange={edit.onDraftChange}
+                    onVersionHistory={() => setHistoryOpen(true)}
+                    versionHistoryDisabled={page.versions.length === 0}
                   />
                 </div>
               </Suspense>
@@ -179,6 +190,22 @@ export function ResourceEditPage() {
         value={edit.description}
         onClose={() => setDescriptionOpen(false)}
         onSave={edit.setDescription}
+      />
+
+      <MaterialVersionHistoryDialog
+        open={historyOpen}
+        versions={page.versions}
+        restoring={page.revert.isPending}
+        previewFromSnapshot={previewFromResourceSnapshot}
+        onClose={() => setHistoryOpen(false)}
+        onRestore={(snapshot) => {
+          page.revert.mutate(snapshot, {
+            onSuccess: () => {
+              edit.afterRestore();
+              setHistoryOpen(false);
+            },
+          });
+        }}
       />
     </>
   );

@@ -9,6 +9,9 @@ import {
 } from "@/lesson-plans/model/validate";
 import type { MaterialRecord } from "@/materials/databridge/materials";
 import type { UnitRecord } from "@/units/databridge/units";
+import { OrgDayTypeIcons } from "@/organizations/components/OrgDayTypeIcons";
+import { DEFAULT_HOME_DAYS, type HomeDay } from "@/organizations/model/homeDays";
+import { DEFAULT_SCHOOL_DAYS, type SchoolDay } from "@/organizations/model/schoolDays";
 import { AddDayModal } from "./AddDayModal";
 import { LinkMaterialsModal } from "./LinkMaterialsModal";
 
@@ -30,6 +33,8 @@ export function LessonPlanFormFields({
   onDayBody,
   onToggleMaterial,
   onAddDay,
+  schoolDays = DEFAULT_SCHOOL_DAYS,
+  homeDays = DEFAULT_HOME_DAYS,
 }: {
   title: string;
   weekNote: string;
@@ -43,6 +48,8 @@ export function LessonPlanFormFields({
   onDayBody: (date: string, body: string) => void;
   onToggleMaterial: (date: string, materialId: number) => void;
   onAddDay: (date: string) => void;
+  schoolDays?: readonly SchoolDay[];
+  homeDays?: readonly HomeDay[];
 }) {
   const [addDayOpen, setAddDayOpen] = useState(false);
   const [linkDay, setLinkDay] = useState<string | null>(null);
@@ -100,8 +107,13 @@ export function LessonPlanFormFields({
               key={day.date}
               className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--paper)] p-4"
             >
-              <h3 className="text-[12.5px] font-bold text-[var(--ink)]">
+              <h3 className="flex items-center gap-1.5 text-[12.5px] font-bold text-[var(--ink)]">
                 {weekdayDateLabel(day.date)}
+                <OrgDayTypeIcons
+                  date={day.date}
+                  schoolDays={schoolDays}
+                  homeDays={homeDays}
+                />
               </h3>
               <textarea
                 className={`${controlClass} mt-2 min-h-[7rem] resize-y text-[13.5px]`}
