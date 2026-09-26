@@ -12,7 +12,7 @@ Repo-root utility scripts (not app runtime).
 | `tf-apply.sh <tier>` | Apply saved `infra/terraform/tf.plan` for that tier |
 | `build-spa.sh <tier>` | Write gitignored `.env.production` from Terraform outputs (incl. `VITE_PUBLIC_HOST` from `site_domain`; testing refuses parent/main) + `npm run build` |
 | `deploy-spa.sh <tier>` | `aws s3 sync dist/` + CloudFront invalidate |
-| `deploy-supabase.sh <tier>` | `db push --include-all` + Edge Functions to tier’s Supabase ref (testing = branch, production = main) |
+| `deploy-supabase.sh <tier>` | `supabase link` + `db push --include-all` + Edge Functions to tier’s Supabase ref (testing = branch, production = main). Auth: `supabase login` or `SUPABASE_ACCESS_TOKEN`. |
 | `setup-activity-push.sh` | **HN-018** — VAPID + Activity push webhook on testing and/or production. Refs come from Terraform state. Production needs `--yes`. |
 | `deploy.sh <tier>` | Local one-shot: plan → apply → supabase → build → SPA (production requires `--yes`) |
 | `gha-resolve-plan-run.sh` | Actions helper: matching plan artifact run id + git SHA |
@@ -24,6 +24,6 @@ Repo-root utility scripts (not app runtime).
 - Prefer scripts here over one-offs under `supabase/` or `infra/`.
 - Destructive scripts must require confirmation (or an explicit `--yes`).
 - Tiers must keep backend key + tfvars paired (`backend-testing.hcl` + `testing.tfvars`, etc.).
-- `SUPABASE_ACCESS_TOKEN` required for Terraform Supabase provider and CLI scripts.
+- `SUPABASE_ACCESS_TOKEN` required for Terraform (`tf-plan` / `tf-apply`). `deploy-supabase.sh` uses `supabase login` when the token is unset.
 - Document new scripts in this file and link from root [AGENTS.md](../AGENTS.md) when agents should use them.
 - GitHub Actions call these scripts — keep YAML thin.

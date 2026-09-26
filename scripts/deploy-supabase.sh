@@ -4,7 +4,8 @@
 # production → main project
 #
 # Usage: ./scripts/deploy-supabase.sh <testing|production>
-# Requires: SUPABASE_ACCESS_TOKEN, supabase CLI, Terraform state for the tier.
+# Requires: supabase CLI (logged in via `supabase login` or SUPABASE_ACCESS_TOKEN),
+#           Terraform state for the tier.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -14,8 +15,10 @@ source "${SCRIPT_DIR}/lib/terraform-env.sh"
 resolve_tier "${1:-}"
 require_tools terraform supabase
 
-if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
-  red "SUPABASE_ACCESS_TOKEN is not set (needed for Management API / CLI)."
+if ! supabase projects list --yes >/dev/null 2>&1; then
+  red "Supabase CLI is not authenticated."
+  red "Run: supabase login"
+  red "Or set SUPABASE_ACCESS_TOKEN for non-interactive use."
   exit 1
 fi
 
