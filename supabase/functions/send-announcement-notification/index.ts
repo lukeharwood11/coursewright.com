@@ -219,7 +219,7 @@ async function canSendNotification(
   if (args.audience === "student") {
     if (args.studentIds.length === 0) return false;
     const { data, error } = await db
-      .from("student_profiles")
+      .from("org_profiles")
       .select("id")
       .eq("organization_id", args.organizationId)
       .in("id", args.studentIds);
@@ -241,7 +241,7 @@ async function loadTargetNames(
   }
   return loadOrderedLabels(
     db,
-    "student_profiles",
+    "org_profiles",
     "name",
     asIdList(announcement.student_profile_ids),
     "Student",
@@ -250,7 +250,7 @@ async function loadTargetNames(
 
 async function loadOrderedLabels(
   db: ReturnType<typeof serviceClient>,
-  table: "courses" | "classes" | "student_profiles",
+  table: "courses" | "classes" | "org_profiles",
   column: "title" | "name",
   ids: number[],
   fallback: string,
@@ -305,22 +305,26 @@ async function loadRecipientEmails(
   const { data, error } = await db
     .from("parent_student_links")
     .select(
-      "parent_user_id, parent:profiles!parent_student_links_parent_user_id_fkey(email)",
+      "parent:org_profiles!parent_student_links_parent_org_profile_id_fkey(user_id)",
     )
     .in("student_profile_id", studentIds);
   if (error) throw error;
 
   const { data: studentAccounts, error: studentError } = await db
-    .from("student_profiles")
-    .select("user_id, profile:profiles!student_profiles_user_id_fkey(email)")
+    .from("org_profiles")
+    .select("user_id")
     .in("id", studentIds)
     .not("user_id", "is", null);
   if (studentError) throw studentError;
 
+  const parentUserIds = (data ?? []).flatMap((row) => {
+    const parent = Array.isArray(row.parent) ? row.parent[0] : row.parent;
+    return parent?.user_id ? [parent.user_id] : [];
+  });
   const userIds = [
     ...new Set(
       [
-        ...(data ?? []).map((row) => row.parent_user_id),
+        ...parentUserIds,
         ...(studentAccounts ?? []).map((row) => row.user_id),
       ].filter((id): id is string => typeof id === "string" && id.length > 0),
     ),
@@ -336,30 +340,17 @@ async function loadRecipientEmails(
   if (membershipError) throw membershipError;
   const active = new Set((memberships ?? []).map((row) => row.user_id as string));
 
-  const emails = new Set<string>();
-  for (const row of data ?? []) {
-    const userId = row.parent_user_id as string;
-    if (!active.has(userId)) continue;
-    const profile = unwrapProfile((row as { parent?: unknown }).parent);
-    addEmail(emails, profile?.email);
-  }
-  for (const row of studentAccounts ?? []) {
-    const userId = row.user_id as string;
-    if (!active.has(userId)) continue;
-    const profile = unwrapProfile((row as { profile?: unknown }).profile);
-    addEmail(emails, profile?.email);
-  }
-  return [...emails];
-}
+  const activeIds = [...active];
+  if (activeIds.length === 0) return [];
+  const { data: accounts, error: accountError } = await db
+    .from("profiles")
+    .select("email")
+    .in("id", activeIds);
+  if (accountError) throw accountError;
 
-function unwrapProfile(value: unknown): { email?: string } | null {
-  if (!value) return null;
-  if (Array.isArray(value)) {
-    const first = value[0];
-    return first && typeof first === "object" ? (first as { email?: string }) : null;
-  }
-  if (typeof value === "object") return value as { email?: string };
-  return null;
+  const emails = new Set<string>();
+  for (const row of accounts ?? []) addEmail(emails, row.email);
+  return [...emails];
 }
 
 function addEmail(emails: Set<string>, value: string | null | undefined) {

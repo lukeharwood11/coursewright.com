@@ -92,7 +92,7 @@ export async function loadOwnStudentProfileIds(
 ): Promise<number[]> {
   const db = requireSupabase();
   const { data, error } = await db
-    .from("student_profiles")
+    .from("org_profiles")
     .select("id")
     .eq("organization_id", organizationId)
     .eq("user_id", userId);
@@ -105,10 +105,18 @@ export async function loadLinkedParentStudentIds(
   userId: string,
 ): Promise<number[]> {
   const db = requireSupabase();
+  const { data: parents, error: parentsError } = await db
+    .from("org_profiles")
+    .select("id")
+    .eq("user_id", userId);
+  if (parentsError) throw new Error(parentsError.message);
+  const parentIds = (parents ?? []).map((row) => row.id);
+  if (parentIds.length === 0) return [];
+
   const { data, error } = await db
     .from("parent_student_links")
     .select("student_profile_id")
-    .eq("parent_user_id", userId);
+    .in("parent_org_profile_id", parentIds);
 
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => row.student_profile_id);
@@ -190,7 +198,7 @@ async function loadDashboardForStudentIds(
   const [studentsResult, enrollmentsResult, importantResult, membersResult, announcementsResult] =
     await Promise.all([
     db
-      .from("student_profiles")
+      .from("org_profiles")
       .select("id, name, grade_level")
       .eq("organization_id", organizationId)
       .in("id", studentIds)
@@ -606,7 +614,7 @@ async function mapAnnouncements(
     announcementStudentIds.length === 0
       ? Promise.resolve({ data: [] as Array<{ id: number; name: string }>, error: null })
       : db
-          .from("student_profiles")
+          .from("org_profiles")
           .select("id, name")
           .eq("organization_id", organizationId)
           .in("id", announcementStudentIds),

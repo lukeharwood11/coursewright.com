@@ -718,7 +718,7 @@ export async function listQuizAttempts(quizId: number): Promise<QuizAttemptRecor
   const { data, error } = await db
     .from("quiz_attempts")
     .select(
-      "id, quiz_id, student_profile_id, submitted_by, submitted_at, autograded, teacher_graded_at, score, score_total, student:student_profiles(name, student_email), submitter:profiles!quiz_attempts_submitted_by_fkey(name, email)",
+      "id, quiz_id, student_profile_id, submitted_by, submitted_at, autograded, teacher_graded_at, score, score_total, student:org_profiles(name, email), submitter:profiles!quiz_attempts_submitted_by_fkey(name, email)",
     )
     .eq("quiz_id", quizId)
     .order("submitted_at", { ascending: false });
@@ -731,7 +731,7 @@ export async function listQuizAttempts(quizId: number): Promise<QuizAttemptRecor
       quizId: row.quiz_id,
       studentProfileId: row.student_profile_id,
       studentName: student?.name ?? "Student",
-      studentEmail: student?.student_email ?? null,
+      studentEmail: student?.email ?? null,
       submittedBy: row.submitted_by,
       submitterName: submitter?.name || submitter?.email || "Parent",
       submitterEmail: submitter?.email ?? "",
@@ -852,21 +852,29 @@ export async function listLinkedStudents(
 ): Promise<LinkedStudent[]> {
   const db = requireSupabase();
   const [links, own] = await Promise.all([
-    db.from("parent_student_links").select("student_profile_id").eq("parent_user_id", userId),
-    db.from("student_profiles").select("id").eq("user_id", userId),
+    db
+      .from("org_profiles")
+      .select("id, links:parent_student_links!parent_student_links_parent_org_profile_id_fkey(student_profile_id)")
+      .eq("user_id", userId),
+    db.from("org_profiles").select("id").eq("user_id", userId),
   ]);
   if (links.error) throw new Error(links.error.message);
   if (own.error) throw new Error(own.error.message);
+  const linkedIds = (links.data ?? []).flatMap((row) => {
+    const nested = row.links;
+    const list = Array.isArray(nested) ? nested : nested ? [nested] : [];
+    return list.map((link) => link.student_profile_id);
+  });
   const ids = [
     ...new Set([
-      ...(links.data ?? []).map((row) => row.student_profile_id),
+      ...linkedIds,
       ...(own.data ?? []).map((row) => row.id),
     ]),
   ];
   if (ids.length === 0) return [];
   const { data, error } = await db
     .from("enrollments")
-    .select("student:student_profiles(id, name, student_email)")
+    .select("student:org_profiles(id, name, email)")
     .eq("course_id", courseId)
     .eq("status", "active")
     .in("student_profile_id", ids);
@@ -878,7 +886,7 @@ export async function listLinkedStudents(
       {
         id: student.id,
         name: student.name,
-        studentEmail: student.student_email,
+        studentEmail: student.email,
       },
     ];
   });

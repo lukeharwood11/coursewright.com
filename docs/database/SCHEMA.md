@@ -16,7 +16,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | OrganizationFeatures | `organization_features` | Owner-only writes. Members read. Missing row means all features on. |
 | Membership | `memberships` | |
 | AdminInvite | `admin_invites` | Unified email-claim invite. Role payload: `owner` / `admin` / `instructor` / `observer` / `parent` / `student`. Claimed via emailed `/invite/<token>` (Resend `organization-invite`) or pending-request inbox after login. Copy-link remains. Membership is created on claim. |
-| StudentProfile | `student_profiles` | |
+| StudentProfile | `org_profiles` | Student-scoped rows (`counts_as_student`). Column name on enrollments and links stays `student_profile_id`. |
 | Family | `families` | |
 | FamilyMember | `family_members` | |
 | ParentInvite | `admin_invites` (`role = parent`) | Same token table as staff. One pending per `(org, email)`; students via `admin_invite_students`. Separate `parent_invites` table retired. |
@@ -449,23 +449,22 @@ Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor
 
 ### StudentProfile
 
-Org-level student record. Optional **student account**: `user_id` is set when a `role = student` invite is claimed.
+One person in an organization lives on `org_profiles`. A student is that row with `counts_as_student`. `user_id` is set when their invite is claimed. The name and contact email on this row are organizer-managed. Account `profiles.name` and the login email can differ and are not copied onto this row.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
-| name | text | **Required** — only required field |
+| name | text | **Required** — name shown inside the org |
 | parent_email | text | **Optional** — first parent email for create/search; more parents via invites + `ParentStudentLink` |
-| student_email | text | **Optional** — student contact email; invite uses `admin_invites.role = student` |
+| email | text | **Optional** — organizer-managed contact email. Unique per org when set. Replaces `student_email` |
+| counts_as_student | boolean | Billing and student-scoped links. Default false. True for students, including staff who are also students |
 | grade_level | text | **Optional** — must be in org `grade_labels` when set |
-| user_id | uuid | FK → User, **nullable** — set on student-invite claim. Unique per org when set |
+| user_id | uuid | FK → User, **nullable** — set on claim. Unique per org when set. Changing `email` does not clear it |
 | created_at | timestamptz | |
 | created_via_course_id | bigint | FK → Course, nullable — course that triggered first enrollment |
 
-No other student-profile fields in P0 besides optional parent/student emails and grade.
-
-Changing `student_email` invalidates every pending `role = student` invite for the profile. If one was pending and the new email is non-null, create a replacement with a fresh token and send it to the new address. If `user_id` was already set, clear it and do not create a replacement invite. A student-only membership ends. If that account is also a parent, the membership stays as parent and `is_student` clears. An exclusive staff membership is kept and `is_student` clears.
+Changing `email` while a student invite is pending deletes that invite and, when the new email is set, inserts a replacement token. After claim, the account stays linked. Detach is a separate action.
 
 Staff may **delete** a profile. Class membership, enrollments, parent links, and invites cascade. If `user_id` has a student-only membership in the org, that membership ends. If they are also a parent, the membership stays as parent and `is_student` clears. An exclusive staff role on the same account is kept and `is_student` clears.
 
@@ -517,9 +516,9 @@ Emails Resend `organization-invite` and keeps copy `/invite/<token>`. On claim: 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
-| parent_user_id | uuid | FK → User |
+| parent_org_profile_id | bigint | FK → `org_profiles` — the parent person in this org |
 | student_profile_id | bigint | FK → StudentProfile |
-| unique | (parent_user_id, student_profile_id) | Verified via invite or email match (enforced in claim Function) |
+| unique | (parent_org_profile_id, student_profile_id) | Access uses the parent row’s `user_id` |
 
 ### Enrollment
 

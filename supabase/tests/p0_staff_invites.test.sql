@@ -106,6 +106,7 @@ select lives_ok(
 reset role;
 create temp table invite_tokens as
   select email, role, token from admin_invites;
+grant select, insert on invite_tokens to anon, authenticated;
 
 select is_empty(
   $$select 1 from memberships
@@ -150,8 +151,8 @@ select results_eq(
 );
 
 select lives_ok(
-  $$insert into student_profiles (organization_id, name, parent_email)
-    select id, 'Sam Student', 'parent@example.com' from organizations$$,
+  $$insert into org_profiles (organization_id, name, parent_email, counts_as_student)
+    select id, 'Sam Student', 'parent@example.com', true from organizations$$,
   'instructor can create a student profile'
 );
 
@@ -159,7 +160,7 @@ select lives_ok(
   $$insert into admin_invites (organization_id, email, role, student_profile_id)
     select o.id, 'parent@example.com', 'parent', sp.id
     from organizations o
-    join student_profiles sp on sp.organization_id = o.id
+    join org_profiles sp on sp.organization_id = o.id
     where sp.name = 'Sam Student'$$,
   'instructor can invite a parent'
 );
@@ -171,8 +172,8 @@ select results_eq(
 );
 
 select lives_ok(
-  $$insert into student_profiles (organization_id, name, parent_email)
-    select id, 'Alex Sibling', 'parent@example.com' from organizations$$,
+  $$insert into org_profiles (organization_id, name, parent_email, counts_as_student)
+    select id, 'Alex Sibling', 'parent@example.com', true from organizations$$,
   'instructor can create a second student with the same parent email'
 );
 
@@ -180,7 +181,7 @@ select lives_ok(
   $$insert into admin_invite_students (invite_id, student_profile_id)
     select i.id, sp.id
     from admin_invites i
-    join student_profiles sp on sp.organization_id = i.organization_id
+    join org_profiles sp on sp.organization_id = i.organization_id
     where i.role = 'parent' and sp.name = 'Alex Sibling'$$,
   'instructor can attach a second student to the same pending parent invite'
 );
@@ -189,7 +190,7 @@ select throws_ok(
   $$insert into admin_invites (organization_id, email, role, student_profile_id)
     select o.id, 'parent@example.com', 'parent', sp.id
     from organizations o
-    join student_profiles sp on sp.organization_id = o.id
+    join org_profiles sp on sp.organization_id = o.id
     where sp.name = 'Alex Sibling'$$,
   'P0001',
   'That email already has a pending invite.',
@@ -277,8 +278,9 @@ select results_eq(
 );
 
 select results_eq(
-  $$select count(*)::int from parent_student_links
-    where parent_user_id = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'$$,
+  $$select count(*)::int from parent_student_links psl
+    join org_profiles parent on parent.id = psl.parent_org_profile_id
+    where parent.user_id = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'$$,
   array[2],
   'parent claim links the parent to every attached student'
 );
@@ -299,8 +301,9 @@ select id, 'Biology', 'active', 'published' from organizations;
 
 insert into enrollments (student_profile_id, course_id, status)
 select sp.id, c.id, 'active'
-from student_profiles sp
-join courses c on c.organization_id = sp.organization_id;
+from org_profiles sp
+join courses c on c.organization_id = sp.organization_id
+where sp.counts_as_student;
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', true);

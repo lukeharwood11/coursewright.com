@@ -162,12 +162,22 @@ select results_eq(
   'suspended member cannot patch a course even with a leftover instructor row'
 );
 
-insert into student_profiles (organization_id, name)
-select id, 'Access Kid' from organizations where name = 'Access Co-op';
+insert into org_profiles (organization_id, name, counts_as_student)
+select id, 'Access Kid', true from organizations where name = 'Access Co-op';
 
-insert into parent_student_links (parent_user_id, student_profile_id)
-select 'dddd4444-4444-4444-4444-444444444444', id
-from student_profiles where name = 'Access Kid';
+insert into org_profiles (organization_id, name, email, user_id, counts_as_student)
+select o.id, 'Access Parent', p.email, p.id, false
+from organizations o
+join profiles p on p.id = 'dddd4444-4444-4444-4444-444444444444'
+where o.name = 'Access Co-op';
+
+insert into parent_student_links (parent_org_profile_id, student_profile_id)
+select parent.id, kid.id
+from org_profiles kid
+join org_profiles parent
+  on parent.organization_id = kid.organization_id
+ and parent.user_id = 'dddd4444-4444-4444-4444-444444444444'
+where kid.name = 'Access Kid';
 
 insert into memberships (organization_id, user_id, role, status)
 select id, 'dddd4444-4444-4444-4444-444444444444', 'parent', 'active'
@@ -213,8 +223,8 @@ select results_eq(
   'removing the exclusive role leaves the parent membership'
 );
 
-insert into student_profiles (organization_id, name, user_id)
-select id, 'Access Student Kid', 'eeee5555-5555-5555-5555-555555555555'
+insert into org_profiles (organization_id, name, user_id, counts_as_student)
+select id, 'Access Student Kid', 'eeee5555-5555-5555-5555-555555555555', true
 from organizations where name = 'Access Co-op';
 
 insert into memberships (organization_id, user_id, role, status)

@@ -11,7 +11,7 @@ import { listClassesForStudent, classQueryKeys } from "@/roster/databridge/class
 async function getOwnStudent(organizationId: number, userId: string): Promise<StudentSummary | null> {
   const db = requireSupabase();
   const { data, error } = await db
-    .from("student_profiles")
+    .from("org_profiles")
     .select(STUDENT_COLUMNS)
     .eq("organization_id", organizationId)
     .eq("user_id", userId)

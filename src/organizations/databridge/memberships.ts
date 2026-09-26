@@ -18,6 +18,7 @@ import { parseHomeDays, type HomeDay } from "@/organizations/model/homeDays";
 import { DEFAULT_SCHOOL_DAYS, parseSchoolDays, type SchoolDay } from "@/organizations/model/schoolDays";
 import { staffMembershipWriteErrorMessage } from "@/organizations/model/staffAccount";
 import { requireSupabase } from "./client";
+import { orgContactsByUserId } from "./orgNames";
 
 export const ORG_SUMMARY_SELECT =
   "id, name, slug, org_type, school_days, home_days, about, address, website, contact_email, phone, branding:organization_branding(accent_color, icon_path, updated_at)" as const;
@@ -220,15 +221,21 @@ export async function listOrgPeople(
 
   if (error) throw new Error(error.message);
 
+  const contacts = await orgContactsByUserId(
+    organizationId,
+    (data ?? []).map((row) => row.user_id),
+  );
+
   return (data ?? []).flatMap((row) => {
     const role = parseOrgRole(row.role);
     const profile = Array.isArray(row.profile) ? row.profile[0] : row.profile;
-    if (!role || !profile || !row.user_id) return [];
+    const contact = row.user_id ? contacts.get(row.user_id) : undefined;
+    if (!role || !row.user_id || (!contact && !profile)) return [];
     return [
       {
         userId: row.user_id,
-        name: profile.name || profile.email,
-        email: profile.email,
+        name: contact?.name || "Member",
+        email: contact?.email || profile?.email || "",
         role,
       },
     ];

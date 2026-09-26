@@ -4,6 +4,7 @@ import {
   setSignUpPendingNameStep,
   stashPendingProfileName,
 } from "@/auth/model/signUpPending";
+import { friendlyCaptchaAuthError } from "@/auth/model/captchaAuthError";
 import type { ValidatedSignUpName } from "@/auth/model/signUpName";
 import { isSupabaseConfigured, supabase } from "@/infrastructure/supabase/client";
 
@@ -30,7 +31,7 @@ function friendlySignUpError(message: string): string {
   if (lower.includes("rate limit")) {
     return "Too many attempts just now. Wait a minute and try again.";
   }
-  return message;
+  return friendlyCaptchaAuthError(message) ?? message;
 }
 
 export type SignUpName = ValidatedSignUpName;
@@ -40,6 +41,7 @@ export async function beginPasswordSignUp(
   email: string,
   password: string,
   nextPath = "/my",
+  getCaptchaToken?: () => Promise<string | undefined>,
 ): Promise<SignUpResult> {
   if (!isSupabaseConfigured || !supabase) {
     return {
@@ -48,17 +50,20 @@ export async function beginPasswordSignUp(
     };
   }
 
-  const signIn = await signInWithPassword(email, password);
+  const probeCaptchaToken = getCaptchaToken ? await getCaptchaToken() : undefined;
+  const signIn = await signInWithPassword(email, password, probeCaptchaToken);
   if (!signIn.error) {
     await supabase.auth.signOut();
     return { error: SIGN_UP_EMAIL_TAKEN_MESSAGE };
   }
 
+  const signUpCaptchaToken = getCaptchaToken ? await getCaptchaToken() : probeCaptchaToken;
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: `${window.location.origin}${nextPath}`,
+      captchaToken: signUpCaptchaToken,
       data: {
         first_name: "",
         last_name: "",

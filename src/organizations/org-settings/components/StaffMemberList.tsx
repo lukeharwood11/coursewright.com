@@ -3,6 +3,7 @@ import { UserCard } from "@/organizations/user-card/UserCard";
 import { Badge } from "@/ui/Badge";
 import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
+import { Input } from "@/ui/Input";
 import { Select } from "@/ui/Select";
 import { roleBadgeVariant, roleLabel } from "@/organizations/model/role";
 import type { StaffMemberRow } from "../hooks/useOrgStaff";
@@ -12,15 +13,19 @@ export function StaffMemberList({
   members,
   changingId,
   removingId,
+  savingContactId,
   onChangeRole,
   onRemove,
+  onSaveContact,
 }: {
   orgSlug: string;
   members: StaffMemberRow[];
   changingId: number | null;
   removingId: number | null;
+  savingContactId: number | null;
   onChangeRole: (member: StaffMemberRow, nextRole: string) => void;
   onRemove: (member: StaffMemberRow) => void;
+  onSaveContact: (member: StaffMemberRow, name: string, email?: string) => void;
 }) {
   const [pendingRemove, setPendingRemove] = useState<StaffMemberRow | null>(null);
 
@@ -57,7 +62,13 @@ export function StaffMemberList({
                     You
                   </p>
                 ) : null}
-                {member.name ? (
+                {member.canEditOrgName ? (
+                  <OrgContactEditor
+                    member={member}
+                    saving={savingContactId === member.membershipId}
+                    onSave={onSaveContact}
+                  />
+                ) : member.name ? (
                   <p className="truncate pl-11 text-[12.5px] text-[var(--ink-faint)]">
                     {member.email}
                   </p>
@@ -129,5 +140,57 @@ export function StaffMemberList({
         }}
       />
     </>
+  );
+}
+
+function OrgContactEditor({
+  member,
+  saving,
+  onSave,
+}: {
+  member: StaffMemberRow;
+  saving: boolean;
+  onSave: (member: StaffMemberRow, name: string, email?: string) => void;
+}) {
+  const [name, setName] = useState(member.name);
+  const [email, setEmail] = useState(member.email);
+
+  return (
+    <form
+      className="mt-2 flex flex-wrap items-end gap-2 pl-11"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSave(member, name, member.canEditOrgEmail ? email : undefined);
+      }}
+    >
+      <label className="min-w-[10rem] flex-1">
+        <span className="mb-1 block text-[12px] font-bold text-[var(--ink-faint)]">
+          Name in this organization
+        </span>
+        <Input
+          value={name}
+          disabled={saving}
+          onChange={(event) => setName(event.target.value)}
+        />
+      </label>
+      {member.canEditOrgEmail ? (
+        <label className="min-w-[12rem] flex-1">
+          <span className="mb-1 block text-[12px] font-bold text-[var(--ink-faint)]">
+            Contact email
+          </span>
+          <Input
+            type="email"
+            value={email}
+            disabled={saving}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+        </label>
+      ) : (
+        <p className="truncate pb-3 text-[12.5px] text-[var(--ink-faint)]">{member.email}</p>
+      )}
+      <Button type="submit" variant="secondary" disabled={saving || name.trim().length === 0}>
+        {saving ? "Saving…" : "Save"}
+      </Button>
+    </form>
   );
 }

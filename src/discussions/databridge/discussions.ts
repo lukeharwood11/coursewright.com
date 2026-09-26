@@ -11,6 +11,7 @@ import {
 } from "@/discussions/model/audience";
 import type { DiscussionDraft } from "@/discussions/model/validate";
 import { requireSupabase } from "./client";
+import { orgContactsByUserId } from "@/organizations/databridge/orgNames";
 import { loadFamilyStudentIds } from "@/parent/databridge/dashboard";
 
 export type DiscussionRecord = {
@@ -197,6 +198,20 @@ function authorNameFrom(author: ProfileName): string {
   return name || "Someone";
 }
 
+async function applyOrgAuthorNames(
+  organizationId: number,
+  discussions: DiscussionRecord[],
+): Promise<DiscussionRecord[]> {
+  const contacts = await orgContactsByUserId(
+    organizationId,
+    discussions.map((discussion) => discussion.createdBy),
+  );
+  return discussions.map((discussion) => ({
+    ...discussion,
+    authorName: contacts.get(discussion.createdBy)?.name ?? "Someone",
+  }));
+}
+
 function titleFrom(
   value: { title: string } | { title: string }[] | null | undefined,
 ): string | null {
@@ -342,10 +357,11 @@ export async function listDiscussionsForOrganization(
     .order("id", { ascending: false });
 
   if (error) throw new Error(error.message);
-  return (data ?? []).flatMap((row) => {
-    const mapped = toDiscussion(row as DiscussionRow, userId);
-    return mapped ? [mapped] : [];
+  const mapped = (data ?? []).flatMap((row) => {
+    const discussion = toDiscussion(row as DiscussionRow, userId);
+    return discussion ? [discussion] : [];
   });
+  return applyOrgAuthorNames(organizationId, mapped);
 }
 
 export async function getDiscussion(
@@ -373,11 +389,25 @@ export async function getDiscussion(
     .order("id", { ascending: true });
 
   if (messageError) throw new Error(messageError.message);
+  const contacts = await orgContactsByUserId(discussion.organizationId, [
+    discussion.createdBy,
+    ...(messageRows ?? []).map((row) => (row as MessageRow).author_id),
+  ]);
+  const named = {
+    ...discussion,
+    authorName: contacts.get(discussion.createdBy)?.name ?? "Someone",
+  };
   const messages = await withSignedUrls(
-    (messageRows ?? []).map((row) => toMessage(row as MessageRow)),
+    (messageRows ?? []).map((row) => {
+      const message = toMessage(row as MessageRow);
+      return {
+        ...message,
+        authorName: contacts.get(message.authorId)?.name ?? "Someone",
+      };
+    }),
   );
 
-  return { ...discussion, messages };
+  return { ...named, messages };
 }
 
 export async function createDiscussion(args: {
@@ -433,7 +463,13 @@ export async function createDiscussion(args: {
       : new Error("Couldn’t post the first message.");
   }
 
-  return { ...discussion, hasVisibleMessages: true };
+  const [named] = await applyOrgAuthorNames(args.organizationId, [
+    { ...discussion, hasVisibleMessages: true },
+  ]);
+  if (!named) {
+    throw new Error("The discussion was created but couldn’t be opened yet.");
+  }
+  return named;
 }
 
 export async function createDiscussionMessage(args: {
@@ -605,7 +641,7 @@ export async function listParentDiscussionContext(
 
   const [studentsResult, enrollmentsResult, membersResult] = await Promise.all([
     db
-      .from("student_profiles")
+      .from("org_profiles")
       .select("id, name")
       .eq("organization_id", organizationId)
       .in("id", studentIds)

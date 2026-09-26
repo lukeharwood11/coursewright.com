@@ -3,7 +3,7 @@
 create or replace function private.discussion_target_in_org()
 returns trigger
 language plpgsql
-security invoker
+security definer
 set search_path = ''
 as $$
 declare

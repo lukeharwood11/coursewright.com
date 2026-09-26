@@ -12,4 +12,4 @@ Implementation plans for in-flight or upcoming work. These are **not** the produ
 
 | File | Topic |
 |------|--------|
-| [ORG_PROFILES.md](./ORG_PROFILES.md) | Unified org profiles (one person per org: privileges, student context, parent relationships); pre-claim config and hard backfill. [ORG_STAFF_PROFILES.md](./ORG_STAFF_PROFILES.md) redirects here. |
+| [ORG_PROFILES.md](./ORG_PROFILES.md) | Unified org profiles (one person per org: privileges, student context, parent relationships); org-owned name and email; pre-claim config and hard backfill |

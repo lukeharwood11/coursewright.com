@@ -55,7 +55,7 @@ export async function listCourseEnrollments(
   const { data, error } = await db
     .from("enrollments")
     .select(
-      "id, course_id, student_profile_id, status, student:student_profiles(id, organization_id, name, grade_level, parent_email, student_email)",
+      "id, course_id, student_profile_id, status, student:org_profiles(id, organization_id, name, grade_level, parent_email, email)",
     )
     .eq("course_id", courseId)
     .eq("status", "active")
@@ -76,7 +76,7 @@ export async function listCourseEnrollments(
           name: studentRow.name,
           gradeLevel: studentRow.grade_level,
           parentEmail: studentRow.parent_email,
-          studentEmail: studentRow.student_email,
+          studentEmail: studentRow.email,
         },
       },
     ];
@@ -208,12 +208,13 @@ export async function addStudentToCourse(args: {
 }): Promise<void> {
   const db = requireSupabase();
   const { data: student, error: studentError } = await db
-    .from("student_profiles")
+    .from("org_profiles")
     .insert({
       organization_id: args.organizationId,
       name: args.name,
       parent_email: args.parentEmail,
-      student_email: args.studentEmail,
+      email: args.studentEmail,
+      counts_as_student: true,
       grade_level: args.gradeLevel,
       created_via_course_id: args.courseId,
     })

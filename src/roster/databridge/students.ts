@@ -23,7 +23,7 @@ export type StudentRow = {
   name: string;
   grade_level: string | null;
   parent_email: string | null;
-  student_email: string | null;
+  email: string | null;
   user_id: string | null;
 };
 
@@ -34,20 +34,20 @@ export function toStudentSummary(row: StudentRow): StudentSummary {
     name: row.name,
     gradeLevel: row.grade_level,
     parentEmail: row.parent_email,
-    studentEmail: row.student_email,
+    studentEmail: row.email,
     userId: row.user_id,
   };
 }
 
 export const STUDENT_COLUMNS =
-  "id, organization_id, name, grade_level, parent_email, student_email, user_id";
+  "id, organization_id, name, grade_level, parent_email, email, user_id";
 
 export async function listStudents(
   organizationId: number,
 ): Promise<StudentSummary[]> {
   const db = requireSupabase();
   const { data, error } = await db
-    .from("student_profiles")
+    .from("org_profiles")
     .select(STUDENT_COLUMNS)
     .eq("organization_id", organizationId)
     .order("name");
@@ -59,7 +59,7 @@ export async function listStudents(
 export async function getStudent(id: number): Promise<StudentSummary | null> {
   const db = requireSupabase();
   const { data, error } = await db
-    .from("student_profiles")
+    .from("org_profiles")
     .select(STUDENT_COLUMNS)
     .eq("id", id)
     .maybeSingle();
@@ -94,14 +94,15 @@ export async function createStudents(
   if (inputs.length === 0) return [];
   const db = requireSupabase();
   const { data, error } = await db
-    .from("student_profiles")
+    .from("org_profiles")
     .insert(
       inputs.map((input) => ({
         organization_id: organizationId,
         name: input.name,
         parent_email: input.parentEmail,
-        student_email: input.studentEmail,
+        email: input.studentEmail,
         grade_level: input.gradeLevel,
+        counts_as_student: true,
         created_via_course_id: createdViaCourseId ?? null,
       })),
     )
@@ -120,11 +121,11 @@ export async function updateStudent(
 ): Promise<StudentSummary> {
   const db = requireSupabase();
   const { data, error } = await db
-    .from("student_profiles")
+    .from("org_profiles")
     .update({
       name: input.name,
       parent_email: input.parentEmail,
-      student_email: input.studentEmail,
+      email: input.studentEmail,
       grade_level: input.gradeLevel,
     })
     .eq("id", id)
@@ -141,7 +142,7 @@ export async function updateStudent(
 export async function deleteStudent(id: number): Promise<void> {
   const db = requireSupabase();
   const { data, error } = await db
-    .from("student_profiles")
+    .from("org_profiles")
     .delete()
     .eq("id", id)
     .select("id")

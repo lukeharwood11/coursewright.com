@@ -57,8 +57,8 @@ select lives_ok(
 );
 
 select lives_ok(
-  $$insert into student_profiles (organization_id, name)
-    select id, 'Sam Sibling' from organizations where name = 'Family Co-op'$$,
+  $$insert into org_profiles (organization_id, name, counts_as_student)
+    select id, 'Sam Sibling', true from organizations where name = 'Family Co-op'$$,
   'owner can create a student profile'
 );
 
@@ -66,16 +66,25 @@ select lives_ok(
   $$insert into family_members (family_id, student_profile_id, display_name)
     select f.id, sp.id, sp.name
     from families f
-    join student_profiles sp on sp.organization_id = f.organization_id
+    join org_profiles sp on sp.organization_id = f.organization_id
     where f.display_name = 'The Testers'
       and sp.name = 'Sam Sibling'$$,
   'owner can add a student family member'
 );
 
 select lives_ok(
-  $$insert into parent_student_links (parent_user_id, student_profile_id)
-    select 'f2222222-2222-2222-2222-222222222222', sp.id
-    from student_profiles sp
+  $$with parent_person as (
+      insert into org_profiles (organization_id, name, email, user_id, counts_as_student)
+      select sp.organization_id, 'Fay Parent', 'family-parent@example.com',
+        'f2222222-2222-2222-2222-222222222222', false
+      from org_profiles sp
+      where sp.name = 'Sam Sibling'
+      returning id, organization_id
+    )
+    insert into parent_student_links (parent_org_profile_id, student_profile_id)
+    select parent_person.id, sp.id
+    from parent_person
+    join org_profiles sp on sp.organization_id = parent_person.organization_id
     where sp.name = 'Sam Sibling'$$,
   'owner can create a parent-student link'
 );
@@ -85,7 +94,7 @@ select lives_ok(
     select o.id, 'pending-parent@example.com', 'parent', sp.id,
       'f1111111-1111-1111-1111-111111111111'
     from organizations o
-    join student_profiles sp on sp.organization_id = o.id
+    join org_profiles sp on sp.organization_id = o.id
     where o.name = 'Family Co-op' and sp.name = 'Sam Sibling'$$,
   'owner can save a pending parent invite on admin_invites'
 );
@@ -95,10 +104,10 @@ select throws_ok(
     select o.id, 'pending-parent@example.com', 'parent', sp.id,
       'f1111111-1111-1111-1111-111111111111'
     from organizations o
-    join student_profiles sp on sp.organization_id = o.id
+    join org_profiles sp on sp.organization_id = o.id
     where o.name = 'Family Co-op' and sp.name = 'Sam Sibling'$$,
-  '23505',
-  NULL,
+  'P0001',
+  'That email already has a pending invite.',
   'pending parent invite is unique per org, email, and student'
 );
 
@@ -117,7 +126,7 @@ select throws_ok(
   $$insert into family_members (family_id, student_profile_id, display_name)
     select f.id, sp.id, sp.name
     from families f
-    join student_profiles sp on sp.organization_id = f.organization_id
+    join org_profiles sp on sp.organization_id = f.organization_id
     where f.display_name = 'Other household'
       and sp.name = 'Sam Sibling'$$,
   '23505',
@@ -125,20 +134,23 @@ select throws_ok(
   'student belongs to at most one family'
 );
 
-insert into student_profiles (organization_id, name)
-select id, 'Lee Learner' from organizations where name = 'Family Co-op';
+insert into org_profiles (organization_id, name, counts_as_student)
+select id, 'Lee Learner', true from organizations where name = 'Family Co-op';
 
 insert into family_members (family_id, student_profile_id, display_name)
 select f.id, sp.id, sp.name
 from families f
-join student_profiles sp on sp.organization_id = f.organization_id
+join org_profiles sp on sp.organization_id = f.organization_id
 where f.display_name = 'Other household'
   and sp.name = 'Lee Learner';
 
 select lives_ok(
-  $$insert into parent_student_links (parent_user_id, student_profile_id)
-    select 'f2222222-2222-2222-2222-222222222222', sp.id
-    from student_profiles sp
+  $$insert into parent_student_links (parent_org_profile_id, student_profile_id)
+    select parent.id, sp.id
+    from org_profiles sp
+    join org_profiles parent
+      on parent.organization_id = sp.organization_id
+     and parent.user_id = 'f2222222-2222-2222-2222-222222222222'
     where sp.name = 'Lee Learner'$$,
   'same parent can link to students in two families'
 );
@@ -150,7 +162,7 @@ where name = 'Family Co-op';
 
 insert into enrollments (student_profile_id, course_id, status)
 select sp.id, c.id, 'active'
-from student_profiles sp
+from org_profiles sp
 join courses c on c.organization_id = sp.organization_id
 where sp.name = 'Sam Sibling'
   and c.title = 'Published offering';
@@ -168,9 +180,12 @@ from families f
 where f.display_name = 'The Testers';
 
 delete from parent_student_links
-where parent_user_id = 'f2222222-2222-2222-2222-222222222222'
+where parent_org_profile_id = (
+  select id from org_profiles
+  where user_id = 'f2222222-2222-2222-2222-222222222222'
+)
   and student_profile_id = (
-    select id from student_profiles where name = 'Sam Sibling'
+    select id from org_profiles where name = 'Sam Sibling'
   );
 
 set local role authenticated;
@@ -187,10 +202,13 @@ select is_empty(
 );
 
 reset role;
-insert into parent_student_links (parent_user_id, student_profile_id)
-select 'f2222222-2222-2222-2222-222222222222', id
-from student_profiles
-where name = 'Sam Sibling';
+insert into parent_student_links (parent_org_profile_id, student_profile_id)
+select parent.id, kid.id
+from org_profiles kid
+join org_profiles parent
+  on parent.organization_id = kid.organization_id
+ and parent.user_id = 'f2222222-2222-2222-2222-222222222222'
+where kid.name = 'Sam Sibling';
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'f2222222-2222-2222-2222-222222222222', true);
@@ -209,16 +227,34 @@ select results_eq(
 reset role;
 delete from family_members
 where student_profile_id = (
-  select id from student_profiles where name = 'Sam Sibling'
+  select id from org_profiles where name = 'Sam Sibling'
 );
 
 select isnt_empty(
-  $$select 1 from parent_student_links
-    where parent_user_id = 'f2222222-2222-2222-2222-222222222222'
-      and student_profile_id = (
-        select id from student_profiles where name = 'Sam Sibling'
+  $$select 1 from parent_student_links psl
+    join org_profiles parent on parent.id = psl.parent_org_profile_id
+    where parent.user_id = 'f2222222-2222-2222-2222-222222222222'
+      and psl.student_profile_id = (
+        select id from org_profiles where name = 'Sam Sibling'
       )$$,
   'removing a student from a family does not delete parent_student_links'
+);
+
+reset role;
+select set_config(
+  'test.family_org_id',
+  (select id::text from organizations where name = 'Family Co-op'),
+  true
+);
+select set_config(
+  'test.sam_id',
+  (
+    select sp.id::text
+    from org_profiles sp
+    where sp.organization_id = current_setting('test.family_org_id')::bigint
+      and sp.name = 'Sam Sibling'
+  ),
+  true
 );
 
 set local role authenticated;
@@ -236,11 +272,13 @@ select is_empty(
 
 select throws_ok(
   $$insert into admin_invites (organization_id, email, role, student_profile_id, invited_by)
-    select o.id, 'outsider-invite@example.com', 'parent', sp.id,
+    values (
+      current_setting('test.family_org_id')::bigint,
+      'outsider-invite@example.com',
+      'parent',
+      current_setting('test.sam_id')::bigint,
       'f3333333-3333-3333-3333-333333333333'
-    from organizations o
-    join student_profiles sp on sp.organization_id = o.id
-    where o.name = 'Family Co-op' and sp.name = 'Sam Sibling'$$,
+    )$$,
   '42501',
   NULL,
   'unrelated user cannot write parent invites'

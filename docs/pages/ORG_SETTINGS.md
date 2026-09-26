@@ -31,7 +31,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 - Profile: **about**, **address**, **website**, **contact email**, **phone** (optional)
 - **School days** (Sun–Sat toggles; default Mon–Fri)
 - Current **grade scheme** and labels (None, K–12 preset, or custom)
-- Collaborators list: person **name** / **email**, governing **role** (owner | admin | instructor | parent), plus a Parent or Student badge when that additive role is also on; name opens [USER_PROFILE](./USER_PROFILE.md); owners and admins see change-role (and remove when allowed). Students are not listed
+- Collaborators list: person **name** / **contact email** from `org_profiles` (account name is not shown). Staff, including observers, can save their own org name. Owners and admins can save anyone’s org name and contact email. Parents cannot edit their own. Governing **role** (owner | admin | instructor | parent), plus a Parent or Student badge when that additive role is also on; name opens [USER_PROFILE](./USER_PROFILE.md); owners and admins see change-role (and remove when allowed). Students are not listed
 - Last owner/admin rows explain why they can’t be removed or demoted
 - Pending collaborator invites: **email**, **role**, copyable `/invite/<token>` link, **Resend email**, cancel
 - Billing status — Free plan (owners only)

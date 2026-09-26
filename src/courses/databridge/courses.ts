@@ -192,13 +192,13 @@ export async function updateCourseVisibility(
 function mapCourseInstructorRows(
   rows: Array<{
     course_id?: number;
-    user_id: string;
+    user_id: string | null;
     profile: { name: string; email: string } | { name: string; email: string }[] | null;
   }>,
 ): CourseInstructor[] {
   return rows.flatMap((row) => {
     const profile = Array.isArray(row.profile) ? row.profile[0] : row.profile;
-    if (!profile) return [];
+    if (!profile || !row.user_id) return [];
     return [
       {
         userId: row.user_id,

@@ -11,7 +11,7 @@ Document entities, relationships, and constraints so implementation can start fr
 | File | Description |
 |------|-------------|
 | [SCHEMA.md](./SCHEMA.md) | Entity list, relationships, RBAC & parent access rules |
-| [Org staff profiles plan](../plans/ORG_STAFF_PROFILES.md) | Planned `org_staff_profiles` + hard backfill |
+| [Org profiles plan](../plans/ORG_PROFILES.md) | Planned `org_profiles` (one person per org) + hard backfill |
 | [STACK.md](../STACK.md) | Supabase + React; S3 + CloudFront via Terraform |
 
 ## Conventions

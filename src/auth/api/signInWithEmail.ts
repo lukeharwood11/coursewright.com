@@ -1,7 +1,11 @@
 import { isSupabaseConfigured, supabase } from "@/infrastructure/supabase/client";
 
 /** Email magic-link / OTP via Supabase Auth. */
-export async function signInWithEmail(email: string, nextPath = "/my") {
+export async function signInWithEmail(
+  email: string,
+  nextPath = "/my",
+  captchaToken?: string,
+) {
   if (!isSupabaseConfigured || !supabase) {
     return {
       error:
@@ -11,7 +15,10 @@ export async function signInWithEmail(email: string, nextPath = "/my") {
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: `${window.location.origin}${nextPath}` },
+    options: {
+      emailRedirectTo: `${window.location.origin}${nextPath}`,
+      captchaToken,
+    },
   });
 
   return { error: error?.message ?? null };

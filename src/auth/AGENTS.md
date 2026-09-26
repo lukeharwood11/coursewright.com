@@ -14,7 +14,7 @@ Auth APIs call the browser Supabase client (`infrastructure/supabase/client.ts`)
 
 ## Rules
 
-- Supabase Auth only — Google via Google Cloud OAuth wired into Supabase.
+- Supabase Auth only — Google via Google Cloud OAuth wired into Supabase. When `VITE_HCAPTCHA_SITE_KEY` is set, login/signup pass **hCaptcha** tokens to Auth (`AuthScreen` + invisible widget).
 - Parents must have an account in P0 to view.
 - Keep the screen calm and obvious.
 - Signup is **email + password** or Google. Email signup is two steps: email/password, then **first and last name** (stored on `profiles.name` via Auth user metadata). On success with a session, keep it (`RedirectIfAuthed` → `/my`, or `next` when present). When confirmation is required, show an “Account created — check your email” success state (not an error). Password signup passes `emailRedirectTo` so confirmation links land on `/my` (or the invite `next` path). Magic-link stays on login for returning users.

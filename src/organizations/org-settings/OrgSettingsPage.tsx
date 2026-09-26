@@ -200,6 +200,7 @@ export function OrgSettingsPage() {
                 cancelingId={staff.cancelingId}
                 changingId={staff.changingId}
                 removingId={staff.removingId}
+                savingContactId={staff.savingContactId}
                 lastInviteSent={staff.lastInviteSent}
                 onEmailChange={staff.onEmailChange}
                 onRoleChange={staff.onRoleChange}
@@ -209,6 +210,7 @@ export function OrgSettingsPage() {
                 onCancel={staff.onCancel}
                 onChangeRole={staff.onChangeRole}
                 onRemove={staff.onRemove}
+                onSaveContact={staff.onSaveContact}
               />
             </div>
           ) : null}

@@ -70,7 +70,7 @@ export type Database = {
             foreignKeyName: "admin_invite_students_student_profile_id_fkey"
             columns: ["student_profile_id"]
             isOneToOne: false
-            referencedRelation: "student_profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -84,6 +84,7 @@ export type Database = {
           invited_by: string
           membership_id: number | null
           organization_id: number
+          org_profile_id: number
           role: string
           student_profile_id: number | null
           token: string
@@ -96,6 +97,7 @@ export type Database = {
           invited_by: string
           membership_id?: number | null
           organization_id: number
+          org_profile_id?: number
           role?: string
           student_profile_id?: number | null
           token?: string
@@ -108,6 +110,7 @@ export type Database = {
           invited_by?: string
           membership_id?: number | null
           organization_id?: number
+          org_profile_id?: number
           role?: string
           student_profile_id?: number | null
           token?: string
@@ -138,7 +141,7 @@ export type Database = {
             foreignKeyName: "admin_invites_student_profile_id_fkey"
             columns: ["student_profile_id"]
             isOneToOne: false
-            referencedRelation: "student_profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -321,19 +324,22 @@ export type Database = {
           class_id: number
           created_at: string
           id: number
-          user_id: string
+          org_profile_id: number
+          user_id: string | null
         }
         Insert: {
           class_id: number
           created_at?: string
           id?: number
-          user_id: string
+          org_profile_id?: number
+          user_id?: string | null
         }
         Update: {
           class_id?: number
           created_at?: string
           id?: number
-          user_id?: string
+          org_profile_id?: number
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -383,7 +389,7 @@ export type Database = {
             foreignKeyName: "class_members_student_profile_id_fkey"
             columns: ["student_profile_id"]
             isOneToOne: false
-            referencedRelation: "student_profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -470,19 +476,22 @@ export type Database = {
           course_id: number
           created_at: string
           id: number
-          user_id: string
+          org_profile_id: number
+          user_id: string | null
         }
         Insert: {
           course_id: number
           created_at?: string
           id?: number
-          user_id: string
+          org_profile_id?: number
+          user_id?: string | null
         }
         Update: {
           course_id?: number
           created_at?: string
           id?: number
-          user_id?: string
+          org_profile_id?: number
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1028,7 +1037,7 @@ export type Database = {
             foreignKeyName: "enrollments_student_profile_id_fkey"
             columns: ["student_profile_id"]
             isOneToOne: false
-            referencedRelation: "student_profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1284,7 +1293,7 @@ export type Database = {
             foreignKeyName: "family_members_student_profile_id_fkey"
             columns: ["student_profile_id"]
             isOneToOne: false
-            referencedRelation: "student_profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1835,7 +1844,7 @@ export type Database = {
             foreignKeyName: "material_submission_uploads_student_profile_id_fkey"
             columns: ["student_profile_id"]
             isOneToOne: false
-            referencedRelation: "student_profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1955,7 +1964,7 @@ export type Database = {
             foreignKeyName: "material_submissions_student_profile_id_fkey"
             columns: ["student_profile_id"]
             isOneToOne: false
-            referencedRelation: "student_profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2360,7 +2369,7 @@ export type Database = {
             foreignKeyName: "notifications_student_profile_id_fkey"
             columns: ["student_profile_id"]
             isOneToOne: false
-            referencedRelation: "student_profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -2862,34 +2871,34 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          parent_user_id: string
+          parent_org_profile_id: number
           student_profile_id: number
         }
         Insert: {
           created_at?: string
           id?: number
-          parent_user_id: string
+          parent_org_profile_id: number
           student_profile_id: number
         }
         Update: {
           created_at?: string
           id?: number
-          parent_user_id?: string
+          parent_org_profile_id?: number
           student_profile_id?: number
         }
         Relationships: [
           {
-            foreignKeyName: "parent_student_links_parent_user_id_fkey"
-            columns: ["parent_user_id"]
+            foreignKeyName: "parent_student_links_parent_org_profile_id_fkey"
+            columns: ["parent_org_profile_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "parent_student_links_student_profile_id_fkey"
             columns: ["student_profile_id"]
             isOneToOne: false
-            referencedRelation: "student_profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -3114,7 +3123,7 @@ export type Database = {
             foreignKeyName: "quiz_attempts_student_profile_id_fkey"
             columns: ["student_profile_id"]
             isOneToOne: false
-            referencedRelation: "student_profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -3578,7 +3587,7 @@ export type Database = {
             foreignKeyName: "report_card_instances_student_profile_id_fkey"
             columns: ["student_profile_id"]
             isOneToOne: false
-            referencedRelation: "student_profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -3660,48 +3669,51 @@ export type Database = {
             foreignKeyName: "share_links_student_profile_id_fkey"
             columns: ["student_profile_id"]
             isOneToOne: false
-            referencedRelation: "student_profiles"
+            referencedRelation: "org_profiles"
             referencedColumns: ["id"]
           },
         ]
       }
-      student_profiles: {
+      org_profiles: {
         Row: {
+          counts_as_student: boolean
           created_at: string
           created_via_course_id: number | null
+          email: string | null
           grade_level: string | null
           id: number
           name: string
           organization_id: number
           parent_email: string | null
           search_vector: unknown
-          student_email: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          counts_as_student?: boolean
           created_at?: string
           created_via_course_id?: number | null
+          email?: string | null
           grade_level?: string | null
           id?: number
           name: string
           organization_id: number
           parent_email?: string | null
           search_vector?: unknown
-          student_email?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          counts_as_student?: boolean
           created_at?: string
           created_via_course_id?: number | null
+          email?: string | null
           grade_level?: string | null
           id?: number
           name?: string
           organization_id?: number
           parent_email?: string | null
           search_vector?: unknown
-          student_email?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -3977,8 +3989,8 @@ export type Database = {
       list_discussion_audience_members: {
         Args: {
           p_audience: string
-          p_class_id: number
-          p_course_id: number
+          p_class_id: number | null
+          p_course_id: number | null
           p_family_audience?: string
           p_organization_id: number
         }

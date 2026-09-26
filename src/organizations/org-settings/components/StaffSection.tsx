@@ -25,6 +25,7 @@ export function StaffSection({
   cancelingId,
   changingId,
   removingId,
+  savingContactId,
   lastInviteSent,
   onEmailChange,
   onRoleChange,
@@ -34,6 +35,7 @@ export function StaffSection({
   onCancel,
   onChangeRole,
   onRemove,
+  onSaveContact,
 }: {
   orgSlug: string;
   canInvite: boolean;
@@ -52,6 +54,7 @@ export function StaffSection({
   cancelingId: number | null;
   changingId: number | null;
   removingId: number | null;
+  savingContactId: number | null;
   lastInviteSent: boolean;
   onEmailChange: (value: string) => void;
   onRoleChange: (value: StaffInviteRole) => void;
@@ -61,6 +64,7 @@ export function StaffSection({
   onCancel: (invite: PendingStaffInvite) => void;
   onChangeRole: (member: StaffMemberRow, nextRole: string) => void;
   onRemove: (member: StaffMemberRow) => void;
+  onSaveContact: (member: StaffMemberRow, name: string, email?: string) => void;
 }) {
   useToastOnError(loadError);
 
@@ -83,8 +87,10 @@ export function StaffSection({
           members={members}
           changingId={changingId}
           removingId={removingId}
+          savingContactId={savingContactId}
           onChangeRole={onChangeRole}
           onRemove={onRemove}
+          onSaveContact={onSaveContact}
         />
       ) : null}
 

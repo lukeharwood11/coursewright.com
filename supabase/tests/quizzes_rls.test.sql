@@ -1,7 +1,7 @@
 -- Course quizzes: families see published quizzes, students never see the key,
 -- and submit_quiz_attempt enforces the window and attempt limit.
 begin;
-select plan(21);
+select plan(26);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -55,24 +55,26 @@ insert into courses (organization_id, title, status, visibility)
 select id, 'Quiz course', 'active', 'published'
 from organizations where name = 'Quiz Co-op';
 
-insert into student_profiles (organization_id, name, student_email)
-select id, 'Ava Quiz', 'quiz-student@example.com'
-from organizations where name = 'Quiz Co-op';
+-- The student login is the same contact email, so it is the same org person.
+update org_profiles
+set name = 'Ava Quiz', counts_as_student = true
+where user_id = 'c3333333-3333-3333-3333-333333333333';
 
 insert into enrollments (student_profile_id, course_id, status)
 select sp.id, c.id, 'active'
-from student_profiles sp
+from org_profiles sp
 join courses c on c.organization_id = sp.organization_id
 where sp.name = 'Ava Quiz';
 
-insert into parent_student_links (parent_user_id, student_profile_id)
-select parent_id, sp.id
-from student_profiles sp
-cross join (
-  values
-    ('c2222222-2222-2222-2222-222222222222'::uuid),
-    ('c3333333-3333-3333-3333-333333333333'::uuid)
-) as parents(parent_id)
+insert into parent_student_links (parent_org_profile_id, student_profile_id)
+select parent.id, sp.id
+from org_profiles sp
+join org_profiles parent
+  on parent.organization_id = sp.organization_id
+ and parent.user_id in (
+   'c2222222-2222-2222-2222-222222222222',
+   'c3333333-3333-3333-3333-333333333333'
+ )
 where sp.name = 'Ava Quiz';
 
 insert into quizzes (
@@ -214,7 +216,7 @@ select throws_ok(
   $$
     select public.submit_quiz_attempt(
       (select id from quizzes where title = 'Hidden quiz'),
-      (select id from student_profiles where name = 'Ava Quiz'),
+      (select id from org_profiles where name = 'Ava Quiz'),
       '[]'::jsonb
     )
   $$,
@@ -242,7 +244,7 @@ select ok(
   (
     select public.submit_quiz_attempt(
       (select id from quizzes where title = 'Hidden quiz'),
-      (select id from student_profiles where name = 'Ava Quiz'),
+      (select id from org_profiles where name = 'Ava Quiz'),
       '[]'::jsonb
     ) ->> 'attemptId'
   ) is not null,
@@ -271,7 +273,7 @@ select throws_ok(
   $$
     select public.submit_quiz_attempt(
       (select id from quizzes where title = 'Hidden quiz'),
-      (select id from student_profiles where name = 'Ava Quiz'),
+      (select id from org_profiles where name = 'Ava Quiz'),
       '[]'::jsonb
     )
   $$,
@@ -299,7 +301,7 @@ select throws_ok(
   $$
     select public.submit_quiz_attempt(
       (select id from quizzes where title = 'Hidden quiz'),
-      (select id from student_profiles where name = 'Ava Quiz'),
+      (select id from org_profiles where name = 'Ava Quiz'),
       '[]'::jsonb
     )
   $$,
@@ -329,7 +331,7 @@ select is(
   (
     select public.submit_quiz_attempt(
       (select id from quizzes where title = 'Hidden quiz'),
-      (select id from student_profiles where name = 'Ava Quiz'),
+      (select id from org_profiles where name = 'Ava Quiz'),
       jsonb_build_array(
         jsonb_build_object(
           'questionId', (select id from quiz_questions where prompt = 'Capital?'),
@@ -351,7 +353,7 @@ select throws_ok(
   $$
     select public.submit_quiz_attempt(
       (select id from quizzes where title = 'Hidden quiz'),
-      (select id from student_profiles where name = 'Ava Quiz'),
+      (select id from org_profiles where name = 'Ava Quiz'),
       '[]'::jsonb
     )
   $$,
@@ -383,7 +385,7 @@ select ok(
   (
     select public.submit_quiz_attempt(
       (select id from quizzes where title = 'Unscored quiz'),
-      (select id from student_profiles where name = 'Ava Quiz'),
+      (select id from org_profiles where name = 'Ava Quiz'),
       '[]'::jsonb
     ) ->> 'score'
   ) is null,
@@ -420,7 +422,7 @@ select ok(
   (
     select public.submit_quiz_attempt(
       (select id from quizzes where title = 'Number quiz'),
-      (select id from student_profiles where name = 'Ava Quiz'),
+      (select id from org_profiles where name = 'Ava Quiz'),
       jsonb_build_array(
         jsonb_build_object(
           'questionId', (select id from quiz_questions where prompt = 'Half of 7'),
@@ -525,7 +527,7 @@ select is(
   (
     select public.submit_quiz_attempt(
       (select id from quizzes where title = 'Match quiz'),
-      (select id from student_profiles where name = 'Ava Quiz'),
+      (select id from org_profiles where name = 'Ava Quiz'),
       jsonb_build_array(
         jsonb_build_object(
           'questionId', (select id from quiz_questions where prompt = 'Animals'),
@@ -664,7 +666,7 @@ select is(
   (
     select public.submit_quiz_attempt(
       (select id from quizzes where title = 'Partial quiz'),
-      (select id from student_profiles where name = 'Ava Quiz'),
+      (select id from org_profiles where name = 'Ava Quiz'),
       jsonb_build_array(
         jsonb_build_object(
           'questionId', (select id from quiz_questions where prompt = 'Cities'),

@@ -23,20 +23,24 @@ function one<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? (value[0] ?? null) : value;
 }
 
-async function countExact(
-  table: "student_profiles" | "classes",
-  organizationId: number,
-  softDelete = false,
-): Promise<number> {
+async function countClasses(organizationId: number): Promise<number> {
   const db = requireSupabase();
-  let query = db
-    .from(table)
+  const { count, error } = await db
+    .from("classes")
     .select("id", { count: "exact", head: true })
-    .eq("organization_id", organizationId);
-  if (softDelete) {
-    query = query.is("deleted_at", null);
-  }
-  const { count, error } = await query;
+    .eq("organization_id", organizationId)
+    .is("deleted_at", null);
+  if (error) throw new Error(error.message);
+  return count ?? 0;
+}
+
+async function countStudents(organizationId: number): Promise<number> {
+  const db = requireSupabase();
+  const { count, error } = await db
+    .from("org_profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", organizationId)
+    .eq("counts_as_student", true);
   if (error) throw new Error(error.message);
   return count ?? 0;
 }
@@ -45,8 +49,8 @@ export async function loadStaffPeopleCounts(
   organizationId: number,
 ): Promise<StaffPeopleCounts> {
   const [studentCount, classCount] = await Promise.all([
-    countExact("student_profiles", organizationId),
-    countExact("classes", organizationId, true),
+    countStudents(organizationId),
+    countClasses(organizationId),
   ]);
   return { studentCount, classCount };
 }

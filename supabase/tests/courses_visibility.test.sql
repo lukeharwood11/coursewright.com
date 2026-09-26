@@ -44,21 +44,24 @@ select id, 'Draft offering', 'active', 'unpublished'
 from organizations
 where name = 'Course Visibility Co-op';
 
-insert into student_profiles (organization_id, name)
-select id, 'Kid Course Visibility'
+insert into org_profiles (organization_id, name, counts_as_student)
+select id, 'Kid Course Visibility', true
 from organizations
 where name = 'Course Visibility Co-op';
 
 insert into enrollments (student_profile_id, course_id, status)
 select sp.id, c.id, 'active'
-from student_profiles sp
+from org_profiles sp
 join courses c on c.organization_id = sp.organization_id
 where sp.name = 'Kid Course Visibility';
 
-insert into parent_student_links (parent_user_id, student_profile_id)
-select 'dddd2222-2222-2222-2222-222222222222', id
-from student_profiles
-where name = 'Kid Course Visibility';
+insert into parent_student_links (parent_org_profile_id, student_profile_id)
+select parent.id, kid.id
+from org_profiles kid
+join org_profiles parent
+  on parent.organization_id = kid.organization_id
+ and parent.user_id = 'dddd2222-2222-2222-2222-222222222222'
+where kid.name = 'Kid Course Visibility';
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'cccc1111-1111-1111-1111-111111111111', true);

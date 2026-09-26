@@ -63,6 +63,9 @@ if [[ -z "$SITE_DOMAIN" ]]; then
 fi
 printf 'VITE_PUBLIC_HOST=%s\n' "$SITE_DOMAIN" >> "$ENV_FILE"
 
+HCAPTCHA_SITE_KEY="${VITE_HCAPTCHA_SITE_KEY:-2550caca-0d52-4d48-9b44-5380349ca538}"
+printf 'VITE_HCAPTCHA_SITE_KEY=%s\n' "$HCAPTCHA_SITE_KEY" >> "$ENV_FILE"
+
 POSTHOG_KEY=""
 POSTHOG_HOST=""
 if [[ "$TIER" == "production" ]]; then
@@ -81,6 +84,7 @@ fi
 export VITE_SUPABASE_URL="$URL"
 export VITE_SUPABASE_ANON_KEY="$KEY"
 export VITE_PUBLIC_HOST="$SITE_DOMAIN"
+export VITE_HCAPTCHA_SITE_KEY="$HCAPTCHA_SITE_KEY"
 if [[ -n "$POSTHOG_KEY" ]]; then
   export VITE_POSTHOG_KEY="$POSTHOG_KEY"
   if [[ -n "$POSTHOG_HOST" ]]; then

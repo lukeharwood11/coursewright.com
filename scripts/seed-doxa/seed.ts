@@ -268,14 +268,14 @@ async function resetOrg(admin: SupabaseClient, orgId: number, lukeId: string) {
   }
 
   const { data: students } = await admin
-    .from("student_profiles")
+    .from("org_profiles")
     .select("id")
     .eq("organization_id", orgId);
   const studentIds = (students || []).map((s) => s.id as number);
   if (studentIds.length) {
     await admin.from("parent_student_links").delete().in("student_profile_id", studentIds);
     await admin.from("admin_invites").delete().eq("organization_id", orgId);
-    await admin.from("student_profiles").delete().in("id", studentIds);
+    await admin.from("org_profiles").delete().in("id", studentIds);
   }
 
   // Keep Luke; drop other memberships (re-added below).
@@ -393,19 +393,20 @@ async function main() {
   const studentIdByName = new Map<string, { id: number; grade: string }>();
   for (const s of allStudents) {
     let { data: row } = await admin
-      .from("student_profiles")
+      .from("org_profiles")
       .select("id, grade_level")
       .eq("organization_id", orgId)
       .eq("name", s.name)
       .maybeSingle();
     if (!row) {
       const { data: created, error } = await admin
-        .from("student_profiles")
+        .from("org_profiles")
         .insert({
           organization_id: orgId,
           name: s.name,
           grade_level: s.grade,
           parent_email: s.parentEmail.toLowerCase(),
+          counts_as_student: true,
         })
         .select("id, grade_level")
         .single();
@@ -413,7 +414,7 @@ async function main() {
       row = created;
     } else {
       await admin
-        .from("student_profiles")
+        .from("org_profiles")
         .update({
           grade_level: s.grade,
           parent_email: s.parentEmail.toLowerCase(),
@@ -436,9 +437,38 @@ async function main() {
   for (const kid of HARWOOD_KIDS) {
     const sp = studentIdByName.get(kid.name);
     if (!sp) continue;
+    const { data: parentProfile, error: parentProfileError } = await admin
+      .from("org_profiles")
+      .select("id")
+      .eq("organization_id", orgId)
+      .eq("user_id", lanaId)
+      .maybeSingle();
+    if (parentProfileError) throw parentProfileError;
+    let parentOrgProfileId = parentProfile?.id as number | undefined;
+    if (!parentOrgProfileId) {
+      const { data: account, error: accountError } = await admin
+        .from("profiles")
+        .select("name, email")
+        .eq("id", lanaId)
+        .single();
+      if (accountError) throw accountError;
+      const { data: created, error: createError } = await admin
+        .from("org_profiles")
+        .insert({
+          organization_id: orgId,
+          name: account.name,
+          email: account.email,
+          user_id: lanaId,
+          counts_as_student: false,
+        })
+        .select("id")
+        .single();
+      if (createError) throw createError;
+      parentOrgProfileId = created.id as number;
+    }
     await admin.from("parent_student_links").upsert(
-      { parent_user_id: lanaId, student_profile_id: sp.id },
-      { onConflict: "parent_user_id,student_profile_id" },
+      { parent_org_profile_id: parentOrgProfileId, student_profile_id: sp.id },
+      { onConflict: "parent_org_profile_id,student_profile_id" },
     );
   }
   console.log("Linked Lana → Ava & Landon (parent_student_links).");

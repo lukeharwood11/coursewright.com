@@ -175,11 +175,11 @@ async function resolveEmail(
   if (row.recipient_email) return row.recipient_email;
   if (row.recipient_kind === "student") {
     const { data } = await db
-      .from("student_profiles")
-      .select("student_email")
+      .from("org_profiles")
+      .select("email")
       .eq("id", studentProfileId)
       .maybeSingle();
-    const email = (data as { student_email: string | null } | null)?.student_email;
+    const email = (data as { email: string | null } | null)?.email;
     return email?.trim() ? email.trim().toLowerCase() : null;
   }
   if (row.recipient_user_id) {

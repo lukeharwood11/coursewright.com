@@ -44,21 +44,24 @@ select id, 'Drafting', 'active', 'published'
 from organizations
 where name = 'Visibility Co-op';
 
-insert into student_profiles (organization_id, name)
-select id, 'Kid Visibility'
+insert into org_profiles (organization_id, name, counts_as_student)
+select id, 'Kid Visibility', true
 from organizations
 where name = 'Visibility Co-op';
 
 insert into enrollments (student_profile_id, course_id, status)
 select sp.id, c.id, 'active'
-from student_profiles sp
+from org_profiles sp
 join courses c on c.organization_id = sp.organization_id
 where sp.name = 'Kid Visibility';
 
-insert into parent_student_links (parent_user_id, student_profile_id)
-select 'bbbb2222-2222-2222-2222-222222222222', id
-from student_profiles
-where name = 'Kid Visibility';
+insert into parent_student_links (parent_org_profile_id, student_profile_id)
+select parent.id, kid.id
+from org_profiles kid
+join org_profiles parent
+  on parent.organization_id = kid.organization_id
+ and parent.user_id = 'bbbb2222-2222-2222-2222-222222222222'
+where kid.name = 'Kid Visibility';
 
 insert into materials (
   organization_id, course_id, title, description, kind, visibility

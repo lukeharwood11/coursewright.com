@@ -1,4 +1,5 @@
 import { requireSupabase } from "./client";
+import { orgContactsByUserId } from "@/organizations/databridge/orgNames";
 import {
   parseAnnouncementAudience,
   type AnnouncementAudience,
@@ -48,14 +49,6 @@ type AnnouncementRow = {
   announcement_reads?: Array<{ user_id: string }> | null;
 };
 
-function authorNameFrom(row: AnnouncementRow): string {
-  const author = row.author;
-  if (!author) return "Teacher";
-  const profile = Array.isArray(author) ? author[0] : author;
-  const name = profile?.name?.trim();
-  return name || "Teacher";
-}
-
 function asIdList(value: number[] | null | undefined): number[] {
   if (!Array.isArray(value)) return [];
   return value.filter((id) => typeof id === "number" && Number.isFinite(id));
@@ -102,7 +95,7 @@ async function resolveTargetLabels(args: {
 
   if (args.audience === "student" && args.studentIds.length > 0) {
     const { data, error } = await db
-      .from("student_profiles")
+      .from("org_profiles")
       .select("id, name")
       .in("id", args.studentIds);
     if (error) throw new Error(error.message);
@@ -135,6 +128,7 @@ async function toAnnouncement(
   const read = userId
     ? reads.some((entry) => entry.user_id === userId)
     : reads.length > 0;
+  const contacts = await orgContactsByUserId(row.organization_id, [row.created_by]);
   return {
     id: row.id,
     organizationId: row.organization_id,
@@ -147,7 +141,7 @@ async function toAnnouncement(
     startDate: row.start_date,
     endDate: row.end_date,
     createdAt: row.created_at,
-    authorName: authorNameFrom(row),
+    authorName: contacts.get(row.created_by)?.name ?? "Teacher",
     deletedAt: row.deleted_at,
     courseTitles: labels.courseTitles,
     classTitles: labels.classTitles,

@@ -7,6 +7,8 @@ import { Input } from "@/ui/Input";
 import { Wordmark } from "@/ui/Wordmark";
 import { isNetworkError } from "@/ui/networkError";
 import { toastCheckNetworkConnection } from "@/ui/toast";
+import { AuthHcaptchaWidget, useAuthHcaptcha } from "@/auth/components/AuthHcaptcha";
+import { friendlyCaptchaAuthError } from "@/auth/model/captchaAuthError";
 import { GoogleMark } from "./GoogleMark";
 import { signInWithEmail } from "@/auth/api/signInWithEmail";
 import { signInWithPassword } from "@/auth/api/signInWithPassword";
@@ -21,6 +23,8 @@ import { safeNextPath } from "@/auth/model/safeNext";
 import { isSupabaseConfigured } from "@/infrastructure/supabase/client";
 
 function friendlySignInError(message: string): string {
+  const captcha = friendlyCaptchaAuthError(message);
+  if (captcha) return captcha;
   const lower = message.toLowerCase();
   if (lower.includes("email not confirmed") || lower.includes("not confirmed")) {
     return "Check your email for a verification link, then sign in.";
@@ -71,8 +75,19 @@ export function AuthScreen({
   );
   const showPassword = passwordSignIn || passwordSignUp;
   const onSignUpNameStep = passwordSignUp && signUpStep === "name";
+  const { configured: hcaptchaOn, widgetRef, handle: hcaptcha } = useAuthHcaptcha();
+
+  async function captchaTokenForAuth(): Promise<string | undefined> {
+    if (!hcaptchaOn) return undefined;
+    const token = await hcaptcha.getToken();
+    if (!token) {
+      setMessage("We couldn’t run the security check. Try again.");
+    }
+    return token;
+  }
 
   function showError(error: string) {
+    hcaptcha.reset();
     if (isNetworkError(error)) {
       toastCheckNetworkConnection();
       return;
@@ -95,9 +110,17 @@ export function AuthScreen({
     }
     setBusy(true);
     setMessage(null);
-    const result = await signInWithEmail(email.trim(), nextPath);
+    const captchaToken = await captchaTokenForAuth();
+    if (hcaptchaOn && !captchaToken) {
+      setBusy(false);
+      return;
+    }
+    const result = await signInWithEmail(email.trim(), nextPath, captchaToken);
     if (result.error) showError(result.error);
-    else setMessage("Check your email for a sign-in link.");
+    else {
+      hcaptcha.reset();
+      setMessage("Check your email for a sign-in link.");
+    }
     setBusy(false);
   }
 
@@ -111,9 +134,17 @@ export function AuthScreen({
         }
         setBusy(true);
         setMessage(null);
-        const beginResult = await beginPasswordSignUp(email.trim(), password, nextPath);
+        const beginResult = await beginPasswordSignUp(
+          email.trim(),
+          password,
+          nextPath,
+          hcaptchaOn ? () => hcaptcha.getToken() : undefined,
+        );
         if (beginResult.error) showError(beginResult.error);
-        else setSignUpStep("name");
+        else {
+          hcaptcha.reset();
+          setSignUpStep("name");
+        }
         setBusy(false);
         return;
       }
@@ -139,8 +170,14 @@ export function AuthScreen({
 
     setBusy(true);
     setMessage(null);
-    const result = await signInWithPassword(email.trim(), password);
+    const captchaToken = await captchaTokenForAuth();
+    if (hcaptchaOn && !captchaToken) {
+      setBusy(false);
+      return;
+    }
+    const result = await signInWithPassword(email.trim(), password, captchaToken);
     if (result.error) showError(friendlySignInError(result.error));
+    else hcaptcha.reset();
     setBusy(false);
   }
 
@@ -332,6 +369,7 @@ export function AuthScreen({
             )}
 
             <div className="mt-6 text-center text-[12px] text-[var(--ink-faint)]">{footer}</div>
+            <AuthHcaptchaWidget widgetRef={widgetRef} />
           </>
         )}
       </div>

@@ -112,7 +112,7 @@ Deno.serve(async (request) => {
       row.student_profile_id != null
     ) {
       const { data: profile } = await db
-        .from("student_profiles")
+        .from("org_profiles")
         .select("user_id")
         .eq("id", row.student_profile_id)
         .maybeSingle();

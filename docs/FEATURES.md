@@ -65,7 +65,7 @@ A person who signs up to make their own materials is the org **owner** (anyone c
 | **Org school days** | Org chooses which weekdays school operates | shipped | Default Mon–Fri. Owners/admins edit circle toggles in org settings; instructors read-only. Optional **home days** on a **School days / Home days** tab (default none selected). School/home weekdays show cap and home icons on calendar and lesson plans. Lesson-plan compose defaults to school days, with a dropdown to add another weekday |
 | **Org profile** | Optional about, address, website, contact email, and phone | shipped | Owners/admins edit in org settings. All members read at `/my/<org-slug>/profile` (account menu **Organization profile**). Not a public `/about` page |
 | **Admin invites** | Add other admins by email; those emails can be **claimed** by accounts | shipped | Invite owner/admin/instructor; **email via Resend** `organization-invite` (HN-015) plus copyable `/invite/<token>`; unsigned claim page names the invited email and prefills signup/login (HN-016) |
-| **Student profiles** | Org-level student records; optional student login | shipped | Org roster create/edit + profile page; **multiple parent invites** (one pending token per email; siblings share it) + optional **student email** on a distinct **student** invite. Changing that email revokes a claimed student login; a pending invite is invalidated, replaced, and emailed to the new address. Parent invite email + copy-link on profile and course roster. Created when first added to a course or class |
+| **Student profiles** | Org-level student records; optional student login | shipped | One `org_profiles` row per person. In-org name and contact email are organizer-managed (`counts_as_student` for students). Account name and login email can differ. Changing the contact email rotates a pending invite and **keeps** a claimed account linked |
 | **Classes** | Org-scoped **group of students** — separate from a Course | shipped | Create class + batch add/remove members. Class is a **batch preset** into course enroll (not a live link). Owners/admins assign optional **class leads** (zero or more owners/admins/instructors) |
 | **Roster management** | Manage org people: student profiles, **classes**, course enrollments, staff | shipped | List-first org / class / course roster with **batch select** enroll/add and **remove from the org roster** (also leaves classes and courses); multiple parent invites + optional student email; parent invite emails via Resend `organization-invite` (HN-015) plus copyable claim link |
 | **RBAC** | Role-based access control across the org | in progress | Membership roles + RLS live; app switches student vs staff home. **Roles:** owner, admin, instructor, observer, parent, student. **Observer** is view-only staff chrome (org-wide read, no writes, no invites, no Teacher/Preview toggle). Owner vs admin = billing. Instructors **see and edit courses they teach**; they may **view** a course they parent in (read-only). Owners/admins still see all courses. Staff change/remove is **membership-only** — family content stays enrollment-gated. **Staff view modes** shipped (header toggle). **Student** membership uses the same chrome as parent and is linked with `student_profiles.user_id` |
@@ -159,14 +159,14 @@ Keep **Course.enrollment → student_profile** as the access gate for parents.
 
 ### Student profiles (P0)
 
-Students are represented as **`student_profile`** records. A **student account** is optional: staff invite `student_email` with `admin_invites.role = student`, and claim sets `student_profiles.user_id`.
+Students are represented as **`org_profiles`** rows with `counts_as_student`. A **student account** is optional: staff invite the contact `email` with `admin_invites.role = student`, and claim sets `user_id`. The name inside the org is the org profile name, not the account name.
 
 | Rule | Detail |
 |------|--------|
 | **Student role** | Membership `is_student` is additive and can sit on the same row as parent and as one exclusive role (owner, admin, or instructor). Claim links that one profile via `user_id` (not `parent_student_links`). One account per profile in an org. The exclusive role governs privileges |
 | **Created on first enrollment** | When an instructor adds a student to a course and they don't exist in the org yet, a `student_profile` is created automatically |
 | **Same student home** | A student account sees the parent presentation for that one profile (published courses they are enrolled in). Students are **not** promoted from Collaborators. A staff invite claim can add an exclusive role and keeps the student flag |
-| **Email changes** | Changing `student_email` invalidates any pending student invite and emails a fresh invite to the new address. If the invite was already claimed, the profile’s `user_id` link is cleared and a student-only membership ends. A parent membership stays and `is_student` clears. An exclusive staff membership is kept and `is_student` clears |
+| **Email changes** | Changing the contact email invalidates any pending student invite and creates a fresh invite for the new address. A claimed account stays linked. Detach is a separate action |
 
 **Fields:**
 
@@ -174,7 +174,7 @@ Students are represented as **`student_profile`** records. A **student account**
 |-------|----------|-------|
 | **Name** | Yes | That's the only required field |
 | **Parent emails** | Optional | One or more. First email may be stored on create; more parents are invited from the student profile |
-| **Student email** | Optional | Contact email for the student. Staff invite that address with a **student** claim (`role = student`), not a parent invite |
+| **Student email** | Optional | Contact email on `org_profiles.email`. Staff invite that address with a **student** claim (`role = student`), not a parent invite |
 | **Grade level** | Optional | Value depends on **org grade scheme** — exact grade or range |
 
 ### Org grade scheme (P0)

@@ -1,5 +1,5 @@
--- Student role: claim sets student_profiles.user_id; published courses only.
--- Changing student_email rotates a pending invite or revokes a claimed login.
+-- Student role: claim sets org_profiles.user_id; published courses only.
+-- Changing the contact email rotates a pending invite and keeps a claimed login.
 begin;
 select plan(14);
 
@@ -40,14 +40,14 @@ select id, 'Student Role Offering', 'active', 'unpublished'
 from organizations
 where name = 'Student Role Co-op';
 
-insert into student_profiles (organization_id, name, student_email)
-select id, 'Kid Student Role', 'student-role-kid@example.com'
+insert into org_profiles (organization_id, name, email, counts_as_student)
+select id, 'Kid Student Role', 'student-role-kid@example.com', true
 from organizations
 where name = 'Student Role Co-op';
 
 insert into enrollments (student_profile_id, course_id, status)
 select sp.id, c.id, 'active'
-from student_profiles sp
+from org_profiles sp
 join courses c on c.organization_id = sp.organization_id
 where sp.name = 'Kid Student Role';
 
@@ -63,7 +63,7 @@ select lives_ok(
   $$insert into admin_invites (organization_id, email, role, student_profile_id)
     select o.id, 'student-role-kid@example.com', 'student', sp.id
     from organizations o
-    join student_profiles sp on sp.organization_id = o.id
+    join org_profiles sp on sp.organization_id = o.id
     where sp.name = 'Kid Student Role'$$,
   'staff can create a student invite'
 );
@@ -79,8 +79,8 @@ select set_config(
 );
 
 select lives_ok(
-  $$update student_profiles
-    set student_email = 'student-role-new@example.com'
+  $$update org_profiles
+    set email = 'student-role-new@example.com'
     where name = 'Kid Student Role'$$,
   'staff can change the email while a student invite is pending'
 );
@@ -141,7 +141,7 @@ select results_eq(
 );
 
 select results_eq(
-  $$select user_id::text from student_profiles where name = 'Kid Student Role'$$,
+  $$select user_id::text from org_profiles where name = 'Kid Student Role'$$,
   array['ffff2222-2222-2222-2222-222222222222'::text],
   'claim links student_profiles.user_id'
 );
@@ -178,23 +178,24 @@ select set_config(
 );
 
 select lives_ok(
-  $$update student_profiles
-    set student_email = 'student-role-final@example.com'
+  $$update org_profiles
+    set email = 'student-role-final@example.com'
     where name = 'Kid Student Role'$$,
   'staff can change the email after the student account is linked'
 );
 
 select is(
-  (select user_id from student_profiles where name = 'Kid Student Role'),
-  null::uuid,
-  'changing a linked email clears the student account link'
+  (select user_id from org_profiles where name = 'Kid Student Role'),
+  'ffff2222-2222-2222-2222-222222222222'::uuid,
+  'changing a linked email keeps the student account link'
 );
 
-select is_empty(
-  $$select id from memberships
+select results_eq(
+  $$select role from memberships
     where user_id = 'ffff2222-2222-2222-2222-222222222222'
       and role = 'student'$$,
-  'changing a linked email removes the student membership'
+  array['student'::text],
+  'changing a linked email keeps the student membership'
 );
 
 reset role;
@@ -206,9 +207,10 @@ select set_config(
   true
 );
 
-select is_empty(
+select results_eq(
   $$select title from courses where title = 'Student Role Offering'$$,
-  'the former student account can no longer read the published course'
+  array['Student Role Offering'::text],
+  'the linked student account can still read the published course'
 );
 
 select * from finish();

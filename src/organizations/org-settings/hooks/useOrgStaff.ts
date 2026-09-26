@@ -17,6 +17,7 @@ import {
   listOrgPendingInvites,
   listOrgStaff,
   staffInviteQueryKeys,
+  updateOrgPersonContact,
   type OrgStaffMember,
   type PendingStaffInvite,
 } from "@/organizations/databridge/staffInvites";
@@ -48,6 +49,8 @@ export type StaffMemberRow = OrgStaffMember & {
   isYou: boolean;
   canChangeRole: boolean;
   canRemove: boolean;
+  canEditOrgName: boolean;
+  canEditOrgEmail: boolean;
   changeRoles: AssignableMembershipRole[];
   lastManagerGuard: boolean;
   releaseTo: "parent" | "student" | null;
@@ -252,14 +255,41 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     },
   });
 
+  const contactMutation = useMutation({
+    mutationFn: async (input: { member: StaffMemberRow; name: string; email?: string }) => {
+      if (input.member.orgProfileId == null) {
+        throw new Error("That person doesn’t have an organization profile yet.");
+      }
+      await updateOrgPersonContact({
+        orgProfileId: input.member.orgProfileId,
+        name: input.name,
+        email: input.member.canEditOrgEmail ? input.email : undefined,
+      });
+    },
+    onSuccess: async () => {
+      await invalidateStaff();
+      toast("Name saved.");
+    },
+    onError: (error: Error) => {
+      toastCaughtError(error);
+    },
+  });
   const pending = pendingQuery.data ?? [];
   const lastInvite = pending.find((invite) => invite.id === lastInviteId) ?? null;
 
   const rows: StaffMemberRow[] = members.map((member) => {
     const actions = staffMemberActions({ actorRole: role, member, members });
+    const selfStaff =
+      member.userId === user.id &&
+      (member.role === "owner" ||
+        member.role === "admin" ||
+        member.role === "instructor" ||
+        member.role === "observer");
     return {
       ...member,
       isYou: member.userId === user.id,
+      canEditOrgName: member.orgProfileId != null && (canManage || selfStaff),
+      canEditOrgEmail: member.orgProfileId != null && canManage,
       ...actions,
     };
   });
@@ -316,6 +346,9 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     removingId: removeMutation.isPending
       ? (removeMutation.variables?.membershipId ?? null)
       : null,
+    savingContactId: contactMutation.isPending
+      ? (contactMutation.variables?.member.membershipId ?? null)
+      : null,
     lastInviteSent: Boolean(lastInvite && lastInviteSent),
     onEmailChange: (value: string) => {
       setEmail(value);
@@ -331,5 +364,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     onCancel: (invite: PendingStaffInvite) => cancelMutation.mutate(invite),
     onChangeRole,
     onRemove: (member: OrgStaffMember) => removeMutation.mutate(member),
+    onSaveContact: (member: StaffMemberRow, name: string, email?: string) =>
+      contactMutation.mutate({ member, name, email }),
   };
 }

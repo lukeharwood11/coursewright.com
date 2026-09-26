@@ -182,16 +182,27 @@ select is_empty(
 -- Seed parent access as table owner, then verify the SCHEMA.md parent gate.
 reset role;
 
-insert into student_profiles (organization_id, name)
-select id, 'Sam Student' from organizations;
+insert into org_profiles (organization_id, name, counts_as_student)
+select id, 'Sam Student', true from organizations;
 
 insert into enrollments (student_profile_id, course_id, status)
 select sp.id, c.id, 'active'
-from student_profiles sp
-join courses c on c.organization_id = sp.organization_id;
+from org_profiles sp
+join courses c on c.organization_id = sp.organization_id
+where sp.name = 'Sam Student';
 
-insert into parent_student_links (parent_user_id, student_profile_id)
-select '33333333-3333-3333-3333-333333333333', id from student_profiles;
+insert into org_profiles (organization_id, name, email, user_id, counts_as_student)
+select o.id, 'Course Parent', p.email, p.id, false
+from organizations o
+join profiles p on p.id = '33333333-3333-3333-3333-333333333333';
+
+insert into parent_student_links (parent_org_profile_id, student_profile_id)
+select parent.id, kid.id
+from org_profiles kid
+join org_profiles parent
+  on parent.organization_id = kid.organization_id
+ and parent.user_id = '33333333-3333-3333-3333-333333333333'
+where kid.name = 'Sam Student';
 
 -- Parent membership but course archived → still hidden.
 insert into memberships (organization_id, user_id, role, status)
@@ -231,7 +242,7 @@ select results_eq(
 );
 
 select isnt_empty(
-  $$select 1 from student_profiles where name = 'Sam Student'$$,
+  $$select 1 from org_profiles where name = 'Sam Student'$$,
   'parent reads the linked student profile'
 );
 

@@ -7,6 +7,7 @@ import { rosterWriteErrorMessage } from "@/roster/model/studentProfile";
 import type { ValidatedFamily } from "@/roster/model/family";
 import { requireSupabase } from "./client";
 import type { StudentSummary } from "./students";
+import { parentOrgProfileIdForStudent } from "./parentLinks";
 
 export type FamilyParent = {
   userId: string;
@@ -47,7 +48,7 @@ type StudentEmbed = {
   name: string;
   grade_level: string | null;
   parent_email: string | null;
-  student_email: string | null;
+  email: string | null;
 };
 
 type FamilyMemberEmbed = {
@@ -65,9 +66,12 @@ type FamilyRow = {
 };
 
 type ParentLinkRow = {
-  parent_user_id: string;
+  parent_org_profile_id: number;
   student_profile_id: number;
-  parent: { id: string; name: string; email: string } | { id: string; name: string; email: string }[] | null;
+  parent:
+    | { id: number; name: string; email: string | null; user_id: string | null }
+    | { id: number; name: string; email: string | null; user_id: string | null }[]
+    | null;
 };
 
 const FAMILY_SELECT = `
@@ -78,8 +82,8 @@ const FAMILY_SELECT = `
     id,
     student_profile_id,
     display_name,
-    student:student_profiles!family_members_student_profile_id_fkey(
-      id, organization_id, name, grade_level, parent_email, student_email
+    student:org_profiles!family_members_student_profile_id_fkey(
+      id, organization_id, name, grade_level, parent_email, email
     )
   )
 `;
@@ -96,7 +100,7 @@ function toStudentSummary(row: StudentEmbed): StudentSummary {
     name: row.name,
     gradeLevel: row.grade_level,
     parentEmail: row.parent_email,
-    studentEmail: row.student_email,
+    studentEmail: row.email,
   };
 }
 
@@ -136,15 +140,16 @@ function parentsFromLinks(
   for (const link of links) {
     if (!wanted.has(link.student_profile_id)) continue;
     const profile = unwrapOne(link.parent);
-    const existing = byParent.get(link.parent_user_id);
+    const key = String(link.parent_org_profile_id);
+    const existing = byParent.get(key);
     if (existing) {
       if (!existing.studentIds.includes(link.student_profile_id)) {
         existing.studentIds.push(link.student_profile_id);
       }
       continue;
     }
-    byParent.set(link.parent_user_id, {
-      userId: link.parent_user_id,
+    byParent.set(key, {
+      userId: profile?.user_id ?? "",
       name: profile?.name || profile?.email || "Parent",
       email: profile?.email ?? "",
       studentIds: [link.student_profile_id],
@@ -160,7 +165,7 @@ async function listParentLinks(studentIds: number[]): Promise<ParentLinkRow[]> {
   const { data, error } = await db
     .from("parent_student_links")
     .select(
-      "parent_user_id, student_profile_id, parent:profiles!parent_student_links_parent_user_id_fkey(id, name, email)",
+      "parent_org_profile_id, student_profile_id, parent:org_profiles!parent_student_links_parent_org_profile_id_fkey(id, name, email, user_id)",
     )
     .in("student_profile_id", studentIds);
 
@@ -336,8 +341,12 @@ export async function ensureParentStudentLinks(
   const db = requireSupabase();
   const results = await Promise.all(
     studentProfileIds.map(async (studentProfileId) => {
+      const parentOrgProfileId = await parentOrgProfileIdForStudent(
+        parentUserId,
+        studentProfileId,
+      );
       const { error } = await db.from("parent_student_links").insert({
-        parent_user_id: parentUserId,
+        parent_org_profile_id: parentOrgProfileId,
         student_profile_id: studentProfileId,
       });
       return error;

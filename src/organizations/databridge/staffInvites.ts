@@ -5,6 +5,8 @@ import {
   normalizeInviteEmail,
 } from "@/organizations/model/staffInvite";
 import { requireSupabase } from "./client";
+import { parentOrgProfileIdForStudent } from "@/roster/databridge/parentLinks";
+import { orgContactsByUserId } from "./orgNames";
 import {
   listOrgPeople,
   toOrganizationSummary,
@@ -19,6 +21,7 @@ export type OrgStaffMember = {
   role: OrgRole;
   name: string;
   email: string;
+  orgProfileId: number | null;
   hasLinkedStudent: boolean;
   hasStudentAccount: boolean;
 };
@@ -111,25 +114,35 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
 
   if (error) throw new Error(error.message);
 
-  const members = (data ?? [])
-    .map((row) => {
-      const typed = row as StaffMembershipRow;
-      const role = parseOrgRole(typed.role);
-      const profile = unwrapOne(typed.profile);
-      if (!role || !profile || !typed.user_id || !Number.isFinite(typed.id)) {
-        return null;
-      }
-      return {
-        membershipId: typed.id,
-        userId: typed.user_id,
-        role,
-        name: profile.name,
-        email: profile.email,
-        hasLinkedStudent: false,
-        hasStudentAccount: false,
-      };
-    })
-    .filter((row): row is OrgStaffMember => row !== null);
+  const members: OrgStaffMember[] = [];
+  for (const row of data ?? []) {
+    const typed = row as StaffMembershipRow;
+    const role = parseOrgRole(typed.role);
+    const profile = unwrapOne(typed.profile);
+    if (!role || !profile || !typed.user_id || !Number.isFinite(typed.id)) continue;
+    members.push({
+      membershipId: typed.id,
+      userId: typed.user_id,
+      role,
+      name: profile.name,
+      email: profile.email,
+      orgProfileId: null,
+      hasLinkedStudent: false,
+      hasStudentAccount: false,
+    });
+  }
+
+  const contacts = await orgContactsByUserId(
+    organizationId,
+    members.map((member) => member.userId),
+  );
+  for (const member of members) {
+    const contact = contacts.get(member.userId);
+    if (!contact) continue;
+    member.name = contact.name;
+    member.orgProfileId = contact.id;
+    if (contact.email) member.email = contact.email;
+  }
 
   const userIds = members.map((member) => member.userId);
   const [linkedParents, studentAccounts] = await Promise.all([
@@ -144,6 +157,29 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
   }));
 }
 
+export async function updateOrgPersonContact(input: {
+  orgProfileId: number;
+  name: string;
+  email?: string;
+}): Promise<void> {
+  const name = input.name.trim();
+  if (!name) throw new Error("Enter a name.");
+  const patch: { name: string; email?: string | null } = { name };
+  if (input.email !== undefined) {
+    const email = input.email.trim().toLowerCase();
+    patch.email = email.length > 0 ? email : null;
+  }
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("org_profiles")
+    .update(patch)
+    .eq("id", input.orgProfileId)
+    .select("id")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("You don’t have permission to change that name.");
+}
+
 async function listLinkedParentUserIds(
   organizationId: number,
   userIds: string[],
@@ -152,7 +188,7 @@ async function listLinkedParentUserIds(
 
   const db = requireSupabase();
   const { data: students, error: studentsError } = await db
-    .from("student_profiles")
+    .from("org_profiles")
     .select("id")
     .eq("organization_id", organizationId);
 
@@ -163,13 +199,19 @@ async function listLinkedParentUserIds(
 
   const { data, error } = await db
     .from("parent_student_links")
-    .select("parent_user_id")
-    .in("parent_user_id", userIds)
+    .select("parent:org_profiles!parent_student_links_parent_org_profile_id_fkey(user_id)")
     .in("student_profile_id", studentIds);
 
   if (error) throw new Error(error.message);
 
-  return new Set((data ?? []).map((row) => row.parent_user_id));
+  const linked = new Set<string>();
+  for (const row of data ?? []) {
+    const parent = Array.isArray(row.parent) ? row.parent[0] : row.parent;
+    if (parent?.user_id && userIds.includes(parent.user_id)) {
+      linked.add(parent.user_id);
+    }
+  }
+  return linked;
 }
 
 async function listStudentAccountUserIds(
@@ -180,7 +222,7 @@ async function listStudentAccountUserIds(
 
   const db = requireSupabase();
   const { data, error } = await db
-    .from("student_profiles")
+    .from("org_profiles")
     .select("user_id")
     .eq("organization_id", organizationId)
     .in("user_id", userIds);
@@ -263,7 +305,7 @@ export async function listParentLinksForStudents(
   const { data, error } = await db
     .from("parent_student_links")
     .select(
-      "parent_user_id, student_profile_id, parent:profiles!parent_student_links_parent_user_id_fkey(name, email)",
+      "parent_org_profile_id, student_profile_id, parent:org_profiles!parent_student_links_parent_org_profile_id_fkey(name, email, user_id)",
     )
     .in("student_profile_id", studentIds);
 
@@ -272,7 +314,7 @@ export async function listParentLinksForStudents(
     const parent = unwrapOne(row.parent);
     return {
       studentProfileId: row.student_profile_id,
-      parentUserId: row.parent_user_id,
+      parentUserId: parent?.user_id ?? "",
       name: parent?.name || parent?.email || "Parent",
       email: parent?.email ?? "",
     };
@@ -351,8 +393,12 @@ async function ensureParentStudentLink(
   studentProfileId: number,
 ): Promise<void> {
   const db = requireSupabase();
+  const parentOrgProfileId = await parentOrgProfileIdForStudent(
+    parentUserId,
+    studentProfileId,
+  );
   const { error } = await db.from("parent_student_links").insert({
-    parent_user_id: parentUserId,
+    parent_org_profile_id: parentOrgProfileId,
     student_profile_id: studentProfileId,
   });
   if (error) {
@@ -459,22 +505,18 @@ export async function getStudentAccountLink(
 ): Promise<StudentAccountLink | null> {
   const db = requireSupabase();
   const { data, error } = await db
-    .from("student_profiles")
-    .select("id, user_id, profile:profiles!student_profiles_user_id_fkey(name, email)")
+    .from("org_profiles")
+    .select("id, user_id, name, email")
     .eq("id", studentProfileId)
     .maybeSingle();
 
   if (error) throw new Error(error.message);
   if (!data?.user_id) return null;
-  const profile = unwrapOne(
-    data.profile as ProfileEmbed,
-  );
-  if (!profile) return null;
   return {
     studentProfileId: data.id,
     userId: data.user_id,
-    name: profile.name,
-    email: profile.email,
+    name: data.name,
+    email: data.email ?? "",
   };
 }
 

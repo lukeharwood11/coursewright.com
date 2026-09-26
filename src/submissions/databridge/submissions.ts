@@ -132,7 +132,7 @@ const SUBMISSION_EMBED = [
   "points_possible",
   "feedback",
   "graded_at",
-  "student:student_profiles!material_submissions_student_profile_id_fkey(id, name)",
+  "student:org_profiles!material_submissions_student_profile_id_fkey(id, name)",
   "versions:material_submission_versions(id, version, submitted_at, submitted_by, submitter:profiles!material_submission_versions_submitted_by_fkey(name), files:material_submission_files(position, file:files!material_submission_files_file_id_fkey(id, filename, mime_type, storage_ref)))",
 ].join(", ");
 
@@ -171,7 +171,7 @@ export async function listActiveEnrolledStudents(
   const { data, error } = await db
     .from("enrollments")
     .select(
-      "student_profile_id, student:student_profiles!enrollments_student_profile_id_fkey(id, name)",
+      "student_profile_id, student:org_profiles!enrollments_student_profile_id_fkey(id, name)",
     )
     .eq("course_id", courseId)
     .eq("status", "active");

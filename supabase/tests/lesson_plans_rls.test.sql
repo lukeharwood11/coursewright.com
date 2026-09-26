@@ -49,21 +49,24 @@ select id, 'Art', 'active', 'published'
 from organizations
 where name = 'Plan Co-op';
 
-insert into student_profiles (organization_id, name)
-select id, 'Kid Plan'
+insert into org_profiles (organization_id, name, counts_as_student)
+select id, 'Kid Plan', true
 from organizations
 where name = 'Plan Co-op';
 
 insert into enrollments (student_profile_id, course_id, status)
 select sp.id, c.id, 'active'
-from student_profiles sp
+from org_profiles sp
 join courses c on c.organization_id = sp.organization_id
 where sp.name = 'Kid Plan' and c.title = 'Science';
 
-insert into parent_student_links (parent_user_id, student_profile_id)
-select 'dddd4444-4444-4444-4444-444444444444', id
-from student_profiles
-where name = 'Kid Plan';
+insert into parent_student_links (parent_org_profile_id, student_profile_id)
+select parent.id, kid.id
+from org_profiles kid
+join org_profiles parent
+  on parent.organization_id = kid.organization_id
+ and parent.user_id = 'dddd4444-4444-4444-4444-444444444444'
+where kid.name = 'Kid Plan';
 
 insert into materials (organization_id, course_id, title, description, kind, visibility)
 select o.id, c.id, 'Lab packet', '', 'page', 'published'
@@ -147,6 +150,7 @@ select throws_ok(
     where o.name = 'Plan Co-op' and c.title = 'Science'
   $$,
   '23505',
+  'duplicate key value violates unique constraint "lesson_plans_course_week_uidx"',
   'one published or draft plan per course per week'
 );
 
@@ -177,6 +181,7 @@ select throws_ok(
     where o.name = 'Plan Co-op' and c.title = 'Science'
   $$,
   '42501',
+  'new row violates row-level security policy for table "lesson_plans"',
   'parent cannot create a lesson plan'
 );
 
