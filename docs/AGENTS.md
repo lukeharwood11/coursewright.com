@@ -18,6 +18,7 @@ Product and planning documentation. Runtime code stays in `src/`, `supabase/`, `
 | `pages/` | Per-page outlines (`HOME.md`, `ORG_HOME.md`, …) |
 | `HUMAN_NEEDED.md` | Human/admin cloud todos |
 | `database/` | Schema planning (`SCHEMA.md`) |
+| `plans/` | In-flight implementation plans (archive or mark shipped when done) |
 
 ## Rules
 

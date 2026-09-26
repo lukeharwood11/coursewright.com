@@ -19,6 +19,7 @@ All product and planning docs live under [`docs/`](./docs/). Start here before i
 | [docs/URLS.md](./docs/URLS.md) | UI URL map — routes by feature/page |
 | [docs/pages/](./docs/pages/) | Per-page outlines (what’s on each screen) |
 | [docs/database/SCHEMA.md](./docs/database/SCHEMA.md) | Entities & access rules (planning) |
+| [docs/plans/](./docs/plans/) | In-flight implementation plans |
 | [docs/database/README.md](./docs/database/README.md) | Schema folder purpose |
 | [docs/HUMAN_NEEDED.md](./docs/HUMAN_NEEDED.md) | **Human/admin todos** (AWS, Supabase, Google, DNS) — agents must update when blocked |
 | [docs/AGENTS.md](./docs/AGENTS.md) | Rules for editing docs |
