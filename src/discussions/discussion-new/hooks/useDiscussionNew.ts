@@ -12,7 +12,7 @@ import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import {
   isStaffInstructorPreview,
-  STAFF_PREVIEW_DISCUSSION_HINT,
+  staffPreviewDiscussionHint,
   staffCanEdit,
 } from "@/app/layouts/model/viewMode";
 import { canManageOrgSettings, isStaffRole } from "@/organizations/model/role";
@@ -168,7 +168,7 @@ export function useDiscussionNew() {
 
   function blockIfInstructorPreview(): boolean {
     if (!instructorPreview) return false;
-    toast(STAFF_PREVIEW_DISCUSSION_HINT);
+    toast(staffPreviewDiscussionHint(role));
     return true;
   }
 

@@ -1,12 +1,14 @@
 import {
   browsesAsStaff,
   isStaffRole,
+  roleLabel,
   type OrgRole,
 } from "@/organizations/model/role";
 
 export const STAFF_VIEW_MODES = ["teacher", "preview", "parent", "student"] as const;
 export type StaffViewMode = (typeof STAFF_VIEW_MODES)[number];
 
+/** @deprecated Prefer {@link staffViewModeLabel} with a writer role. */
 export const TEACHER_VIEW_LABEL = "Teacher";
 export const PREVIEW_VIEW_LABEL = "Preview";
 export const PARENT_VIEW_LABEL = "Parent";
@@ -19,9 +21,13 @@ export type StaffViewModeOption = {
   label: string;
 };
 
-export function staffViewModeLabel(mode: StaffViewMode): string {
+export function staffViewModeLabel(
+  mode: StaffViewMode,
+  staffRole?: OrgRole | null,
+): string {
   switch (mode) {
     case "teacher":
+      if (staffRole && isStaffRole(staffRole)) return roleLabel(staffRole);
       return TEACHER_VIEW_LABEL;
     case "preview":
       return PREVIEW_VIEW_LABEL;
@@ -36,11 +42,15 @@ export function staffViewModeLabel(mode: StaffViewMode): string {
 export function availableStaffViewModes(input: {
   isParent: boolean;
   isStudent: boolean;
+  staffRole?: OrgRole | null;
 }): StaffViewModeOption[] {
   const modes: StaffViewMode[] = ["teacher", "preview"];
   if (input.isParent) modes.push("parent");
   if (input.isStudent) modes.push("student");
-  return modes.map((mode) => ({ mode, label: staffViewModeLabel(mode) }));
+  return modes.map((mode) => ({
+    mode,
+    label: staffViewModeLabel(mode, input.staffRole),
+  }));
 }
 
 /**
@@ -59,10 +69,14 @@ export function parseStaffViewMode(value: string | null | undefined): StaffViewM
 export function resolveStaffViewMode(
   value: string | null | undefined,
   flags: { isParent: boolean; isStudent: boolean },
+  role?: OrgRole | null,
 ): StaffViewMode {
+  if (role === "observer") return "teacher";
   const parsed = parseStaffViewMode(value);
   const allowed = new Set(
-    availableStaffViewModes(flags).map((option) => option.mode),
+    availableStaffViewModes({ ...flags, staffRole: role }).map(
+      (option) => option.mode,
+    ),
   );
   if (allowed.has(parsed)) return parsed;
   // Legacy Student view stored as "parent" — prefer real family tabs, else Preview.
@@ -89,8 +103,16 @@ export function staffShowsParentPresentation(
   return viewMode !== "teacher";
 }
 
+/** Writers only — observers stay in staff chrome with no preview toggle. */
 export function canUseStaffViewToggle(role: OrgRole | null): boolean {
   return Boolean(role && isStaffRole(role));
+}
+
+export function staffWriterInPreviewMode(
+  role: OrgRole | null,
+  staffViewMode: StaffViewMode,
+): boolean {
+  return Boolean(role && isStaffRole(role) && staffViewMode === "preview");
 }
 
 export function staffCanEdit(
@@ -105,11 +127,20 @@ export function isStaffInstructorPreview(
   role: OrgRole | null,
   staffViewMode: StaffViewMode,
 ): boolean {
-  return Boolean(role && isStaffRole(role) && staffViewMode === "preview");
+  return staffWriterInPreviewMode(role, staffViewMode);
 }
 
-export const STAFF_PREVIEW_DISCUSSION_HINT =
-  "Switch to Teacher view to start or post in a discussion.";
+export function staffPreviewActionHint(
+  role: OrgRole | null,
+  action: string,
+): string {
+  const view = staffViewModeLabel("teacher", role);
+  return `Switch to ${view} view to ${action}.`;
+}
+
+export function staffPreviewDiscussionHint(role: OrgRole | null): string {
+  return staffPreviewActionHint(role, "start or post in a discussion");
+}
 
 /** Drafts, unpublished rows, and answer keys. Does not grant a write. */
 export function staffBrowsesContent(

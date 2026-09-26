@@ -1,5 +1,10 @@
 import { Link } from "react-router-dom";
-import { Cog6ToothIcon } from "@heroicons/react/24/outline";
+import {
+  ClipboardDocumentCheckIcon,
+  Cog6ToothIcon,
+  DocumentTextIcon,
+  TableCellsIcon,
+} from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { Button, ButtonLink } from "@/ui/Button";
 import { formatGradeDisplay } from "@/grading/model/scale";
@@ -58,6 +63,7 @@ export function StudentGradesSection({ studentId }: { studentId: number }) {
                 {grades.canAct ? (
                   <span className="flex flex-wrap items-center gap-2">
                     <ButtonLink variant="secondary" to={gradebookPath(slug, grade.courseId)}>
+                      <TableCellsIcon className="h-5 w-5" aria-hidden />
                       Gradebook
                     </ButtonLink>
                     {draftByCourseId.has(grade.courseId) ? (
@@ -65,6 +71,7 @@ export function StudentGradesSection({ studentId }: { studentId: number }) {
                         variant="secondary"
                         to={reportCardPath(slug, draftByCourseId.get(grade.courseId)!.id)}
                       >
+                        <DocumentTextIcon className="h-5 w-5" aria-hidden />
                         Draft
                       </ButtonLink>
                     ) : (
@@ -74,6 +81,7 @@ export function StudentGradesSection({ studentId }: { studentId: number }) {
                         disabled={grades.generatingEnrollmentId === grade.enrollmentId}
                         onClick={() => grades.generateForEnrollment(grade.enrollmentId)}
                       >
+                        <ClipboardDocumentCheckIcon className="h-5 w-5" aria-hidden />
                         {grades.generatingEnrollmentId === grade.enrollmentId
                           ? "Generating…"
                           : "Report card"}

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { Badge } from "@/ui/Badge";
 import { studentPath } from "@/grading/model/paths";
@@ -58,9 +59,14 @@ export function StudentRosterList({
           <div className="flex items-center justify-between gap-3 border-b border-[var(--line-soft)] bg-[var(--paper)] px-4 py-2 lg:hidden">
             <button
               type="button"
-              className="text-[13px] font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+              className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
               onClick={allSelected ? onClearSelection : onSelectAll}
             >
+              {allSelected ? (
+                <XMarkIcon className="h-4 w-4" aria-hidden />
+              ) : (
+                <CheckIcon className="h-4 w-4" aria-hidden />
+              )}
               {allSelected ? "Clear selection" : "Select all matching"}
             </button>
           </div>
@@ -151,9 +157,14 @@ export function StudentRosterList({
         <div className="mb-2 flex flex-wrap gap-2">
           <button
             type="button"
-            className="text-[13px] font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+            className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
             onClick={allSelected ? onClearSelection : onSelectAll}
           >
+            {allSelected ? (
+              <XMarkIcon className="h-4 w-4" aria-hidden />
+            ) : (
+              <CheckIcon className="h-4 w-4" aria-hidden />
+            )}
             {allSelected ? "Clear selection" : "Select all matching"}
           </button>
         </div>

@@ -1,9 +1,14 @@
 import { useEffect } from "react";
+import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import {
   UserProfileContent,
   UserProfileNotFound,
 } from "./components/UserProfileContent";
-import { useUserProfile } from "./hooks/useUserProfile";
+import { OrgPersonContactForm } from "./components/OrgPersonContactForm";
+import {
+  ORG_PERSON_CONTACT_FORM_ID,
+  useUserProfile,
+} from "./hooks/useUserProfile";
 
 export function UserProfilePage() {
   const page = useUserProfile();
@@ -40,6 +45,30 @@ export function UserProfilePage() {
         profile={page.profile}
         orgSlug={page.organization.slug}
         role={page.role}
+      />
+      {page.canEditName ? (
+        <OrgPersonContactForm
+          formId={ORG_PERSON_CONTACT_FORM_ID}
+          name={page.name}
+          email={page.email}
+          canEditEmail={page.canEditEmail}
+          linkedEmailChangeWarning={page.linkedEmailChangeWarning}
+          error={page.formError}
+          saving={page.saving}
+          hasChanges={page.hasChanges}
+          onNameChange={page.onNameChange}
+          onEmailChange={page.onEmailChange}
+          onSubmit={page.onSubmit}
+        />
+      ) : null}
+      <ConfirmDialog
+        open={page.confirmLinkedEmailOpen}
+        title="Change contact email?"
+        body="This person already has a linked account. Saving a new contact email keeps them linked to this profile and does not change how they sign in. It only updates the organizer contact address on this row."
+        confirmLabel="Save email"
+        cancelLabel="Keep current email"
+        onCancel={page.onCancelLinkedEmailSave}
+        onConfirm={page.onConfirmLinkedEmailSave}
       />
     </div>
   );

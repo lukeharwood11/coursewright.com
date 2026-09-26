@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChatBubbleLeftRightIcon, MegaphoneIcon, UserPlusIcon } from "@heroicons/react/24/outline";
+import {
+  ChatBubbleLeftRightIcon,
+  MegaphoneIcon,
+  TrashIcon,
+  UserPlusIcon,
+} from "@heroicons/react/24/outline";
 import { Button, ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
@@ -180,6 +185,7 @@ export function ClassRosterPage() {
                 onClick={() => setPendingRemove({ student, memberId })}
                 disabled={roster.removingId === memberId}
               >
+                <TrashIcon className="h-5 w-5" aria-hidden />
                 {roster.removingId === memberId ? "Removing…" : "Remove"}
               </Button>
             );

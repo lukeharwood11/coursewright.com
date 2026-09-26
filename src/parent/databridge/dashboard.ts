@@ -95,7 +95,8 @@ export async function loadOwnStudentProfileIds(
     .from("org_profiles")
     .select("id")
     .eq("organization_id", organizationId)
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .eq("counts_as_student", true);
 
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => row.id);

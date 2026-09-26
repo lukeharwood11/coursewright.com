@@ -5,7 +5,7 @@ App chrome: collapsible sidebar + top bar for signed-in `/my` pages.
 ## Scope
 
 - **Account shell** (`/my`, `/my/settings`, `/my/feedback`) — Organizations (nested org names) and Account. No course/roster nav.
-- **Org shell** (`/my/<org-slug>/…`) — staff vs parent nav (role decides chrome, not a second app). Staff writers get a **Teacher / Preview** toggle in the header (plus **Parent** / **Student** when additive flags apply; mobile Select when 3+ modes).
+- **Org shell** (`/my/<org-slug>/…`) — staff vs parent nav (role decides chrome, not a second app). Staff writers get a header toggle: their role (**Owner** / **Admin** / **Instructor**) vs **Preview** (plus **Parent** / **Student** when additive flags apply; mobile Select when 3+ modes). **Observers** have no toggle and cannot use Preview.
 - Collapse on desktop; overlay drawer on small screens
 - Nested course / class links from domain databridge lists (org shell only)
 - Staff nav includes **Calendar**, **Announcements**, **Discussions**, and **Resources** (between Courses and Students) when those org customizations are on. The people item is **Students** (`/students`). There is no top-level **Roster** or **Records** item. Classes are a tab on Students, not sidebar children. **Activity** is a header bell (right of the avatar), not a sidebar tab.

@@ -1,3 +1,4 @@
+import { EyeSlashIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import {
   isCoursePublished,
@@ -24,6 +25,7 @@ export function CourseVisibilityBanner({
         Unpublished. Families can’t see this course until you publish it.
       </p>
       <Button type="button" disabled={pending} onClick={onPublish}>
+        <GlobeAltIcon className="h-5 w-5" aria-hidden />
         Publish
       </Button>
     </div>
@@ -58,6 +60,7 @@ export function CourseUnpublishControl({
         disabled={pending}
         onClick={onUnpublish}
       >
+        <EyeSlashIcon className="h-5 w-5" aria-hidden />
         Unpublish
       </Button>
     </div>

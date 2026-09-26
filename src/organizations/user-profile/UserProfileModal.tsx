@@ -1,7 +1,10 @@
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Button, ButtonLink } from "@/ui/Button";
-import { userProfilePath } from "@/organizations/model/paths";
+import {
+  orgPersonProfilePath,
+  userProfilePath,
+} from "@/organizations/model/paths";
 import {
   UserProfileContent,
   UserProfileNotFound,
@@ -35,7 +38,10 @@ export function UserProfileModal({
 
   if (!open || !userId) return null;
 
-  const profileHref = userProfilePath(page.organization.slug, userId);
+  const profileHref =
+    page.orgProfileId != null
+      ? orgPersonProfilePath(page.organization.slug, page.orgProfileId)
+      : userProfilePath(page.organization.slug, userId);
 
   return createPortal(
     <div className="fixed inset-0 z-40 flex items-center justify-center p-4">

@@ -25,7 +25,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [ORG_PROFILE](./ORG_PROFILE.md) | `/my/<org-slug>/profile` |
 | [CALENDAR](./CALENDAR.md) | `/my/<org-slug>/calendar` |
 | [EVENT](./EVENT.md) | `/my/<org-slug>/events/<event_id>` (new `…/events/new`; edit `…/edit`; print `…/print`) |
-| [USER_PROFILE](./USER_PROFILE.md) | `/my/<org-slug>/people/<user_id>` |
+| [USER_PROFILE](./USER_PROFILE.md) | `/my/<org-slug>/people/<org_profile_id>` · UUID redirects |
 | [ACTIVITY](./ACTIVITY.md) | `/my/<org-slug>/activity` | **P1** |
 | [ORG_SETTINGS](./ORG_SETTINGS.md) | `/my/<org-slug>/settings` |
 | [COURSE_LIST](./COURSE_LIST.md) | `/my/<org-slug>/courses` |

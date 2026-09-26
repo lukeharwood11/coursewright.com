@@ -8,11 +8,6 @@ import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import { getOrganization } from "@/organizations/databridge/organizations";
 import {
-  listOrgPendingStudentInvites,
-  sendOrganizationInviteEmail,
-  staffInviteQueryKeys,
-} from "@/organizations/databridge/staffInvites";
-import {
   classQueryKeys,
   listClassesForStudent,
 } from "@/roster/databridge/classes";
@@ -26,10 +21,7 @@ import {
   studentQueryKeys,
   updateStudent,
 } from "@/roster/databridge/students";
-import {
-  studentProfileHaveChanges,
-  validateStudentProfile,
-} from "@/roster/model/studentProfile";
+import { validateStudentProfile } from "@/roster/model/studentProfile";
 
 export const STUDENT_PROFILE_FORM_ID = "student-profile-form";
 
@@ -66,15 +58,11 @@ export function useStudentProfile() {
     enabled: Number.isFinite(studentId) && belongsHere,
   });
 
-  const [name, setName] = useState("");
-  const [studentEmail, setStudentEmail] = useState("");
   const [gradeLevel, setGradeLevel] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
   const resetForm = useCallback(() => {
     if (!student || !belongsHere) return;
-    setName(student.name);
-    setStudentEmail(student.studentEmail ?? "");
     setGradeLevel(student.gradeLevel ?? "");
     setFormError(null);
   }, [student, belongsHere]);
@@ -87,77 +75,25 @@ export function useStudentProfile() {
     mutationFn: async () => {
       if (!student) throw new Error("Student isn’t loaded yet.");
       const parsed = validateStudentProfile({
-        name,
+        name: student.name,
         parentEmail: student.parentEmail ?? "",
-        studentEmail,
+        studentEmail: student.studentEmail ?? "",
         gradeLevel,
         gradeLabels: organizationQuery.data?.gradeLabels ?? [],
       });
       if (!parsed.ok) throw new Error(parsed.error);
-      const emailChanged = parsed.value.studentEmail !== student.studentEmail;
-      const hadLinkedAccount = Boolean(student.userId);
       const saved = await updateStudent(student.id, parsed.value);
-
-      if (!emailChanged || !saved.studentEmail) {
-        return {
-          saved,
-          emailChanged,
-          hadLinkedAccount,
-          replacementInvite: null,
-          inviteEmailSent: null,
-        };
-      }
-
-      const pending = await listOrgPendingStudentInvites(organization.id);
-      const replacementInvite =
-        pending.find(
-          (invite) =>
-            invite.email === saved.studentEmail &&
-            invite.studentProfileIds.includes(saved.id),
-        ) ?? null;
-      const inviteEmail = replacementInvite
-        ? await sendOrganizationInviteEmail(replacementInvite.id)
-        : null;
-
-      return {
-        saved,
-        emailChanged,
-        hadLinkedAccount,
-        replacementInvite,
-        inviteEmailSent: inviteEmail?.sent ?? null,
-      };
+      return { saved };
     },
     onSuccess: async (result) => {
       setFormError(null);
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: studentQueryKeys.detail(result.saved.id),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: studentQueryKeys.list(organization.id),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: staffInviteQueryKeys.students(organization.id),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: staffInviteQueryKeys.staff(organization.id),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["student-account", result.saved.id],
-        }),
-      ]);
-
-      if (result.replacementInvite) {
-        toast(
-          result.inviteEmailSent
-            ? `Student saved. New invite sent to ${result.replacementInvite.email}.`
-            : "Student saved and the old invite was canceled, but the new invite email didn’t send.",
-        );
-      } else if (result.emailChanged && result.hadLinkedAccount) {
-        toast("Student saved. The previous account is no longer linked to this student.");
-      } else {
-        toast("Student saved.");
-      }
+      await queryClient.invalidateQueries({
+        queryKey: studentQueryKeys.detail(result.saved.id),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: studentQueryKeys.list(organization.id),
+      });
+      toast("Student saved.");
     },
     onError: (error: Error) => {
       setFormError(caughtErrorMessage(error));
@@ -182,15 +118,7 @@ export function useStudentProfile() {
 
   const hasChanges =
     student && belongsHere
-      ? studentProfileHaveChanges(
-          {
-            name,
-            parentEmail: student.parentEmail ?? "",
-            studentEmail,
-            gradeLevel,
-          },
-          student,
-        )
+      ? gradeLevel.trim() !== (student.gradeLevel ?? "")
       : false;
 
   function onSubmit(event: FormEvent) {
@@ -209,21 +137,11 @@ export function useStudentProfile() {
     loading: query.isLoading,
     error: query.error ? query.error.message : null,
     notFound: !query.isLoading && (!student || !belongsHere),
-    name,
-    studentEmail,
     gradeLevel,
     formError,
     saving: saveMutation.isPending,
     removing: removeMutation.isPending,
     hasChanges,
-    setName: (value: string) => {
-      setName(value);
-      setFormError(null);
-    },
-    setStudentEmail: (value: string) => {
-      setStudentEmail(value);
-      setFormError(null);
-    },
     setGradeLevel: (value: string) => {
       setGradeLevel(value);
       setFormError(null);

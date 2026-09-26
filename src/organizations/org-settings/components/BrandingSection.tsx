@@ -1,5 +1,10 @@
 import { useRef } from "react";
-import { ArrowPathIcon, CheckIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  ArrowUpTrayIcon,
+  CheckIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { Input } from "@/ui/Input";
@@ -75,6 +80,7 @@ export function BrandingSection({
                     variant="secondary"
                     onClick={() => fileInputRef.current?.click()}
                   >
+                    <ArrowUpTrayIcon className="h-4 w-4" aria-hidden />
                     {branding.iconUrl || branding.iconFileName
                       ? "Replace icon"
                       : "Choose icon"}
@@ -85,6 +91,7 @@ export function BrandingSection({
                       variant="secondary"
                       onClick={branding.onRemoveIcon}
                     >
+                      <TrashIcon className="h-4 w-4" aria-hidden />
                       Remove icon
                     </Button>
                   ) : null}

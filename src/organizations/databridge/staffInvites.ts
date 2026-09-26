@@ -6,7 +6,11 @@ import {
 } from "@/organizations/model/staffInvite";
 import { requireSupabase } from "./client";
 import { parentOrgProfileIdForStudent } from "@/roster/databridge/parentLinks";
-import { orgContactsByUserId } from "./orgNames";
+import {
+  createOrgPerson,
+  findOrgProfileByEmail,
+  orgContactsByUserId,
+} from "./orgNames";
 import {
   listOrgPeople,
   toOrganizationSummary,
@@ -34,6 +38,9 @@ export type PendingOrgInvite = {
   createdAt: string;
   studentProfileId: number | null;
   studentProfileIds: number[];
+  orgProfileId: number | null;
+  name: string | null;
+  userId: string | null;
   organization: OrganizationSummary;
 };
 
@@ -56,7 +63,8 @@ export type StaffInvitePreview = InvitePreview & { role: StaffInviteRole };
 
 export type ParentLinkStatus = {
   studentProfileId: number;
-  parentUserId: string;
+  parentOrgProfileId: number;
+  parentUserId: string | null;
   name: string;
   email: string;
 };
@@ -77,7 +85,12 @@ type PendingInviteRow = {
   token: string;
   created_at: string;
   student_profile_id: number | null;
+  org_profile_id: number | null;
   organization: OrganizationSummaryRow | OrganizationSummaryRow[] | null;
+  org_profile?:
+    | { id: number; name: string; user_id: string | null }
+    | { id: number; name: string; user_id: string | null }[]
+    | null;
   invite_students?:
     | { student_profile_id: number }[]
     | { student_profile_id: number }
@@ -101,7 +114,7 @@ export const staffInviteQueryKeys = {
 };
 
 const INVITE_COLUMNS =
-  "id, email, role, token, created_at, student_profile_id, organization:organizations(id, name, slug, school_days, about, address, website, contact_email, phone), invite_students:admin_invite_students(student_profile_id)";
+  "id, email, role, token, created_at, student_profile_id, org_profile_id, organization:organizations(id, name, slug, school_days, about, address, website, contact_email, phone), org_profile:org_profiles!admin_invites_org_profile_id_fkey(id, name, user_id), invite_students:admin_invite_students(student_profile_id)";
 
 export async function listOrgStaff(organizationId: number): Promise<OrgStaffMember[]> {
   const db = requireSupabase();
@@ -157,29 +170,6 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
   }));
 }
 
-export async function updateOrgPersonContact(input: {
-  orgProfileId: number;
-  name: string;
-  email?: string;
-}): Promise<void> {
-  const name = input.name.trim();
-  if (!name) throw new Error("Enter a name.");
-  const patch: { name: string; email?: string | null } = { name };
-  if (input.email !== undefined) {
-    const email = input.email.trim().toLowerCase();
-    patch.email = email.length > 0 ? email : null;
-  }
-  const db = requireSupabase();
-  const { data, error } = await db
-    .from("org_profiles")
-    .update(patch)
-    .eq("id", input.orgProfileId)
-    .select("id")
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("You don’t have permission to change that name.");
-}
-
 async function listLinkedParentUserIds(
   organizationId: number,
   userIds: string[],
@@ -190,7 +180,8 @@ async function listLinkedParentUserIds(
   const { data: students, error: studentsError } = await db
     .from("org_profiles")
     .select("id")
-    .eq("organization_id", organizationId);
+    .eq("organization_id", organizationId)
+    .eq("counts_as_student", true);
 
   if (studentsError) throw new Error(studentsError.message);
 
@@ -225,6 +216,7 @@ async function listStudentAccountUserIds(
     .from("org_profiles")
     .select("user_id")
     .eq("organization_id", organizationId)
+    .eq("counts_as_student", true)
     .in("user_id", userIds);
 
   if (error) throw new Error(error.message);
@@ -314,7 +306,8 @@ export async function listParentLinksForStudents(
     const parent = unwrapOne(row.parent);
     return {
       studentProfileId: row.student_profile_id,
-      parentUserId: parent?.user_id ?? "",
+      parentOrgProfileId: row.parent_org_profile_id,
+      parentUserId: parent?.user_id ?? null,
       name: parent?.name || parent?.email || "Parent",
       email: parent?.email ?? "",
     };
@@ -359,23 +352,37 @@ export async function sendOrganizationInviteEmail(
 
 export async function createStaffInvite(input: {
   organizationId: number;
+  name: string;
   email: string;
   role: StaffInviteRole;
   invitedBy: string;
 }): Promise<{ invite: PendingStaffInvite; email: InviteEmailStatus }> {
+  const existing = await findOrgProfileByEmail(input.organizationId, input.email);
+  if (existing?.userId) {
+    throw new Error("They’re already in this organization.");
+  }
+
+  const orgProfile =
+    existing ??
+    (await createOrgPerson({
+      organizationId: input.organizationId,
+      name: input.name,
+      email: input.email,
+    }));
+
   const invite = await insertInvite({
     organizationId: input.organizationId,
     email: input.email,
     role: input.role,
     invitedBy: input.invitedBy,
     studentProfileId: null,
+    orgProfileId: orgProfile.id,
   });
   const staff = toPendingStaffInviteFromInvite(invite);
   if (!staff) {
     throw new Error("The invite was created but couldn’t be loaded. Refresh and try again.");
   }
-  const email = await sendOrganizationInviteEmail(staff.id);
-  return { invite: staff, email };
+  return { invite: staff, email: { sent: false, error: null } };
 }
 
 export async function findOrgPersonByEmail(
@@ -412,6 +419,8 @@ export async function createParentInvite(input: {
   studentProfileId: number;
   email: string;
   invitedBy: string;
+  sendEmail?: boolean;
+  orgProfileId?: number | null;
 }): Promise<CreatedOrgInvite<PendingOrgInvite>> {
   const email = input.email.trim().toLowerCase();
   const orgMember = await findOrgPersonByEmail(input.organizationId, email);
@@ -445,8 +454,11 @@ export async function createParentInvite(input: {
       role: "parent",
       invitedBy: input.invitedBy,
       studentProfileId: input.studentProfileId,
+      orgProfileId: input.orgProfileId,
     });
-    const emailStatus = await sendOrganizationInviteEmail(invite.id);
+    const emailStatus = input.sendEmail
+      ? await sendOrganizationInviteEmail(invite.id)
+      : { sent: false, error: null };
     return { invite, email: emailStatus, attached: false };
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
@@ -641,6 +653,7 @@ async function insertInvite(input: {
   role: OrgRole;
   invitedBy: string;
   studentProfileId: number | null;
+  orgProfileId?: number | null;
 }): Promise<PendingOrgInvite> {
   const db = requireSupabase();
   const { data, error } = await db
@@ -651,6 +664,7 @@ async function insertInvite(input: {
       role: input.role,
       invited_by: input.invitedBy,
       student_profile_id: input.studentProfileId,
+      org_profile_id: input.orgProfileId ?? undefined,
     })
     .select(INVITE_COLUMNS)
     .maybeSingle();
@@ -679,6 +693,7 @@ function toPendingInvite(row: PendingInviteRow): PendingOrgInvite | null {
       ...(row.student_profile_id != null ? [row.student_profile_id] : []),
     ]),
   );
+  const orgProfile = unwrapOne(row.org_profile);
   return {
     id: row.id,
     email: row.email,
@@ -687,6 +702,9 @@ function toPendingInvite(row: PendingInviteRow): PendingOrgInvite | null {
     createdAt: row.created_at,
     studentProfileId: row.student_profile_id,
     studentProfileIds,
+    orgProfileId: orgProfile?.id ?? row.org_profile_id,
+    name: orgProfile?.name ?? null,
+    userId: orgProfile?.user_id ?? null,
     organization,
   };
 }

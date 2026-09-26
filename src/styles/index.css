@@ -52,6 +52,21 @@ body {
   background: var(--paper);
 }
 
+@layer base {
+  button:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  a[href] {
+    cursor: pointer;
+  }
+}
+
 /* Calendar: subtle cue for org-configured school / home days (icons in day headers). */
 .cw-calendar-school-day {
   background: color-mix(in srgb, var(--green-tint) 42%, var(--surface));

@@ -44,7 +44,7 @@ export function DetailPageHeader({
             <Link
               to={backTo}
               state={backState}
-              className="inline-flex shrink-0 items-center justify-center rounded-[6px] p-1 text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+              className="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-[6px] p-1 text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
               aria-label={backLabel}
               title={backLabel}
             >

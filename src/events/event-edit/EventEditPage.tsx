@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { PageEditorMediaProvider } from "@/materials/material/components/PageEditorMediaContext";
 import { PageFormActions } from "@/ui/PageFormActions";
 import { PageLoading } from "@/ui/PageLoading";
+import { staffPreviewActionHint } from "@/app/layouts/model/viewMode";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { EventFormFields } from "./components/EventFormFields";
 import { EventMaterialsField } from "./components/EventMaterialsField";
@@ -16,6 +18,7 @@ const PageContentEditor = lazy(async () => {
 export function EventEditPage() {
   const page = useEventEdit();
   const user = useAuthedUser();
+  const { role } = useOrgShell();
 
   useEffect(() => {
     document.title = page.isNew
@@ -37,7 +40,7 @@ export function EventEditPage() {
           Events
         </h1>
         <p className="mt-2 text-[14.5px] text-[var(--ink-soft)]">
-          Switch to Teacher view to add or edit an event.
+          {staffPreviewActionHint(role, "add or edit an event")}
         </p>
       </div>
     );

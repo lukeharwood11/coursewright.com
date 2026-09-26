@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { OrgRole } from "@/organizations/model/role";
 import {
   parseStaffViewMode,
   resolveStaffViewMode,
@@ -46,9 +47,14 @@ export const useStaffViewStore = create<ViewModeStore>((set) => ({
 
 export function useStaffViewMode(
   orgSlug: string | undefined,
-  flags: { isParent: boolean; isStudent: boolean } = {
+  flags: {
+    isParent: boolean;
+    isStudent: boolean;
+    role?: OrgRole | null;
+  } = {
     isParent: false,
     isStudent: false,
+    role: null,
   },
 ): {
   staffViewMode: StaffViewMode;
@@ -64,6 +70,7 @@ export function useStaffViewMode(
   const staffViewMode = resolveStaffViewMode(
     typeof raw === "string" ? raw : parseStaffViewMode(raw),
     flags,
+    flags.role,
   );
 
   return {

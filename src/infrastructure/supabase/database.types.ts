@@ -3902,6 +3902,13 @@ export type Database = {
         Returns: Json
       }
       claim_invite: { Args: { p_token: string }; Returns: string }
+      remove_parent_from_student: {
+        Args: {
+          p_student_profile_id: number
+          p_parent_org_profile_id: number
+        }
+        Returns: undefined
+      }
       claim_push_subscription: {
         Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
         Returns: undefined

@@ -1,3 +1,4 @@
+import { CheckIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { ORG_FEATURE_OPTIONS } from "@/organizations/model/features";
@@ -87,6 +88,7 @@ export function CustomizationsSection({
                 onClick={customizations.onSave}
                 disabled={!customizations.hasChanges || customizations.saving}
               >
+                <CheckIcon className="h-4 w-4" aria-hidden />
                 {customizations.saving ? "Saving…" : "Save customizations"}
               </Button>
             </div>

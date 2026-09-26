@@ -2,6 +2,18 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { inviteCreatedMessage, inviteEmailResultMessage } from "./staffInvite";
 
+test("inviteCreatedMessage leaves sending the invite for later when the profile is just added", () => {
+  assert.equal(
+    inviteCreatedMessage({
+      recipientEmail: "alex@example.com",
+      emailSent: false,
+      linkCopied: false,
+      addedWithoutInviteEmail: true,
+    }),
+    "Added. Send an invite when you’re ready.",
+  );
+});
+
 test("inviteCreatedMessage celebrates a sent email without a copied link", () => {
   assert.equal(
     inviteCreatedMessage({

@@ -17,13 +17,12 @@ import {
   listOrgPendingInvites,
   listOrgStaff,
   staffInviteQueryKeys,
-  updateOrgPersonContact,
   type OrgStaffMember,
   type PendingStaffInvite,
 } from "@/organizations/databridge/staffInvites";
 import {
   canInviteStaff,
-  canManageStaff,
+  defaultStaffInviteRole,
   inviteableStaffRoles,
   parseAssignableMembershipRole,
   roleLabel,
@@ -49,8 +48,6 @@ export type StaffMemberRow = OrgStaffMember & {
   isYou: boolean;
   canChangeRole: boolean;
   canRemove: boolean;
-  canEditOrgName: boolean;
-  canEditOrgEmail: boolean;
   changeRoles: AssignableMembershipRole[];
   lastManagerGuard: boolean;
   releaseTo: "parent" | "student" | null;
@@ -61,19 +58,17 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const canInvite = role ? canInviteStaff(role) : false;
-  const canManage = role ? canManageStaff(role) : false;
   const roles = role ? inviteableStaffRoles(role) : [];
 
   const [email, setEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<StaffInviteRole>("observer");
+  const [name, setName] = useState("");
+  const [inviteRole, setInviteRole] = useState<StaffInviteRole>("instructor");
   const [formError, setFormError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
-  const [lastInviteId, setLastInviteId] = useState<number | null>(null);
-  const [lastInviteSent, setLastInviteSent] = useState(false);
 
   const selectedRole = roles.includes(inviteRole)
     ? inviteRole
-    : (roles[0] ?? "observer");
+    : defaultStaffInviteRole(roles);
 
   const staffQuery = useQuery({
     queryKey: staffInviteQueryKeys.staff(organizationId ?? 0),
@@ -106,6 +101,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     mutationFn: async () => {
       if (!role) throw new Error("You don’t have permission to invite collaborators.");
       const parsed = validateCreateStaffInvite({
+        name,
         email,
         role: selectedRole,
         actorRole: role,
@@ -113,21 +109,23 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
       if (!parsed.ok) throw new Error(parsed.error);
       return createStaffInvite({
         organizationId: organizationId!,
+        name: parsed.value.name,
         email: parsed.value.email,
         role: parsed.value.role,
         invitedBy: user.id,
       });
     },
-    onSuccess: async ({ invite, email: emailStatus }) => {
+    onSuccess: async ({ invite }) => {
       setEmail("");
+      setName("");
+      setInviteRole("instructor");
       setFormError(null);
-      setLastInviteId(invite.id);
-      setLastInviteSent(emailStatus.sent);
       toast(
         inviteCreatedMessage({
           recipientEmail: invite.email,
-          emailSent: emailStatus.sent,
+          emailSent: false,
           linkCopied: false,
+          addedWithoutInviteEmail: true,
         }),
       );
       await queryClient.invalidateQueries({
@@ -159,8 +157,6 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     mutationFn: (invite: PendingStaffInvite) => cancelStaffInvite(invite.id),
     onSuccess: async () => {
       toast("Invite canceled.");
-      setLastInviteId(null);
-      setLastInviteSent(false);
       await queryClient.invalidateQueries({
         queryKey: staffInviteQueryKeys.org(organizationId ?? 0),
       });
@@ -255,41 +251,13 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     },
   });
 
-  const contactMutation = useMutation({
-    mutationFn: async (input: { member: StaffMemberRow; name: string; email?: string }) => {
-      if (input.member.orgProfileId == null) {
-        throw new Error("That person doesn’t have an organization profile yet.");
-      }
-      await updateOrgPersonContact({
-        orgProfileId: input.member.orgProfileId,
-        name: input.name,
-        email: input.member.canEditOrgEmail ? input.email : undefined,
-      });
-    },
-    onSuccess: async () => {
-      await invalidateStaff();
-      toast("Name saved.");
-    },
-    onError: (error: Error) => {
-      toastCaughtError(error);
-    },
-  });
   const pending = pendingQuery.data ?? [];
-  const lastInvite = pending.find((invite) => invite.id === lastInviteId) ?? null;
 
   const rows: StaffMemberRow[] = members.map((member) => {
     const actions = staffMemberActions({ actorRole: role, member, members });
-    const selfStaff =
-      member.userId === user.id &&
-      (member.role === "owner" ||
-        member.role === "admin" ||
-        member.role === "instructor" ||
-        member.role === "observer");
     return {
       ...member,
       isYou: member.userId === user.id,
-      canEditOrgName: member.orgProfileId != null && (canManage || selfStaff),
-      canEditOrgEmail: member.orgProfileId != null && canManage,
       ...actions,
     };
   });
@@ -319,7 +287,6 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
 
   return {
     canInvite,
-    canManage,
     roles,
     loading: staffQuery.isLoading || (canInvite && pendingQuery.isLoading),
     loadError: staffQuery.error
@@ -329,6 +296,7 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
         : null,
     members: rows,
     pending,
+    name,
     email,
     role: selectedRole,
     formError,
@@ -346,10 +314,10 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     removingId: removeMutation.isPending
       ? (removeMutation.variables?.membershipId ?? null)
       : null,
-    savingContactId: contactMutation.isPending
-      ? (contactMutation.variables?.member.membershipId ?? null)
-      : null,
-    lastInviteSent: Boolean(lastInvite && lastInviteSent),
+    onNameChange: (value: string) => {
+      setName(value);
+      setFormError(null);
+    },
     onEmailChange: (value: string) => {
       setEmail(value);
       setFormError(null);
@@ -364,7 +332,5 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     onCancel: (invite: PendingStaffInvite) => cancelMutation.mutate(invite),
     onChangeRole,
     onRemove: (member: OrgStaffMember) => removeMutation.mutate(member),
-    onSaveContact: (member: StaffMemberRow, name: string, email?: string) =>
-      contactMutation.mutate({ member, name, email }),
   };
 }

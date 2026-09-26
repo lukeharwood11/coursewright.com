@@ -1,5 +1,6 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { CheckIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { Input } from "@/ui/Input";
@@ -17,6 +18,7 @@ import { GRADE_SCHEMES } from "@/organizations/model/gradeScheme";
 import { WeekdayCircleToggles } from "@/organizations/components/WeekdayCircleToggles";
 import { normalizeHomeDays, type HomeDay } from "@/organizations/model/homeDays";
 import { type SchoolDay } from "@/organizations/model/schoolDays";
+import { NewPill } from "@/ui/NewPill";
 import { Tab, TabList } from "@/ui/Tabs";
 import type { OrgSettingsTabId } from "./OrgSettingsNav";
 
@@ -100,6 +102,7 @@ function SectionSave({
   return (
     <div className="mt-5">
       <Button type="submit" disabled={!hasChanges || saving}>
+        <CheckIcon className="h-4 w-4" aria-hidden />
         {saving ? "Saving…" : label}
       </Button>
     </div>
@@ -219,7 +222,10 @@ function OrganizationSection({
             School days
           </Tab>
           <Tab selected={weekdayTab === "home"} onSelect={() => setWeekdayTab("home")}>
-            Home days
+            <span className="inline-flex items-center gap-1.5">
+              Home days
+              <NewPill />
+            </span>
           </Tab>
         </TabList>
         <div className="mt-3 flex items-center gap-1.5">

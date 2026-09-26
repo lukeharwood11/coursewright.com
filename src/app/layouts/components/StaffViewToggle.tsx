@@ -1,3 +1,4 @@
+import type { OrgRole } from "@/organizations/model/role";
 import {
   availableStaffViewModes,
   parseStaffViewMode,
@@ -11,13 +12,15 @@ export function StaffViewToggle({
   onChange,
   isParent,
   isStudent,
+  staffRole,
 }: {
   mode: StaffViewMode;
   onChange: (mode: StaffViewMode) => void;
   isParent: boolean;
   isStudent: boolean;
+  staffRole: OrgRole;
 }) {
-  const options = availableStaffViewModes({ isParent, isStudent });
+  const options = availableStaffViewModes({ isParent, isStudent, staffRole });
   const useMobileSelect = options.length >= 3;
 
   return (

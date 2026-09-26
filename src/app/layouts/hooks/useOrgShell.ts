@@ -38,6 +38,7 @@ import {
   canUseStaffViewToggle,
   familyVisibleCourses,
   staffShowsParentPresentation,
+  staffWriterInPreviewMode,
 } from "../model/viewMode";
 import type { AppShellValue } from "../OrgShellContext";
 import { useStaffViewMode } from "../stores/viewMode";
@@ -67,9 +68,11 @@ export function useOrgShellData(orgSlug: string | undefined) {
 
   const isParent = Boolean(membershipQuery.data?.isParent);
   const isStudent = Boolean(membershipQuery.data?.isStudent);
+  const roleEarly = membershipQuery.data?.role ?? null;
   const { staffViewMode, setStaffViewMode } = useStaffViewMode(orgSlug, {
     isParent,
     isStudent,
+    role: roleEarly,
   });
 
   const profileQuery = useQuery({
@@ -110,7 +113,9 @@ export function useOrgShellData(orgSlug: string | undefined) {
   const taughtCoursesQuery = useQuery({
     queryKey: parentQueryKeys.taughtCourses(organizationId ?? 0, user.id),
     queryFn: () => listTaughtPublishedCourses(organizationId!, user.id),
-    enabled: Boolean(organizationId) && browsesStaff && staffViewMode === "preview",
+    enabled:
+      Boolean(organizationId) &&
+      staffWriterInPreviewMode(role, staffViewMode),
   });
 
   const classesQuery = useQuery({
@@ -164,7 +169,7 @@ export function useOrgShellData(orgSlug: string | undefined) {
     ? familyVisibleCourses(courseRows)
     : courseRows;
 
-  if (staffViewMode === "preview" && browsesStaff) {
+  if (staffWriterInPreviewMode(role, staffViewMode)) {
     const taughtIds = new Set((taughtCoursesQuery.data ?? []).map((row) => row.id));
     navCourses = familyVisibleCourses(courseRows).filter((course) =>
       taughtIds.has(course.id),
@@ -229,7 +234,7 @@ export function useOrgShellData(orgSlug: string | undefined) {
     unreadAnnouncements,
     unreadDiscussions,
     showResources: Boolean(visibleResourcesQuery.data),
-    showProgress: !(browsesStaff && staffViewMode === "preview"),
+    showProgress: !staffWriterInPreviewMode(role, staffViewMode),
   };
   const staffChrome = browsesStaff && !parentPresentation;
   const navSections =

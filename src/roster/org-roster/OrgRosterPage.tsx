@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { PlusIcon, UserPlusIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
+import {
+  CheckIcon,
+  Cog6ToothIcon,
+  PlusIcon,
+  TrashIcon,
+  UserPlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { canEditGradingScale, studentsHubTier } from "@/grading/model/access";
 import { gradingSettingsPath, progressPath } from "@/grading/model/paths";
@@ -210,6 +217,7 @@ export function OrgRosterPage() {
                           onClick={() => setPendingRemove(student)}
                           disabled={roster.removingId === student.id}
                         >
+                          <TrashIcon className="h-5 w-5" aria-hidden />
                           {roster.removingId === student.id ? "Removing…" : "Remove"}
                         </Button>
                       )
@@ -263,6 +271,7 @@ export function OrgRosterPage() {
                 disabled={roster.creatingClass}
               />
               <Button type="submit" disabled={roster.creatingClass}>
+                <CheckIcon className="h-5 w-5" aria-hidden />
                 {roster.creatingClass ? "Creating…" : "Create"}
               </Button>
               <Button
@@ -271,6 +280,7 @@ export function OrgRosterPage() {
                 disabled={roster.creatingClass}
                 onClick={roster.closeCreateClass}
               >
+                <XMarkIcon className="h-5 w-5" aria-hidden />
                 Cancel
               </Button>
             </form>

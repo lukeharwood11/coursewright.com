@@ -6,15 +6,15 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 
 - Org picker (`/my`) and org home (`/my/<org-slug>`)
 - Create organization; org settings (`/my/<org-slug>/settings`)
-- Org-visible **user profiles** (`/my/<org-slug>/people/<user_id>`) + reusable `user-card/`
+- Org-visible **person profiles** (`/my/<org-slug>/people/<org_profile_id>`; UUID URLs redirect here) + reusable `user-card/`. Always `org_profiles`, never Auth `profiles`. Owners and admins edit org name and contact email there; staff may edit their own org name.
 - **Permalink `slug`** — generated on create; changing it must warn that existing links break
 - Grade scheme (K–12 / Custom / **None**) and organization type (other / co-op / school / family; default **other**)
 - **Grading** tab (`?tab=grading`) is the org score scale (`none` / letter / pass/fail). Owners and admins save it. It is not `grade_scheme` / `grade_labels`. UI lives in `src/grading/`
 - Optional org **profile** (about, address, website, contact email, phone) on `/my/<org-slug>/profile` for all members; owners edit via org settings
 - **School days** (default Mon–Fri) and optional **home days** (default none) — owners/admins edit via **School days / Home days** tabs in org settings; lesson-plan compose defaults to school days; calendar and lesson plans show school/home icons on matching weekdays
-- Admin invites (email via Resend `organization-invite` + copyable claim link)
+- Admin invites (create the org profile first; email via Resend `organization-invite` and copyable claim link when ready)
 - Parent invites use the **same** `/invite/<token>` claim path (`role = parent`); student invites use that path with `role = student`. Create UI lives in `roster/`. The claim page loads unsigned so the invited email is obvious before signup/login.
-- **Collaborators** (staff membership) — one exclusive role (owner, admin, instructor, or observer) plus additive parent and student flags. **Observer** is view-only staff: staff chrome, org-wide read, no writes or invites. Promote a parent by adding an exclusive role; parent stays. Newest exclusive replaces the previous one. Removing the exclusive role leaves parent or student. **Students are not in this list** and cannot be promoted here. Not the last owner or admin (observer does not count). **Membership table only** — do not wire staff role into materials/roster RLS
+- **Collaborators** (staff membership) — add a person (name, email, role; default **instructor**) without sending email; send or copy the invite later. Change exclusive roles (owner, admin, instructor, or observer) plus additive parent and student flags. **Observer** is view-only staff: staff chrome, org-wide read, no writes or invites. Promote a parent by adding an exclusive role; parent stays. Newest exclusive replaces the previous one. Removing the exclusive role leaves parent or student. **Students are not in this list** and cannot be promoted here. Not the last owner or admin (observer does not count). Name and contact email are edited on the person’s org profile, not here. **Membership table only** — do not wire staff role into materials/roster RLS
 - Not: course builder, roster details (those are sibling domains)
 
 ## Rules

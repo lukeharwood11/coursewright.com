@@ -8,6 +8,7 @@ import {
   canManageBranding,
   canManageCustomizations,
   canManageOrgSettings,
+  defaultStaffInviteRole,
   inviteableStaffRoles,
   isStaffRole,
   OBSERVER_VIEW_ONLY_LABEL,
@@ -42,6 +43,14 @@ test("observer browses as staff and cannot write, invite, or manage billing", ()
   assert.deepEqual(inviteableStaffRoles("admin"), ["observer", "instructor", "admin"]);
   assert.deepEqual(inviteableStaffRoles("instructor"), []);
   assert.deepEqual(inviteableStaffRoles("observer"), []);
+  assert.equal(
+    defaultStaffInviteRole(inviteableStaffRoles("owner")),
+    "instructor",
+  );
+  assert.equal(
+    defaultStaffInviteRole(inviteableStaffRoles("admin")),
+    "instructor",
+  );
 });
 
 test("branding and customizations are owner-only", () => {

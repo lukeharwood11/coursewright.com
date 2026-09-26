@@ -50,6 +50,7 @@ export async function listStudents(
     .from("org_profiles")
     .select(STUDENT_COLUMNS)
     .eq("organization_id", organizationId)
+    .eq("counts_as_student", true)
     .order("name");
 
   if (error) throw new Error(error.message);
@@ -62,6 +63,7 @@ export async function getStudent(id: number): Promise<StudentSummary | null> {
     .from("org_profiles")
     .select(STUDENT_COLUMNS)
     .eq("id", id)
+    .eq("counts_as_student", true)
     .maybeSingle();
 
   if (error) throw new Error(error.message);
@@ -145,6 +147,7 @@ export async function deleteStudent(id: number): Promise<void> {
     .from("org_profiles")
     .delete()
     .eq("id", id)
+    .eq("counts_as_student", true)
     .select("id")
     .maybeSingle();
 

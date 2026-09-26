@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { MegaphoneIcon } from "@heroicons/react/24/outline";
+import { MegaphoneIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
@@ -83,6 +83,7 @@ export function StudentProfilePage() {
   }
 
   const base = `/my/${profile.organization.slug}`;
+  const showGradeForm = profile.gradeLabels.length > 0;
 
   return (
     <div>
@@ -111,14 +112,17 @@ export function StudentProfilePage() {
               disabled={profile.removing}
               onClick={() => setConfirmRemove(true)}
             >
+              <TrashIcon className="h-5 w-5" aria-hidden />
               {profile.removing ? "Removing…" : "Remove"}
             </Button>
-            <PageFormActions
-              formId={STUDENT_PROFILE_FORM_ID}
-              saving={profile.saving}
-              hasChanges={profile.hasChanges}
-              cancelTo={studentsPath(profile.organization.slug)}
-            />
+            {showGradeForm ? (
+              <PageFormActions
+                formId={STUDENT_PROFILE_FORM_ID}
+                saving={profile.saving}
+                hasChanges={profile.hasChanges}
+                cancelTo={studentsPath(profile.organization.slug)}
+              />
+            ) : null}
           </>
           ) : null
         }
@@ -127,53 +131,11 @@ export function StudentProfilePage() {
       <StudentGradesSection studentId={profile.student.id} />
       {canEdit ? (
       <>
-      <form
-        id={STUDENT_PROFILE_FORM_ID}
-        className="max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5"
-        onSubmit={profile.onSubmit}
-      >
-        <StudentProfileFields
-          name={profile.name}
-          parentEmail={profile.student.parentEmail ?? ""}
-          studentEmail={profile.studentEmail}
-          gradeLevel={profile.gradeLevel}
-          gradeLabels={profile.gradeLabels}
-          disabled={profile.saving}
-          showParentEmail={false}
-          onNameChange={profile.setName}
-          onParentEmailChange={() => undefined}
-          onStudentEmailChange={profile.setStudentEmail}
-          onGradeLevelChange={profile.setGradeLevel}
-        />
-        {profile.formError ? (
-          <p className="mt-3 text-[13px] text-[var(--amber-deep)]" role="alert">
-            {profile.formError}
-          </p>
-        ) : null}
-      </form>
-
-      <ParentInvitePanel
-        parentEmail={profile.student.parentEmail}
-        canInvite={parentInvite.canInvite}
-        loading={parentInvite.loading}
-        loadError={parentInvite.loadError}
-        pending={parentInvite.pending}
-        linked={parentInvite.linked}
-        addEmail={parentInvite.addEmail}
-        invitingEmail={parentInvite.invitingEmail}
-        cancelingId={parentInvite.cancelingId}
-        sendingId={parentInvite.sendingId}
-        copiedId={parentInvite.copiedId}
-        origin={parentInvite.origin}
-        orgMemberForEmail={parentInvite.orgMemberForEmail}
-        onAddEmailChange={parentInvite.setAddEmail}
-        onInvite={parentInvite.onInvite}
-        onCopy={parentInvite.onCopy}
-        onSendEmail={parentInvite.onSendEmail}
-        onCancel={parentInvite.onCancel}
-      />
-
       <StudentInvitePanel
+        orgSlug={profile.organization.slug}
+        studentOrgProfileId={profile.student.id}
+        displayName={profile.student.name}
+        contactEmail={profile.student.studentEmail}
         studentEmail={profile.student.studentEmail}
         canInvite={studentInvite.canInvite}
         loading={studentInvite.loading}
@@ -188,6 +150,63 @@ export function StudentProfilePage() {
         onCopy={studentInvite.onCopy}
         onSendEmail={studentInvite.onSendEmail}
         onCancel={studentInvite.onCancel}
+      />
+
+      {showGradeForm ? (
+        <form
+          id={STUDENT_PROFILE_FORM_ID}
+          className="max-w-xl rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5"
+          onSubmit={profile.onSubmit}
+        >
+          <StudentProfileFields
+            name={profile.student.name}
+            parentEmail={profile.student.parentEmail ?? ""}
+            studentEmail={profile.student.studentEmail ?? ""}
+            gradeLevel={profile.gradeLevel}
+            gradeLabels={profile.gradeLabels}
+            disabled={profile.saving}
+            showParentEmail={false}
+            showIdentityFields={false}
+            onNameChange={() => undefined}
+            onParentEmailChange={() => undefined}
+            onStudentEmailChange={() => undefined}
+            onGradeLevelChange={profile.setGradeLevel}
+          />
+          {profile.formError ? (
+            <p className="mt-3 text-[13px] text-[var(--amber-deep)]" role="alert">
+              {profile.formError}
+            </p>
+          ) : null}
+        </form>
+      ) : null}
+
+      <ParentInvitePanel
+        orgSlug={profile.organization.slug}
+        parentEmail={profile.student.parentEmail}
+        canInvite={parentInvite.canInvite}
+        loading={parentInvite.loading}
+        loadError={parentInvite.loadError}
+        pending={parentInvite.pending}
+        linked={parentInvite.linked}
+        addName={parentInvite.addName}
+        addEmail={parentInvite.addEmail}
+        addingParent={parentInvite.addingParent}
+        invitingEmail={parentInvite.invitingEmail}
+        removingParentOrgProfileId={parentInvite.removingParentOrgProfileId}
+        cancelingId={parentInvite.cancelingId}
+        sendingId={parentInvite.sendingId}
+        copiedId={parentInvite.copiedId}
+        origin={parentInvite.origin}
+        pendingInviteForEmail={parentInvite.pendingInviteForEmail}
+        onAddNameChange={parentInvite.setAddName}
+        onAddEmailChange={parentInvite.setAddEmail}
+        onAddParent={parentInvite.onAddParent}
+        onAddSavedParentEmail={parentInvite.onAddSavedParentEmail}
+        onInvite={parentInvite.onInvite}
+        onRemove={parentInvite.onRemove}
+        onCopy={parentInvite.onCopy}
+        onSendEmail={parentInvite.onSendEmail}
+        onCancel={parentInvite.onCancel}
       />
       </>
       ) : null}

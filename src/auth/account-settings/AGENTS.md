@@ -15,3 +15,4 @@ Page UI in `AccountSettingsPage.tsx` + `components/`; React wiring in `hooks/`; 
 
 - Upload avatars or manage Google link in P0
 - Edit org identity, staff, or billing here — that is `organizations/org-settings/`
+- Edit in-org name or contact email here — that is the org person profile (`organizations/user-profile/`)

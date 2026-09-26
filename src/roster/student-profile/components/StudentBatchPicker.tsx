@@ -1,4 +1,9 @@
 import { useState } from "react";
+import {
+  CheckIcon,
+  UserPlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import type { StudentSummary } from "@/roster/databridge/students";
 import { studentMatchesQuery } from "@/roster/model/studentProfile";
 import { Button } from "@/ui/Button";
@@ -107,6 +112,7 @@ export function StudentBatchPicker({
           disabled={saving || filteredIds.length === 0 || allFilteredSelected}
           onClick={() => onSelectFiltered(filteredIds)}
         >
+          <CheckIcon className="h-5 w-5" aria-hidden />
           Select all{query.trim() ? " matching" : ""}
         </Button>
         <Button
@@ -115,6 +121,7 @@ export function StudentBatchPicker({
           disabled={saving || selectedIds.length === 0}
           onClick={onClear}
         >
+          <XMarkIcon className="h-5 w-5" aria-hidden />
           Clear
         </Button>
       </div>
@@ -166,6 +173,7 @@ export function StudentBatchPicker({
           disabled={saving || selectedIds.length === 0}
           onClick={onConfirm}
         >
+          <UserPlusIcon className="h-5 w-5" aria-hidden />
           {saving ? "Saving…" : confirmLabel(selectedIds.length)}
         </Button>
       </div>

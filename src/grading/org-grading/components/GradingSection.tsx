@@ -1,3 +1,4 @@
+import { CheckIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { useToastOnError } from "@/ui/useToastOnError";
@@ -88,6 +89,7 @@ export function GradingSection() {
           {grading.canEdit ? (
             <div className="mt-5">
               <Button type="button" disabled={grading.saving} onClick={grading.onSave}>
+                <CheckIcon className="h-4 w-4" aria-hidden />
                 {grading.saving ? "Saving…" : "Save grading"}
               </Button>
             </div>

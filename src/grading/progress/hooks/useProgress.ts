@@ -15,6 +15,7 @@ async function getOwnStudent(organizationId: number, userId: string): Promise<St
     .select(STUDENT_COLUMNS)
     .eq("organization_id", organizationId)
     .eq("user_id", userId)
+    .eq("counts_as_student", true)
     .maybeSingle();
   if (error) throw new Error(error.message);
   return data ? toStudentSummary(data) : null;

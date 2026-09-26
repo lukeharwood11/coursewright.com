@@ -30,12 +30,18 @@ export function staffInviteUrl(origin: string, token: string): string {
 }
 
 export function validateCreateStaffInvite(input: {
+  name: string;
   email: string;
   role: string;
   actorRole: OrgRole;
 }):
-  | { ok: true; value: { email: string; role: StaffInviteRole } }
+  | { ok: true; value: { name: string; email: string; role: StaffInviteRole } }
   | { ok: false; error: string } {
+  const name = input.name.trim();
+  if (!name) {
+    return { ok: false, error: "Enter a name." };
+  }
+
   const email = normalizeInviteEmail(input.email);
   if (!isValidInviteEmail(email)) {
     return { ok: false, error: "Enter a valid email address." };
@@ -56,7 +62,7 @@ export function validateCreateStaffInvite(input: {
     };
   }
 
-  return { ok: true, value: { email, role } };
+  return { ok: true, value: { name, email, role } };
 }
 
 export function validateCreateParentInvite(input: {
@@ -78,6 +84,7 @@ export function inviteCreatedMessage(input: {
   attached?: boolean;
   linked?: boolean;
   linkedParentName?: string;
+  addedWithoutInviteEmail?: boolean;
 }): string {
   if (input.linked) {
     const name = input.linkedParentName?.trim() || input.recipientEmail;
@@ -85,6 +92,9 @@ export function inviteCreatedMessage(input: {
   }
   if (input.attached) {
     return "Already invited — this student was added to the existing invite.";
+  }
+  if (input.addedWithoutInviteEmail) {
+    return "Added. Send an invite when you’re ready.";
   }
   if (input.emailSent) {
     return "Email invite sent!";

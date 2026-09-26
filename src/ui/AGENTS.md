@@ -4,7 +4,7 @@ Design-system primitives from [STYLE_GUIDE.md](../../docs/STYLE_GUIDE.md).
 
 ## Scope
 
-- Button, ButtonLink, Input, Select, Wordmark, Badge, PublishedBadge, Avatar, PageFormActions (optional desktop **Save & close**; optional **Close** when unchanged), ConfirmDialog, DescriptionDialog (Add / Edit description on editor headers), InfoHint, **ListCardLink** (shared feed-row card chrome for announcements / discussions), **PageLoading** (animated mark + optional label), **TabList** / **Tab** / **SegmentGroup** / **SegmentButton** (segmented control — same pattern as Resources All / Documents / Files / Links)
+- Button, ButtonLink, Input, Select, Wordmark, Badge, **NewPill** (recently shipped surfaces), PublishedBadge, Avatar, PageFormActions (optional desktop **Save & close**; optional **Close** when unchanged), ConfirmDialog, DescriptionDialog (Add / Edit description on editor headers), InfoHint, **ListCardLink** (shared feed-row card chrome for announcements / discussions), **PageLoading** (animated mark + optional label), **TabList** / **Tab** / **SegmentGroup** / **SegmentButton** (segmented control — same pattern as Resources All / Documents / Files / Links)
 - **DetailPageHeader** — shared detail-screen chrome (surface bar, compact title + inline back, meta, actions)
 - **VerticalReorderList** / **DragHandle** — Framer Motion drag-to-reorder lists (handle-only drag so links stay clickable)
 - `AnchoredPopup` — viewport-aware menus / tooltips (flip and stay in frame)

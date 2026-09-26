@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
 import { useToastOnError } from "@/ui/useToastOnError";
@@ -51,6 +52,7 @@ export function AccountSettingsPage() {
           onClick={account.onSignOut}
           disabled={account.signingOut}
         >
+          <ArrowRightOnRectangleIcon className="h-4 w-4" aria-hidden />
           {account.signingOut ? "Signing out…" : "Sign out"}
         </Button>
       </div>

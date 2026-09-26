@@ -18,7 +18,7 @@ export function InfoHint({
       <button
         ref={buttonRef}
         type="button"
-        className="inline-flex rounded-full text-[var(--ink-faint)] hover:text-[var(--ink-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
+        className="inline-flex cursor-pointer rounded-full text-[var(--ink-faint)] hover:text-[var(--ink-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
         aria-label={label}
         aria-expanded={open}
         aria-controls={tooltipId}

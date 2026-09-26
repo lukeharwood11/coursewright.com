@@ -16,6 +16,8 @@ export type NavSection = {
   soon?: boolean;
   /** Unread count badge. Hidden when 0 / unset. */
   badgeCount?: number;
+  /** Show the shared “New” pill beside the label (expanded sidebar only). */
+  featureNew?: boolean;
   children: NavLinkItem[];
 };
 
@@ -150,6 +152,7 @@ export function buildStaffNav(
       label: "Resources",
       href: `${base}/resources`,
       match: "prefix",
+      featureNew: true,
       children: [],
     });
   }
@@ -247,6 +250,7 @@ export function buildParentNav(
       label: "Resources",
       href: `${base}/resources`,
       match: "prefix",
+      featureNew: true,
       children: [],
     });
   }
@@ -341,6 +345,7 @@ export function buildLearnerNav(
       label: "Resources",
       href: `${base}/resources`,
       match: "prefix",
+      featureNew: true,
       children: [],
     });
   }

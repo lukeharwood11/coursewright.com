@@ -10,11 +10,11 @@ import { StaffMemberList } from "./StaffMemberList";
 export function StaffSection({
   orgSlug,
   canInvite,
-  canManage,
   loading,
   loadError,
   members,
   pending,
+  name,
   email,
   role,
   roles,
@@ -25,8 +25,7 @@ export function StaffSection({
   cancelingId,
   changingId,
   removingId,
-  savingContactId,
-  lastInviteSent,
+  onNameChange,
   onEmailChange,
   onRoleChange,
   onInvite,
@@ -35,15 +34,14 @@ export function StaffSection({
   onCancel,
   onChangeRole,
   onRemove,
-  onSaveContact,
 }: {
   orgSlug: string;
   canInvite: boolean;
-  canManage: boolean;
   loading: boolean;
   loadError: string | null;
   members: StaffMemberRow[];
   pending: PendingStaffInvite[];
+  name: string;
   email: string;
   role: StaffInviteRole;
   roles: StaffInviteRole[];
@@ -54,8 +52,7 @@ export function StaffSection({
   cancelingId: number | null;
   changingId: number | null;
   removingId: number | null;
-  savingContactId: number | null;
-  lastInviteSent: boolean;
+  onNameChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onRoleChange: (value: StaffInviteRole) => void;
   onInvite: (event: FormEvent) => void;
@@ -64,18 +61,12 @@ export function StaffSection({
   onCancel: (invite: PendingStaffInvite) => void;
   onChangeRole: (member: StaffMemberRow, nextRole: string) => void;
   onRemove: (member: StaffMemberRow) => void;
-  onSaveContact: (member: StaffMemberRow, name: string, email?: string) => void;
 }) {
   useToastOnError(loadError);
 
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
       <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Collaborators</h2>
-      <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink-soft)]">
-        {canManage
-          ? "Invite someone new, or change roles below. Promoting a parent adds observer, instructor, admin, or owner and keeps parent. Students are not in this list."
-          : "Owners, admins, instructors, observers, and parents in this organization."}
-      </p>
 
       {loading ? (
         <p className="mt-3 text-[14px] text-[var(--ink-soft)]">Loading collaborators…</p>
@@ -87,36 +78,31 @@ export function StaffSection({
           members={members}
           changingId={changingId}
           removingId={removingId}
-          savingContactId={savingContactId}
           onChangeRole={onChangeRole}
           onRemove={onRemove}
-          onSaveContact={onSaveContact}
         />
       ) : null}
 
       {canInvite ? (
         <>
-          <InviteStaffForm
-            email={email}
-            role={role}
-            roles={roles}
-            error={formError}
-            submitting={inviting}
-            onEmailChange={onEmailChange}
-            onRoleChange={onRoleChange}
-            onSubmit={onInvite}
-          />
-
-          {lastInviteSent ? (
-            <div className="mt-4 rounded-[10px] border border-[var(--green)] bg-[var(--green-tint)] p-3">
-              <p className="text-[13.5px] font-bold text-[var(--green-deep)]">
-                Email invite sent!
-              </p>
-            </div>
-          ) : null}
+          <div className="mt-2 border-t border-[var(--line-soft)] pt-5">
+            <InviteStaffForm
+              name={name}
+              email={email}
+              role={role}
+              roles={roles}
+              error={formError}
+              submitting={inviting}
+              onNameChange={onNameChange}
+              onEmailChange={onEmailChange}
+              onRoleChange={onRoleChange}
+              onSubmit={onInvite}
+            />
+          </div>
 
           <h3 className="mt-6 text-[13px] font-bold text-[var(--ink-soft)]">Pending invites</h3>
           <PendingInviteList
+            orgSlug={orgSlug}
             invites={pending}
             copiedId={copiedId}
             sendingId={sendingId}

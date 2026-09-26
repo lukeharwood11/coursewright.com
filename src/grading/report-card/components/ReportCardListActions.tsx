@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowPathIcon,
+  ArrowTopRightOnSquareIcon,
   EllipsisHorizontalIcon,
   TableCellsIcon,
   TrashIcon,
@@ -83,6 +84,7 @@ export function ReportCardListActions({
     <>
       <span className="inline-flex items-center gap-2">
         <ButtonLink variant="secondary" to={reportCardPath(orgSlug, card.id)}>
+          <ArrowTopRightOnSquareIcon className="h-5 w-5" aria-hidden />
           {openLabel}
         </ButtonLink>
         {canManage ? (

@@ -17,9 +17,9 @@ const variantClass: Record<Variant, string> = {
 
 function buttonClassName(variant: Variant, fullWidth: boolean | undefined, extra?: string) {
   return [
-    "inline-flex items-center justify-center gap-2 rounded-[6px] border px-3 py-[11px] text-[13px] font-bold transition-colors",
+    "inline-flex cursor-pointer items-center justify-center gap-2 rounded-[6px] border px-3 py-[11px] text-[13px] font-bold transition-colors",
     "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]",
-    "disabled:pointer-events-none disabled:opacity-60",
+    "disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-60",
     "motion-reduce:transition-none",
     fullWidth ? "w-full" : "",
     variantClass[variant],

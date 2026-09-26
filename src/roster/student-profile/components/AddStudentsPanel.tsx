@@ -6,6 +6,7 @@ import {
   StudentBatchPicker,
   type ClassPresetOption,
 } from "@/roster/student-profile/components/StudentBatchPicker";
+import { UserPlusIcon, UsersIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 
 type PanelTab = "existing" | "new";
@@ -93,6 +94,7 @@ export function AddStudentsPanel({
           ) : null}
         </div>
         <Button type="button" variant="secondary" onClick={onClose}>
+          <XMarkIcon className="h-5 w-5" aria-hidden />
           Close
         </Button>
       </div>
@@ -103,6 +105,7 @@ export function AddStudentsPanel({
           variant={tab === "existing" ? "primary" : "secondary"}
           onClick={() => onTabChange("existing")}
         >
+          <UsersIcon className="h-5 w-5" aria-hidden />
           From roster
         </Button>
         <Button
@@ -110,6 +113,7 @@ export function AddStudentsPanel({
           variant={tab === "new" ? "primary" : "secondary"}
           onClick={() => onTabChange("new")}
         >
+          <UserPlusIcon className="h-5 w-5" aria-hidden />
           New students
         </Button>
       </div>

@@ -1,4 +1,10 @@
 import type { FormEvent } from "react";
+import {
+  ClipboardDocumentListIcon,
+  MinusIcon,
+  PlusIcon,
+  UserPlusIcon,
+} from "@heroicons/react/24/outline";
 import type { NewStudentDraft } from "@/roster/model/studentProfile";
 import { Button } from "@/ui/Button";
 import { StudentProfileFields } from "@/roster/student-profile/components/StudentProfileFields";
@@ -68,6 +74,7 @@ export function BatchCreateStudentsForm({
           disabled={saving || !pasteText.trim()}
           onClick={onApplyPaste}
         >
+          <ClipboardDocumentListIcon className="h-5 w-5" aria-hidden />
           Add pasted names
         </Button>
       </div>
@@ -89,6 +96,7 @@ export function BatchCreateStudentsForm({
                   disabled={saving}
                   onClick={() => onRemoveRow(index)}
                 >
+                  <MinusIcon className="h-5 w-5" aria-hidden />
                   Remove row
                 </Button>
               ) : null}
@@ -117,6 +125,7 @@ export function BatchCreateStudentsForm({
 
       <div className="mt-3">
         <Button type="button" variant="secondary" disabled={saving} onClick={onAddRow}>
+          <PlusIcon className="h-5 w-5" aria-hidden />
           Add another student
         </Button>
       </div>
@@ -129,6 +138,7 @@ export function BatchCreateStudentsForm({
 
       <div className="mt-4">
         <Button type="submit" disabled={saving || filledCount === 0}>
+          <UserPlusIcon className="h-5 w-5" aria-hidden />
           {saving ? "Saving…" : buttonLabel}
         </Button>
       </div>

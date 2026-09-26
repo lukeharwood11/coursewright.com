@@ -185,11 +185,11 @@ export function OrgSettingsPage() {
               <StaffSection
                 orgSlug={settings.organization.slug}
                 canInvite={staff.canInvite}
-                canManage={staff.canManage}
                 loading={staff.loading}
                 loadError={staff.loadError}
                 members={staff.members}
                 pending={staff.pending}
+                name={staff.name}
                 email={staff.email}
                 role={staff.role}
                 roles={staff.roles}
@@ -200,8 +200,7 @@ export function OrgSettingsPage() {
                 cancelingId={staff.cancelingId}
                 changingId={staff.changingId}
                 removingId={staff.removingId}
-                savingContactId={staff.savingContactId}
-                lastInviteSent={staff.lastInviteSent}
+                onNameChange={staff.onNameChange}
                 onEmailChange={staff.onEmailChange}
                 onRoleChange={staff.onRoleChange}
                 onInvite={staff.onInvite}
@@ -210,7 +209,6 @@ export function OrgSettingsPage() {
                 onCancel={staff.onCancel}
                 onChangeRole={staff.onChangeRole}
                 onRemove={staff.onRemove}
-                onSaveContact={staff.onSaveContact}
               />
             </div>
           ) : null}

@@ -232,6 +232,7 @@ function AssignDestinationDialog({
             disabled={saving}
             onClick={onClose}
           >
+            <XMarkIcon className="h-5 w-5" aria-hidden />
             Cancel
           </Button>
           <Button
@@ -239,6 +240,11 @@ function AssignDestinationDialog({
             disabled={saving || !value}
             onClick={onConfirm}
           >
+            {isClass ? (
+              <UserGroupIcon className="h-5 w-5" aria-hidden />
+            ) : (
+              <AcademicCapIcon className="h-5 w-5" aria-hidden />
+            )}
             {saving ? "Saving…" : isClass ? "Add to class" : "Enroll"}
           </Button>
         </div>

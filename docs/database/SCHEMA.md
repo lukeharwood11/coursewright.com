@@ -398,7 +398,7 @@ Turning a feature off does **not** delete existing rows. RLS for those tables is
 
 ### User
 
-Authenticated users only: admins, instructors, parents. **Not students** (P0/P1). Table: `profiles`; PK is `auth.users.id`. Org members may view another member’s **directory profile** (name, role, courses they teach/lead/are on) via `get_org_person_profile`. Email is not part of that directory. People still edit their own name on account settings.
+Authenticated users only: admins, instructors, parents. **Not students** (P0/P1). Table: `profiles`; PK is `auth.users.id`. Org members may view another member’s **directory profile** (name, role, courses they teach/lead/are on) via `get_org_person_profile`. Email is not part of that directory. The in-app profile page is always `org_profiles` (`/people/<org_profile_id>`). In-org name and contact email are edited there by owners/admins (staff may edit their own org name). Account `profiles.name` is still edited on account settings.
 
 | Field | Type | Notes |
 |-------|------|-------|

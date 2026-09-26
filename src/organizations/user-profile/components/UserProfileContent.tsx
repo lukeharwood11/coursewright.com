@@ -41,34 +41,42 @@ export function UserProfileContent({
             {profile.name}
           </HeadingTag>
           <div className="mt-2">
-            <Badge variant={roleBadgeVariant(profile.role)}>
-              {roleLabel(profile.role)}
-            </Badge>
+            {profile.role ? (
+              <Badge variant={roleBadgeVariant(profile.role)}>
+                {roleLabel(profile.role)}
+              </Badge>
+            ) : (
+              <p className="text-[13.5px] text-[var(--ink-soft)]">Not claimed yet</p>
+            )}
           </div>
         </div>
       </div>
 
-      <ProfileLinkList
-        heading="Teaches"
-        empty="Not listed as a teacher on a course."
-        items={profile.teaches}
-        hrefFor={(item) => coursePath(orgSlug, item.id)}
-        compact={compact}
-      />
-      <ProfileLinkList
-        heading="Leads"
-        empty="Not a lead on a class."
-        items={profile.leads}
-        hrefFor={staff ? (item) => `/my/${orgSlug}/classes/${item.id}` : undefined}
-        compact={compact}
-      />
-      <ProfileLinkList
-        heading="Courses"
-        empty="Not on a course through a linked student."
-        items={profile.courses}
-        hrefFor={(item) => coursePath(orgSlug, item.id)}
-        compact={compact}
-      />
+      {profile.role ? (
+        <>
+          <ProfileLinkList
+            heading="Teaches"
+            empty="Not listed as a teacher on a course."
+            items={profile.teaches}
+            hrefFor={(item) => coursePath(orgSlug, item.id)}
+            compact={compact}
+          />
+          <ProfileLinkList
+            heading="Leads"
+            empty="Not a lead on a class."
+            items={profile.leads}
+            hrefFor={staff ? (item) => `/my/${orgSlug}/classes/${item.id}` : undefined}
+            compact={compact}
+          />
+          <ProfileLinkList
+            heading="Courses"
+            empty="Not on a course through a linked student."
+            items={profile.courses}
+            hrefFor={(item) => coursePath(orgSlug, item.id)}
+            compact={compact}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

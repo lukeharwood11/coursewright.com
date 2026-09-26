@@ -1,6 +1,6 @@
 -- RLS for classes / class_members and staff writes on student_profiles + enrollments.
 begin;
-select plan(10);
+select plan(12);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -154,6 +154,28 @@ select set_config(
 select is_empty(
   $$select * from classes$$,
   'parent does not see classes'
+);
+
+select set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', true);
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}',
+  true
+);
+
+delete from org_profiles where name = 'Roster Parent';
+
+select results_eq(
+  $$select name from org_profiles where name = 'Roster Parent'$$,
+  array['Roster Parent'::text],
+  'instructor cannot remove a parent-only profile'
+);
+
+delete from org_profiles where name = 'Lee Learner';
+
+select is_empty(
+  $$select name from org_profiles where name = 'Lee Learner'$$,
+  'instructor can remove a student profile'
 );
 
 select * from finish();

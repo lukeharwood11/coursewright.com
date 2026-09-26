@@ -66,6 +66,7 @@ export function useCourseParentInvites(students: StudentSummary[]) {
         studentProfileId: student.id,
         email: parsed.value.email,
         invitedBy: user.id,
+        sendEmail: true,
       });
     },
     onSuccess: async (result) => {

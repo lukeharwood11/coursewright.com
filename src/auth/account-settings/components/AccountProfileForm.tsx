@@ -1,4 +1,5 @@
 import type { FormEvent } from "react";
+import { CheckIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { ACCOUNT_PROFILE_FORM_ID } from "../hooks/useAccountSettings";
@@ -61,6 +62,7 @@ export function AccountProfileForm({
 
       <div className="mt-4">
         <Button type="submit" disabled={saving || !hasChanges}>
+          <CheckIcon className="h-4 w-4" aria-hidden />
           {saving ? "Saving…" : "Save"}
         </Button>
       </div>

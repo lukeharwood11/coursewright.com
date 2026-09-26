@@ -7,9 +7,9 @@ export type OrgPersonLink = {
 };
 
 export type OrgPersonProfile = {
-  userId: string;
+  userId: string | null;
   name: string;
-  role: OrgRole;
+  role: OrgRole | null;
   teaches: OrgPersonLink[];
   leads: OrgPersonLink[];
   courses: OrgPersonLink[];
@@ -18,6 +18,8 @@ export type OrgPersonProfile = {
 export const orgPersonQueryKeys = {
   profile: (orgId: number, userId: string) =>
     ["organizations", "person", orgId, userId] as const,
+  orgProfile: (orgId: number, orgProfileId: number) =>
+    ["organizations", "org-profile", orgId, orgProfileId] as const,
 };
 
 function asLinks(value: unknown): OrgPersonLink[] {

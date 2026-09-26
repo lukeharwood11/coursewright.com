@@ -12,7 +12,9 @@ import {
   isStaffInstructorPreview,
   staffCanEdit,
   staffShowsParentPresentation,
+  staffPreviewDiscussionHint,
   staffViewModeLabel,
+  staffWriterInPreviewMode,
 } from "./viewMode.ts";
 
 test("isStaffInstructorPreview is only staff Preview mode", () => {
@@ -57,6 +59,11 @@ test("observers stay in staff chrome with no toggle and no edit", () => {
   assert.equal(staffBrowsesContent("observer", false), true);
   assert.equal(staffBrowsesContent("instructor", false), true);
   assert.equal(staffBrowsesContent("instructor", true), false);
+  assert.equal(staffWriterInPreviewMode("observer", "preview"), false);
+  assert.equal(
+    resolveStaffViewMode("preview", { isParent: false, isStudent: false }, "observer"),
+    "teacher",
+  );
 });
 
 test("parseStaffViewMode accepts the four modes", () => {
@@ -111,10 +118,17 @@ test("resolveStaffViewMode migrates legacy parent and drops disallowed modes", (
 });
 
 test("staffViewModeLabel matches product labels", () => {
+  assert.equal(staffViewModeLabel("teacher", "owner"), "Owner");
+  assert.equal(staffViewModeLabel("teacher", "admin"), "Admin");
+  assert.equal(staffViewModeLabel("teacher", "instructor"), "Instructor");
   assert.equal(staffViewModeLabel("teacher"), "Teacher");
   assert.equal(staffViewModeLabel("preview"), "Preview");
   assert.equal(staffViewModeLabel("parent"), "Parent");
   assert.equal(staffViewModeLabel("student"), "Student");
+  assert.equal(
+    staffPreviewDiscussionHint("owner"),
+    "Switch to Owner view to start or post in a discussion.",
+  );
 });
 
 test("family-visible courses are active and published", () => {

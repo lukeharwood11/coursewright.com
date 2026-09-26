@@ -8,9 +8,10 @@ export const ORG_ROLES = [
 ] as const;
 export type OrgRole = (typeof ORG_ROLES)[number];
 
-/** Lowest privilege first so the invite default is Observer. */
+/** Lowest privilege first in the picker. New-person default is Instructor. */
 export const STAFF_INVITE_ROLES = ["observer", "instructor", "admin", "owner"] as const;
 export type StaffInviteRole = (typeof STAFF_INVITE_ROLES)[number];
+export const DEFAULT_STAFF_INVITE_ROLE: StaffInviteRole = "instructor";
 
 export const OBSERVER_VIEW_ONLY_LABEL = "Observer · View only";
 export const OBSERVER_VIEW_ONLY_HINT = "Observers can view but not edit.";
@@ -133,11 +134,18 @@ export function parseChangeableStaffRole(value: string): EditableStaffRole | nul
 }
 
 /** Admins may invite observer, instructor, or admin. Only owners may invite an owner.
- * Observer is first so the invite default stays the lowest privilege. */
+ * Observer stays first in the picker; the selected default is Instructor. */
 export function inviteableStaffRoles(actor: OrgRole): StaffInviteRole[] {
   if (actor === "owner") return ["observer", "instructor", "admin", "owner"];
   if (actor === "admin") return ["observer", "instructor", "admin"];
   return [];
+}
+
+export function defaultStaffInviteRole(
+  roles: readonly StaffInviteRole[],
+): StaffInviteRole {
+  if (roles.includes(DEFAULT_STAFF_INVITE_ROLE)) return DEFAULT_STAFF_INVITE_ROLE;
+  return roles[0] ?? DEFAULT_STAFF_INVITE_ROLE;
 }
 
 /**

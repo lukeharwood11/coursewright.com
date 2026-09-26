@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
 import { Avatar } from "@/ui/Avatar";
 import { Badge } from "@/ui/Badge";
-import { userProfilePath } from "@/organizations/model/paths";
+import { orgVisibleProfilePath } from "@/organizations/model/paths";
 import {
   parseOrgRole,
   roleBadgeVariant,
@@ -11,6 +11,7 @@ import {
 
 export function UserCard({
   orgSlug,
+  orgProfileId,
   userId,
   name,
   role,
@@ -19,7 +20,8 @@ export function UserCard({
   fit = false,
 }: {
   orgSlug: string;
-  userId: string;
+  orgProfileId?: number | null;
+  userId?: string | null;
   name: string;
   role?: string | null;
   trailing?: ReactNode;
@@ -29,29 +31,46 @@ export function UserCard({
 }) {
   const parsedRole = role ? parseOrgRole(role) : null;
   const avatarSize = compact ? 28 : 32;
+  const href = orgVisibleProfilePath(orgSlug, { orgProfileId, userId });
+
+  const person = (
+    <>
+      <Avatar name={name} size={avatarSize} />
+      <span
+        className={`min-w-0 truncate font-semibold text-[var(--ink)] ${
+          compact ? "text-[13.5px]" : "text-[14px] font-extrabold"
+        }`}
+      >
+        {name}
+      </span>
+      {parsedRole ? (
+        <Badge variant={roleBadgeVariant(parsedRole)}>{roleLabel(parsedRole)}</Badge>
+      ) : null}
+    </>
+  );
 
   return (
     <div
       className={`flex min-w-0 items-center gap-2 ${fit ? "w-fit max-w-full" : ""}`}
     >
-      <Link
-        to={userProfilePath(orgSlug, userId)}
-        className={`flex min-w-0 items-center gap-2 rounded-[8px] px-1 py-1 hover:bg-[var(--green-tint)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)] ${
-          fit ? "" : "flex-1"
-        }`}
-      >
-        <Avatar name={name} size={avatarSize} />
-        <span
-          className={`min-w-0 truncate font-semibold text-[var(--ink)] ${
-            compact ? "text-[13.5px]" : "text-[14px] font-extrabold"
+      {href ? (
+        <Link
+          to={href}
+          className={`flex min-w-0 items-center gap-2 rounded-[8px] px-1 py-1 hover:bg-[var(--green-tint)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)] ${
+            fit ? "" : "flex-1"
           }`}
         >
-          {name}
-        </span>
-        {parsedRole ? (
-          <Badge variant={roleBadgeVariant(parsedRole)}>{roleLabel(parsedRole)}</Badge>
-        ) : null}
-      </Link>
+          {person}
+        </Link>
+      ) : (
+        <div
+          className={`flex min-w-0 items-center gap-2 rounded-[8px] px-1 py-1 ${
+            fit ? "" : "flex-1"
+          }`}
+        >
+          {person}
+        </div>
+      )}
       {trailing ? <div className="shrink-0">{trailing}</div> : null}
     </div>
   );

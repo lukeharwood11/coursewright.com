@@ -2,10 +2,10 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { forwardRef } from "react";
 
 const segmentIdle =
-  "inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-bold text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)] motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-bold text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)] motion-reduce:transition-none disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-60";
 
 const segmentActive =
-  "inline-flex items-center justify-center gap-1.5 bg-[var(--green-tint)] px-3 py-2 text-[13px] font-bold text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)]";
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 bg-[var(--green-tint)] px-3 py-2 text-[13px] font-bold text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)] disabled:cursor-not-allowed";
 
 const segmentShell =
   "inline-flex overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--surface)] [&>*+*]:border-l [&>*+*]:border-[var(--line)]";

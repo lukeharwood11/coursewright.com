@@ -1,6 +1,11 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { UserPlusIcon } from "@heroicons/react/24/outline";
+import {
+  ClipboardDocumentIcon,
+  MinusIcon,
+  PaperAirplaneIcon,
+  UserPlusIcon,
+} from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
@@ -133,6 +138,7 @@ export function CourseRosterPage() {
                     variant="secondary"
                     onClick={() => parentInvites.onCopy(student.id)}
                   >
+                    <ClipboardDocumentIcon className="h-5 w-5" aria-hidden />
                     {parentInvites.copiedId === firstPending.id
                       ? "Copied"
                       : pending.length > 1
@@ -147,6 +153,7 @@ export function CourseRosterPage() {
                     onClick={() => parentInvites.onInvite(student)}
                     disabled={parentInvites.invitingStudentId === student.id}
                   >
+                    <PaperAirplaneIcon className="h-5 w-5" aria-hidden />
                     {parentInvites.invitingStudentId === student.id
                       ? "Inviting…"
                       : "Invite parent"}
@@ -158,6 +165,7 @@ export function CourseRosterPage() {
                     onClick={() => roster.onUnenroll(enrollmentId)}
                     disabled={roster.unenrollingId === enrollmentId}
                   >
+                    <MinusIcon className="h-5 w-5" aria-hidden />
                     {roster.unenrollingId === enrollmentId ? "Removing…" : "Unenroll"}
                   </Button>
                 ) : null}

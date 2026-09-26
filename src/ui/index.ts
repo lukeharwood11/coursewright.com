@@ -1,6 +1,7 @@
 export { AnchoredPopup, TypeaheadPopup } from "./AnchoredPopup";
 export { Avatar } from "./Avatar";
 export { Badge } from "./Badge";
+export { NewPill } from "./NewPill";
 export { PublishedBadge } from "./PublishedBadge";
 export { Button, ButtonLink } from "./Button";
 export { ConfirmDialog } from "./ConfirmDialog";

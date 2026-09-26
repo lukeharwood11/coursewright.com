@@ -26,6 +26,7 @@ import {
   UserCircleIcon as UserCircleSolidIcon,
   UsersIcon as UsersSolidIcon,
 } from "@heroicons/react/24/solid";
+import { NewPill } from "@/ui/NewPill";
 import { toastNotImplemented } from "@/ui/toast";
 import { useAppShell } from "../OrgShellContext";
 import {
@@ -134,6 +135,7 @@ function SidebarSection({
         label={section.label}
         href={href}
         soon={section.soon}
+        featureNew={section.featureNew}
         active={sectionActive}
         collapsed={collapsed}
         icon={Icon}
@@ -200,6 +202,7 @@ function SidebarRow({
   label,
   href,
   soon,
+  featureNew,
   active,
   collapsed,
   icon: Icon,
@@ -209,6 +212,7 @@ function SidebarRow({
   label: string;
   href: string | null;
   soon?: boolean;
+  featureNew?: boolean;
   active: boolean;
   collapsed: boolean;
   icon: IconComponent;
@@ -239,9 +243,15 @@ function SidebarRow({
         <Icon className="h-5 w-5 shrink-0" aria-hidden />
       )}
       {collapsed ? (
-        <span className="sr-only">{label}</span>
+        <span className="sr-only">
+          {label}
+          {featureNew ? " (New)" : ""}
+        </span>
       ) : (
-        <span className="truncate">{label}</span>
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span className="truncate">{label}</span>
+          {featureNew ? <NewPill /> : null}
+        </span>
       )}
       {!collapsed && showBadge ? (
         <NavBadge count={badgeCount} collapsed={false} />

@@ -341,7 +341,7 @@ Do not ship a partial backfill. Prefer fixing forward. Local reset: `scripts/nuk
 | Area | Changes |
 |------|---------|
 | Databridge / types | `org_profiles` as person API; regenerate `database.types.ts`. In-org labels read `org_profiles.name`. |
-| Org settings Collaborators | Add person; privileges; send invite; pending rows. Staff can edit their own org name here or on their org profile; not on Account settings. |
+| Org settings Collaborators | Add person (name, email, role) without sending email; privileges; send invite later; pending rows. Name and contact email are edited on the org person profile (`/people/…`), not on Collaborators. Staff can edit their own org name on that profile; not on Account settings. |
 | Roster / courses | Pickers accept org profile id (pending or claimed). Student name and contact email stay organizer-edited. |
 | Parent flows | Create/link parent org profiles; relationships UI. Parent-only members cannot edit the org name. |
 | Account settings | Still edits `profiles.name` only. |

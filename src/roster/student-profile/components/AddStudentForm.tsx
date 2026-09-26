@@ -1,4 +1,5 @@
 import type { FormEvent } from "react";
+import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { StudentProfileFields } from "@/roster/student-profile/components/StudentProfileFields";
 
@@ -52,6 +53,7 @@ export function AddStudentForm({
       ) : null}
       <div className="mt-4">
         <Button type="submit" disabled={saving}>
+          <UserPlusIcon className="h-5 w-5" aria-hidden />
           {saving ? "Adding…" : submitLabel}
         </Button>
       </div>

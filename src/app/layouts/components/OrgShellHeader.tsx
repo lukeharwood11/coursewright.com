@@ -4,6 +4,7 @@ import { AccountMenu } from "@/auth/components/AccountMenu";
 import { ActivityMenu } from "@/notifications";
 import { chromeAccentVars } from "@/organizations/model/brand";
 import {
+  isStaffRole,
   OBSERVER_VIEW_ONLY_HINT,
   OBSERVER_VIEW_ONLY_LABEL,
   roleBadgeVariant,
@@ -70,12 +71,13 @@ export function OrgShellHeader() {
             {OBSERVER_VIEW_ONLY_LABEL}
           </span>
         ) : null}
-        {showStaffViewToggle ? (
+        {showStaffViewToggle && role && isStaffRole(role) ? (
           <StaffViewToggle
             mode={staffViewMode}
             onChange={setStaffViewMode}
             isParent={isParent}
             isStudent={isStudent}
+            staffRole={role}
           />
         ) : null}
         <div className="flex shrink-0 items-center gap-1.5">

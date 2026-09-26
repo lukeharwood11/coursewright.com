@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import {
@@ -180,6 +181,7 @@ export function LetterBandsPanel({
               </table>
             </div>
             <Button type="button" variant="secondary" className="mt-3" onClick={onAddBand}>
+              <PlusIcon className="h-4 w-4" aria-hidden />
               Add a letter
             </Button>
             <p className="mt-2 text-[12.5px] text-[var(--ink-soft)]">

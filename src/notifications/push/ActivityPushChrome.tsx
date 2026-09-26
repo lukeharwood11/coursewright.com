@@ -1,4 +1,5 @@
 import { createContext, useContext, type ReactNode } from "react";
+import { BellIcon, BellSlashIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { pushSettingMode, shouldShowPushPrompt } from "@/notifications/model/push";
 import { useActivityPush, usePushNavigation } from "./hooks/useActivityPush";
@@ -110,6 +111,7 @@ export function PushNotificationSetting() {
           </p>
           <div className="mt-3">
             <Button variant="secondary" onClick={() => void push.turnOff()} disabled={push.busy}>
+              <BellSlashIcon className="h-4 w-4" aria-hidden />
               {push.busy ? "Turning off…" : "Turn off notifications"}
             </Button>
           </div>
@@ -122,6 +124,7 @@ export function PushNotificationSetting() {
           </p>
           <div className="mt-3">
             <Button onClick={() => void push.turnOn()} disabled={push.busy}>
+              <BellIcon className="h-4 w-4" aria-hidden />
               {push.busy ? "Turning on…" : "Turn on notifications"}
             </Button>
           </div>
