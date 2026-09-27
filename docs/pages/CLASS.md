@@ -20,7 +20,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - First-time add creates the org `student_profile` when they are new.
 - Removing a student from the class does **not** unenroll them from courses.
 - Empty class is allowed.
-- Owners and admins **assign teachers** (class leads — zero or more owners, admins, or instructors). Instructors can see the list. Leads are notified in [ACTIVITY](./ACTIVITY.md) when someone posts in a discussion for this class. **Add teacher** opens a search modal of eligible staff.
+- Owners and admins **assign teachers** (class leads — zero or more owners, admins, or instructors, including people who have not claimed). Instructors can see the list. Names are the org profile name. A pending lead is labeled pending and is not notified until they claim. Leads are notified in [ACTIVITY](./ACTIVITY.md) when someone posts in a discussion for this class. **Add teacher** opens a search modal of eligible staff.
 - **Events** for this class: title, when, location. **Add event** starts a class event with this class selected; staff can check other classes. Opening a row goes to [EVENT](./EVENT.md).
 - **Announce** to this class → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
 - **Start a discussion** (**P1**) → [DISCUSSION](./DISCUSSION.md) new with this class prefilled.
@@ -31,7 +31,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 ## Data shown
 
 - Class **name** (title)
-- Optional **teachers / leads** (owners, admins, or instructors assigned to this class)
+- Optional **teachers / leads** (owners, admins, or instructors assigned to this class, including pending people). Name is `org_profiles.name`
 - Members: **name**, optional **grade**, optional parent / student email
 - Batch picker of org students not already in the class
 - New-student draft rows: name (required), optional student email (invite goes out on add), optional parent email, grade (org scheme)

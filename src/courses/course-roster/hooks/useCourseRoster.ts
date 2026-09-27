@@ -19,7 +19,11 @@ import {
   listOrgStaffForPicker,
   removeCourseInstructor,
 } from "@/courses/databridge/courses";
-import { staffCanManageCourse, staffCanViewCourse } from "@/courses/model/access";
+import {
+  claimedInstructorUserIds,
+  staffCanManageCourse,
+  staffCanViewCourse,
+} from "@/courses/model/access";
 import { orgQueryKeys } from "@/organizations/databridge/memberships";
 import { getOrganization } from "@/organizations/databridge/organizations";
 import { canManageOrgSettings } from "@/organizations/model/role";
@@ -58,7 +62,7 @@ export function useCourseRoster() {
   const user = useAuthedUser();
   const queryClient = useQueryClient();
   const courseReady = Number.isFinite(courseId);
-  const [addUserId, setAddUserId] = useState("");
+  const [addOrgProfileId, setAddOrgProfileId] = useState("");
   const canManageInstructors = canManageOrgSettings(role);
 
   const courseQuery = useQuery({
@@ -74,7 +78,7 @@ export function useCourseRoster() {
 
   const course = courseQuery.data ?? null;
   const belongsHere = course?.organizationId === organization.id;
-  const instructorUserIds = (instructorsQuery.data ?? []).map((row) => row.userId);
+  const instructorUserIds = claimedInstructorUserIds(instructorsQuery.data ?? []);
   const canEdit = staffCanManageCourse({
     role,
     parentPresentation,
@@ -208,9 +212,9 @@ export function useCourseRoster() {
   });
 
   const addInstructorMutation = useMutation({
-    mutationFn: () => addCourseInstructor(courseId, addUserId),
+    mutationFn: () => addCourseInstructor(courseId, Number(addOrgProfileId)),
     onSuccess: async () => {
-      setAddUserId("");
+      setAddOrgProfileId("");
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.instructors(courseId),
       });
@@ -222,7 +226,8 @@ export function useCourseRoster() {
   });
 
   const removeInstructorMutation = useMutation({
-    mutationFn: (userId: string) => removeCourseInstructor(courseId, userId),
+    mutationFn: (orgProfileId: number) =>
+      removeCourseInstructor(courseId, orgProfileId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.instructors(courseId),
@@ -280,7 +285,7 @@ export function useCourseRoster() {
   }
 
   const instructorIds = new Set(
-    (instructorsQuery.data ?? []).map((row) => row.userId),
+    (instructorsQuery.data ?? []).map((row) => row.orgProfileId),
   );
 
   return {
@@ -291,17 +296,19 @@ export function useCourseRoster() {
     course: belongsHere ? course : null,
     enrollments,
     instructors: instructorsQuery.data ?? [],
-    staff: (staffQuery.data ?? []).filter((row) => !instructorIds.has(row.userId)),
-    addUserId,
-    setAddUserId,
+    staff: (staffQuery.data ?? []).filter(
+      (row) => !instructorIds.has(row.orgProfileId),
+    ),
+    addOrgProfileId,
+    setAddOrgProfileId,
     addInstructor: () => addInstructorMutation.mutate(),
     addingInstructor: addInstructorMutation.isPending,
     addInstructorError:
       addInstructorMutation.error && !isNetworkError(addInstructorMutation.error)
         ? addInstructorMutation.error.message
         : null,
-    onRemoveInstructor: (userId: string) =>
-      removeInstructorMutation.mutate(userId),
+    onRemoveInstructor: (orgProfileId: number) =>
+      removeInstructorMutation.mutate(orgProfileId),
     availableStudents,
     classes: classesQuery.data ?? [],
     gradeLabels: organizationQuery.data?.gradeLabels ?? [],

@@ -1,4 +1,5 @@
 import type { Json } from "@/infrastructure/supabase/database.types";
+import { listOrgMemberNames } from "@/organizations/databridge/orgNames";
 import { uploadOrgFileObject } from "@/infrastructure/supabase/storage";
 import { safeFilename } from "@/materials/model/kind";
 import {
@@ -62,7 +63,6 @@ type VersionEmbed = {
   version: number;
   submitted_at: string;
   submitted_by: string;
-  submitter: { name: string } | { name: string }[] | null;
   files: SubmissionFileEmbed[] | null;
 };
 
@@ -73,7 +73,10 @@ type SubmissionEmbed = {
   points_possible: number | null;
   feedback: string | null;
   graded_at: string | null;
-  student: { id: number; name: string } | { id: number; name: string }[] | null;
+  student:
+    | { id: number; name: string; organization_id: number }
+    | { id: number; name: string; organization_id: number }[]
+    | null;
   versions: VersionEmbed[] | null;
 };
 
@@ -82,11 +85,13 @@ function one<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? (value[0] ?? null) : value;
 }
 
-function toSubmission(row: SubmissionEmbed): MaterialSubmissionRecord {
+function toSubmission(
+  row: SubmissionEmbed,
+  namesByUserId: Map<string, string>,
+): MaterialSubmissionRecord {
   const student = one(row.student);
   const versions = (row.versions ?? [])
     .map((version) => {
-      const submitter = one(version.submitter);
       const files = (version.files ?? [])
         .flatMap((entry) => {
           const file = one(entry.file);
@@ -107,7 +112,7 @@ function toSubmission(row: SubmissionEmbed): MaterialSubmissionRecord {
         version: version.version,
         submittedAt: version.submitted_at,
         submittedBy: version.submitted_by,
-        parentName: submitter?.name ?? "",
+        parentName: namesByUserId.get(version.submitted_by) ?? "Someone",
         files,
       };
     })
@@ -132,8 +137,8 @@ const SUBMISSION_EMBED = [
   "points_possible",
   "feedback",
   "graded_at",
-  "student:org_profiles!material_submissions_student_profile_id_fkey(id, name)",
-  "versions:material_submission_versions(id, version, submitted_at, submitted_by, submitter:profiles!material_submission_versions_submitted_by_fkey(name), files:material_submission_files(position, file:files!material_submission_files_file_id_fkey(id, filename, mime_type, storage_ref)))",
+  "student:org_profiles!material_submissions_student_profile_id_fkey(id, name, organization_id)",
+  "versions:material_submission_versions(id, version, submitted_at, submitted_by, files:material_submission_files(position, file:files!material_submission_files_file_id_fkey(id, filename, mime_type, storage_ref)))",
 ].join(", ");
 
 export async function gradeMaterialSubmission(args: {
@@ -161,7 +166,17 @@ export async function listMaterialSubmissions(
     .is("deleted_at", null);
 
   if (error) throw new Error(error.message);
-  return ((data ?? []) as unknown as SubmissionEmbed[]).map(toSubmission);
+  const rows = (data ?? []) as unknown as SubmissionEmbed[];
+  const orgId = rows
+    .map((row) => one(row.student)?.organization_id)
+    .find((id): id is number => typeof id === "number");
+  const namesByUserId = new Map<string, string>();
+  if (orgId != null) {
+    for (const person of await listOrgMemberNames(orgId)) {
+      if (person.userId) namesByUserId.set(person.userId, person.name);
+    }
+  }
+  return rows.map((row) => toSubmission(row, namesByUserId));
 }
 
 export async function listActiveEnrolledStudents(

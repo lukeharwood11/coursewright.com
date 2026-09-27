@@ -20,13 +20,13 @@ export function ClassLeadsSection({
 }: {
   orgSlug: string;
   leads: ClassLeader[];
-  staff: Array<{ userId: string; name: string }>;
+  staff: Array<{ orgProfileId: number; name: string; pending?: boolean }>;
   canManage: boolean;
   addOpen: boolean;
   onOpenAdd: () => void;
   onCloseAdd: () => void;
-  onAdd: (userId: string) => void;
-  onRemove: (userId: string) => void;
+  onAdd: (orgProfileId: number) => void;
+  onRemove: (orgProfileId: number) => void;
   adding: boolean;
   addError: string | null;
 }) {
@@ -57,10 +57,11 @@ export function ClassLeadsSection({
       ) : (
         <ul className="mt-4 flex flex-wrap gap-2">
           {leads.map((person) => (
-            <li key={person.userId} className="max-w-full">
+            <li key={person.orgProfileId} className="max-w-full">
               <div className="inline-flex max-w-full items-center rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] py-1.5 pr-2 pl-1.5">
                 <UserCard
                   orgSlug={orgSlug}
+                  orgProfileId={person.orgProfileId}
                   userId={person.userId}
                   name={person.name}
                   compact
@@ -71,7 +72,7 @@ export function ClassLeadsSection({
                         type="button"
                         variant="secondary"
                         className="px-2.5 py-1.5 text-[12px]"
-                        onClick={() => onRemove(person.userId)}
+                        onClick={() => onRemove(person.orgProfileId)}
                       >
                         <MinusIcon className="h-4 w-4" aria-hidden />
                         Remove

@@ -82,7 +82,7 @@ export function CourseCard({
           {catalogMeta.instructors.length > 0 ? (
             <span className="flex -space-x-1.5 shrink-0" aria-hidden>
               {catalogMeta.instructors.slice(0, 3).map((person) => (
-                <Avatar key={person.userId} name={person.name} size={24} />
+                <Avatar key={person.orgProfileId} name={person.name} size={24} />
               ))}
             </span>
           ) : null}

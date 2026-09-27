@@ -8,7 +8,10 @@ import {
   listCourseInstructors,
 } from "@/courses/databridge/courses";
 import { familyVisibleMaterials, staffCanEdit } from "@/app/layouts/model/viewMode";
-import { staffCanManageCourse } from "@/courses/model/access";
+import {
+  claimedInstructorUserIds,
+  staffCanManageCourse,
+} from "@/courses/model/access";
 import {
   importantNowQueryKeys,
   listImportantNowForCourse,
@@ -87,7 +90,7 @@ export function useUnit() {
     role,
     parentPresentation,
     userId: user.id,
-    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+    instructorUserIds: claimedInstructorUserIds(instructorsQuery.data ?? []),
   });
   const familyCourseHidden =
     parentPresentation &&

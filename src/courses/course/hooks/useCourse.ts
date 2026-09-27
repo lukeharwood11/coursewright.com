@@ -10,7 +10,10 @@ import {
   quizQueryKeys,
 } from "@/quizzes/databridge/quizzes";
 import { latestAttemptByQuizId } from "@/quizzes/model/quiz";
-import { staffCanManageCourse } from "@/courses/model/access";
+import {
+  claimedInstructorUserIds,
+  staffCanManageCourse,
+} from "@/courses/model/access";
 import {
   courseQueryKeys,
   getCourse,
@@ -112,7 +115,7 @@ export function useCourse() {
     role,
     parentPresentation,
     userId: user.id,
-    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+    instructorUserIds: claimedInstructorUserIds(instructorsQuery.data ?? []),
   });
   const familyCourseHidden =
     parentPresentation &&

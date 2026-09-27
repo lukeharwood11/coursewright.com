@@ -13,8 +13,8 @@ export function InstructorsSection({
   instructors,
   staff,
   canManage,
-  addUserId,
-  onAddUserId,
+  addOrgProfileId,
+  onAddOrgProfileId,
   onAdd,
   onRemove,
   adding,
@@ -22,12 +22,12 @@ export function InstructorsSection({
 }: {
   orgSlug: string;
   instructors: CourseInstructor[];
-  staff: Array<{ userId: string; name: string }>;
+  staff: Array<{ orgProfileId: number; name: string; pending?: boolean }>;
   canManage: boolean;
-  addUserId: string;
-  onAddUserId: (value: string) => void;
+  addOrgProfileId: string;
+  onAddOrgProfileId: (value: string) => void;
   onAdd: () => void;
-  onRemove: (userId: string) => void;
+  onRemove: (orgProfileId: number) => void;
   adding: boolean;
   addError: string | null;
 }) {
@@ -35,7 +35,8 @@ export function InstructorsSection({
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
       <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Teachers</h2>
       <p className="mt-1 max-w-xl text-[13.5px] text-[var(--ink-soft)]">
-        People who teach this course. A course can have more than one teacher.
+        People who teach this course. You can assign someone before they claim
+        their account. A course can have more than one teacher.
       </p>
       {instructors.length === 0 ? (
         <p className="mt-3 text-[13.5px] text-[var(--ink-faint)]">
@@ -44,9 +45,10 @@ export function InstructorsSection({
       ) : (
         <ul className="mt-3 flex flex-col gap-1">
           {instructors.map((person) => (
-            <li key={person.userId}>
+            <li key={person.orgProfileId}>
               <UserCard
                 orgSlug={orgSlug}
+                orgProfileId={person.orgProfileId}
                 userId={person.userId}
                 name={person.name}
                 compact
@@ -56,7 +58,7 @@ export function InstructorsSection({
                       type="button"
                       variant="secondary"
                       className="px-2.5 py-1.5 text-[12px]"
-                      onClick={() => onRemove(person.userId)}
+                      onClick={() => onRemove(person.orgProfileId)}
                     >
                       <MinusIcon className="h-4 w-4" aria-hidden />
                       Remove
@@ -72,17 +74,17 @@ export function InstructorsSection({
         <div className="mt-4 flex flex-wrap gap-2">
           <select
             className={`${controlClass} min-w-0 flex-1`}
-            value={addUserId}
-            onChange={(event) => onAddUserId(event.target.value)}
+            value={addOrgProfileId}
+            onChange={(event) => onAddOrgProfileId(event.target.value)}
           >
             <option value="">Add a teacher</option>
             {staff.map((person) => (
-              <option key={person.userId} value={person.userId}>
-                {person.name}
+              <option key={person.orgProfileId} value={String(person.orgProfileId)}>
+                {person.pending ? `${person.name} (pending)` : person.name}
               </option>
             ))}
           </select>
-          <Button type="button" disabled={!addUserId || adding} onClick={onAdd}>
+          <Button type="button" disabled={!addOrgProfileId || adding} onClick={onAdd}>
             <UserPlusIcon className="h-5 w-5" aria-hidden />
             {adding ? "Adding…" : "Add"}
           </Button>

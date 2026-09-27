@@ -275,10 +275,10 @@ export function CourseSettingsPage() {
             instructors={settings.instructors}
             staff={settings.staff}
             canManage={settings.canManageInstructors}
-            addUserId={settings.addUserId}
-            onAddUserId={settings.setAddUserId}
+            addOrgProfileId={settings.addOrgProfileId}
+            onAddOrgProfileId={settings.setAddOrgProfileId}
             onAdd={() => settings.addInstructor.mutate()}
-            onRemove={(userId) => settings.removeInstructor.mutate(userId)}
+            onRemove={(orgProfileId) => settings.removeInstructor.mutate(orgProfileId)}
             adding={settings.addInstructor.isPending}
             addError={null}
           />

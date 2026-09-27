@@ -1,3 +1,8 @@
+import {
+  listAssignableOrgStaff,
+  type AssignableOrgPerson,
+} from "@/organizations/databridge/assignableStaff";
+import { listOrgMemberNames } from "@/organizations/databridge/orgNames";
 import { requireSupabase } from "./client";
 import type { CourseSettingsInput, CreateCourseInput } from "@/courses/model/createCourse";
 import { parseCourseStatus, type CourseStatus } from "@/courses/model/status";
@@ -30,7 +35,8 @@ export type CourseSummary = {
 };
 
 export type CourseInstructor = {
-  userId: string;
+  orgProfileId: number;
+  userId: string | null;
   name: string;
   email: string;
 };
@@ -189,24 +195,18 @@ export async function updateCourseVisibility(
   if (error) throw new Error(error.message);
 }
 
-function mapCourseInstructorRows(
-  rows: Array<{
-    course_id?: number;
-    user_id: string | null;
-    profile: { name: string; email: string } | { name: string; email: string }[] | null;
-  }>,
-): CourseInstructor[] {
-  return rows.flatMap((row) => {
-    const profile = Array.isArray(row.profile) ? row.profile[0] : row.profile;
-    if (!profile || !row.user_id) return [];
-    return [
-      {
-        userId: row.user_id,
-        name: profile.name || profile.email,
-        email: profile.email,
-      },
-    ];
-  });
+function toCourseInstructor(
+  row: { org_profile_id: number; user_id: string | null },
+  names: Map<number, { name: string; email: string }>,
+): CourseInstructor | null {
+  const person = names.get(row.org_profile_id);
+  if (!person) return null;
+  return {
+    orgProfileId: row.org_profile_id,
+    userId: row.user_id,
+    name: person.name,
+    email: person.email,
+  };
 }
 
 export async function listCoursesCatalogMeta(
@@ -223,26 +223,39 @@ export async function listCoursesCatalogMeta(
   if (courseIds.length === 0) return byCourseId;
 
   const db = requireSupabase();
-  const [instructorResult, enrollmentResult] = await Promise.all([
+  const [instructorResult, enrollmentResult, courseOrgs] = await Promise.all([
     db
       .from("course_instructors")
-      .select("course_id, user_id, profile:profiles(name, email)")
+      .select("course_id, org_profile_id, user_id")
       .in("course_id", courseIds),
     db
       .from("enrollments")
       .select("course_id")
       .in("course_id", courseIds)
       .eq("status", "active"),
+    db.from("courses").select("id, organization_id").in("id", courseIds),
   ]);
 
   if (instructorResult.error) throw new Error(instructorResult.error.message);
   if (enrollmentResult.error) throw new Error(enrollmentResult.error.message);
+  if (courseOrgs.error) throw new Error(courseOrgs.error.message);
+
+  const orgByCourse = new Map<number, number>();
+  for (const course of courseOrgs.data ?? []) {
+    orgByCourse.set(course.id, course.organization_id);
+  }
+  const namesByOrg = new Map<number, Map<number, { name: string; email: string }>>();
+  for (const orgId of new Set(orgByCourse.values())) {
+    const names = await listOrgMemberNames(orgId);
+    namesByOrg.set(orgId, new Map(names.map((person) => [person.id, person])));
+  }
 
   const instructorsByCourse = new Map<number, CourseInstructor[]>();
   for (const row of instructorResult.data ?? []) {
     const courseId = row.course_id;
     if (typeof courseId !== "number") continue;
-    const person = mapCourseInstructorRows([row])[0];
+    const names = namesByOrg.get(orgByCourse.get(courseId) ?? -1);
+    const person = names ? toCourseInstructor(row, names) : null;
     if (!person) continue;
     const list = instructorsByCourse.get(courseId) ?? [];
     list.push(person);
@@ -272,74 +285,64 @@ export async function listCourseInstructors(
   courseId: number,
 ): Promise<CourseInstructor[]> {
   const db = requireSupabase();
+  const { data: course, error: courseError } = await db
+    .from("courses")
+    .select("organization_id")
+    .eq("id", courseId)
+    .maybeSingle();
+  if (courseError) throw new Error(courseError.message);
+  if (!course) return [];
+
   const { data, error } = await db
     .from("course_instructors")
-    .select("user_id, profile:profiles(name, email)")
+    .select("org_profile_id, user_id")
     .eq("course_id", courseId);
-
   if (error) throw new Error(error.message);
 
-  return mapCourseInstructorRows(data ?? []);
+  const names = new Map(
+    (await listOrgMemberNames(course.organization_id)).map((person) => [
+      person.id,
+      person,
+    ]),
+  );
+  return (data ?? []).flatMap((row) => {
+    const person = toCourseInstructor(row, names);
+    return person ? [person] : [];
+  });
 }
 
 export async function addCourseInstructor(
   courseId: number,
-  userId: string,
+  orgProfileId: number,
 ): Promise<void> {
   const db = requireSupabase();
   const { error } = await db.from("course_instructors").insert({
     course_id: courseId,
-    user_id: userId,
+    org_profile_id: orgProfileId,
   });
   if (error) throw new Error(error.message);
 }
 
 export async function removeCourseInstructor(
   courseId: number,
-  userId: string,
+  orgProfileId: number,
 ): Promise<void> {
   const db = requireSupabase();
   const { error } = await db
     .from("course_instructors")
     .delete()
     .eq("course_id", courseId)
-    .eq("user_id", userId);
+    .eq("org_profile_id", orgProfileId);
   if (error) throw new Error(error.message);
 }
 
-export type OrgStaffPickerPerson = {
-  userId: string;
-  name: string;
-  email: string;
-  role: string;
-};
+export type OrgStaffPickerPerson = AssignableOrgPerson;
 
-/** Staff names for the co-teacher picker — not the org-settings membership list. */
+/** Staff names for the co-teacher picker — claimed and not-yet-claimed. */
 export async function listOrgStaffForPicker(
   organizationId: number,
 ): Promise<OrgStaffPickerPerson[]> {
-  const db = requireSupabase();
-  const { data, error } = await db
-    .from("memberships")
-    .select("user_id, role, profile:profiles(name, email)")
-    .eq("organization_id", organizationId)
-    .eq("status", "active")
-    .in("role", ["owner", "admin", "instructor"]);
-
-  if (error) throw new Error(error.message);
-
-  return (data ?? []).flatMap((row) => {
-    const profile = Array.isArray(row.profile) ? row.profile[0] : row.profile;
-    if (!profile || !row.user_id) return [];
-    return [
-      {
-        userId: row.user_id,
-        name: profile.name || profile.email,
-        email: profile.email,
-        role: row.role,
-      },
-    ];
-  });
+  return listAssignableOrgStaff(organizationId);
 }
 
 export async function copyCourseFromCourse(args: {

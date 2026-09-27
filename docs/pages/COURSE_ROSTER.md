@@ -20,13 +20,13 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
   - **New students** — batch create org profiles (multi-row or paste names) and enroll them in one confirm.
 - Unenroll (withdrawn) from the row; parent **course** access requires enrollment in an active published course (membership is created on invite claim).
 - **Invite parent** from an enrolled student — emails `/invite/<token>` for a parent email (copy-link remains). Multiple parents are managed on the student profile.
-- Owners and admins **assign teachers** (course instructors). Instructors can see the list. Same assignment as [COURSE_SETTINGS](./COURSE_SETTINGS.md).
+- Owners and admins **assign teachers** (course instructors), including people who have not claimed. Instructors can see the list. Names are the org profile name. A pending teacher cannot manage the course until they claim. Same assignment as [COURSE_SETTINGS](./COURSE_SETTINGS.md).
 - Empty roster allowed — printing materials does not require students.
 
 ## Data shown
 
 - Course context (title) for orientation
-- **Teachers** assigned to the course
+- **Teachers** assigned to the course (`org_profiles.name`; pending people included)
 - Enrolled students: **name**, optional **grade**, parent / student email / invite status
 - Batch picker of org students not already enrolled
 - Optional class list for preset

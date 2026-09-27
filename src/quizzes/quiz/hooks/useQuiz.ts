@@ -3,7 +3,10 @@ import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
-import { staffCanManageCourse } from "@/courses/model/access";
+import {
+  claimedInstructorUserIds,
+  staffCanManageCourse,
+} from "@/courses/model/access";
 import { courseQueryKeys, getCourse, listCourseInstructors } from "@/courses/databridge/courses";
 import {
   getQuiz,
@@ -86,7 +89,7 @@ export function useQuiz() {
     role,
     parentPresentation,
     userId: user.id,
-    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+    instructorUserIds: claimedInstructorUserIds(instructorsQuery.data ?? []),
   });
   const familyHidden =
     parentPresentation &&
@@ -123,8 +126,8 @@ export function useQuiz() {
       parentName: attempt.submitterName,
       studentName: attempt.studentName,
       submitterIsStudent:
-        attempt.submitterEmail.trim().toLowerCase() ===
-        (attempt.studentEmail ?? "").trim().toLowerCase(),
+        Boolean(attempt.studentUserId) &&
+        attempt.submittedBy === attempt.studentUserId,
     }),
     answers: (answersQuery.data ?? []).filter((answer) => answer.attemptId === attempt.id),
   }));

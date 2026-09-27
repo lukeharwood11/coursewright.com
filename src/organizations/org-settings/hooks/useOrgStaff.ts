@@ -41,6 +41,7 @@ import {
   inviteCreatedMessage,
   inviteEmailResultMessage,
   staffInviteUrl,
+  staffPrivilegeStackedMessage,
   validateCreateStaffInvite,
 } from "@/organizations/model/staffInvite";
 
@@ -117,14 +118,19 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
         invitedBy: user.id,
       });
     },
-    onSuccess: async ({ invite }) => {
+    onSuccess: async (result) => {
       setEmail("");
       setName("");
       setInviteRole("instructor");
       setFormError(null);
+      if (result.kind === "stacked") {
+        toast(staffPrivilegeStackedMessage(result));
+        await invalidateStaff();
+        return;
+      }
       toast(
         inviteCreatedMessage({
-          recipientEmail: invite.email,
+          recipientEmail: result.invite.email,
           emailSent: false,
           linkCopied: false,
           addedWithoutInviteEmail: true,

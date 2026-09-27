@@ -3,6 +3,7 @@ import { parseOrgRole, parseStaffInviteRole } from "@/organizations/model/role";
 import {
   inviteWriteErrorMessage,
   normalizeInviteEmail,
+  staffAddForExistingPerson,
 } from "@/organizations/model/staffInvite";
 import { requireSupabase } from "./client";
 import { parentOrgProfileIdForStudent } from "@/roster/databridge/parentLinks";
@@ -10,10 +11,12 @@ import {
   createOrgPerson,
   findOrgProfileByEmail,
   orgContactsByUserId,
+  updateOrgPersonContact,
 } from "./orgNames";
 import {
   listOrgPeople,
   toOrganizationSummary,
+  updateStaffMembershipRole,
   type OrganizationSummary,
   type OrganizationSummaryRow,
   type OrgPerson,
@@ -69,13 +72,10 @@ export type ParentLinkStatus = {
   email: string;
 };
 
-type ProfileEmbed = { name: string; email: string } | { name: string; email: string }[] | null;
-
 type StaffMembershipRow = {
   id: number;
   user_id: string | null;
   role: string;
-  profile: ProfileEmbed;
 };
 
 type PendingInviteRow = {
@@ -120,7 +120,7 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
   const db = requireSupabase();
   const { data, error } = await db
     .from("memberships")
-    .select("id, user_id, role, profile:profiles!memberships_user_id_fkey(name, email)")
+    .select("id, user_id, role")
     .eq("organization_id", organizationId)
     .eq("status", "active")
     .in("role", ["owner", "admin", "instructor", "observer", "parent"]);
@@ -131,14 +131,13 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
   for (const row of data ?? []) {
     const typed = row as StaffMembershipRow;
     const role = parseOrgRole(typed.role);
-    const profile = unwrapOne(typed.profile);
-    if (!role || !profile || !typed.user_id || !Number.isFinite(typed.id)) continue;
+    if (!role || !typed.user_id || !Number.isFinite(typed.id)) continue;
     members.push({
       membershipId: typed.id,
       userId: typed.user_id,
       role,
-      name: profile.name,
-      email: profile.email,
+      name: "",
+      email: "",
       orgProfileId: null,
       hasLinkedStudent: false,
       hasStudentAccount: false,
@@ -149,21 +148,25 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
     organizationId,
     members.map((member) => member.userId),
   );
+  const named: OrgStaffMember[] = [];
   for (const member of members) {
     const contact = contacts.get(member.userId);
     if (!contact) continue;
-    member.name = contact.name;
-    member.orgProfileId = contact.id;
-    if (contact.email) member.email = contact.email;
+    named.push({
+      ...member,
+      name: contact.name,
+      email: contact.email ?? "",
+      orgProfileId: contact.id,
+    });
   }
 
-  const userIds = members.map((member) => member.userId);
+  const userIds = named.map((member) => member.userId);
   const [linkedParents, studentAccounts] = await Promise.all([
     listLinkedParentUserIds(organizationId, userIds),
     listStudentAccountUserIds(organizationId, userIds),
   ]);
 
-  return members.map((member) => ({
+  return named.map((member) => ({
     ...member,
     hasLinkedStudent: linkedParents.has(member.userId),
     hasStudentAccount: studentAccounts.has(member.userId),
@@ -350,16 +353,114 @@ export async function sendOrganizationInviteEmail(
   return { sent: true, error: null };
 }
 
+export type StaffAddResult =
+  | { kind: "invited"; invite: PendingStaffInvite; email: InviteEmailStatus }
+  | {
+      kind: "stacked";
+      name: string;
+      email: string;
+      role: StaffInviteRole;
+      stayedParent: boolean;
+      stayedStudent: boolean;
+    };
+
+async function profileLinkedAsParent(orgProfileId: number): Promise<boolean> {
+  const db = requireSupabase();
+  const [links, invites] = await Promise.all([
+    db
+      .from("parent_student_links")
+      .select("student_profile_id")
+      .eq("parent_org_profile_id", orgProfileId)
+      .limit(1),
+    db
+      .from("admin_invites")
+      .select("id")
+      .eq("org_profile_id", orgProfileId)
+      .eq("role", "parent")
+      .limit(1),
+  ]);
+  if (links.error) throw new Error(links.error.message);
+  if (invites.error) throw new Error(invites.error.message);
+  return (links.data?.length ?? 0) > 0 || (invites.data?.length ?? 0) > 0;
+}
+
 export async function createStaffInvite(input: {
   organizationId: number;
   name: string;
   email: string;
   role: StaffInviteRole;
   invitedBy: string;
-}): Promise<{ invite: PendingStaffInvite; email: InviteEmailStatus }> {
-  const existing = await findOrgProfileByEmail(input.organizationId, input.email);
+}): Promise<StaffAddResult> {
+  let existing = await findOrgProfileByEmail(input.organizationId, input.email);
+  let countsAsStudent = false;
+  let linkedAsParent = false;
+  if (existing) {
+    const db = requireSupabase();
+    const { data: row, error } = await db
+      .from("org_profiles")
+      .select("counts_as_student")
+      .eq("id", existing.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    countsAsStudent = Boolean(row?.counts_as_student);
+    linkedAsParent = await profileLinkedAsParent(existing.id);
+  }
+
+  let membership: {
+    id: number;
+    role: string;
+    is_parent: boolean;
+    is_student: boolean;
+  } | null = null;
   if (existing?.userId) {
-    throw new Error("They’re already in this organization.");
+    const db = requireSupabase();
+    const { data, error } = await db
+      .from("memberships")
+      .select("id, role, is_parent, is_student")
+      .eq("organization_id", input.organizationId)
+      .eq("user_id", existing.userId)
+      .eq("status", "active")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    membership = data;
+  }
+
+  const membershipRole = membership ? parseOrgRole(membership.role) : null;
+  const decision = staffAddForExistingPerson({
+    hasAccount: Boolean(existing?.userId),
+    countsAsStudent,
+    linkedAsParent: linkedAsParent || membershipRole === "parent" || Boolean(membership?.is_parent),
+    membershipRole,
+  });
+
+  if (decision.action === "reject") {
+    throw new Error(decision.message);
+  }
+
+  if (decision.action === "stack-role") {
+    if (!existing || !membership) {
+      throw new Error("That person couldn’t be updated. Refresh and try again.");
+    }
+    await updateStaffMembershipRole({
+      membershipId: membership.id,
+      role: input.role,
+    });
+    return {
+      kind: "stacked",
+      name: existing.name,
+      email: existing.email ?? input.email,
+      role: input.role,
+      stayedParent: true,
+      stayedStudent: Boolean(membership.is_student),
+    };
+  }
+
+  if (existing && !decision.keepName) {
+    const name = input.name.trim();
+    if (name && name !== existing.name) {
+      await updateOrgPersonContact({ orgProfileId: existing.id, name });
+      existing = { ...existing, name };
+    }
   }
 
   const orgProfile =
@@ -382,7 +483,7 @@ export async function createStaffInvite(input: {
   if (!staff) {
     throw new Error("The invite was created but couldn’t be loaded. Refresh and try again.");
   }
-  return { invite: staff, email: { sent: false, error: null } };
+  return { kind: "invited", invite: staff, email: { sent: false, error: null } };
 }
 
 export async function findOrgPersonByEmail(

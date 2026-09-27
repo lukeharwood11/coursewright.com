@@ -1,6 +1,6 @@
 # Org profiles — unified organizational person plan
 
-**Status:** implemented in `supabase/migrations/20261011000000_org_profiles.sql` and the app. A throwaway preview branch cloned from production applied the migration. pgTAP then caught two rewriter bugs (claim bypass flag, and any org person counting as a student); those are fixed in that migration. Local Docker still cannot start a database, so `supabase test db` was not run locally.  
+**Status:** shipped in app and migrations `20261011000000`–`20261011000004`. Claim, same-email merge, pre-claim course/class placement, and the name/email split match this plan. Billing meter remapping stays deferred with Track A; the meter source is `counts_as_student`. Apply on testing with `./scripts/deploy-supabase.sh testing` (HN-020). That script runs `supabase db push --linked --yes --include-all`.  
 **Supersedes:** staff-only `org_staff_profiles` slice (former title of this file).  
 **Global Auth `profiles`:** unchanged (PK = `auth.users.id`).  
 **Org SoT:** one **`org_profiles`** row per person in an organization — generalizing the existing [`student_profiles`](../database/SCHEMA.md) pattern. Auth account is optional until claim.
@@ -352,11 +352,11 @@ Do not ship a partial backfill. Prefer fixing forward. Local reset: `scripts/nuk
 ## Implementation todos
 
 - [x] Email nullability and student discriminator: `email` nullable; `counts_as_student` boolean (locked above)
-- [ ] Migration: `org_profiles` rename, relationship + assignment FKs, RLS, claim updates, **hard backfill** in one transaction
-- [ ] pgTAP: multi-role claim; parent link on profiles; staff placement; student enrollment preserved; merge same email; email edit does not clear `user_id`; student account rename does not change org name; observer can rename self and cannot change org email
-- [ ] App: Collaborators, pickers, parent directory, invite UX, in-org display names
-- [ ] Billing meter remapping + Track A plan note
-- [ ] FEATURES / SCHEMA / page docs → **shipped**
+- [x] Migration: `org_profiles` rename, relationship + assignment FKs, RLS, claim updates, **hard backfill** in `20261011000000` (follow-ups `000001`–`000003`; placement sync, `org_member_names`, and student-claim `counts_as_student` in `000004`)
+- [x] pgTAP: `supabase/tests/org_profiles_claim.test.sql` — pre-claim teachers/leads/enrollment/parent link; same-email merge keeps the student name; claim fills placement `user_id` and does not rename either profile; email edit keeps `user_id`; observer can rename self and cannot change org email; cross-org placement rejected
+- [x] App: Collaborators add person without sending email; pickers include pending org people; parent links and enrollments key on org profiles; in-org labels read `org_profiles.name` (no account-name fallback)
+- [ ] Billing meter remapping — deferred with Track A. Source of the future meter is `counts_as_student`, not every org profile and not `memberships.is_student`
+- [x] FEATURES / SCHEMA / page docs → **shipped**
 
 ## Test plan
 

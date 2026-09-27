@@ -1,9 +1,16 @@
 import {
+  browsesAsStaff,
   inviteableStaffRoles,
   parseStaffInviteRole,
+  roleLabel,
   type OrgRole,
   type StaffInviteRole,
 } from "./role";
+
+export const ALREADY_IN_ORGANIZATION_MESSAGE = "They’re already in this organization.";
+
+export const STUDENT_NOT_A_COLLABORATOR_MESSAGE =
+  "Students can’t be changed from the collaborators list.";
 
 export function normalizeInviteEmail(value: string): string {
   return value.trim().toLowerCase();
@@ -65,6 +72,34 @@ export function validateCreateStaffInvite(input: {
   return { ok: true, value: { name, email, role } };
 }
 
+/**
+ * Add collaborator when that email already belongs to an org person.
+ * A claimed parent gains the staff role on the same membership. A student
+ * or an existing staff member is rejected. Parent and student names stay.
+ */
+export function staffAddForExistingPerson(input: {
+  hasAccount: boolean;
+  countsAsStudent: boolean;
+  linkedAsParent: boolean;
+  membershipRole: OrgRole | null;
+}):
+  | { action: "create-invite"; keepName: boolean }
+  | { action: "stack-role" }
+  | { action: "reject"; message: string } {
+  const keepName = input.countsAsStudent || input.linkedAsParent;
+
+  if (input.hasAccount && input.membershipRole && browsesAsStaff(input.membershipRole)) {
+    return { action: "reject", message: ALREADY_IN_ORGANIZATION_MESSAGE };
+  }
+  if (input.hasAccount && input.membershipRole === "student") {
+    return { action: "reject", message: STUDENT_NOT_A_COLLABORATOR_MESSAGE };
+  }
+  if (input.hasAccount && input.membershipRole === "parent") {
+    return { action: "stack-role" };
+  }
+  return { action: "create-invite", keepName };
+}
+
 export function validateCreateParentInvite(input: {
   email: string;
 }):
@@ -103,6 +138,21 @@ export function inviteCreatedMessage(input: {
     return "Invite created, but the email didn’t send. Link copied — send it yourself.";
   }
   return "Invite created, but the email didn’t send. Copy the link and send it yourself.";
+}
+
+export function staffPrivilegeStackedMessage(input: {
+  name: string;
+  role: StaffInviteRole;
+  stayedParent: boolean;
+  stayedStudent: boolean;
+}): string {
+  const who = input.name.trim() || "They";
+  const kept = [
+    input.stayedParent ? "parent" : null,
+    input.stayedStudent ? "student" : null,
+  ].filter((label): label is string => Boolean(label));
+  const keptNote = kept.length > 0 ? ` They stay a ${kept.join(" and ")}.` : "";
+  return `Changed ${who} to ${roleLabel(input.role).toLowerCase()}.${keptNote}`;
 }
 
 export function inviteEmailResultMessage(input: {

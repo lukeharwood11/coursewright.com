@@ -29,9 +29,10 @@ export function CourseSidebar({
       ) : (
         <ul className="mt-3 flex flex-col gap-1">
           {instructors.map((person) => (
-            <li key={person.userId}>
+            <li key={person.orgProfileId}>
               <UserCard
                 orgSlug={orgSlug}
+                orgProfileId={person.orgProfileId}
                 userId={person.userId}
                 name={person.name}
                 compact

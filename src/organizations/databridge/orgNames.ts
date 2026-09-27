@@ -38,6 +38,36 @@ function orgPersonWriteError(error: { code?: string; message: string }): string 
   return error.message;
 }
 
+export type OrgMemberName = {
+  id: number;
+  userId: string | null;
+  name: string;
+  email: string;
+};
+
+/** In-org names for every person the caller can see. No account-name fallback. */
+export async function listOrgMemberNames(
+  organizationId: number,
+): Promise<OrgMemberName[]> {
+  const db = requireSupabase();
+  const { data, error } = await db.rpc("org_member_names", {
+    p_organization_id: organizationId,
+  });
+  if (error) throw new Error(error.message);
+  return (data ?? []).flatMap((row) => {
+    const name = row.name.trim();
+    if (!name) return [];
+    return [
+      {
+        id: row.id,
+        userId: row.user_id,
+        name,
+        email: row.email ?? "",
+      },
+    ];
+  });
+}
+
 /** In-org name and contact email for claimed accounts. Account profile is not a fallback. */
 export async function orgContactsByUserId(
   organizationId: number,

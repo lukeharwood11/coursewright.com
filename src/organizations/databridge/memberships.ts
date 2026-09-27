@@ -178,7 +178,6 @@ type MemberAccessMembershipRow = {
   status: string;
   is_parent?: boolean | null;
   is_student?: boolean | null;
-  profile: { name: string; email: string } | { name: string; email: string }[] | null;
 };
 
 export async function listMyMemberships(userId: string): Promise<OrgMembership[]> {
@@ -240,7 +239,7 @@ export async function listOrgPeople(
   const db = requireSupabase();
   const { data, error } = await db
     .from("memberships")
-    .select("user_id, role, profile:profiles(name, email)")
+    .select("user_id, role")
     .eq("organization_id", organizationId)
     .eq("status", "active")
     .order("created_at", { ascending: true });
@@ -254,14 +253,13 @@ export async function listOrgPeople(
 
   return (data ?? []).flatMap((row) => {
     const role = parseOrgRole(row.role);
-    const profile = Array.isArray(row.profile) ? row.profile[0] : row.profile;
     const contact = row.user_id ? contacts.get(row.user_id) : undefined;
-    if (!role || !row.user_id || (!contact && !profile)) return [];
+    if (!role || !row.user_id || !contact) return [];
     return [
       {
         userId: row.user_id,
-        name: contact?.name || "Member",
-        email: contact?.email || profile?.email || "",
+        name: contact.name,
+        email: contact.email ?? "",
         role,
       },
     ];
@@ -321,9 +319,7 @@ export async function listOrgMembersWithAccess(
   const db = requireSupabase();
   const { data, error } = await db
     .from("memberships")
-    .select(
-      "id, user_id, role, status, is_parent, is_student, profile:profiles!memberships_user_id_fkey(name, email)",
-    )
+    .select("id, user_id, role, status, is_parent, is_student")
     .eq("organization_id", organizationId)
     .in("status", ["active", "suspended"])
     .not("user_id", "is", null)
@@ -331,14 +327,17 @@ export async function listOrgMembersWithAccess(
 
   if (error) throw new Error(error.message);
 
+  const contacts = await orgContactsByUserId(
+    organizationId,
+    (data ?? []).map((row) => row.user_id),
+  );
+
   const rows: OrgMemberAccessRow[] = [];
   for (const row of data ?? []) {
     const typed = row as MemberAccessMembershipRow;
     const role = parseOrgRole(typed.role);
-    const profile = Array.isArray(typed.profile)
-      ? (typed.profile[0] ?? null)
-      : typed.profile;
-    if (!role || !profile || !typed.user_id || !Number.isFinite(typed.id)) continue;
+    const contact = typed.user_id ? contacts.get(typed.user_id) : undefined;
+    if (!role || !contact || !typed.user_id || !Number.isFinite(typed.id)) continue;
     if (typed.status !== "active" && typed.status !== "suspended") continue;
     rows.push({
       membershipId: typed.id,
@@ -347,22 +346,10 @@ export async function listOrgMembersWithAccess(
       role,
       isParent: Boolean(typed.is_parent) || role === "parent",
       isStudent: Boolean(typed.is_student) || role === "student",
-      orgProfileId: null,
-      name: profile.name,
-      email: profile.email,
+      orgProfileId: contact.id,
+      name: contact.name,
+      email: contact.email ?? "",
     });
-  }
-
-  const contacts = await orgContactsByUserId(
-    organizationId,
-    rows.map((member) => member.userId),
-  );
-  for (const member of rows) {
-    const contact = contacts.get(member.userId);
-    if (!contact) continue;
-    member.orgProfileId = contact.id;
-    member.name = contact.name;
-    if (contact.email) member.email = contact.email;
   }
 
   return rows.sort((a, b) =>
