@@ -16,6 +16,27 @@ import {
 } from "./events.ts";
 import { addIsoDays, monthContaining } from "./dates.ts";
 
+test("material work type does not emit a due chip", () => {
+  const chips = chipsForMaterials([
+    {
+      id: 3,
+      title: "Reading",
+      courseId: 10,
+      courseTitle: "Science",
+      colorKey: "moss",
+      scheduledDate: "2026-09-15",
+      dueDate: "2026-09-17",
+      workType: "material",
+      unitId: null,
+      unitStart: null,
+      unitEnd: null,
+      unpublished: false,
+    },
+  ]);
+  assert.equal(chips.length, 1);
+  assert.equal(chips[0]?.kind, "assigned");
+});
+
 test("assigned uses scheduled_date, else unit start", () => {
   const chips = chipsForMaterials([
     {

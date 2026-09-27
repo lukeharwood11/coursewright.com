@@ -1,10 +1,19 @@
-import { DocumentIcon, LinkIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import {
+  ClipboardDocumentListIcon,
+  DocumentIcon,
+  DocumentTextIcon,
+  LinkIcon,
+} from "@heroicons/react/24/outline";
 import { PrinterIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { Badge } from "@/ui/Badge";
 import { ButtonLink } from "@/ui/Button";
 import { formatIsoDate } from "@/courses/model/dates";
 import { materialKindLabel, type MaterialKind } from "@/materials/model/kind";
+import {
+  materialWorkTypeLabel,
+  type MaterialWorkType,
+} from "@/materials/model/workType";
 import { materialLocationState } from "@/materials/model/navigation";
 import { materialPath, materialPrintPath } from "@/materials/model/paths";
 import { isPublished, type MaterialVisibility } from "@/materials/model/visibility";
@@ -17,6 +26,7 @@ export function MaterialRow({
   title,
   description,
   kind,
+  workType,
   scheduledDate,
   dueDate,
   importantNow,
@@ -33,6 +43,7 @@ export function MaterialRow({
   title: string;
   description: string;
   kind: MaterialKind;
+  workType: MaterialWorkType;
   scheduledDate: string | null;
   dueDate?: string | null;
   importantNow: boolean;
@@ -43,8 +54,9 @@ export function MaterialRow({
 }) {
   const href = materialPath({ orgSlug, courseId, unitId, materialId });
   const printHref = materialPrintPath({ orgSlug, courseId, unitId, materialId });
-  const Icon =
+  const KindIcon =
     kind === "link" ? LinkIcon : kind === "file" ? DocumentIcon : DocumentTextIcon;
+  const Icon = workType === "assignment" ? ClipboardDocumentListIcon : KindIcon;
 
   return (
     <Root
@@ -70,17 +82,25 @@ export function MaterialRow({
           </span>
         ) : null}
         <span className="mt-1 flex flex-wrap items-center gap-1.5">
+          <Badge variant={workType === "assignment" ? "amber" : "green"}>
+            {materialWorkTypeLabel(workType)}
+          </Badge>
           <Badge variant="slate">{materialKindLabel(kind)}</Badge>
           {importantNow ? <Badge variant="amberSolid">Important now</Badge> : null}
           {!isPublished(visibility) ? (
             <Badge variant="amber">Unpublished</Badge>
           ) : null}
-          {scheduledDate ? (
+          {workType === "material" && scheduledDate ? (
             <span className="text-[12px] font-bold text-[var(--slate)]">
-              For {formatIsoDate(scheduledDate)}
+              Available {formatIsoDate(scheduledDate)}
             </span>
           ) : null}
-          {dueDate ? (
+          {workType === "assignment" && scheduledDate ? (
+            <span className="text-[12px] font-bold text-[var(--slate)]">
+              Focus {formatIsoDate(scheduledDate)}
+            </span>
+          ) : null}
+          {workType === "assignment" && dueDate ? (
             <span className="text-[12px] font-bold text-[var(--amber-deep)]">
               Due {formatIsoDate(dueDate)}
             </span>

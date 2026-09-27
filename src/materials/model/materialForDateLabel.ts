@@ -18,7 +18,22 @@ export function materialFocusDayKind(
   return null;
 }
 
-/** Edit form field title for `scheduled_date`. */
+/**
+ * Edit form field title for `scheduled_date` on a material (not an assignment).
+ * Matches a school or home day as Focus Day; otherwise Date available.
+ */
+export function materialAvailableDateFieldLabel(
+  isoDate: string,
+  schoolDays: readonly SchoolDay[] = DEFAULT_SCHOOL_DAYS,
+  homeDays: readonly HomeDay[] = [],
+): string {
+  const kind = materialFocusDayKind(isoDate, schoolDays, homeDays);
+  if (kind === "home") return "Focus Day (Home)";
+  if (kind === "school") return "Focus Day (School)";
+  return "Date available";
+}
+
+/** Edit form field title for `scheduled_date` on an assignment. */
 export function materialFocusDayFieldLabel(
   isoDate: string,
   schoolDays: readonly SchoolDay[] = DEFAULT_SCHOOL_DAYS,

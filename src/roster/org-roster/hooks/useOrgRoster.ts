@@ -16,6 +16,7 @@ import {
   classQueryKeys,
   createClass,
   listClasses,
+  listClassesCatalogMeta,
 } from "@/roster/databridge/classes";
 import {
   enrollStudents,
@@ -51,8 +52,14 @@ export function useOrgRoster() {
   });
 
   const classesQuery = useQuery({
-    queryKey: classQueryKeys.list(organization.id),
-    queryFn: () => listClasses(organization.id),
+    queryKey: classQueryKeys.listWithCatalog(organization.id),
+    queryFn: async () => {
+      const classes = await listClasses(organization.id);
+      const catalogByClassId = await listClassesCatalogMeta(
+        classes.map((classGroup) => classGroup.id),
+      );
+      return { classes, catalogByClassId };
+    },
   });
 
   const coursesQuery = useQuery({
@@ -132,6 +139,9 @@ export function useOrgRoster() {
       await queryClient.invalidateQueries({
         queryKey: classQueryKeys.list(organization.id),
       });
+      await queryClient.invalidateQueries({
+        queryKey: classQueryKeys.listWithCatalog(organization.id),
+      });
       toast("Class created.");
     },
     onError: (error: Error) => {
@@ -160,6 +170,9 @@ export function useOrgRoster() {
       });
       await queryClient.invalidateQueries({
         queryKey: classQueryKeys.list(organization.id),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: classQueryKeys.listWithCatalog(organization.id),
       });
       toast(count === 1 ? "Student added to class." : `${count} students added to class.`);
     },
@@ -256,7 +269,8 @@ export function useOrgRoster() {
     organization,
     gradeLabels: organizationQuery.data?.gradeLabels ?? [],
     students,
-    classes: classesQuery.data ?? [],
+    classes: classesQuery.data?.classes ?? [],
+    catalogByClassId: classesQuery.data?.catalogByClassId ?? {},
     courses: coursesQuery.data ?? [],
     query,
     selectedIds,

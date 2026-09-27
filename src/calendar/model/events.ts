@@ -160,6 +160,8 @@ export function chipsForMaterials(
     colorKey: CourseColorKey;
     scheduledDate: string | null;
     dueDate: string | null;
+    /** When `material`, due chips are omitted even if a due date is present. */
+    workType?: "material" | "assignment";
     unitId: number | null;
     unitStart: string | null;
     unitEnd: string | null;
@@ -192,7 +194,7 @@ export function chipsForMaterials(
         unpublished: material.unpublished,
       });
     }
-    if (material.dueDate) {
+    if (material.dueDate && material.workType !== "material") {
       chips.push({
         itemKind,
         materialId: material.id,

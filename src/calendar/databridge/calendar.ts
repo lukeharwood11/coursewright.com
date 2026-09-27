@@ -22,6 +22,7 @@ export type CalendarSourceMaterial = {
   colorKey: CourseColorKey;
   scheduledDate: string | null;
   dueDate: string | null;
+  workType: "material" | "assignment";
   unitId: number | null;
   unitStart: string | null;
   unitEnd: string | null;
@@ -146,7 +147,7 @@ async function loadStaffCalendar(
     const { data, error } = await db
       .from("materials")
       .select(
-        "id, title, scheduled_date, due_date, course_id, status, deleted_at, visibility, unit:units(id, start_date, end_date)",
+        "id, title, work_type, scheduled_date, due_date, course_id, status, deleted_at, visibility, unit:units(id, start_date, end_date)",
       )
       .in("course_id", courseIds)
       .is("deleted_at", null)
@@ -166,6 +167,7 @@ async function loadStaffCalendar(
           colorKey: course.colorKey,
           scheduledDate: row.scheduled_date,
           dueDate: row.due_date,
+          workType: row.work_type === "assignment" ? "assignment" : "material",
           unitId: unit?.id ?? null,
           unitStart: unit?.start_date ?? null,
           unitEnd: unit?.end_date ?? null,
@@ -279,7 +281,7 @@ async function loadPublishedCoursesCalendar(
     const { data, error } = await db
       .from("materials")
       .select(
-        "id, title, scheduled_date, due_date, course_id, status, deleted_at, visibility, unit:units(id, start_date, end_date)",
+        "id, title, work_type, scheduled_date, due_date, course_id, status, deleted_at, visibility, unit:units(id, start_date, end_date)",
       )
       .in("course_id", courseIds)
       .is("deleted_at", null)
@@ -300,6 +302,7 @@ async function loadPublishedCoursesCalendar(
           colorKey: course.colorKey,
           scheduledDate: row.scheduled_date,
           dueDate: row.due_date,
+          workType: row.work_type === "assignment" ? "assignment" : "material",
           unitId: unit?.id ?? null,
           unitStart: unit?.start_date ?? null,
           unitEnd: unit?.end_date ?? null,

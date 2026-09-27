@@ -3,6 +3,10 @@ import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { MATERIAL_KINDS, materialKindLabel, type MaterialKind } from "@/materials/model/kind";
+import {
+  materialWorkTypeLabel,
+  type MaterialWorkType,
+} from "@/materials/model/workType";
 import { useAddMaterial } from "../hooks/useAddMaterial";
 import { AudioSnippetRecorder } from "./AudioSnippetRecorder";
 import { MaterialDateFields } from "./MaterialDateFields";
@@ -18,6 +22,7 @@ export function AddMaterialForm({
   orgSlug,
   courseId,
   unitId,
+  workType,
   label,
   fromUnitPage = false,
   formOnly = false,
@@ -27,6 +32,7 @@ export function AddMaterialForm({
   orgSlug: string;
   courseId: number;
   unitId: number | null;
+  workType: MaterialWorkType;
   label: string;
   fromUnitPage?: boolean;
   /** Skip the trigger button; parent mounts this only when the form should show. */
@@ -39,6 +45,7 @@ export function AddMaterialForm({
     orgSlug,
     courseId,
     unitId,
+    workType,
     fromUnitPage,
   });
 
@@ -61,7 +68,9 @@ export function AddMaterialForm({
       onSubmit={add.onSubmit}
       className="rounded-[10px] border border-dashed border-[var(--line)] bg-[var(--surface)] p-4"
     >
-      <p className="text-[13px] font-bold text-[var(--ink-soft)]">Add material</p>
+      <p className="text-[13px] font-bold text-[var(--ink-soft)]">
+        Add {materialWorkTypeLabel(workType).toLowerCase()}
+      </p>
       <div className="mt-3 flex flex-wrap gap-2">
         {MATERIAL_KINDS.map((kind) => (
           <KindButton
@@ -121,6 +130,7 @@ export function AddMaterialForm({
         </div>
       ) : null}
       <MaterialDateFields
+        workType={workType}
         scheduledDate={add.scheduledDate}
         dueDate={add.dueDate}
         dueTime={add.dueTime}
@@ -138,7 +148,7 @@ export function AddMaterialForm({
       ) : null}
       <div className="mt-4 flex flex-wrap gap-2">
         <Button type="submit" disabled={add.submitting}>
-          {add.submitting ? "Adding…" : "Add material"}
+          {add.submitting ? "Adding…" : `Add ${materialWorkTypeLabel(workType).toLowerCase()}`}
         </Button>
         <Button
           type="button"

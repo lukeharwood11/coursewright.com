@@ -107,6 +107,7 @@ export function UnitOutlineList({
                 title={material.title}
                 description={material.description}
                 kind={material.kind}
+                workType={material.workType}
                 scheduledDate={material.scheduledDate}
                 dueDate={material.dueDate}
                 importantNow={importantIds.has(material.id)}

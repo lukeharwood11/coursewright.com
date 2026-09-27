@@ -19,4 +19,4 @@ Month and week **calendar** of assigned/due materials, lesson plans, and shared 
 ## Don’t
 
 - Put lesson-plan authoring here — that lives in `lesson-plans/`.
-- Invent a separate assignment object.
+- Invent a separate assignment table. Assignment is `materials.work_type = assignment` (due chips). `work_type = material` is assigned-only.

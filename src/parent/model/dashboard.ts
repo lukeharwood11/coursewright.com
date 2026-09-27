@@ -19,6 +19,7 @@ export type ParentDashboardMaterial = {
   /** When the work is assigned / for This week (scheduled_date, else unit start). */
   assignedDate: string | null;
   dueDate: string | null;
+  workType?: "material" | "assignment";
   unitId: number | null;
   itemKind?: "material" | "quiz";
   shareAnswerKeyWithParents?: boolean;
@@ -154,6 +155,7 @@ export type ParentDashboardSource = {
     title: string;
     scheduledDate: string | null;
     dueDate: string | null;
+    workType?: "material" | "assignment";
     courseId: number;
     unitId: number | null;
     unitStart: string | null;
@@ -238,7 +240,8 @@ function toDashboardMaterial(
       material.unitStart,
       material.unitEnd,
     ),
-    dueDate: material.dueDate,
+    dueDate: material.workType === "material" ? null : material.dueDate,
+    workType: material.workType,
     unitId: material.unitId,
     itemKind: material.itemKind ?? "material",
     shareAnswerKeyWithParents: material.shareAnswerKeyWithParents,

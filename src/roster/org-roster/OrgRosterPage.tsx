@@ -25,6 +25,7 @@ import { BatchCreateStudentsForm } from "@/roster/student-profile/components/Bat
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
 import { AddStudentsDrawer } from "./components/AddStudentsDrawer";
 import { AssignSelectedBar } from "./components/AssignSelectedBar";
+import { ClassCard } from "./components/ClassCard";
 import { useOrgRoster } from "./hooks/useOrgRoster";
 import { useToastOnError } from "@/ui/useToastOnError";
 
@@ -298,15 +299,14 @@ export function OrgRosterPage() {
               course.
             </p>
           ) : (
-            <ul className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <ul className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
               {roster.classes.map((classGroup) => (
-                <li key={classGroup.id}>
-                  <Link
-                    to={`/my/${roster.organization.slug}/classes/${classGroup.id}`}
-                    className="block h-full rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 text-[15.5px] font-extrabold text-[var(--ink)] hover:border-[var(--green)] hover:bg-[var(--green-tint)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]"
-                  >
-                    {classGroup.title}
-                  </Link>
+                <li key={classGroup.id} className="min-h-0">
+                  <ClassCard
+                    classGroup={classGroup}
+                    orgSlug={roster.organization.slug}
+                    catalogMeta={roster.catalogByClassId[classGroup.id]}
+                  />
                 </li>
               ))}
             </ul>

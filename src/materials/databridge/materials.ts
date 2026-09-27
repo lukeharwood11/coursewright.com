@@ -2,6 +2,10 @@ import type { Json } from "@/infrastructure/supabase/database.types";
 import { requireSupabase } from "./client";
 import { nextPosition } from "@/units/model/order";
 import { parseMaterialKind, type MaterialKind } from "@/materials/model/kind";
+import {
+  parseMaterialWorkType,
+  type MaterialWorkType,
+} from "@/materials/model/workType";
 import type { CreateMaterialInput } from "@/materials/model/validate";
 import {
   parseMaterialVisibility,
@@ -16,6 +20,7 @@ export type MaterialRecord = {
   title: string;
   description: string;
   kind: MaterialKind;
+  workType: MaterialWorkType;
   url: string | null;
   fileId: number | null;
   scheduledDate: string | null;
@@ -43,7 +48,7 @@ export const materialQueryKeys = {
 };
 
 const MATERIAL_COLUMNS =
-  "id, organization_id, course_id, unit_id, title, description, kind, url, file_id, scheduled_date, due_date, due_at, due_timezone, accept_submissions, allow_submissions_past_due, gradable, points_possible, submission_limit, submission_file_types, position, current_version, visibility, deleted_at";
+  "id, organization_id, course_id, unit_id, title, description, kind, work_type, url, file_id, scheduled_date, due_date, due_at, due_timezone, accept_submissions, allow_submissions_past_due, gradable, points_possible, submission_limit, submission_file_types, position, current_version, visibility, deleted_at";
 
 type MaterialRow = {
   id: number;
@@ -53,6 +58,7 @@ type MaterialRow = {
   title: string;
   description: string;
   kind: string;
+  work_type: string;
   url: string | null;
   file_id: number | null;
   scheduled_date: string | null;
@@ -73,7 +79,8 @@ type MaterialRow = {
 
 function toMaterial(row: MaterialRow): MaterialRecord | null {
   const kind = parseMaterialKind(row.kind);
-  if (!kind || row.course_id == null) return null;
+  const workType = parseMaterialWorkType(row.work_type);
+  if (!kind || !workType || row.course_id == null) return null;
   return {
     id: row.id,
     organizationId: row.organization_id,
@@ -82,6 +89,7 @@ function toMaterial(row: MaterialRow): MaterialRecord | null {
     title: row.title,
     description: row.description,
     kind,
+    workType,
     url: row.url,
     fileId: row.file_id,
     scheduledDate: row.scheduled_date,
@@ -173,12 +181,14 @@ export async function createMaterial(args: {
       title: args.input.title,
       description: args.input.description,
       kind: args.input.kind,
+      work_type: args.input.workType,
       url: args.input.url,
       file_id: args.fileId ?? null,
       scheduled_date: args.input.scheduledDate,
-      due_date: args.input.dueDate,
-      due_at: args.dueAt ?? null,
-      due_timezone: args.dueTimezone ?? null,
+      due_date: args.input.workType === "assignment" ? args.input.dueDate : null,
+      due_at: args.input.workType === "assignment" ? (args.dueAt ?? null) : null,
+      due_timezone:
+        args.input.workType === "assignment" ? (args.dueTimezone ?? null) : null,
       position: nextPosition(siblings.map((row) => row.position)),
     })
     .select(MATERIAL_COLUMNS)
@@ -196,6 +206,7 @@ export async function updateMaterial(
     title?: string;
     description?: string;
     url?: string | null;
+    workType?: MaterialWorkType;
     fileId?: number | null;
     scheduledDate?: string | null;
     dueDate?: string | null;
@@ -220,6 +231,7 @@ export async function updateMaterial(
       title: patch.title,
       description: patch.description,
       url: patch.url,
+      work_type: patch.workType,
       file_id: patch.fileId,
       scheduled_date: patch.scheduledDate,
       due_date: patch.dueDate,
@@ -315,6 +327,22 @@ function snapshotBlocks(snapshot: unknown): SnapshotBlock[] {
   });
 }
 
+function workTypeFromSnapshot(material: Record<string, unknown>): MaterialWorkType {
+  const parsed =
+    typeof material.work_type === "string"
+      ? parseMaterialWorkType(material.work_type)
+      : null;
+  if (parsed) return parsed;
+  if (
+    typeof material.due_date === "string" ||
+    material.accept_submissions === true ||
+    material.gradable === true
+  ) {
+    return "assignment";
+  }
+  return "material";
+}
+
 function snapshotMaterial(snapshot: unknown): Record<string, unknown> | null {
   if (!snapshot || typeof snapshot !== "object") return null;
   const material = (snapshot as { material?: unknown }).material;
@@ -329,6 +357,9 @@ export async function revertMaterialToVersion(
   const material = snapshotMaterial(snapshot);
   if (!material) throw new Error("That version doesn’t have a snapshot we can restore.");
 
+  const workType = workTypeFromSnapshot(material);
+  const assignment = workType === "assignment";
+
   const db = requireSupabase();
   const { error: updateError } = await db
     .from("materials")
@@ -337,33 +368,34 @@ export async function revertMaterialToVersion(
       description:
         typeof material.description === "string" ? material.description : undefined,
       url: typeof material.url === "string" ? material.url : null,
+      work_type: workType,
       file_id: typeof material.file_id === "number" ? material.file_id : null,
       scheduled_date:
         typeof material.scheduled_date === "string" ? material.scheduled_date : null,
-      due_date: typeof material.due_date === "string" ? material.due_date : null,
+      due_date:
+        assignment && typeof material.due_date === "string" ? material.due_date : null,
       due_at:
-        material.due_date == null
+        !assignment || material.due_date == null
           ? null
           : typeof material.due_at === "string"
             ? material.due_at
             : null,
       due_timezone:
-        material.due_date == null
+        !assignment || material.due_date == null
           ? null
           : typeof material.due_timezone === "string"
             ? material.due_timezone
             : null,
-      accept_submissions:
-        typeof material.accept_submissions === "boolean"
-          ? material.accept_submissions
-          : undefined,
+      accept_submissions: assignment && material.accept_submissions === true,
       allow_submissions_past_due:
         typeof material.allow_submissions_past_due === "boolean"
           ? material.allow_submissions_past_due
           : undefined,
-      gradable: material.gradable === true,
+      gradable: assignment && material.gradable === true,
       points_possible:
-        material.gradable === true && typeof material.points_possible === "number"
+        assignment &&
+        material.gradable === true &&
+        typeof material.points_possible === "number"
           ? material.points_possible
           : null,
       submission_limit:

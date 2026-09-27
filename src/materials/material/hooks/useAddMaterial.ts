@@ -7,6 +7,7 @@ import { createMaterial, materialQueryKeys } from "@/materials/databridge/materi
 import { uploadNewFile } from "@/materials/databridge/files";
 import { materialLocationState } from "@/materials/model/navigation";
 import type { MaterialKind } from "@/materials/model/kind";
+import type { MaterialWorkType } from "@/materials/model/workType";
 import { materialEditPath, materialPath } from "@/materials/model/paths";
 import { validateMaterialFields } from "@/materials/model/validate";
 import { DEFAULT_DUE_TIME, browserTimeZone, dueInstantIso } from "@/submissions/model/dueInstant";
@@ -17,6 +18,7 @@ export function useAddMaterial(args: {
   orgSlug: string;
   courseId: number;
   unitId: number | null;
+  workType: MaterialWorkType;
   fromUnitPage?: boolean;
 }) {
   const user = useAuthedUser();
@@ -39,9 +41,10 @@ export function useAddMaterial(args: {
         title,
         description,
         kind,
+        workType: args.workType,
         url,
         scheduledDate,
-        dueDate,
+        dueDate: args.workType === "assignment" ? dueDate : "",
       });
       if (!parsed.ok) throw new Error(parsed.error);
       if (kind === "file" && !file) {

@@ -64,6 +64,7 @@ export function parentWeekCalendar(dashboard: ParentDashboard): ParentWeekCalend
             colorKey: course.colorKey,
             scheduledDate: material.assignedDate,
             dueDate: material.dueDate,
+            workType: material.workType,
             unitId: material.unitId,
             unitStart: null,
             unitEnd: null,

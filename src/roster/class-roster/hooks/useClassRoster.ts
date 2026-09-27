@@ -175,6 +175,9 @@ export function useClassRoster() {
       await queryClient.invalidateQueries({
         queryKey: classQueryKeys.leaders(classId),
       });
+      await queryClient.invalidateQueries({
+        queryKey: classQueryKeys.listWithCatalog(organization.id),
+      });
       toast("Lead added.");
     },
     onError: (error: Error) => {
@@ -187,6 +190,9 @@ export function useClassRoster() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: classQueryKeys.leaders(classId),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: classQueryKeys.listWithCatalog(organization.id),
       });
       toast("Lead removed.");
     },
@@ -327,6 +333,9 @@ async function invalidateClass(
 ) {
   await queryClient.invalidateQueries({
     queryKey: classQueryKeys.list(organizationId),
+  });
+  await queryClient.invalidateQueries({
+    queryKey: classQueryKeys.listWithCatalog(organizationId),
   });
   await queryClient.invalidateQueries({
     queryKey: studentQueryKeys.list(organizationId),

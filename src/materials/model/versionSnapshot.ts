@@ -1,5 +1,6 @@
 import type { BlockRecord } from "@/materials/databridge/blocks";
 import { parseBlockKind, parseMaterialKind, type MaterialKind } from "./kind";
+import { parseMaterialWorkType, type MaterialWorkType } from "./workType";
 
 /** What the version-history dialog can show for one snapshot. */
 export type MaterialVersionPreview = {
@@ -7,6 +8,7 @@ export type MaterialVersionPreview = {
   description: string;
   url: string | null;
   kind: MaterialKind | null;
+  workType: MaterialWorkType;
   fileId: number | null;
   scheduledDate: string | null;
   dueDate: string | null;
@@ -38,6 +40,17 @@ export function previewFromMaterialSnapshot(
   const materialId = numberOrNull(material.id) ?? 0;
   const kind =
     typeof material.kind === "string" ? parseMaterialKind(material.kind) : null;
+  const parsedWorkType =
+    typeof material.work_type === "string"
+      ? parseMaterialWorkType(material.work_type)
+      : null;
+  const workType =
+    parsedWorkType ??
+    (material.due_date != null ||
+    material.accept_submissions === true ||
+    material.gradable === true
+      ? "assignment"
+      : "material");
   const blocksRaw = Array.isArray(root.blocks) ? root.blocks : [];
   const blocks = blocksRaw.flatMap((item, index): BlockRecord[] => {
     const row = asRecord(item);
@@ -61,6 +74,7 @@ export function previewFromMaterialSnapshot(
     description: typeof material.description === "string" ? material.description : "",
     url: stringOrNull(material.url),
     kind,
+    workType,
     fileId: numberOrNull(material.file_id),
     scheduledDate: stringOrNull(material.scheduled_date),
     dueDate: stringOrNull(material.due_date),

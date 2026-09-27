@@ -22,8 +22,9 @@ View (and edit) a single material placement — the thing parents open from this
 - Instructors: edit via `…/edit`, set important now, **publish / unpublish**, share resource link, print, version/revert, soft-delete.
 - **Published:** green **Published** badge (check) next to the title for staff; no “families can see this” banner. **Unpublish** sits at the bottom of the material view/edit.
 - **Unpublished:** amber warning banner + Publish; unpublished badge next to title.
-- Students: read + print + play media for **published** materials; unpublished is not listed and not openable (RLS); no builder chrome; account required (P0). Staff **Student view** matches that presentation (quizzes show questions only). When the material **accepts submissions**, a linked parent turns in one or more files for an enrolled student.
-- **Accept submissions** (edit): off by default. When on, the teacher chooses allowed file groups (at least one), how many submissions a student may make (1–10, default 2), and whether submissions are allowed past the due time (on by default).
+- Students: read + print + play media for **published** materials; unpublished is not listed and not openable (RLS); no builder chrome; account required (P0). Staff **Student view** matches that presentation (quizzes show questions only). When an **assignment** **accepts submissions**, a linked parent turns in one or more files for an enrolled student.
+- **Work type:** **Material** or **Assignment** (same row; page / link / file is still the content kind). Unit **Add** offers Material, Assignment, and Quiz. Edit can switch type. **Material:** optional **date available** (`scheduled_date`); no due date; no submissions. **Assignment:** due date is the primary field (optional focus day); submissions are optional.
+- **Accept submissions** (edit, assignments only): off by default. When on, the teacher chooses allowed file groups (at least one), how many submissions a student may make (1–10, default 2), and whether submissions are allowed past the due time (on by default).
 - **Gradable** (edit, only while accepting submissions): off by default. On enables **Possible points** (default 10, fractions such as 4.5 allowed) and the saved grade counts in the course gradebook. Off disables points; the teacher saves feedback only, and the submission stays out of the gradebook.
 - A submission is one turn-in: one or more files, one timestamp, labeled **"<Parent name> on behalf of <child name>"** (or the student name when they submit themselves). The family and the teacher both see every submission in a **right side panel** on the material view (allowed file kinds listed there). There is no separate submissions URL. Submitted files offer **Download**; **Open** appears only when the browser can render the file (PDF, photo, audio, video, plain text) and shows it in a fullscreen view portal.
 - View URL is the material path without `/edit`; edit appends `/edit`.
@@ -38,8 +39,10 @@ View (and edit) a single material placement — the thing parents open from this
 
 - **Title** (all kinds)
 - **Description** (all kinds)
-- Optional **due_date** (+ time for submission cutoff)
-- Optional **scheduled_date** — UI **Focus Day** / **Focus Day (School)** / **Focus Day (Home)** from org calendar; drives This week
+- **Work type** badge: Material or Assignment (distinct from the page / link / file kind badge)
+- **Assignment:** optional **due_date** (+ time for submission cutoff), emphasized
+- **Material:** optional **scheduled_date** labeled **Date available** (or **Focus Day (School)** / **Focus Day (Home)** when the date matches the org calendar). No due date
+- **Assignment:** optional **scheduled_date** — UI **Focus Day** / **Focus Day (School)** / **Focus Day (Home)** from org calendar; drives This week
 - Optional **due time** (`due_at` + timezone). Default 11:59 PM when a due date is saved. Shown with the timezone abbreviation. This week still uses the calendar day.
 - **Accept submissions**, allowed file groups, submissions allowed, allow past due date
 - **Important now** flag
@@ -64,10 +67,12 @@ View (and edit) a single material placement — the thing parents open from this
 - **Description** — every material (field always present; may be empty)
 - Course context; optional **unit** name when nested (omit when top-level)
 - Kind badge: page / link / file
+- Work-type badge: **Material** or **Assignment** (assignment uses a distinct icon and amber pill on lists)
 - **Visibility** — unpublished: amber badge + warning banner; published: green Published badge (staff). Unpublish at bottom of page/edit
-- Optional `due_date` (+ time; default **11:59 PM** in the saver’s timezone when a due date is set)
-- Optional `scheduled_date` — **Due date** is the primary field; **Add focus day** opens the This week day. Field title becomes **Focus Day (School)** or **Focus Day (Home)** when the date matches the org calendar. Wins over unit dates for This week; required for top-level materials without a unit to appear in This week
-- **Accept submissions** — allowed files, submissions allowed, allow submissions past due date
+- **Assignment:** optional `due_date` (+ time; default **11:59 PM** in the saver’s timezone when a due date is set). **Due date** is the primary field; **Add focus day** opens the This week day. Field title becomes **Focus Day (School)** or **Focus Day (Home)** when the date matches the org calendar
+- **Material:** optional `scheduled_date` labeled **Date available** (school/home focus label when it matches). No due date field
+- `scheduled_date` wins over unit dates for This week; required for top-level rows without a unit to appear in This week
+- **Accept submissions** (assignments only) — allowed files, submissions allowed, allow submissions past due date
 - Important now flag (instructor)
 
 ### Content (v1 kinds)
@@ -91,7 +96,7 @@ Word-like layout (same condensed chrome as resource / quiz edit): compact header
 - No “Edit …” page title. One header row: back, editable **title** beside it, quiet **Add description** / **Edit description** (small dialog), **Save** / **Cancel** (reads **Close** when unchanged); on desktop also **Save & close** (primary; saves then returns to the material view). **Cmd/Ctrl+S** saves when there are changes. Below the `md` breakpoint those actions collapse into a header **⋯** menu. Leaving the title field, pressing **Enter**, or leaving the editor (back / Close / Cancel) saves the title on its own.
 - Description via the header button (not an always-visible field).
 - Link URL when kind is link (slim field under the header).
-- Assignment / due dates and **Accept submissions** settings sit below the content (page editor / file / link note).
+- **Material / Assignment** switch, then dates, sit below the content (page editor / file / link note). **Accept submissions** only when the type is Assignment.
 - **page:** Lexical editor fills most of the viewport (same chrome as resource document edit). A version is stored only when the instructor saves and something changed — not per keystroke.
 - **link / file:** edit URL or replace file (file replace → new FileVersion)
 - **Version history** sits in the page editor toolbar (labeled on desktop; **⋯** on small screens). Link/file materials expose it in the edit header instead. The dialog lists each version with change type, **who saved**, and when; browse with preview; **Restore this version** confirms before applying.

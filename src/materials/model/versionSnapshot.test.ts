@@ -30,6 +30,7 @@ test("previewFromMaterialSnapshot reads placement and page blocks", () => {
     description: "Intro",
     url: null,
     kind: "page",
+    workType: "material",
     fileId: null,
     scheduledDate: "2026-09-01",
     dueDate: null,
@@ -44,6 +45,21 @@ test("previewFromMaterialSnapshot reads placement and page blocks", () => {
       },
     ],
   });
+});
+
+test("previewFromMaterialSnapshot treats a due date without work_type as an assignment", () => {
+  const preview = previewFromMaterialSnapshot({
+    material: {
+      id: 4,
+      title: "Essay",
+      description: "",
+      kind: "page",
+      due_date: "2026-09-18",
+    },
+    blocks: [],
+  });
+  assert.equal(preview?.workType, "assignment");
+  assert.equal(preview?.dueDate, "2026-09-18");
 });
 
 test("previewFromMaterialSnapshot returns null without material", () => {

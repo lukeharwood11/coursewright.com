@@ -2,6 +2,7 @@ import { useId, useRef, useState } from "react";
 import {
   ChevronDownIcon,
   ClipboardDocumentCheckIcon,
+  ClipboardDocumentListIcon,
   DocumentTextIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
@@ -21,7 +22,7 @@ const segmentShell =
 const menuItemClass =
   "flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[13px] font-bold text-[var(--ink)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:bg-[var(--green-tint)] focus-visible:outline-none";
 
-type AddMode = "material" | "quiz";
+type AddMode = "material" | "assignment" | "quiz";
 
 export function UnitAddMenu({
   organizationId,
@@ -46,15 +47,16 @@ export function UnitAddMenu({
     setMode(next);
   }
 
-  if (mode === "material") {
+  if (mode === "material" || mode === "assignment") {
     return (
       <AddMaterialForm
         organizationId={organizationId}
         orgSlug={orgSlug}
         courseId={courseId}
         unitId={unitId}
+        workType={mode}
         fromUnitPage={fromUnitPage}
-        label="Add material"
+        label={mode === "assignment" ? "Add assignment" : "Add material"}
         formOnly
         onCancel={() => setMode(null)}
       />
@@ -112,6 +114,17 @@ export function UnitAddMenu({
               <DocumentTextIcon className="h-4 w-4" />
             </span>
             Material
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className={menuItemClass}
+            onClick={() => choose("assignment")}
+          >
+            <span className="text-[var(--ink-soft)]" aria-hidden>
+              <ClipboardDocumentListIcon className="h-4 w-4" />
+            </span>
+            Assignment
           </button>
           <button
             type="button"

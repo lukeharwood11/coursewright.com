@@ -187,7 +187,7 @@ Other drafts kept for reference (not in use):
 | Student / family chrome | **Student view** | This week + Focus + announcements; staff toggle label; parents inherit this presentation |
 | Calendar page | **Calendar** | month/week view of assigned (outline) and due (filled) work, color-coded by course |
 | This week's content | **This week** | week calendar of lesson plans + assigned/due chips; Sunday–Saturday |
-| Dated unit material (P0 homework) | **Material** (with dates) | not an assignment object yet |
+| Dated unit content (P0 homework) | **Material** or **Assignment** | same `materials` row (`work_type`). Material = date available, no due date or submissions. Assignment = due date and optional submissions. Not a separate table |
 | Turned-in work on a material | **Submission** | one or more files, one timestamp; "<Parent name> on behalf of <child name>"; not a quiz entry |
 | Turned-in quiz | **Entry** | one submit. Parent: "<Parent name> on behalf of <child name>". Student login: the student name |
 | Extra org admin | **Admin invite** | email, claimable |

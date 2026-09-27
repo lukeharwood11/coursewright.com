@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { materialFocusDayFieldLabel } from "@/materials/model/materialForDateLabel";
+import { materialAvailableDateFieldLabel, materialFocusDayFieldLabel } from "@/materials/model/materialForDateLabel";
+import type { MaterialWorkType } from "@/materials/model/workType";
 import { DEFAULT_HOME_DAYS, type HomeDay } from "@/organizations/model/homeDays";
 import {
   DEFAULT_SCHOOL_DAYS,
@@ -8,16 +9,87 @@ import {
 import { Input } from "@/ui/Input";
 
 /**
- * Optional due date (primary) and optional focus day (`scheduled_date`) for This week.
- * Focus day label refines to school or home day from the org calendar.
+ * Assignment: due date is primary; focus day (`scheduled_date`) is optional.
+ * Material: date available (`scheduled_date`) only — no due date.
  */
 export function MaterialDateFields({
+  workType,
   scheduledDate,
   dueDate,
   dueTime,
   timeZoneLabel,
+  acceptSubmissions = false,
+  allowPastDue = true,
   schoolDays = DEFAULT_SCHOOL_DAYS,
   homeDays = DEFAULT_HOME_DAYS,
+  onScheduledChange,
+  onDueDateChange,
+  onDueTimeChange,
+}: {
+  workType: MaterialWorkType;
+  scheduledDate: string;
+  dueDate: string;
+  dueTime: string;
+  timeZoneLabel: string;
+  /** Due time is a submission cutoff only when turn-in is on and late work is closed. */
+  acceptSubmissions?: boolean;
+  allowPastDue?: boolean;
+  schoolDays?: readonly SchoolDay[];
+  homeDays?: readonly HomeDay[];
+  onScheduledChange: (value: string) => void;
+  onDueDateChange: (value: string) => void;
+  onDueTimeChange: (value: string) => void;
+}) {
+  if (workType === "material") {
+    const availableLabel = materialAvailableDateFieldLabel(
+      scheduledDate,
+      schoolDays,
+      homeDays,
+    );
+    return (
+      <div className="mt-3 flex flex-col gap-3">
+        <label className="flex min-w-0 flex-col gap-1">
+          <span className="text-[13px] font-bold text-[var(--ink-soft)]">
+            {availableLabel}
+          </span>
+          <Input
+            className="w-full"
+            type="date"
+            value={scheduledDate}
+            onChange={(event) => onScheduledChange(event.target.value)}
+          />
+          <span className="text-[12px] text-[var(--ink-faint)]">
+            Shows on This week on this day. Leave blank if it isn’t tied to a day.
+          </span>
+        </label>
+      </div>
+    );
+  }
+
+  return (
+    <AssignmentDateFields
+      scheduledDate={scheduledDate}
+      dueDate={dueDate}
+      dueTime={dueTime}
+      timeZoneLabel={timeZoneLabel}
+      submissionCutoff={acceptSubmissions && !allowPastDue}
+      schoolDays={schoolDays}
+      homeDays={homeDays}
+      onScheduledChange={onScheduledChange}
+      onDueDateChange={onDueDateChange}
+      onDueTimeChange={onDueTimeChange}
+    />
+  );
+}
+
+function AssignmentDateFields({
+  scheduledDate,
+  dueDate,
+  dueTime,
+  timeZoneLabel,
+  submissionCutoff,
+  schoolDays,
+  homeDays,
   onScheduledChange,
   onDueDateChange,
   onDueTimeChange,
@@ -26,8 +98,9 @@ export function MaterialDateFields({
   dueDate: string;
   dueTime: string;
   timeZoneLabel: string;
-  schoolDays?: readonly SchoolDay[];
-  homeDays?: readonly HomeDay[];
+  submissionCutoff: boolean;
+  schoolDays: readonly SchoolDay[];
+  homeDays: readonly HomeDay[];
   onScheduledChange: (value: string) => void;
   onDueDateChange: (value: string) => void;
   onDueTimeChange: (value: string) => void;
@@ -74,7 +147,9 @@ export function MaterialDateFields({
         </span>
         <span className="text-[12px] text-[var(--ink-faint)]">
           {dueDate
-            ? `Submission cutoff. Times use ${timeZoneLabel}.`
+            ? submissionCutoff
+              ? `Submission cutoff. Times use ${timeZoneLabel}.`
+              : `Times use ${timeZoneLabel}.`
             : "Leave blank if there is no due date."}
         </span>
       </label>

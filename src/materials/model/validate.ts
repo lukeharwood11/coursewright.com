@@ -2,6 +2,7 @@ export type CreateMaterialInput = {
   title: string;
   description: string;
   kind: "page" | "link" | "file";
+  workType: "material" | "assignment";
   url: string | null;
   scheduledDate: string | null;
   dueDate: string | null;
@@ -15,6 +16,7 @@ export function validateMaterialFields(raw: {
   title: string;
   description: string;
   kind: "page" | "link" | "file";
+  workType: "material" | "assignment";
   url: string;
   scheduledDate: string;
   dueDate: string;
@@ -35,15 +37,21 @@ export function validateMaterialFields(raw: {
     }
   }
 
+  const dueDate = raw.dueDate.trim();
+  if (raw.workType === "material" && dueDate) {
+    return { ok: false, error: "Materials don’t have a due date." };
+  }
+
   return {
     ok: true,
     value: {
       title,
       description: raw.description.trim(),
       kind: raw.kind,
+      workType: raw.workType,
       url: raw.kind === "link" ? url : null,
       scheduledDate: raw.scheduledDate.trim() || null,
-      dueDate: raw.dueDate.trim() || null,
+      dueDate: raw.workType === "assignment" ? dueDate || null : null,
     },
   };
 }

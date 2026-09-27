@@ -4,9 +4,11 @@ import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { DescriptionDialog } from "@/ui/DescriptionDialog";
 import { Input } from "@/ui/Input";
 import { PageLoading } from "@/ui/PageLoading";
+import { segmentButtonClass, SegmentGroup } from "@/ui/Tabs";
 import { useSaveShortcut } from "@/ui/useSaveShortcut";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { materialLocationState, materialOpenedFromUnit } from "@/materials/model/navigation";
+import { materialWorkTypeLabel } from "@/materials/model/workType";
 import { materialPath } from "@/materials/model/paths";
 import { timeZoneLabel } from "@/submissions/model/dueInstant";
 import { useMaterialEdit } from "./hooks/useMaterialEdit";
@@ -240,17 +242,39 @@ export function MaterialEditPage() {
 
           <div className="px-5 pb-8 md:px-8">
             <div className="max-w-xl">
+              <SegmentGroup label="Material or assignment" className="mt-3">
+                <button
+                  type="button"
+                  className={segmentButtonClass(edit.workType === "material")}
+                  aria-pressed={edit.workType === "material"}
+                  onClick={() => edit.setWorkType("material")}
+                >
+                  {materialWorkTypeLabel("material")}
+                </button>
+                <button
+                  type="button"
+                  className={segmentButtonClass(edit.workType === "assignment")}
+                  aria-pressed={edit.workType === "assignment"}
+                  onClick={() => edit.setWorkType("assignment")}
+                >
+                  {materialWorkTypeLabel("assignment")}
+                </button>
+              </SegmentGroup>
               <MaterialDateFields
+                workType={edit.workType}
                 scheduledDate={edit.scheduledDate}
                 dueDate={edit.dueDate}
                 dueTime={edit.dueTime}
                 timeZoneLabel={timeZoneLabel(edit.dueTimezone)}
+                acceptSubmissions={edit.acceptSubmissions}
+                allowPastDue={edit.allowPastDue}
                 schoolDays={page.organization.schoolDays}
                 homeDays={page.organization.homeDays}
                 onScheduledChange={edit.setScheduledDate}
                 onDueDateChange={edit.setDueDate}
                 onDueTimeChange={edit.setDueTime}
               />
+              {edit.workType === "assignment" ? (
               <SubmissionSettingsFields
                 acceptSubmissions={edit.acceptSubmissions}
                 allowPastDue={edit.allowPastDue}
@@ -265,6 +289,7 @@ export function MaterialEditPage() {
                 onLimitChange={edit.setSubmissionLimit}
                 onToggleType={edit.toggleFileType}
               />
+              ) : null}
             </div>
 
             {!page.material.deletedAt ? (

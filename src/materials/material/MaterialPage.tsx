@@ -14,8 +14,12 @@ import { formatDueDeadline } from "@/submissions/model/dueInstant";
 import { MaterialSubmissionsSection } from "@/submissions";
 import { SubmissionGrading } from "@/submissions/turn-in/components/SubmissionGrading";
 import { coursePath } from "@/courses/model/paths";
-import { materialForDateLabel } from "@/materials/model/materialForDateLabel";
+import {
+  materialAvailableDateFieldLabel,
+  materialForDateLabel,
+} from "@/materials/model/materialForDateLabel";
 import { materialKindLabel } from "@/materials/model/kind";
+import { materialWorkTypeLabel } from "@/materials/model/workType";
 import {
   materialBackDestination,
   materialLocationState,
@@ -112,6 +116,9 @@ export function MaterialPage() {
         title={page.material.title}
         meta={
           <>
+            <Badge variant={page.material.workType === "assignment" ? "amber" : "green"}>
+              {materialWorkTypeLabel(page.material.workType)}
+            </Badge>
             <Badge variant="slate">{materialKindLabel(page.material.kind)}</Badge>
             {page.importantNow ? (
               <Badge variant="amberSolid">Important now</Badge>
@@ -123,15 +130,21 @@ export function MaterialPage() {
             )}
             {page.material.scheduledDate ? (
               <span className="text-[12px] font-bold text-[var(--slate)]">
-                {materialForDateLabel(
-                  page.material.scheduledDate,
-                  page.organization.schoolDays,
-                  page.organization.homeDays,
-                )}{" "}
+                {page.material.workType === "material"
+                  ? materialAvailableDateFieldLabel(
+                      page.material.scheduledDate,
+                      page.organization.schoolDays,
+                      page.organization.homeDays,
+                    )
+                  : materialForDateLabel(
+                      page.material.scheduledDate,
+                      page.organization.schoolDays,
+                      page.organization.homeDays,
+                    )}{" "}
                 {formatIsoDate(page.material.scheduledDate)}
               </span>
             ) : null}
-            {page.material.dueDate ? (
+            {page.material.workType === "assignment" && page.material.dueDate ? (
               <span className="text-[12px] font-bold text-[var(--amber-deep)]">
                 Due{" "}
                 {page.material.dueAt && page.material.dueTimezone
@@ -234,7 +247,9 @@ export function MaterialPage() {
             </div>
           ) : null}
 
-          {page.canEdit && !page.material.deletedAt ? (
+          {page.canEdit &&
+          !page.material.deletedAt &&
+          page.material.workType === "assignment" ? (
             <SubmissionGrading material={page.material} courseId={page.material.courseId} />
           ) : null}
 
@@ -248,7 +263,10 @@ export function MaterialPage() {
           ) : null}
         </div>
 
-        {!page.material.deletedAt && page.material.courseId ? (
+        {!page.material.deletedAt &&
+        page.material.courseId &&
+        page.material.workType === "assignment" &&
+        page.material.acceptSubmissions ? (
           <MaterialSubmissionsSection
             material={page.material}
             courseId={page.material.courseId}

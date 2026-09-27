@@ -2050,6 +2050,7 @@ export type Database = {
           updated_at: string
           url: string | null
           visibility: string
+          work_type: string
         }
         Insert: {
           accept_submissions?: boolean
@@ -2086,6 +2087,7 @@ export type Database = {
           updated_at?: string
           url?: string | null
           visibility?: string
+          work_type?: string
         }
         Update: {
           accept_submissions?: boolean
@@ -2122,6 +2124,7 @@ export type Database = {
           updated_at?: string
           url?: string | null
           visibility?: string
+          work_type?: string
         }
         Relationships: [
           {

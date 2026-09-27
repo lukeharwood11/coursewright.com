@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { normalizeHomeDays } from "@/organizations/model/homeDays";
 import {
+  materialAvailableDateFieldLabel,
   materialFocusDayFieldLabel,
   materialForDateLabel,
 } from "./materialForDateLabel";
@@ -38,4 +39,16 @@ test("focus day label omits kind when the day matches neither", () => {
 
 test("focus day field label before a date is chosen", () => {
   assert.equal(materialFocusDayFieldLabel("", [1, 2, 3, 4, 5], []), "Focus Day");
+});
+
+test("date available stays plain until the day matches the org calendar", () => {
+  assert.equal(materialAvailableDateFieldLabel("", [1, 2, 3, 4, 5], []), "Date available");
+  assert.equal(
+    materialAvailableDateFieldLabel("2026-09-13", [1, 2, 3, 4, 5], []),
+    "Date available",
+  );
+  assert.equal(
+    materialAvailableDateFieldLabel("2026-09-15", [1, 2, 3, 4, 5], []),
+    "Focus Day (School)",
+  );
 });

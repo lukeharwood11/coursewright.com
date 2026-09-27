@@ -66,6 +66,7 @@ export function previewFromResourceSnapshot(
     description: typeof item.description === "string" ? item.description : "",
     url: stringOrNull(item.url),
     kind,
+    workType: "material",
     fileId: numberOrNull(item.file_id),
     scheduledDate: null,
     dueDate: null,

@@ -28,6 +28,7 @@ import {
   DEFAULT_SUBMISSION_LIMIT,
   submissionLimitValid,
 } from "@/submissions/model/submission";
+import type { MaterialWorkType } from "@/materials/model/workType";
 import { isNetworkError } from "@/ui/networkError";
 import { useMaterial } from "./useMaterial";
 
@@ -37,6 +38,7 @@ type PlacementSeed = {
   title: string;
   description: string;
   url: string | null;
+  workType: MaterialWorkType;
   scheduledDate: string | null;
   dueDate: string | null;
   dueAt: string | null;
@@ -55,6 +57,7 @@ export function useMaterialEdit() {
   const [savedTitle, setSavedTitle] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
+  const [workType, setWorkTypeState] = useState<MaterialWorkType>("material");
   const [scheduledDate, setScheduledDate] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [dueTime, setDueTime] = useState(DEFAULT_DUE_TIME);
@@ -90,6 +93,7 @@ export function useMaterialEdit() {
     setSavedTitle(material.title);
     setDescription(material.description);
     setUrl(material.url ?? "");
+    setWorkTypeState(material.workType);
     setScheduledDate(material.scheduledDate ?? "");
     setDueDate(material.dueDate ?? "");
     if (material.dueAt && material.dueTimezone) {
@@ -147,9 +151,14 @@ export function useMaterialEdit() {
   const baselineZone = page.material?.dueTimezone ?? browserTimeZone();
   const baselineTypes = parseSubmissionFileTypes(page.material?.submissionFileTypes ?? []).join(",");
 
-  const submissionsInvalid = acceptSubmissions && fileTypes.length === 0;
+  const submissionsInvalid =
+    workType === "assignment" && acceptSubmissions && fileTypes.length === 0;
   const limitInvalid = !submissionLimitValid(submissionLimit);
-  const pointsInvalid = acceptSubmissions && gradable && parseMaterialPoints(pointsText) == null;
+  const pointsInvalid =
+    workType === "assignment" &&
+    acceptSubmissions &&
+    gradable &&
+    parseMaterialPoints(pointsText) == null;
   const pointsPossible = gradable ? parseMaterialPoints(pointsText) : null;
 
   // Title is saved on blur / Enter / leave, so it must not enable Save.
@@ -157,6 +166,7 @@ export function useMaterialEdit() {
     page.material &&
       (description !== page.material.description ||
         (page.material.kind === "link" && url !== (page.material.url ?? "")) ||
+        workType !== page.material.workType ||
         scheduledDate !== (page.material.scheduledDate ?? "") ||
         dueDate !== (page.material.dueDate ?? "") ||
         (dueDate !== "" && dueTime !== baselineTime) ||
@@ -254,6 +264,8 @@ export function useMaterialEdit() {
         const parsed = JSON.parse(contentDraft) as SerializedEditorState;
         blocks = editorStateToBlocks(parsed, editorSettings);
       }
+      const assignment = workType === "assignment";
+      const savedDue = assignment ? dueDate : "";
       await saveMaterialPage({
         materialId: page.material.id,
         placement: placementChanged
@@ -261,16 +273,18 @@ export function useMaterialEdit() {
               title: savedTitleRef.current,
               description,
               url: page.material.kind === "link" ? url.trim() : page.material.url,
+              workType,
               scheduledDate: scheduledDate || null,
-              dueDate: dueDate || null,
-              dueAt: dueDate
-                ? dueInstantIso(dueDate, dueTime || DEFAULT_DUE_TIME, dueTimezone)
+              dueDate: savedDue || null,
+              dueAt: savedDue
+                ? dueInstantIso(savedDue, dueTime || DEFAULT_DUE_TIME, dueTimezone)
                 : null,
-              dueTimezone: dueDate ? dueTimezone : null,
-              acceptSubmissions,
+              dueTimezone: savedDue ? dueTimezone : null,
+              acceptSubmissions: assignment && acceptSubmissions,
               allowSubmissionsPastDue: allowPastDue,
-              gradable: acceptSubmissions && gradable,
-              pointsPossible: acceptSubmissions && gradable ? pointsPossible : null,
+              gradable: assignment && acceptSubmissions && gradable,
+              pointsPossible:
+                assignment && acceptSubmissions && gradable ? pointsPossible : null,
               submissionLimit,
               submissionFileTypes: fileTypes,
             }
@@ -303,6 +317,7 @@ export function useMaterialEdit() {
     title,
     description,
     url,
+    workType,
     scheduledDate,
     dueDate,
     dueTime,
@@ -316,6 +331,28 @@ export function useMaterialEdit() {
     setTitle,
     setDescription,
     setUrl,
+    setWorkType(next: MaterialWorkType) {
+      setWorkTypeState(next);
+      if (next === "material") {
+        setDueDate("");
+        setAcceptSubmissions(false);
+        setGradable(false);
+        return;
+      }
+      const saved = page.material;
+      if (!saved || saved.workType !== "assignment") return;
+      setDueDate(saved.dueDate ?? "");
+      setAcceptSubmissions(saved.acceptSubmissions);
+      setGradable(saved.gradable);
+      setAllowPastDue(saved.allowSubmissionsPastDue);
+      setSubmissionLimit(saved.submissionLimit);
+      setFileTypes(parseSubmissionFileTypes(saved.submissionFileTypes));
+      setPointsText(
+        saved.pointsPossible != null
+          ? String(saved.pointsPossible)
+          : String(DEFAULT_MATERIAL_POINTS),
+      );
+    },
     setScheduledDate,
     setDueDate,
     setDueTime,

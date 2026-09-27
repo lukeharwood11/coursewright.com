@@ -655,7 +655,7 @@ Optional content grouping on a **course** (P0) or a **template** (P1). Materials
 | deleted_at | timestamptz | soft delete |
 | deprecated_at | timestamptz | nullable |
 
-**Dating:** unit dates, per-material `scheduled_date` (assignment), and per-material `due_date` are **all optional**. For parent "this week": material appears when **assignment** falls in the week (`scheduled_date` when set; otherwise the unit range if the material has a unit) **and/or** when `due_date` falls in the week. Top-level materials need `scheduled_date` to count as assigned for the week. UI always labels **Assigned** vs **Due**.
+**Dating:** unit dates, per-material `scheduled_date`, and (assignments only) `due_date` are **optional**. **`work_type = material`** may set `scheduled_date` (date available) and must not set a due date or accept submissions. **`work_type = assignment`** may set a due date and optional submissions; `scheduled_date` is an optional focus day. For parent "this week": a row appears when **assigned** in the week (`scheduled_date` when set; otherwise the unit range if the material has a unit) **and/or** when an assignment’s `due_date` falls in the week. Top-level rows need `scheduled_date` to count as assigned for the week. UI always labels **Assigned** vs **Due**.
 
 ### Material
 
@@ -671,10 +671,11 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 | title | text | **required** — all kinds |
 | description | text | **optional** — all kinds (page · link · file); short blurb for lists / parents |
 | kind | text | **v1:** `page` · `link` · `file` |
+| work_type | text | **`material`** · **`assignment`**. Material: `scheduled_date` only; `due_date` / `due_at` / `due_timezone` null; `accept_submissions` and `gradable` false; `points_possible` null. Assignment: due date and optional submissions |
 | url | text | nullable — required when `kind = link` |
 | file_id | bigint | FK → **File**, nullable — required when `kind = file` |
-| scheduled_date | date | **optional** — assignment date; when set, used for calendar-week dashboard (wins over unit dates) |
-| due_date | date | **optional** — calendar due day; materials also appear on parent This week when this date falls in the week |
+| scheduled_date | date | **optional** — date available (material) or focus day (assignment); when set, used for calendar-week dashboard (wins over unit dates) |
+| due_date | date | **optional, assignments only** — calendar due day; the row also appears on parent This week when this date falls in the week |
 | due_at | timestamptz | **optional** — due instant for submissions. Null until the due date is saved with a time. Default wall time is 11:59 PM |
 | due_timezone | text | **optional** — IANA zone captured when the due time is saved. Display the deadline in this zone |
 | accept_submissions | boolean | default false. The student account or a linked parent may turn in files for an enrolled student |
@@ -705,7 +706,7 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 
 ### Material submission
 
-A student (or a linked parent on their behalf) turns work in on a **course** material with `accept_submissions`. Not a quiz attempt (`quiz_attempts`). Not a separate assignment object.
+A student (or a linked parent on their behalf) turns work in on a **course assignment** (`work_type = assignment`) with `accept_submissions`. Not a quiz attempt (`quiz_attempts`). Materials (`work_type = material`) do not accept submissions.
 
 One `material_submissions` row per student per material (unique while not deleted). The student’s account and any parent linked to that student upload into the same slot. A teacher saves one grade on that slot: `points_earned` / snapshotted `points_possible` when the material is gradable, or `feedback` only when it is not. `graded_at` is set when that save happens. Feedback-only rows stay out of the gradebook. Gradable rows with points join the course final (unweighted mean with locked quiz percents).
 

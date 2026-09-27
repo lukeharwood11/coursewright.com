@@ -426,7 +426,7 @@ async function loadPublishedMaterialsForCourses(
   const materialsResult = await db
     .from("materials")
     .select(
-      "id, title, scheduled_date, due_date, course_id, status, deleted_at, visibility, unit:units(id, start_date, end_date)",
+      "id, title, work_type, scheduled_date, due_date, course_id, status, deleted_at, visibility, unit:units(id, start_date, end_date)",
     )
     .in("course_id", courseIds)
     .is("deleted_at", null)
@@ -445,6 +445,7 @@ async function loadPublishedMaterialsForCourses(
           title: row.title,
           scheduledDate: row.scheduled_date,
           dueDate: row.due_date,
+          workType: row.work_type === "assignment" ? "assignment" : "material",
           courseId: row.course_id,
           unitId: unit?.id ?? null,
           unitStart: unit?.start_date ?? null,

@@ -19,11 +19,26 @@ import { mergeOutline } from "@/quizzes/model/outline";
 import { quizPath } from "@/quizzes/model/paths";
 import type { UnitRecord } from "@/units/databridge/units";
 import { unitPath } from "@/units/model/paths";
-import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
+import {
+  ClipboardDocumentCheckIcon,
+  ClipboardDocumentListIcon,
+} from "@heroicons/react/24/outline";
 
-function MaterialKindIcon({ kind }: { kind: MaterialKind }) {
+function MaterialKindIcon({
+  kind,
+  workType,
+}: {
+  kind: MaterialKind;
+  workType: MaterialRecord["workType"];
+}) {
   const Icon =
-    kind === "link" ? LinkIcon : kind === "file" ? DocumentIcon : DocumentTextIcon;
+    workType === "assignment"
+      ? ClipboardDocumentListIcon
+      : kind === "link"
+        ? LinkIcon
+        : kind === "file"
+          ? DocumentIcon
+          : DocumentTextIcon;
   return <Icon className="h-3.5 w-3.5 shrink-0 text-[var(--ink-faint)]" aria-hidden />;
 }
 
@@ -49,7 +64,7 @@ function MaterialLink({
       className="flex min-w-0 items-center gap-1.5 rounded-[4px] px-1.5 py-1 text-[12.5px] font-semibold text-[var(--ink)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]"
       title={material.title}
     >
-      <MaterialKindIcon kind={material.kind} />
+      <MaterialKindIcon kind={material.kind} workType={material.workType} />
       <span className="min-w-0 truncate">{material.title}</span>
     </Link>
   );

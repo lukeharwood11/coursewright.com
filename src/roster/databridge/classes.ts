@@ -15,8 +15,15 @@ export type ClassMember = {
   student: StudentSummary;
 };
 
+export type ClassCatalogMeta = {
+  leaders: ClassLeader[];
+  memberCount: number;
+};
+
 export const classQueryKeys = {
   list: (orgId: number) => ["classes", "list", orgId] as const,
+  /** Org roster Classes tab — includes leads and member counts; do not share cache with `list`. */
+  listWithCatalog: (orgId: number) => ["classes", "listWithCatalog", orgId] as const,
   detail: (id: number) => ["classes", "detail", id] as const,
   members: (id: number) => ["classes", "members", id] as const,
   leaders: (id: number) => ["classes", "leaders", id] as const,
@@ -55,6 +62,65 @@ export async function listClasses(
 
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => toClassSummary(row));
+}
+
+export async function listClassesCatalogMeta(
+  classIds: number[],
+): Promise<Record<number, ClassCatalogMeta>> {
+  const metaFor = (): ClassCatalogMeta => ({
+    leaders: [],
+    memberCount: 0,
+  });
+  const byClassId: Record<number, ClassCatalogMeta> = {};
+  for (const classId of classIds) {
+    byClassId[classId] = metaFor();
+  }
+  if (classIds.length === 0) return byClassId;
+
+  const db = requireSupabase();
+  const [leaderResult, memberResult] = await Promise.all([
+    db
+      .from("class_leaders")
+      .select("class_id, user_id, profile:profiles(name, email)")
+      .in("class_id", classIds),
+    db.from("class_members").select("class_id").in("class_id", classIds),
+  ]);
+
+  if (leaderResult.error) throw new Error(leaderResult.error.message);
+  if (memberResult.error) throw new Error(memberResult.error.message);
+
+  const leadersByClass = new Map<number, ClassLeader[]>();
+  for (const row of leaderResult.data ?? []) {
+    const classId = row.class_id;
+    if (typeof classId !== "number") continue;
+    const person = mapStaffProfileRows([row])[0];
+    if (!person) continue;
+    const list = leadersByClass.get(classId) ?? [];
+    list.push({
+      userId: person.userId,
+      name: person.name,
+      email: person.email,
+    });
+    leadersByClass.set(classId, list);
+  }
+
+  for (const [classId, leaders] of leadersByClass) {
+    byClassId[classId] = {
+      ...byClassId[classId],
+      leaders,
+    };
+  }
+
+  for (const row of memberResult.data ?? []) {
+    const classId = row.class_id;
+    if (typeof classId !== "number") continue;
+    byClassId[classId] = {
+      ...byClassId[classId],
+      memberCount: byClassId[classId].memberCount + 1,
+    };
+  }
+
+  return byClassId;
 }
 
 export async function getClass(id: number): Promise<ClassSummary | null> {

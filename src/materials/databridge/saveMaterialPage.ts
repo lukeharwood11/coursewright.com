@@ -8,11 +8,13 @@ import {
 } from "./blocks";
 import { updateMaterial } from "./materials";
 import type { PageBlockDraft } from "@/materials/model/pageContent";
+import type { MaterialWorkType } from "@/materials/model/workType";
 
 export type MaterialPagePlacement = {
   title: string;
   description: string;
   url: string | null;
+  workType: MaterialWorkType;
   scheduledDate: string | null;
   dueDate: string | null;
   dueAt: string | null;
@@ -69,6 +71,7 @@ export async function saveMaterialPage(args: {
                 title: args.placement.title,
                 description: args.placement.description,
                 url: args.placement.url,
+                work_type: args.placement.workType,
                 scheduled_date: args.placement.scheduledDate,
                 due_date: args.placement.dueDate,
                 due_at: args.placement.dueAt,
@@ -168,6 +171,7 @@ async function saveMaterialPageFallback(args: {
       title: args.placement.title,
       description: args.placement.description,
       url: args.placement.url,
+      workType: args.placement.workType,
       scheduledDate: args.placement.scheduledDate,
       dueDate: args.placement.dueDate,
       dueAt: args.placement.dueAt,
