@@ -4,7 +4,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { staffCanManageCourse, staffCanViewCourse } from "@/courses/model/access";
+import {
+  claimedInstructorUserIds,
+  staffCanManageCourse,
+  staffCanViewCourse,
+} from "@/courses/model/access";
 import {
   caughtErrorMessage,
   formOrMutationError,
@@ -64,7 +68,7 @@ export function useCourseSettings() {
 
   const course = courseQuery.data ?? null;
   const belongsHere = course?.organizationId === organization.id;
-  const instructorUserIds = (instructorsQuery.data ?? []).map((row) => row.userId);
+  const instructorUserIds = claimedInstructorUserIds(instructorsQuery.data ?? []);
   const canEdit = staffCanManageCourse({
     role,
     parentPresentation,
@@ -89,7 +93,7 @@ export function useCourseSettings() {
   const [status, setStatus] = useState("active");
   const [gradeLevels, setGradeLevels] = useState<string[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
-  const [addUserId, setAddUserId] = useState("");
+  const [addOrgProfileId, setAddOrgProfileId] = useState("");
 
   const resetForm = useCallback(() => {
     if (!course) return;
@@ -164,9 +168,9 @@ export function useCourseSettings() {
   });
 
   const addInstructor = useMutation({
-    mutationFn: () => addCourseInstructor(courseId, addUserId),
+    mutationFn: () => addCourseInstructor(courseId, Number(addOrgProfileId)),
     onSuccess: async () => {
-      setAddUserId("");
+      setAddOrgProfileId("");
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.instructors(courseId),
       });
@@ -174,7 +178,8 @@ export function useCourseSettings() {
   });
 
   const removeInstructor = useMutation({
-    mutationFn: (userId: string) => removeCourseInstructor(courseId, userId),
+    mutationFn: (orgProfileId: number) =>
+      removeCourseInstructor(courseId, orgProfileId),
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.instructors(courseId),
@@ -206,7 +211,9 @@ export function useCourseSettings() {
     save.mutate();
   }
 
-  const instructorIds = new Set((instructorsQuery.data ?? []).map((row) => row.userId));
+  const instructorIds = new Set(
+    (instructorsQuery.data ?? []).map((row) => row.orgProfileId),
+  );
 
   return {
     organization,
@@ -243,9 +250,11 @@ export function useCourseSettings() {
     hasChanges,
     onSubmit,
     instructors: instructorsQuery.data ?? [],
-    staff: (staffQuery.data ?? []).filter((row) => !instructorIds.has(row.userId)),
-    addUserId,
-    setAddUserId,
+    staff: (staffQuery.data ?? []).filter(
+      (row) => !instructorIds.has(row.orgProfileId),
+    ),
+    addOrgProfileId,
+    setAddOrgProfileId,
     addInstructor,
     removeInstructor,
     setVisibility,

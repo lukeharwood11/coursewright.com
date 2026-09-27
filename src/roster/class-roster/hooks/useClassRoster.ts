@@ -170,7 +170,7 @@ export function useClassRoster() {
   });
 
   const addLeadMutation = useMutation({
-    mutationFn: (userId: string) => addClassLeader(classId, userId),
+    mutationFn: (orgProfileId: number) => addClassLeader(classId, orgProfileId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: classQueryKeys.leaders(classId),
@@ -186,7 +186,7 @@ export function useClassRoster() {
   });
 
   const removeLeadMutation = useMutation({
-    mutationFn: (userId: string) => removeClassLeader(classId, userId),
+    mutationFn: (orgProfileId: number) => removeClassLeader(classId, orgProfileId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: classQueryKeys.leaders(classId),
@@ -228,14 +228,18 @@ export function useClassRoster() {
     setNewError(null);
   }
 
-  const leaderIds = new Set((leadersQuery.data ?? []).map((row) => row.userId));
+  const leaderIds = new Set(
+    (leadersQuery.data ?? []).map((row) => row.orgProfileId),
+  );
 
   return {
     organization,
     classGroup: belongsHere ? classGroup : null,
     members,
     leads: leadersQuery.data ?? [],
-    staff: (staffQuery.data ?? []).filter((row) => !leaderIds.has(row.userId)),
+    staff: (staffQuery.data ?? []).filter(
+      (row) => !leaderIds.has(row.orgProfileId),
+    ),
     canManageLeads,
     addLeadOpen,
     openAddLead: () => {
@@ -246,13 +250,14 @@ export function useClassRoster() {
       setAddLeadOpen(false);
       addLeadMutation.reset();
     },
-    addLead: (userId: string) => addLeadMutation.mutate(userId),
+    addLead: (orgProfileId: number) => addLeadMutation.mutate(orgProfileId),
     addingLead: addLeadMutation.isPending,
     addLeadError:
       addLeadMutation.error && !isNetworkError(addLeadMutation.error)
         ? addLeadMutation.error.message
         : null,
-    onRemoveLead: (userId: string) => removeLeadMutation.mutate(userId),
+    onRemoveLead: (orgProfileId: number) =>
+      removeLeadMutation.mutate(orgProfileId),
     availableStudents,
     gradeLabels: organizationQuery.data?.gradeLabels ?? [],
     loading: classQuery.isLoading || membersQuery.isLoading,

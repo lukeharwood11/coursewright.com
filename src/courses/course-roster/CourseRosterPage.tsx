@@ -95,8 +95,8 @@ export function CourseRosterPage() {
           instructors={roster.instructors}
           staff={roster.staff}
           canManage={roster.canManageInstructors}
-          addUserId={roster.addUserId}
-          onAddUserId={roster.setAddUserId}
+          addOrgProfileId={roster.addOrgProfileId}
+          onAddOrgProfileId={roster.setAddOrgProfileId}
           onAdd={roster.addInstructor}
           onRemove={roster.onRemoveInstructor}
           adding={roster.addingInstructor}

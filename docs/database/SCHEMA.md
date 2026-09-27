@@ -264,12 +264,13 @@ Multiple instructors per course (co-teaching). **P0.**
 |-------|------|-------|
 | id | bigint | PK |
 | course_id | bigint | FK → Course |
-| user_id | uuid | FK → User (`profiles`) — instructor |
-| unique | (course_id, user_id) | Co-teaching; no extra course-role in P0 |
+| org_profile_id | bigint | FK → `org_profiles`, not null. The person, claimed or not |
+| user_id | uuid | nullable until claim. FK → User (`profiles`). Filled from the org profile on insert and on claim |
+| unique | (course_id, org_profile_id); (course_id, user_id) | Several unclaimed rows can share a null `user_id` |
 
-**On create:** membership role `instructor` is auto-inserted as a teacher for the new course (so they can see and manage it). Org **owner / admin** creators are **not** auto-added — they assign teachers (including themselves) from course settings / roster. Owners/admins already SELECT every course via org admin RLS.
+**On create:** membership role `instructor` is auto-inserted as a teacher for the new course (so they can see and manage it). Org **owner / admin** creators are **not** auto-added — they assign teachers (including themselves, and people who have not claimed) from course settings / roster. Owners/admins already SELECT every course via org admin RLS.
 
-**Edit access:** `can_manage_course` / `is_course_instructor` count a `course_instructors` row only when that user has an **active** membership in the course’s org with exclusive role `owner`, `admin`, or `instructor`. Removing or suspending that membership deletes their `course_instructors` rows for the org. A leftover row alone cannot PATCH the course.
+**Edit access:** `can_manage_course` / `is_course_instructor` count a `course_instructors` row only when `user_id` is set and that user has an **active** membership in the course’s org with exclusive role `owner`, `admin`, or `instructor`. A placement made before claim does not grant manage access. Removing or suspending that membership deletes their `course_instructors` rows for the org. A leftover row alone cannot PATCH the course. In-org labels read `org_profiles.name`.
 
 ---
 
@@ -445,7 +446,7 @@ Unified email-claim invite. **Role is payload:** `owner` / `admin` / `instructor
 
 **Who can invite parents:** owners, admins, and instructors. Parent invites are created from roster / student profile (copy `/invite/<token>`). Same email for another student attaches to the existing pending invite (no second email). The Families directory, when routed, attaches chosen students to one pending invite when linking an email with no account.
 
-**Who can invite students:** owners, admins, and instructors. One profile per invite. Claim sets `student_profiles.user_id` and `is_student`. A new membership is `role = student`. If they already have a membership, that governing role stays (including parent or staff) and `is_student` is set. A parent can also claim a student invite.
+**Who can invite students:** owners, admins, and instructors. One profile per invite. Claim sets `org_profiles.user_id`, `counts_as_student`, and membership `is_student`. A new membership is `role = student`. If they already have a membership, that governing role stays (including parent or staff) and `is_student` is set. A parent can also claim a student invite. Claim does not rename `profiles.name` or `org_profiles.name`.
 
 ---
 
@@ -566,10 +567,11 @@ Zero or more **leads** for a class. **P0.** Owners and admins assign; instructor
 |-------|------|-------|
 | id | bigint | PK |
 | class_id | bigint | FK → Class |
-| user_id | uuid | FK → User (`profiles`) — must be an active owner, admin, or instructor in the class’s org |
-| unique | (class_id, user_id) | |
+| org_profile_id | bigint | FK → `org_profiles`, not null. The person, claimed or not |
+| user_id | uuid | nullable until claim. FK → User (`profiles`). Filled from the org profile on insert and on claim |
+| unique | (class_id, org_profile_id); (class_id, user_id) | Several unclaimed rows can share a null `user_id` |
 
-Leads are notified in **Activity** when someone posts in a discussion for that class. Demoting or removing staff membership drops their lead rows for classes in that org.
+Owners and admins may assign an owner, admin, or instructor before that person claims. Activity notifications and any manage access wait until `user_id` is set and the membership is active. Leads are notified in **Activity** when someone posts in a discussion for that class. Demoting or removing staff membership drops their lead rows for classes in that org. In-org labels read `org_profiles.name`.
 
 ### Course
 
@@ -725,7 +727,7 @@ One `material_submissions` row per student per material (unique while not delete
 
 **Who can read:** course managers (`can_manage_course`) see every student. A parent sees a submission only for a student they are linked to, and only while the material is published and they can view the course. A student account sees only their own slot under the same published-course gate. Submission files are **not** readable by every family who can see the material.
 
-**Who can write:** `begin_material_submission` / `finish_material_submission` only. The caller must be the student (`student_profiles.user_id`) or a linked parent, the student enrolled and active, the material published and accepting submissions, every file in an allowed group, and the past-due rule must allow it. Families do not get a general file insert.
+**Who can write:** `begin_material_submission` / `finish_material_submission` only. The caller must be the student (`org_profiles.user_id`) or a linked parent, the student enrolled and active, the material published and accepting submissions, every file in an allowed group, and the past-due rule must allow it. Families do not get a general file insert. The “on behalf of” label is the student’s `org_profiles.name`.
 
 An in-progress upload claim (`material_submission_uploads`) holds file ids between begin and finish. It is not a submission. Abandoned claims stay unreferenced.
 
@@ -1039,7 +1041,7 @@ A **one-way** notice to one or more targets of a single audience kind: **course(
 
 **Who can post:** org owners and admins (any audience in the org). Instructors for courses they can manage (every selected course), or for a class / student they can already manage on the roster (`is_org_staff`).
 
-**Who can read:** staff in the org. Parents (via `parent_student_links`) and student accounts (via `student_profiles.user_id`) when the notice applies to that student: enrolled in **any** of the **courses** (active + published), **or** a member of **any** of the **classes**, **or** listed as **any** of the **students**. Class membership can surface a class announcement even without a course enrollment. Materials / this-week / print stay enrollment-gated.
+**Who can read:** staff in the org. Parents (via `parent_student_links`) and student accounts (via `org_profiles.user_id`) when the notice applies to that student: enrolled in **any** of the **courses** (active + published), **or** a member of **any** of the **classes**, **or** listed as **any** of the **students**. Class membership can surface a class announcement even without a course enrollment. Materials / this-week / print stay enrollment-gated. In-org author labels read `org_profiles.name`.
 
 **Email and Activity:** not stored on the announcement row. Staff may opt in to **Send notification** on save; Edge Function `send-announcement-notification` emails claimed family accounts only (`parent_student_links` → `profiles.email` with an active org membership) for affected students — one Resend `announcement-notification` event per unique address — and calls `notify_announcement` so those same accounts (except the sender) get one Activity row. A later send updates that row. Pending invites and `student_email` contact fields are not mailed or pinged. Payload includes a truncated audience preview (`audience_summary`) and the full target list (`audience_list`).
 
@@ -1280,7 +1282,7 @@ Material ──< MaterialVersion
 Material ──< MaterialSubmission ──< MaterialSubmissionVersion ──< MaterialSubmissionFile ──> File
 Course ──> CourseTemplate (optional; **P1**)
 Course / CourseTemplate.grade_levels (catalog metadata)
-Course ──< CourseInstructor >── User (instructor)  ← many
+Course ──< CourseInstructor >── org_profiles (user_id filled on claim)  ← many
 Course ──< ImportantNow
 Course ──< LessonPlan ──< LessonPlanDay ──< LessonPlanDayMaterial >── Material
 Organization ──< Announcement (course(s) | class(es) | student(s)) ──< AnnouncementRead >── User

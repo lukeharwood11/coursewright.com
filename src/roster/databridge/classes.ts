@@ -1,3 +1,8 @@
+import {
+  listAssignableOrgStaff,
+  type AssignableOrgPerson,
+} from "@/organizations/databridge/assignableStaff";
+import { listOrgMemberNames } from "@/organizations/databridge/orgNames";
 import { rosterWriteErrorMessage } from "@/roster/model/studentProfile";
 import type { ValidatedClass } from "@/roster/model/classGroup";
 import { requireSupabase } from "./client";
@@ -78,26 +83,39 @@ export async function listClassesCatalogMeta(
   if (classIds.length === 0) return byClassId;
 
   const db = requireSupabase();
-  const [leaderResult, memberResult] = await Promise.all([
+  const [leaderResult, memberResult, classOrgs] = await Promise.all([
     db
       .from("class_leaders")
-      .select("class_id, user_id, profile:profiles(name, email)")
+      .select("class_id, org_profile_id, user_id")
       .in("class_id", classIds),
     db.from("class_members").select("class_id").in("class_id", classIds),
+    db.from("classes").select("id, organization_id").in("id", classIds),
   ]);
 
   if (leaderResult.error) throw new Error(leaderResult.error.message);
   if (memberResult.error) throw new Error(memberResult.error.message);
+  if (classOrgs.error) throw new Error(classOrgs.error.message);
+
+  const orgByClass = new Map<number, number>();
+  for (const classGroup of classOrgs.data ?? []) {
+    orgByClass.set(classGroup.id, classGroup.organization_id);
+  }
+  const namesByOrg = new Map<number, Map<number, { name: string; email: string }>>();
+  for (const orgId of new Set(orgByClass.values())) {
+    const names = await listOrgMemberNames(orgId);
+    namesByOrg.set(orgId, new Map(names.map((person) => [person.id, person])));
+  }
 
   const leadersByClass = new Map<number, ClassLeader[]>();
   for (const row of leaderResult.data ?? []) {
     const classId = row.class_id;
     if (typeof classId !== "number") continue;
-    const person = mapStaffProfileRows([row])[0];
+    const person = namesByOrg.get(orgByClass.get(classId) ?? -1)?.get(row.org_profile_id);
     if (!person) continue;
     const list = leadersByClass.get(classId) ?? [];
     list.push({
-      userId: person.userId,
+      orgProfileId: row.org_profile_id,
+      userId: row.user_id,
       name: person.name,
       email: person.email,
     });
@@ -294,76 +312,72 @@ export async function removeClassMember(memberId: number): Promise<void> {
 }
 
 export type ClassLeader = {
-  userId: string;
+  orgProfileId: number;
+  userId: string | null;
   name: string;
   email: string;
 };
 
-export type OrgStaffPickerPerson = {
-  userId: string;
-  name: string;
-  email: string;
-  role: string;
-};
+export type OrgStaffPickerPerson = AssignableOrgPerson;
 
-function mapStaffProfileRows(
-  rows: Array<{
-    user_id: string | null;
-    role?: string;
-    profile: { name: string; email: string } | { name: string; email: string }[] | null;
-  }>,
-): Array<{ userId: string; name: string; email: string; role: string }> {
-  return rows.flatMap((row) => {
-    const profile = unwrapOne(row.profile);
-    if (!profile || !row.user_id) return [];
+export async function listClassLeaders(classId: number): Promise<ClassLeader[]> {
+  const db = requireSupabase();
+  const { data: classGroup, error: classError } = await db
+    .from("classes")
+    .select("organization_id")
+    .eq("id", classId)
+    .maybeSingle();
+  if (classError) throw new Error(classError.message);
+  if (!classGroup) return [];
+
+  const { data, error } = await db
+    .from("class_leaders")
+    .select("org_profile_id, user_id")
+    .eq("class_id", classId);
+  if (error) throw new Error(error.message);
+
+  const names = new Map(
+    (await listOrgMemberNames(classGroup.organization_id)).map((person) => [
+      person.id,
+      person,
+    ]),
+  );
+  return (data ?? []).flatMap((row) => {
+    const person = names.get(row.org_profile_id);
+    if (!person) return [];
     return [
       {
+        orgProfileId: row.org_profile_id,
         userId: row.user_id,
-        name: profile.name || profile.email,
-        email: profile.email,
-        role: row.role ?? "",
+        name: person.name,
+        email: person.email,
       },
     ];
   });
 }
 
-export async function listClassLeaders(classId: number): Promise<ClassLeader[]> {
-  const db = requireSupabase();
-  const { data, error } = await db
-    .from("class_leaders")
-    .select("user_id, profile:profiles(name, email)")
-    .eq("class_id", classId);
-
-  if (error) throw new Error(error.message);
-  return mapStaffProfileRows(data ?? []).map((row) => ({
-    userId: row.userId,
-    name: row.name,
-    email: row.email,
-  }));
-}
-
 export async function addClassLeader(
   classId: number,
-  userId: string,
+  orgProfileId: number,
 ): Promise<void> {
   const db = requireSupabase();
   const { error } = await db.from("class_leaders").insert({
     class_id: classId,
-    user_id: userId,
+    org_profile_id: orgProfileId,
   });
   if (error) throw new Error(rosterWriteErrorMessage(error));
 }
 
 export async function removeClassLeader(
   classId: number,
-  userId: string,
+  orgProfileId: number,
 ): Promise<void> {
   const db = requireSupabase();
   const { data, error } = await db
     .from("class_leaders")
     .delete()
     .eq("class_id", classId)
-    .eq("user_id", userId)
+    .eq("org_profile_id", orgProfileId)
     .select("id")
     .maybeSingle();
 
@@ -376,15 +390,6 @@ export async function removeClassLeader(
 export async function listOrgStaffForPicker(
   organizationId: number,
 ): Promise<OrgStaffPickerPerson[]> {
-  const db = requireSupabase();
-  const { data, error } = await db
-    .from("memberships")
-    .select("user_id, role, profile:profiles(name, email)")
-    .eq("organization_id", organizationId)
-    .eq("status", "active")
-    .in("role", ["owner", "admin", "instructor"]);
-
-  if (error) throw new Error(error.message);
-  return mapStaffProfileRows(data ?? []);
+  return listAssignableOrgStaff(organizationId);
 }
 

@@ -22,6 +22,42 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ## Open
 
+### HN-020 — Apply org-profile migrations on testing (and production when chosen)
+
+| | |
+|--|--|
+| **Why** | Unified org people (`org_profiles`) are in `supabase/migrations/20261011000000_org_profiles.sql` through `20261011000004_org_profile_placements.sql`. The app on this branch reads those columns (nullable placement `user_id`, `org_member_names`, student-claim `counts_as_student`). Agents must not apply this on the linked Supabase projects. |
+| **Where** | Supabase testing project (Terraform testing branch). Production only when Luke chooses that tier. |
+| **Placeholder** | `supabase/migrations/20261011000004_org_profile_placements.sql` (`HN-020`) |
+
+**Steps:**
+
+1. From the repo, with `SUPABASE_ACCESS_TOKEN` set, apply migrations and deploy functions to testing:
+   `./scripts/deploy-supabase.sh testing`
+   That script links the testing branch ref from Terraform and runs `supabase db push --linked --yes --include-all`. `--include-all` is required so timestamps `20261011000000` through `20261011000004` apply even if a later remote migration is already recorded. It also deploys functions.
+2. Do not point this at the parent/main production ref unless you mean to migrate production. Production, when chosen:
+   `./scripts/deploy-supabase.sh production`
+3. If `20261011000000` aborts, fix the named rows and push again. The transaction rolls back. Abort messages:
+
+   - `Two students in one organization share an email (%). Fix that before org profiles.`
+   - `A student email belongs to a different account in that organization (%).`
+   - `A parent link is missing its student or account (%).`
+   - `% parent link(s) did not resolve to an org profile.`
+   - `% invite(s) have no org profile.`
+   - `% course teacher row(s) have no org profile.`
+   - `% class lead row(s) have no org profile.`
+   - `Org contact emails collide (%).`
+   - `Two people in one organization share an account (%).`
+   - `Student org profiles were not preserved.`
+   - `Org profile migration changed related row counts.`
+   - `Migration changed % student name(s).`
+   - `A staff, parent, or invite profile was marked as a student.`
+   - `% staff membership(s) have no org profile.`
+   - `An invite is missing its org profile.`
+   - `claim_invite student link was not found.` (`20261011000004` could not patch the student claim to set `counts_as_student`)
+
+**Done when:** testing `schema_migrations` includes `20261011000000` through `20261011000004`, and Quinn can add a person, claim, and assign that person to a course before claim.
+
 ### HN-019 — Apply org grading migration, deploy report-card email, create the Resend template
 
 | | |

@@ -1,6 +1,13 @@
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
 import { canManageOrgSettings, type OrgRole } from "@/organizations/model/role";
 
+/** Claimed accounts on a course. Pending placements have no user id yet. */
+export function claimedInstructorUserIds(
+  instructors: readonly { userId: string | null }[],
+): string[] {
+  return instructors.flatMap((row) => (row.userId ? [row.userId] : []));
+}
+
 /** Staff may edit a course they teach; owners/admins may edit any course. */
 export function staffCanManageCourse(args: {
   role: OrgRole | null;

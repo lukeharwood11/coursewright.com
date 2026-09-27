@@ -10,6 +10,7 @@ import {
   createOrgPerson,
   findOrgProfileByEmail,
   orgContactsByUserId,
+  updateOrgPersonContact,
 } from "./orgNames";
 import {
   listOrgPeople,
@@ -69,13 +70,10 @@ export type ParentLinkStatus = {
   email: string;
 };
 
-type ProfileEmbed = { name: string; email: string } | { name: string; email: string }[] | null;
-
 type StaffMembershipRow = {
   id: number;
   user_id: string | null;
   role: string;
-  profile: ProfileEmbed;
 };
 
 type PendingInviteRow = {
@@ -120,7 +118,7 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
   const db = requireSupabase();
   const { data, error } = await db
     .from("memberships")
-    .select("id, user_id, role, profile:profiles!memberships_user_id_fkey(name, email)")
+    .select("id, user_id, role")
     .eq("organization_id", organizationId)
     .eq("status", "active")
     .in("role", ["owner", "admin", "instructor", "observer", "parent"]);
@@ -131,14 +129,13 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
   for (const row of data ?? []) {
     const typed = row as StaffMembershipRow;
     const role = parseOrgRole(typed.role);
-    const profile = unwrapOne(typed.profile);
-    if (!role || !profile || !typed.user_id || !Number.isFinite(typed.id)) continue;
+    if (!role || !typed.user_id || !Number.isFinite(typed.id)) continue;
     members.push({
       membershipId: typed.id,
       userId: typed.user_id,
       role,
-      name: profile.name,
-      email: profile.email,
+      name: "",
+      email: "",
       orgProfileId: null,
       hasLinkedStudent: false,
       hasStudentAccount: false,
@@ -149,21 +146,25 @@ export async function listOrgStaff(organizationId: number): Promise<OrgStaffMemb
     organizationId,
     members.map((member) => member.userId),
   );
+  const named: OrgStaffMember[] = [];
   for (const member of members) {
     const contact = contacts.get(member.userId);
     if (!contact) continue;
-    member.name = contact.name;
-    member.orgProfileId = contact.id;
-    if (contact.email) member.email = contact.email;
+    named.push({
+      ...member,
+      name: contact.name,
+      email: contact.email ?? "",
+      orgProfileId: contact.id,
+    });
   }
 
-  const userIds = members.map((member) => member.userId);
+  const userIds = named.map((member) => member.userId);
   const [linkedParents, studentAccounts] = await Promise.all([
     listLinkedParentUserIds(organizationId, userIds),
     listStudentAccountUserIds(organizationId, userIds),
   ]);
 
-  return members.map((member) => ({
+  return named.map((member) => ({
     ...member,
     hasLinkedStudent: linkedParents.has(member.userId),
     hasStudentAccount: studentAccounts.has(member.userId),
@@ -357,9 +358,22 @@ export async function createStaffInvite(input: {
   role: StaffInviteRole;
   invitedBy: string;
 }): Promise<{ invite: PendingStaffInvite; email: InviteEmailStatus }> {
-  const existing = await findOrgProfileByEmail(input.organizationId, input.email);
+  let existing = await findOrgProfileByEmail(input.organizationId, input.email);
   if (existing?.userId) {
     throw new Error("They’re already in this organization.");
+  }
+  if (existing) {
+    const { data: row, error } = await requireSupabase()
+      .from("org_profiles")
+      .select("counts_as_student")
+      .eq("id", existing.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    const name = input.name.trim();
+    if (row && !row.counts_as_student && name && name !== existing.name) {
+      await updateOrgPersonContact({ orgProfileId: existing.id, name });
+      existing = { ...existing, name };
+    }
   }
 
   const orgProfile =

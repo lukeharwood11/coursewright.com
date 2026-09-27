@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { staffCanManageCourse, staffCanViewCourse } from "./access.ts";
+import {
+  claimedInstructorUserIds,
+  staffCanManageCourse,
+  staffCanViewCourse,
+} from "./access.ts";
 
 const teacher = {
   userId: "teacher-1",
@@ -86,5 +90,12 @@ test("Parent view and parent role cannot edit a course", () => {
       instructorUserIds: ["parent-1"],
     }),
     false,
+  );
+});
+
+test("pending course teachers are not treated as claimed instructors", () => {
+  assert.deepEqual(
+    claimedInstructorUserIds([{ userId: "teacher-1" }, { userId: null }]),
+    ["teacher-1"],
   );
 });

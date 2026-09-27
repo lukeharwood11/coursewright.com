@@ -3981,6 +3981,24 @@ export type Database = {
           user_id: string
         }[]
       }
+      mark_org_profile_as_student: {
+        Args: {
+          p_created_via_course_id: number | null
+          p_grade_level: string | null
+          p_org_profile_id: number
+          p_parent_email: string | null
+        }
+        Returns: undefined
+      }
+      org_member_names: {
+        Args: { p_organization_id: number }
+        Returns: {
+          email: string | null
+          id: number
+          name: string
+          user_id: string | null
+        }[]
+      }
       get_staff_invite: {
         Args: { p_token: string }
         Returns: {

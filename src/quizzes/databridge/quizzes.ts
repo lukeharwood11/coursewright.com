@@ -1,4 +1,5 @@
 import type { Json } from "@/infrastructure/supabase/database.types";
+import { listOrgMemberNames } from "@/organizations/databridge/orgNames";
 import {
   parseMaterialVisibility,
   type MaterialVisibility,
@@ -102,6 +103,7 @@ export type QuizAttemptRecord = {
   studentProfileId: number;
   studentName: string;
   studentEmail: string | null;
+  studentUserId: string | null;
   submittedBy: string;
   submitterName: string;
   submitterEmail: string;
@@ -715,25 +717,41 @@ export type QuizAttemptSummary = {
 
 export async function listQuizAttempts(quizId: number): Promise<QuizAttemptRecord[]> {
   const db = requireSupabase();
+  const { data: quiz, error: quizError } = await db
+    .from("quizzes")
+    .select("organization_id")
+    .eq("id", quizId)
+    .maybeSingle();
+  if (quizError) throw new Error(quizError.message);
+
   const { data, error } = await db
     .from("quiz_attempts")
     .select(
-      "id, quiz_id, student_profile_id, submitted_by, submitted_at, autograded, teacher_graded_at, score, score_total, student:org_profiles(name, email), submitter:profiles!quiz_attempts_submitted_by_fkey(name, email)",
+      "id, quiz_id, student_profile_id, submitted_by, submitted_at, autograded, teacher_graded_at, score, score_total, student:org_profiles(name, email, user_id)",
     )
     .eq("quiz_id", quizId)
     .order("submitted_at", { ascending: false });
   if (error) throw new Error(error.message);
+
+  const namesByUserId = new Map<string, { name: string; email: string }>();
+  if (quiz) {
+    for (const person of await listOrgMemberNames(quiz.organization_id)) {
+      if (person.userId) namesByUserId.set(person.userId, person);
+    }
+  }
+
   return (data ?? []).map((row) => {
     const student = Array.isArray(row.student) ? row.student[0] : row.student;
-    const submitter = Array.isArray(row.submitter) ? row.submitter[0] : row.submitter;
+    const submitter = namesByUserId.get(row.submitted_by);
     return {
       id: row.id,
       quizId: row.quiz_id,
       studentProfileId: row.student_profile_id,
       studentName: student?.name ?? "Student",
       studentEmail: student?.email ?? null,
+      studentUserId: student?.user_id ?? null,
       submittedBy: row.submitted_by,
-      submitterName: submitter?.name || submitter?.email || "Parent",
+      submitterName: submitter?.name ?? "Someone",
       submitterEmail: submitter?.email ?? "",
       submittedAt: row.submitted_at,
       autograded: row.autograded,

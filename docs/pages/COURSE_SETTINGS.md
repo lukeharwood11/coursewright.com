@@ -19,7 +19,7 @@ Configure the course instance (not content authoring — that’s [COURSE](./COU
 - Optional dates are informational only (not access gates).
 - **Status** (active / archived) is whether the offering is running.
 - **Publish / unpublish** controls whether enrolled students can see the course (distinct from status).
-- Manage co-teachers.
+- Manage co-teachers, including people who have not claimed. Names are the org profile name. A pending teacher cannot manage the course until they claim.
 - Soft-delete/archive TBD; no hard deletes of content.
 - **P1:** promote from-scratch course to template or open linked template.
 

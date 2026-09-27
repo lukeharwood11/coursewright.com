@@ -15,10 +15,10 @@ export function AddTeacherModal({
   onClose,
 }: {
   open: boolean;
-  staff: Array<{ userId: string; name: string }>;
+  staff: Array<{ orgProfileId: number; name: string; pending?: boolean }>;
   adding: boolean;
   error: string | null;
-  onSelect: (userId: string) => void;
+  onSelect: (orgProfileId: number) => void;
   onClose: () => void;
 }) {
   const titleId = useId();
@@ -86,7 +86,7 @@ export function AddTeacherModal({
           {staff.length === 0 ? (
             <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">
               No one left to add. Owners, admins, and instructors can be class
-              teachers.
+              teachers, including people who have not claimed yet.
             </p>
           ) : matches.length === 0 ? (
             <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">
@@ -95,7 +95,7 @@ export function AddTeacherModal({
           ) : (
             <ul className="flex flex-col gap-0.5" aria-label="Staff">
               {matches.map((person) => (
-                <li key={person.userId}>
+                <li key={person.orgProfileId}>
                   <button
                     type="button"
                     disabled={adding}
@@ -105,11 +105,11 @@ export function AddTeacherModal({
                       "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]",
                       "disabled:pointer-events-none disabled:opacity-60",
                     ].join(" ")}
-                    onClick={() => onSelect(person.userId)}
+                    onClick={() => onSelect(person.orgProfileId)}
                   >
                     <Avatar name={person.name} size={28} />
                     <span className="min-w-0 truncate text-[13.5px] font-semibold text-[var(--ink)]">
-                      {person.name}
+                      {person.pending ? `${person.name} (pending)` : person.name}
                     </span>
                   </button>
                 </li>

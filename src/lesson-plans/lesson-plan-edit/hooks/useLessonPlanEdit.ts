@@ -32,7 +32,10 @@ import {
 import { toggleMaterialId } from "@/lesson-plans/model/materials";
 import type { LessonPlanVisibility } from "@/lesson-plans/model/visibility";
 import { getCourse, courseQueryKeys, listCourseInstructors } from "@/courses/databridge/courses";
-import { staffCanManageCourse } from "@/courses/model/access";
+import {
+  claimedInstructorUserIds,
+  staffCanManageCourse,
+} from "@/courses/model/access";
 import { coursePath } from "@/courses/model/paths";
 import {
   listMaterialsForCourse,
@@ -93,7 +96,7 @@ export function useLessonPlanEdit() {
     role,
     parentPresentation,
     userId: user.id,
-    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+    instructorUserIds: claimedInstructorUserIds(instructorsQuery.data ?? []),
   });
   const loaded = isNew ? null : (planQuery.data ?? null);
   const newTitleDefault = course ? defaultLessonPlanTitle(course.title) : "";

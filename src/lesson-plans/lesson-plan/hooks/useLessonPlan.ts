@@ -8,7 +8,10 @@ import {
   getCourse,
   listCourseInstructors,
 } from "@/courses/databridge/courses";
-import { staffCanManageCourse } from "@/courses/model/access";
+import {
+  claimedInstructorUserIds,
+  staffCanManageCourse,
+} from "@/courses/model/access";
 import {
   getLessonPlan,
   lessonPlanQueryKeys,
@@ -52,7 +55,7 @@ export function useLessonPlan() {
     role,
     parentPresentation,
     userId: user.id,
-    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+    instructorUserIds: claimedInstructorUserIds(instructorsQuery.data ?? []),
   });
   const belongsHere =
     plan != null &&

@@ -3,7 +3,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
-import { staffCanManageCourse } from "@/courses/model/access";
+import {
+  claimedInstructorUserIds,
+  staffCanManageCourse,
+} from "@/courses/model/access";
 import { courseQueryKeys, getCourse, listCourseInstructors } from "@/courses/databridge/courses";
 import {
   getQuiz,
@@ -80,7 +83,7 @@ export function useQuizEdit() {
     role,
     parentPresentation,
     userId: user.id,
-    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+    instructorUserIds: claimedInstructorUserIds(instructorsQuery.data ?? []),
   });
 
   const quiz = quizQuery.data ?? null;

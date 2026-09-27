@@ -15,7 +15,7 @@ export async function inviteCreatedStudents(input: {
 }): Promise<StudentInviteBatchResult> {
   const targets = input.students.filter(
     (student): student is StudentSummary & { studentEmail: string } =>
-      Boolean(student.studentEmail),
+      Boolean(student.studentEmail) && !student.userId,
   );
   let sent = 0;
   let failed = 0;

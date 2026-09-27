@@ -8,7 +8,10 @@ import {
   listCourseInstructors,
 } from "@/courses/databridge/courses";
 import { staffBrowsesContent, staffCanEdit } from "@/app/layouts/model/viewMode";
-import { staffCanManageCourse } from "@/courses/model/access";
+import {
+  claimedInstructorUserIds,
+  staffCanManageCourse,
+} from "@/courses/model/access";
 import { listBlocks } from "@/materials/databridge/blocks";
 import { fileSignedUrl, getFile } from "@/materials/databridge/files";
 import {
@@ -96,7 +99,7 @@ export function useMaterial() {
     role,
     parentPresentation,
     userId: user.id,
-    instructorUserIds: (instructorsQuery.data ?? []).map((row) => row.userId),
+    instructorUserIds: claimedInstructorUserIds(instructorsQuery.data ?? []),
   });
   const versionsQuery = useQuery({
     queryKey: materialQueryKeys.versions(materialId),
