@@ -13,3 +13,6 @@ Implementation plans for in-flight or upcoming work. These are **not** the produ
 | File | Topic |
 |------|--------|
 | [ORG_PROFILES.md](./ORG_PROFILES.md) | Unified org profiles (one person per org: privileges, student context, parent relationships); org-owned name and email; pre-claim config and hard backfill |
+| [REPORT_CARDS.md](./REPORT_CARDS.md) | Templates (print format + sections); student-term assemble; fill cycles; period + class-lead feedback |
+| [ATTENDANCE.md](./ATTENDANCE.md) | **Prerequisite** — class/course/day capture + cycle attendance package submit |
+| [COURSE_OUTCOMES.md](./COURSE_OUTCOMES.md) | **Prerequisite** — course outcomes/criteria + org rating options (not freeform feedback) |
