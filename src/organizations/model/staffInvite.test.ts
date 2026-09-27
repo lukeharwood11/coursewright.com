@@ -1,6 +1,91 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { inviteCreatedMessage, inviteEmailResultMessage } from "./staffInvite";
+import {
+  ALREADY_IN_ORGANIZATION_MESSAGE,
+  STUDENT_NOT_A_COLLABORATOR_MESSAGE,
+  inviteCreatedMessage,
+  inviteEmailResultMessage,
+  staffAddForExistingPerson,
+  staffPrivilegeStackedMessage,
+} from "./staffInvite";
+
+test("claimed parent stacks a staff role and keeps the org name", () => {
+  assert.deepEqual(
+    staffAddForExistingPerson({
+      hasAccount: true,
+      countsAsStudent: false,
+      linkedAsParent: true,
+      membershipRole: "parent",
+    }),
+    { action: "stack-role" },
+  );
+});
+
+test("unclaimed parent still gets an invite and keeps the existing name", () => {
+  assert.deepEqual(
+    staffAddForExistingPerson({
+      hasAccount: false,
+      countsAsStudent: false,
+      linkedAsParent: true,
+      membershipRole: null,
+    }),
+    { action: "create-invite", keepName: true },
+  );
+});
+
+test("a student merge keeps the name and a new person can take the typed name", () => {
+  assert.deepEqual(
+    staffAddForExistingPerson({
+      hasAccount: false,
+      countsAsStudent: true,
+      linkedAsParent: false,
+      membershipRole: null,
+    }),
+    { action: "create-invite", keepName: true },
+  );
+  assert.deepEqual(
+    staffAddForExistingPerson({
+      hasAccount: false,
+      countsAsStudent: false,
+      linkedAsParent: false,
+      membershipRole: null,
+    }),
+    { action: "create-invite", keepName: false },
+  );
+});
+
+test("already-staff and student adds stay explicit rejections", () => {
+  assert.deepEqual(
+    staffAddForExistingPerson({
+      hasAccount: true,
+      countsAsStudent: false,
+      linkedAsParent: true,
+      membershipRole: "instructor",
+    }),
+    { action: "reject", message: ALREADY_IN_ORGANIZATION_MESSAGE },
+  );
+  assert.deepEqual(
+    staffAddForExistingPerson({
+      hasAccount: true,
+      countsAsStudent: true,
+      linkedAsParent: false,
+      membershipRole: "student",
+    }),
+    { action: "reject", message: STUDENT_NOT_A_COLLABORATOR_MESSAGE },
+  );
+});
+
+test("stacking a parent names the new role and that they stay a parent", () => {
+  assert.equal(
+    staffPrivilegeStackedMessage({
+      name: "Pat Parent",
+      role: "instructor",
+      stayedParent: true,
+      stayedStudent: false,
+    }),
+    "Changed Pat Parent to instructor. They stay a parent.",
+  );
+});
 
 test("inviteCreatedMessage leaves sending the invite for later when the profile is just added", () => {
   assert.equal(

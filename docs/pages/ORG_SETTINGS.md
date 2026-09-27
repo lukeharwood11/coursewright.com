@@ -79,7 +79,7 @@ Segmented **Collaborators** and **Access** tabs (same control as elsewhere in th
 #### Collaborators
 
 - List owners, admins, instructors, and parents. Do not list students
-- Add a person with name, email, and role (defaults to **instructor**). No invite email is sent until **Send email**
+- Add a person with name, email, and role (defaults to **instructor**). No invite email is sent until **Send email**. If that email is already a claimed parent, Add gives them the staff role on the same person and keeps the parent link and org name. An existing staff member is told they’re already in the organization. A student is not added from here. An unclaimed parent still gets a pending staff invite on that same person, and the existing org name stays
 - Pending invites: copy link, **Send email**, or cancel
 - Change the **exclusive** role: owners may set instructor / admin / owner; admins may set instructor / admin. Promoting a parent adds that role and keeps parent. Do not offer parent or student as replacements, and do not promote students from this list
 - Guard: cannot demote the **last remaining owner or admin**

@@ -1,6 +1,5 @@
 import type { FormEvent } from "react";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
-import { useToastOnError } from "@/ui/useToastOnError";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { Select } from "@/ui/Select";
@@ -30,7 +29,6 @@ export function InviteStaffForm({
   onRoleChange: (value: StaffInviteRole) => void;
   onSubmit: (event: FormEvent) => void;
 }) {
-  useToastOnError(error);
   return (
     <form
       onSubmit={onSubmit}
@@ -82,6 +80,11 @@ export function InviteStaffForm({
           {submitting ? "Adding…" : "Add"}
         </Button>
       </div>
+      {error ? (
+        <p className="text-[13px] text-[var(--amber-deep)] lg:col-span-4" role="alert">
+          {error}
+        </p>
+      ) : null}
     </form>
   );
 }
