@@ -1,11 +1,11 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { caughtErrorMessage, toastCaughtError } from "@/ui/toast";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import {
+  orgQueryKeys,
   releaseExclusiveMembershipRole,
   removeStaffMembership,
   updateStaffMembershipRole,
@@ -55,7 +55,6 @@ export type StaffMemberRow = OrgStaffMember & {
 
 export function useOrgStaff(organizationId: number | undefined, role: OrgRole | null) {
   const user = useAuthedUser();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const canInvite = role ? canInviteStaff(role) : false;
   const roles = role ? inviteableStaffRoles(role) : [];
@@ -92,6 +91,9 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     await Promise.all([
       queryClient.invalidateQueries({
         queryKey: staffInviteQueryKeys.staff(organizationId ?? 0),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: orgQueryKeys.membersWithAccess(organizationId ?? 0),
       }),
       queryClient.invalidateQueries({ queryKey: ["organizations"] }),
     ]);
@@ -166,6 +168,43 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     },
   });
 
+  const removeCollaboratorMutation = useMutation({
+    mutationFn: async (member: StaffMemberRow) => {
+      if (!role) throw new Error("You don’t have permission to remove collaborators.");
+      const parsed = validateRemoveStaffMember({
+        actorRole: role,
+        targetRole: member.role,
+        isLastManager: isLastOrgManager(members, member.membershipId),
+        hasLinkedStudent: member.hasLinkedStudent,
+        hasStudentAccount: member.hasStudentAccount,
+      });
+      if (!parsed.ok) throw new Error(parsed.error);
+      if (parsed.releaseTo) {
+        await releaseExclusiveMembershipRole({
+          membershipId: member.membershipId,
+          role: parsed.releaseTo,
+        });
+      } else {
+        await removeStaffMembership(member.membershipId);
+      }
+      return { member, releaseTo: parsed.releaseTo };
+    },
+    onSuccess: async ({ member, releaseTo }) => {
+      const name = member.name || member.email;
+      if (releaseTo === "parent") {
+        toast(`Removed ${name} as a collaborator. They’re still a parent here.`);
+      } else if (releaseTo === "student") {
+        toast(`Removed ${name} as a collaborator. They’re still a student here.`);
+      } else {
+        toast(`Removed ${name} from collaborators.`);
+      }
+      await invalidateStaff();
+    },
+    onError: (error: Error) => {
+      toastCaughtError(error);
+    },
+  });
+
   const changeRoleMutation = useMutation({
     mutationFn: async (input: {
       member: OrgStaffMember;
@@ -200,50 +239,6 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
       const keptNote =
         kept.length > 0 ? ` They stay a ${kept.join(" and ")}.` : "";
       toast(`Changed ${name} to ${roleLabel(input.nextRole).toLowerCase()}.${keptNote}`);
-      await invalidateStaff();
-    },
-    onError: (error: Error) => {
-      toastCaughtError(error);
-    },
-  });
-
-  const removeMutation = useMutation({
-    mutationFn: async (member: OrgStaffMember) => {
-      if (!role) throw new Error("You don’t have permission to remove collaborators.");
-      const parsed = validateRemoveStaffMember({
-        actorRole: role,
-        targetRole: member.role,
-        isLastManager: isLastOrgManager(members, member.membershipId),
-        hasLinkedStudent: member.hasLinkedStudent,
-        hasStudentAccount: member.hasStudentAccount,
-      });
-      if (!parsed.ok) throw new Error(parsed.error);
-      if (parsed.releaseTo) {
-        await releaseExclusiveMembershipRole({
-          membershipId: member.membershipId,
-          role: parsed.releaseTo,
-        });
-      } else {
-        await removeStaffMembership(member.membershipId);
-      }
-      return { member, releaseTo: parsed.releaseTo };
-    },
-    onSuccess: async ({ member, releaseTo }) => {
-      const removedSelf = member.userId === user.id;
-      const name = member.name || member.email;
-      if (removedSelf && !releaseTo) {
-        toast("You were removed as a collaborator in this organization.");
-        await invalidateStaff();
-        navigate("/my");
-        return;
-      }
-      if (releaseTo === "parent") {
-        toast(`${name} is no longer staff. They stay a parent.`);
-      } else if (releaseTo === "student") {
-        toast(`${name} is no longer staff. They stay a student.`);
-      } else {
-        toast(`Removed ${name} as a collaborator.`);
-      }
       await invalidateStaff();
     },
     onError: (error: Error) => {
@@ -311,8 +306,8 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     changingId: changeRoleMutation.isPending
       ? (changeRoleMutation.variables?.member.membershipId ?? null)
       : null,
-    removingId: removeMutation.isPending
-      ? (removeMutation.variables?.membershipId ?? null)
+    removingCollaboratorId: removeCollaboratorMutation.isPending
+      ? (removeCollaboratorMutation.variables?.membershipId ?? null)
       : null,
     onNameChange: (value: string) => {
       setName(value);
@@ -331,6 +326,13 @@ export function useOrgStaff(organizationId: number | undefined, role: OrgRole | 
     onSendEmail: (invite: PendingStaffInvite) => sendEmailMutation.mutate(invite),
     onCancel: (invite: PendingStaffInvite) => cancelMutation.mutate(invite),
     onChangeRole,
-    onRemove: (member: OrgStaffMember) => removeMutation.mutate(member),
+    onRemoveAsCollaborator: (
+      member: StaffMemberRow,
+      afterSuccess?: () => void,
+    ) =>
+      removeCollaboratorMutation.mutate(
+        member,
+        afterSuccess ? { onSuccess: afterSuccess } : undefined,
+      ),
   };
 }

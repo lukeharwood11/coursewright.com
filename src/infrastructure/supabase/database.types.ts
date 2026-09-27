@@ -3902,11 +3902,19 @@ export type Database = {
         Returns: Json
       }
       claim_invite: { Args: { p_token: string }; Returns: string }
+      remove_member_from_org: {
+        Args: { p_membership_id: number }
+        Returns: undefined
+      }
       remove_parent_from_student: {
         Args: {
           p_student_profile_id: number
           p_parent_org_profile_id: number
         }
+        Returns: undefined
+      }
+      reactivate_org_member: {
+        Args: { p_membership_id: number }
         Returns: undefined
       }
       claim_push_subscription: {
@@ -4047,6 +4055,10 @@ export type Database = {
       student_course_grades: {
         Args: { p_student_profile_id: number }
         Returns: Json
+      }
+      suspend_org_member: {
+        Args: { p_membership_id: number }
+        Returns: undefined
       }
       submit_quiz_attempt: {
         Args: {

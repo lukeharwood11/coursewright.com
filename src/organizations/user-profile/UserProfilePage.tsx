@@ -1,5 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
+import {
+  OrgMemberAccessActions,
+  orgMemberAccessModelFromPeopleRow,
+} from "@/organizations/org-settings/components/OrgMemberAccessActions";
+import { useOrgPeople } from "@/organizations/org-settings/hooks/useOrgPeople";
+import { useOrgStaff } from "@/organizations/org-settings/hooks/useOrgStaff";
 import {
   UserProfileContent,
   UserProfileNotFound,
@@ -12,6 +19,46 @@ import {
 
 export function UserProfilePage() {
   const page = useUserProfile();
+  const navigate = useNavigate();
+  const people = useOrgPeople(page.organization.id, page.role);
+  const staff = useOrgStaff(page.organization.id, page.role);
+
+  const accessMember = useMemo(() => {
+    const userId = page.profile?.userId;
+    if (!userId) return null;
+    return people.members.find((member) => member.userId === userId) ?? null;
+  }, [page.profile?.userId, people.members]);
+
+  const staffMember = useMemo(() => {
+    const userId = page.profile?.userId;
+    if (!userId) return null;
+    return staff.members.find((member) => member.userId === userId) ?? null;
+  }, [page.profile?.userId, staff.members]);
+
+  const peopleTabPath = `/my/${page.organization.slug}/settings?tab=people`;
+
+  const accessActions =
+    accessMember != null
+      ? orgMemberAccessModelFromPeopleRow(
+          page.organization.slug,
+          accessMember,
+          {
+            onSuspend: people.onSuspend,
+            onReactivate: people.onReactivate,
+            onRemoveFromOrg: (member) =>
+              people.onRemoveFromOrg(member, () => {
+                navigate(peopleTabPath);
+              }),
+          },
+          {
+            staff: staffMember,
+            onRemoveAsCollaborator: (member) =>
+              staff.onRemoveAsCollaborator(member, () => {
+                navigate(peopleTabPath);
+              }),
+          },
+        )
+      : null;
 
   useEffect(() => {
     document.title = page.profile
@@ -45,6 +92,18 @@ export function UserProfilePage() {
         profile={page.profile}
         orgSlug={page.organization.slug}
         role={page.role}
+        headerActions={
+          accessActions ? (
+            <OrgMemberAccessActions
+              {...accessActions}
+              busy={
+                accessMember != null &&
+                (people.busyMembershipId === accessMember.membershipId ||
+                  staff.removingCollaboratorId === accessMember.membershipId)
+              }
+            />
+          ) : null
+        }
       />
       {page.canEditName ? (
         <OrgPersonContactForm

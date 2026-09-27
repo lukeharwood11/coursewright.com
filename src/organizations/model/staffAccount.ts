@@ -240,11 +240,137 @@ export function validateRemoveStaffMember(input: {
   };
 }
 
+export const SELF_MEMBER_ACCESS_MESSAGE =
+  "You can’t change your own access here. Ask another owner or admin.";
+
+export const OWNER_MEMBER_ACCESS_MESSAGE =
+  "Owner access can’t be changed here.";
+
+export function memberAccessActions(input: {
+  actorRole: OrgRole | null;
+  actorUserId: string;
+  member: {
+    membershipId: number;
+    userId: string;
+    role: OrgRole;
+    status: "active" | "suspended";
+  };
+  members: readonly { membershipId: number; role: OrgRole; status: "active" | "suspended" }[];
+}): {
+  canSuspend: boolean;
+  canReactivate: boolean;
+  canRemoveFromOrg: boolean;
+  lastManagerGuard: boolean;
+} {
+  const lastManagerGuard = isLastOrgManager(
+    input.members.filter((row) => row.status === "active"),
+    input.member.membershipId,
+  );
+  const isSelf = input.member.userId === input.actorUserId;
+  const isOwner = input.member.role === "owner";
+
+  if (!input.actorRole || !canManageStaff(input.actorRole) || isSelf || isOwner) {
+    return {
+      canSuspend: false,
+      canReactivate: false,
+      canRemoveFromOrg: false,
+      lastManagerGuard,
+    };
+  }
+
+  const wouldBlockManager =
+    lastManagerGuard && isOrgManagerRole(input.member.role);
+
+  return {
+    canSuspend:
+      input.member.status === "active" && !wouldBlockManager,
+    canReactivate: input.member.status === "suspended",
+    canRemoveFromOrg: !wouldBlockManager,
+    lastManagerGuard,
+  };
+}
+
+export function validateSuspendOrgMember(input: {
+  actorRole: OrgRole;
+  targetRole: OrgRole;
+  targetStatus: "active" | "suspended";
+  targetUserId: string;
+  actorUserId: string;
+  isLastManager: boolean;
+}): { ok: true } | { ok: false; error: string } {
+  if (!canManageStaff(input.actorRole)) {
+    return { ok: false, error: "You don’t have permission to change member access." };
+  }
+  if (input.targetUserId === input.actorUserId) {
+    return { ok: false, error: SELF_MEMBER_ACCESS_MESSAGE };
+  }
+  if (input.targetRole === "owner") {
+    return { ok: false, error: OWNER_MEMBER_ACCESS_MESSAGE };
+  }
+  if (input.targetStatus !== "active") {
+    return { ok: false, error: "That person is already suspended." };
+  }
+  if (input.isLastManager && isOrgManagerRole(input.targetRole)) {
+    return { ok: false, error: LAST_OWNER_ADMIN_MESSAGE };
+  }
+  return { ok: true };
+}
+
+export function validateReactivateOrgMember(input: {
+  actorRole: OrgRole;
+  targetRole: OrgRole;
+  targetStatus: "active" | "suspended";
+  targetUserId: string;
+  actorUserId: string;
+}): { ok: true } | { ok: false; error: string } {
+  if (!canManageStaff(input.actorRole)) {
+    return { ok: false, error: "You don’t have permission to change member access." };
+  }
+  if (input.targetUserId === input.actorUserId) {
+    return { ok: false, error: SELF_MEMBER_ACCESS_MESSAGE };
+  }
+  if (input.targetRole === "owner") {
+    return { ok: false, error: OWNER_MEMBER_ACCESS_MESSAGE };
+  }
+  if (input.targetStatus !== "suspended") {
+    return { ok: false, error: "That person isn’t suspended." };
+  }
+  return { ok: true };
+}
+
+export function validateRemoveFromOrg(input: {
+  actorRole: OrgRole;
+  targetRole: OrgRole;
+  targetUserId: string;
+  actorUserId: string;
+  isLastManager: boolean;
+}): { ok: true } | { ok: false; error: string } {
+  if (!canManageStaff(input.actorRole)) {
+    return { ok: false, error: "You don’t have permission to remove people from this organization." };
+  }
+  if (input.targetUserId === input.actorUserId) {
+    return { ok: false, error: SELF_MEMBER_ACCESS_MESSAGE };
+  }
+  if (input.targetRole === "owner") {
+    return { ok: false, error: OWNER_MEMBER_ACCESS_MESSAGE };
+  }
+  if (input.isLastManager && isOrgManagerRole(input.targetRole)) {
+    return { ok: false, error: LAST_OWNER_ADMIN_MESSAGE };
+  }
+  return { ok: true };
+}
+
 export function staffMembershipWriteErrorMessage(error: {
   code?: string;
   message: string;
 }): string {
   const message = error.message.toLowerCase();
+  if (message.includes("owner access can't be changed here")) {
+    return OWNER_MEMBER_ACCESS_MESSAGE;
+  }
+  if (message.includes("you can't change your own access here")) {
+    return SELF_MEMBER_ACCESS_MESSAGE;
+  }
   if (message.includes("cannot remove or demote the last remaining owner or admin")) {
     return LAST_OWNER_ADMIN_MESSAGE;
   }

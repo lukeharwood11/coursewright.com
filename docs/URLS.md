@@ -79,7 +79,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 
 | Page | URL | Notes |
 |------|-----|-------|
-| [ORG_SETTINGS](./pages/ORG_SETTINGS.md) | `/my/<org-slug>/settings` | Left settings menu + one panel (`?tab=`). Slug, grade scheme, **grading** (`?tab=grading`), collaborators, billing (owners) — not separate top-level pages |
+| [ORG_SETTINGS](./pages/ORG_SETTINGS.md) | `/my/<org-slug>/settings` | Left settings menu + one panel (`?tab=`). Slug, grade scheme, **grading** (`?tab=grading`), **people** (collaborators + access), billing (owners) — not separate top-level pages |
 | [USER_PROFILE](./pages/USER_PROFILE.md) | `/my/<org-slug>/people/<org_profile_id>` · `/my/<org-slug>/people/<user_id>` | Org-visible `org_profiles` page; UUID URLs redirect to the org profile id |
 | Billing (P1) | <!-- TBD — under settings --> | Course Wright → org |
 

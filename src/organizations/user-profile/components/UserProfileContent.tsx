@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import type { ReactNode } from "react";
 import { Avatar } from "@/ui/Avatar";
 import { Badge } from "@/ui/Badge";
 import { coursePath } from "@/courses/model/paths";
@@ -13,6 +14,7 @@ export function UserProfileContent({
   role,
   compact = false,
   headingId,
+  headerActions,
 }: {
   profile: OrgPersonProfile;
   orgSlug: string;
@@ -20,6 +22,7 @@ export function UserProfileContent({
   /** Tighter spacing for modal presentation. */
   compact?: boolean;
   headingId?: string;
+  headerActions?: ReactNode;
 }) {
   const staff = role != null && browsesAsStaff(role);
   const avatarSize = compact ? 48 : 56;
@@ -30,7 +33,8 @@ export function UserProfileContent({
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-4">
         <Avatar name={profile.name} size={avatarSize} />
         <div>
           <HeadingTag
@@ -50,6 +54,10 @@ export function UserProfileContent({
             )}
           </div>
         </div>
+        </div>
+        {headerActions ? (
+          <div className="shrink-0">{headerActions}</div>
+        ) : null}
       </div>
 
       {profile.role ? (

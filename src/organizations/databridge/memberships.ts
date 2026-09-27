@@ -151,8 +151,34 @@ export const orgQueryKeys = {
     ["organizations", "slug", slug, userId] as const,
   detail: (id: number) => ["organizations", "detail", id] as const,
   people: (orgId: number) => ["organizations", "people", orgId] as const,
+  membersWithAccess: (orgId: number) =>
+    ["organizations", "members-with-access", orgId] as const,
   branding: (orgId: number) => ["organizations", "branding", orgId] as const,
   features: (orgId: number) => ["organizations", "features", orgId] as const,
+};
+
+export type OrgMemberAccessStatus = "active" | "suspended";
+
+export type OrgMemberAccessRow = {
+  membershipId: number;
+  userId: string;
+  status: OrgMemberAccessStatus;
+  role: OrgRole;
+  isParent: boolean;
+  isStudent: boolean;
+  orgProfileId: number | null;
+  name: string;
+  email: string;
+};
+
+type MemberAccessMembershipRow = {
+  id: number;
+  user_id: string | null;
+  role: string;
+  status: string;
+  is_parent?: boolean | null;
+  is_student?: boolean | null;
+  profile: { name: string; email: string } | { name: string; email: string }[] | null;
 };
 
 export async function listMyMemberships(userId: string): Promise<OrgMembership[]> {
@@ -287,6 +313,94 @@ export async function releaseExclusiveMembershipRole(input: {
   if (!data) {
     throw new Error("You don’t have permission to change that person’s role.");
   }
+}
+
+export async function listOrgMembersWithAccess(
+  organizationId: number,
+): Promise<OrgMemberAccessRow[]> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("memberships")
+    .select(
+      "id, user_id, role, status, is_parent, is_student, profile:profiles!memberships_user_id_fkey(name, email)",
+    )
+    .eq("organization_id", organizationId)
+    .in("status", ["active", "suspended"])
+    .not("user_id", "is", null)
+    .order("created_at", { ascending: true });
+
+  if (error) throw new Error(error.message);
+
+  const rows: OrgMemberAccessRow[] = [];
+  for (const row of data ?? []) {
+    const typed = row as MemberAccessMembershipRow;
+    const role = parseOrgRole(typed.role);
+    const profile = Array.isArray(typed.profile)
+      ? (typed.profile[0] ?? null)
+      : typed.profile;
+    if (!role || !profile || !typed.user_id || !Number.isFinite(typed.id)) continue;
+    if (typed.status !== "active" && typed.status !== "suspended") continue;
+    rows.push({
+      membershipId: typed.id,
+      userId: typed.user_id,
+      status: typed.status,
+      role,
+      isParent: Boolean(typed.is_parent) || role === "parent",
+      isStudent: Boolean(typed.is_student) || role === "student",
+      orgProfileId: null,
+      name: profile.name,
+      email: profile.email,
+    });
+  }
+
+  const contacts = await orgContactsByUserId(
+    organizationId,
+    rows.map((member) => member.userId),
+  );
+  for (const member of rows) {
+    const contact = contacts.get(member.userId);
+    if (!contact) continue;
+    member.orgProfileId = contact.id;
+    member.name = contact.name;
+    if (contact.email) member.email = contact.email;
+  }
+
+  return rows.sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  );
+}
+
+export async function suspendOrgMember(membershipId: number): Promise<void> {
+  if (!Number.isFinite(membershipId)) {
+    throw new Error("That person couldn’t be updated. Refresh and try again.");
+  }
+  const db = requireSupabase();
+  const { error } = await db.rpc("suspend_org_member", {
+    p_membership_id: membershipId,
+  });
+  if (error) throw new Error(staffMembershipWriteErrorMessage(error));
+}
+
+export async function reactivateOrgMember(membershipId: number): Promise<void> {
+  if (!Number.isFinite(membershipId)) {
+    throw new Error("That person couldn’t be updated. Refresh and try again.");
+  }
+  const db = requireSupabase();
+  const { error } = await db.rpc("reactivate_org_member", {
+    p_membership_id: membershipId,
+  });
+  if (error) throw new Error(staffMembershipWriteErrorMessage(error));
+}
+
+export async function removeMemberFromOrg(membershipId: number): Promise<void> {
+  if (!Number.isFinite(membershipId)) {
+    throw new Error("That person couldn’t be removed. Refresh and try again.");
+  }
+  const db = requireSupabase();
+  const { error } = await db.rpc("remove_member_from_org", {
+    p_membership_id: membershipId,
+  });
+  if (error) throw new Error(staffMembershipWriteErrorMessage(error));
 }
 
 export async function removeStaffMembership(membershipId: number): Promise<void> {

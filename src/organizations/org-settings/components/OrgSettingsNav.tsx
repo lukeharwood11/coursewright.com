@@ -6,7 +6,7 @@ import {
   CreditCardIcon,
   IdentificationIcon,
   PaintBrushIcon,
-  UsersIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import {
   AcademicCapIcon as AcademicCapSolidIcon,
@@ -15,8 +15,9 @@ import {
   CreditCardIcon as CreditCardSolidIcon,
   IdentificationIcon as IdentificationSolidIcon,
   PaintBrushIcon as PaintBrushSolidIcon,
-  UsersIcon as UsersSolidIcon,
+  UserGroupIcon as UserGroupSolidIcon,
 } from "@heroicons/react/24/solid";
+import { NewPill } from "@/ui/NewPill";
 import { Select } from "@/ui/Select";
 
 export type OrgSettingsTabId =
@@ -25,7 +26,7 @@ export type OrgSettingsTabId =
   | "grading"
   | "branding"
   | "customizations"
-  | "collaborators"
+  | "people"
   | "billing";
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
@@ -35,6 +36,7 @@ type OrgSettingsTab = {
   label: string;
   outline: IconComponent;
   solid: IconComponent;
+  featureNew?: boolean;
 };
 
 const ALL_TABS: OrgSettingsTab[] = [
@@ -69,10 +71,11 @@ const ALL_TABS: OrgSettingsTab[] = [
     solid: AdjustmentsHorizontalSolidIcon,
   },
   {
-    id: "collaborators",
-    label: "Collaborators",
-    outline: UsersIcon,
-    solid: UsersSolidIcon,
+    id: "people",
+    label: "People",
+    outline: UserGroupIcon,
+    solid: UserGroupSolidIcon,
+    featureNew: true,
   },
   {
     id: "billing",
@@ -93,7 +96,8 @@ export function parseOrgSettingsTab(
   options: { showBilling: boolean },
 ): OrgSettingsTabId {
   const tabs = orgSettingsTabs(options);
-  const match = tabs.find((tab) => tab.id === value);
+  const normalized = value === "collaborators" ? "people" : value;
+  const match = tabs.find((tab) => tab.id === normalized);
   return match?.id ?? "organization";
 }
 
@@ -134,6 +138,7 @@ export function OrgSettingsNav({
             {tabs.map((tab) => (
               <option key={tab.id} value={tab.id}>
                 {tab.label}
+                {tab.featureNew ? " (New)" : ""}
               </option>
             ))}
           </Select>
@@ -164,7 +169,10 @@ export function OrgSettingsNav({
                 ].join(" ")}
               >
                 <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden />
-                <span className="whitespace-nowrap">{tab.label}</span>
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <span className="whitespace-nowrap">{tab.label}</span>
+                  {tab.featureNew ? <NewPill /> : null}
+                </span>
               </button>
             </li>
           );

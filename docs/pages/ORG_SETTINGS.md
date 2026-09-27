@@ -40,7 +40,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 
 ## Contents
 
-Left **settings menu** (icons + labels) with one active panel on the right on desktop. On small screens the menu is a **Section** dropdown above the panel. Active section is reflected in `?tab=` (`organization` default / omitted; `profile`; `grading`; `branding`; `customizations`; `collaborators`; `billing` when shown). Every editable panel owns its Save at the bottom of that panel. Collaborators and Billing have no Save — their actions are inline (invite, change role, remove).
+Left **settings menu** (icons + labels) with one active panel on the right on desktop. On small screens the menu is a **Section** dropdown above the panel. Active section is reflected in `?tab=` (`organization` default / omitted; `profile`; `grading`; `branding`; `customizations`; `people`; `billing` when shown). `?tab=collaborators` redirects to **people**. Every editable panel owns its Save at the bottom of that panel. People and Billing have no Save — their actions are inline.
 
 ### Organization
 
@@ -72,15 +72,24 @@ Owners and admins edit one org-wide score scale. Instructors see the same fields
 
 Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing page.
 
-### Collaborators / roles
+### People (`?tab=people`)
+
+Segmented **Collaborators** and **Access** tabs (same control as elsewhere in the app).
+
+#### Collaborators
 
 - List owners, admins, instructors, and parents. Do not list students
 - Add a person with name, email, and role (defaults to **instructor**). No invite email is sent until **Send email**
 - Pending invites: copy link, **Send email**, or cancel
 - Change the **exclusive** role: owners may set instructor / admin / owner; admins may set instructor / admin. Promoting a parent adds that role and keeps parent. Do not offer parent or student as replacements, and do not promote students from this list
-- Remove drops the exclusive role (confirm). Parent or student stays when that flag is set; otherwise the membership ends. On small screens Remove is a minus control
-- Guard: cannot remove or demote the **last remaining owner or admin**
+- Guard: cannot demote the **last remaining owner or admin**
 - Existing **owner** rows stay badge-only (promote others to owner; don’t demote owners from this list)
+
+#### Access (owners and admins)
+
+- Everyone with a **claimed** account (`memberships.user_id` set), including students, active or suspended
+- Per-person **Actions** menu: open profile, **Suspend access** (reversible), **Restore access** when suspended, **Remove as collaborator** (drops exclusive staff role; parent or student access can remain), or **Remove from org** (ends all membership access and clears `user_id` on their org profile row)
+- Cannot suspend or remove **owners**, the **last** active owner/admin, or **yourself**
 
 ### Branding (owners only)
 
@@ -109,7 +118,7 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 - Save customizations (owners only)
 - Add a collaborator (name, email, role) without sending email; send email or copy the claim link later; cancel a pending invite
 - Change the exclusive role for existing collaborators (promoting a parent keeps parent)
-- Remove an admin or instructor (blocked when they are the last owner/admin). A parent or student membership stays
+- Suspend, restore, or remove from org on the **People** tab
 
 ## Links to
 

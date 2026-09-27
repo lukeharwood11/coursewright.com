@@ -17,8 +17,9 @@ import {
   parseOrgSettingsTab,
   type OrgSettingsTabId,
 } from "./components/OrgSettingsNav";
-import { StaffSection } from "./components/StaffSection";
+import { PeopleSection } from "./components/PeopleSection";
 import { useOrgSettings } from "./hooks/useOrgSettings";
+import { useOrgPeople } from "./hooks/useOrgPeople";
 import { useOrgStaff } from "./hooks/useOrgStaff";
 import { useToastOnError } from "@/ui/useToastOnError";
 
@@ -34,6 +35,7 @@ export function OrgSettingsPage() {
   const shell = useOrgShell();
   const settings = useOrgSettings(orgSlug);
   const staff = useOrgStaff(settings.organization?.id, settings.role);
+  const people = useOrgPeople(settings.organization?.id, settings.role);
   useToastOnError(settings.error);
 
   const showBilling = settings.showBilling;
@@ -180,35 +182,43 @@ export function OrgSettingsPage() {
             </div>
           ) : null}
 
-          {activeTab === "collaborators" ? (
+          {activeTab === "people" ? (
             <div role="tabpanel">
-              <StaffSection
+              <PeopleSection
                 orgSlug={settings.organization.slug}
+                canManagePeople={people.canManage}
                 canInvite={staff.canInvite}
-                loading={staff.loading}
-                loadError={staff.loadError}
-                members={staff.members}
+                staffLoading={staff.loading}
+                staffLoadError={staff.loadError}
+                staffMembers={staff.members}
                 pending={staff.pending}
-                name={staff.name}
-                email={staff.email}
-                role={staff.role}
-                roles={staff.roles}
-                formError={staff.formError}
+                inviteName={staff.name}
+                inviteEmail={staff.email}
+                inviteRole={staff.role}
+                inviteRoles={staff.roles}
+                inviteFormError={staff.formError}
                 inviting={staff.inviting}
                 copiedId={staff.copiedId}
                 sendingId={staff.sendingId}
                 cancelingId={staff.cancelingId}
                 changingId={staff.changingId}
-                removingId={staff.removingId}
-                onNameChange={staff.onNameChange}
-                onEmailChange={staff.onEmailChange}
-                onRoleChange={staff.onRoleChange}
+                onInviteNameChange={staff.onNameChange}
+                onInviteEmailChange={staff.onEmailChange}
+                onInviteRoleChange={staff.onRoleChange}
                 onInvite={staff.onInvite}
                 onCopy={staff.onCopy}
                 onSendEmail={staff.onSendEmail}
-                onCancel={staff.onCancel}
+                onCancelInvite={staff.onCancel}
                 onChangeRole={staff.onChangeRole}
-                onRemove={staff.onRemove}
+                peopleLoading={people.loading}
+                peopleLoadError={people.loadError}
+                accessMembers={people.members}
+                busyMembershipId={people.busyMembershipId}
+                onSuspend={people.onSuspend}
+                onReactivate={people.onReactivate}
+                onRemoveFromOrg={people.onRemoveFromOrg}
+                removingCollaboratorId={staff.removingCollaboratorId}
+                onRemoveAsCollaborator={staff.onRemoveAsCollaborator}
               />
             </div>
           ) : null}

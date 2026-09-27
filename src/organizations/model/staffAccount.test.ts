@@ -8,7 +8,11 @@ import {
   isLastOrgManager,
   staffMemberActions,
   validateChangeStaffRole,
+  memberAccessActions,
+  validateReactivateOrgMember,
+  validateRemoveFromOrg,
   validateRemoveStaffMember,
+  validateSuspendOrgMember,
 } from "./staffAccount";
 
 test("assignableMembershipRoles promotes parents by adding an exclusive role", () => {
@@ -225,6 +229,60 @@ test("validateRemoveStaffMember drops the exclusive role when a parent link rema
     hasLinkedStudent: true,
   });
   assert.deepEqual(result, { ok: true, releaseTo: "parent" });
+});
+
+test("memberAccessActions allows suspend and remove for an instructor", () => {
+  const actions = memberAccessActions({
+    actorRole: "admin",
+    actorUserId: "actor",
+    member: {
+      membershipId: 2,
+      userId: "instructor",
+      role: "instructor",
+      status: "active",
+    },
+    members: [
+      { membershipId: 1, role: "owner", status: "active" },
+      { membershipId: 2, role: "instructor", status: "active" },
+    ],
+  });
+  assert.equal(actions.canSuspend, true);
+  assert.equal(actions.canReactivate, false);
+  assert.equal(actions.canRemoveFromOrg, true);
+});
+
+test("validateRemoveFromOrg blocks removing yourself", () => {
+  const result = validateRemoveFromOrg({
+    actorRole: "admin",
+    targetRole: "instructor",
+    targetUserId: "same",
+    actorUserId: "same",
+    isLastManager: false,
+  });
+  assert.equal(result.ok, false);
+});
+
+test("validateSuspendOrgMember blocks the last admin", () => {
+  const result = validateSuspendOrgMember({
+    actorRole: "owner",
+    targetRole: "admin",
+    targetStatus: "active",
+    targetUserId: "admin-user",
+    actorUserId: "owner-user",
+    isLastManager: true,
+  });
+  assert.equal(result.ok, false);
+});
+
+test("validateReactivateOrgMember requires a suspended member", () => {
+  const result = validateReactivateOrgMember({
+    actorRole: "admin",
+    targetRole: "parent",
+    targetStatus: "active",
+    targetUserId: "parent-user",
+    actorUserId: "admin-user",
+  });
+  assert.equal(result.ok, false);
 });
 
 test("validateRemoveStaffMember deletes staff who have no additive role", () => {

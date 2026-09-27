@@ -1,17 +1,16 @@
 import type { FormEvent } from "react";
-import { useToastOnError } from "@/ui/useToastOnError";
 import type { StaffInviteRole } from "@/organizations/model/role";
 import type { PendingStaffInvite } from "@/organizations/databridge/staffInvites";
+import type { OrgPeopleMemberRow } from "../hooks/useOrgPeople";
 import type { StaffMemberRow } from "../hooks/useOrgStaff";
 import { InviteStaffForm } from "./InviteStaffForm";
 import { PendingInviteList } from "./PendingInviteList";
 import { StaffMemberList } from "./StaffMemberList";
 
-export function StaffSection({
+export function CollaboratorsPanel({
   orgSlug,
   canInvite,
   loading,
-  loadError,
   members,
   pending,
   name,
@@ -24,7 +23,13 @@ export function StaffSection({
   sendingId,
   cancelingId,
   changingId,
-  removingId,
+  accessByMembershipId,
+  busyMembershipId,
+  removingCollaboratorId,
+  onSuspend,
+  onReactivate,
+  onRemoveFromOrg,
+  onRemoveAsCollaborator,
   onNameChange,
   onEmailChange,
   onRoleChange,
@@ -33,12 +38,10 @@ export function StaffSection({
   onSendEmail,
   onCancel,
   onChangeRole,
-  onRemove,
 }: {
   orgSlug: string;
   canInvite: boolean;
   loading: boolean;
-  loadError: string | null;
   members: StaffMemberRow[];
   pending: PendingStaffInvite[];
   name: string;
@@ -51,7 +54,13 @@ export function StaffSection({
   sendingId: number | null;
   cancelingId: number | null;
   changingId: number | null;
-  removingId: number | null;
+  accessByMembershipId: Map<number, OrgPeopleMemberRow>;
+  busyMembershipId: number | null;
+  removingCollaboratorId: number | null;
+  onSuspend: (member: OrgPeopleMemberRow) => void;
+  onReactivate: (member: OrgPeopleMemberRow) => void;
+  onRemoveFromOrg: (member: OrgPeopleMemberRow) => void;
+  onRemoveAsCollaborator: (staff: StaffMemberRow) => void;
   onNameChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onRoleChange: (value: StaffInviteRole) => void;
@@ -60,13 +69,12 @@ export function StaffSection({
   onSendEmail: (invite: PendingStaffInvite) => void;
   onCancel: (invite: PendingStaffInvite) => void;
   onChangeRole: (member: StaffMemberRow, nextRole: string) => void;
-  onRemove: (member: StaffMemberRow) => void;
 }) {
-  useToastOnError(loadError);
-
   return (
-    <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Collaborators</h2>
+    <>
+      <p className="text-[13px] leading-relaxed text-[var(--ink-soft)]">
+        Invite staff, change roles, and manage pending collaborator invites.
+      </p>
 
       {loading ? (
         <p className="mt-3 text-[14px] text-[var(--ink-soft)]">Loading collaborators…</p>
@@ -76,10 +84,15 @@ export function StaffSection({
         <StaffMemberList
           orgSlug={orgSlug}
           members={members}
+          accessByMembershipId={accessByMembershipId}
           changingId={changingId}
-          removingId={removingId}
+          busyMembershipId={busyMembershipId}
+          removingCollaboratorId={removingCollaboratorId}
           onChangeRole={onChangeRole}
-          onRemove={onRemove}
+          onSuspend={onSuspend}
+          onReactivate={onReactivate}
+          onRemoveFromOrg={onRemoveFromOrg}
+          onRemoveAsCollaborator={onRemoveAsCollaborator}
         />
       ) : null}
 
@@ -100,7 +113,9 @@ export function StaffSection({
             />
           </div>
 
-          <h3 className="mt-6 text-[13px] font-bold text-[var(--ink-soft)]">Pending invites</h3>
+          <h3 className="mt-6 text-[13px] font-bold text-[var(--ink-soft)]">
+            Pending invites
+          </h3>
           <PendingInviteList
             orgSlug={orgSlug}
             invites={pending}
@@ -113,6 +128,6 @@ export function StaffSection({
           />
         </>
       ) : null}
-    </section>
+    </>
   );
 }
