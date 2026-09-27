@@ -74,7 +74,7 @@ Shown on [ORG_HOME](./ORG_HOME.md) when any field is set. Not a public marketing
 
 ### People (`?tab=people`)
 
-Segmented **Collaborators** and **Access** tabs (same control as elsewhere in the app).
+Segmented **Collaborators** and **Access** tabs (same control as elsewhere in the app). **Access** is reflected in the URL as `?tab=people&peopleView=access` (omit `peopleView` for Collaborators) so refresh keeps the sub-tab.
 
 #### Collaborators
 
@@ -88,6 +88,7 @@ Segmented **Collaborators** and **Access** tabs (same control as elsewhere in th
 #### Access (owners and admins)
 
 - Everyone with a **claimed** account (`memberships.user_id` set), including students, active or suspended
+- **Find people** search (name, email, suspended) plus **Role** filter (Owner, Admin, Instructor, Observer, Parent, Student — parent/student include additive flags) and paginated list (20 per page)
 - Per-person **Actions** menu: open profile, **Suspend access** (reversible), **Restore access** when suspended, **Remove as collaborator** (drops exclusive staff role; parent or student access can remain), or **Remove from org** (ends all membership access and clears `user_id` on their org profile row)
 - Cannot suspend or remove **owners**, the **last** active owner/admin, or **yourself**
 

@@ -5,6 +5,7 @@ import { useToastOnError } from "@/ui/useToastOnError";
 import type { GradingMode } from "@/grading/model/scale";
 import { LetterBandsPanel } from "./LetterBandsPanel";
 import { useOrgGrading } from "../hooks/useOrgGrading";
+import { OrgSettingsSectionTitle } from "@/organizations/org-settings/components/OrgSettingsSectionTitle";
 
 const MODES: { id: GradingMode; label: string; hint: string }[] = [
   { id: "none", label: "Points only", hint: "Show points and percents. No letter or pass/fail." },
@@ -18,7 +19,7 @@ export function GradingSection() {
 
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Grading</h2>
+      <OrgSettingsSectionTitle tab="grading" />
       {!grading.canEdit ? (
         <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
           Only owners and admins can change grading.

@@ -3,6 +3,7 @@ import { Button } from "@/ui/Button";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { ORG_FEATURE_OPTIONS } from "@/organizations/model/features";
 import { useOrgFeatures } from "../hooks/useOrgFeatures";
+import { OrgSettingsSectionTitle } from "./OrgSettingsSectionTitle";
 
 export function CustomizationsSection({
   organizationId,
@@ -16,7 +17,7 @@ export function CustomizationsSection({
 
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Customizations</h2>
+      <OrgSettingsSectionTitle tab="customizations" />
       <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
         {canManage
           ? "Choose which features people in this organization can use."

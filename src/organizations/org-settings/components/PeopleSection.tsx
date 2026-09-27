@@ -1,28 +1,21 @@
-import { useState } from "react";
 import type { FormEvent } from "react";
-import {
-  ShieldCheckIcon,
-  UserGroupIcon,
-} from "@heroicons/react/24/outline";
+import { useSearchParams } from "react-router-dom";
+import { ShieldCheckIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 import { Tab, TabList } from "@/ui/Tabs";
+import { OrgSettingsSectionTitle } from "./OrgSettingsSectionTitle";
 import { useToastOnError } from "@/ui/useToastOnError";
 import type { StaffInviteRole } from "@/organizations/model/role";
 import type { PendingStaffInvite } from "@/organizations/databridge/staffInvites";
 import type { OrgPeopleMemberRow } from "../hooks/useOrgPeople";
 import type { StaffMemberRow } from "../hooks/useOrgStaff";
+import {
+  PEOPLE_SECTION_VIEW_PARAM,
+  parsePeopleSectionSubview,
+  peopleSectionSubviewSearchValue,
+  type PeopleSectionSubview,
+} from "@/organizations/model/peopleSectionUrl";
 import { CollaboratorsPanel } from "./CollaboratorsPanel";
-import { OrgPeopleMemberRow as OrgPeopleMemberRowView } from "./OrgPeopleMemberRow";
-
-type PeopleSubview = "collaborators" | "access";
-
-function PeopleSectionTitle() {
-  return (
-    <div className="flex items-center gap-2">
-      <UserGroupIcon className="h-4 w-4 shrink-0 text-[var(--ink-soft)]" aria-hidden />
-      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">People</h2>
-    </div>
-  );
-}
+import { PeopleAccessPanel } from "./PeopleAccessPanel";
 
 export function PeopleSection({
   orgSlug,
@@ -97,18 +90,27 @@ export function PeopleSection({
 }) {
   const canSeeCollaborators =
     canInvite || staffMembers.length > 0 || pending.length > 0;
-  const [subview, setSubview] = useState<PeopleSubview>(
-    canSeeCollaborators ? "collaborators" : "access",
-  );
+  const [searchParams, setSearchParams] = useSearchParams();
   useToastOnError(staffLoadError);
   useToastOnError(peopleLoadError);
 
-  const activeSubview =
-    subview === "collaborators" && canSeeCollaborators
-      ? "collaborators"
-      : canManagePeople
-        ? "access"
-        : "collaborators";
+  const activeSubview = parsePeopleSectionSubview(
+    searchParams.get(PEOPLE_SECTION_VIEW_PARAM),
+    { canManagePeople, canSeeCollaborators },
+  );
+
+  function selectSubview(subview: PeopleSectionSubview) {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        const value = peopleSectionSubviewSearchValue(subview);
+        if (value) next.set(PEOPLE_SECTION_VIEW_PARAM, value);
+        else next.delete(PEOPLE_SECTION_VIEW_PARAM);
+        return next;
+      },
+      { replace: true },
+    );
+  }
 
   const accessByMembershipId = new Map(
     accessMembers.map((member) => [member.membershipId, member]),
@@ -120,7 +122,7 @@ export function PeopleSection({
   if (!canManagePeople && !canSeeCollaborators) {
     return (
       <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-        <PeopleSectionTitle />
+        <OrgSettingsSectionTitle tab="people" />
         <p className="mt-2 text-[14px] text-[var(--ink-soft)]">
           Only owners and admins can manage people in this organization.
         </p>
@@ -130,7 +132,7 @@ export function PeopleSection({
 
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-      <PeopleSectionTitle />
+      <OrgSettingsSectionTitle tab="people" />
       <p className="mt-1 text-[13px] leading-relaxed text-[var(--ink-soft)]">
         Collaborators, roles, and invites. Suspend or remove access for anyone with a
         linked account.
@@ -141,7 +143,7 @@ export function PeopleSection({
           <TabList label="People sections">
             <Tab
               selected={activeSubview === "collaborators"}
-              onSelect={() => setSubview("collaborators")}
+              onSelect={() => selectSubview("collaborators")}
             >
               <span className="inline-flex items-center gap-1.5">
                 <UserGroupIcon className="h-4 w-4 shrink-0" aria-hidden />
@@ -150,7 +152,7 @@ export function PeopleSection({
             </Tab>
             <Tab
               selected={activeSubview === "access"}
-              onSelect={() => setSubview("access")}
+              onSelect={() => selectSubview("access")}
             >
               <span className="inline-flex items-center gap-1.5">
                 <ShieldCheckIcon className="h-4 w-4 shrink-0" aria-hidden />
@@ -198,43 +200,18 @@ export function PeopleSection({
         ) : null}
 
         {activeSubview === "access" && canManagePeople ? (
-          <>
-            <p className="text-[13px] leading-relaxed text-[var(--ink-soft)]">
-              Everyone with a linked account. Suspend blocks sign-in temporarily. Remove
-              ends all access and unlinks their login from their org profile.
-            </p>
-
-            {peopleLoading ? (
-              <p className="mt-3 text-[14px] text-[var(--ink-soft)]">Loading access…</p>
-            ) : null}
-
-            {!peopleLoading && accessMembers.length === 0 ? (
-              <p className="mt-3 text-[14px] text-[var(--ink-soft)]">
-                No one has claimed an account in this organization yet.
-              </p>
-            ) : null}
-
-            {!peopleLoading && accessMembers.length > 0 ? (
-              <ul className="mt-3 divide-y divide-[var(--line-soft)]">
-                {accessMembers.map((member) => (
-                  <OrgPeopleMemberRowView
-                    key={member.membershipId}
-                    orgSlug={orgSlug}
-                    member={member}
-                    staffMember={staffByMembershipId.get(member.membershipId)}
-                    busy={
-                      busyMembershipId === member.membershipId ||
-                      removingCollaboratorId === member.membershipId
-                    }
-                    onSuspend={onSuspend}
-                    onReactivate={onReactivate}
-                    onRemoveFromOrg={onRemoveFromOrg}
-                    onRemoveAsCollaborator={onRemoveAsCollaborator}
-                  />
-                ))}
-              </ul>
-            ) : null}
-          </>
+          <PeopleAccessPanel
+            orgSlug={orgSlug}
+            loading={peopleLoading}
+            members={accessMembers}
+            staffByMembershipId={staffByMembershipId}
+            busyMembershipId={busyMembershipId}
+            removingCollaboratorId={removingCollaboratorId}
+            onSuspend={onSuspend}
+            onReactivate={onReactivate}
+            onRemoveFromOrg={onRemoveFromOrg}
+            onRemoveAsCollaborator={onRemoveAsCollaborator}
+          />
         ) : null}
       </div>
     </section>

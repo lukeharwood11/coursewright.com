@@ -1,6 +1,10 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { CheckIcon } from "@heroicons/react/24/outline";
+import {
+  AcademicCapIcon,
+  CheckIcon,
+  HomeIcon,
+} from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { Input } from "@/ui/Input";
@@ -20,7 +24,8 @@ import { normalizeHomeDays, type HomeDay } from "@/organizations/model/homeDays"
 import { type SchoolDay } from "@/organizations/model/schoolDays";
 import { NewPill } from "@/ui/NewPill";
 import { Tab, TabList } from "@/ui/Tabs";
-import type { OrgSettingsTabId } from "./OrgSettingsNav";
+import type { OrgSettingsTabId } from "../orgSettingsTabConfig";
+import { OrgSettingsSectionTitle } from "./OrgSettingsSectionTitle";
 
 type WeekdayScheduleTab = "school" | "home";
 
@@ -139,7 +144,7 @@ function OrganizationSection({
 
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Organization</h2>
+      <OrgSettingsSectionTitle tab="organization" />
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
@@ -219,10 +224,14 @@ function OrganizationSection({
             selected={weekdayTab === "school"}
             onSelect={() => setWeekdayTab("school")}
           >
-            School days
+            <span className="inline-flex items-center gap-1.5">
+              <AcademicCapIcon className="h-4 w-4 shrink-0" aria-hidden />
+              School days
+            </span>
           </Tab>
           <Tab selected={weekdayTab === "home"} onSelect={() => setWeekdayTab("home")}>
             <span className="inline-flex items-center gap-1.5">
+              <HomeIcon className="h-4 w-4 shrink-0" aria-hidden />
               Home days
               <NewPill />
             </span>
@@ -343,7 +352,7 @@ function ProfileSection({
 
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Profile</h2>
+      <OrgSettingsSectionTitle tab="profile" />
       <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
         Optional details members see on your organization profile.
       </p>

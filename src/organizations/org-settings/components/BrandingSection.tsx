@@ -13,6 +13,7 @@ import { useToastOnError } from "@/ui/useToastOnError";
 import { DEFAULT_CHROME } from "@/organizations/model/brand";
 import { useOrgBranding } from "../hooks/useOrgBranding";
 import { BrandingPreview, BrandingReportCardPreview } from "./BrandingPreview";
+import { OrgSettingsSectionTitle } from "./OrgSettingsSectionTitle";
 
 export function BrandingSection({
   organizationId,
@@ -44,7 +45,7 @@ export function BrandingSection({
 
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Branding</h2>
+      <OrgSettingsSectionTitle tab="branding" />
       <p className="mt-1 text-[14px] text-[var(--ink-soft)]">
         {canManage
           ? "A small icon and color for the sidebar, plus an optional full logo for report cards."
