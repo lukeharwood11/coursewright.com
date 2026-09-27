@@ -2702,18 +2702,24 @@ export type Database = {
         Row: {
           accent_color: string | null
           icon_path: string | null
+          logo_accent_background: boolean
+          logo_path: string | null
           organization_id: number
           updated_at: string
         }
         Insert: {
           accent_color?: string | null
           icon_path?: string | null
+          logo_accent_background?: boolean
+          logo_path?: string | null
           organization_id: number
           updated_at?: string
         }
         Update: {
           accent_color?: string | null
           icon_path?: string | null
+          logo_accent_background?: boolean
+          logo_path?: string | null
           organization_id?: number
           updated_at?: string
         }
@@ -3868,16 +3874,19 @@ export type Database = {
       organization_icons: {
         Row: {
           icon_path: string | null
+          logo_path: string | null
           organization_id: number | null
           updated_at: string | null
         }
         Insert: {
           icon_path?: string | null
+          logo_path?: string | null
           organization_id?: number | null
           updated_at?: string | null
         }
         Update: {
           icon_path?: string | null
+          logo_path?: string | null
           organization_id?: number | null
           updated_at?: string | null
         }

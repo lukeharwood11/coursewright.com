@@ -368,16 +368,18 @@ UI map: [URLS.md](../URLS.md), [PRINT](../pages/PRINT.md).
 
 One optional row per organization. **Owners** set it. Admins, instructors, and parents can read the row and see it in chrome; they cannot write it. Separate from `organizations` because org updates are allowed for any admin.
 
-**The icon is public.** Storage bucket `org-brand` allows `select` for `public`, so anyone with the URL can load the picture — including someone who is not a member (a future invite page). View `organization_icons` exposes only `organization_id`, `icon_path`, and `updated_at` to `anon` and `authenticated`. `accent_color` stays on this table and is not on that view.
+**The icon and logo are public.** Storage bucket `org-brand` allows `select` for `public`, so anyone with the URL can load the picture — including someone who is not a member (a future invite page). View `organization_icons` exposes only `organization_id`, `icon_path`, `logo_path`, and `updated_at` to `anon` and `authenticated`. `accent_color` stays on this table and is not on that view.
 
 | Field | Type | Notes |
 |-------|------|-------|
 | organization_id | bigint | PK, FK → Organization, cascade delete |
 | accent_color | text | Optional `#rrggbb`. Empty means Wright Green. Inside the org this replaces the primary color. The app rejects colors that fail WCAG AA (4.5:1) for white text on the color and for the color as text on paper, and derives a darker hover and a light tint. |
 | icon_path | text | Optional Storage path `{organization_id}/icon.{png\|jpg\|webp}` in the public `org-brand` bucket (256 KB). Empty means the CW mark. The object and this path (via `organization_icons`) are readable without a membership. |
+| logo_path | text | Optional horizontal lockup `{organization_id}/logo.{png\|jpg\|webp}` in the same bucket (256 KB). Used on report cards and similar artifacts; snapshotted when a report card is generated or refreshed. Public via `organization_icons`. |
+| logo_accent_background | boolean | Default false. When true, the logo lockup renders on the org accent color (Wright Green when `accent_color` is empty). Snapshotted on report cards. |
 | updated_at | timestamptz | Cache-busts the public icon URL |
 
-**Chrome only.** The accent restyles the org sidebar and header controls. It does not recolor page content, emails, or print. The icon also appears beside the org name on the account org list.
+**Chrome only.** The accent restyles the org sidebar and header controls. It does not recolor page content, emails, or print. The square icon appears beside the org name on the account org list. The logo lockup appears on report cards when set.
 
 ### OrganizationFeatures
 

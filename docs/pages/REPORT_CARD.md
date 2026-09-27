@@ -26,7 +26,7 @@ Review one course report card, edit the comment, and send it. Grades on the card
 
 ## Data shown
 
-- Student name, course title, status
+- Org logo lockup or org name, student name, course title, status
 - Final percent and derived label, or the teacher override label
 - Assignment rows from the snapshot (locked percent and label, or “Not graded”)
 - Comment

@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { BrandLogoLockup } from "@/organizations/components/BrandLogoLockup";
 import { Mark } from "@/ui/Wordmark";
 import type { ChromeAccent } from "@/organizations/model/brand";
 
@@ -47,6 +48,40 @@ export function BrandingPreview({
           Continue
         </div>
       </div>
+    </div>
+  );
+}
+
+export function BrandingReportCardPreview({
+  orgName,
+  logoUrl,
+  logoAccentBackground,
+  accentColor,
+}: {
+  orgName: string;
+  logoUrl: string | null;
+  logoAccentBackground: boolean;
+  accentColor: string | null;
+}) {
+  return (
+    <div className="overflow-hidden rounded-[10px] border border-[var(--line-soft)] bg-[var(--paper)] p-3">
+      {logoUrl ? (
+        <BrandLogoLockup
+          logoUrl={logoUrl}
+          orgName={orgName}
+          accentBackground={logoAccentBackground}
+          accentColor={accentColor}
+          imgClassName="max-h-12 max-w-full object-contain object-left"
+          plateClassName="inline-flex max-w-full rounded-[6px] px-2.5 py-1.5"
+        />
+      ) : (
+        <p
+          className="text-[15px] font-semibold text-[var(--ink)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {orgName}
+        </p>
+      )}
     </div>
   );
 }

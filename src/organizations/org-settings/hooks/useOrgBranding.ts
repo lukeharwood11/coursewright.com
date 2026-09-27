@@ -14,6 +14,7 @@ import {
   DEFAULT_CHROME,
   validateAccentInput,
   validateBrandIcon,
+  validateBrandLogo,
   type ChromeAccent,
 } from "@/organizations/model/brand";
 
@@ -30,7 +31,11 @@ export function useOrgBranding(organizationId: number | undefined) {
   const [accentText, setAccentText] = useState("");
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [removeIcon, setRemoveIcon] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [removeLogo, setRemoveLogo] = useState(false);
+  const [logoAccentBackground, setLogoAccentBackground] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
 
@@ -38,12 +43,21 @@ export function useOrgBranding(organizationId: number | undefined) {
     setAccentText(saved?.accentColor ?? "");
     setIconFile(null);
     setRemoveIcon(false);
+    setLogoFile(null);
+    setRemoveLogo(false);
+    setLogoAccentBackground(saved?.logoAccentBackground ?? false);
     setFormError(null);
   }
 
   useEffect(() => {
     resetDraft();
-  }, [saved?.accentColor, saved?.iconPath, saved?.updatedAt]);
+  }, [
+    saved?.accentColor,
+    saved?.iconPath,
+    saved?.logoPath,
+    saved?.logoAccentBackground,
+    saved?.updatedAt,
+  ]);
 
   useEffect(() => {
     if (!iconFile) {
@@ -55,14 +69,32 @@ export function useOrgBranding(organizationId: number | undefined) {
     return () => URL.revokeObjectURL(url);
   }, [iconFile]);
 
+  useEffect(() => {
+    if (!logoFile) {
+      setLogoPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(logoFile);
+    setLogoPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [logoFile]);
+
   const savedAccent = saved?.accentColor ?? "";
   const draftAccent = accentText.trim() === "" ? "" : (parseDraft(accentText) ?? accentText.trim());
-  const dirty = draftAccent !== savedAccent || iconFile != null || removeIcon;
+  const dirty =
+    draftAccent !== savedAccent ||
+    iconFile != null ||
+    removeIcon ||
+    logoFile != null ||
+    removeLogo ||
+    logoAccentBackground !== (saved?.logoAccentBackground ?? false);
   const accentCheck = validateAccentInput(accentText);
   const accentError = accentText.trim() && !accentCheck.ok ? accentCheck.error : null;
 
   const preview = previewChrome(accentText);
   const iconUrl = previewUrl ?? (removeIcon ? null : saved?.iconUrl ?? null);
+  const logoUrl = logoPreviewUrl ?? (removeLogo ? null : saved?.logoUrl ?? null);
+  const draftAccentColor = parseDraft(accentText);
 
   async function refresh() {
     if (!organizationId) return;
@@ -91,6 +123,13 @@ export function useOrgBranding(organizationId: number | undefined) {
         if (!icon.ok) throw new Error(icon.error);
         iconExtension = icon.extension;
       }
+      let logoExtension = null;
+      if (logoFile) {
+        const logo = validateBrandLogo(logoFile);
+        if (!logo.ok) throw new Error(logo.error);
+        logoExtension = logo.extension;
+      }
+      const hasLogo = Boolean(logoFile) || (Boolean(saved?.logoPath) && !removeLogo);
       await saveOrganizationBranding({
         organizationId,
         accentColor: accent.value,
@@ -98,6 +137,11 @@ export function useOrgBranding(organizationId: number | undefined) {
         iconExtension,
         removeIcon: removeIcon && !iconFile,
         currentIconPath: saved?.iconPath ?? null,
+        logoFile,
+        logoExtension,
+        removeLogo: removeLogo && !logoFile,
+        currentLogoPath: saved?.logoPath ?? null,
+        logoAccentBackground: hasLogo ? logoAccentBackground : false,
       });
     },
     onSuccess: async () => {
@@ -113,13 +157,20 @@ export function useOrgBranding(organizationId: number | undefined) {
   const removeMutation = useMutation({
     mutationFn: async () => {
       if (!organizationId) throw new Error("Organization isn’t loaded yet.");
-      await clearOrganizationBranding(organizationId, saved?.iconPath ?? null);
+      await clearOrganizationBranding(
+        organizationId,
+        saved?.iconPath ?? null,
+        saved?.logoPath ?? null,
+      );
     },
     onSuccess: async () => {
       setConfirmRemove(false);
       setFormError(null);
       setIconFile(null);
       setRemoveIcon(false);
+      setLogoFile(null);
+      setRemoveLogo(false);
+      setLogoAccentBackground(false);
       setAccentText("");
       await refresh();
       toast("Branding removed.");
@@ -156,12 +207,43 @@ export function useOrgBranding(organizationId: number | undefined) {
     setRemoveIcon(true);
   }
 
+  function onLogoChange(file: File | null) {
+    if (!file) return;
+    const parsed = validateBrandLogo(file);
+    if (!parsed.ok) {
+      setFormError(parsed.error);
+      return;
+    }
+    setFormError(null);
+    setLogoFile(file);
+    setRemoveLogo(false);
+  }
+
+  function onRemoveLogo() {
+    setFormError(null);
+    if (logoFile) {
+      setLogoFile(null);
+      return;
+    }
+    setRemoveLogo(true);
+    setLogoAccentBackground(false);
+  }
+
+  function onToggleLogoAccentBackground() {
+    setLogoAccentBackground((value) => !value);
+    setFormError(null);
+  }
+
   return {
     loading: brandingQuery.isLoading,
     loadError: brandingQuery.error instanceof Error ? brandingQuery.error.message : null,
     accentText,
     iconUrl,
+    logoUrl,
+    logoAccentBackground,
+    draftAccentColor,
     iconFileName: iconFile?.name ?? null,
+    logoFileName: logoFile?.name ?? null,
     preview,
     formError: accentError ?? formError,
     hasChanges: dirty && !accentError,
@@ -169,10 +251,13 @@ export function useOrgBranding(organizationId: number | undefined) {
     saving: saveMutation.isPending,
     removing: removeMutation.isPending,
     confirmRemove,
-    canRemove: Boolean(saved?.accentColor || saved?.iconPath),
+    canRemove: Boolean(saved?.accentColor || saved?.iconPath || saved?.logoPath),
     onAccentChange,
     onIconChange,
     onRemoveIcon,
+    onLogoChange,
+    onRemoveLogo,
+    onToggleLogoAccentBackground,
     onSave: () => saveMutation.mutate(),
     onReset: resetDraft,
     onAskRemove: () => setConfirmRemove(true),

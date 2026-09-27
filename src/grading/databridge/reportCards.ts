@@ -26,6 +26,11 @@ export type ReportCardSnapshot = {
   courseId: number | null;
   courseTitle: string;
   studentName: string;
+  orgName: string | null;
+  orgLogoPath: string | null;
+  orgLogoUpdatedAt: string | null;
+  orgLogoAccentBackground: boolean;
+  orgAccentColor: string | null;
   finalPercent: number | null;
   finalLabel: string | null;
   overrideLabel: string | null;
@@ -76,6 +81,11 @@ export function parseSnapshot(value: Json): ReportCardSnapshot {
     courseId: null,
     courseTitle: "Course",
     studentName: "Student",
+    orgName: null,
+    orgLogoPath: null,
+    orgLogoUpdatedAt: null,
+    orgLogoAccentBackground: false,
+    orgAccentColor: null,
     finalPercent: null,
     finalLabel: null,
     overrideLabel: null,
@@ -108,6 +118,12 @@ export function parseSnapshot(value: Json): ReportCardSnapshot {
     courseId: asNumber(value.course_id),
     courseTitle: typeof value.course_title === "string" ? value.course_title : "Course",
     studentName: typeof value.student_name === "string" ? value.student_name : "Student",
+    orgName: typeof value.org_name === "string" ? value.org_name : null,
+    orgLogoPath: typeof value.org_logo_path === "string" ? value.org_logo_path : null,
+    orgLogoUpdatedAt:
+      typeof value.org_logo_updated_at === "string" ? value.org_logo_updated_at : null,
+    orgLogoAccentBackground: value.org_logo_accent_background === true,
+    orgAccentColor: typeof value.org_accent_color === "string" ? value.org_accent_color : null,
     finalPercent: asNumber(value.final_percent),
     finalLabel: typeof value.final_label === "string" ? value.final_label : null,
     overrideLabel: typeof value.override_label === "string" ? value.override_label : null,

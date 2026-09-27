@@ -145,6 +145,16 @@ export function brandIconObjectPath(
   return `${organizationId}/icon.${extension}`;
 }
 
+/** Horizontal lockup (icon + text) for report cards and similar artifacts. */
+export function brandLogoObjectPath(
+  organizationId: number,
+  extension: BrandIconExtension,
+): string {
+  return `${organizationId}/logo.${extension}`;
+}
+
+export const validateBrandLogo = validateBrandIcon;
+
 export function brandIconPublicUrl(
   supabaseUrl: string,
   iconPath: string,
@@ -153,6 +163,8 @@ export function brandIconPublicUrl(
   const base = supabaseUrl.replace(/\/$/, "");
   return `${base}/storage/v1/object/public/org-brand/${iconPath}?v=${encodeURIComponent(updatedAt)}`;
 }
+
+export const brandAssetPublicUrl = brandIconPublicUrl;
 
 function extensionForMime(type: string): BrandIconExtension | null {
   if (type === "image/png") return "png";

@@ -9,6 +9,7 @@ import { PageLoading } from "@/ui/PageLoading";
 import { formatPercent } from "@/grading/model/scale";
 import { gradebookPath, studentPath } from "@/grading/model/paths";
 import { useReportCard } from "./hooks/useReportCard";
+import { ReportCardArtifactHeader } from "./components/ReportCardArtifactHeader";
 
 export function ReportCardPage() {
   const cardPage = useReportCard();
@@ -44,6 +45,7 @@ export function ReportCardPage() {
 
   return (
     <div>
+      <div className="print:hidden">
       <DetailPageHeader
         backTo={studentPath(slug, card.studentProfileId)}
         backLabel="Back to student"
@@ -56,8 +58,19 @@ export function ReportCardPage() {
           </Button>
         }
       />
+      </div>
       <div className="space-y-6 px-5 py-4 md:px-8 print:px-0">
-        <div className="flex flex-wrap items-center gap-2">
+        <ReportCardArtifactHeader snapshot={snapshot} />
+        <div className="hidden print:block">
+          <h1
+            className="text-[22px] font-semibold text-[var(--ink)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {snapshot.studentName}
+          </h1>
+          <p className="mt-1 text-[15px] text-[var(--ink-soft)]">{snapshot.courseTitle}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 print:hidden">
           <Badge variant={card.status === "draft" ? "neutral" : "green"}>{card.status}</Badge>
           {cardPage.canEdit ? (
             <Link
@@ -69,7 +82,7 @@ export function ReportCardPage() {
           ) : null}
         </div>
 
-        <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
+        <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5 print:border-0 print:bg-white print:p-0">
           <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Grades</h2>
           <p className="mt-2 text-[20px] font-semibold text-[var(--ink)]">{finalText}</p>
           {snapshot.items.length === 0 ? (
@@ -90,7 +103,7 @@ export function ReportCardPage() {
               ))}
             </ul>
           )}
-          <p className="mt-3 text-[12.5px] text-[var(--ink-faint)]">
+          <p className="mt-3 text-[12.5px] text-[var(--ink-faint)] print:hidden">
             Grades come from the gradebook. Change a score there, then refresh this draft.
           </p>
         </section>
@@ -111,7 +124,7 @@ export function ReportCardPage() {
         </section>
 
         {draft ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 print:hidden">
             <Button type="button" variant="secondary" disabled={cardPage.saving} onClick={cardPage.saveNarrative}>
               {cardPage.saving ? "Saving…" : "Save comment"}
             </Button>
@@ -150,7 +163,7 @@ export function ReportCardPage() {
         />
 
         {cardPage.canEdit && card.status !== "draft" ? (
-          <section>
+          <section className="print:hidden">
             <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Email</h2>
             {cardPage.deliveries.filter((row) => row.channel === "email").length === 0 ? (
               <p className="mt-2 text-[14px] text-[var(--ink-soft)]">No email deliveries.</p>

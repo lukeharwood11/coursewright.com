@@ -4,6 +4,7 @@ import { canManageBranding } from "./role.ts";
 import {
   brandIconObjectPath,
   brandIconPublicUrl,
+  brandLogoObjectPath,
   chromeAccentFromHex,
   contrastRatio,
   parseAccentHex,
@@ -77,6 +78,7 @@ test("validateBrandIcon allows a small png and rejects other files", () => {
 
 test("brand icon path and public url stay stable", () => {
   assert.equal(brandIconObjectPath(12, "png"), "12/icon.png");
+  assert.equal(brandLogoObjectPath(12, "webp"), "12/logo.webp");
   assert.equal(
     brandIconPublicUrl("https://example.supabase.co/", "12/icon.png", "2026-09-22T00:00:00.000Z"),
     "https://example.supabase.co/storage/v1/object/public/org-brand/12/icon.png?v=2026-09-22T00%3A00%3A00.000Z",

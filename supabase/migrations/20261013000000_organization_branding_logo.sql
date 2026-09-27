@@ -1,0 +1,173 @@
+-- Full logo lockup (icon + text) for artifacts such as report cards.
+-- Square icon_path is unchanged for chrome.
+
+alter table public.organization_branding
+  add column logo_path text,
+  add constraint organization_branding_logo_path_chk check (
+    logo_path is null
+    or logo_path ~ ('^' || organization_id::text || '/logo\.(png|jpg|webp)$')
+  );
+
+comment on column public.organization_branding.logo_path is
+  'Optional horizontal lockup in org-brand bucket for report cards and similar artifacts.';
+
+drop view if exists public.organization_icons;
+
+create view public.organization_icons
+with (security_invoker = false) as
+select
+  organization_id,
+  icon_path,
+  logo_path,
+  updated_at
+from public.organization_branding
+where icon_path is not null or logo_path is not null;
+
+comment on view public.organization_icons is
+  'Public org brand asset paths for chrome, invites, and artifacts. No accent color.';
+
+revoke all on table public.organization_icons from public, anon, authenticated;
+grant select on table public.organization_icons to anon, authenticated, service_role;
+
+drop policy if exists org_brand_insert on storage.objects;
+create policy org_brand_insert on storage.objects
+for insert to authenticated
+with check (
+  bucket_id = 'org-brand'
+  and name ~ '^[0-9]+/(icon|logo)\.(png|jpg|webp)$'
+  and (select private.is_org_owner(
+    case
+      when split_part(name, '/', 1) ~ '^[0-9]+$' then split_part(name, '/', 1)::bigint
+      else null
+    end
+  ))
+);
+
+drop policy if exists org_brand_update on storage.objects;
+create policy org_brand_update on storage.objects
+for update to authenticated
+using (
+  bucket_id = 'org-brand'
+  and (select private.is_org_owner(
+    case
+      when split_part(name, '/', 1) ~ '^[0-9]+$' then split_part(name, '/', 1)::bigint
+      else null
+    end
+  ))
+)
+with check (
+  bucket_id = 'org-brand'
+  and name ~ '^[0-9]+/(icon|logo)\.(png|jpg|webp)$'
+  and (select private.is_org_owner(
+    case
+      when split_part(name, '/', 1) ~ '^[0-9]+$' then split_part(name, '/', 1)::bigint
+      else null
+    end
+  ))
+);
+
+create or replace function private.report_card_snapshot(p_enrollment_id bigint)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  v_items jsonb;
+  v_final numeric;
+  v_mode text;
+  v_pass numeric;
+  v_bands jsonb;
+  v_updated timestamptz;
+  v_course_id bigint;
+  v_course_title text;
+  v_student_id bigint;
+  v_student_name text;
+  v_org bigint;
+  v_org_name text;
+  v_logo_path text;
+  v_logo_updated_at timestamptz;
+  v_override text;
+  v_note text;
+  v_overridden_at timestamptz;
+  item jsonb;
+  labeled jsonb := '[]'::jsonb;
+begin
+  select
+    e.course_id,
+    c.title,
+    e.student_profile_id,
+    sp.name,
+    c.organization_id,
+    o.name,
+    b.logo_path,
+    b.updated_at,
+    f.override_label,
+    f.override_note,
+    f.overridden_at
+  into
+    v_course_id,
+    v_course_title,
+    v_student_id,
+    v_student_name,
+    v_org,
+    v_org_name,
+    v_logo_path,
+    v_logo_updated_at,
+    v_override,
+    v_note,
+    v_overridden_at
+  from public.enrollments e
+  join public.courses c on c.id = e.course_id
+  join public.org_profiles sp on sp.id = e.student_profile_id
+  join public.organizations o on o.id = c.organization_id
+  left join public.organization_branding b on b.organization_id = c.organization_id
+  left join public.course_final_grades f on f.enrollment_id = e.id
+  where e.id = p_enrollment_id;
+
+  select s.mode, s.pass_threshold, s.bands, s.updated_at
+  into v_mode, v_pass, v_bands, v_updated
+  from public.organization_grading_scales s
+  where s.organization_id = v_org;
+
+  if v_mode is null then
+    v_mode := 'none';
+    v_bands := '[]'::jsonb;
+  end if;
+
+  v_items := private.enrollment_grade_rows(p_enrollment_id);
+  v_final := private.mean_locked_percent(v_items);
+
+  for item in
+    select value from jsonb_array_elements(v_items)
+  loop
+    labeled := labeled || jsonb_build_array(
+      item || jsonb_build_object(
+        'label', private.percent_label(
+          v_mode, v_pass, v_bands, nullif(item->>'percent', '')::numeric
+        )
+      )
+    );
+  end loop;
+
+  return jsonb_build_object(
+    'scale_mode', v_mode,
+    'scale_updated_at', v_updated,
+    'course_id', v_course_id,
+    'course_title', v_course_title,
+    'student_profile_id', v_student_id,
+    'student_name', v_student_name,
+    'enrollment_id', p_enrollment_id,
+    'org_name', v_org_name,
+    'org_logo_path', v_logo_path,
+    'org_logo_updated_at', v_logo_updated_at,
+    'final_percent', v_final,
+    'final_label', private.percent_label(v_mode, v_pass, v_bands, v_final),
+    'override_label', v_override,
+    'override_note', v_note,
+    'overridden_at', v_overridden_at,
+    'items', labeled
+  );
+end;
+$$;
