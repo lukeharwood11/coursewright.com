@@ -11,6 +11,7 @@ import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
 import { studentsHubTier } from "@/grading/model/access";
 import { progressPath, studentsPath } from "@/grading/model/paths";
+import { StudentAttendanceSection } from "@/attendance";
 import { StudentGradesSection } from "@/grading";
 import { newAnnouncementPath } from "@/announcements/model/paths";
 import { enrollmentStatusLabel } from "@/roster/model/enrollment";
@@ -129,6 +130,7 @@ export function StudentProfilePage() {
       />
       <div className="space-y-6 px-5 pt-4 pb-6 md:px-8">
       <StudentGradesSection studentId={profile.student.id} />
+      <StudentAttendanceSection studentId={profile.student.id} />
       {canEdit ? (
       <>
       <StudentInvitePanel

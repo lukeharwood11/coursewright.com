@@ -258,6 +258,191 @@ export type Database = {
           },
         ]
       }
+      attendance_class_entries: {
+        Row: {
+          class_id: number
+          created_at: string
+          id: number
+          on_date: string
+          organization_id: number
+          recorded_by: string | null
+          status: string
+          student_profile_id: number
+          updated_at: string
+        }
+        Insert: {
+          class_id: number
+          created_at?: string
+          id?: number
+          on_date: string
+          organization_id: number
+          recorded_by?: string | null
+          status: string
+          student_profile_id: number
+          updated_at?: string
+        }
+        Update: {
+          class_id?: number
+          created_at?: string
+          id?: number
+          on_date?: string
+          organization_id?: number
+          recorded_by?: string | null
+          status?: string
+          student_profile_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_class_entries_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_class_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_class_entries_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_class_entries_student_profile_id_fkey"
+            columns: ["student_profile_id"]
+            isOneToOne: false
+            referencedRelation: "org_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_course_entries: {
+        Row: {
+          course_id: number
+          created_at: string
+          id: number
+          on_date: string
+          organization_id: number
+          recorded_by: string | null
+          status: string
+          student_profile_id: number
+          updated_at: string
+        }
+        Insert: {
+          course_id: number
+          created_at?: string
+          id?: number
+          on_date: string
+          organization_id: number
+          recorded_by?: string | null
+          status: string
+          student_profile_id: number
+          updated_at?: string
+        }
+        Update: {
+          course_id?: number
+          created_at?: string
+          id?: number
+          on_date?: string
+          organization_id?: number
+          recorded_by?: string | null
+          status?: string
+          student_profile_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_course_entries_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_course_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_course_entries_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_course_entries_student_profile_id_fkey"
+            columns: ["student_profile_id"]
+            isOneToOne: false
+            referencedRelation: "org_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_days: {
+        Row: {
+          created_at: string
+          id: number
+          on_date: string
+          organization_id: number
+          recorded_by: string | null
+          status: string
+          student_profile_id: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          on_date: string
+          organization_id: number
+          recorded_by?: string | null
+          status: string
+          student_profile_id: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          on_date?: string
+          organization_id?: number
+          recorded_by?: string | null
+          status?: string
+          student_profile_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_days_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_days_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_days_student_profile_id_fkey"
+            columns: ["student_profile_id"]
+            isOneToOne: false
+            referencedRelation: "org_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blocks: {
         Row: {
           body: Json

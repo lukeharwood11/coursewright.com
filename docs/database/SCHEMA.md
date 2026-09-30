@@ -27,6 +27,9 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | Class | `classes` | **P0** — group of students; **not** a course |
 | ClassMember | `class_members` | **P0** — student_profile ↔ class |
 | ClassLeader | `class_leaders` | **P0** — staff assigned as a lead for a class |
+| AttendanceDay | `attendance_days` | **P1** — whole-day status for one student on one date |
+| AttendanceClassEntry | `attendance_class_entries` | **P1** — class sheet mark |
+| AttendanceCourseEntry | `attendance_course_entries` | **P1** — course sheet mark |
 | CourseTemplate | `course_templates` | **P1** product — table exists |
 | TemplateAccess | `template_access` | **P1** product — table exists |
 | CourseInstructor | `course_instructors` | |
@@ -93,7 +96,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | Phase | Entities in focus |
 |-------|-------------------|
 | **P0** | Organization, User, Membership, **AdminInvite**, **AdminInviteStudents**, **StudentProfile**, **Class**, **ClassMember**, **ClassLeader**, **Family**, **FamilyMember**, Enrollment, ParentInvite, ParentStudentLink, CourseInstructor, Course, **Unit**, **Material** (page), **Block**, **MaterialVersion**, File, **FileVersion**, ShareLink, ImportantNow, **LessonPlan**, **LessonPlanDay**, **LessonPlanDayMaterial**, **Announcement**, **AnnouncementRead**, **search indexes / facets**. (**Create course from course** copies units/materials/blocks — Function candidate.) |
-| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification**, **PushSubscription**, **Feedback**, **OrgResourceFolder**, **OrgResourceItem**, **OrgResourceBlock**, **OrgResourceGrant**, **MaterialSubmission**, **MaterialSubmissionVersion**, **MaterialSubmissionFile**, **Quiz**, **QuizQuestion**, **QuizChoice**, **QuizAnswerKey**, **QuizAttempt**, **QuizAttemptAnswer** |
+| **P1** | **CourseTemplate**, **TemplateAccess**, template↔course sync/promote/deprecate, CourseSummary, Grade, InstructorNote, ChecklistItem, **OrgSubscription** (Course Wright bills orgs), **Discussion**, **DiscussionMessage**, **DiscussionMessageAttachment**, **DiscussionRead**, **Notification**, **PushSubscription**, **Feedback**, **OrgResourceFolder**, **OrgResourceItem**, **OrgResourceBlock**, **OrgResourceGrant**, **MaterialSubmission**, **MaterialSubmissionVersion**, **MaterialSubmissionFile**, **Quiz**, **QuizQuestion**, **QuizChoice**, **QuizAnswerKey**, **QuizAttempt**, **QuizAttemptAnswer**, **AttendanceDay**, **AttendanceClassEntry**, **AttendanceCourseEntry** |
 | **P2** | Cross-org Family management, StudentProfile.user_id, dedicated student role, **ParentPayments** (orgs collect from parents) |
 
 ---
@@ -572,6 +575,69 @@ Zero or more **leads** for a class. **P0.** Owners and admins assign; instructor
 | unique | (class_id, org_profile_id); (class_id, user_id) | Several unclaimed rows can share a null `user_id` |
 
 Owners and admins may assign an owner, admin, or instructor before that person claims. Activity notifications and any manage access wait until `user_id` is set and the membership is active. Leads are notified in **Activity** when someone posts in a discussion for that class. Demoting or removing staff membership drops their lead rows for classes in that org. In-org labels read `org_profiles.name`.
+
+### AttendanceDay
+
+Whole-day status for one student on one calendar date. Not a grade. Does not replace class or course sheet rows.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| student_profile_id | bigint | FK → StudentProfile (`org_profiles`, `counts_as_student`) |
+| on_date | date | |
+| status | text | `present` · `absent` · `excused` · `partial` |
+| recorded_by | uuid | FK → User. Trigger sets `auth.uid()` on insert and update |
+| created_at / updated_at | timestamptz | |
+| unique | (student_profile_id, on_date) | Unset = delete the row |
+
+**Who can SELECT:** org staff who can browse (`can_browse_as_staff`: owner, admin, instructor, observer); a linked parent; the student account for that profile.
+
+**Who can write:** owners and admins for any student in the org; a claimed class lead for a **current** member of that class; a course instructor for a student with an **active** enrollment in a course they teach. Observers, parents, and students do not write. `recorded_by` is not client-writable.
+
+### AttendanceClassEntry
+
+One class sheet mark. Separate from the day row and from course sheets.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization. Must match the class |
+| class_id | bigint | FK → Class |
+| student_profile_id | bigint | FK → StudentProfile |
+| on_date | date | |
+| status | text | `present` · `absent` · `late` · `excused` |
+| recorded_by | uuid | FK → User. Trigger sets `auth.uid()` |
+| created_at / updated_at | timestamptz | |
+| unique | (class_id, student_profile_id, on_date) | Unset = delete the row |
+
+**Who can SELECT:** same as AttendanceDay.
+
+**Who can insert:** owners/admins, or a claimed class lead of that class, and the student is a **current** class member.
+
+**Who can update or delete:** owners/admins or a claimed class lead of that class. The row may stay after the student leaves the class. Identity columns (`organization_id`, `class_id`, `student_profile_id`, `on_date`) cannot change.
+
+### AttendanceCourseEntry
+
+Same shape as a class entry, with `course_id` instead of `class_id`.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization. Must match the course |
+| course_id | bigint | FK → Course |
+| student_profile_id | bigint | FK → StudentProfile |
+| on_date | date | |
+| status | text | `present` · `absent` · `late` · `excused` |
+| recorded_by | uuid | FK → User. Trigger sets `auth.uid()` |
+| created_at / updated_at | timestamptz | |
+| unique | (course_id, student_profile_id, on_date) | Unset = delete the row |
+
+**Who can insert:** `can_manage_course`, and the student has an **active** enrollment in that course.
+
+**Who can update or delete:** `can_manage_course`, including after the enrollment is no longer active. Identity columns cannot change.
+
+**SELECT:** same as AttendanceDay.
 
 ### Course
 
@@ -1298,6 +1364,9 @@ DiscussionMessage ──< DiscussionMessageAttachment >── File | Material | 
 DiscussionMessage ──< DiscussionMessageMention >── User
 Discussion ──< DiscussionRead >── User
 Organization ──< Notification >── User
+Organization ──< AttendanceDay >── StudentProfile
+Class ──< AttendanceClassEntry >── StudentProfile
+Course ──< AttendanceCourseEntry >── StudentProfile
 User ──< PushSubscription
 User ──< Feedback >── Organization?
 Course ──< Quiz ──< QuizAttempt ──< QuizAttemptAnswer

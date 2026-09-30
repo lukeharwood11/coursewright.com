@@ -48,11 +48,13 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [QUIZ](./QUIZ.md) | `…/units/<unit_id>/quizzes/<quiz_id>`; edit appends `/edit` |
 | [PRINT](./PRINT.md) | `…/materials/<id>/print`; `…/units/<id>/print`; `…/quizzes/<id>/print`; `/my/<org-slug>/print-this-week`; `…/resources/items/<id>/print`; `…/resources/print?items=` |
 | [COURSE_GRADEBOOK](./COURSE_GRADEBOOK.md) | `/my/<org-slug>/courses/<course_id>/gradebook` |
+| [COURSE_ATTENDANCE](./COURSE_ATTENDANCE.md) | `/my/<org-slug>/courses/<course_id>/attendance` |
 | [ORG_ROSTER](./ORG_ROSTER.md) | `/my/<org-slug>/students` (`?tab=classes`; `/roster` redirects) |
 | [STUDENT_PROFILE](./STUDENT_PROFILE.md) | `/my/<org-slug>/students/<student_id>` |
 | [PROGRESS](./PROGRESS.md) | `/my/<org-slug>/progress` |
 | [REPORT_CARD](./REPORT_CARD.md) | `/my/<org-slug>/report-cards/<card_id>` |
 | [CLASS](./CLASS.md) | `/my/<org-slug>/classes/<class_id>` |
+| [CLASS_ATTENDANCE](./CLASS_ATTENDANCE.md) | `/my/<org-slug>/classes/<class_id>/attendance` |
 | [FAMILIES](./FAMILIES.md) | `/my/<org-slug>/families` | **Not currently routed** |
 | [FAMILY](./FAMILY.md) | `/my/<org-slug>/families/<family_id>` | **Not currently routed** |
 

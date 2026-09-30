@@ -6,9 +6,10 @@ import {
   PaperAirplaneIcon,
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
-import { Button } from "@/ui/Button";
+import { Button, ButtonLink } from "@/ui/Button";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
+import { courseAttendancePath } from "@/attendance/model/paths";
 import { coursePath, coursesPath } from "@/courses/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
@@ -77,6 +78,14 @@ export function CourseRosterPage() {
           <span className="text-[13px] font-bold text-[var(--ink-soft)]">
             {roster.course.title}
           </span>
+        }
+        titleTrailing={
+          <ButtonLink
+            variant="secondary"
+            to={courseAttendancePath(roster.organization.slug, roster.course.id)}
+          >
+            Take attendance
+          </ButtonLink>
         }
         description={
           <p className="text-[13px]">

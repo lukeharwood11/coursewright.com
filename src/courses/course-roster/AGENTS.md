@@ -1,6 +1,6 @@
 # AGENTS — `src/courses/course-roster/`
 
-Course enrollments and **teachers**. List-first enrolled students; **Enroll students** opens batch multi-select (optional Class preset) or batch create-and-enroll. Empty roster is allowed — create → print does not require students.
+Course enrollments and **teachers**. List-first enrolled students; **Enroll students** opens batch multi-select (optional Class preset) or batch create-and-enroll. **Take attendance** opens the course sheet. Empty roster is allowed — create → print does not require students.
 
 Owners and admins assign course teachers (same `course_instructors` rows as course settings). Instructors see the list.
 

@@ -22,6 +22,7 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
 - **Invite parent** from an enrolled student — emails `/invite/<token>` for a parent email (copy-link remains). Multiple parents are managed on the student profile.
 - Owners and admins **assign teachers** (course instructors), including people who have not claimed. Instructors can see the list. Names are the org profile name. A pending teacher cannot manage the course until they claim. Same assignment as [COURSE_SETTINGS](./COURSE_SETTINGS.md).
 - Empty roster allowed — printing materials does not require students.
+- **Take attendance** → [COURSE_ATTENDANCE](./COURSE_ATTENDANCE.md). Staff who can open this roster can open the sheet. Writes stay with people who can manage the course.
 
 ## Data shown
 
@@ -47,10 +48,12 @@ Manage **who is enrolled** in this course instance (course has its own roster). 
 - Enroll / unenroll (batch enroll preferred)
 - Invite parent (email + copy the claim link)
 - Open [STUDENT_PROFILE](./STUDENT_PROFILE.md)
+- Take attendance
 
 ## Links to
 
 - [COURSE](./COURSE.md) — back to course
+- [COURSE_ATTENDANCE](./COURSE_ATTENDANCE.md) — attendance for this course
 - [COURSE_SETTINGS](./COURSE_SETTINGS.md) — other course settings
 - [USER_PROFILE](./USER_PROFILE.md) — teacher cards
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — open student

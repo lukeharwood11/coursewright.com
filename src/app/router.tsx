@@ -13,6 +13,7 @@ import { OrgLayout } from "@/app/layouts/OrgLayout";
 import { PrintLayout } from "@/app/layouts/PrintLayout";
 import { StubPage } from "@/app/StubPage";
 import { CourseListPage, CoursePage, CourseRosterPage, CourseSettingsPage } from "@/courses";
+import { ClassAttendancePage, CourseAttendancePage } from "@/attendance";
 import { CourseGradebookPage, ProgressPage, ReportCardPage } from "@/grading";
 import { CalendarPage } from "@/calendar";
 import { EventEditPage, EventPage } from "@/events";
@@ -153,6 +154,14 @@ export function AppRoutes() {
               element={
                 <RequireStaff>
                   <CourseGradebookPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="courses/:courseId/attendance"
+              element={
+                <RequireStaff>
+                  <CourseAttendancePage />
                 </RequireStaff>
               }
             />
@@ -339,6 +348,7 @@ export function AppRoutes() {
             <Route path="roster" element={<Navigate to="../students" replace />} />
             <Route path="roster/:studentId" element={<RosterStudentRedirect />} />
             <Route path="classes/:classId" element={<ClassRosterPage />} />
+            <Route path="classes/:classId/attendance" element={<ClassAttendancePage />} />
           </Route>
           <Route element={<PrintLayout />}>
             <Route path="print-this-week" element={<PrintPage />} />

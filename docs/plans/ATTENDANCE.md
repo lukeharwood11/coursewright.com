@@ -1,6 +1,6 @@
 # Attendance — capture at class and course
 
-**Status:** in design  
+**Status:** capture shipped — package submit still waits on report cards  
 **Prerequisite for:** [REPORT_CARDS.md](./REPORT_CARDS.md) (optional template section)  
 **Domains:** new `src/attendance/` · roster classes · courses · grading report cards  
 **Migrations:** TBD (experiment mode — prefer one coherent migration when implementing)
@@ -29,7 +29,7 @@ Microschools and co-ops need a simple attendance record that can feed report car
 | Two capture scopes | **Class** and **Course** — separate rows / sheets, not one merged write |
 | Who writes class attendance | Class **leads** for that class; owners and admins for any class in the org |
 | Who writes course attendance | **Course instructors** for that course; owners and admins for any course in the org |
-| Who reads (staff) | Owners/admins org-wide. Instructors see class sheets for classes they lead and course sheets for courses they teach. Broader “any instructor sees any class” stays **TBD** (default: same manage rules as roster discussions) |
+| Who reads (staff) | Org staff who can browse (owner, admin, instructor, observer) read all three tables in the org. Parents and students read linked / own rows only and do not open the class or course grid |
 | Day mark | Explicit **day-level** row on (student, date). Statuses: `present` · `absent` · `excused` · `partial`. Does not delete class/course rows. Whole-day `present` / `absent` / `excused` is the fast path when every period is the same |
 | Partial absence / excuse | Supported two ways: (1) day status `partial`, and/or (2) **different statuses on some class/course sheets** the same day (e.g. present in one class, excused in another). Capture UI always shows per-sheet detail; never silently flatten mixed sheets |
 | Status vocabulary (v1) | Fixed set on **class/course** entries: `present` · `absent` · `late` · `excused`. On **day** entries: `present` · `absent` · `excused` · `partial`. Unset = no row. Org-custom labels later |
@@ -100,7 +100,7 @@ v1 hardcodes the enum in check constraints. Org-custom labels are a later enhanc
 |-------|-------|
 | organization_id | FK |
 | class_id | FK |
-| student_profile_id | FK — must be class member at write time (or allow historical after leave — **TBD**) |
+| student_profile_id | FK — new mark requires current class membership. An existing row stays and can still be edited by whoever can write that sheet |
 | on_date | date |
 | status | `present` · `absent` · `late` · `excused` |
 | recorded_by | user_id |
@@ -126,22 +126,24 @@ Same shape with `course_id` and enrollment check at write time.
 
 ## Open questions
 
-1. After a student leaves a class, do historical class entries stay readable?
-2. Should instructors who are not class leads see other classes’ sheets for students they teach?
-3. Date range defaults for report rollup (term dates vs course start/end vs free picker on the card)?
-4. Optional note on a day or sheet entry (e.g. “left at noon”) in v1?
+Resolved for capture:
+
+1. After a student leaves a class, historical entries stay. A new mark still requires current membership (or an active enrollment on a course sheet). Whoever can write that sheet can still edit the old row.
+2. Staff who can browse the org can read every sheet in the org. Writes stay with class leads, course managers, and owners/admins as above. Parents and students do not see other students’ grids.
+3. Report rollup date range waits on report cards.
+4. No note column in v1.
 
 ## Implementation checklist (when building)
 
-1. SCHEMA + FEATURES rows; status → `in progress`
-2. Migration + RLS + helpers
-3. `src/attendance/` databridge + AGENTS.md
-4. Class and course capture UI
-5. Day status control on student profile (present / absent / excused / partial)
-6. Progress / parent + student read
-7. Cycle attendance package submit (wired to report-card fill cycles)
-8. Export helpers for report-card snapshot
-9. Status → `shipped` in FEATURES; mark this plan shipped
+1. SCHEMA + FEATURES rows; status → `in progress` — done for capture
+2. Migration + RLS + helpers — done
+3. `src/attendance/` databridge + AGENTS.md — done
+4. Class and course capture UI — done
+5. Day status control on student profile (present / absent / excused / partial) — done
+6. Progress / parent + student read — done
+7. Cycle attendance package submit (wired to report-card fill cycles) — waits on report cards
+8. Export helpers for report-card snapshot — waits on report cards
+9. Status → `shipped` in FEATURES for capture; package submit stays open
 
 ## References
 

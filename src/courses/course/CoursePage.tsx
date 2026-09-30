@@ -8,6 +8,7 @@ import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { browsesAsStaff } from "@/organizations/model/role";
 import { CourseHeader } from "./components/CourseHeader";
 import { CourseVisibilityBanner } from "./components/CourseVisibilityBanner";
 import {
@@ -48,7 +49,7 @@ export function CoursePage() {
     reorderUnitOutline,
     setVisibility,
   } = useCourse();
-  const { organization: shellOrg } = useOrgShell();
+  const { organization: shellOrg, role, parentPresentation } = useOrgShell();
   const showLessonPlans = shellOrg.features.lessonPlans;
   const showEvents = shellOrg.features.events;
   const eventsQuery = useCourseEvents(
@@ -274,6 +275,7 @@ export function CoursePage() {
           instructors={instructors}
           students={students}
           canEdit={canEdit}
+          showAttendance={Boolean(role && browsesAsStaff(role) && !parentPresentation)}
         />
       </div>
       </div>

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { StudentAttendanceSection } from "@/attendance";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { PageLoading } from "@/ui/PageLoading";
 import { studentsHubTier } from "@/grading/model/access";
@@ -79,6 +80,8 @@ export function ProgressPage() {
           </ul>
         )}
       </section>
+
+      <StudentAttendanceSection studentId={progress.student.id} />
 
       <section>
         <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Grades</h2>

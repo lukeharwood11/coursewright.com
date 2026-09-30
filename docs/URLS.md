@@ -93,6 +93,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | [COURSE](./pages/COURSE.md) | `/my/<org-slug>/courses/<course_id>` | Builder home |
 | [COURSE_ROSTER](./pages/COURSE_ROSTER.md) | `/my/<org-slug>/courses/<course_id>/roster` | Enrollments |
 | [COURSE_GRADEBOOK](./pages/COURSE_GRADEBOOK.md) | `/my/<org-slug>/courses/<course_id>/gradebook` | Staff who can manage the course. Needs-grade queue, matrix, final override |
+| [COURSE_ATTENDANCE](./pages/COURSE_ATTENDANCE.md) | `/my/<org-slug>/courses/<course_id>/attendance` | Staff who can view the course. Writes follow course manage |
 | [COURSE_SETTINGS](./pages/COURSE_SETTINGS.md) | `/my/<org-slug>/courses/<course_id>/settings` | Dates, status, instructors, grades, calendar color |
 | [LESSON_PLAN](./pages/LESSON_PLAN.md) (view) | `/my/<org-slug>/courses/<course_id>/lesson-plans/<lesson_plan_id>` | Week plan + day notes and materials |
 | [LESSON_PLAN](./pages/LESSON_PLAN.md) (new) | `/my/<org-slug>/courses/<course_id>/lesson-plans/new` | Staff compose (`?week=` optional Sunday) |
@@ -203,6 +204,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 | [PROGRESS](./pages/PROGRESS.md) | `/my/<org-slug>/progress` | Learner chrome only. Staff and parents are sent to Students |
 | [REPORT_CARD](./pages/REPORT_CARD.md) | `/my/<org-slug>/report-cards/<card_id>` | Draft, review, submit. Families can open a sent card |
 | [CLASS](./pages/CLASS.md) | `/my/<org-slug>/classes/<class_id>` | Canonical class page. Parents and learners can open it read-only |
+| [CLASS_ATTENDANCE](./pages/CLASS_ATTENDANCE.md) | `/my/<org-slug>/classes/<class_id>/attendance` | Staff sheet. Parents and learners are sent back to the class |
 | [FAMILIES](./pages/FAMILIES.md) | `/my/<org-slug>/families` | Parent directory — **not currently routed in SPA** |
 | [FAMILY](./pages/FAMILY.md) | `/my/<org-slug>/families/<family_id>` | **Not currently routed in SPA** |
 

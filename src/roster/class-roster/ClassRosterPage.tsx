@@ -12,6 +12,8 @@ import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
+import { classAttendancePath } from "@/attendance/model/paths";
+import { browsesAsStaff } from "@/organizations/model/role";
 import { studentsHubTier } from "@/grading/model/access";
 import { progressPath, studentsClassesPath } from "@/grading/model/paths";
 import type { StudentSummary } from "@/roster/databridge/students";
@@ -35,6 +37,7 @@ export function ClassRosterPage() {
   const roster = useClassRoster();
   const { organization, role, parentPresentation } = useOrgShell();
   const canManage = staffCanEdit(role, parentPresentation);
+  const showAttendance = Boolean(role && browsesAsStaff(role) && !parentPresentation);
   const backTo =
     studentsHubTier(role, parentPresentation) === "learner"
       ? progressPath(organization.slug)
@@ -98,6 +101,15 @@ export function ClassRosterPage() {
         title={roster.classGroup.title}
         titleTrailing={
           <div className="flex shrink-0 flex-nowrap items-center gap-2">
+            {showAttendance ? (
+              <ButtonLink
+                variant="secondary"
+                className="shrink-0"
+                to={classAttendancePath(roster.organization.slug, roster.classGroup.id)}
+              >
+                Take attendance
+              </ButtonLink>
+            ) : null}
             {canManage && showDiscussions ? (
               <ButtonLink
                 variant="secondary"

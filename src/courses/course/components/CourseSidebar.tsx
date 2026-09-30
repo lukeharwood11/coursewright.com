@@ -1,6 +1,7 @@
 import { ButtonLink } from "@/ui/Button";
 import { UserCard } from "@/organizations/user-card/UserCard";
 import { Avatar } from "@/ui/Avatar";
+import { courseAttendancePath } from "@/attendance/model/paths";
 import { courseRosterPath } from "@/courses/model/paths";
 import { gradebookPath } from "@/grading/model/paths";
 import type { CourseInstructor } from "@/courses/databridge/courses";
@@ -12,12 +13,14 @@ export function CourseSidebar({
   instructors,
   students,
   canEdit,
+  showAttendance,
 }: {
   orgSlug: string;
   courseId: number;
   instructors: CourseInstructor[];
   students: CourseEnrollment[];
   canEdit: boolean;
+  showAttendance: boolean;
 }) {
   return (
     <aside className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
@@ -58,22 +61,35 @@ export function CourseSidebar({
           ))}
         </ul>
       )}
-      {canEdit ? (
+      {showAttendance || canEdit ? (
         <div className="mt-4 flex flex-col gap-2">
-          <ButtonLink
-            variant="secondary"
-            to={gradebookPath(orgSlug, courseId)}
-            fullWidth
-          >
-            Gradebook
-          </ButtonLink>
-          <ButtonLink
-            variant="secondary"
-            to={courseRosterPath(orgSlug, courseId)}
-            fullWidth
-          >
-            Course roster
-          </ButtonLink>
+          {showAttendance ? (
+            <ButtonLink
+              variant="secondary"
+              to={courseAttendancePath(orgSlug, courseId)}
+              fullWidth
+            >
+              Attendance
+            </ButtonLink>
+          ) : null}
+          {canEdit ? (
+            <>
+              <ButtonLink
+                variant="secondary"
+                to={gradebookPath(orgSlug, courseId)}
+                fullWidth
+              >
+                Gradebook
+              </ButtonLink>
+              <ButtonLink
+                variant="secondary"
+                to={courseRosterPath(orgSlug, courseId)}
+                fullWidth
+              >
+                Course roster
+              </ButtonLink>
+            </>
+          ) : null}
         </div>
       ) : null}
     </aside>

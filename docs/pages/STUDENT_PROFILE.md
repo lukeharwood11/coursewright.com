@@ -24,7 +24,8 @@ View/edit one org-level **student profile**, including an optional student accou
 - Show course enrollments and class membership. A class link opens the same [CLASS](./CLASS.md) page as the Students **Classes** tab.
 - **Grades** lists each active course the viewer may read (teachers: courses they teach; owners/admins: all; parents: linked published courses). The label is derived from the org scale. A final override shows that label and the stamp.
 - Staff who can act see **Gradebook** and **Report card** on each course row they can manage (Pattern A). **Report card** drafts one enrollment at a time and opens the draft. **Draft** appears when a draft already exists for that course.
-- Parents do not edit the profile, remove the student, or generate cards. They see classes and grades.
+- Parents do not edit the profile, remove the student, or generate cards. They see classes, grades, and attendance.
+- **Attendance** lists the last 14 days through a chosen date. Staff who may set a day mark can set or clear Present, Absent, Excused, or Partial. Class and course sheet rows for those dates stay visible and are not edited here. Parents and other readers see the same list without controls.
 - Activity for a saved quiz grade or a final override opens this page for a linked parent. A device notification uses `?activity=` and marks that row read.
 - **Announce** (staff) → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
 - Owners and admins who can edit see **Grading settings** on the grades section.
@@ -39,6 +40,7 @@ View/edit one org-level **student profile**, including an optional student accou
 - Enrollments: course title + status. Staff link to that course roster; parents link to the course
 - Class memberships: class name + link to the canonical class page
 - Grades: course title, derived percent/label or override, stamp when overridden
+- Attendance: date, day summary (Present, Absent, Excused, Partial, or Late when every sheet that day is Late), and each class or course sheet row (title + status)
 - Report cards (staff): course, status (`draft` / `submitted` / `sent`)
 - Parent invite / claim status (pending link, copyable claim URL, or accepted)
 
@@ -68,6 +70,7 @@ View/edit one org-level **student profile**, including an optional student accou
 - Create parent (or student-email) invite (email + copy the claim link); **Resend email** or cancel a pending invite; add a parent (then another)
 - Open class / course enrollments
 - Staff: open gradebook, generate a report card, open a card
+- Staff who may mark the day: set or clear that student’s day status
 - Owners/admins: open grading settings
 
 ## Links to
@@ -81,6 +84,8 @@ View/edit one org-level **student profile**, including an optional student accou
 - [INVITE_CLAIM](./INVITE_CLAIM.md) — copied parent invite link (recipient)
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — course enrollment contexts
 - [CLASS](./CLASS.md) — class membership
+- [CLASS_ATTENDANCE](./CLASS_ATTENDANCE.md) — class sheet (staff, from the class page)
+- [COURSE_ATTENDANCE](./COURSE_ATTENDANCE.md) — course sheet (staff, from the course)
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
 ## Notes

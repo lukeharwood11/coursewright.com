@@ -20,6 +20,7 @@ Learners: a student account, or staff using **Student view**. Teachers, parents,
 - Classes open the canonical [CLASS](./CLASS.md) page, read-only for the learner.
 - Grades are per course enrollment. The label comes from the org grading scale. Mode `none` shows a percent. A teacher final override shows that label.
 - Report cards listed here are **sent** only.
+- **Attendance** is read-only: the last 14 days through a chosen date, with the day summary and any class or course sheet rows. No day controls.
 - Activity for a saved quiz grade or a final override opens this page for the learner. A device notification uses `?activity=` and marks that row read.
 - No bulk actions, no other students, no grading settings.
 
@@ -29,10 +30,12 @@ Learners: a student account, or staff using **Student view**. Teachers, parents,
 - Classes: title
 - Grades: course title, derived percent and label (or override label)
 - Sent report cards: course title from the card snapshot
+- Attendance: date, day summary, class and course sheet rows for that date
 
 ## Contents
 
 - Classes list
+- Attendance list
 - Grades list
 - Report cards list
 
