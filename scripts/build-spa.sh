@@ -63,7 +63,12 @@ if [[ -z "$SITE_DOMAIN" ]]; then
 fi
 printf 'VITE_PUBLIC_HOST=%s\n' "$SITE_DOMAIN" >> "$ENV_FILE"
 
-HCAPTCHA_SITE_KEY="${VITE_HCAPTCHA_SITE_KEY:-2550caca-0d52-4d48-9b44-5380349ca538}"
+# Same publishable key as `.env.testing` on all tiers; empty CI env must not wipe it.
+DEFAULT_HCAPTCHA_SITE_KEY="2550caca-0d52-4d48-9b44-5380349ca538"
+HCAPTCHA_SITE_KEY="${VITE_HCAPTCHA_SITE_KEY:-}"
+if [[ -z "$HCAPTCHA_SITE_KEY" ]]; then
+  HCAPTCHA_SITE_KEY="$DEFAULT_HCAPTCHA_SITE_KEY"
+fi
 printf 'VITE_HCAPTCHA_SITE_KEY=%s\n' "$HCAPTCHA_SITE_KEY" >> "$ENV_FILE"
 
 POSTHOG_KEY=""

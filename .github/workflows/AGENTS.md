@@ -9,7 +9,7 @@ CI/CD YAML. Product behavior is not defined here. Keep YAML thin — call [`scri
 | `terraform-plan.yml` | `workflow_dispatch` | OIDC + `SUPABASE_ACCESS_TOKEN` → compile-check `npm run build` → `./scripts/tf-plan.sh` → upload `tf.plan` |
 | `terraform-apply.yml` | `workflow_dispatch` | Resolve plan run SHA → checkout that commit → `./scripts/tf-apply.sh` → optional `./scripts/deploy-supabase.sh` → `./scripts/build-spa.sh` → `./scripts/deploy-spa.sh` |
 
-Input `tier`: `testing` \| `production`. Optional `plan_run_id`, `deploy_supabase`. Job `environment:` matches the tier.
+Input `tier`: `testing` \| `production`. Optional `plan_run_id`, `deploy_supabase`. Job `environment:` matches the tier. Environment vars: `VITE_SUPABASE_*`, `VITE_HCAPTCHA_SITE_KEY`, `VITE_POSTHOG_*` (see HN-010); `build-spa.sh` defaults hCaptcha when unset/empty.
 
 Apply **rebuilds** `dist/` from Terraform outputs so testing never publishes a stale plan-time `dist/`. Terraform **1.16.3** (must match local; plan files are not portable across versions). Pin in workflow `TERRAFORM_VERSION` and `.terraform-version`.
 

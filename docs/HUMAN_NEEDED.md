@@ -164,7 +164,7 @@ Optional companion secret **`SITE_URL`** (used when the browser `Origin` header 
 
 1. Environment **`testing`** exists (auto-created on first dispatch; no required reviewers). Leave it unprotected.
 2. Create Environment **`production`** and add **required reviewers** (Luke / Dave) so production plan and apply wait for approval.
-3. On **`production`**, set GitHub Environment **variables** (publishable only): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` (from HN-007 when a dedicated production Supabase project exists; until then `build-spa.sh` uses Terraform outputs for the existing main project). Testing deploys always rebuild from Terraform **branch** outputs. Local/dev keys live in committed `.env.testing`.
+3. On **`testing`** and **`production`**, set GitHub Environment **variables** (publishable only): `VITE_HCAPTCHA_SITE_KEY` (same as `.env.testing` on all tiers). On **`production`**, also set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` (from HN-007 when a dedicated production Supabase project exists; until then `build-spa.sh` uses Terraform outputs for the existing main project). Testing deploys always rebuild from Terraform **branch** outputs. Local/dev keys live in committed `.env.testing`.
 4. Confirm repo secret **`SUPABASE_ACCESS_TOKEN`** is set (done). Still confirm HN-003 before live apply.
 
 **Done when:** Dispatching `terraform-plan.yml` / `terraform-apply.yml` with `tier=production` pauses for Environment approval; testing does not.

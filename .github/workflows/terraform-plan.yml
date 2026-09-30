@@ -63,11 +63,15 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_HCAPTCHA_SITE_KEY: ${{ vars.VITE_HCAPTCHA_SITE_KEY }}
           VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
           VITE_POSTHOG_HOST: ${{ vars.VITE_POSTHOG_HOST }}
         run: |
           if [ -z "${VITE_SUPABASE_URL}" ] || [ -z "${VITE_SUPABASE_ANON_KEY}" ]; then
             cp .env.testing .env.production
+          fi
+          if [ -z "${VITE_HCAPTCHA_SITE_KEY}" ]; then
+            export VITE_HCAPTCHA_SITE_KEY=2550caca-0d52-4d48-9b44-5380349ca538
           fi
           npm run build
 
