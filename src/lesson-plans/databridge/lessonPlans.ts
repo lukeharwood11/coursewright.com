@@ -365,7 +365,7 @@ export async function softDeleteLessonPlan(id: number, deletedBy: string): Promi
 
 export function draftFromDetail(
   detail: LessonPlanDetail,
-  schoolDays: readonly SchoolDay[],
+  baseWeekdays: readonly SchoolDay[],
 ): LessonPlanDraft {
   const existing: LessonPlanDayDraft[] = detail.days.map((day) => ({
     date: day.date,
@@ -376,7 +376,7 @@ export function draftFromDetail(
     title: detail.title,
     weekNote: detail.weekNote,
     weekStart: detail.weekStart,
-    days: visibleDaysForWeek(detail.weekStart, schoolDays, {
+    days: visibleDaysForWeek(detail.weekStart, baseWeekdays, {
       existingDays: existing,
     }),
   };

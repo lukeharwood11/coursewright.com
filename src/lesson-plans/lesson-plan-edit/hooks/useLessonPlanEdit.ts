@@ -22,6 +22,7 @@ import { lessonPlanEditPath, lessonPlanPath } from "@/lesson-plans/model/paths";
 import {
   defaultLessonPlanTitle,
   extraDatesFromDays,
+  mergeDaysToFullWeek,
   remapDaysToWeek,
   sundayOnOrBefore,
   validateLessonPlanDraft,
@@ -29,6 +30,12 @@ import {
   weekFromParam,
   type LessonPlanDayDraft,
 } from "@/lesson-plans/model/validate";
+import {
+  readStoredLessonPlanDaysPreset,
+  weekdaysForLessonPlanPreset,
+  writeStoredLessonPlanDaysPreset,
+  type LessonPlanDaysPreset,
+} from "@/lesson-plans/model/dayPreset";
 import { toggleMaterialId } from "@/lesson-plans/model/materials";
 import type { LessonPlanVisibility } from "@/lesson-plans/model/visibility";
 import { getCourse, courseQueryKeys, listCourseInstructors } from "@/courses/databridge/courses";
@@ -54,6 +61,7 @@ export function useLessonPlanEdit() {
   const isNew = !Number.isFinite(lessonPlanId);
   const { organization, role, parentPresentation } = useOrgShell();
   const schoolDays = organization.schoolDays;
+  const homeDays = organization.homeDays;
   const user = useAuthedUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -100,11 +108,33 @@ export function useLessonPlanEdit() {
   });
   const loaded = isNew ? null : (planQuery.data ?? null);
   const newTitleDefault = course ? defaultLessonPlanTitle(course.title) : "";
+  const storedDayPreset = useMemo(
+    () => readStoredLessonPlanDaysPreset(courseId),
+    [courseId],
+  );
+  const baseWeekdaysForPreset = (preset: LessonPlanDaysPreset) =>
+    weekdaysForLessonPlanPreset(preset, schoolDays, homeDays);
+
+  function visibleForPreset(
+    weekStart: string,
+    preset: LessonPlanDaysPreset,
+    currentDays: readonly LessonPlanDayDraft[],
+    extraDates?: readonly string[],
+  ): LessonPlanDayDraft[] {
+    const base = baseWeekdaysForPreset(preset);
+    const fullWeek = mergeDaysToFullWeek(weekStart, currentDays);
+    return visibleDaysForWeek(weekStart, base, {
+      extraDates,
+      existingDays: fullWeek,
+    });
+  }
+
+  const [dayPreset, setDayPresetState] = useState<LessonPlanDaysPreset>(storedDayPreset);
   const [title, setTitle] = useState("");
   const [weekNote, setWeekNote] = useState("");
   const [weekStart, setWeekStart] = useState(requestedWeek.start);
   const [days, setDays] = useState<LessonPlanDayDraft[]>(() =>
-    visibleDaysForWeek(requestedWeek.start, schoolDays),
+    visibleForPreset(requestedWeek.start, storedDayPreset, []),
   );
   const [hydratedId, setHydratedId] = useState<number | null>(null);
   const [newTitleApplied, setNewTitleApplied] = useState(false);
@@ -120,13 +150,13 @@ export function useLessonPlanEdit() {
 
   useEffect(() => {
     if (!loaded || hydratedId === loaded.id) return;
-    const draft = draftFromDetail(loaded, schoolDays);
+    const draft = draftFromDetail(loaded, baseWeekdaysForPreset(dayPreset));
     setTitle(draft.title);
     setWeekNote(draft.weekNote);
     setWeekStart(draft.weekStart);
     setDays(draft.days);
     setHydratedId(loaded.id);
-  }, [loaded, hydratedId, schoolDays]);
+  }, [loaded, hydratedId, dayPreset, schoolDays, homeDays]);
 
   useEffect(() => {
     if (!isNew || !newTitleDefault || newTitleApplied) return;
@@ -136,12 +166,12 @@ export function useLessonPlanEdit() {
 
   const draft = { title, weekNote, weekStart, days };
   const initial = loaded
-    ? draftFromDetail(loaded, schoolDays)
+    ? draftFromDetail(loaded, baseWeekdaysForPreset(dayPreset))
     : {
         title: newTitleDefault,
         weekNote: "",
         weekStart: requestedWeek.start,
-        days: visibleDaysForWeek(requestedWeek.start, schoolDays),
+        days: visibleForPreset(requestedWeek.start, dayPreset, []),
       };
   const hasChanges = JSON.stringify(draft) !== JSON.stringify(initial);
 
@@ -216,19 +246,26 @@ export function useLessonPlanEdit() {
       setWeekStart(sunday);
       setDays((current) => {
         const remapped = remapDaysToWeek(current, sunday);
-        return visibleDaysForWeek(sunday, schoolDays, {
-          extraDates: extraDatesFromDays(current, sunday, schoolDays),
+        const base = baseWeekdaysForPreset(dayPreset);
+        return visibleDaysForWeek(sunday, base, {
+          extraDates: extraDatesFromDays(remapped, sunday, base),
           existingDays: remapped,
         });
       });
     },
     days,
+    dayPreset,
+    setDayPreset: (preset: LessonPlanDaysPreset) => {
+      writeStoredLessonPlanDaysPreset(courseId, preset);
+      setDayPresetState(preset);
+      setDays((current) => visibleForPreset(weekStart, preset, current));
+    },
     addDay: (date: string) => {
       setDays((current) =>
-        visibleDaysForWeek(weekStart, schoolDays, {
-          extraDates: [...current.map((day) => day.date), date],
-          existingDays: current,
-        }),
+        visibleForPreset(weekStart, dayPreset, current, [
+          ...current.map((day) => day.date),
+          date,
+        ]),
       );
     },
     setDayBody: (date: string, body: string) => {

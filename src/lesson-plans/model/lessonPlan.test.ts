@@ -5,12 +5,17 @@ import {
   extraDatesFromDays,
   isSunday,
   lessonPlanDaysToShow,
+  mergeDaysToFullWeek,
   remainingDaysForWeek,
   remapDaysToWeek,
   validateLessonPlanDraft,
   visibleDaysForWeek,
   weekDates,
 } from "./validate.ts";
+import {
+  parseLessonPlanDaysPreset,
+  weekdaysForLessonPlanPreset,
+} from "./dayPreset.ts";
 import {
   filterPickerGroups,
   groupMaterialsForPicker,
@@ -134,6 +139,32 @@ test("extraDatesFromDays remaps non-school weekdays onto a new week", () => {
     ),
     ["2026-09-26"],
   );
+});
+
+test("mergeDaysToFullWeek keeps notes when toggling day presets", () => {
+  const visible = [{ date: "2026-09-14", body: "Lab", materialIds: [2] }];
+  const full = mergeDaysToFullWeek("2026-09-13", visible);
+  assert.equal(full.length, 7);
+  assert.equal(full[1]?.body, "Lab");
+  const homeDays = [6] as const;
+  const base = weekdaysForLessonPlanPreset("home", [1, 2, 3, 4, 5], homeDays);
+  const shown = visibleDaysForWeek("2026-09-13", base, { existingDays: full });
+  assert.deepEqual(
+    shown.map((day) => day.date),
+    ["2026-09-14"],
+  );
+  const school = weekdaysForLessonPlanPreset("school", [1, 2, 3, 4, 5], homeDays);
+  const back = visibleDaysForWeek("2026-09-13", school, {
+    existingDays: mergeDaysToFullWeek("2026-09-13", shown),
+  });
+  assert.equal(back.find((day) => day.date === "2026-09-14")?.body, "Lab");
+  assert.equal(back.find((day) => day.date === "2026-09-14")?.materialIds[0], 2);
+});
+
+test("parseLessonPlanDaysPreset falls back to school", () => {
+  assert.equal(parseLessonPlanDaysPreset("weekdays"), "weekdays");
+  assert.equal(parseLessonPlanDaysPreset("bogus"), "school");
+  assert.equal(parseLessonPlanDaysPreset(null), "school");
 });
 test("toggleMaterialId adds and removes", () => {
   assert.deepEqual(toggleMaterialId([1], 2), [1, 2]);

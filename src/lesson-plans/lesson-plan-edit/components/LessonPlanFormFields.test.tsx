@@ -20,6 +20,8 @@ test("lesson plan form wraps day cards instead of seven columns", () => {
       onDayBody={() => undefined}
       onToggleMaterial={() => undefined}
       onAddDay={() => undefined}
+      dayPreset="school"
+      onDayPreset={() => undefined}
     />,
   );
   assert.match(html, /auto-fill,minmax\(min\(100%,18rem\),1fr\)/);
@@ -27,6 +29,9 @@ test("lesson plan form wraps day cards instead of seven columns", () => {
   assert.equal([...html.matchAll(/<section/g)].length, 5);
   assert.match(html, /Add another day/);
   assert.match(html, /Link materials/);
+  assert.match(html, /School days/);
+  assert.match(html, /Home days/);
+  assert.match(html, /Weekdays/);
   assert.equal(html.includes("<select"), false);
   assert.equal(html.includes('type="checkbox"'), false);
 });

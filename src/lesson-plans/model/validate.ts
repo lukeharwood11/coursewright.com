@@ -32,14 +32,28 @@ export function emptyDaysForWeek(weekStart: string): LessonPlanDayDraft[] {
   }));
 }
 
+/** Merge visible day drafts into a full Sunday–Saturday week (empty slots for hidden days). */
+export function mergeDaysToFullWeek(
+  weekStart: string,
+  days: readonly LessonPlanDayDraft[],
+): LessonPlanDayDraft[] {
+  const byDate = new Map(days.map((day) => [day.date, day]));
+  return weekDates(weekStart).map((date) => {
+    const existing = byDate.get(date);
+    return existing
+      ? { date, body: existing.body, materialIds: [...existing.materialIds] }
+      : { date, body: "", materialIds: [] };
+  });
+}
+
 function dayHasContent(day: LessonPlanDayDraft): boolean {
   return day.body.trim().length > 0 || day.materialIds.length > 0;
 }
 
-/** Compose defaults: org school days, plus extra dates and any day that already has content. */
+/** Compose defaults: chosen weekdays, plus extra dates and any day that already has content. */
 export function visibleDaysForWeek(
   weekStart: string,
-  schoolDays: readonly SchoolDay[] = DEFAULT_SCHOOL_DAYS,
+  baseWeekdays: readonly SchoolDay[] = DEFAULT_SCHOOL_DAYS,
   extras?: {
     extraDates?: readonly string[];
     existingDays?: readonly LessonPlanDayDraft[];
@@ -47,7 +61,7 @@ export function visibleDaysForWeek(
 ): LessonPlanDayDraft[] {
   const dates = weekDates(weekStart);
   if (dates.length === 0) return [];
-  const school = new Set(schoolDays);
+  const base = new Set(baseWeekdays);
   const extra = new Set(extras?.extraDates ?? []);
   const byDate = new Map((extras?.existingDays ?? []).map((day) => [day.date, day]));
   const content = new Set(
@@ -56,7 +70,7 @@ export function visibleDaysForWeek(
   return dates
     .filter((date) => {
       const weekday = weekdayOfIsoDate(date);
-      return school.has(weekday) || extra.has(date) || content.has(date);
+      return base.has(weekday) || extra.has(date) || content.has(date);
     })
     .map((date) => {
       const existing = byDate.get(date);
@@ -116,15 +130,15 @@ function parseIsoDate(isoDate: string): Date {
 export function extraDatesFromDays(
   days: readonly LessonPlanDayDraft[],
   weekStart: string,
-  schoolDays: readonly SchoolDay[],
+  baseWeekdays: readonly SchoolDay[],
 ): string[] {
-  const school = new Set(schoolDays);
+  const base = new Set(baseWeekdays);
   const dates = weekDates(weekStart);
   const extras: string[] = [];
   const seen = new Set<string>();
   for (const day of days) {
     const weekday = weekdayOfIsoDate(day.date);
-    if (school.has(weekday)) continue;
+    if (base.has(weekday)) continue;
     const mapped = dates[weekday];
     if (!mapped || seen.has(mapped)) continue;
     seen.add(mapped);

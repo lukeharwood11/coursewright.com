@@ -12,6 +12,11 @@ import type { UnitRecord } from "@/units/databridge/units";
 import { OrgDayTypeIcons } from "@/organizations/components/OrgDayTypeIcons";
 import { DEFAULT_HOME_DAYS, type HomeDay } from "@/organizations/model/homeDays";
 import { DEFAULT_SCHOOL_DAYS, type SchoolDay } from "@/organizations/model/schoolDays";
+import {
+  LESSON_PLAN_DAYS_PRESET_LABELS,
+  type LessonPlanDaysPreset,
+} from "@/lesson-plans/model/dayPreset";
+import { SegmentButton, SegmentGroup } from "@/ui/Tabs";
 import { AddDayModal } from "./AddDayModal";
 import { LinkMaterialsModal } from "./LinkMaterialsModal";
 
@@ -33,6 +38,8 @@ export function LessonPlanFormFields({
   onDayBody,
   onToggleMaterial,
   onAddDay,
+  dayPreset,
+  onDayPreset,
   schoolDays = DEFAULT_SCHOOL_DAYS,
   homeDays = DEFAULT_HOME_DAYS,
 }: {
@@ -48,6 +55,8 @@ export function LessonPlanFormFields({
   onDayBody: (date: string, body: string) => void;
   onToggleMaterial: (date: string, materialId: number) => void;
   onAddDay: (date: string) => void;
+  dayPreset: LessonPlanDaysPreset;
+  onDayPreset: (preset: LessonPlanDaysPreset) => void;
   schoolDays?: readonly SchoolDay[];
   homeDays?: readonly HomeDay[];
 }) {
@@ -97,7 +106,22 @@ export function LessonPlanFormFields({
         />
       </label>
 
-      <div className="mt-6 grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(min(100%,18rem),1fr))]">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <span className="text-[13px] font-bold text-[var(--ink-soft)]">Days to show</span>
+        <SegmentGroup label="Days to show">
+          {(["school", "home", "weekdays"] as const).map((preset) => (
+            <SegmentButton
+              key={preset}
+              pressed={dayPreset === preset}
+              onClick={() => onDayPreset(preset)}
+            >
+              {LESSON_PLAN_DAYS_PRESET_LABELS[preset]}
+            </SegmentButton>
+          ))}
+        </SegmentGroup>
+      </div>
+
+      <div className="mt-4 grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(min(100%,18rem),1fr))]">
         {days.map((day) => {
           const linked = day.materialIds
             .map((id) => materialsById.get(id))

@@ -113,6 +113,8 @@ export function LessonPlanEditPage() {
           onDayBody={page.setDayBody}
           onToggleMaterial={page.toggleDayMaterial}
           onAddDay={page.addDay}
+          dayPreset={page.dayPreset}
+          onDayPreset={page.setDayPreset}
           schoolDays={page.organization.schoolDays}
           homeDays={page.organization.homeDays}
         />
