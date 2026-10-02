@@ -12,6 +12,7 @@ import type { GradebookRow } from "@/grading/databridge/gradebook";
 import { AssignmentGradeForm } from "./components/AssignmentGradeForm";
 import { GradebookStudents } from "./components/GradebookStudents";
 import { MaterialGradeForm } from "./components/MaterialGradeForm";
+import { FillPackageBanner } from "@/grading/fill-cycles/components/FillPackageBanner";
 import { useCourseGradebook } from "./hooks/useCourseGradebook";
 
 export function CourseGradebookPage() {
@@ -62,6 +63,7 @@ export function CourseGradebookPage() {
             before you rely on it.
           </p>
         ) : null}
+        <FillPackageBanner kind="grades" courseId={course.id} />
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
           <label className="flex w-full flex-col gap-1 sm:w-auto sm:min-w-[12rem]">

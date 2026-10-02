@@ -31,25 +31,32 @@ function toSaved(row: RatingRow): SavedRating {
   };
 }
 
-export async function listCourseRatings(courseId: number): Promise<SavedRating[]> {
+export async function listCourseRatings(
+  courseId: number,
+  fillCycleId: number | null,
+): Promise<SavedRating[]> {
   const db = requireSupabase();
-  const { data, error } = await db
+  let query = db
     .from("course_outcome_ratings")
     .select("id, student_profile_id, outcome_id, criterion_id, rating_option_id")
-    .eq("course_id", courseId)
-    .is("fill_cycle_id", null);
+    .eq("course_id", courseId);
+  query = fillCycleId == null ? query.is("fill_cycle_id", null) : query.eq("fill_cycle_id", fillCycleId);
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
   return ((data ?? []) as RatingRow[]).map(toSaved);
 }
 
-export async function listOutcomePackage(courseId: number): Promise<OutcomePackage | null> {
+export async function listOutcomePackage(
+  courseId: number,
+  fillCycleId: number | null,
+): Promise<OutcomePackage | null> {
   const db = requireSupabase();
-  const { data, error } = await db
+  let query = db
     .from("course_outcome_packages")
     .select("id, submitted_at")
-    .eq("course_id", courseId)
-    .is("fill_cycle_id", null)
-    .maybeSingle();
+    .eq("course_id", courseId);
+  query = fillCycleId == null ? query.is("fill_cycle_id", null) : query.eq("fill_cycle_id", fillCycleId);
+  const { data, error } = await query.maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
   return { id: data.id, submittedAt: data.submitted_at };
@@ -63,6 +70,7 @@ export async function saveRatingCell(input: {
   criterionId: number | null;
   ratingOptionId: number | null;
   existingId: number | null;
+  fillCycleId: number | null;
 }): Promise<void> {
   const db = requireSupabase();
   if (input.ratingOptionId == null) {
@@ -86,7 +94,7 @@ export async function saveRatingCell(input: {
     outcome_id: input.outcomeId,
     criterion_id: input.criterionId,
     rating_option_id: input.ratingOptionId,
-    fill_cycle_id: null,
+    fill_cycle_id: input.fillCycleId,
   });
   if (error) throw new Error(error.message);
 }
@@ -95,6 +103,7 @@ export async function submitOutcomePackage(input: {
   organizationId: number;
   courseId: number;
   existingId: number | null;
+  fillCycleId: number | null;
 }): Promise<void> {
   const db = requireSupabase();
   if (input.existingId != null) {
@@ -108,7 +117,7 @@ export async function submitOutcomePackage(input: {
   const { error } = await db.from("course_outcome_packages").insert({
     organization_id: input.organizationId,
     course_id: input.courseId,
-    fill_cycle_id: null,
+    fill_cycle_id: input.fillCycleId,
   });
   if (error) throw new Error(error.message);
 }

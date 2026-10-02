@@ -28,6 +28,8 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [USER_PROFILE](./USER_PROFILE.md) | `/my/<org-slug>/people/<org_profile_id>` · UUID redirects |
 | [ACTIVITY](./ACTIVITY.md) | `/my/<org-slug>/activity` | **P1** |
 | [ORG_SETTINGS](./ORG_SETTINGS.md) | `/my/<org-slug>/settings` |
+| [FILL_CYCLES](./FILL_CYCLES.md) | `/my/<org-slug>/fill-cycles` |
+| [FILL_CYCLE](./FILL_CYCLE.md) | `/my/<org-slug>/fill-cycles/<cycle_id>` |
 | [COURSE_LIST](./COURSE_LIST.md) | `/my/<org-slug>/courses` |
 | [RESOURCES](./RESOURCES.md) | `/my/<org-slug>/resources` | **P1a** |
 | [RESOURCE_FOLDER](./RESOURCE_FOLDER.md) | `/my/<org-slug>/resources/folders/<folder_id>` | **P1a** |

@@ -22,6 +22,7 @@ One workbench for a course: see who still needs a grade, set quiz points and gra
 - A class filter only hides rows. It does not store a class grade.
 - If the scale changes after an override, a banner asks the teacher to confirm. Overrides are not wiped.
 - **Draft report card** on a student row creates one draft for that enrollment in this course (Pattern B). **Review** opens [REPORT_CARD](./REPORT_CARD.md). Send happens one card at a time from that page.
+- `?cycle=` from a fill cycle shows a grades package banner. Submitting records the checkpoint. Scores stay editable. The due date does not lock the gradebook. A closed cycle hides the submit button.
 
 ## Data shown
 

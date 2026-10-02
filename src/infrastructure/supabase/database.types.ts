@@ -3967,6 +3967,257 @@ export type Database = {
           },
         ]
       }
+      report_card_fill_cycle_classes: {
+        Row: {
+          class_id: number
+          cycle_id: number
+        }
+        Insert: {
+          class_id: number
+          cycle_id: number
+        }
+        Update: {
+          class_id?: number
+          cycle_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_card_fill_cycle_classes_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_fill_cycle_classes_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "report_card_fill_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_card_fill_cycle_courses: {
+        Row: {
+          course_id: number
+          cycle_id: number
+        }
+        Insert: {
+          course_id: number
+          cycle_id: number
+        }
+        Update: {
+          course_id?: number
+          cycle_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_card_fill_cycle_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_fill_cycle_courses_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "report_card_fill_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_card_fill_cycles: {
+        Row: {
+          audience: string
+          created_at: string
+          created_by: string | null
+          due_on: string
+          id: number
+          label: string
+          organization_id: number
+          request_class_lead_feedback: boolean
+          require_attendance: boolean
+          require_grades: boolean
+          require_outcomes: boolean
+          require_period_feedback: boolean
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          audience: string
+          created_at?: string
+          created_by?: string | null
+          due_on: string
+          id?: number
+          label: string
+          organization_id: number
+          request_class_lead_feedback?: boolean
+          require_attendance?: boolean
+          require_grades?: boolean
+          require_outcomes?: boolean
+          require_period_feedback?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          created_at?: string
+          created_by?: string | null
+          due_on?: string
+          id?: number
+          label?: string
+          organization_id?: number
+          request_class_lead_feedback?: boolean
+          require_attendance?: boolean
+          require_grades?: boolean
+          require_outcomes?: boolean
+          require_period_feedback?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_card_fill_cycles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_fill_cycles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_card_fill_reminders: {
+        Row: {
+          created_at: string
+          cycle_id: number
+          id: number
+          organization_id: number
+          recipient_user_id: string
+          sent_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          cycle_id: number
+          id?: number
+          organization_id: number
+          recipient_user_id: string
+          sent_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          cycle_id?: number
+          id?: number
+          organization_id?: number
+          recipient_user_id?: string
+          sent_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_card_fill_reminders_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "report_card_fill_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_fill_reminders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_fill_reminders_recipient_user_id_fkey"
+            columns: ["recipient_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_fill_reminders_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_card_fill_submissions: {
+        Row: {
+          class_id: number | null
+          course_id: number | null
+          cycle_id: number
+          dependency_kind: string
+          id: number
+          organization_id: number
+          submitted_at: string
+          submitter_user_id: string | null
+        }
+        Insert: {
+          class_id?: number | null
+          course_id?: number | null
+          cycle_id: number
+          dependency_kind: string
+          id?: number
+          organization_id: number
+          submitted_at?: string
+          submitter_user_id?: string | null
+        }
+        Update: {
+          class_id?: number | null
+          course_id?: number | null
+          cycle_id?: number
+          dependency_kind?: string
+          id?: number
+          organization_id?: number
+          submitted_at?: string
+          submitter_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_card_fill_submissions_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_fill_submissions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_fill_submissions_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "report_card_fill_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_fill_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_fill_submissions_submitter_user_id_fkey"
+            columns: ["submitter_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_card_instances: {
         Row: {
           course_id: number
@@ -4407,6 +4658,15 @@ export type Database = {
       generate_student_report_cards: {
         Args: { p_student_profile_id: number }
         Returns: Json
+      }
+      fill_cycle_scope: {
+        Args: { p_organization_id: number }
+        Returns: {
+          class_id: number | null
+          course_id: number | null
+          cycle_id: number
+          title: string
+        }[]
       }
       get_invite: {
         Args: { p_token: string }

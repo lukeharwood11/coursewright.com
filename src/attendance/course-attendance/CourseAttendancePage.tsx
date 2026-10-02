@@ -11,6 +11,7 @@ import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { ListPagination } from "@/ui/ListPagination";
 import { PageLoading } from "@/ui/PageLoading";
 import { useToastOnError } from "@/ui/useToastOnError";
+import { FillPackageBanner } from "@/grading/fill-cycles/components/FillPackageBanner";
 import { useCourseAttendance } from "./hooks/useCourseAttendance";
 
 export function CourseAttendancePage() {
@@ -54,6 +55,7 @@ export function CourseAttendancePage() {
         }
       />
       <div className="space-y-4 px-5 py-4 md:px-8">
+        <FillPackageBanner kind="attendance" courseId={course.id} />
         <div className="flex flex-wrap items-end gap-3">
           <AttendanceDateField
             id="course-attendance-date"

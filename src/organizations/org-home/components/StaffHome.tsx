@@ -1,6 +1,7 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
 import type { StaffDashboard } from "@/organizations/model/staffDashboard";
 import { newCoursePath } from "@/courses/model/paths";
+import { FillCycleTodos } from "@/grading/fill-cycles/components/FillCycleTodos";
 import { ButtonLink } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
 import {
@@ -59,6 +60,7 @@ export function StaffHome({
               canCreate={canCreate}
             />
           ) : null}
+          <FillCycleTodos />
           <StaffAttentionList orgSlug={orgSlug} items={dashboard.attention} />
           <StaffCoursesPreview orgSlug={orgSlug} dashboard={dashboard} />
           {!dashboard.setup.needsCourse ? (

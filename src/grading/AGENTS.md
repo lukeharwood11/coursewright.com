@@ -9,6 +9,7 @@ Org grading: one scale, derived labels, course finals, and report-card workflow.
 - Learner Progress (`progress/`)
 - Report card draft and submit (`report-card/`)
 - Student detail grades (`student-grades/`)
+- Fill cycles (`fill-cycles/`) — package checkpoints, home to-dos, manual reminders. Not templates or send
 
 ## Rules
 

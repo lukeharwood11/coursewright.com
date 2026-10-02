@@ -1,6 +1,6 @@
 # Course outcomes — learning goals and ratings
 
-**Status:** in progress — US-81 config and US-82 matrix / package / Progress read are in the app. Fill-cycle id on the package is still null until US-83.  
+**Status:** shipped for the course-outcomes slice — config, matrix, package checkpoint, family read, and a fill-cycle id when the matrix is opened from a cycle. The report-card outcomes section stays off until templates (US-85).  
 **Prerequisite for:** [REPORT_CARDS.md](./REPORT_CARDS.md) (optional template section)  
 **Domains:** new `src/outcomes/` (or under `src/courses/` + org settings) · courses · grading report cards  
 **Migrations:** TBD (experiment mode)

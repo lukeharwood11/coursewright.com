@@ -700,7 +700,7 @@ One teacher pick for a student on an outcome, or on a criterion when that outcom
 | organization_id | bigint | FK → Organization. Must match the course |
 | course_id | bigint | FK → Course |
 | student_profile_id | bigint | FK → StudentProfile. Must have an enrollment on the course |
-| fill_cycle_id | bigint | nullable until a fill cycle is attached. Null is the course working set |
+| fill_cycle_id | bigint | FK → ReportCardFillCycle, nullable. Null is the course working set. A closed cycle rejects writes |
 | outcome_id | bigint | FK → CourseOutcome |
 | criterion_id | bigint | FK → CourseOutcomeCriterion, null when the outcome has no criteria |
 | rating_option_id | bigint | FK → OutcomeRatingOption, null = unset (row is deleted from the app) |
@@ -721,13 +721,76 @@ Checkpoint that a teacher submitted outcomes for a course (and later a fill cycl
 | id | bigint | PK |
 | organization_id | bigint | FK → Organization |
 | course_id | bigint | FK → Course |
-| fill_cycle_id | bigint | nullable. Null is the course working package |
+| fill_cycle_id | bigint | FK → ReportCardFillCycle, nullable. Null is the course working package. A closed cycle rejects writes |
 | submitted_by | uuid | FK → User. Trigger sets `auth.uid()` |
 | submitted_at | timestamptz | Trigger sets `now()` on insert and update |
 | created_at | timestamptz | |
 | unique | (course_id, fill_cycle_id) | Nulls compare equal |
 
 **Who can SELECT / write:** `can_browse_course` reads. `can_manage_course` writes.
+
+### ReportCardFillCycle
+
+A marking-period work bundle. The due date is soft. Closing the cycle blocks new package submits.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| label | text | 1–80 characters |
+| due_on | date | Soft. Past due does not lock edits |
+| audience | text | `organization` · `classes` · `courses` |
+| require_grades / require_attendance / require_outcomes | boolean | Default true |
+| require_period_feedback | boolean | Default false until period feedback ships |
+| request_class_lead_feedback | boolean | Default false. Unused until class-lead feedback |
+| status | text | `open` · `closed` |
+| created_by | uuid | FK → User |
+| created_at / updated_at | timestamptz | |
+
+Junction tables `report_card_fill_cycle_classes` and `report_card_fill_cycle_courses` hold the audience when it is not the whole organization.
+
+**Who can SELECT:** staff who can browse the org.
+
+**Who can write:** owners and admins.
+
+`public.fill_cycle_scope` lists the courses and classes a person may count: admins see the cycle’s audience; instructors see courses they teach; class leads also see courses taken by current members of a cycle class they lead, without reading those enrollments directly.
+
+### ReportCardFillSubmission
+
+Checkpoint that a package was submitted. Grades and attendance marks stay editable.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| cycle_id | bigint | FK → ReportCardFillCycle. Cycle must be open |
+| dependency_kind | text | `grades` · `attendance` · `outcomes` · `period_feedback` |
+| course_id | bigint | Set for course packages. Null for class attendance |
+| class_id | bigint | Set for class attendance. Null otherwise |
+| submitter_user_id | uuid | FK → User. Trigger sets `auth.uid()` |
+| submitted_at | timestamptz | Trigger refreshes on update |
+| unique | (cycle_id, dependency_kind, course_id, class_id) | Nulls compare equal |
+
+Course packages require `can_manage_course`. Class attendance requires an owner, admin, or class lead. The kind must be required on the cycle, and the course or class must be in the audience. Outcomes are not required when the course has no active outcomes; the app simply omits that slot.
+
+**Who can SELECT:** staff who can browse the org.
+
+### ReportCardFillReminder
+
+A manual nudge that shows on the recipient’s staff home. Not an email and not an Activity row.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| cycle_id | bigint | FK → ReportCardFillCycle |
+| recipient_user_id | uuid | Active owner, admin, or instructor |
+| sent_by | uuid | Trigger sets `auth.uid()` |
+| created_at | timestamptz | |
+
+**Who can SELECT:** the recipient, or an owner/admin.
+
+**Who can insert:** owners and admins. No update.
 
 ### Course
 

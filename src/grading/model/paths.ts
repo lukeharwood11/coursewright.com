@@ -25,3 +25,11 @@ export function reportCardPath(orgSlug: string, cardId: number): string {
 export function gradingSettingsPath(orgSlug: string): string {
   return `/my/${orgSlug}/settings?tab=grading`;
 }
+
+export function fillCyclesPath(orgSlug: string): string {
+  return `/my/${orgSlug}/fill-cycles`;
+}
+
+export function fillCyclePath(orgSlug: string, cycleId: number): string {
+  return `/my/${orgSlug}/fill-cycles/${cycleId}`;
+}

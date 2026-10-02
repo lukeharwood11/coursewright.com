@@ -60,4 +60,4 @@ Class-lead home for one class on one date. Take day-level attendance for the coh
 
 ## Notes
 
-[FEATURES.md](../FEATURES.md) — Attendance. [plans/ATTENDANCE.md](../plans/ATTENDANCE.md). Not a grade. Report-card package submit is a later slice.
+[FEATURES.md](../FEATURES.md) — Attendance. [plans/ATTENDANCE.md](../plans/ATTENDANCE.md). Not a grade. `?cycle=` can show a class attendance package checkpoint. Marks stay editable.
