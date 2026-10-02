@@ -21,6 +21,7 @@ Learners: a student account, or staff using **Student view**. A parent who opens
 - Grades are per course enrollment. The label comes from the org grading scale. Mode `none` shows a percent. A teacher final override shows that label.
 - Report cards listed here are **sent** only.
 - **Attendance** is read-only here: marked days in the last 14 days through a chosen date, with the day summary and any class or course sheet rows. No day controls.
+- **Outcomes** are read-only and appear only after a teacher has submitted that course’s outcomes package. Each line is the outcome (and criterion, when there is one) plus the rating word. The section is omitted when there is nothing to show.
 - Activity for a saved quiz grade or a final override opens this page for the learner. A device notification uses `?activity=` and marks that row read.
 - No bulk actions, no other students, no grading settings.
 
@@ -31,11 +32,13 @@ Learners: a student account, or staff using **Student view**. A parent who opens
 - Grades: course title, derived percent and label (or override label)
 - Sent report cards: course title from the card snapshot
 - Attendance: date, day summary, class and course sheet rows for that date
+- Outcomes: course title, outcome or criterion text, rating word (submitted packages only)
 
 ## Contents
 
 - Classes list
 - Attendance list
+- Outcomes list, when a submitted package has ratings
 - Grades list
 - Report cards list
 

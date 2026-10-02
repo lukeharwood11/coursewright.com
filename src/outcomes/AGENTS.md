@@ -6,6 +6,8 @@ Course outcomes and the org rating words teachers pick. Not letter grades, and n
 
 - Org settings → Outcomes (`org-rating-options/`) — owners and admins edit the ordered labels
 - Course outcomes (`course-outcomes/`) at `/courses/<course_id>/outcomes` — statements and optional criteria
+- Rating matrix (`course-ratings/`) at `/courses/<course_id>/outcomes/ratings` — submit writes `course_outcome_packages`
+- Family read (`student-outcomes/`) on Progress and the student profile. Families see a rating only after the matching package is submitted
 
 ## Rules
 
@@ -13,7 +15,7 @@ Course outcomes and the org rating words teachers pick. Not letter grades, and n
 - Outcomes belong to one course. Criteria are optional children.
 - Owners and admins edit rating options. Course managers edit outcomes and criteria. Observers read.
 - Archive an outcome instead of deleting it when it should leave the active list.
-- Ratings, package submit, and Progress read are the next slice. Do not store freeform marking-period comments here.
+- Do not store freeform marking-period comments here.
 
 ## Don’t
 

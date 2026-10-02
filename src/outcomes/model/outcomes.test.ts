@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   activeOutcomes,
+  groupFamilyRatings,
   nextSortOrder,
+  ratingForCell,
+  ratingTargets,
   sortOrdersForIds,
   validateOutcomeStatement,
   validateRatingLabel,
@@ -58,6 +61,77 @@ test("active outcomes stay in sort order and archived ones drop out", () => {
     activeOutcomes(outcomes).map((outcome) => outcome.id),
     [1, 2],
   );
+});
+
+test("criteria are rated one by one and a bare outcome is rated directly", () => {
+  const outcomes: CourseOutcome[] = [
+    {
+      id: 1,
+      courseId: 9,
+      statement: "Explain energy",
+      sortOrder: 0,
+      archivedAt: null,
+      criteria: [
+        { id: 11, outcomeId: 1, statement: "Mitochondria", sortOrder: 0 },
+        { id: 12, outcomeId: 1, statement: "Aerobic vs anaerobic", sortOrder: 1 },
+      ],
+    },
+    {
+      id: 2,
+      courseId: 9,
+      statement: "Use a microscope",
+      sortOrder: 1,
+      archivedAt: null,
+      criteria: [],
+    },
+    {
+      id: 3,
+      courseId: 9,
+      statement: "Archived",
+      sortOrder: 2,
+      archivedAt: "2026-01-01",
+      criteria: [],
+    },
+  ];
+  const targets = ratingTargets(outcomes);
+  assert.deepEqual(
+    targets.map((target) => [target.outcomeId, target.criterionId]),
+    [
+      [1, 11],
+      [1, 12],
+      [2, null],
+    ],
+  );
+  assert.equal(
+    ratingForCell(
+      [{ id: 1, studentId: 4, outcomeId: 2, criterionId: null, ratingOptionId: 7 }],
+      4,
+      targets[2],
+    )?.ratingOptionId,
+    7,
+  );
+});
+
+test("family ratings group by course", () => {
+  const groups = groupFamilyRatings([
+    {
+      courseId: 1,
+      courseTitle: "Biology",
+      outcomeStatement: "Explain energy",
+      criterionStatement: "Mitochondria",
+      label: "Mastered",
+    },
+    {
+      courseId: 1,
+      courseTitle: "Biology",
+      outcomeStatement: "Use a microscope",
+      criterionStatement: null,
+      label: "In progress",
+    },
+  ]);
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0]?.lines[0]?.text, "Explain energy — Mitochondria");
+  assert.equal(groups[0]?.lines[1]?.label, "In progress");
 });
 
 test("sort helpers append and rewrite order", () => {
