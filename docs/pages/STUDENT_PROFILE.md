@@ -25,7 +25,7 @@ View/edit one org-level **student profile**, including an optional student accou
 - **Grades** lists each active course the viewer may read (teachers: courses they teach; owners/admins: all; parents: linked published courses). The label is derived from the org scale. A final override shows that label and the stamp.
 - Staff who can act see **Gradebook** and **Report card** on each course row they can manage (Pattern A). **Report card** drafts one enrollment at a time and opens the draft. **Draft** appears when a draft already exists for that course.
 - Parents do not edit the profile, remove the student, or generate cards. They see classes, grades, and attendance.
-- **Attendance** lists the last 14 days through a chosen date. Staff who may set a day mark can set or clear Present, Absent, Excused, or Partial. Class and course sheet rows for those dates stay visible and are not edited here. Parents and other readers see the same list without controls.
+- **Attendance** lists recent marked days in the last 14 days through a chosen date (default today). Staff also see that chosen day even when it is unmarked, so the list is today plus recent marks — not every unmarked day before it. Staff who may set a day mark can set it or **Clear** it (a second click does not clear). Undo follows a change. Class and course sheet rows for those dates stay visible and are not edited here. Parents and other readers see marked days only, without controls.
 - Activity for a saved quiz grade or a final override opens this page for a linked parent. A device notification uses `?activity=` and marks that row read.
 - **Announce** (staff) → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
 - Owners and admins who can edit see **Grading settings** on the grades section.
@@ -70,7 +70,7 @@ View/edit one org-level **student profile**, including an optional student accou
 - Create parent (or student-email) invite (email + copy the claim link); **Resend email** or cancel a pending invite; add a parent (then another)
 - Open class / course enrollments
 - Staff: open gradebook, generate a report card, open a card
-- Staff who may mark the day: set or clear that student’s day status
+- Staff who may mark the day: set or clear that student’s day status, then undo
 - Owners/admins: open grading settings
 
 ## Links to

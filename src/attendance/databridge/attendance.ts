@@ -31,8 +31,21 @@ export type DayMark = {
 
 export type OtherSheetMark = {
   studentId: number;
+  kind: "class" | "course";
+  sheetId: number;
   title: string;
   status: SheetStatus;
+};
+
+export type CohortCourseEnrollment = {
+  studentId: number;
+  courseId: number;
+  title: string;
+};
+
+export type CourseInstructorRef = {
+  courseId: number;
+  userId: string | null;
 };
 
 export type DateSheetLoad = {
@@ -149,7 +162,7 @@ async function loadDateContext(input: {
 
   let classQuery = db
     .from("attendance_class_entries")
-    .select("student_profile_id, status, class:classes(title)")
+    .select("class_id, student_profile_id, status, class:classes(title)")
     .eq("on_date", input.onDate)
     .in("student_profile_id", input.studentIds);
   if (input.skipClassId != null) {
@@ -158,7 +171,7 @@ async function loadDateContext(input: {
 
   let courseQuery = db
     .from("attendance_course_entries")
-    .select("student_profile_id, status, course:courses(title)")
+    .select("course_id, student_profile_id, status, course:courses(title)")
     .eq("on_date", input.onDate)
     .in("student_profile_id", input.studentIds);
   if (input.skipCourseId != null) {
@@ -188,6 +201,8 @@ async function loadDateContext(input: {
     if (!status || !classRow) continue;
     others.push({
       studentId: row.student_profile_id,
+      kind: "class",
+      sheetId: row.class_id,
       title: classRow.title,
       status,
     });
@@ -198,11 +213,53 @@ async function loadDateContext(input: {
     if (!status || !courseRow) continue;
     others.push({
       studentId: row.student_profile_id,
+      kind: "course",
+      sheetId: row.course_id,
       title: courseRow.title,
       status,
     });
   }
   return { days, others };
+}
+
+export async function loadClassCohortCourses(memberIds: number[]): Promise<{
+  enrollments: CohortCourseEnrollment[];
+  instructors: CourseInstructorRef[];
+}> {
+  if (memberIds.length === 0) return { enrollments: [], instructors: [] };
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("enrollments")
+    .select("student_profile_id, course_id, course:courses(id, title)")
+    .in("student_profile_id", memberIds)
+    .eq("status", "active");
+  if (error) throw new Error(error.message);
+
+  const enrollments: CohortCourseEnrollment[] = [];
+  for (const row of data ?? []) {
+    const course = unwrapOne(row.course as TitleRow | TitleRow[] | null);
+    if (!course || row.course_id == null) continue;
+    enrollments.push({
+      studentId: row.student_profile_id,
+      courseId: row.course_id,
+      title: course.title,
+    });
+  }
+
+  const courseIds = uniqueIds(enrollments.map((row) => row.courseId));
+  if (courseIds.length === 0) return { enrollments, instructors: [] };
+
+  const { data: instructorRows, error: instructorError } = await db
+    .from("course_instructors")
+    .select("course_id, user_id")
+    .in("course_id", courseIds);
+  if (instructorError) throw new Error(instructorError.message);
+
+  const instructors: CourseInstructorRef[] = (instructorRows ?? []).map((row) => ({
+    courseId: row.course_id,
+    userId: row.user_id,
+  }));
+  return { enrollments, instructors };
 }
 
 export async function loadStudentAttendance(

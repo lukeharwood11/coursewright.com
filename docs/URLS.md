@@ -201,7 +201,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 |------|-----|-------|
 | [ORG_ROSTER](./pages/ORG_ROSTER.md) | `/my/<org-slug>/students` | Students hub. Classes tab: `?tab=classes`. `/roster` redirects here |
 | [STUDENT_PROFILE](./pages/STUDENT_PROFILE.md) | `/my/<org-slug>/students/<student_id>` | `/roster/<student_id>` redirects here |
-| [PROGRESS](./pages/PROGRESS.md) | `/my/<org-slug>/progress` | Learner chrome only. Staff and parents are sent to Students |
+| [PROGRESS](./pages/PROGRESS.md) | `/my/<org-slug>/progress` | Learner chrome, and a parent opening this URL (linked child’s Progress, including Attendance). Other staff are sent to Students |
 | [REPORT_CARD](./pages/REPORT_CARD.md) | `/my/<org-slug>/report-cards/<card_id>` | Draft, review, submit. Families can open a sent card |
 | [CLASS](./pages/CLASS.md) | `/my/<org-slug>/classes/<class_id>` | Canonical class page. Parents and learners can open it read-only |
 | [CLASS_ATTENDANCE](./pages/CLASS_ATTENDANCE.md) | `/my/<org-slug>/classes/<class_id>/attendance` | Staff sheet. Parents and learners are sent back to the class |

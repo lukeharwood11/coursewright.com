@@ -4,7 +4,9 @@ import {
   formatAttendanceDate,
   type DayBadgeStatus,
 } from "@/attendance/model/daySummary";
+import { AttendanceClearButton } from "@/attendance/sheet/components/AttendanceClearButton";
 import { AttendanceStatusPicker } from "@/attendance/sheet/components/AttendanceStatusPicker";
+import { AttendanceUndoNotice } from "@/attendance/sheet/components/AttendanceUndoNotice";
 import { Badge } from "@/ui/Badge";
 import { Input } from "@/ui/Input";
 import { useToastOnError } from "@/ui/useToastOnError";
@@ -38,6 +40,15 @@ export function StudentAttendanceSection({ studentId }: { studentId: number }) {
           />
         </div>
       </div>
+      {attendance.undo ? (
+        <div className="mt-3">
+          <AttendanceUndoNotice
+            message={attendance.undo.message}
+            disabled={attendance.pendingDate != null}
+            onUndo={attendance.undoLast}
+          />
+        </div>
+      ) : null}
       {attendance.loading ? (
         <p className="mt-3 text-[14px] text-[var(--ink-soft)]">Loading attendance…</p>
       ) : attendance.days.length === 0 ? (
@@ -61,13 +72,21 @@ export function StudentAttendanceSection({ studentId }: { studentId: number }) {
                 )}
               </div>
               {attendance.canWrite ? (
-                <AttendanceStatusPicker
-                  label="Day"
-                  options={DAY_STATUSES}
-                  value={day.dayStatus}
-                  disabled={attendance.pendingDate === day.onDate}
-                  onChange={(status) => attendance.saveDay(day.onDate, status)}
-                />
+                <div className="flex flex-wrap items-end gap-2">
+                  <AttendanceStatusPicker
+                    label="Day"
+                    options={DAY_STATUSES}
+                    value={day.dayStatus}
+                    disabled={attendance.pendingDate === day.onDate}
+                    onChange={(status) => attendance.saveDay(day.onDate, status)}
+                  />
+                  {day.dayStatus ? (
+                    <AttendanceClearButton
+                      disabled={attendance.pendingDate === day.onDate}
+                      onClear={() => attendance.saveDay(day.onDate, null)}
+                    />
+                  ) : null}
+                </div>
               ) : null}
               {day.sheets.length > 0 ? (
                 <ul className="space-y-1">

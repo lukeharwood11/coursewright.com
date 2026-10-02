@@ -1,3 +1,3 @@
 # AGENTS — `src/attendance/sheet/components/`
 
-Status picker and the student grid used by both attendance sheets. UI only.
+Status picker, Clear, undo notice, and the course sheet grid. UI only. Choosing a status does not clear it.

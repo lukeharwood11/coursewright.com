@@ -24,7 +24,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - **Events** for this class: title, when, location. **Add event** starts a class event with this class selected; staff can check other classes. Opening a row goes to [EVENT](./EVENT.md).
 - **Announce** to this class → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
 - **Start a discussion** (**P1**) → [DISCUSSION](./DISCUSSION.md) new with this class prefilled.
-- **Take attendance** → [CLASS_ATTENDANCE](./CLASS_ATTENDANCE.md). Staff who can browse the org, including observers (read-only there). Parents and learners stay on this page.
+- **Attendance** tab → [CLASS_ATTENDANCE](./CLASS_ATTENDANCE.md). Staff who can browse the org, including observers (read-only there). Parents and learners stay on this page and do not see the tab.
 - Disclaimer: membership here does not enroll in a course — use [COURSE_ROSTER](./COURSE_ROSTER.md) (Class may be a batch preset there). A class is not a grade container.
 - Parents and learners see members the class policies already allow. Add, remove, announce, discussion, event edit, and lead management stay with staff who can edit.
 - Back goes to Students → Classes for staff and parents, and to [PROGRESS](./PROGRESS.md) for learners.
@@ -54,7 +54,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - Add / open an event
 - Create Announcement
 - Start a discussion (**P1**)
-- Take attendance (staff)
+- Open Attendance (staff)
 
 ## Links to
 
@@ -65,7 +65,7 @@ Manage one org-scoped **Class** — a named group of student profiles. A class i
 - [EVENT](./EVENT.md) — add or open an event for this class
 - [ANNOUNCEMENT](./ANNOUNCEMENT.md) — Create Announcement for this class
 - [DISCUSSION](./DISCUSSION.md) — Start a discussion for this class (**P1**)
-- [CLASS_ATTENDANCE](./CLASS_ATTENDANCE.md) — Take attendance (staff)
+- [CLASS_ATTENDANCE](./CLASS_ATTENDANCE.md) — Attendance tab (staff)
 - [ACTIVITY](./ACTIVITY.md) — leads are notified here when someone posts
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — enroll in a course (Class as preset)
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
