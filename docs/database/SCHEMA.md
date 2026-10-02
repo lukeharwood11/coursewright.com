@@ -792,6 +792,28 @@ A manual nudge that shows on the recipient’s staff home. Not an email and not 
 
 **Who can insert:** owners and admins. No update.
 
+### CoursePeriodFeedback
+
+Freeform teacher comment for one student in one course during one fill cycle. Not an outcome rating. The report-card section that would print it stays off until templates exist.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization. Must match the course and the cycle |
+| fill_cycle_id | bigint | FK → ReportCardFillCycle. Cycle must be open and require period feedback |
+| course_id | bigint | FK → Course. Must be in the cycle audience |
+| student_profile_id | bigint | FK → StudentProfile. Must be enrolled in the course |
+| body | text | 1–4000 characters after trim. Empty deletes the row |
+| authored_by | uuid | FK → User. Trigger sets `auth.uid()` |
+| created_at / updated_at | timestamptz | |
+| unique | (fill_cycle_id, course_id, student_profile_id) | |
+
+**Who can SELECT:** `can_browse_course`, or a linked parent / the student after the period-feedback package is submitted for that course and cycle.
+
+**Who can write:** `can_manage_course`.
+
+Fill-cycle rows stay staff-only. Family and staff profile reads use `family_period_feedback`, which returns the comment plus the cycle label without opening `report_card_fill_cycles` SELECT.
+
 ### Course
 
 | Field | Type | Notes |

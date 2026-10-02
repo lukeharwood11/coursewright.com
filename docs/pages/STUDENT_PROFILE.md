@@ -24,8 +24,9 @@ View/edit one org-level **student profile**, including an optional student accou
 - Show course enrollments and class membership. A class link opens the same [CLASS](./CLASS.md) page as the Students **Classes** tab.
 - **Grades** lists each active course the viewer may read (teachers: courses they teach; owners/admins: all; parents: linked published courses). The label is derived from the org scale. A final override shows that label and the stamp.
 - Staff who can act see **Gradebook** and **Report card** on each course row they can manage (Pattern A). **Report card** drafts one enrollment at a time and opens the draft. **Draft** appears when a draft already exists for that course.
-- Parents do not edit the profile, remove the student, or generate cards. They see classes, grades, attendance, and submitted outcome ratings.
+- Parents do not edit the profile, remove the student, or generate cards. They see classes, grades, attendance, submitted outcome ratings, and submitted period feedback.
 - **Outcomes** list submitted ratings for families. Staff who can browse the course also see ratings that are not submitted yet. The section is omitted when there is nothing to show.
+- **Period feedback** lists submitted comments for families. Staff who can browse the course also see comments that are not submitted yet. The section is omitted when there is nothing to show.
 - **Attendance** lists recent marked days in the last 14 days through a chosen date (default today). Staff also see that chosen day even when it is unmarked, so the list is today plus recent marks — not every unmarked day before it. Staff who may set a day mark can set it or **Clear** it (a second click does not clear). Undo follows a change. Class and course sheet rows for those dates stay visible and are not edited here. Parents and other readers see marked days only, without controls.
 - Activity for a saved quiz grade or a final override opens this page for a linked parent. A device notification uses `?activity=` and marks that row read.
 - **Announce** (staff) → [ANNOUNCEMENT](./ANNOUNCEMENT.md) new with audience prefilled.
@@ -43,6 +44,7 @@ View/edit one org-level **student profile**, including an optional student accou
 - Grades: course title, derived percent/label or override, stamp when overridden
 - Attendance: date, day summary (Present, Absent, Excused, Partial, or Late when every sheet that day is Late), and each class or course sheet row (title + status)
 - Outcomes: course title, outcome or criterion text, rating word
+- Period feedback: course title, cycle name, comment
 - Report cards (staff): course, status (`draft` / `submitted` / `sent`)
 - Parent invite / claim status (pending link, copyable claim URL, or accepted)
 

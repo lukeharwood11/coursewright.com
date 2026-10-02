@@ -98,6 +98,7 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | [COURSE_ATTENDANCE](./pages/COURSE_ATTENDANCE.md) | `/my/<org-slug>/courses/<course_id>/attendance` | Staff who can view the course. Writes follow course manage. `?cycle=` shows the course attendance package checkpoint |
 | [COURSE_OUTCOMES](./pages/COURSE_OUTCOMES.md) | `/my/<org-slug>/courses/<course_id>/outcomes` | Staff who can view the course. Outcome and criteria writes follow course manage |
 | [COURSE_OUTCOME_RATINGS](./pages/COURSE_OUTCOME_RATINGS.md) | `/my/<org-slug>/courses/<course_id>/outcomes/ratings` | Rating matrix and outcomes package submit |
+| [PERIOD_FEEDBACK](./pages/PERIOD_FEEDBACK.md) | `/my/<org-slug>/courses/<course_id>/period-feedback` | Comments for one fill cycle. Opened with `?cycle=` |
 | [COURSE_SETTINGS](./pages/COURSE_SETTINGS.md) | `/my/<org-slug>/courses/<course_id>/settings` | Dates, status, instructors, grades, calendar color |
 | [LESSON_PLAN](./pages/LESSON_PLAN.md) (view) | `/my/<org-slug>/courses/<course_id>/lesson-plans/<lesson_plan_id>` | Week plan + day notes and materials |
 | [LESSON_PLAN](./pages/LESSON_PLAN.md) (new) | `/my/<org-slug>/courses/<course_id>/lesson-plans/new` | Staff compose (`?week=` optional Sunday) |

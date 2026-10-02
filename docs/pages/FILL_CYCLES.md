@@ -21,7 +21,7 @@ Create and review marking-period work bundles. A cycle asks for grades, attendan
 - A course audience includes those courses only. Class attendance is not part of it.
 - An organization audience includes active courses and class attendance.
 - Outcomes are required only for courses that have at least one outcome that is not archived.
-- Period feedback is not offered here yet.
+- Period feedback is a comment package. It can be turned off. It defaults on.
 - The due date is soft. Past due does not lock edits.
 - Empty list says there are no fill cycles yet.
 

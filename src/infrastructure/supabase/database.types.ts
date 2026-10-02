@@ -695,6 +695,78 @@ export type Database = {
           },
         ]
       }
+      course_period_feedback: {
+        Row: {
+          authored_by: string | null
+          body: string
+          course_id: number
+          created_at: string
+          fill_cycle_id: number
+          id: number
+          organization_id: number
+          student_profile_id: number
+          updated_at: string
+        }
+        Insert: {
+          authored_by?: string | null
+          body: string
+          course_id: number
+          created_at?: string
+          fill_cycle_id: number
+          id?: number
+          organization_id: number
+          student_profile_id: number
+          updated_at?: string
+        }
+        Update: {
+          authored_by?: string | null
+          body?: string
+          course_id?: number
+          created_at?: string
+          fill_cycle_id?: number
+          id?: number
+          organization_id?: number
+          student_profile_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_period_feedback_authored_by_fkey"
+            columns: ["authored_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_period_feedback_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_period_feedback_fill_cycle_id_fkey"
+            columns: ["fill_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "report_card_fill_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_period_feedback_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_period_feedback_student_profile_id_fkey"
+            columns: ["student_profile_id"]
+            isOneToOne: false
+            referencedRelation: "org_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_outcome_criteria: {
         Row: {
           created_at: string
@@ -4658,6 +4730,16 @@ export type Database = {
       generate_student_report_cards: {
         Args: { p_student_profile_id: number }
         Returns: Json
+      }
+      family_period_feedback: {
+        Args: { p_student_profile_id: number }
+        Returns: {
+          body: string
+          course_id: number
+          course_title: string
+          cycle_label: string
+          fill_cycle_id: number
+        }[]
       }
       fill_cycle_scope: {
         Args: { p_organization_id: number }
