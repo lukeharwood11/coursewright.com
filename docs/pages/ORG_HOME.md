@@ -33,6 +33,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 
 - Operational **dashboard** (sidebar still provides full nav, including **Calendar**). Home body summarizes the co-op; it does not only list destinations.
 - **Getting started** when there are no courses and/or no students: short checklist (create course → add students → enroll / publish). Create → print does **not** require a roster.
+- **Fill cycles** (staff home): open cycles show personal unfinished packages, a past-due label when the soft date has passed, and a home reminder when an owner or admin sent one. Owners, admins, and class leads also see “N of M packages submitted.” Closed cycles stay off this list. Managing cycles opens [FILL_CYCLES](./FILL_CYCLES.md). Reminders are not email and not Activity.
 - **Needs attention** (only when non-empty): active courses with zero enrollments; unpublished courses that already have enrollments.
 - **Courses**: compact preview cards (title, icon, subject, published/status, enrollment count), up to six, plus link to [COURSE_LIST](./COURSE_LIST.md). Instructors see courses they teach (and published courses they parent in). Primary **Create course**.
 - **This week**: week label; **Important now** and dated-material counts for courses they can see (staff sees those materials, including unpublished).
@@ -58,6 +59,7 @@ Same URL for all roles; chrome and body switch by membership role. Owners, admin
 
 - **Overview** heading + current week label
 - Setup flags: needs course / needs students
+- Open fill cycles: label, due date, past due, personal tasks, rollup counts, reminder line
 - Attention rows: course title + reason
 - Course previews: title, icon, subject, status, visibility, active enrollment count
 - This week: important-now (material title, description when set, course title); dated material counts by course
@@ -90,6 +92,7 @@ Tech-averse parents must understand what’s going on immediately — which chil
 - **Teacher / Preview** (staff only; plus **Parent** / **Student** when applicable) in org chrome
   - On mobile, 3+ modes use a Select instead of tabs
 - Getting started (when needed)
+- Fill cycles (when the person has open work, a rollup, or can manage cycles)
 - Needs attention (when needed)
 - Courses preview + View all
 - This week (important now + dated counts)

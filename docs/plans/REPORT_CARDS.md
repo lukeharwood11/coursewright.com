@@ -1,6 +1,6 @@
 # Report cards — org templates, assemble, and fill cycles
 
-**Status:** in design  
+**Status:** in progress — fill cycles, package checkpoints, home to-dos, and manual reminders are in the app (US-83). Period feedback is the next slice (US-84). Templates, assemble, and send stay later (US-85–87). Section toggles for outcomes and period feedback stay off.  
 **Builds on:** shipped Progress — grading report cards (draft → submit → email, grade snapshot + comment)  
 **Prerequisites (implement first, as their own plans):**
 

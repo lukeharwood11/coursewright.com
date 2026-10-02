@@ -15,7 +15,13 @@ import { StubPage } from "@/app/StubPage";
 import { CourseListPage, CoursePage, CourseRosterPage, CourseSettingsPage } from "@/courses";
 import { CourseOutcomesPage, CourseRatingsPage } from "@/outcomes";
 import { ClassAttendancePage, CourseAttendancePage } from "@/attendance";
-import { CourseGradebookPage, ProgressPage, ReportCardPage } from "@/grading";
+import {
+  CourseGradebookPage,
+  FillCyclePage,
+  FillCyclesPage,
+  ProgressPage,
+  ReportCardPage,
+} from "@/grading";
 import { CalendarPage } from "@/calendar";
 import { EventEditPage, EventPage } from "@/events";
 import { FeedbackPage } from "@/feedback";
@@ -355,6 +361,22 @@ export function AppRoutes() {
               element={
                 <RequireStaff>
                   <QuizEditPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="fill-cycles"
+              element={
+                <RequireStaff>
+                  <FillCyclesPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="fill-cycles/:cycleId"
+              element={
+                <RequireStaff>
+                  <FillCyclePage />
                 </RequireStaff>
               }
             />

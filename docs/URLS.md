@@ -56,6 +56,8 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 |------|-----|-------|
 | [ORG_PICKER](./pages/ORG_PICKER.md) | `/my` | Org picker + create org |
 | [ORG_HOME](./pages/ORG_HOME.md) | `/my/<org-slug>` | Role-aware dashboard (parent “this week” calendar lives here). Optional `?week=<sunday-iso>` on the student home selects another Sunday–Saturday week |
+| [FILL_CYCLES](./pages/FILL_CYCLES.md) | `/my/<org-slug>/fill-cycles` | Staff list. Owners and admins create a cycle |
+| [FILL_CYCLE](./pages/FILL_CYCLE.md) | `/my/<org-slug>/fill-cycles/<cycle_id>` | Rollup, missing packages, close, and a manual reminder |
 | [ORG_PROFILE](./pages/ORG_PROFILE.md) | `/my/<org-slug>/profile` | Organization identity + contact profile (all members); owners edit via settings |
 | [CALENDAR](./pages/CALENDAR.md) | `/my/<org-slug>/calendar` | Month/week/day calendar (`?view=month\|week\|day`, `?date=YYYY-MM-DD`) |
 | [EVENT](./pages/EVENT.md) (view) | `/my/<org-slug>/events/<event_id>` | Course, class, or organization event |
@@ -92,8 +94,8 @@ If a resource would reasonably have **more than one page** underneath it, nest t
 | [COURSE_LIST](./pages/COURSE_LIST.md) | `/my/<org-slug>/courses` | |
 | [COURSE](./pages/COURSE.md) | `/my/<org-slug>/courses/<course_id>` | Builder home |
 | [COURSE_ROSTER](./pages/COURSE_ROSTER.md) | `/my/<org-slug>/courses/<course_id>/roster` | Enrollments |
-| [COURSE_GRADEBOOK](./pages/COURSE_GRADEBOOK.md) | `/my/<org-slug>/courses/<course_id>/gradebook` | Staff who can manage the course. Needs-grade queue, matrix, final override |
-| [COURSE_ATTENDANCE](./pages/COURSE_ATTENDANCE.md) | `/my/<org-slug>/courses/<course_id>/attendance` | Staff who can view the course. Writes follow course manage |
+| [COURSE_GRADEBOOK](./pages/COURSE_GRADEBOOK.md) | `/my/<org-slug>/courses/<course_id>/gradebook` | Staff who can manage the course. Needs-grade queue, matrix, final override. `?cycle=` shows the grades package checkpoint |
+| [COURSE_ATTENDANCE](./pages/COURSE_ATTENDANCE.md) | `/my/<org-slug>/courses/<course_id>/attendance` | Staff who can view the course. Writes follow course manage. `?cycle=` shows the course attendance package checkpoint |
 | [COURSE_OUTCOMES](./pages/COURSE_OUTCOMES.md) | `/my/<org-slug>/courses/<course_id>/outcomes` | Staff who can view the course. Outcome and criteria writes follow course manage |
 | [COURSE_OUTCOME_RATINGS](./pages/COURSE_OUTCOME_RATINGS.md) | `/my/<org-slug>/courses/<course_id>/outcomes/ratings` | Rating matrix and outcomes package submit |
 | [COURSE_SETTINGS](./pages/COURSE_SETTINGS.md) | `/my/<org-slug>/courses/<course_id>/settings` | Dates, status, instructors, grades, calendar color |
@@ -206,7 +208,7 @@ Dedicated `/print` child routes — **generate a PDF**, preview it in-app, then 
 | [PROGRESS](./pages/PROGRESS.md) | `/my/<org-slug>/progress` | Learner chrome, and a parent opening this URL (linked child’s Progress, including Attendance). Other staff are sent to Students |
 | [REPORT_CARD](./pages/REPORT_CARD.md) | `/my/<org-slug>/report-cards/<card_id>` | Draft, review, submit. Families can open a sent card |
 | [CLASS](./pages/CLASS.md) | `/my/<org-slug>/classes/<class_id>` | Canonical class page. Parents and learners can open it read-only |
-| [CLASS_ATTENDANCE](./pages/CLASS_ATTENDANCE.md) | `/my/<org-slug>/classes/<class_id>/attendance` | Staff sheet. Parents and learners are sent back to the class |
+| [CLASS_ATTENDANCE](./pages/CLASS_ATTENDANCE.md) | `/my/<org-slug>/classes/<class_id>/attendance` | Staff sheet. Parents and learners are sent back to the class. `?cycle=` shows the class attendance package checkpoint |
 | [FAMILIES](./pages/FAMILIES.md) | `/my/<org-slug>/families` | Parent directory — **not currently routed in SPA** |
 | [FAMILY](./pages/FAMILY.md) | `/my/<org-slug>/families/<family_id>` | **Not currently routed in SPA** |
 

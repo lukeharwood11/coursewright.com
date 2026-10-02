@@ -23,6 +23,7 @@ Course instructors record attendance for one course on one date. This sheet is t
 - A new sheet mark requires an active enrollment. An existing row can still be changed by someone who can manage the course.
 - People who can manage the course write the sheet. Observers read only, with view-only copy and no write controls.
 - Empty roster: enroll students before taking attendance.
+- `?cycle=` from a fill cycle shows an attendance package banner when that cycle includes course attendance. Submitting records the checkpoint. Day marks stay editable.
 
 ## Data shown
 

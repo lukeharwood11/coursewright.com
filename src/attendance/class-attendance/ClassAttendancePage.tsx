@@ -11,6 +11,7 @@ import { PageLoading } from "@/ui/PageLoading";
 import { Select } from "@/ui/Select";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { AttendanceUndoNotice } from "@/attendance/sheet/components/AttendanceUndoNotice";
+import { FillPackageBanner } from "@/grading/fill-cycles/components/FillPackageBanner";
 import { ClassAttendanceRows } from "./components/ClassAttendanceRows";
 import { useClassAttendance } from "./hooks/useClassAttendance";
 
@@ -60,6 +61,7 @@ export function ClassAttendancePage() {
         title={sheet.classGroup.title}
       />
       <div className="space-y-4 px-5 py-4 md:px-8">
+        <FillPackageBanner kind="attendance" classId={sheet.classGroup.id} />
         <ClassSectionTabs
           orgSlug={slug}
           classId={sheet.classGroup.id}

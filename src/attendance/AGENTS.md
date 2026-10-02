@@ -1,6 +1,6 @@
 # AGENTS — `src/attendance/`
 
-Class sheets, course sheets, and whole-day attendance. Not a grade. Report-card package submit is out of this domain until fill cycles exist.
+Class sheets, course sheets, and whole-day attendance. Not a grade. A fill-cycle attendance checkpoint is the banner from `src/grading/fill-cycles/`, mounted on these sheets. It does not freeze marks.
 
 ## Scope
 
@@ -20,4 +20,4 @@ Class sheets, course sheets, and whole-day attendance. Not a grade. Report-card 
 ## Don’t
 
 - Fold attendance into the gradebook mean.
-- Add a note column, custom statuses, or an attendance package submit here.
+- Add a note column, custom statuses, or a second attendance store for the package checkpoint.

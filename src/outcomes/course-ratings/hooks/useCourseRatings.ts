@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { claimedInstructorUserIds, staffCanManageCourse, staffCanViewCourse } from "@/courses/model/access";
@@ -18,6 +18,9 @@ import {
   type RatingTarget,
 } from "@/outcomes/model/outcomes";
 import { enrollmentQueryKeys, listCourseEnrollments } from "@/roster/databridge/enrollments";
+import { getFillCycle } from "@/grading/databridge/fillCycles";
+import { submitFillPackage } from "@/grading/databridge/fillCycles";
+import { fillCycleQueryKeys } from "@/grading/databridge/fillCycles";
 
 export function useCourseRatings() {
   const { courseId: courseIdParam } = useParams();
@@ -25,7 +28,21 @@ export function useCourseRatings() {
   const { organization, role, parentPresentation } = useOrgShell();
   const user = useAuthedUser();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const requestedCycleId = Number(searchParams.get("cycle"));
   const enabled = Number.isFinite(courseId);
+  const cycleQuery = useQuery({
+    queryKey: fillCycleQueryKeys.detail(requestedCycleId),
+    queryFn: () => getFillCycle(requestedCycleId),
+    enabled: Number.isFinite(requestedCycleId),
+  });
+  const cycle =
+    cycleQuery.data &&
+    cycleQuery.data.status === "open" &&
+    cycleQuery.data.requireOutcomes
+      ? cycleQuery.data
+      : null;
+  const fillCycleId = cycle?.id ?? null;
 
   const courseQuery = useQuery({
     queryKey: courseQueryKeys.detail(courseId),
@@ -51,15 +68,16 @@ export function useCourseRatings() {
     queryFn: () => listCourseEnrollments(courseId),
     enabled,
   });
+  const cycleReady = !Number.isFinite(requestedCycleId) || cycleQuery.isSuccess || cycleQuery.isError;
   const ratingsQuery = useQuery({
-    queryKey: ratingQueryKeys.matrix(courseId),
-    queryFn: () => listCourseRatings(courseId),
-    enabled,
+    queryKey: [...ratingQueryKeys.matrix(courseId), fillCycleId],
+    queryFn: () => listCourseRatings(courseId, fillCycleId),
+    enabled: enabled && cycleReady,
   });
   const packageQuery = useQuery({
-    queryKey: ratingQueryKeys.package(courseId),
-    queryFn: () => listOutcomePackage(courseId),
-    enabled,
+    queryKey: [...ratingQueryKeys.package(courseId), fillCycleId],
+    queryFn: () => listOutcomePackage(courseId, fillCycleId),
+    enabled: enabled && cycleReady,
   });
 
   const course = courseQuery.data ?? null;
@@ -81,6 +99,9 @@ export function useCourseRatings() {
     return Promise.all([
       queryClient.invalidateQueries({ queryKey: ratingQueryKeys.matrix(courseId) }),
       queryClient.invalidateQueries({ queryKey: ratingQueryKeys.package(courseId) }),
+      queryClient.invalidateQueries({
+        queryKey: fillCycleQueryKeys.workspace(organization.id),
+      }),
     ]);
   }
 
@@ -100,19 +121,30 @@ export function useCourseRatings() {
         criterionId: input.target.criterionId,
         ratingOptionId: input.ratingOptionId,
         existingId: existing?.id ?? null,
+        fillCycleId,
       });
     },
     onSuccess: invalidate,
   });
 
   const submit = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!course) throw new Error("Course isn’t loaded.");
-      return submitOutcomePackage({
+      await submitOutcomePackage({
         organizationId: course.organizationId,
         courseId,
         existingId: packageQuery.data?.id ?? null,
+        fillCycleId,
       });
+      if (fillCycleId != null) {
+        await submitFillPackage({
+          organizationId: course.organizationId,
+          cycleId: fillCycleId,
+          kind: "outcomes",
+          courseId,
+          classId: null,
+        });
+      }
     },
     onSuccess: invalidate,
   });
@@ -153,6 +185,7 @@ export function useCourseRatings() {
     options,
     ratings,
     packageSubmittedAt: packageQuery.data?.submittedAt ?? null,
+    cycleLabel: cycle?.label ?? null,
     saving: save.isPending,
     submitting: submit.isPending,
     error,
