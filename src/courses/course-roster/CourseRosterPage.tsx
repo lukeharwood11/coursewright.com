@@ -84,7 +84,7 @@ export function CourseRosterPage() {
             variant="secondary"
             to={courseAttendancePath(roster.organization.slug, roster.course.id)}
           >
-            Take attendance
+            Attendance
           </ButtonLink>
         }
         description={

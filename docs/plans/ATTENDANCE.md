@@ -1,6 +1,7 @@
 # Attendance — capture at class and course
 
 **Status:** capture shipped — package submit still waits on report cards  
+**UX (US-92):** The class **Attendance** tab is the class-lead home for a selected date (day-level marks and course-sheet corrections in that class). One summary badge per student. The capture outline’s staff “Attendance today” path is superseded by that tab. Course attendance sheets stay the course instructor’s primary write surface. Schema is unchanged.  
 **Prerequisite for:** [REPORT_CARDS.md](./REPORT_CARDS.md) (optional template section)  
 **Domains:** new `src/attendance/` · roster classes · courses · grading report cards  
 **Migrations:** TBD (experiment mode — prefer one coherent migration when implementing)
@@ -67,10 +68,10 @@ For a single student on a date:
 
 | Surface | Behavior |
 |---------|----------|
-| Class roster / class attendance | Date picker (default today). Grid of class members × status. Save per student or batch. Show day badge if set. Hint when other sheets exist that day |
-| Course roster / course attendance | Same pattern for **active enrollments** |
-| Student profile | Timeline or calendar; who recorded what; **day status** control (present / absent / excused / partial) |
-| Day mark | Student profile or staff “Attendance today” — set/clear whole-day status without opening every sheet |
+| Class → Attendance tab | Class-lead home (owners and admins acting on that class too). Date defaults to today. **Day** marks for the cohort, and course sheets tied to that class (active enrollments of its members) can be corrected without leaving the class. One day summary badge per student — never a day chip beside a sheet chip. An explicit day mark wins and is labeled day mark. Otherwise disagreeing or incomplete sheets are Partial, with each sheet status and a link. Clear is its own control. Undo follows a change. Optional Mark all Present. Observers read only |
+| Course attendance sheet | Course instructors’ primary write surface. Active enrollments. Sheet statuses only (the day summary badge is read-only here). Clear, undo, and optional Mark all Present. Observers read only |
+| Student profile | Today plus recent marked days for staff — unmarked earlier days stay hidden. Day status control for staff who may write it. Clear, not a second click. Family read shows marked days only |
+| Day mark | Class Attendance tab, or the student profile for staff who may write that day. Not a separate “Attendance today” screen |
 | Partial via sheets | Leave day unset (or set `partial`) and mark only the classes/courses that apply |
 
 Do **not** invent locked routes in this plan. When paths lock, add them to [URLS.md](../URLS.md) + [pages/](../pages/) together.

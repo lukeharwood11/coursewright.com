@@ -1,8 +1,11 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { coursePath, courseRosterPath } from "@/courses/model/paths";
+import { courseAttendanceHelp } from "@/attendance/model/daySummary";
 import { AttendanceGrid } from "@/attendance/sheet/components/AttendanceGrid";
+import { AttendanceUndoNotice } from "@/attendance/sheet/components/AttendanceUndoNotice";
 import { studentPath } from "@/grading/model/paths";
+import { Button } from "@/ui/Button";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { Input } from "@/ui/Input";
 import { PageLoading } from "@/ui/PageLoading";
@@ -50,23 +53,41 @@ export function CourseAttendancePage() {
         }
       />
       <div className="space-y-4 px-5 py-4 md:px-8">
-        <div className="max-w-[12rem]">
-          <label className="block text-[12px] font-bold text-[var(--ink-soft)]" htmlFor="course-attendance-date">
-            Date
-          </label>
-          <Input
-            id="course-attendance-date"
-            type="date"
-            value={sheet.onDate}
-            onChange={(event) => {
-              if (event.target.value) sheet.setOnDate(event.target.value);
-            }}
-          />
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="max-w-[12rem]">
+            <label className="block text-[12px] font-bold text-[var(--ink-soft)]" htmlFor="course-attendance-date">
+              Date
+            </label>
+            <Input
+              id="course-attendance-date"
+              type="date"
+              value={sheet.onDate}
+              onChange={(event) => {
+                if (event.target.value) sheet.setOnDate(event.target.value);
+              }}
+            />
+          </div>
+          {sheet.showMarkAll ? (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={sheet.pending}
+              onClick={sheet.markAllPresent}
+            >
+              Mark all Present
+            </Button>
+          ) : null}
         </div>
         <p className="max-w-xl text-[14px] leading-relaxed text-[var(--ink-soft)]">
-          This course is separate from the day. A day mark does not change this sheet.
-          Choose a status again to clear it.
+          {courseAttendanceHelp(sheet.canManage)}
         </p>
+        {sheet.undo ? (
+          <AttendanceUndoNotice
+            message={sheet.undo.message}
+            disabled={sheet.pending}
+            onUndo={sheet.undoLast}
+          />
+        ) : null}
         {sheet.rows.length === 0 ? (
           <p className="text-[14.5px] text-[var(--ink-soft)]">
             Enroll students on the{" "}
@@ -84,11 +105,9 @@ export function CourseAttendancePage() {
             rows={sheet.rows.map((row) => ({
               ...row,
               profileTo: studentPath(slug, row.studentId),
-              sheetPending: sheet.pendingSheetId === row.studentId,
-              dayPending: sheet.pendingDayId === row.studentId,
+              sheetPending: sheet.pending,
             }))}
             onSheetStatus={sheet.saveSheet}
-            onDayStatus={sheet.saveDay}
           />
         )}
       </div>

@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { StudentAttendanceSection } from "@/attendance";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { PageLoading } from "@/ui/PageLoading";
+import { Select } from "@/ui/Select";
 import { studentsHubTier } from "@/grading/model/access";
 import { formatGradeDisplay } from "@/grading/model/scale";
 import { reportCardPath, studentsPath } from "@/grading/model/paths";
@@ -19,12 +20,16 @@ export function ProgressPage() {
     document.title = `Progress · ${progress.organization.name} · Course Wright`;
   }, [progress.organization.name]);
 
+  if (!role) {
+    return <PageLoading label="Loading progress…" />;
+  }
+
   // Staff Preview has no linked student — send them home.
   if (staffViewMode === "preview" && parentPresentation) {
     return <Navigate to={`/my/${progress.organization.slug}`} replace />;
   }
 
-  if (tier !== "learner") {
+  if (tier !== "learner" && role !== "parent") {
     return <Navigate to={studentsPath(progress.organization.slug)} replace />;
   }
 
@@ -44,8 +49,9 @@ export function ProgressPage() {
           Progress
         </h1>
         <p className="mt-2 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-          This view is for your own classes and grades. It stays empty until this
-          account is linked to a student.
+          {progress.parentViewer
+            ? "This view shows a linked student’s classes, grades, and attendance. It stays empty until a student is linked to this account."
+            : "This view is for your own classes and grades. It stays empty until this account is linked to a student."}
         </p>
       </div>
     );
@@ -59,7 +65,23 @@ export function ProgressPage() {
       >
         Progress
       </h1>
-      <p className="text-[14.5px] text-[var(--ink-soft)]">{progress.student.name}</p>
+      {progress.parentViewer && progress.children.length > 1 ? (
+        <label className="block max-w-xs">
+          <span className="block text-[12px] font-bold text-[var(--ink-soft)]">Student</span>
+          <Select
+            value={String(progress.student.id)}
+            onChange={(event) => progress.selectStudent(Number(event.target.value))}
+          >
+            {progress.children.map((child) => (
+              <option key={child.id} value={child.id}>
+                {child.name}
+              </option>
+            ))}
+          </Select>
+        </label>
+      ) : (
+        <p className="text-[14.5px] text-[var(--ink-soft)]">{progress.student.name}</p>
+      )}
 
       <section>
         <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Classes</h2>

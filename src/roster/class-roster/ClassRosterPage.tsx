@@ -12,7 +12,6 @@ import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { staffCanEdit } from "@/app/layouts/model/viewMode";
-import { classAttendancePath } from "@/attendance/model/paths";
 import { browsesAsStaff } from "@/organizations/model/role";
 import { studentsHubTier } from "@/grading/model/access";
 import { progressPath, studentsClassesPath } from "@/grading/model/paths";
@@ -22,6 +21,7 @@ import { newDiscussionPath } from "@/discussions/model/paths";
 import { AddStudentsPanel } from "@/roster/student-profile/components/AddStudentsPanel";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
 import { ClassActionsMenu } from "./components/ClassActionsMenu";
+import { ClassSectionTabs } from "./components/ClassSectionTabs";
 import { ClassEventsSection } from "./components/ClassEventsSection";
 import { ClassLeadsSection } from "./components/ClassLeadsSection";
 import { useClassEvents } from "./hooks/useClassEvents";
@@ -101,15 +101,6 @@ export function ClassRosterPage() {
         title={roster.classGroup.title}
         titleTrailing={
           <div className="flex shrink-0 flex-nowrap items-center gap-2">
-            {showAttendance ? (
-              <ButtonLink
-                variant="secondary"
-                className="shrink-0"
-                to={classAttendancePath(roster.organization.slug, roster.classGroup.id)}
-              >
-                Take attendance
-              </ButtonLink>
-            ) : null}
             {canManage && showDiscussions ? (
               <ButtonLink
                 variant="secondary"
@@ -148,6 +139,13 @@ export function ClassRosterPage() {
         }
       />
       <div className="space-y-6 px-5 pt-4 pb-6 md:px-8">
+      {showAttendance ? (
+        <ClassSectionTabs
+          orgSlug={roster.organization.slug}
+          classId={roster.classGroup.id}
+          selected="students"
+        />
+      ) : null}
       {showEvents ? (
         <ClassEventsSection
           orgSlug={roster.organization.slug}

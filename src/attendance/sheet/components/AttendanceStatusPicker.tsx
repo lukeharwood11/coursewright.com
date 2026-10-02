@@ -11,7 +11,7 @@ export function AttendanceStatusPicker<T extends string>({
   options: readonly T[];
   value: T | null;
   disabled?: boolean;
-  onChange: (next: T | null) => void;
+  onChange: (next: T) => void;
 }) {
   return (
     <div>
@@ -26,7 +26,9 @@ export function AttendanceStatusPicker<T extends string>({
               type="button"
               aria-pressed={selected}
               disabled={disabled}
-              onClick={() => onChange(selected ? null : option)}
+              onClick={() => {
+                if (!selected) onChange(option);
+              }}
               className={[
                 "rounded-full border px-2.5 py-1 text-[12px] font-bold",
                 "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--green)]",

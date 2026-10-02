@@ -13,11 +13,6 @@ export type GridStudent = {
   current: boolean;
 };
 
-export type SheetHint = {
-  title: string;
-  status: SheetStatus;
-};
-
 const SHEET_STATUS_SET = new Set<string>(SHEET_STATUSES);
 const DAY_STATUS_SET = new Set<string>(DAY_STATUSES);
 
@@ -46,32 +41,91 @@ export function attendanceStatusLabel(status: string): string {
   }
 }
 
+export type DaySummary = {
+  badge: DayBadgeStatus | null;
+  /** An explicit day row is the badge. */
+  dayMark: boolean;
+  /** Why the badge is Partial. Null when it is not Partial from sheets. */
+  partialReason: "disagree" | "incomplete" | null;
+};
+
+export type SummarySheet = {
+  status: SheetStatus | null;
+  /** Unmarked sheet still counts (a course tied to this class the student takes). */
+  countsWhenBlank: boolean;
+};
+
 /**
  * Day summary badge.
- * An explicit day row wins. Otherwise agreeing sheets use that status
- * (including Late). Disagreeing sheets are Partial. No rows means no badge.
+ * An explicit day row wins. Otherwise a blank expected sheet beside any mark
+ * is Partial (incomplete). Disagreeing marks are Partial. Agreeing marks,
+ * including a single sheet and Late, use that status. No marks means no badge.
  */
+export function summarizeDay(input: {
+  dayStatus: DayStatus | null;
+  sheets: readonly SummarySheet[];
+}): DaySummary {
+  if (input.dayStatus) {
+    return { badge: input.dayStatus, dayMark: true, partialReason: null };
+  }
+  const marked = input.sheets.flatMap((sheet) => (sheet.status ? [sheet.status] : []));
+  if (marked.length === 0) {
+    return { badge: null, dayMark: false, partialReason: null };
+  }
+  const first = marked[0];
+  if (!first) return { badge: null, dayMark: false, partialReason: null };
+  if (!marked.every((status) => status === first)) {
+    return { badge: "partial", dayMark: false, partialReason: "disagree" };
+  }
+  const unmarkedExpected = input.sheets.some(
+    (sheet) => sheet.countsWhenBlank && sheet.status == null,
+  );
+  if (unmarkedExpected) {
+    return { badge: "partial", dayMark: false, partialReason: "incomplete" };
+  }
+  return { badge: first, dayMark: false, partialReason: null };
+}
+
 export function dayBadge(input: {
   dayStatus: DayStatus | null;
   sheetStatuses: readonly SheetStatus[];
 }): DayBadgeStatus | null {
-  if (input.dayStatus) return input.dayStatus;
-  const statuses = input.sheetStatuses;
-  if (statuses.length === 0) return null;
-  const first = statuses[0];
-  if (!first) return null;
-  if (statuses.every((status) => status === first)) return first;
-  return "partial";
+  return summarizeDay({
+    dayStatus: input.dayStatus,
+    sheets: input.sheetStatuses.map((status) => ({
+      status,
+      countsWhenBlank: false,
+    })),
+  }).badge;
 }
 
-export function otherSheetHint(marks: readonly SheetHint[]): string | null {
-  if (marks.length === 0) return null;
-  const parts = [...marks]
-    .sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }))
-    .map((mark) => `${mark.title} · ${attendanceStatusLabel(mark.status)}`);
-  if (parts.length === 1) return `Also marked on ${parts[0]}.`;
-  const last = parts[parts.length - 1];
-  return `Also marked on ${parts.slice(0, -1).join(", ")} and ${last}.`;
+export function partialReasonCopy(
+  reason: DaySummary["partialReason"],
+): string | null {
+  if (reason === "disagree") return "Sheets don’t agree.";
+  if (reason === "incomplete") return "Some sheets for this day are still open.";
+  return null;
+}
+
+export function classAttendanceHelp(input: {
+  canWrite: boolean;
+  scope: "day" | "class" | "course";
+}): string {
+  if (!input.canWrite) {
+    return "You’re viewing attendance for this class. You can’t change it.";
+  }
+  if (input.scope === "day") {
+    return "Mark the day for this class. A day mark is the summary for that student. Clear removes it.";
+  }
+  if (input.scope === "class") {
+    return "This class sheet is separate from the day. The badge beside each name is still the one day summary.";
+  }
+  return "Correct this course for students in the class. The badge beside each name is still the one day summary.";
+}
+
+export function courseAttendanceHelp(canWrite: boolean): string {
+  if (!canWrite) return "You’re viewing this course sheet. You can’t change it.";
+  return "This is the course sheet. Clear removes a mark. A day mark, when one is set, is the summary and does not change this sheet.";
 }
 
 export function mergeAttendanceGrid(
@@ -165,6 +219,8 @@ export function studentAttendanceDays(input: {
   days: readonly StudentDayRecord[];
   marks: readonly StudentSheetMark[];
   includeEmpty: boolean;
+  /** Keep these dates even when nothing is marked (staff profile pins the chosen day). */
+  pinDates?: readonly string[];
 }): StudentDayView[] {
   const dayByDate = new Map(input.days.map((day) => [day.onDate, day.status]));
   const marksByDate = new Map<string, StudentSheetMark[]>();
@@ -185,7 +241,8 @@ export function studentAttendanceDays(input: {
       dayStatus,
       sheetStatuses: sheets.map((sheet) => sheet.status),
     });
-    if (!input.includeEmpty && !badge && sheets.length === 0) continue;
+    const pinned = input.pinDates?.includes(onDate) ?? false;
+    if (!input.includeEmpty && !pinned && !badge && sheets.length === 0) continue;
     views.push({ onDate, dayStatus, badge, sheets });
   }
   return views;
