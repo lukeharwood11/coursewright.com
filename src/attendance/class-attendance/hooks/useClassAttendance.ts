@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
@@ -13,24 +13,22 @@ import {
   upsertClassEntry,
   upsertCourseEntry,
   upsertDay,
-  type OtherSheetMark,
 } from "@/attendance/databridge/attendance";
 import {
+  attendancePageCount,
+  attendanceRangeLabel,
   canWriteClassDay,
   canWriteClassSheet,
+  clampAttendancePage,
+  dayFooterForMark,
   mergeAttendanceGrid,
+  paginateAttendance,
   parseIsoDate,
-  summarizeDay,
   todayIso,
-  type DayBadgeStatus,
   type DayStatus,
   type SheetStatus,
 } from "@/attendance/model/daySummary";
-import {
-  classAttendancePath,
-  courseAttendancePath,
-  withAttendanceDate,
-} from "@/attendance/model/paths";
+import { orgContactsByUserId } from "@/organizations/databridge/orgNames";
 import { browsesAsStaff, canManageOrgSettings } from "@/organizations/model/role";
 import {
   classQueryKeys,
@@ -50,24 +48,13 @@ export type ClassAttendanceScope =
   | { kind: "class" }
   | { kind: "course"; courseId: number };
 
-export type ClassSheetLine = {
-  key: string;
-  title: string;
-  status: SheetStatus | null;
-  href: string | null;
-  correctScope: string | null;
-};
-
 export type ClassAttendanceRow = {
   studentId: number;
   name: string;
   current: boolean;
-  badge: DayBadgeStatus | null;
-  dayMark: boolean;
-  partialReason: "disagree" | "incomplete" | null;
-  lines: ClassSheetLine[];
-  control: SheetStatus | DayStatus | null;
+  status: SheetStatus | DayStatus | null;
   canWrite: boolean;
+  dayFooter: string | null;
 };
 
 type Write =
@@ -106,10 +93,10 @@ export function useClassAttendance() {
     parseIsoDate(dateParam) ? dateParam : todayIso(),
   );
   const [scopeValue, setScopeValue] = useState("day");
+  const [page, setPage] = useState(1);
   const [undo, setUndo] = useState<AttendanceUndo | null>(null);
   const classReady = Number.isFinite(classId);
   const isOrgAdmin = Boolean(role && canManageOrgSettings(role));
-  const isObserver = role === "observer";
   const staffBrowse = Boolean(role && browsesAsStaff(role) && !parentPresentation);
   const scope = parseScope(scopeValue);
 
@@ -148,7 +135,6 @@ export function useClassAttendance() {
 
   const isClassLead = (leadersQuery.data ?? []).some((lead) => lead.userId === user.id);
   const writeClass = canWriteClassSheet({ isOrgAdmin, isClassLead });
-  const slug = organization.slug;
 
   const instructorsByCourse = new Map<number, string[]>();
   for (const instructor of marksQuery.data?.instructors ?? []) {
@@ -161,11 +147,6 @@ export function useClassAttendance() {
     if (!role || parentPresentation || role === "observer") return false;
     if (isOrgAdmin) return true;
     return (instructorsByCourse.get(courseId) ?? []).includes(user.id);
-  }
-
-  function canViewCourse(courseId: number): boolean {
-    if (isObserver) return true;
-    return canManageCourse(courseId);
   }
 
   const courseTitleById = new Map<number, string>();
@@ -193,15 +174,25 @@ export function useClassAttendance() {
   const entryByStudent = new Map(
     (marksQuery.data?.entries ?? []).map((entry) => [entry.studentId, entry.status]),
   );
-  const dayByStudent = new Map(
-    (marksQuery.data?.days ?? []).map((day) => [day.studentId, day.status]),
-  );
-  const othersByStudent = new Map<number, OtherSheetMark[]>();
-  for (const other of marksQuery.data?.others ?? []) {
-    const list = othersByStudent.get(other.studentId) ?? [];
-    list.push(other);
-    othersByStudent.set(other.studentId, list);
-  }
+  const days = marksQuery.data?.days ?? [];
+  const dayByStudent = new Map(days.map((day) => [day.studentId, day]));
+  const recorderIds = days.map((day) => day.recordedBy);
+  const recorderKey = [...new Set(recorderIds.filter((id): id is string => Boolean(id)))]
+    .sort()
+    .join(",");
+  const recordersQuery = useQuery({
+    queryKey: ["attendance", "recorders", organization.id, recorderKey],
+    queryFn: () => orgContactsByUserId(organization.id, recorderIds),
+    enabled: recorderKey.length > 0,
+  });
+  const recorderNames =
+    recorderKey.length === 0 || recordersQuery.isError
+      ? new Map<string, string>()
+      : recordersQuery.isSuccess
+        ? new Map(
+            [...recordersQuery.data.entries()].map(([id, contact]) => [id, contact.name]),
+          )
+        : null;
   const courseMarkByStudent = new Map<number, Map<number, SheetStatus>>();
   for (const other of marksQuery.data?.others ?? []) {
     if (other.kind !== "course") continue;
@@ -212,10 +203,9 @@ export function useClassAttendance() {
 
   const rows: ClassAttendanceRow[] = students.flatMap((student) => {
     const sheetStatus = entryByStudent.get(student.id) ?? null;
-    const dayStatus = dayByStudent.get(student.id) ?? null;
+    const day = dayByStudent.get(student.id);
     const enrolled = enrolledByStudent.get(student.id) ?? [];
     const courseMarks = courseMarkByStudent.get(student.id) ?? new Map();
-    const others = othersByStudent.get(student.id) ?? [];
 
     if (scope.kind === "course") {
       const enrolledHere = enrolled.some((course) => course.courseId === scope.courseId);
@@ -223,91 +213,22 @@ export function useClassAttendance() {
       if (!enrolledHere && !markedHere) return [];
     }
 
-    const summarySheets = [
-      {
-        status: sheetStatus,
-        countsWhenBlank: false,
-      },
-      ...others
-        .filter((other) => other.kind === "class")
-        .map((other) => ({ status: other.status, countsWhenBlank: false })),
-      ...enrolled.map((course) => ({
-        status: courseMarks.get(course.courseId) ?? null,
-        countsWhenBlank: true,
-      })),
-      ...others
-        .filter(
-          (other) =>
-            other.kind === "course" &&
-            !enrolled.some((course) => course.courseId === other.sheetId),
-        )
-        .map((other) => ({ status: other.status, countsWhenBlank: false })),
-    ];
-    const summary = summarizeDay({ dayStatus, sheets: summarySheets });
-
-    const lineSheets: ClassSheetLine[] = [];
-    lineSheets.push({
-      key: `class-${classId}`,
-      title: classGroup?.title ?? "This class",
-      status: sheetStatus,
-      href: null,
-      correctScope: writeClass && (student.current || sheetStatus) ? "class" : null,
-    });
-    for (const other of others.filter((mark) => mark.kind === "class")) {
-      lineSheets.push({
-        key: `class-${other.sheetId}`,
-        title: other.title,
-        status: other.status,
-        href: withAttendanceDate(classAttendancePath(slug, other.sheetId), onDate),
-        correctScope: null,
-      });
-    }
-    const courseIds = new Set<number>([
-      ...enrolled.map((course) => course.courseId),
-      ...others.filter((mark) => mark.kind === "course").map((mark) => mark.sheetId),
-    ]);
-    for (const courseId of courseIds) {
-      const title =
-        courseTitleById.get(courseId) ??
-        others.find((mark) => mark.kind === "course" && mark.sheetId === courseId)?.title ??
-        "Course";
-      const status = courseMarks.get(courseId) ?? null;
-      const manageable = canManageCourse(courseId);
-      lineSheets.push({
-        key: `course-${courseId}`,
-        title,
-        status,
-        href: canViewCourse(courseId)
-          ? withAttendanceDate(courseAttendancePath(slug, courseId), onDate)
-          : null,
-        correctScope:
-          manageable && (enrolled.some((course) => course.courseId === courseId) || status)
-            ? `course:${courseId}`
-            : null,
-      });
-    }
-    lineSheets.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }));
-    const lines = lineSheets.filter((line) => {
-      if (line.status != null) return true;
-      return summary.partialReason != null && line.key.startsWith("course-");
-    });
-
-    let control: SheetStatus | DayStatus | null = null;
+    let status: SheetStatus | DayStatus | null = null;
     let canWrite = false;
     if (scope.kind === "day") {
-      control = dayStatus;
+      status = day?.status ?? null;
       canWrite = canWriteClassDay({
         isOrgAdmin,
         isClassLead,
         currentMember: student.current,
       });
     } else if (scope.kind === "class") {
-      control = sheetStatus;
+      status = sheetStatus;
       canWrite = writeClass && (student.current || sheetStatus != null);
     } else {
-      control = courseMarks.get(scope.courseId) ?? null;
+      status = courseMarks.get(scope.courseId) ?? null;
       const active = enrolled.some((course) => course.courseId === scope.courseId);
-      canWrite = canManageCourse(scope.courseId) && (active || control != null);
+      canWrite = canManageCourse(scope.courseId) && (active || status != null);
     }
 
     return [
@@ -315,15 +236,16 @@ export function useClassAttendance() {
         studentId: student.id,
         name: student.name,
         current: student.current,
-        badge: summary.badge,
-        dayMark: summary.dayMark,
-        partialReason: summary.partialReason,
-        lines,
-        control,
+        status,
         canWrite,
+        dayFooter: dayFooterForMark(day, recorderNames),
       },
     ];
   });
+
+  const pageCount = attendancePageCount(rows.length);
+  const safePage = clampAttendancePage(page, rows.length);
+  const pageRows = paginateAttendance(rows, safePage);
 
   function refresh() {
     return queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.all });
@@ -383,6 +305,7 @@ export function useClassAttendance() {
 
   function setOnDate(value: string) {
     setOnDateState(value);
+    setPage(1);
     setUndo(null);
     setSearchParams(
       (prev) => {
@@ -396,6 +319,7 @@ export function useClassAttendance() {
 
   function setScope(value: string) {
     setScopeValue(value);
+    setPage(1);
     setUndo(null);
   }
 
@@ -405,8 +329,8 @@ export function useClassAttendance() {
 
   function saveOne(studentId: number, status: DayStatus | SheetStatus | null) {
     const row = rows.find((item) => item.studentId === studentId);
-    if (!row || !row.canWrite || row.control === status) return;
-    const previous = row.control;
+    if (!row || !row.canWrite || row.status === status) return;
+    const previous = row.status;
     let write: Write;
     let undoWrite: Write;
     if (scope.kind === "day") {
@@ -435,7 +359,7 @@ export function useClassAttendance() {
   }
 
   function markAllPresent() {
-    const targets = rows.filter((row) => row.canWrite && row.control !== "present");
+    const targets = rows.filter((row) => row.canWrite && row.status !== "present");
     if (targets.length === 0) return;
     const writes: Write[] = [];
     const undoWrites: Write[] = [];
@@ -445,14 +369,14 @@ export function useClassAttendance() {
         undoWrites.push({
           studentId: row.studentId,
           scope: "day",
-          status: row.control as DayStatus | null,
+          status: row.status as DayStatus | null,
         });
       } else if (scope.kind === "class") {
         writes.push({ studentId: row.studentId, scope: "class", status: "present" });
         undoWrites.push({
           studentId: row.studentId,
           scope: "class",
-          status: row.control as SheetStatus | null,
+          status: row.status as SheetStatus | null,
         });
       } else {
         writes.push({
@@ -465,7 +389,7 @@ export function useClassAttendance() {
           studentId: row.studentId,
           scope: "course",
           courseId: scope.courseId,
-          status: row.control as SheetStatus | null,
+          status: row.status as SheetStatus | null,
         });
       }
     }
@@ -485,7 +409,11 @@ export function useClassAttendance() {
   }
 
   const canWriteAny = rows.some((row) => row.canWrite);
-  const showMarkAll = canWriteAny && rows.some((row) => row.canWrite && row.control !== "present");
+  const showMarkAll = canWriteAny && rows.some((row) => row.canWrite && row.status !== "present");
+
+  useEffect(() => {
+    if (page !== safePage) setPage(safePage);
+  }, [page, safePage]);
   const recordingOptions: { value: string; label: string }[] = [];
   if (writeClass || isClassLead || isOrgAdmin || courseOptions.length > 0) {
     recordingOptions.push({ value: "day", label: "Day" });
@@ -506,6 +434,13 @@ export function useClassAttendance() {
     setScope,
     recordingOptions,
     rows,
+    pageRows,
+    page: safePage,
+    pageCount,
+    rangeLabel: attendanceRangeLabel(rows.length, safePage),
+    canPrev: safePage > 1,
+    canNext: safePage < pageCount,
+    setPage,
     staffBrowse,
     roleReady: role != null,
     canWriteAny,

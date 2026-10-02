@@ -14,27 +14,27 @@ Course instructors record attendance for one course on one date. This sheet is t
 
 ## Behavior
 
-- Date picker defaults to today (`?date=` opens that day).
-- One row per **active** enrollment, plus anyone who already has a course-sheet row on that date.
-- One day summary badge per student. A day mark is labeled **Day mark** and is not edited on this sheet. Sheet rows explain Partial when recorded sheets disagree.
-- Sheet statuses: Present, Absent, Late, Excused. **Clear** removes the mark. Choosing the selected status again does nothing. Undo follows a change, a clear, or Mark all Present.
-- **Mark all Present** sets this course to Present for rows the viewer can write.
+- Previous day and Next day sit on either side of the date field. The date defaults to today (`?date=` opens that day).
+- One row per **active** enrollment, plus anyone who already has a course-sheet row on that date. The list pages 20 students at a time.
+- Each card shows only this course’s mark. Writers use the status chips. Readers see one badge, or **Not marked**. There is no “This course” label and no other sheet lines on the card.
+- When a day row exists, the bottom of the card says who marked the day (“Ada marked Present”). That line is not edited here. If no day row exists, it is omitted.
+- Sheet statuses: Present, Absent, Late, Excused. **Clear** is a text link under the chips, not a status chip. Choosing the selected status again does nothing. Undo follows a change, a clear, or Mark all Present.
+- **Mark all Present** sets this course to Present for every row the viewer can write on that date, including students on other pages.
 - A new sheet mark requires an active enrollment. An existing row can still be changed by someone who can manage the course.
 - People who can manage the course write the sheet. Observers read only, with view-only copy and no write controls.
-- A class sheet that exists that day links to that class’s Attendance tab. Other course sheets are named without a link.
 - Empty roster: enroll students before taking attendance.
 
 ## Data shown
 
 - Course title
 - Date
-- Per student: name, day summary badge, this course’s status, and other sheet lines for that day
+- Per student: name, this course’s status, and a day attribution line when a day row exists
 
 ## Contents
 
-- Date picker
+- Date, with Previous day and Next day on either side
 - Mark all Present when a row can still be set to Present
-- Student rows
+- Student rows, paged
 - Undo after a change
 - Link back to the course
 
@@ -45,13 +45,11 @@ Course instructors record attendance for one course on one date. This sheet is t
 - Mark all Present
 - Undo
 - Open the student profile
-- Open a class Attendance tab when that sheet is listed
 
 ## Links to
 
 - [COURSE](./COURSE.md) — back to the course
 - [COURSE_ROSTER](./COURSE_ROSTER.md) — enrollments
-- [CLASS_ATTENDANCE](./CLASS_ATTENDANCE.md) — a class sheet listed on the row
 - [STUDENT_PROFILE](./STUDENT_PROFILE.md) — open a student
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 

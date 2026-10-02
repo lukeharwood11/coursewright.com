@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
@@ -8,17 +8,19 @@ import {
   deleteCourseEntry,
   loadCourseDateMarks,
   upsertCourseEntry,
-  type OtherSheetMark,
 } from "@/attendance/databridge/attendance";
 import {
+  attendancePageCount,
+  attendanceRangeLabel,
+  clampAttendancePage,
+  dayFooterForMark,
   mergeAttendanceGrid,
+  paginateAttendance,
   parseIsoDate,
-  summarizeDay,
   todayIso,
-  type DayBadgeStatus,
   type SheetStatus,
 } from "@/attendance/model/daySummary";
-import { classAttendancePath, withAttendanceDate } from "@/attendance/model/paths";
+import { orgContactsByUserId } from "@/organizations/databridge/orgNames";
 import { claimedInstructorUserIds, staffCanManageCourse, staffCanViewCourse } from "@/courses/model/access";
 import {
   courseQueryKeys,
@@ -49,6 +51,7 @@ export function useCourseAttendance() {
   const [onDate, setOnDateState] = useState(
     parseIsoDate(dateParam) ? dateParam : todayIso(),
   );
+  const [page, setPage] = useState(1);
   const [undo, setUndo] = useState<UndoState | null>(null);
   const courseReady = Number.isFinite(courseId);
 
@@ -103,50 +106,42 @@ export function useCourseAttendance() {
   const entryByStudent = new Map(
     (marksQuery.data?.entries ?? []).map((entry) => [entry.studentId, entry.status]),
   );
-  const dayByStudent = new Map(
-    (marksQuery.data?.days ?? []).map((day) => [day.studentId, day.status]),
-  );
-  const othersByStudent = new Map<number, OtherSheetMark[]>();
-  for (const other of marksQuery.data?.others ?? []) {
-    const list = othersByStudent.get(other.studentId) ?? [];
-    list.push(other);
-    othersByStudent.set(other.studentId, list);
-  }
+  const days = marksQuery.data?.days ?? [];
+  const dayByStudent = new Map(days.map((day) => [day.studentId, day]));
+  const recorderIds = days.map((day) => day.recordedBy);
+  const recorderKey = [...new Set(recorderIds.filter((id): id is string => Boolean(id)))]
+    .sort()
+    .join(",");
+  const recordersQuery = useQuery({
+    queryKey: ["attendance", "recorders", organization.id, recorderKey],
+    queryFn: () => orgContactsByUserId(organization.id, recorderIds),
+    enabled: recorderKey.length > 0,
+  });
+  const recorderNames =
+    recorderKey.length === 0 || recordersQuery.isError
+      ? new Map<string, string>()
+      : recordersQuery.isSuccess
+        ? new Map(
+            [...recordersQuery.data.entries()].map(([id, contact]) => [id, contact.name]),
+          )
+        : null;
 
   const rows = students.map((student) => {
     const sheetStatus = entryByStudent.get(student.id) ?? null;
-    const dayStatus = dayByStudent.get(student.id) ?? null;
-    const others = othersByStudent.get(student.id) ?? [];
-    const summary = summarizeDay({
-      dayStatus,
-      sheets: [
-        ...(sheetStatus ? [{ status: sheetStatus, countsWhenBlank: false }] : []),
-        ...others.map((other) => ({ status: other.status, countsWhenBlank: false })),
-      ],
-    });
+    const day = dayByStudent.get(student.id);
     return {
       studentId: student.id,
       name: student.name,
       current: student.current,
       sheetStatus,
-      badge: summary.badge as DayBadgeStatus | null,
-      dayMark: summary.dayMark,
-      partialReason: summary.partialReason,
-      lines: others.map((other) => ({
-        key: `${other.kind}-${other.sheetId}`,
-        title: other.title,
-        status: other.status,
-        href:
-          other.kind === "class"
-            ? withAttendanceDate(
-                classAttendancePath(organization.slug, other.sheetId),
-                onDate,
-              )
-            : null,
-      })),
+      dayFooter: dayFooterForMark(day, recorderNames),
       canWriteSheet: canManage && (student.current || sheetStatus != null),
     };
   });
+
+  const pageCount = attendancePageCount(rows.length);
+  const safePage = clampAttendancePage(page, rows.length);
+  const pageRows = paginateAttendance(rows, safePage);
 
   function refresh() {
     return queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.all });
@@ -179,6 +174,7 @@ export function useCourseAttendance() {
 
   function setOnDate(value: string) {
     setOnDateState(value);
+    setPage(1);
     setUndo(null);
     setSearchParams(
       (prev) => {
@@ -220,6 +216,10 @@ export function useCourseAttendance() {
 
   const showMarkAll = rows.some((row) => row.canWriteSheet && row.sheetStatus !== "present");
 
+  useEffect(() => {
+    if (page !== safePage) setPage(safePage);
+  }, [page, safePage]);
+
   return {
     organization,
     courseId,
@@ -227,6 +227,13 @@ export function useCourseAttendance() {
     onDate,
     setOnDate,
     rows,
+    pageRows,
+    page: safePage,
+    pageCount,
+    rangeLabel: attendanceRangeLabel(rows.length, safePage),
+    canPrev: safePage > 1,
+    canNext: safePage < pageCount,
+    setPage,
     canView,
     canManage,
     showMarkAll,

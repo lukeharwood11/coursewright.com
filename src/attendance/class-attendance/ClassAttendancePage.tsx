@@ -2,10 +2,11 @@ import { useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ClassSectionTabs } from "@/roster/class-roster/components/ClassSectionTabs";
 import { classAttendanceHelp } from "@/attendance/model/daySummary";
+import { AttendanceDateField } from "@/attendance/sheet/components/AttendanceDateField";
 import { studentsClassesPath } from "@/grading/model/paths";
 import { Button } from "@/ui/Button";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
-import { Input } from "@/ui/Input";
+import { ListPagination } from "@/ui/ListPagination";
 import { PageLoading } from "@/ui/PageLoading";
 import { Select } from "@/ui/Select";
 import { useToastOnError } from "@/ui/useToastOnError";
@@ -65,22 +66,11 @@ export function ClassAttendancePage() {
           selected="attendance"
         />
         <div className="flex flex-wrap items-end gap-3">
-          <div className="max-w-[12rem]">
-            <label
-              className="block text-[12px] font-bold text-[var(--ink-soft)]"
-              htmlFor="class-attendance-date"
-            >
-              Date
-            </label>
-            <Input
-              id="class-attendance-date"
-              type="date"
-              value={sheet.onDate}
-              onChange={(event) => {
-                if (event.target.value) sheet.setOnDate(event.target.value);
-              }}
-            />
-          </div>
+          <AttendanceDateField
+            id="class-attendance-date"
+            value={sheet.onDate}
+            onChange={sheet.setOnDate}
+          />
           {sheet.recordingOptions.length > 1 ? (
             <label className="block min-w-[12rem]">
               <span className="block text-[12px] font-bold text-[var(--ink-soft)]">
@@ -143,15 +133,24 @@ export function ClassAttendancePage() {
             )}
           </p>
         ) : (
-          <ClassAttendanceRows
-            orgSlug={slug}
-            scope={sheet.scope}
-            scopeValue={sheet.scopeValue}
-            rows={sheet.rows}
-            pending={sheet.pending}
-            onStatus={sheet.saveOne}
-            onScope={sheet.setScope}
-          />
+          <>
+            <ClassAttendanceRows
+              orgSlug={slug}
+              scope={sheet.scope}
+              rows={sheet.pageRows}
+              pending={sheet.pending}
+              onStatus={sheet.saveOne}
+            />
+            <ListPagination
+              rangeLabel={sheet.rangeLabel}
+              page={sheet.page}
+              pageCount={sheet.pageCount}
+              canPrev={sheet.canPrev}
+              canNext={sheet.canNext}
+              onPrev={() => sheet.setPage(sheet.page - 1)}
+              onNext={() => sheet.setPage(sheet.page + 1)}
+            />
+          </>
         )}
       </div>
     </div>

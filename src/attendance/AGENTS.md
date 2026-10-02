@@ -4,7 +4,7 @@ Class sheets, course sheets, and whole-day attendance. Not a grade. Report-card 
 
 ## Scope
 
-- Class Attendance tab (`class-attendance/`) at `/classes/<class_id>/attendance` — day mark and course-sheet correct, one summary badge
+- Class Attendance tab (`class-attendance/`) at `/classes/<class_id>/attendance` — day mark and course-sheet correct; the card shows only the surface in Showing
 - Course attendance (`course-attendance/`) at `/courses/<course_id>/attendance`
 - Student history (`student-attendance/`) mounted on the student profile and Progress
 - Shared sheet controls in `sheet/`

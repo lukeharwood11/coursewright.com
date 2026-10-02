@@ -1,13 +1,14 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { coursePath, courseRosterPath } from "@/courses/model/paths";
-import { courseAttendanceHelp } from "@/attendance/model/daySummary";
-import { AttendanceGrid } from "@/attendance/sheet/components/AttendanceGrid";
+import { SHEET_STATUSES, courseAttendanceHelp } from "@/attendance/model/daySummary";
+import { AttendanceDateField } from "@/attendance/sheet/components/AttendanceDateField";
+import { AttendanceStudentList } from "@/attendance/sheet/components/AttendanceStudentList";
 import { AttendanceUndoNotice } from "@/attendance/sheet/components/AttendanceUndoNotice";
 import { studentPath } from "@/grading/model/paths";
 import { Button } from "@/ui/Button";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
-import { Input } from "@/ui/Input";
+import { ListPagination } from "@/ui/ListPagination";
 import { PageLoading } from "@/ui/PageLoading";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { useCourseAttendance } from "./hooks/useCourseAttendance";
@@ -54,19 +55,11 @@ export function CourseAttendancePage() {
       />
       <div className="space-y-4 px-5 py-4 md:px-8">
         <div className="flex flex-wrap items-end gap-3">
-          <div className="max-w-[12rem]">
-            <label className="block text-[12px] font-bold text-[var(--ink-soft)]" htmlFor="course-attendance-date">
-              Date
-            </label>
-            <Input
-              id="course-attendance-date"
-              type="date"
-              value={sheet.onDate}
-              onChange={(event) => {
-                if (event.target.value) sheet.setOnDate(event.target.value);
-              }}
-            />
-          </div>
+          <AttendanceDateField
+            id="course-attendance-date"
+            value={sheet.onDate}
+            onChange={sheet.setOnDate}
+          />
           {sheet.showMarkAll ? (
             <Button
               type="button"
@@ -100,15 +93,31 @@ export function CourseAttendancePage() {
             before taking attendance.
           </p>
         ) : (
-          <AttendanceGrid
-            sheetLabel="This course"
-            rows={sheet.rows.map((row) => ({
-              ...row,
-              profileTo: studentPath(slug, row.studentId),
-              sheetPending: sheet.pending,
-            }))}
-            onSheetStatus={sheet.saveSheet}
-          />
+          <>
+            <AttendanceStudentList
+              rows={sheet.pageRows.map((row) => ({
+                studentId: row.studentId,
+                name: row.name,
+                profileTo: studentPath(slug, row.studentId),
+                status: row.sheetStatus,
+                canWrite: row.canWriteSheet,
+                dayFooter: row.dayFooter,
+              }))}
+              options={SHEET_STATUSES}
+              pending={sheet.pending}
+              ariaLabel="Course"
+              onStatus={sheet.saveSheet}
+            />
+            <ListPagination
+              rangeLabel={sheet.rangeLabel}
+              page={sheet.page}
+              pageCount={sheet.pageCount}
+              canPrev={sheet.canPrev}
+              canNext={sheet.canNext}
+              onPrev={() => sheet.setPage(sheet.page - 1)}
+              onNext={() => sheet.setPage(sheet.page + 1)}
+            />
+          </>
         )}
       </div>
     </div>

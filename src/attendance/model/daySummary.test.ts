@@ -1,15 +1,22 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  attendancePageCount,
+  attendanceRangeLabel,
   attendanceWindow,
   canWriteClassDay,
   canWriteCourseDay,
   canWriteStudentDay,
+  clampAttendancePage,
   classAttendanceHelp,
   courseAttendanceHelp,
   dayBadge,
+  dayFooterForMark,
+  dayMarkFooter,
   mergeAttendanceGrid,
+  paginateAttendance,
   partialReasonCopy,
+  shiftIsoDate,
   studentAttendanceDays,
   summarizeDay,
 } from "./daySummary.ts";
@@ -114,6 +121,48 @@ test("observer class copy has no writer instructions", () => {
   );
   assert.match(courseAttendanceHelp(false), /can’t change/);
   assert.match(classAttendanceHelp({ canWrite: true, scope: "day" }), /Clear/);
+  assert.doesNotMatch(classAttendanceHelp({ canWrite: true, scope: "class" }), /badge/i);
+  assert.doesNotMatch(courseAttendanceHelp(true), /This course/);
+});
+
+test("previous and next day stay on the calendar", () => {
+  assert.equal(shiftIsoDate("2026-09-30", -1), "2026-09-29");
+  assert.equal(shiftIsoDate("2026-09-30", 1), "2026-10-01");
+  assert.equal(shiftIsoDate("2026-01-01", -1), "2025-12-31");
+  assert.equal(shiftIsoDate("nope", 1), null);
+});
+
+test("student list pages twenty at a time", () => {
+  const rows = Array.from({ length: 21 }, (_, index) => index);
+  assert.equal(attendancePageCount(21), 2);
+  assert.equal(paginateAttendance(rows, 1).length, 20);
+  assert.equal(paginateAttendance(rows, 2).length, 1);
+  assert.equal(attendanceRangeLabel(21, 2), "21–21 of 21 students");
+  assert.equal(attendanceRangeLabel(1, 1), "1 student");
+  assert.equal(attendanceRangeLabel(0, 1), "0 students");
+  assert.equal(clampAttendancePage(9, 21), 2);
+});
+
+test("day footer names the teacher only when a day mark exists", () => {
+  assert.equal(dayMarkFooter("Ada Lovelace", "present"), "Ada Lovelace marked Present");
+  assert.equal(dayMarkFooter(null, "excused"), "A teacher marked Excused");
+  assert.equal(dayMarkFooter("  ", "absent"), "A teacher marked Absent");
+  assert.equal(dayFooterForMark(undefined, new Map()), null);
+  assert.equal(
+    dayFooterForMark({ status: "present", recordedBy: "user-1" }, null),
+    null,
+  );
+  assert.equal(
+    dayFooterForMark(
+      { status: "present", recordedBy: "user-1" },
+      new Map([["user-1", "Quinn"]]),
+    ),
+    "Quinn marked Present",
+  );
+  assert.equal(
+    dayFooterForMark({ status: "excused", recordedBy: null }, null),
+    "A teacher marked Excused",
+  );
 });
 
 test("the date grid keeps current members and anyone already marked", () => {

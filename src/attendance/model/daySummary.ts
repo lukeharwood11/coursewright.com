@@ -115,17 +115,91 @@ export function classAttendanceHelp(input: {
     return "You’re viewing attendance for this class. You can’t change it.";
   }
   if (input.scope === "day") {
-    return "Mark the day for this class. A day mark is the summary for that student. Clear removes it.";
+    return "Mark the day for this class. Clear removes that day’s mark.";
   }
   if (input.scope === "class") {
-    return "This class sheet is separate from the day. The badge beside each name is still the one day summary.";
+    return "This class sheet is separate from the day. Clear removes the class mark.";
   }
-  return "Correct this course for students in the class. The badge beside each name is still the one day summary.";
+  return "Mark the course you chose. Clear removes that course mark. A day note, when one is set, stays on the card.";
 }
 
 export function courseAttendanceHelp(canWrite: boolean): string {
   if (!canWrite) return "You’re viewing this course sheet. You can’t change it.";
-  return "This is the course sheet. Clear removes a mark. A day mark, when one is set, is the summary and does not change this sheet.";
+  return "Record attendance for this date. Clear removes a mark. A note at the bottom of a card is a day mark and does not change these marks.";
+}
+
+/** “Ada marked Present”, or “A teacher marked Present” when the name is unknown. */
+export function dayMarkFooter(name: string | null, status: string): string {
+  const who = name?.trim() ? name.trim() : "A teacher";
+  return `${who} marked ${attendanceStatusLabel(status)}`;
+}
+
+/**
+ * Footer for an explicit day row. Returns null when there is no day row, or
+ * when a recorder id is set and names have not loaded yet.
+ */
+export function dayFooterForMark(
+  day: { status: string; recordedBy: string | null } | undefined,
+  names: ReadonlyMap<string, string> | null,
+): string | null {
+  if (!day) return null;
+  if (day.recordedBy) {
+    if (!names) return null;
+    return dayMarkFooter(names.get(day.recordedBy) ?? null, day.status);
+  }
+  return dayMarkFooter(null, day.status);
+}
+
+export const ATTENDANCE_PAGE_SIZE = 20;
+
+export function attendancePageCount(
+  total: number,
+  pageSize = ATTENDANCE_PAGE_SIZE,
+): number {
+  if (total <= 0) return 1;
+  return Math.ceil(total / pageSize);
+}
+
+export function clampAttendancePage(
+  page: number,
+  total: number,
+  pageSize = ATTENDANCE_PAGE_SIZE,
+): number {
+  const maxPage = attendancePageCount(total, pageSize);
+  if (!Number.isFinite(page) || page < 1) return 1;
+  return Math.min(page, maxPage);
+}
+
+export function paginateAttendance<T>(
+  rows: readonly T[],
+  page: number,
+  pageSize = ATTENDANCE_PAGE_SIZE,
+): T[] {
+  const safePage = clampAttendancePage(page, rows.length, pageSize);
+  const start = (safePage - 1) * pageSize;
+  return rows.slice(start, start + pageSize);
+}
+
+export function attendanceRangeLabel(
+  total: number,
+  page: number,
+  pageSize = ATTENDANCE_PAGE_SIZE,
+): string {
+  if (total === 0) return "0 students";
+  const safePage = clampAttendancePage(page, total, pageSize);
+  const start = (safePage - 1) * pageSize + 1;
+  const end = Math.min(safePage * pageSize, total);
+  const noun = total === 1 ? "student" : "students";
+  if (start === end && total === 1) return `1 ${noun}`;
+  return `${start}–${end} of ${total} ${noun}`;
+}
+
+/** Shift a calendar date by whole days. Null when `iso` is not a real date. */
+export function shiftIsoDate(iso: string, days: number): string | null {
+  const date = parseIsoDate(iso);
+  if (!date) return null;
+  date.setDate(date.getDate() + days);
+  return isoDate(date);
 }
 
 export function mergeAttendanceGrid(
