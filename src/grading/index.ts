@@ -1,5 +1,7 @@
 export { GradingSection } from "./org-grading/components/GradingSection";
 export { CourseGradebookPage } from "./course-gradebook/CourseGradebookPage";
+export { PeriodFeedbackPage } from "./period-feedback/PeriodFeedbackPage";
+export { StudentPeriodFeedbackSection } from "./period-feedback/components/StudentPeriodFeedbackSection";
 export { FillCyclePage } from "./fill-cycles/FillCyclePage";
 export { FillCyclesPage } from "./fill-cycles/FillCyclesPage";
 export { ProgressPage } from "./progress/ProgressPage";

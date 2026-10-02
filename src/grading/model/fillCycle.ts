@@ -54,6 +54,7 @@ export function validateFillCycleDraft(input: {
   requireGrades: boolean;
   requireAttendance: boolean;
   requireOutcomes: boolean;
+  requirePeriodFeedback: boolean;
 }): string | null {
   const label = input.label.trim().replace(/\s+/g, " ");
   if (!label) return "Name this fill cycle.";
@@ -65,7 +66,12 @@ export function validateFillCycleDraft(input: {
   if (input.audience === "courses" && input.courseIds.length === 0) {
     return "Choose at least one course.";
   }
-  if (!input.requireGrades && !input.requireAttendance && !input.requireOutcomes) {
+  if (
+    !input.requireGrades &&
+    !input.requireAttendance &&
+    !input.requireOutcomes &&
+    !input.requirePeriodFeedback
+  ) {
     return "Choose at least one package.";
   }
   return null;

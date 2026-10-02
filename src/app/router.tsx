@@ -19,6 +19,7 @@ import {
   CourseGradebookPage,
   FillCyclePage,
   FillCyclesPage,
+  PeriodFeedbackPage,
   ProgressPage,
   ReportCardPage,
 } from "@/grading";
@@ -145,6 +146,14 @@ export function AppRoutes() {
               element={
                 <RequireStaff>
                   <CourseOutcomesPage />
+                </RequireStaff>
+              }
+            />
+            <Route
+              path="courses/:courseId/period-feedback"
+              element={
+                <RequireStaff>
+                  <PeriodFeedbackPage />
                 </RequireStaff>
               }
             />

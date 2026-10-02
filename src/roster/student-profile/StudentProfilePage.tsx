@@ -12,6 +12,7 @@ import { staffCanEdit } from "@/app/layouts/model/viewMode";
 import { studentsHubTier } from "@/grading/model/access";
 import { progressPath, studentsPath } from "@/grading/model/paths";
 import { StudentAttendanceSection } from "@/attendance";
+import { StudentPeriodFeedbackSection } from "@/grading/period-feedback/components/StudentPeriodFeedbackSection";
 import { StudentOutcomesSection } from "@/outcomes";
 import { StudentGradesSection } from "@/grading";
 import { newAnnouncementPath } from "@/announcements/model/paths";
@@ -132,6 +133,7 @@ export function StudentProfilePage() {
       <div className="space-y-6 px-5 pt-4 pb-6 md:px-8">
       <StudentGradesSection studentId={profile.student.id} />
       <StudentOutcomesSection studentId={profile.student.id} />
+      <StudentPeriodFeedbackSection studentId={profile.student.id} />
       <StudentAttendanceSection studentId={profile.student.id} />
       {canEdit ? (
       <>

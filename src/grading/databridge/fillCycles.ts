@@ -219,6 +219,7 @@ export async function createFillCycle(input: {
   requireGrades: boolean;
   requireAttendance: boolean;
   requireOutcomes: boolean;
+  requirePeriodFeedback: boolean;
 }): Promise<number> {
   const db = requireSupabase();
   const { data, error } = await db
@@ -231,7 +232,7 @@ export async function createFillCycle(input: {
       require_grades: input.requireGrades,
       require_attendance: input.requireAttendance,
       require_outcomes: input.requireOutcomes,
-      require_period_feedback: false,
+      require_period_feedback: input.requirePeriodFeedback,
     })
     .select("id")
     .single();

@@ -10,6 +10,7 @@ Org grading: one scale, derived labels, course finals, and report-card workflow.
 - Report card draft and submit (`report-card/`)
 - Student detail grades (`student-grades/`)
 - Fill cycles (`fill-cycles/`) — package checkpoints, home to-dos, manual reminders. Not templates or send
+- Period feedback (`period-feedback/`) — comments per course, student, and cycle. Not outcome ratings
 
 ## Rules
 

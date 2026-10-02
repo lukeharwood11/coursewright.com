@@ -31,6 +31,7 @@ export function FillCyclesPage() {
   const [requireGrades, setRequireGrades] = useState(true);
   const [requireAttendance, setRequireAttendance] = useState(true);
   const [requireOutcomes, setRequireOutcomes] = useState(true);
+  const [requirePeriodFeedback, setRequirePeriodFeedback] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export function FillCyclesPage() {
         requireGrades,
         requireAttendance,
         requireOutcomes,
+        requirePeriodFeedback,
       }),
     onSuccess: async (cycleId) => {
       await queryClient.invalidateQueries({
@@ -81,6 +83,7 @@ export function FillCyclesPage() {
       requireGrades,
       requireAttendance,
       requireOutcomes,
+      requirePeriodFeedback,
     });
     setFormError(message);
     if (message) return;
@@ -93,7 +96,7 @@ export function FillCyclesPage() {
         backTo={`/my/${organization.slug}`}
         backLabel="Back to overview"
         title="Fill cycles"
-        description="A fill cycle asks staff to submit grades, attendance, and outcomes before a soft due date. Closing it stops new submits. It does not send report cards."
+        description="A fill cycle asks staff to submit grades, attendance, outcomes, and period feedback before a soft due date. Closing it stops new submits. It does not send report cards."
       />
       <div className="space-y-8 px-5 py-6 md:px-8">
         <section aria-label="Cycles">
@@ -192,9 +195,14 @@ export function FillCyclesPage() {
                 onChange={setRequireAttendance}
               />
               <PackageToggle label="Outcomes" checked={requireOutcomes} onChange={setRequireOutcomes} />
+              <PackageToggle
+                label="Period feedback"
+                checked={requirePeriodFeedback}
+                onChange={setRequirePeriodFeedback}
+              />
               <p className="text-[13px] text-[var(--ink-soft)]">
-                Outcomes are skipped for a course that has none. Period feedback stays off until that
-                piece is turned on.
+                Outcomes are skipped for a course that has none. Period feedback is a comment for each
+                student, separate from outcomes.
               </p>
             </fieldset>
             {formError ? <p className="text-[14px] text-[var(--amber-deep)]">{formError}</p> : null}

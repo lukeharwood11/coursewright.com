@@ -41,6 +41,7 @@ test("drafts require a name, a date, and an audience pick", () => {
       requireGrades: true,
       requireAttendance: true,
       requireOutcomes: true,
+      requirePeriodFeedback: false,
     }),
     "Name this fill cycle.",
   );
@@ -54,6 +55,7 @@ test("drafts require a name, a date, and an audience pick", () => {
       requireGrades: true,
       requireAttendance: false,
       requireOutcomes: false,
+      requirePeriodFeedback: false,
     }),
     "Choose at least one course.",
   );
@@ -67,6 +69,7 @@ test("drafts require a name, a date, and an audience pick", () => {
       requireGrades: false,
       requireAttendance: false,
       requireOutcomes: false,
+      requirePeriodFeedback: false,
     }),
     "Choose at least one package.",
   );
@@ -138,6 +141,7 @@ test("a valid org draft is accepted", () => {
       requireGrades: true,
       requireAttendance: true,
       requireOutcomes: true,
+      requirePeriodFeedback: true,
     }),
     null,
   );

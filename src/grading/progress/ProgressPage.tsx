@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { StudentAttendanceSection } from "@/attendance";
+import { StudentPeriodFeedbackSection } from "@/grading/period-feedback/components/StudentPeriodFeedbackSection";
 import { StudentOutcomesSection } from "@/outcomes";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { PageLoading } from "@/ui/PageLoading";
@@ -106,6 +107,7 @@ export function ProgressPage() {
 
       <StudentAttendanceSection studentId={progress.student.id} />
       <StudentOutcomesSection studentId={progress.student.id} />
+      <StudentPeriodFeedbackSection studentId={progress.student.id} />
 
       <section>
         <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Grades</h2>
