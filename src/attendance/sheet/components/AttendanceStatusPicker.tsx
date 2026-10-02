@@ -15,8 +15,7 @@ export function AttendanceStatusPicker<T extends string>({
 }) {
   return (
     <div>
-      <p className="text-[12px] font-bold text-[var(--ink-soft)]">{label}</p>
-      <div className="mt-1 flex flex-wrap gap-1.5" role="group" aria-label={label}>
+      <div className="flex flex-wrap gap-1.5" role="group" aria-label={label}>
         {options.map((option) => {
           const selected = value === option;
           const name = attendanceStatusLabel(option);

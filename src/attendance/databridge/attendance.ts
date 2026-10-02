@@ -27,6 +27,7 @@ export type NamedSheetStatus = {
 export type DayMark = {
   studentId: number;
   status: DayStatus;
+  recordedBy: string | null;
 };
 
 export type OtherSheetMark = {
@@ -156,7 +157,7 @@ async function loadDateContext(input: {
 
   const daysQuery = db
     .from("attendance_days")
-    .select("student_profile_id, status")
+    .select("student_profile_id, status, recorded_by")
     .eq("on_date", input.onDate)
     .in("student_profile_id", input.studentIds);
 
@@ -191,7 +192,11 @@ async function loadDateContext(input: {
   for (const row of daysResult.data ?? []) {
     const status = parseDayStatus(row.status);
     if (!status) continue;
-    days.push({ studentId: row.student_profile_id, status });
+    days.push({
+      studentId: row.student_profile_id,
+      status,
+      recordedBy: row.recorded_by,
+    });
   }
 
   const others: OtherSheetMark[] = [];
