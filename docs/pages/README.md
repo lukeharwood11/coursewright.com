@@ -50,6 +50,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [COURSE_GRADEBOOK](./COURSE_GRADEBOOK.md) | `/my/<org-slug>/courses/<course_id>/gradebook` |
 | [COURSE_ATTENDANCE](./COURSE_ATTENDANCE.md) | `/my/<org-slug>/courses/<course_id>/attendance` |
 | [COURSE_OUTCOMES](./COURSE_OUTCOMES.md) | `/my/<org-slug>/courses/<course_id>/outcomes` |
+| [COURSE_OUTCOME_RATINGS](./COURSE_OUTCOME_RATINGS.md) | `/my/<org-slug>/courses/<course_id>/outcomes/ratings` |
 | [ORG_ROSTER](./ORG_ROSTER.md) | `/my/<org-slug>/students` (`?tab=classes`; `/roster` redirects) |
 | [STUDENT_PROFILE](./STUDENT_PROFILE.md) | `/my/<org-slug>/students/<student_id>` |
 | [PROGRESS](./PROGRESS.md) | `/my/<org-slug>/progress` |

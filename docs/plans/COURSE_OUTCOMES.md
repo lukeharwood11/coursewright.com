@@ -1,6 +1,6 @@
 # Course outcomes — learning goals and ratings
 
-**Status:** in progress — org rating options and course outcomes/criteria CRUD (US-81). Matrix and package submit next.  
+**Status:** in progress — US-81 config and US-82 matrix / package / Progress read are in the app. Fill-cycle id on the package is still null until US-83.  
 **Prerequisite for:** [REPORT_CARDS.md](./REPORT_CARDS.md) (optional template section)  
 **Domains:** new `src/outcomes/` (or under `src/courses/` + org settings) · courses · grading report cards  
 **Migrations:** TBD (experiment mode)

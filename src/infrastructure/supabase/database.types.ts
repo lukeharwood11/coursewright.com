@@ -778,6 +778,153 @@ export type Database = {
           },
         ]
       }
+      course_outcome_packages: {
+        Row: {
+          course_id: number
+          created_at: string
+          fill_cycle_id: number | null
+          id: number
+          organization_id: number
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          course_id: number
+          created_at?: string
+          fill_cycle_id?: number | null
+          id?: number
+          organization_id: number
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          course_id?: number
+          created_at?: string
+          fill_cycle_id?: number | null
+          id?: number
+          organization_id?: number
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_outcome_packages_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_outcome_packages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_outcome_packages_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_outcome_ratings: {
+        Row: {
+          course_id: number
+          created_at: string
+          criterion_id: number | null
+          fill_cycle_id: number | null
+          id: number
+          organization_id: number
+          outcome_id: number
+          rated_at: string
+          rated_by: string | null
+          rating_option_id: number | null
+          student_profile_id: number
+          updated_at: string
+        }
+        Insert: {
+          course_id: number
+          created_at?: string
+          criterion_id?: number | null
+          fill_cycle_id?: number | null
+          id?: number
+          organization_id: number
+          outcome_id: number
+          rated_at?: string
+          rated_by?: string | null
+          rating_option_id?: number | null
+          student_profile_id: number
+          updated_at?: string
+        }
+        Update: {
+          course_id?: number
+          created_at?: string
+          criterion_id?: number | null
+          fill_cycle_id?: number | null
+          id?: number
+          organization_id?: number
+          outcome_id?: number
+          rated_at?: string
+          rated_by?: string | null
+          rating_option_id?: number | null
+          student_profile_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_outcome_ratings_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_outcome_ratings_criterion_id_fkey"
+            columns: ["criterion_id"]
+            isOneToOne: false
+            referencedRelation: "course_outcome_criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_outcome_ratings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_outcome_ratings_outcome_id_fkey"
+            columns: ["outcome_id"]
+            isOneToOne: false
+            referencedRelation: "course_outcomes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_outcome_ratings_rated_by_fkey"
+            columns: ["rated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_outcome_ratings_rating_option_id_fkey"
+            columns: ["rating_option_id"]
+            isOneToOne: false
+            referencedRelation: "outcome_rating_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_outcome_ratings_student_profile_id_fkey"
+            columns: ["student_profile_id"]
+            isOneToOne: false
+            referencedRelation: "org_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_resource_links: {
         Row: {
           course_id: number

@@ -690,6 +690,45 @@ Optional measurable part of a course outcome. When any exist, later ratings targ
 
 **Who can SELECT / write:** same as the parent outcome.
 
+### CourseOutcomeRating
+
+One teacher pick for a student on an outcome, or on a criterion when that outcome has criteria. Not a gradebook score.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization. Must match the course |
+| course_id | bigint | FK → Course |
+| student_profile_id | bigint | FK → StudentProfile. Must have an enrollment on the course |
+| fill_cycle_id | bigint | nullable until a fill cycle is attached. Null is the course working set |
+| outcome_id | bigint | FK → CourseOutcome |
+| criterion_id | bigint | FK → CourseOutcomeCriterion, null when the outcome has no criteria |
+| rating_option_id | bigint | FK → OutcomeRatingOption, null = unset (row is deleted from the app) |
+| rated_by | uuid | FK → User. Trigger sets `auth.uid()` |
+| rated_at / created_at / updated_at | timestamptz | |
+| unique | (course_id, student_profile_id, outcome_id, criterion_id, fill_cycle_id) | Nulls compare equal |
+
+**Who can SELECT:** `can_browse_course`, or a linked parent / the student **after** a matching package is submitted.
+
+**Who can write:** `can_manage_course`.
+
+### CourseOutcomePackage
+
+Checkpoint that a teacher submitted outcomes for a course (and later a fill cycle). Blank ratings are allowed. Submitting again refreshes `submitted_at`.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| course_id | bigint | FK → Course |
+| fill_cycle_id | bigint | nullable. Null is the course working package |
+| submitted_by | uuid | FK → User. Trigger sets `auth.uid()` |
+| submitted_at | timestamptz | Trigger sets `now()` on insert and update |
+| created_at | timestamptz | |
+| unique | (course_id, fill_cycle_id) | Nulls compare equal |
+
+**Who can SELECT / write:** `can_browse_course` reads. `can_manage_course` writes.
+
 ### Course
 
 | Field | Type | Notes |

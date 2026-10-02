@@ -94,6 +94,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - [COURSE_GRADEBOOK](./COURSE_GRADEBOOK.md) — staff who can edit the course
 - [COURSE_ATTENDANCE](./COURSE_ATTENDANCE.md) — staff attendance sheet
 - [COURSE_OUTCOMES](./COURSE_OUTCOMES.md) — outcomes and criteria for this course
+- [COURSE_OUTCOME_RATINGS](./COURSE_OUTCOME_RATINGS.md) — rate students and submit the outcomes package
 - [COURSE_SETTINGS](./COURSE_SETTINGS.md) — course settings
 - [COURSE_LIST](./COURSE_LIST.md) — after create-from-course lands on new course / list
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD

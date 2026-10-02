@@ -43,6 +43,7 @@ Define what students should be able to do by the end of this course, and optiona
 ## Links to
 
 - [COURSE](./COURSE.md) — back to the course
+- [COURSE_OUTCOME_RATINGS](./COURSE_OUTCOME_RATINGS.md) — rate students (from the course sidebar)
 - [ORG_SETTINGS](./ORG_SETTINGS.md) — Outcomes tab for rating words (owners and admins)
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
