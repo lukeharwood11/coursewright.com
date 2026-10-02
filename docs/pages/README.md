@@ -49,6 +49,7 @@ Behavior source of truth: [FEATURES.md](../FEATURES.md).
 | [PRINT](./PRINT.md) | `…/materials/<id>/print`; `…/units/<id>/print`; `…/quizzes/<id>/print`; `/my/<org-slug>/print-this-week`; `…/resources/items/<id>/print`; `…/resources/print?items=` |
 | [COURSE_GRADEBOOK](./COURSE_GRADEBOOK.md) | `/my/<org-slug>/courses/<course_id>/gradebook` |
 | [COURSE_ATTENDANCE](./COURSE_ATTENDANCE.md) | `/my/<org-slug>/courses/<course_id>/attendance` |
+| [COURSE_OUTCOMES](./COURSE_OUTCOMES.md) | `/my/<org-slug>/courses/<course_id>/outcomes` |
 | [ORG_ROSTER](./ORG_ROSTER.md) | `/my/<org-slug>/students` (`?tab=classes`; `/roster` redirects) |
 | [STUDENT_PROFILE](./STUDENT_PROFILE.md) | `/my/<org-slug>/students/<student_id>` |
 | [PROGRESS](./PROGRESS.md) | `/my/<org-slug>/progress` |

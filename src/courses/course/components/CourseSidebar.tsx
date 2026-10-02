@@ -2,6 +2,7 @@ import { ButtonLink } from "@/ui/Button";
 import { UserCard } from "@/organizations/user-card/UserCard";
 import { Avatar } from "@/ui/Avatar";
 import { courseAttendancePath } from "@/attendance/model/paths";
+import { courseOutcomesPath } from "@/outcomes/model/paths";
 import { courseRosterPath } from "@/courses/model/paths";
 import { gradebookPath } from "@/grading/model/paths";
 import type { CourseInstructor } from "@/courses/databridge/courses";
@@ -70,6 +71,15 @@ export function CourseSidebar({
               fullWidth
             >
               Attendance
+            </ButtonLink>
+          ) : null}
+          {showAttendance ? (
+            <ButtonLink
+              variant="secondary"
+              to={courseOutcomesPath(orgSlug, courseId)}
+              fullWidth
+            >
+              Outcomes
             </ButtonLink>
           ) : null}
           {canEdit ? (

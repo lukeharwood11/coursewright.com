@@ -639,6 +639,57 @@ Same shape as a class entry, with `course_id` instead of `class_id`.
 
 **SELECT:** same as AttendanceDay.
 
+### OutcomeRatingOption
+
+Org-defined label teachers pick when rating a course outcome. Separate from the grading scale.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization |
+| label | text | 1–80 characters after trim. Unique per org, case-insensitive |
+| sort_order | integer | |
+| is_active | boolean | false hides the label from new ratings |
+| created_at / updated_at | timestamptz | |
+
+New organizations are seeded with N/A, Not mastered, In progress, Mastered.
+
+**Who can SELECT:** any active org member.
+
+**Who can write:** owners and admins.
+
+### CourseOutcome
+
+Per-course learning goal. Not period feedback and not a gradebook score.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK → Organization. Must match the course |
+| course_id | bigint | FK → Course. Cannot change after insert |
+| statement | text | 1–500 characters after trim |
+| sort_order | integer | |
+| archived_at | timestamptz | null = active |
+| created_at / updated_at | timestamptz | |
+
+**Who can SELECT:** `can_browse_course`, a parent who can view the course, or a student who can view the course.
+
+**Who can write:** `can_manage_course`.
+
+### CourseOutcomeCriterion
+
+Optional measurable part of a course outcome. When any exist, later ratings target each criterion. When none exist, later ratings target the outcome.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| outcome_id | bigint | FK → CourseOutcome. Cannot change after insert |
+| statement | text | 1–500 characters after trim |
+| sort_order | integer | |
+| created_at / updated_at | timestamptz | |
+
+**Who can SELECT / write:** same as the parent outcome.
+
 ### Course
 
 | Field | Type | Notes |

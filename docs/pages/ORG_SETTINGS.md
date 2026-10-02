@@ -9,7 +9,7 @@ Org **owners** and **admins** (can edit). Instructors may view read-only. Parent
 
 ## Purpose
 
-Configure the organization: identity, permalink, organization type, **profile** (about, address, website, contact), **school days**, grade scheme, **grading** (score scale), **branding**, **customizations**, and **collaborators** (section on this page — not a separate top-level route).
+Configure the organization: identity, permalink, organization type, **profile** (about, address, website, contact), **school days**, grade scheme, **grading** (score scale), **outcomes** (rating words), **branding**, **customizations**, and **collaborators** (section on this page — not a separate top-level route).
 
 
 ## Behavior
@@ -31,6 +31,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 - Profile: **about**, **address**, **website**, **contact email**, **phone** (optional)
 - **School days** (Sun–Sat toggles; default Mon–Fri)
 - Current **grade scheme** and labels (None, K–12 preset, or custom)
+- Outcome **rating options**: label, order, active (owners and admins edit)
 - Collaborators list: person **name** / **contact email** from `org_profiles` (account name is not shown). Name opens [USER_PROFILE](./USER_PROFILE.md), where owners and admins save name and contact email (staff can save their own org name). Governing **role** (owner | admin | instructor | parent), plus a Parent or Student badge when that additive role is also on; owners and admins see change-role (and remove when allowed). Students are not listed
 - Last owner/admin rows explain why they can’t be removed or demoted
 - Pending collaborator invites: **email**, **role**, copyable `/invite/<token>` link, **Resend email**, cancel
@@ -40,7 +41,7 @@ Configure the organization: identity, permalink, organization type, **profile** 
 
 ## Contents
 
-Left **settings menu** (icons + labels) with one active panel on the right on desktop. On small screens the menu is a **Section** dropdown above the panel. Active section is reflected in `?tab=` (`organization` default / omitted; `profile`; `grading`; `branding`; `customizations`; `people`; `billing` when shown). `?tab=collaborators` redirects to **people**. Every editable panel owns its Save at the bottom of that panel. People and Billing have no Save — their actions are inline.
+Left **settings menu** (icons + labels) with one active panel on the right on desktop. On small screens the menu is a **Section** dropdown above the panel. Active section is reflected in `?tab=` (`organization` default / omitted; `profile`; `grading`; `outcomes`; `branding`; `customizations`; `people`; `billing` when shown). `?tab=collaborators` redirects to **people**. Every editable panel owns its Save at the bottom of that panel. People and Billing have no Save — their actions are inline.
 
 ### Organization
 
@@ -60,6 +61,15 @@ Owners and admins edit one org-wide score scale. Instructors see the same fields
 - Pass / fail: one inclusive percent
 - Letters: pick a **preset** (Classic A–F at 92, A/AB/B…, or A+/A/A-…), see the scale as **range chips**, and open **Customize** for a compact letter / min-% table when needed. One band must start at 0. **Save grading** writes the scale
 - Teachers consume the scale on quizzes, the gradebook, and report cards. They do not edit it
+
+### Outcomes (`?tab=outcomes`)
+
+Owners and admins edit the words teachers pick when they rate a course outcome. Instructors see the list read-only (“Only owners and admins can change rating options.”). This is not the grading scale.
+
+- Ordered labels (new orgs start with N/A, Not mastered, In progress, Mastered)
+- **Active** hides a label from new ratings without deleting it
+- Add, rename, reorder, or remove a label
+- Course outcomes and criteria are edited on [COURSE_OUTCOMES](./COURSE_OUTCOMES.md), not here
 
 ### Profile
 
@@ -116,6 +126,7 @@ Segmented **Collaborators** and **Access** tabs (same control as elsewhere in th
 - Save profile (owners and admins; disabled when unchanged)
 - Set school days / grade scheme (via Save organization)
 - Save grading (owners and admins)
+- Add, rename, reorder, hide, or remove an outcome rating (owners and admins)
 - Save, remove branding, or reset queued branding changes (owners only)
 - Save customizations (owners only)
 - Add a collaborator (name, email, role) without sending email; send email or copy the claim link later; cancel a pending invite
@@ -130,6 +141,7 @@ Segmented **Collaborators** and **Access** tabs (same control as elsewhere in th
 - [INVITE_CLAIM](./INVITE_CLAIM.md) — copied staff invite link (recipient); parent invites use the same URL from roster
 - [LOGIN](./LOGIN.md) — after sign-out (if sign-out lives in chrome)
 - [ORG_ROSTER](./ORG_ROSTER.md) — Students hub can link here on `?tab=grading`
+- [COURSE_OUTCOMES](./COURSE_OUTCOMES.md) — per-course outcomes and criteria
 - Via org chrome: [ORG_HOME](./ORG_HOME.md), [COURSE_LIST](./COURSE_LIST.md), [RESOURCES](./RESOURCES.md), [TEMPLATE_LIST](./TEMPLATE_LIST.md), [ORG_ROSTER](./ORG_ROSTER.md), [ORG_SETTINGS](./ORG_SETTINGS.md), [ORG_PICKER](./ORG_PICKER.md), [ACCOUNT_SETTINGS](./ACCOUNT_SETTINGS.md); advanced search TBD
 
 ## Notes

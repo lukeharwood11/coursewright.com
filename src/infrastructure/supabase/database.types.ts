@@ -695,6 +695,89 @@ export type Database = {
           },
         ]
       }
+      course_outcome_criteria: {
+        Row: {
+          created_at: string
+          id: number
+          outcome_id: number
+          sort_order: number
+          statement: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          outcome_id: number
+          sort_order: number
+          statement: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          outcome_id?: number
+          sort_order?: number
+          statement?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_outcome_criteria_outcome_id_fkey"
+            columns: ["outcome_id"]
+            isOneToOne: false
+            referencedRelation: "course_outcomes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_outcomes: {
+        Row: {
+          archived_at: string | null
+          course_id: number
+          created_at: string
+          id: number
+          organization_id: number
+          sort_order: number
+          statement: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          course_id: number
+          created_at?: string
+          id?: number
+          organization_id: number
+          sort_order: number
+          statement: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          course_id?: number
+          created_at?: string
+          id?: number
+          organization_id?: number
+          sort_order?: number
+          statement?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_outcomes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_outcomes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_resource_links: {
         Row: {
           course_id: number
@@ -3060,6 +3143,44 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      outcome_rating_options: {
+        Row: {
+          created_at: string
+          id: number
+          is_active: boolean
+          label: string
+          organization_id: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          is_active?: boolean
+          label: string
+          organization_id: number
+          sort_order: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          is_active?: boolean
+          label?: string
+          organization_id?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outcome_rating_options_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       parent_student_links: {
         Row: {

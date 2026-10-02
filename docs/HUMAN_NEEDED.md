@@ -22,6 +22,24 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 
 ## Open
 
+### HN-021 — Apply course-outcomes migrations on testing
+
+| | |
+|--|--|
+| **Why** | Course outcomes (US-81 and the slices that follow on this train) add tables the SPA reads. Agents must not apply them on the linked Supabase projects. |
+| **Where** | Supabase testing project. Production only when Luke chooses that tier. |
+| **Placeholder** | `supabase/migrations/20261016000000_course_outcomes.sql` (`HN-021`) |
+
+**Steps:**
+
+1. From the repo, with `SUPABASE_ACCESS_TOKEN` set, apply migrations to testing:
+   `./scripts/deploy-supabase.sh testing`
+2. Do not point this at production unless you mean to migrate production:
+   `./scripts/deploy-supabase.sh production`
+3. New organizations get rating labels N/A, Not mastered, In progress, and Mastered. Existing organizations are seeded by the same migration.
+
+**Done when:** testing lists `outcome_rating_options` for an existing org, and an owner can open Settings → Outcomes.
+
 ### HN-020 — Apply org-profile migrations on testing (and production when chosen)
 
 | | |

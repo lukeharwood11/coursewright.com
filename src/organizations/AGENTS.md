@@ -10,6 +10,7 @@ Org create, settings, grade scheme, permalink slug, admin invites, staff role ch
 - **Permalink `slug`** — generated on create; changing it must warn that existing links break
 - Grade scheme (K–12 / Custom / **None**) and organization type (other / co-op / school / family; default **other**)
 - **Grading** tab (`?tab=grading`) is the org score scale (`none` / letter / pass/fail). Owners and admins save it. It is not `grade_scheme` / `grade_labels`. UI lives in `src/grading/`
+- **Outcomes** tab (`?tab=outcomes`) is the org rating-word list for course outcomes. Owners and admins edit it. UI lives in `src/outcomes/`. It is not the grading scale
 - Optional org **profile** (about, address, website, contact email, phone) on `/my/<org-slug>/profile` for all members; owners edit via org settings
 - **School days** (default Mon–Fri) and optional **home days** (default none) — owners/admins edit via **School days / Home days** tabs in org settings; lesson-plan compose defaults to school days; calendar and lesson plans show school/home icons on matching weekdays
 - Admin invites (create the org profile first; email via Resend `organization-invite` and copyable claim link when ready)
