@@ -1,6 +1,6 @@
 # Course outcomes — learning goals and ratings
 
-**Status:** in design  
+**Status:** in progress — org rating options and course outcomes/criteria CRUD (US-81). Matrix and package submit next.  
 **Prerequisite for:** [REPORT_CARDS.md](./REPORT_CARDS.md) (optional template section)  
 **Domains:** new `src/outcomes/` (or under `src/courses/` + org settings) · courses · grading report cards  
 **Migrations:** TBD (experiment mode)
@@ -127,7 +127,7 @@ Submitted report-card snapshots keep label text from send time.
 ## Open questions
 
 1. Copy outcomes when “create course from another course”?  
-2. Soft max length on anything? (ratings are picks only)  
+2. Soft max length on anything? (ratings are picks only) — labels 80 characters, statements 500.  
 
 ## Implementation checklist
 

@@ -13,6 +13,7 @@ import { OrgLayout } from "@/app/layouts/OrgLayout";
 import { PrintLayout } from "@/app/layouts/PrintLayout";
 import { StubPage } from "@/app/StubPage";
 import { CourseListPage, CoursePage, CourseRosterPage, CourseSettingsPage } from "@/courses";
+import { CourseOutcomesPage } from "@/outcomes";
 import { ClassAttendancePage, CourseAttendancePage } from "@/attendance";
 import { CourseGradebookPage, ProgressPage, ReportCardPage } from "@/grading";
 import { CalendarPage } from "@/calendar";
@@ -133,6 +134,14 @@ export function AppRoutes() {
             />
             <Route path="courses" element={<CourseListPage />} />
             <Route path="courses/:courseId" element={<CoursePage />} />
+            <Route
+              path="courses/:courseId/outcomes"
+              element={
+                <RequireStaff>
+                  <CourseOutcomesPage />
+                </RequireStaff>
+              }
+            />
             <Route
               path="courses/:courseId/settings"
               element={

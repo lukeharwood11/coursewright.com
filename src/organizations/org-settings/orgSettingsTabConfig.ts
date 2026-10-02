@@ -3,6 +3,7 @@ import {
   AcademicCapIcon,
   AdjustmentsHorizontalIcon,
   BuildingOffice2Icon,
+  ClipboardDocumentListIcon,
   CreditCardIcon,
   IdentificationIcon,
   PaintBrushIcon,
@@ -12,6 +13,7 @@ import {
   AcademicCapIcon as AcademicCapSolidIcon,
   AdjustmentsHorizontalIcon as AdjustmentsHorizontalSolidIcon,
   BuildingOffice2Icon as BuildingOffice2SolidIcon,
+  ClipboardDocumentListIcon as ClipboardDocumentListSolidIcon,
   CreditCardIcon as CreditCardSolidIcon,
   IdentificationIcon as IdentificationSolidIcon,
   PaintBrushIcon as PaintBrushSolidIcon,
@@ -22,6 +24,7 @@ export type OrgSettingsTabId =
   | "organization"
   | "profile"
   | "grading"
+  | "outcomes"
   | "branding"
   | "customizations"
   | "people"
@@ -55,6 +58,13 @@ const ALL_TABS: OrgSettingsTabConfig[] = [
     label: "Grading",
     outline: AcademicCapIcon,
     solid: AcademicCapSolidIcon,
+  },
+  {
+    id: "outcomes",
+    label: "Outcomes",
+    outline: ClipboardDocumentListIcon,
+    solid: ClipboardDocumentListSolidIcon,
+    featureNew: true,
   },
   {
     id: "branding",

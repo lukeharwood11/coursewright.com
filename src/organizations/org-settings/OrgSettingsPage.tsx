@@ -3,6 +3,7 @@ import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { BillingPlaceholder } from "@/billing";
 import { OBSERVER_VIEW_ONLY_HINT } from "@/organizations/model/role";
 import { GradingSection } from "@/grading";
+import { RatingOptionsSection } from "@/outcomes";
 import {
   canManageBranding,
   canManageCustomizations,
@@ -160,6 +161,12 @@ export function OrgSettingsPage() {
           {activeTab === "grading" ? (
             <div role="tabpanel">
               <GradingSection />
+            </div>
+          ) : null}
+
+          {activeTab === "outcomes" ? (
+            <div role="tabpanel">
+              <RatingOptionsSection />
             </div>
           ) : null}
 

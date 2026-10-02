@@ -7,6 +7,7 @@ Course **instances**: offerings with optional dates, roster, instructors, catalo
 - Course list/detail (builder shell) — **P0**
 - Create from scratch or **from another course** (copy units/materials; Function candidate)
 - Course instructors (co-teaching)
+- Outcomes and criteria for this course live in `src/outcomes/` (`/courses/<id>/outcomes`)
 - Catalog: **description**, **location**, **subject / area**, **calendar color** (`color_key`)
 - `status = active` means the offering is running; `visibility = published` is what enrolled parents can see
 - **P1:** `template_id` live link; promote course / content → template (Function)
