@@ -68,31 +68,23 @@ export async function savePeriodFeedback(input: {
 
 export async function listFamilyPeriodFeedback(studentId: number): Promise<FamilyPeriodFeedback[]> {
   const db = requireSupabase();
-  const { data, error } = await db
-    .from("course_period_feedback")
-    .select(
-      "body, fill_cycle_id, course_id, course:courses(title), cycle:report_card_fill_cycles(label)",
-    )
-    .eq("student_profile_id", studentId);
+  // Fill-cycle rows are staff-only. Embedding them returns a null label for parents
+  // and the comment disappears. The function copies the label without that SELECT.
+  const { data, error } = await db.rpc("family_period_feedback", {
+    p_student_profile_id: studentId,
+  });
   if (error) throw new Error(error.message);
-  const rows: FamilyPeriodFeedback[] = [];
-  for (const row of (data ?? []) as {
+  return ((data ?? []) as {
     body: string;
-    fill_cycle_id: number;
     course_id: number;
-    course: { title: string } | { title: string }[] | null;
-    cycle: { label: string } | { label: string }[] | null;
-  }[]) {
-    const course = Array.isArray(row.course) ? row.course[0] : row.course;
-    const cycle = Array.isArray(row.cycle) ? row.cycle[0] : row.cycle;
-    if (!course || !cycle) continue;
-    rows.push({
-      courseId: row.course_id,
-      courseTitle: course.title,
-      cycleId: row.fill_cycle_id,
-      cycleLabel: cycle.label,
-      body: row.body,
-    });
-  }
-  return rows;
+    course_title: string;
+    fill_cycle_id: number;
+    cycle_label: string;
+  }[]).map((row) => ({
+    courseId: row.course_id,
+    courseTitle: row.course_title,
+    cycleId: row.fill_cycle_id,
+    cycleLabel: row.cycle_label,
+    body: row.body,
+  }));
 }

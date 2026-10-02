@@ -28,7 +28,7 @@ Agents: use this file whenever you need a **human / admin** to do something in a
 |--|--|
 | **Why** | Course outcomes (US-81 and the slices that follow on this train) add tables the SPA reads. Agents must not apply them on the linked Supabase projects. |
 | **Where** | Supabase testing project. Production only when Luke chooses that tier. |
-| **Placeholder** | `supabase/migrations/20261016000000_course_outcomes.sql` through `20261016000003_period_feedback.sql` (`HN-021`) |
+| **Placeholder** | `supabase/migrations/20261016000000_course_outcomes.sql` through `20261016000004_period_feedback_family_read.sql` (`HN-021`) |
 
 **Steps:**
 

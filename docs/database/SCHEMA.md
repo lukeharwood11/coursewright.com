@@ -812,6 +812,8 @@ Freeform teacher comment for one student in one course during one fill cycle. No
 
 **Who can write:** `can_manage_course`.
 
+Fill-cycle rows stay staff-only. Family and staff profile reads use `family_period_feedback`, which returns the comment plus the cycle label without opening `report_card_fill_cycles` SELECT.
+
 ### Course
 
 | Field | Type | Notes |

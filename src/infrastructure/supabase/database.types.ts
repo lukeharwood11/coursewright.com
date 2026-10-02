@@ -4731,6 +4731,16 @@ export type Database = {
         Args: { p_student_profile_id: number }
         Returns: Json
       }
+      family_period_feedback: {
+        Args: { p_student_profile_id: number }
+        Returns: {
+          body: string
+          course_id: number
+          course_title: string
+          cycle_label: string
+          fill_cycle_id: number
+        }[]
+      }
       fill_cycle_scope: {
         Args: { p_organization_id: number }
         Returns: {
