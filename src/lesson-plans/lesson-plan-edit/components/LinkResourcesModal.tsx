@@ -1,5 +1,4 @@
-import { useEffect, useId, useState } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -10,7 +9,6 @@ import {
   FolderOpenIcon,
   LinkIcon,
 } from "@heroicons/react/24/outline";
-import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import {
   dayResourceKey,
@@ -64,6 +62,9 @@ function ResourceRow({
           {node.title}
         </span>
         <AccessWarning warning={node.familyAccessWarning} />
+      {checked ? (
+        <span className="mt-0.5 block text-[12px] font-bold text-[var(--green-deep)]">Linked</span>
+      ) : null}
       </span>
     </label>
   );
@@ -133,96 +134,73 @@ function FolderBranch({
   );
 }
 
-export function LinkResourcesModal({
-  open,
-  dayLabel,
+export function LessonPlanResourcePicker({
   nodes,
   selected,
   courseHasLinks,
   loading,
   onToggle,
-  onClose,
+  autoFocus = false,
 }: {
-  open: boolean;
-  dayLabel: string;
   nodes: LessonPlanResourcePickerNode[];
   selected: LessonPlanDayResourceRef[];
   courseHasLinks: boolean;
   loading: boolean;
   onToggle: (resource: LessonPlanDayResourceRef) => void;
-  onClose: () => void;
+  autoFocus?: boolean;
 }) {
-  const titleId = useId();
   const [query, setQuery] = useState("");
   const selectedKeys = new Set(selected.map(dayResourceKey));
-
-  useEffect(() => {
-    if (!open) return;
-    setQuery("");
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-    }
-
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
-
-  if (!open) return null;
-
   const visible = filterPickerNodes(nodes, query);
   const searching = query.trim().length > 0;
 
-  return createPortal(
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-      <button
-        type="button"
-        className="absolute inset-0 bg-[var(--ink)]/30"
-        aria-label="Dismiss"
-        onClick={onClose}
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="relative flex max-h-[min(40rem,90vh)] w-full max-w-lg flex-col rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow)]"
-      >
-        <h2
-          id={titleId}
-          className="text-[20px] font-semibold text-[var(--ink)]"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Link resources
-        </h2>
-        <p className="mt-1 text-[13.5px] text-[var(--ink-soft)]">
-          Choose resources for {dayLabel}. Only resources this course already links, including
-          what’s inside a linked folder. Linking one here doesn’t share it.
-        </p>
-        <label className="mt-4 flex flex-col gap-1">
-          <span className="text-[12.5px] font-bold text-[var(--ink-soft)]">Search</span>
-          <Input
-            className="w-full"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Filter by name or folder…"
-            aria-label="Filter resources"
-            autoFocus
-          />
-        </label>
-        <div className="mt-3 min-h-0 flex-1 overflow-y-auto rounded-[8px] border border-[var(--line-soft)] bg-[var(--paper)] p-2">
-          {loading ? (
-            <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">Loading…</p>
-          ) : !courseHasLinks ? (
-            <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">
-              Link a resource on this course first.
-            </p>
-          ) : visible.length === 0 ? (
-            <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">
-              No resources match that search.
-            </p>
-          ) : searching ? (
-            <ul className="flex flex-col gap-0.5" aria-label="Course resources">
-              {visible.map((node) => (
+  return (
+    <>
+      <label className="mt-4 flex flex-col gap-1">
+        <span className="text-[12.5px] font-bold text-[var(--ink-soft)]">Search</span>
+        <Input
+          className="w-full"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Filter by name or folder…"
+          aria-label="Filter resources"
+          autoFocus={autoFocus}
+        />
+      </label>
+      <div className="mt-3 min-h-0 flex-1 overflow-y-auto rounded-[8px] border border-[var(--line-soft)] bg-[var(--paper)] p-2">
+        {loading ? (
+          <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">Loading…</p>
+        ) : !courseHasLinks ? (
+          <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">
+            Link a resource on this course first.
+          </p>
+        ) : visible.length === 0 ? (
+          <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">
+            No resources match that search.
+          </p>
+        ) : searching ? (
+          <ul className="flex flex-col gap-0.5" aria-label="Course resources">
+            {visible.map((node) => (
+              <li key={dayResourceKey(node)}>
+                <ResourceRow
+                  node={node}
+                  checked={selectedKeys.has(dayResourceKey(node))}
+                  onToggle={onToggle}
+                />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <ul className="flex flex-col gap-0.5" aria-label="Course resources">
+            {visible.map((node) =>
+              node.kind === "folder" ? (
+                <FolderBranch
+                  key={dayResourceKey(node)}
+                  node={node}
+                  selected={selectedKeys}
+                  onToggle={onToggle}
+                />
+              ) : (
                 <li key={dayResourceKey(node)}>
                   <ResourceRow
                     node={node}
@@ -230,41 +208,11 @@ export function LinkResourcesModal({
                     onToggle={onToggle}
                   />
                 </li>
-              ))}
-            </ul>
-          ) : (
-            <ul className="flex flex-col gap-0.5" aria-label="Course resources">
-              {visible.map((node) =>
-                node.kind === "folder" ? (
-                  <FolderBranch
-                    key={dayResourceKey(node)}
-                    node={node}
-                    selected={selectedKeys}
-                    onToggle={onToggle}
-                  />
-                ) : (
-                  <li key={dayResourceKey(node)}>
-                    <ResourceRow
-                      node={node}
-                      checked={selectedKeys.has(dayResourceKey(node))}
-                      onToggle={onToggle}
-                    />
-                  </li>
-                ),
-              )}
-            </ul>
-          )}
-        </div>
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[12.5px] text-[var(--ink-faint)]">
-            {selected.length === 0 ? "None selected" : `${selected.length} selected`}
-          </p>
-          <Button type="button" onClick={onClose}>
-            Done
-          </Button>
-        </div>
+              ),
+            )}
+          </ul>
+        )}
       </div>
-    </div>,
-    document.body,
+    </>
   );
 }

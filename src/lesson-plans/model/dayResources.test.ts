@@ -7,6 +7,7 @@ import {
   filterPickerNodes,
   lessonPlanDayResourceInserts,
   lessonPlanDayResourcesFromEmbeds,
+  linkedContentSummary,
   toggleDayResource,
 } from "./dayResources.ts";
 
@@ -275,4 +276,10 @@ test("picker is course links plus descendants, and search stays in that set", ()
     ["Week 1", "Nested sheet"],
   );
   assert.deepEqual(filterPickerNodes(nodes, "other"), []);
+});
+
+test("linked content summary counts materials and resources separately", () => {
+  assert.equal(linkedContentSummary(0, 0), "None selected");
+  assert.equal(linkedContentSummary(1, 0), "1 material");
+  assert.equal(linkedContentSummary(2, 1), "2 materials, 1 resource");
 });

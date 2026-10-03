@@ -1,5 +1,4 @@
-import { useEffect, useId, useState } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -9,7 +8,6 @@ import {
   FolderOpenIcon,
   LinkIcon,
 } from "@heroicons/react/24/outline";
-import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import {
   filterPickerGroups,
@@ -108,46 +106,29 @@ function MaterialRow({
             Unpublished
           </span>
         ) : null}
+        {checked ? (
+          <span className="block text-[12px] font-bold text-[var(--green-deep)]">Linked</span>
+        ) : null}
       </span>
     </label>
   );
 }
 
-export function LinkMaterialsModal({
-  open,
-  dayLabel,
+export function LessonPlanMaterialPicker({
   materials,
   units,
   selectedIds,
   onToggle,
-  onClose,
+  autoFocus = false,
 }: {
-  open: boolean;
-  dayLabel: string;
   materials: MaterialRecord[];
   units: UnitRecord[];
   selectedIds: number[];
   onToggle: (materialId: number) => void;
-  onClose: () => void;
+  autoFocus?: boolean;
 }) {
-  const titleId = useId();
   const [query, setQuery] = useState("");
   const selected = new Set(selectedIds);
-
-  useEffect(() => {
-    if (!open) return;
-    setQuery("");
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-    }
-
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
-
-  if (!open) return null;
-
   const groups = filterPickerGroups(
     groupMaterialsForPicker(
       materials.map((material) => ({
@@ -162,88 +143,54 @@ export function LinkMaterialsModal({
     query,
   );
 
-  return createPortal(
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-      <button
-        type="button"
-        className="absolute inset-0 bg-[var(--ink)]/30"
-        aria-label="Dismiss"
-        onClick={onClose}
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="relative flex max-h-[min(40rem,90vh)] w-full max-w-lg flex-col rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow)]"
-      >
-        <h2
-          id={titleId}
-          className="text-[20px] font-semibold text-[var(--ink)]"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Link materials
-        </h2>
-        <p className="mt-1 text-[13.5px] text-[var(--ink-soft)]">
-          Choose materials for {dayLabel}. Families only see published ones.
-        </p>
-        <label className="mt-4 flex flex-col gap-1">
-          <span className="text-[12.5px] font-bold text-[var(--ink-soft)]">Search</span>
-          <Input
-            className="w-full"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Filter by material or unit…"
-            aria-label="Filter materials"
-            autoFocus
-          />
-        </label>
-        <div className="mt-3 min-h-0 flex-1 overflow-y-auto rounded-[8px] border border-[var(--line-soft)] bg-[var(--paper)] p-2">
-          {materials.length === 0 ? (
-            <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">
-              Add materials to this course first.
-            </p>
-          ) : groups.length === 0 ? (
-            <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">
-              No materials match that search.
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-0.5" aria-label="Course outline">
-              {groups.map((group) =>
-                group.unitTitle == null ? (
-                  group.materials.map((material) => (
-                    <li key={material.id}>
-                      <MaterialRow
-                        material={material}
-                        checked={selected.has(material.id)}
-                        onToggle={onToggle}
-                      />
-                    </li>
-                  ))
-                ) : (
-                  <UnitBranch
-                    key={group.unitId}
-                    unitTitle={group.unitTitle}
-                    materials={group.materials}
-                    selected={selected}
-                    onToggle={onToggle}
-                  />
-                ),
-              )}
-            </ul>
-          )}
-        </div>
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[12.5px] text-[var(--ink-faint)]">
-            {selectedIds.length === 0
-              ? "None selected"
-              : `${selectedIds.length} selected`}
+  return (
+    <>
+      <label className="mt-4 flex flex-col gap-1">
+        <span className="text-[12.5px] font-bold text-[var(--ink-soft)]">Search</span>
+        <Input
+          className="w-full"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Filter by material or unit…"
+          aria-label="Filter materials"
+          autoFocus={autoFocus}
+        />
+      </label>
+      <div className="mt-3 min-h-0 flex-1 overflow-y-auto rounded-[8px] border border-[var(--line-soft)] bg-[var(--paper)] p-2">
+        {materials.length === 0 ? (
+          <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">
+            Add materials to this course first.
           </p>
-          <Button type="button" onClick={onClose}>
-            Done
-          </Button>
-        </div>
+        ) : groups.length === 0 ? (
+          <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">
+            No materials match that search.
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-0.5" aria-label="Course outline">
+            {groups.map((group) =>
+              group.unitTitle == null ? (
+                group.materials.map((material) => (
+                  <li key={material.id}>
+                    <MaterialRow
+                      material={material}
+                      checked={selected.has(material.id)}
+                      onToggle={onToggle}
+                    />
+                  </li>
+                ))
+              ) : (
+                <UnitBranch
+                  key={group.unitId}
+                  unitTitle={group.unitTitle}
+                  materials={group.materials}
+                  selected={selected}
+                  onToggle={onToggle}
+                />
+              ),
+            )}
+          </ul>
+        )}
       </div>
-    </div>,
-    document.body,
+    </>
   );
 }

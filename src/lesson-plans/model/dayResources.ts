@@ -448,3 +448,18 @@ export function catalogFromPicker(
     familyAccessWarning: node.familyAccessWarning,
   }));
 }
+
+export const LESSON_PLAN_CONTENT_LINK_PANES = ["materials", "resources"] as const;
+export type LessonPlanContentLinkPane = (typeof LESSON_PLAN_CONTENT_LINK_PANES)[number];
+
+export function linkedContentSummary(materialCount: number, resourceCount: number): string {
+  if (materialCount === 0 && resourceCount === 0) return "None selected";
+  const parts: string[] = [];
+  if (materialCount > 0) {
+    parts.push(materialCount === 1 ? "1 material" : `${materialCount} materials`);
+  }
+  if (resourceCount > 0) {
+    parts.push(resourceCount === 1 ? "1 resource" : `${resourceCount} resources`);
+  }
+  return parts.join(", ");
+}

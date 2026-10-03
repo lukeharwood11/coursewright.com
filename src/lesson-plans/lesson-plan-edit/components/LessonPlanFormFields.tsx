@@ -24,8 +24,7 @@ import {
   type LessonPlanResourcePickerNode,
 } from "@/lesson-plans/model/dayResources";
 import { AddDayModal } from "./AddDayModal";
-import { LinkMaterialsModal } from "./LinkMaterialsModal";
-import { LinkResourcesModal } from "./LinkResourcesModal";
+import { LinkContentModal } from "./LinkContentModal";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -79,7 +78,6 @@ export function LessonPlanFormFields({
 }) {
   const [addDayOpen, setAddDayOpen] = useState(false);
   const [linkDay, setLinkDay] = useState<string | null>(null);
-  const [resourceDay, setResourceDay] = useState<string | null>(null);
   const materialsById = new Map(materials.map((material) => [material.id, material]));
   const resourcesByKey = new Map(
     resourceCatalog.map((resource) => [dayResourceKey(resource), resource]),
@@ -89,7 +87,6 @@ export function LessonPlanFormFields({
     days.map((day) => day.date),
   );
   const linkDayDraft = days.find((day) => day.date === linkDay) ?? null;
-  const resourceDayDraft = days.find((day) => day.date === resourceDay) ?? null;
 
   return (
     <>
@@ -203,16 +200,6 @@ export function LessonPlanFormFields({
                   No materials linked yet.
                 </p>
               )}
-              <Button
-                type="button"
-                variant="ghost"
-                fullWidth
-                className="mt-2"
-                onClick={() => setLinkDay(day.date)}
-              >
-                <PlusIcon className="h-4 w-4" aria-hidden />
-                Link materials
-              </Button>
               <div className="my-3 border-t border-[var(--line)]" />
               <p className="text-[12px] font-bold text-[var(--ink-soft)]">Resources</p>
               {day.resources.length > 0 ? (
@@ -257,10 +244,10 @@ export function LessonPlanFormFields({
                 variant="ghost"
                 fullWidth
                 className="mt-2"
-                onClick={() => setResourceDay(day.date)}
+                onClick={() => setLinkDay(day.date)}
               >
                 <PlusIcon className="h-4 w-4" aria-hidden />
-                Link resources
+                Link content
               </Button>
             </section>
           );
@@ -281,28 +268,23 @@ export function LessonPlanFormFields({
         onSelect={onAddDay}
         onClose={() => setAddDayOpen(false)}
       />
-      <LinkMaterialsModal
+      <LinkContentModal
         open={linkDay != null}
         dayLabel={linkDay ? weekdayDateLabel(linkDay) : ""}
         materials={materials}
         units={units}
-        selectedIds={linkDayDraft?.materialIds ?? []}
-        onToggle={(materialId) => {
+        selectedMaterialIds={linkDayDraft?.materialIds ?? []}
+        onToggleMaterial={(materialId) => {
           if (linkDay) onToggleMaterial(linkDay, materialId);
         }}
-        onClose={() => setLinkDay(null)}
-      />
-      <LinkResourcesModal
-        open={resourceDay != null}
-        dayLabel={resourceDay ? weekdayDateLabel(resourceDay) : ""}
-        nodes={resourceNodes}
-        selected={resourceDayDraft?.resources ?? []}
-        courseHasLinks={courseHasResourceLinks}
-        loading={resourcesLoading}
-        onToggle={(resource) => {
-          if (resourceDay) onToggleResource(resourceDay, resource);
+        resourceNodes={resourceNodes}
+        selectedResources={linkDayDraft?.resources ?? []}
+        courseHasResourceLinks={courseHasResourceLinks}
+        resourcesLoading={resourcesLoading}
+        onToggleResource={(resource) => {
+          if (linkDay) onToggleResource(linkDay, resource);
         }}
-        onClose={() => setResourceDay(null)}
+        onClose={() => setLinkDay(null)}
       />
     </>
   );

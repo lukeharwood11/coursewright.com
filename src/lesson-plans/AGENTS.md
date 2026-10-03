@@ -7,7 +7,7 @@ Weekly course **lesson plans**: a Sunday–Saturday week note, optional per-day 
 - Course list of lesson plans + **Add lesson plan**
 - Create / edit / view / publish / soft-delete
 - Parent This week and Calendar show **published** plans
-- View page wraps days that have a plan (empty days omitted); materials sit with that day’s text after a divider. The compose form defaults to the org’s **school days**; staff can **Add another day** via a modal of remaining weekdays. Days with notes or materials stay visible even if they are not school days. Per-day materials use **Link materials** (outline multi-select with search). Per-day resources use **Link resources**, which only lists Resources the course already links.
+- View page wraps days that have a plan (empty days omitted); materials sit with that day’s text after a divider. The compose form defaults to the org’s **school days**; staff can **Add another day** via a modal of remaining weekdays. Days with notes, materials, or resources stay visible even if they are not school days. Per day, **Link content** opens one popup that switches between the course outline and Resources the course already links.
 
 ## Rules
 
