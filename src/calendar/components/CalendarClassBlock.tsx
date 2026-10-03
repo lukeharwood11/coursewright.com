@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { courseColorCssVar } from "@/courses/model/courseColor";
 import { lessonPlanPath } from "@/lesson-plans/model/paths";
-import { resourceFolderPath, resourceItemPath } from "@/resources/model/paths";
 import type { WeekClassCard } from "@/calendar/model/events";
 import { chipKind, MaterialChip } from "./MaterialChip";
 
@@ -42,24 +41,6 @@ export function CalendarClassBlock({
         <p className="mt-1 whitespace-pre-wrap text-[12.5px] leading-relaxed text-[var(--ink)]">
           {card.body}
         </p>
-      ) : null}
-      {card.resources.length > 0 ? (
-        <ul className="relative z-10 mt-2 flex flex-col gap-1">
-          {card.resources.map((resource) => (
-            <li key={`${resource.kind}:${resource.id}`}>
-              <Link
-                to={
-                  resource.kind === "folder"
-                    ? resourceFolderPath(orgSlug, resource.id)
-                    : resourceItemPath(orgSlug, resource.id)
-                }
-                className="block truncate text-[12.5px] font-semibold text-[var(--ink)]"
-              >
-                {resource.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
       ) : null}
       {card.materials.length > 0 ? (
         <>

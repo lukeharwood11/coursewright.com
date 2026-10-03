@@ -516,11 +516,6 @@ async function loadPublishedLessonPlansForCourses(
           title: material.title,
           unitId: material.unitId,
         })),
-        resources: day.resources.map((resource) => ({
-          kind: resource.kind,
-          id: resource.id,
-          title: resource.title,
-        })),
       })),
     }));
 }

@@ -41,11 +41,6 @@ export function lessonPlansToDays(plans: LessonPlanDetail[]): CalendarLessonPlan
           assigned: false,
           due: false,
         })),
-      resources: day.resources.map((resource) => ({
-        kind: resource.kind,
-        id: resource.id,
-        title: resource.title,
-      })),
     })),
   );
 }

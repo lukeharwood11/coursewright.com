@@ -17,7 +17,7 @@ import {
 import { CourseSidebar } from "./components/CourseSidebar";
 import { CourseEventsSection } from "./components/CourseEventsSection";
 import { CourseLessonPlansSection } from "./components/CourseLessonPlansSection";
-import { CourseResourceLinksSection } from "./components/CourseResourceLinksSection";
+import { CourseLinkResourceButton } from "./components/CourseLinkResourceButton";
 import { useCourseEvents } from "./hooks/useCourseEvents";
 import { UnitCard } from "./components/UnitCard";
 import { useCourse } from "./hooks/useCourse";
@@ -261,12 +261,12 @@ export function CoursePage() {
             ) : null}
           </section>
 
-          <CourseResourceLinksSection
-            orgSlug={organization.slug}
-            organizationId={organization.id}
-            courseId={course.id}
-            canEdit={canEdit}
-          />
+          {canEdit && !units.some((unit) => unit.isResources) ? (
+            <CourseLinkResourceButton
+              organizationId={organization.id}
+              courseId={course.id}
+            />
+          ) : null}
         </div>
         <CourseSidebar
           orgSlug={organization.slug}

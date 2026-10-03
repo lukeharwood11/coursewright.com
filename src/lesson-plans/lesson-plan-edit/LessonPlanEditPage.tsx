@@ -112,11 +112,6 @@ export function LessonPlanEditPage() {
           onWeekStart={page.setWeekStart}
           onDayBody={page.setDayBody}
           onToggleMaterial={page.toggleDayMaterial}
-          onToggleResource={page.toggleDayResource}
-          resourceCatalog={page.resourceCatalog}
-          resourceNodes={page.resourceNodes}
-          courseHasResourceLinks={page.courseHasResourceLinks}
-          resourcesLoading={page.resourcesLoading}
           onAddDay={page.addDay}
           dayPreset={page.dayPreset}
           onDayPreset={page.setDayPreset}

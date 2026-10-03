@@ -2,9 +2,11 @@ import {
   ClipboardDocumentListIcon,
   DocumentIcon,
   DocumentTextIcon,
+  EyeIcon,
+  FolderIcon,
   LinkIcon,
+  PrinterIcon,
 } from "@heroicons/react/24/outline";
-import { PrinterIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { Badge } from "@/ui/Badge";
 import { ButtonLink } from "@/ui/Button";
@@ -31,6 +33,8 @@ export function MaterialRow({
   dueDate,
   importantNow,
   visibility,
+  href: hrefOverride,
+  familyAccessWarning = null,
   fromUnitPage = false,
   as: Root = "li",
   className,
@@ -48,14 +52,24 @@ export function MaterialRow({
   dueDate?: string | null;
   importantNow: boolean;
   visibility: MaterialVisibility;
+  /** Resource rows open the org library instead of the material editor. */
+  href?: string;
+  /** Staff-only family-access hint. Shown as an eye icon, not a paragraph. */
+  familyAccessWarning?: string | null;
   /** Use `div` when already inside an outer `<li>` (e.g. unit reorder row). */
   as?: "li" | "div";
   className?: string;
 }) {
-  const href = materialPath({ orgSlug, courseId, unitId, materialId });
+  const href = hrefOverride ?? materialPath({ orgSlug, courseId, unitId, materialId });
   const printHref = materialPrintPath({ orgSlug, courseId, unitId, materialId });
   const KindIcon =
-    kind === "link" ? LinkIcon : kind === "file" ? DocumentIcon : DocumentTextIcon;
+    kind === "link"
+      ? LinkIcon
+      : kind === "file"
+        ? DocumentIcon
+        : kind === "resource"
+          ? FolderIcon
+          : DocumentTextIcon;
   const Icon = workType === "assignment" ? ClipboardDocumentListIcon : KindIcon;
 
   return (
@@ -70,7 +84,7 @@ export function MaterialRow({
       <Icon className="h-5 w-5 shrink-0 text-[var(--ink-faint)]" aria-hidden />
       <Link
         to={href}
-        state={materialLocationState(fromUnitPage)}
+        state={hrefOverride ? undefined : materialLocationState(fromUnitPage)}
         className="min-w-0 flex-1"
       >
         <span className="block truncate text-[14px] font-semibold text-[var(--ink)]">
@@ -107,14 +121,26 @@ export function MaterialRow({
           ) : null}
         </span>
       </Link>
-      <ButtonLink
-        variant="secondary"
-        to={printHref}
-        className="shrink-0 px-2.5 py-1.5 text-[12px]"
-      >
-        <PrinterIcon className="h-4 w-4" aria-hidden />
-        Print
-      </ButtonLink>
+      {familyAccessWarning ? (
+        <span
+          role="img"
+          title={familyAccessWarning}
+          aria-label={familyAccessWarning}
+          className="inline-flex shrink-0 text-[var(--ink-faint)]"
+        >
+          <EyeIcon className="h-4 w-4" aria-hidden />
+        </span>
+      ) : null}
+      {kind === "resource" ? null : (
+        <ButtonLink
+          variant="secondary"
+          to={printHref}
+          className="shrink-0 px-2.5 py-1.5 text-[12px]"
+        >
+          <PrinterIcon className="h-4 w-4" aria-hidden />
+          Print
+        </ButtonLink>
+      )}
     </Root>
   );
 }

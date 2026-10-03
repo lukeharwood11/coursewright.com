@@ -9,6 +9,7 @@ export type UnitRecord = {
   position: number;
   startDate: string | null;
   endDate: string | null;
+  isResources: boolean;
   deletedAt: string | null;
 };
 
@@ -19,7 +20,7 @@ export const unitQueryKeys = {
 };
 
 const UNIT_COLUMNS =
-  "id, organization_id, course_id, title, position, start_date, end_date, deleted_at";
+  "id, organization_id, course_id, title, position, start_date, end_date, is_resources, deleted_at";
 
 type UnitRow = {
   id: number;
@@ -29,6 +30,7 @@ type UnitRow = {
   position: number;
   start_date: string | null;
   end_date: string | null;
+  is_resources: boolean;
   deleted_at: string | null;
 };
 
@@ -42,6 +44,7 @@ function toUnit(row: UnitRow): UnitRecord | null {
     position: row.position,
     startDate: row.start_date,
     endDate: row.end_date,
+    isResources: row.is_resources,
     deletedAt: row.deleted_at,
   };
 }
@@ -144,4 +147,48 @@ export async function restoreUnit(id: number): Promise<void> {
     .update({ deleted_at: null })
     .eq("id", id);
   if (error) throw new Error(error.message);
+}
+
+function isUniqueViolation(error: { code?: string; message?: string }): boolean {
+  return (
+    error.code === "23505" ||
+    (error.message ?? "").toLowerCase().includes("duplicate")
+  );
+}
+
+/** Live Resources unit for the course, creating it again when it was removed. */
+export async function ensureResourcesUnit(
+  organizationId: number,
+  courseId: number,
+): Promise<UnitRecord> {
+  const units = await listUnitsForCourse(courseId);
+  const existing = units.find((unit) => unit.isResources);
+  if (existing) return existing;
+
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("units")
+    .insert({
+      organization_id: organizationId,
+      course_id: courseId,
+      title: "Resources",
+      start_date: null,
+      end_date: null,
+      position: nextPosition(units.map((row) => row.position)),
+      is_resources: true,
+    })
+    .select(UNIT_COLUMNS)
+    .maybeSingle();
+
+  if (error) {
+    if (isUniqueViolation(error)) {
+      const again = await listUnitsForCourse(courseId);
+      const raced = again.find((unit) => unit.isResources);
+      if (raced) return raced;
+    }
+    throw new Error(error.message);
+  }
+  const unit = data ? toUnit(data) : null;
+  if (!unit) throw new Error("The Resources unit was created but couldn’t be opened yet.");
+  return unit;
 }

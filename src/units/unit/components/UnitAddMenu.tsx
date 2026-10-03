@@ -4,9 +4,12 @@ import {
   ClipboardDocumentCheckIcon,
   ClipboardDocumentListIcon,
   DocumentTextIcon,
+  FolderIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { AnchoredPopup } from "@/ui/AnchoredPopup";
+import { LinkResourceDialog } from "@/courses/course/components/LinkResourceDialog";
+import { useCreateResourceMaterial } from "@/materials/material/hooks/useCreateResourceMaterial";
 import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm";
 import { AddQuizForm } from "@/quizzes/quiz/components/AddQuizForm";
 
@@ -24,23 +27,35 @@ const menuItemClass =
 
 type AddMode = "material" | "assignment" | "quiz";
 
+const EMPTY_IDS = new Set<number>();
+
 export function UnitAddMenu({
   organizationId,
   orgSlug,
   courseId,
   unitId,
+  isResources = false,
+  linkedFolderIds,
+  linkedItemIds,
   fromUnitPage = false,
 }: {
   organizationId: number;
   orgSlug: string;
   courseId: number;
   unitId: number;
+  isResources?: boolean;
+  linkedFolderIds?: Set<number>;
+  linkedItemIds?: Set<number>;
   fromUnitPage?: boolean;
 }) {
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [linkOpen, setLinkOpen] = useState(false);
   const [mode, setMode] = useState<AddMode | null>(null);
+  const linkResource = useCreateResourceMaterial({ organizationId, courseId });
+  const folderIds = linkedFolderIds ?? EMPTY_IDS;
+  const itemIds = linkedItemIds ?? EMPTY_IDS;
 
   function choose(next: AddMode) {
     setMenuOpen(false);
@@ -137,8 +152,37 @@ export function UnitAddMenu({
             </span>
             Quiz
           </button>
+          {isResources ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={menuItemClass}
+              onClick={() => {
+                setMenuOpen(false);
+                setLinkOpen(true);
+              }}
+            >
+              <span className="text-[var(--ink-soft)]" aria-hidden>
+                <FolderIcon className="h-4 w-4" />
+              </span>
+              Link resource
+            </button>
+          ) : null}
         </div>
       </AnchoredPopup>
+      {isResources ? (
+        <LinkResourceDialog
+          open={linkOpen}
+          organizationId={organizationId}
+          linkedFolderIds={folderIds}
+          linkedItemIds={itemIds}
+          onClose={() => setLinkOpen(false)}
+          onLinkFolder={(folderId) => linkResource.mutate({ folderId })}
+          onLinkItem={(itemId) => linkResource.mutate({ itemId })}
+          pending={linkResource.isPending}
+          error={linkResource.error?.message ?? null}
+        />
+      ) : null}
     </div>
   );
 }

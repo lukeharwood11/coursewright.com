@@ -1,9 +1,12 @@
+import { useMemo } from "react";
 import { ChevronDownIcon, PrinterIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { ButtonLink } from "@/ui/Button";
 import { DragHandle, type DragHandleProps } from "@/ui/DragHandle";
 import { formatDateRange } from "@/courses/model/dates";
 import type { MaterialRecord } from "@/materials/databridge/materials";
+import { useResourceMaterialAccessWarnings } from "@/materials/material/hooks/useResourceMaterialAccessWarnings";
+import { resourceMaterialTargetSets } from "@/materials/model/resourceMaterial";
 import type { QuizRecord } from "@/quizzes/databridge/quizzes";
 import type { OutlineItem } from "@/quizzes/model/outline";
 import { UnitAddMenu } from "@/units/unit/components/UnitAddMenu";
@@ -48,6 +51,15 @@ export function UnitCard({
   onOutlineReorder: (ordered: OutlineItem[]) => void;
 }) {
   const dates = formatDateRange(unit.startDate, unit.endDate);
+  const { folderIds, itemIds } = useMemo(
+    () => resourceMaterialTargetSets(materials),
+    [materials],
+  );
+  const familyAccessWarnings = useResourceMaterialAccessWarnings({
+    organizationId,
+    materials,
+    enabled: canEdit,
+  });
   const href = unitPath(orgSlug, unit.courseId, unit.id);
   const printHref = unitPrintPath(orgSlug, unit.courseId, unit.id);
   const hasOutline = materials.length > 0 || quizzes.length > 0;
@@ -107,6 +119,7 @@ export function UnitCard({
                 attemptByQuizId={attemptByQuizId}
                 importantIds={importantIds}
                 canEdit={canEdit}
+                familyAccessWarnings={familyAccessWarnings}
                 onReorder={onOutlineReorder}
               />
             </div>
@@ -122,6 +135,9 @@ export function UnitCard({
                 orgSlug={orgSlug}
                 courseId={unit.courseId}
                 unitId={unit.id}
+                isResources={unit.isResources}
+                linkedFolderIds={folderIds}
+                linkedItemIds={itemIds}
               />
             </div>
           ) : null}

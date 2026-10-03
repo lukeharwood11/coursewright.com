@@ -510,75 +510,6 @@ export type Database = {
           },
         ]
       }
-      course_resource_links: {
-        Row: {
-          course_id: number
-          created_at: string
-          created_by: string | null
-          folder_id: number | null
-          id: number
-          item_id: number | null
-          organization_id: number
-          sort_order: number
-        }
-        Insert: {
-          course_id: number
-          created_at?: string
-          created_by?: string | null
-          folder_id?: number | null
-          id?: number
-          item_id?: number | null
-          organization_id: number
-          sort_order?: number
-        }
-        Update: {
-          course_id?: number
-          created_at?: string
-          created_by?: string | null
-          folder_id?: number | null
-          id?: number
-          item_id?: number | null
-          organization_id?: number
-          sort_order?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_resource_links_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_resource_links_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_resource_links_folder_id_fkey"
-            columns: ["folder_id"]
-            isOneToOne: false
-            referencedRelation: "org_resource_folders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_resource_links_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "org_resource_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_resource_links_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       course_templates: {
         Row: {
           created_at: string
@@ -1645,55 +1576,6 @@ export type Database = {
           },
         ]
       }
-      lesson_plan_day_resources: {
-        Row: {
-          created_at: string
-          folder_id: number | null
-          id: number
-          item_id: number | null
-          lesson_plan_day_id: number
-          position: number
-        }
-        Insert: {
-          created_at?: string
-          folder_id?: number | null
-          id?: number
-          item_id?: number | null
-          lesson_plan_day_id: number
-          position?: number
-        }
-        Update: {
-          created_at?: string
-          folder_id?: number | null
-          id?: number
-          item_id?: number | null
-          lesson_plan_day_id?: number
-          position?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_plan_day_resources_folder_id_fkey"
-            columns: ["folder_id"]
-            isOneToOne: false
-            referencedRelation: "org_resource_folders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_plan_day_resources_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "org_resource_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_plan_day_resources_lesson_plan_day_id_fkey"
-            columns: ["lesson_plan_day_id"]
-            isOneToOne: false
-            referencedRelation: "lesson_plan_days"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       lesson_plan_days: {
         Row: {
           body: string
@@ -2084,6 +1966,8 @@ export type Database = {
           id: number
           is_overridden: boolean
           kind: string
+          resource_folder_id: number | null
+          resource_item_id: number | null
           organization_id: number
           points_possible: number | null
           position: number
@@ -2121,6 +2005,8 @@ export type Database = {
           id?: number
           is_overridden?: boolean
           kind: string
+          resource_folder_id?: number | null
+          resource_item_id?: number | null
           organization_id: number
           points_possible?: number | null
           position?: number
@@ -2158,6 +2044,8 @@ export type Database = {
           id?: number
           is_overridden?: boolean
           kind?: string
+          resource_folder_id?: number | null
+          resource_item_id?: number | null
           organization_id?: number
           points_possible?: number | null
           position?: number
@@ -3848,6 +3736,7 @@ export type Database = {
           end_date: string | null
           id: number
           is_overridden: boolean
+          is_resources: boolean
           organization_id: number
           position: number
           search_vector: unknown
@@ -3865,6 +3754,7 @@ export type Database = {
           end_date?: string | null
           id?: number
           is_overridden?: boolean
+          is_resources?: boolean
           organization_id: number
           position?: number
           search_vector?: unknown
@@ -3882,6 +3772,7 @@ export type Database = {
           end_date?: string | null
           id?: number
           is_overridden?: boolean
+          is_resources?: boolean
           organization_id?: number
           position?: number
           search_vector?: unknown

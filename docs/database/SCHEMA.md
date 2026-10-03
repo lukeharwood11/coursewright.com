@@ -31,7 +31,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | TemplateAccess | `template_access` | **P1** product — table exists |
 | CourseInstructor | `course_instructors` | |
 | Unit | `units` | |
-| Material | `materials` | page · link · file; `unit_id` nullable (top-level) |
+| Material | `materials` | page · link · file · resource; `unit_id` nullable (top-level) |
 | Block | `blocks` | Ordered content on a page material (`rich_text` · `video`; quiz lives as a Lexical node in rich-text `body.lexical`) |
 | MaterialVersion | `material_versions` | |
 | MaterialSubmission | `material_submissions` | One slot per student per material. Not a quiz Submission |
@@ -44,7 +44,6 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | LessonPlan | `lesson_plans` | Weekly course plan; published / unpublished |
 | LessonPlanDay | `lesson_plan_days` | Optional note for one day in that week |
 | LessonPlanDayMaterial | `lesson_plan_day_materials` | Materials listed under a day |
-| LessonPlanDayResource | `lesson_plan_day_resources` | Course-linked org Resources listed under a day |
 | Event | `events` | One course, several classes, or the whole organization. Required location |
 | EventBlock | `event_blocks` | Lexical write-up on an event (`rich_text` · `video`). Not a course material |
 | EventMaterial | `event_materials` | Existing course materials linked from an event |
@@ -62,7 +61,6 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | OrgResourceBlock | `org_resource_blocks` | **P1a** — Lexical body on document items |
 | OrgResourceGrant | `org_resource_grants` | **P1a** — extra read/write for a person on a folder or item |
 | OrgResourceVersion | `org_resource_versions` | **P1a** — snapshot includes item row + blocks array |
-| CourseResourceLink | `course_resource_links` | Shortcut from a course to an org Resource folder or item |
 | WeeklyContent | *(not a table)* | Derived from material/unit dates + published lesson plans (Sunday–Saturday). |
 | Page quiz | `blocks` body | Lexical `quiz` node on a page. Print only. Not a material kind |
 | Quiz | `quizzes` | Course outline item. Take in the app or print. Not a material |
@@ -598,26 +596,6 @@ Owners and admins may assign an owner, admin, or instructor before that person c
 
 **Grade levels:** `text[]` of scheme values (exact grades and/or range labels). Same model on `CourseTemplate`.
 
-### CourseResourceLink
-
-Shortcut on a **course** to one org **Resource** folder or item (not a `materials` row). Families who can view the course see the links; opening the folder or item still follows org Resource ACL.
-
-| Field | Type | Notes |
-|-------|------|-------|
-| id | bigint | PK |
-| course_id | bigint | FK → Course |
-| organization_id | bigint | FK → Organization — denormalized from course for RLS |
-| folder_id | bigint | FK → OrgResourceFolder, nullable |
-| item_id | bigint | FK → OrgResourceItem, nullable |
-| sort_order | int | display order on the course page |
-| created_by | uuid | FK → User, nullable |
-
-Exactly one of `folder_id` or `item_id` is set. Target must be in the same org as the course and not archived.
-
-**Who can read:** anyone who `can_view_course` for that course.
-
-**Who can write:** `can_manage_course` (org owner/admin or instructor on that course).
-
 ### CourseTemplate
 
 | Field | Type | Notes |
@@ -655,6 +633,7 @@ Optional content grouping on a **course** (P0) or a **template** (P1). Materials
 | position | int | order |
 | copied_from_id | bigint | FK → Unit, nullable — lineage for sync |
 | is_overridden | boolean | same override rules as Material |
+| is_resources | boolean | The course **Resources** unit. One live row per course. Created undated and titled Resources. Renaming, mixing other material kinds, and deleting are allowed. Adding a resource recreates it when missing |
 | deleted_at | timestamptz | soft delete |
 | deprecated_at | timestamptz | nullable |
 
@@ -672,8 +651,10 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 | template_id | bigint | FK → CourseTemplate, nullable |
 | unit_id | bigint | FK → Unit, **nullable** — null = **course top-level** material (shown above units) |
 | title | text | **required** — all kinds |
-| description | text | **optional** — all kinds (page · link · file); short blurb for lists / parents |
-| kind | text | **v1:** `page` · `link` · `file` |
+| description | text | **optional** — all kinds (page · link · file · resource); short blurb for lists / parents |
+| kind | text | **v1:** `page` · `link` · `file` · `resource` |
+| resource_folder_id | bigint | FK → OrgResourceFolder, nullable — set only when `kind = resource`. The folder itself, not its children |
+| resource_item_id | bigint | FK → OrgResourceItem, nullable — set only when `kind = resource` |
 | work_type | text | **`material`** · **`assignment`**. Material: `scheduled_date` only; `due_date` / `due_at` / `due_timezone` null; `accept_submissions` and `gradable` false; `points_possible` null. Assignment: due date and optional submissions |
 | url | text | nullable — required when `kind = link` |
 | file_id | bigint | FK → **File**, nullable — required when `kind = file` |
@@ -704,6 +685,7 @@ Placement in a unit (course **P0** or template **P1**). **kind** chooses the sha
 | `page` | Ordered **Block** rows (no material-level body blob); plus title + description |
 | `link` | `url` (+ title + description) |
 | `file` | `file_id` → org File (+ title + description) |
+| `resource` | Exactly one of `resource_folder_id` or `resource_item_id`. `work_type = material`. Same organization. Archived or missing targets are rejected on write. Publishing this material does **not** change org-resource visibility or ACL; families open the file only when Resources already shares it |
 
 **Deprecated / migrate away:** opaque whole-page `body` jsonb; old kind values (`document`, `quiz`, …) — replace with v1 kinds + blocks for pages.
 
@@ -940,7 +922,7 @@ One calendar day inside a lesson plan.
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
-Unique `(lesson_plan_id, day_date)`. Persist only days that have body text, materials, or resource links.
+Unique `(lesson_plan_id, day_date)`. Persist only days that have body text or materials.
 
 ### LessonPlanDayMaterial
 
@@ -955,27 +937,6 @@ Join: materials listed under a lesson-plan day, ordered.
 | created_at | timestamptz | |
 
 Unique `(lesson_plan_day_id, material_id)`. Families only follow links to **published** materials (same material RLS). Attaching a material does **not** change `scheduled_date` or `due_date`. Soft-deleting a plan leaves join rows; the app path does not hard-delete lesson plans.
-
-### LessonPlanDayResource
-
-Join: an org Resource folder or item listed under a lesson-plan day, ordered. Not a course material, and not a copy of the course’s resource links.
-
-| Field | Type | Notes |
-|-------|------|-------|
-| id | bigint | PK |
-| lesson_plan_day_id | bigint | FK → LessonPlanDay |
-| folder_id | bigint | FK → OrgResourceFolder, nullable |
-| item_id | bigint | FK → OrgResourceItem, nullable |
-| position | int | order under that day, picker order |
-| created_at | timestamptz | |
-
-Exactly one of `folder_id` or `item_id` is set. Unique per day for each folder and each item.
-
-**Same-course-link rule:** the target must be in the plan’s organization, not archived, and already linked on that course — either a `course_resource_links` row for the item or folder, or the item/folder sits inside a folder the course links. Descendants of a linked folder are eligible, including a nested folder. A course link to a folder does **not** insert child rows; children are only eligible.
-
-**Who can read:** same as the lesson plan (org staff, or a parent who can view the course when the plan is published and not deleted).
-
-**Who can write:** someone who can manage the plan’s course. The on-course check is the write trigger, not a second ACL. Opening the folder or item still follows `org_resource_*` RLS. This join does not publish or share anything. The family-access warning is display-only and does not grant access.
 
 ### Event
 
@@ -1307,7 +1268,7 @@ Course / CourseTemplate.grade_levels (catalog metadata)
 Course ──< CourseInstructor >── org_profiles (user_id filled on claim)  ← many
 Course ──< ImportantNow
 Course ──< LessonPlan ──< LessonPlanDay ──< LessonPlanDayMaterial >── Material
-LessonPlanDay ──< LessonPlanDayResource >── OrgResourceFolder | OrgResourceItem
+Material(resource) ──> OrgResourceFolder | OrgResourceItem
 Organization ──< Announcement (course(s) | class(es) | student(s)) ──< AnnouncementRead >── User
 Course ──< ShareLink
 ```

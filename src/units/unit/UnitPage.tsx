@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { PrinterIcon } from "@heroicons/react/24/outline";
 import { Button, ButtonLink } from "@/ui/Button";
@@ -13,12 +13,23 @@ import { coursePath } from "@/courses/model/paths";
 import { UnitAddMenu } from "./components/UnitAddMenu";
 import { UnitOutlineList } from "./components/UnitOutlineList";
 import { unitPath, unitPrintPath } from "@/units/model/paths";
+import { useResourceMaterialAccessWarnings } from "@/materials/material/hooks/useResourceMaterialAccessWarnings";
+import { resourceMaterialTargetSets } from "@/materials/model/resourceMaterial";
 import { useUnit } from "./hooks/useUnit";
 
 const UNIT_SETTINGS_FORM_ID = "unit-settings-form";
 
 export function UnitPage() {
   const page = useUnit();
+  const resourceTargets = useMemo(
+    () => resourceMaterialTargetSets(page.materials),
+    [page.materials],
+  );
+  const familyAccessWarnings = useResourceMaterialAccessWarnings({
+    organizationId: page.organization.id,
+    materials: page.materials,
+    enabled: page.canEdit,
+  });
   const [editing, setEditing] = useState(false);
   const [confirmRemoveUnit, setConfirmRemoveUnit] = useState(false);
   const [title, setTitle] = useState("");
@@ -220,6 +231,7 @@ export function UnitPage() {
               attemptByQuizId={page.attemptByQuizId}
               importantIds={page.importantIds}
               canEdit={page.canEdit && !unit.deletedAt}
+              familyAccessWarnings={familyAccessWarnings}
               fromUnitPage
               onReorder={(ordered) => page.reorderOutline.mutate({ ordered })}
             />
@@ -236,6 +248,9 @@ export function UnitPage() {
               orgSlug={page.organization.slug}
               courseId={course.id}
               unitId={unit.id}
+              isResources={unit.isResources}
+              linkedFolderIds={resourceTargets.folderIds}
+              linkedItemIds={resourceTargets.itemIds}
               fromUnitPage
             />
           </div>

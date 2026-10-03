@@ -37,15 +37,6 @@ import {
   type LessonPlanDaysPreset,
 } from "@/lesson-plans/model/dayPreset";
 import { toggleMaterialId } from "@/lesson-plans/model/materials";
-import {
-  dayResourceKey,
-  toggleDayResource,
-  type LessonPlanDayResourceRef,
-} from "@/lesson-plans/model/dayResources";
-import {
-  resourceCatalogByKey,
-  useLessonPlanResourcePicker,
-} from "./useLessonPlanResourcePicker";
 import type { LessonPlanVisibility } from "@/lesson-plans/model/visibility";
 import { getCourse, courseQueryKeys, listCourseInstructors } from "@/courses/databridge/courses";
 import {
@@ -107,11 +98,6 @@ export function useLessonPlanEdit() {
     queryFn: () => listUnitsForCourse(courseId),
     enabled: Number.isFinite(courseId),
   });
-  const resourcePicker = useLessonPlanResourcePicker(
-    courseId,
-    organization.id,
-    Number.isFinite(courseId),
-  );
 
   const course = courseQuery.data ?? null;
   const canEdit = staffCanManageCourse({
@@ -296,26 +282,6 @@ export function useLessonPlanEdit() {
         ),
       );
     },
-    toggleDayResource: (date: string, resource: LessonPlanDayResourceRef) => {
-      setDays((current) =>
-        current.map((day) =>
-          day.date === date
-            ? { ...day, resources: toggleDayResource(day.resources, resource) }
-            : day,
-        ),
-      );
-    },
-    resourceNodes: resourcePicker.nodes,
-    resourceCatalog: (() => {
-      const saved = (loaded?.days ?? []).flatMap((day) => day.resources);
-      const byKey = resourceCatalogByKey(saved);
-      for (const record of resourcePicker.catalog) {
-        byKey.set(dayResourceKey(record), record);
-      }
-      return [...byKey.values()];
-    })(),
-    courseHasResourceLinks: resourcePicker.courseHasLinks,
-    resourcesLoading: resourcePicker.loading,
     materials: materialsQuery.data ?? [],
     units: unitsQuery.data ?? [],
     hasChanges,

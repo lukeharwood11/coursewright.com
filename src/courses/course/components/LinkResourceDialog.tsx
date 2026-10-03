@@ -28,7 +28,6 @@ import type { ResourceItemRecord } from "@/resources/databridge/items";
 import type { ResourceFolderRecord } from "@/resources/databridge/folders";
 import type { ResourceItemType } from "@/resources/model/kinds";
 import { folderPathLabel } from "@/resources/model/tree";
-import type { CourseResourceLinkRecord } from "@/courses/databridge/courseResourceLinks";
 
 function itemIcon(type: ResourceItemType) {
   if (type === "document") return DocumentTextIcon;
@@ -464,9 +463,6 @@ export function LinkResourceDialog({
           >
             Link resource
           </h2>
-          <p className="mt-1 text-[13.5px] text-[var(--ink-soft)]">
-            Choose a folder or item from your organization&apos;s Resources library.
-          </p>
         </div>
         <label className="mt-4 flex shrink-0 flex-col gap-1">
           <span className="text-[12.5px] font-bold text-[var(--ink-soft)]">
@@ -514,12 +510,3 @@ export function LinkResourceDialog({
   );
 }
 
-export function linkedResourceIdSets(links: CourseResourceLinkRecord[]) {
-  const folderIds = new Set<number>();
-  const itemIds = new Set<number>();
-  for (const link of links) {
-    if (link.folderId != null) folderIds.add(link.folderId);
-    if (link.itemId != null) itemIds.add(link.itemId);
-  }
-  return { folderIds, itemIds };
-}

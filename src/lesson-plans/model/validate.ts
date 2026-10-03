@@ -4,14 +4,12 @@ import {
   weekdayOfIsoDate,
   type SchoolDay,
 } from "@/organizations/model/schoolDays";
-import { uniqueDayResources, type LessonPlanDayResourceRef } from "./dayResources";
 import { uniqueMaterialIds } from "./materials";
 
 export type LessonPlanDayDraft = {
   date: string;
   body: string;
   materialIds: number[];
-  resources: LessonPlanDayResourceRef[];
 };
 
 export type LessonPlanDraft = {
@@ -27,7 +25,11 @@ export function defaultLessonPlanTitle(courseTitle: string): string {
 }
 
 export function emptyDaysForWeek(weekStart: string): LessonPlanDayDraft[] {
-  return weekDates(weekStart).map((date) => emptyDay(date));
+  return weekDates(weekStart).map((date) => ({
+    date,
+    body: "",
+    materialIds: [],
+  }));
 }
 
 /** Merge visible day drafts into a full Sunday–Saturday week (empty slots for hidden days). */
@@ -38,25 +40,14 @@ export function mergeDaysToFullWeek(
   const byDate = new Map(days.map((day) => [day.date, day]));
   return weekDates(weekStart).map((date) => {
     const existing = byDate.get(date);
-    return existing ? copyDay(date, existing) : emptyDay(date);
+    return existing
+      ? { date, body: existing.body, materialIds: [...existing.materialIds] }
+      : { date, body: "", materialIds: [] };
   });
 }
 
 function dayHasContent(day: LessonPlanDayDraft): boolean {
-  return day.body.trim().length > 0 || day.materialIds.length > 0 || day.resources.length > 0;
-}
-
-function emptyDay(date: string): LessonPlanDayDraft {
-  return { date, body: "", materialIds: [], resources: [] };
-}
-
-function copyDay(date: string, day: LessonPlanDayDraft): LessonPlanDayDraft {
-  return {
-    date,
-    body: day.body,
-    materialIds: [...day.materialIds],
-    resources: day.resources.map((resource) => ({ kind: resource.kind, id: resource.id })),
-  };
+  return day.body.trim().length > 0 || day.materialIds.length > 0;
 }
 
 /** Compose defaults: chosen weekdays, plus extra dates and any day that already has content. */
@@ -83,7 +74,9 @@ export function visibleDaysForWeek(
     })
     .map((date) => {
       const existing = byDate.get(date);
-      return existing ? copyDay(date, existing) : emptyDay(date);
+      return existing
+        ? { date, body: existing.body, materialIds: [...existing.materialIds] }
+        : { date, body: "", materialIds: [] };
     });
 }
 
@@ -165,7 +158,11 @@ export function remapDaysToWeek(
   }
   return weekDates(weekStart).map((date, index) => {
     const previous = byWeekday.get(index);
-    return previous ? copyDay(date, previous) : emptyDay(date);
+    return {
+      date,
+      body: previous?.body ?? "",
+      materialIds: previous?.materialIds ?? [],
+    };
   });
 }
 
@@ -175,29 +172,16 @@ export function daysToPersist(days: LessonPlanDayDraft[]): LessonPlanDayDraft[] 
       ...day,
       body: day.body.trim(),
       materialIds: uniqueMaterialIds(day.materialIds),
-      resources: uniqueDayResources(day.resources),
     }))
-    .filter(
-      (day) => day.body.length > 0 || day.materialIds.length > 0 || day.resources.length > 0,
-    );
+    .filter((day) => day.body.length > 0 || day.materialIds.length > 0);
 }
 
-/** Teacher/family view: skip days with no note, materials, or resources; keep date order. */
-export function lessonPlanDaysToShow<
-  T extends {
-    date: string;
-    body: string;
-    materials: readonly unknown[];
-    resources?: readonly unknown[];
-  },
->(days: T[]): T[] {
+/** Teacher/family view: skip days with no note and no materials; keep date order. */
+export function lessonPlanDaysToShow<T extends { date: string; body: string; materials: readonly unknown[] }>(
+  days: T[],
+): T[] {
   return days
-    .filter(
-      (day) =>
-        day.body.trim().length > 0 ||
-        day.materials.length > 0 ||
-        (day.resources?.length ?? 0) > 0,
-    )
+    .filter((day) => day.body.trim().length > 0 || day.materials.length > 0)
     .slice()
     .sort((a, b) => a.date.localeCompare(b.date));
 }

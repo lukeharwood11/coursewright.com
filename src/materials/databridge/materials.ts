@@ -1,6 +1,9 @@
 import type { Json } from "@/infrastructure/supabase/database.types";
 import { requireSupabase } from "./client";
 import { nextPosition } from "@/units/model/order";
+import { ensureResourcesUnit } from "@/units/databridge/units";
+import { getResourceFolder } from "@/resources/databridge/folders";
+import { getResourceItem } from "@/resources/databridge/items";
 import { parseMaterialKind, type MaterialKind } from "@/materials/model/kind";
 import {
   parseMaterialWorkType,
@@ -23,6 +26,8 @@ export type MaterialRecord = {
   workType: MaterialWorkType;
   url: string | null;
   fileId: number | null;
+  resourceFolderId: number | null;
+  resourceItemId: number | null;
   scheduledDate: string | null;
   dueDate: string | null;
   dueAt: string | null;
@@ -48,7 +53,7 @@ export const materialQueryKeys = {
 };
 
 const MATERIAL_COLUMNS =
-  "id, organization_id, course_id, unit_id, title, description, kind, work_type, url, file_id, scheduled_date, due_date, due_at, due_timezone, accept_submissions, allow_submissions_past_due, gradable, points_possible, submission_limit, submission_file_types, position, current_version, visibility, deleted_at";
+  "id, organization_id, course_id, unit_id, title, description, kind, work_type, url, file_id, resource_folder_id, resource_item_id, scheduled_date, due_date, due_at, due_timezone, accept_submissions, allow_submissions_past_due, gradable, points_possible, submission_limit, submission_file_types, position, current_version, visibility, deleted_at";
 
 type MaterialRow = {
   id: number;
@@ -61,6 +66,8 @@ type MaterialRow = {
   work_type: string;
   url: string | null;
   file_id: number | null;
+  resource_folder_id: number | null;
+  resource_item_id: number | null;
   scheduled_date: string | null;
   due_date: string | null;
   due_at: string | null;
@@ -92,6 +99,8 @@ function toMaterial(row: MaterialRow): MaterialRecord | null {
     workType,
     url: row.url,
     fileId: row.file_id,
+    resourceFolderId: row.resource_folder_id,
+    resourceItemId: row.resource_item_id,
     scheduledDate: row.scheduled_date,
     dueDate: row.due_date,
     dueAt: row.due_at,
@@ -197,6 +206,74 @@ export async function createMaterial(args: {
   if (error) throw new Error(error.message);
   const material = data ? toMaterial(data) : null;
   if (!material) throw new Error("The material was created but couldn’t be opened yet.");
+  return material;
+}
+
+
+function isUniqueViolation(error: { code?: string; message?: string }): boolean {
+  return (
+    error.code === "23505" ||
+    (error.message ?? "").toLowerCase().includes("duplicate")
+  );
+}
+
+/** Link one org folder or item as a material on the course Resources unit. */
+export async function createResourceMaterial(args: {
+  organizationId: number;
+  courseId: number;
+  folderId?: number | null;
+  itemId?: number | null;
+}): Promise<MaterialRecord> {
+  const folderId = args.folderId ?? null;
+  const itemId = args.itemId ?? null;
+  if ((folderId == null) === (itemId == null)) {
+    throw new Error("Choose a folder or a resource.");
+  }
+
+  const unit = await ensureResourcesUnit(args.organizationId, args.courseId);
+
+  let title = "Resource";
+  if (folderId != null) {
+    const folder = await getResourceFolder(folderId);
+    if (!folder || folder.archivedAt || folder.organizationId !== args.organizationId) {
+      throw new Error("That folder isn’t available.");
+    }
+    title = folder.name;
+  } else if (itemId != null) {
+    const item = await getResourceItem(itemId);
+    if (!item || item.archivedAt || item.organizationId !== args.organizationId) {
+      throw new Error("That resource isn’t available.");
+    }
+    title = item.title;
+  }
+
+  const siblings = await listMaterialsForUnit(unit.id);
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("materials")
+    .insert({
+      organization_id: args.organizationId,
+      course_id: args.courseId,
+      unit_id: unit.id,
+      title,
+      description: "",
+      kind: "resource",
+      work_type: "material",
+      resource_folder_id: folderId,
+      resource_item_id: itemId,
+      position: nextPosition(siblings.map((row) => row.position)),
+    })
+    .select(MATERIAL_COLUMNS)
+    .maybeSingle();
+
+  if (error) {
+    if (isUniqueViolation(error)) {
+      throw new Error("That resource is already on this course.");
+    }
+    throw new Error(error.message);
+  }
+  const material = data ? toMaterial(data) : null;
+  if (!material) throw new Error("The resource was linked but couldn’t be opened yet.");
   return material;
 }
 
