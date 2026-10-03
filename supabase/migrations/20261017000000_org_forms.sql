@@ -420,11 +420,11 @@ with check ((select private.can_edit_org_resource_item(item_id)));
 create policy org_form_submissions_select on public.org_form_submissions
 for select to authenticated
 using (
-  submitted_by = (select auth.uid())
+  org_form_submissions.submitted_by = (select auth.uid())
   or exists (
     select 1
     from public.org_forms f
-    where f.id = form_id
+    where f.id = org_form_submissions.form_id
       and (select private.can_edit_org_resource_item(f.item_id))
   )
 );
@@ -432,13 +432,13 @@ using (
 create policy org_form_submissions_insert on public.org_form_submissions
 for insert to authenticated
 with check (
-  submitted_by = (select auth.uid())
+  org_form_submissions.submitted_by = (select auth.uid())
   and exists (
     select 1
     from public.org_forms f
     join public.org_resource_items i on i.id = f.item_id
-    where f.id = form_id
-      and f.organization_id = organization_id
+    where f.id = org_form_submissions.form_id
+      and f.organization_id = org_form_submissions.organization_id
       and i.archived_at is null
       and i.visibility = 'published'
       and i.type = 'form'
