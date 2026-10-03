@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import type { CSSProperties } from "react";
 import type { TooltipRenderProps } from "react-joyride";
-import { primaryButtonName } from "@/tours/model/steps";
+import { primaryButtonName, type PrimaryControl } from "@/tours/model/steps";
 import { TourAdvanceContext, TourLaterContext } from "./tourAdvance";
 
 const tooltipStyle: CSSProperties = {
@@ -45,19 +45,20 @@ const nextStyle: CSSProperties = {
   padding: "8px 14px",
 };
 
-function showsNext(data: unknown): boolean {
-  if (!data || typeof data !== "object") return true;
-  return (data as { showNext?: boolean }).showNext !== false;
+function readPrimary(data: unknown): PrimaryControl | null {
+  if (!data || typeof data !== "object") return null;
+  const primary = (data as { primary?: unknown }).primary;
+  if (primary === "next" || primary === "done") return primary;
+  return null;
 }
 
-/** Renders the tooltip only. Next, skip, and close are handled by the tour hook. */
+/** Renders the tooltip only. Next, Done, skip, and close are handled by the tour hook. */
 export function ProductTourTooltip(props: TooltipRenderProps) {
   const advance = useContext(TourAdvanceContext);
   const later = useContext(TourLaterContext);
-  const { closeProps, index, isLastStep, primaryProps, skipProps, size, step, tooltipProps } =
-    props;
-  const showNext = showsNext(step.data);
-  const primaryLabel = primaryButtonName(isLastStep);
+  const { closeProps, index, primaryProps, skipProps, size, step, tooltipProps } = props;
+  const primary = readPrimary(step.data);
+  const primaryLabel = primary ? primaryButtonName(primary) : null;
 
   return (
     <div {...tooltipProps} style={tooltipStyle}>
@@ -88,7 +89,7 @@ export function ProductTourTooltip(props: TooltipRenderProps) {
             Skip
           </button>
         </div>
-        {showNext ? (
+        {primaryLabel ? (
           <button
             type="button"
             {...primaryProps}

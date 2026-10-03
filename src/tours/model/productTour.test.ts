@@ -9,7 +9,7 @@ import {
   locationMatches,
   orgSlugFromPath,
 } from "./location.ts";
-import { decideStep, primaryButtonName, shouldAdvanceFromAction, stepsForTour } from "./steps.ts";
+import { decideStep, primaryButtonName, primaryControl, shouldAdvanceFromAction, stepsForTour } from "./steps.ts";
 import { tourLaterKey, tourSessionKey } from "./sessionStep.ts";
 
 const unseen = new Set<string>();
@@ -334,7 +334,40 @@ test("next stays only on point-out steps, including everything after the first m
   assert.equal(shouldAdvanceFromAction(save, { kind: "anchor-click" }), true);
   assert.equal(shouldAdvanceFromAction(invite, { kind: "anchor-click" }), false);
   assert.equal(shouldAdvanceFromAction(invite, { kind: "anchor-submit" }), true);
-  assert.equal(primaryButtonName(false), "Next");
-  assert.equal(primaryButtonName(true), "Done");
-  assert.notEqual(primaryButtonName(false), "Close");
+  assert.equal(primaryButtonName("next"), "Next");
+  assert.equal(primaryButtonName("done"), "Done");
+  assert.notEqual(primaryButtonName("next"), "Close");
+  assert.notEqual(primaryButtonName("done"), "Next");
+});
+
+test("the last point-out says Done, and a disabled click does not add Done mid-tour", () => {
+  const owner = stepsForTour(TOUR_KEYS.ownerSetup, { orgSlug: "coop", courseId: null });
+  const course = stepsForTour(TOUR_KEYS.firstCourse, { orgSlug: "coop", courseId: null });
+  const plan = stepsForTour(TOUR_KEYS.lessonPlan, { orgSlug: "coop", courseId: 9 });
+  const labels = (steps: typeof owner) =>
+    steps.map((step, index) =>
+      primaryControl(step, { isLastStep: index === steps.length - 1 }),
+    );
+  assert.deepEqual(labels(owner), ["next", "next", null, "next", null]);
+  assert.deepEqual(labels(course), [null, null, null, null, "done"]);
+  assert.deepEqual(labels(plan), ["next", "next", "next", "done"]);
+  const save = owner[2];
+  const publish = course[4];
+  const preview = plan[3];
+  assert.ok(save && publish && preview);
+  assert.equal(publish.title, "Share it when you want");
+  assert.equal(preview.title, "Preview as a family");
+  assert.equal(primaryButtonName("done"), "Done");
+  assert.equal(
+    primaryControl(save, { isLastStep: false, targetAvailable: false }),
+    null,
+  );
+  assert.equal(
+    primaryControl(save, { isLastStep: true, targetAvailable: false }),
+    "done",
+  );
+  assert.equal(
+    primaryControl(save, { isLastStep: true, targetAvailable: true }),
+    null,
+  );
 });

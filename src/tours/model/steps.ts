@@ -219,7 +219,27 @@ export function shouldAdvanceFromAction(step: TourStep, action: TourAction): boo
   }
 }
 
-/** Visible label and accessible name for a Next button that remains. */
-export function primaryButtonName(isLastStep: boolean): "Next" | "Done" {
-  return isLastStep ? "Done" : "Next";
+export type PrimaryControl = "next" | "done";
+
+/**
+ * Point-outs show a primary button. Earlier ones say Next.
+ * The last step says Done when it is a point-out, or when the click it
+ * would wait for is unavailable. Done finishes the tour. It is not Skip.
+ * A click step that is not last hides the button, even if its target is
+ * disabled. Save organization is that case.
+ */
+export function primaryControl(
+  step: TourStep,
+  input: { isLastStep: boolean; targetAvailable?: boolean },
+): PrimaryControl | null {
+  const waits = step.advance !== "next";
+  if (!waits) return input.isLastStep ? "done" : "next";
+  const unavailable = input.targetAvailable === false;
+  if (input.isLastStep && unavailable) return "done";
+  return null;
+}
+
+/** Visible label and accessible name. Never "Close". */
+export function primaryButtonName(control: PrimaryControl): "Next" | "Done" {
+  return control === "done" ? "Done" : "Next";
 }

@@ -27,6 +27,7 @@ import {
 } from "@/tours/model/sessionStep";
 import {
   decideStep,
+  primaryControl,
   shouldAdvanceFromAction,
   stepsForTour,
   type TourStep,
@@ -354,7 +355,7 @@ export function useProductTour() {
     }
   };
 
-  const steps: Step[] = specs.map((step) => ({
+  const steps: Step[] = specs.map((step, index) => ({
     target: tourSelector(step.anchor),
     title: step.title,
     content: step.body,
@@ -362,7 +363,10 @@ export function useProductTour() {
     disableFocusTrap: step.advance !== "next",
     hideOverlay: step.advance === "material",
     blockTargetInteraction: step.anchor === TOUR_ANCHORS.previewAsFamily,
-    data: { anchor: step.anchor, showNext: step.advance === "next" },
+    data: {
+      anchor: step.anchor,
+      primary: primaryControl(step, { isLastStep: index === specs.length - 1 }),
+    },
   }));
 
   useEffect(() => {

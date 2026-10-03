@@ -19,7 +19,7 @@ Product tours (react-joyride). One provider, three keyed tours.
 - One tour at a time, in `TOUR_ORDER`. Do not spotlight a stand-in when a target is gone.
 - Do not apply the migration from the app.
 - `first-course-v1` qualifies only when this organization has no course, unless this session already started it. Courses are org-scoped. Not qualifying writes no progress row and does not block the next tour.
-- Hide Next when the step waits for the spotlighted click, submit, or the next target to appear. Keep Next when the card is only pointing something out. After the add-material step, later steps keep Next and must not require a click. `preview-as-family` keeps Next and must not switch the user into Preview.
+- Hide Next when the step waits for the spotlighted click, submit, or the next target to appear, unless that step is last and the click is unavailable. Keep Next when an earlier card is only pointing something out. The last step of a tour says Done when it is a point-out and finishes the tour (not Skip). After the add-material step, later steps must not require a click. `preview-as-family` is that Done step and must not switch the user into Preview. Save organization is not last.
 
 ## Don’t
 
