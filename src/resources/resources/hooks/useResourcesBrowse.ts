@@ -337,6 +337,22 @@ export function useResourcesBrowse() {
     onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
+  const createForm = useMutation({
+    mutationFn: async (title: string) => {
+      const message = validateNewResource({ type: "form", title });
+      if (message) throw new Error(message);
+      return createResourceItem({
+        organizationId: organization.id,
+        folderId,
+        type: "form",
+        title,
+        createdBy: user.id,
+      });
+    },
+    onSuccess: invalidateBrowse,
+    onError: (caught: Error) => setError(caughtErrorMessage(caught)),
+  });
+
   const createLink = useMutation({
     mutationFn: async (input: { title: string; url: string }) => {
       const message = validateNewResource({
@@ -408,6 +424,7 @@ export function useResourcesBrowse() {
       null,
     createFolder,
     createDocument,
+    createForm,
     createLink,
     moveFolder,
     moveItem,

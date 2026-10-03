@@ -1,4 +1,4 @@
-export const RESOURCE_ITEM_TYPES = ["document", "link", "file"] as const;
+export const RESOURCE_ITEM_TYPES = ["document", "link", "file", "form"] as const;
 export type ResourceItemType = (typeof RESOURCE_ITEM_TYPES)[number];
 
 export const RESOURCE_VISIBILITIES = ["unpublished", "published"] as const;
@@ -24,7 +24,12 @@ export function parseResourceGrantPermission(value: string): ResourceGrantPermis
 export function resourceItemTypeLabel(type: ResourceItemType): string {
   if (type === "document") return "Document";
   if (type === "link") return "Link";
+  if (type === "form") return "Form";
   return "File";
+}
+
+export function isPrintableResourceType(type: ResourceItemType): boolean {
+  return type === "document" || type === "file";
 }
 
 export function isPublishedResource(visibility: ResourceVisibility): boolean {

@@ -9,6 +9,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { AnchoredPopup } from "@/ui/AnchoredPopup";
+import { isPrintableResourceType, type ResourceItemType } from "@/resources/model/kinds";
 import {
   resourceItemEditPath,
   resourceItemPrintPath,
@@ -32,7 +33,7 @@ export function ResourceActionsMenu({
 }: {
   orgSlug: string;
   itemId: number;
-  itemType: "document" | "link" | "file";
+  itemType: ResourceItemType;
   isStaff: boolean;
   onMove: () => void;
   onAccess: () => void;
@@ -42,7 +43,7 @@ export function ResourceActionsMenu({
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const canPrint = itemType !== "link";
+  const canPrint = isPrintableResourceType(itemType);
 
   return (
     <>

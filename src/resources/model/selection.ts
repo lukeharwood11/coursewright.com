@@ -58,7 +58,9 @@ export function selectionActions(rows: SelectedResource[]) {
     canMove: everyEditable,
     canRemove: everyEditable,
     canPublish: editableItems.length > 0,
-    printableIds: items.filter((item) => item.type !== "link").map((item) => item.id),
+    printableIds: items
+      .filter((item) => item.type === "document" || item.type === "file")
+      .map((item) => item.id),
     files: items
       .filter(
         (item): item is SelectedResourceItem & { fileId: number } =>

@@ -13,6 +13,7 @@ import { ResourceEditHeaderActions } from "./components/ResourceEditHeaderAction
 import { resourceItemPath } from "@/resources/model/paths";
 import { MaterialVersionHistoryDialog } from "@/materials/material/components/MaterialVersionHistoryDialog";
 import { previewFromResourceSnapshot } from "@/resources/model/versionSnapshot";
+import { FormBuilder } from "./components/FormBuilder";
 
 const PageContentEditor = lazy(async () => {
   const module = await import("@/materials/material/components/PageContentEditor");
@@ -123,9 +124,9 @@ export function ResourceEditPage() {
               descriptionLabel={descriptionLabel}
               onDescription={() => setDescriptionOpen(true)}
               onVersionHistory={
-                page.item.type === "document"
-                  ? undefined
-                  : () => setHistoryOpen(true)
+                page.item.type === "link" || page.item.type === "file"
+                  ? () => setHistoryOpen(true)
+                  : undefined
               }
               versionHistoryDisabled={page.versions.length === 0}
               commitTitle={edit.commitTitle}
@@ -183,6 +184,8 @@ export function ResourceEditPage() {
             ready.
           </p>
         ) : null}
+
+        {page.item.type === "form" ? <FormBuilder itemId={page.item.id} /> : null}
       </form>
 
       <ResourceDescriptionDialog

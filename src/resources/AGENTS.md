@@ -1,6 +1,6 @@
 # AGENTS — `src/resources/`
 
-Org-scoped **Resources**: nested folders and document / link / file items. Not course materials.
+Org-scoped **Resources**: nested folders and document / link / file / form items. Not course materials.
 
 ## Scope
 
@@ -22,5 +22,6 @@ Org-scoped **Resources**: nested folders and document / link / file items. Not c
 ## Don’t
 
 - Relax `materials` course⊕template XOR.
-- Add Forms (P1b) or calendar attachments in this slice.
+- Hang form rows off `materials` or add a second Forms nav.
+- Treat a form as a report card (US-85–87).
 - Put Resources CRUD in `organizations/` or `materials/`.

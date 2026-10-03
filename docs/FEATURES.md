@@ -479,7 +479,7 @@ Course
 | **Uploaded audio** | **P0** | Not a v1 add-material kind — upload as **file** material or in-page file attachment; custom in-app player |
 | **Quizzes — author + print** | **P0** (product) | Block on a page — **not** in v1 add-material menu |
 | **Quizzes — take in the app** | **P1** | Course outline item. Page quiz blocks stay print-only |
-| **Forms** | **in design** | |
+| **Forms** | **P1b** | Resource item type, not a material kind |
 
 #### Editor
 
@@ -597,8 +597,8 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 | **Assignment objects** | Separate from dated unit materials | planned | **Next conversation** — not spec'd |
 | **Material submissions** | A material can accept files turned in by a student (parents on their behalf) | shipped | Accept submissions, allowed file groups, submissions allowed (1–10, default 2), multiple files per turn-in, "<Parent name> on behalf of <child name>" (student self-turn-in uses their name), due time default 11:59 PM. **Gradable** (default off) sets possible points (default 10, fractions allowed) and counts a teacher grade in the gradebook. Off means feedback only, and the submission stays out of the gradebook. Staff grade one submission at a time (**Grade next**, **Save and next**), like a quiz. Submitted files: **Open** in a fullscreen portal when the browser can render them (PDF / image / audio / video / txt); otherwise Download only. Not an assignment object and not a quiz attempt. `src/submissions/` |
 | **Quizzes (take in the app or print)** | A course quiz families take when Accept entries is on, or print when it is off | shipped | Outline item on a unit, separate from a page quiz block. `src/quizzes/`. See **Quizzes** below |
-| **Resources** | Org-scoped nested folders + document / link / file (Lexical + print). Folder and item access: **parents can see** and **students can see** are separate, plus per-person read/write. Publish/unpublish. Bulk drag-drop upload with progress. Multi-select to publish, move, remove, print together, or download files (zip when more than one). **Version history** on edit (browse / preview / restore). Independent of course enrollment | shipped | P1a. Forms (P1b) stay a later item type. Not `materials` rows. `src/resources/` |
-| **Forms** | Structured response collection | in design | P1b inside Resources — not a second nav |
+| **Resources** | Org-scoped nested folders + document / link / file / form. Folder and item access: **parents can see** and **students can see** are separate, plus per-person read/write. Publish/unpublish. Bulk drag-drop upload with progress. Multi-select to publish, move, remove, print together, or download files (zip when more than one). **Version history** on document / link / file edit. Independent of course enrollment | shipped | P1a plus form items. Not `materials` rows. `src/resources/` |
+| **Forms** | A Resources item. Staff build questions, publish, and read responses. Members who can open the published form can submit, including an optional student the response is about | in progress | P1b inside Resources (`?type=form`), not a second nav. No branching, no public link, no report-card template. `org_forms` / `org_form_submissions` |
 | **Course Wright billing (orgs)** | We charge organizations so they can serve parents | planned | `billing/` SPA stub + owner-only placeholder on org settings. Public `/pricing` lists Family, Family Pro, Microschool, and School for planning only (**Contact us**; no checkout). In-app packaging and **Stripe** checkout remain unbuilt. |
 | **Org white labelling** | Owners upload a small icon, optional full logo for report cards, and set one accent color used as that org’s primary color | shipped | Buttons, links, and the sidebar use the accent. Report cards show the logo lockup when set (snapshotted on refresh/submit). Login, marketing, account home, and email stay Course Wright. Color must pass WCAG AA for white text and for text on paper. `organization_branding` + public `org-brand` bucket. Owners only write. Icon and logo paths are public via `organization_icons`. Accent stays member-only |
 | **Org feature customizations** | Owners turn optional surfaces on or off: Discussions, Announcements, Resources, Lesson plans, Events, Calendar view | shipped | Org settings **Customizations** tab. `organization_features` (owner writes; members read). Missing row = all on. Off hides sidebar items, routes, and compose buttons; does not delete data. Non-owners see the tab read-only, without Save |
@@ -638,7 +638,7 @@ Progress tracking, auto-summaries, Course Wright billing orgs, **course template
 
 ### Resources (P1a)
 
-**Resources** is an org library — nested **folders** plus **document** / **link** / **file** items. It is **not** course **materials** (no enrollment gate, no This week dates). **Forms** are P1b.
+**Resources** is an org library — nested **folders** plus **document** / **link** / **file** / **form** items. It is **not** course **materials** (no enrollment gate, no This week dates). **Forms** are a resource type: questions, publish, submit, and a staff inbox. Not a report card.
 
 **Who can create:** owners, admins, and instructors. **Item `created_by`** is always an editor. Explicit **write** grants can add a parent (or other member) as an editor of that folder or item.
 
@@ -845,7 +845,7 @@ A **Quiz** is a course outline item on a unit. A Lexical quiz on a lesson page s
 | Staff view modes (header toggle) | **Decided** | Writers (owner/admin/instructor): **Teacher** / **Preview** / optional **Parent** / **Student**. Preview = taught published courses as a synthetic student. Parent/Student tabs only when additive flags apply. Hidden for parent-role / student-role users. Default Teacher. Print never shows page-quiz answer keys on materials. Course quizzes follow the parent answer-key rule and optional worksheet/key/both on print |
 | Quiz online take + autograde | **Decided** | **P1 course quiz** — outline item, not a page block and not `material_submissions`. **Accept entries** toggle; optional start/end (neither = open whenever published). Each question has possible points (default 1, fractions allowed). Multiple choice, number, and matching autograde a first pass the teacher can overwrite. Short answer and long answer wait for the teacher’s points. A long answer has 1–20 blank lines. Share answer key with parents (students never). One attempt unless allowed |
 | Page as composable entity (blocks) | **Decided** | Material is the page; no separate Page table required in P0 |
-| Forms as a content kind | **In design** | Job-to-be-done + who responds TBD |
+| Forms as a resource item | **Decided** | US-58. `org_forms` on an `org_resource_items` row of type `form`. Membership + collection visibility. Publish = item visibility. No branching. Optional student subject. Not report cards |
 | Rich-text block canonical store (MD / JSON / HTML) | **Decided** | Lexical editor state JSON in `blocks.body.lexical`; WYSIWYG on material edit |
 | Instance-only materials don't affect template | **Superseded** | **P1** — replaced by optional promote; N/A in P0 (no templates) |
 | Course summary auto-draft (instructor edits) | **Decided** | P1 only |

@@ -92,7 +92,7 @@ async function resourceItemPrintMaterial(
   itemId: number,
 ): Promise<PrintMaterial | null> {
   const item = await getResourceItem(itemId);
-  if (!item || item.archivedAt) return null;
+  if (!item || item.archivedAt || item.type === "form") return null;
   const kind =
     item.type === "document" ? "page" : item.type === "link" ? "link" : "file";
   const blocks =
