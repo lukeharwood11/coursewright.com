@@ -1,5 +1,10 @@
 -- Resource links are materials in one Resources unit per course.
--- Replaces course_resource_links. Does not add a lesson-plan resource table.
+-- Replaces course_resource_links. Drops the unmerged lesson-plan day-resource
+-- table if a local database already applied that earlier draft.
+
+drop table if exists public.lesson_plan_day_resources;
+drop function if exists private.lesson_plan_day_resource_before_write();
+drop function if exists private.resource_is_linked_on_course(bigint, bigint, bigint);
 
 alter table public.units
   add column is_resources boolean not null default false;
