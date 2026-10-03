@@ -2,7 +2,7 @@ import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { MATERIAL_KINDS, materialKindLabel, type MaterialKind } from "@/materials/model/kind";
+import { MATERIAL_KINDS, materialKindLabel } from "@/materials/model/kind";
 import {
   materialWorkTypeLabel,
   type MaterialWorkType,
@@ -168,9 +168,9 @@ function KindButton({
   selected,
   onSelect,
 }: {
-  kind: MaterialKind;
+  kind: (typeof MATERIAL_KINDS)[number];
   selected: boolean;
-  onSelect: (kind: MaterialKind) => void;
+  onSelect: (kind: (typeof MATERIAL_KINDS)[number]) => void;
 }) {
   return (
     <button

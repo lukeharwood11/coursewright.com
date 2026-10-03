@@ -135,6 +135,23 @@ export async function listOrgResourceItems(
   });
 }
 
+/** Items referenced by course resource materials. Includes archived rows. */
+export async function listOrgResourceItemsByIds(
+  ids: number[],
+): Promise<ResourceItemRecord[]> {
+  if (ids.length === 0) return [];
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("org_resource_items")
+    .select(ITEM_SELECT)
+    .in("id", ids);
+  if (error) throw new Error(error.message);
+  return (data ?? []).flatMap((row) => {
+    const item = toItem(row);
+    return item ? [item] : [];
+  });
+}
+
 export async function getResourceItem(
   id: number,
 ): Promise<ResourceItemRecord | null> {

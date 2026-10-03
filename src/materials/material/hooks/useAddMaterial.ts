@@ -6,7 +6,7 @@ import { useAuthedUser } from "@/auth/hooks/useAuthedUser";
 import { createMaterial, materialQueryKeys } from "@/materials/databridge/materials";
 import { uploadNewFile } from "@/materials/databridge/files";
 import { materialLocationState } from "@/materials/model/navigation";
-import type { MaterialKind } from "@/materials/model/kind";
+import { MATERIAL_KINDS } from "@/materials/model/kind";
 import type { MaterialWorkType } from "@/materials/model/workType";
 import { materialEditPath, materialPath } from "@/materials/model/paths";
 import { validateMaterialFields } from "@/materials/model/validate";
@@ -25,7 +25,7 @@ export function useAddMaterial(args: {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [kind, setKind] = useState<MaterialKind>("page");
+  const [kind, setKind] = useState<(typeof MATERIAL_KINDS)[number]>("page");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");

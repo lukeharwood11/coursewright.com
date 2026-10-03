@@ -13,6 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import type { MaterialRecord } from "@/materials/databridge/materials";
 import { materialPath } from "@/materials/model/paths";
+import { resourceMaterialHref } from "@/materials/model/resourceMaterial";
 import type { MaterialKind } from "@/materials/model/kind";
 import type { QuizRecord } from "@/quizzes/databridge/quizzes";
 import { mergeOutline } from "@/quizzes/model/outline";
@@ -38,7 +39,9 @@ function MaterialKindIcon({
         ? LinkIcon
         : kind === "file"
           ? DocumentIcon
-          : DocumentTextIcon;
+          : kind === "resource"
+            ? FolderIcon
+            : DocumentTextIcon;
   return <Icon className="h-3.5 w-3.5 shrink-0 text-[var(--ink-faint)]" aria-hidden />;
 }
 
@@ -55,12 +58,20 @@ function MaterialLink({
 }) {
   return (
     <Link
-      to={materialPath({
-        orgSlug,
-        courseId,
-        unitId,
-        materialId: material.id,
-      })}
+      to={
+        resourceMaterialHref({
+          orgSlug,
+          kind: material.kind,
+          resourceFolderId: material.resourceFolderId,
+          resourceItemId: material.resourceItemId,
+        }) ??
+        materialPath({
+          orgSlug,
+          courseId,
+          unitId,
+          materialId: material.id,
+        })
+      }
       className="flex min-w-0 items-center gap-1.5 rounded-[4px] px-1.5 py-1 text-[12.5px] font-semibold text-[var(--ink)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]"
       title={material.title}
     >

@@ -22,6 +22,8 @@ import {
   resourceItemQueryKeys,
   updateResourceItem,
 } from "@/resources/databridge/items";
+import { fetchResourceOpenState } from "@/resources/databridge/openState";
+import { resourceOpenView } from "@/resources/model/openState";
 import {
   listMyResourceGrants,
   resourceGrantQueryKeys,
@@ -378,11 +380,38 @@ export function useResourcesBrowse() {
     );
   }
 
+  const folderMissing =
+    folderId != null &&
+    !folderQuery.isLoading &&
+    folderQuery.isFetched &&
+    !folderQuery.data;
+  const openProbeQuery = useQuery({
+    queryKey: ["org-resources", "open-state", organization.id, "folder", folderId ?? 0] as const,
+    queryFn: () =>
+      fetchResourceOpenState({
+        organizationId: organization.id,
+        kind: "folder",
+        id: folderId!,
+      }),
+    enabled: folderMissing,
+  });
+  const openView = resourceOpenView({
+    rowLoaded: folderId == null || folderQuery.data != null,
+    probe: !folderMissing
+      ? "ok"
+      : openProbeQuery.isError
+        ? "missing"
+        : openProbeQuery.isSuccess
+          ? openProbeQuery.data
+          : null,
+  });
   const loading =
     foldersQuery.isLoading ||
     itemsQuery.isLoading ||
-    (folderId != null && folderQuery.isLoading);
-  const notFound = folderId != null && !folderQuery.isLoading && !folderQuery.data;
+    (folderId != null && folderQuery.isLoading) ||
+    openView === "loading";
+  const notFound = openView === "missing";
+  const forbidden = openView === "forbidden";
 
   return {
     organization,
@@ -400,6 +429,7 @@ export function useResourcesBrowse() {
     isStaff,
     loading,
     notFound,
+    forbidden,
     error:
       error ??
       foldersQuery.error?.message ??

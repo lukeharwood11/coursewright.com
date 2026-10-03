@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { MaterialRecord } from "@/materials/databridge/materials";
 import { MaterialRow } from "@/materials/material/components/MaterialRow";
+import { resourceMaterialHref } from "@/materials/model/resourceMaterial";
 import type { QuizRecord } from "@/quizzes/databridge/quizzes";
 import { QuizRow } from "@/quizzes/quiz/components/QuizRow";
 import {
@@ -20,6 +21,7 @@ export function UnitOutlineList({
   attemptByQuizId,
   importantIds,
   canEdit,
+  familyAccessWarnings,
   fromUnitPage = false,
   onReorder,
 }: {
@@ -38,6 +40,7 @@ export function UnitOutlineList({
   >;
   importantIds: Set<number>;
   canEdit: boolean;
+  familyAccessWarnings?: Map<number, string>;
   fromUnitPage?: boolean;
   onReorder: (ordered: OutlineItem[]) => void;
 }) {
@@ -112,6 +115,15 @@ export function UnitOutlineList({
                 dueDate={material.dueDate}
                 importantNow={importantIds.has(material.id)}
                 visibility={material.visibility}
+                href={
+                  resourceMaterialHref({
+                    orgSlug,
+                    kind: material.kind,
+                    resourceFolderId: material.resourceFolderId,
+                    resourceItemId: material.resourceItemId,
+                  }) ?? undefined
+                }
+                familyAccessWarning={familyAccessWarnings?.get(material.id) ?? null}
                 className="border-t-0"
               />
             </div>

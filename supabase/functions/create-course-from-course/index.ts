@@ -115,14 +115,38 @@ Deno.serve(async (request) => {
 
     const { data: units, error: unitsError } = await db
       .from("units")
-      .select("id, title, start_date, end_date, position")
+      .select("id, title, start_date, end_date, position, is_resources")
       .eq("course_id", source.id)
       .is("deleted_at", null)
       .order("position");
     if (unitsError) throw unitsError;
 
+    // Course insert already created one Resources unit. Reuse it for the source
+    // is_resources unit so the copy does not get a second one.
+    const { data: seededResources, error: seededError } = await db
+      .from("units")
+      .select("id")
+      .eq("course_id", created.id)
+      .eq("is_resources", true)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (seededError) throw seededError;
+
     const unitMap = new Map<number, number>();
     for (const unit of units ?? []) {
+      if (unit.is_resources && seededResources) {
+        const { error } = await db
+          .from("units")
+          .update({
+            title: unit.title,
+            position: unit.position,
+            copied_from_id: unit.id,
+          })
+          .eq("id", seededResources.id);
+        if (error) throw error;
+        unitMap.set(unit.id, seededResources.id);
+        continue;
+      }
       const { data: copied, error } = await db
         .from("units")
         .insert({
@@ -132,6 +156,7 @@ Deno.serve(async (request) => {
           start_date: unit.start_date,
           end_date: unit.end_date,
           position: unit.position,
+          is_resources: unit.is_resources,
           copied_from_id: unit.id,
         })
         .select("id")
@@ -143,7 +168,7 @@ Deno.serve(async (request) => {
     const { data: materials, error: materialsError } = await db
       .from("materials")
       .select(
-        "id, unit_id, title, description, kind, work_type, url, file_id, scheduled_date, due_date, due_at, due_timezone, accept_submissions, allow_submissions_past_due, gradable, points_possible, submission_limit, submission_file_types, position, visibility",
+        "id, unit_id, title, description, kind, work_type, url, file_id, resource_folder_id, resource_item_id, scheduled_date, due_date, due_at, due_timezone, accept_submissions, allow_submissions_past_due, gradable, points_possible, submission_limit, submission_file_types, position, visibility",
       )
       .eq("course_id", source.id)
       .is("deleted_at", null)
@@ -167,6 +192,8 @@ Deno.serve(async (request) => {
           work_type: material.work_type,
           url: material.url,
           file_id: material.file_id,
+          resource_folder_id: material.resource_folder_id,
+          resource_item_id: material.resource_item_id,
           scheduled_date: material.scheduled_date,
           due_date: material.due_date,
           due_at: material.due_at,

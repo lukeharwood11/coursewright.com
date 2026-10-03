@@ -17,6 +17,7 @@ import { AccessSettingsDialog } from "@/resources/resources/components/AccessSet
 import { MoveResourceDialog } from "@/resources/resources/components/MoveResourceDialog";
 import { ResourceActionsMenu } from "./components/ResourceActionsMenu";
 import { useResource } from "./hooks/useResource";
+import { RESOURCE_OPEN_PERMISSION_MESSAGE } from "@/resources/model/openState";
 import {
   isPublishedResource,
   resourceItemTypeLabel,
@@ -48,6 +49,27 @@ export function ResourcePage() {
 
   if (page.loading) {
     return <PageLoading label="Loading resource…" />;
+  }
+
+  if (page.forbidden) {
+    return (
+      <div className="px-5 py-8 md:px-8">
+        <h1
+          className="text-[24px] font-semibold text-[var(--ink)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {RESOURCE_OPEN_PERMISSION_MESSAGE}
+        </h1>
+        <p className="mt-4 text-[13px]">
+          <Link
+            to={resourceBrowsePath(page.organization.slug, null)}
+            className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+          >
+            Back to Resources
+          </Link>
+        </p>
+      </div>
+    );
   }
 
   if (page.notFound || !page.item) {
