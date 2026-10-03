@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/ui/Button";
 import { Tab, TabList } from "@/ui/Tabs";
@@ -42,18 +42,25 @@ export function LinkContentModal({
 }) {
   const titleId = useId();
   const [pane, setPane] = useState<LessonPlanContentLinkPane>("materials");
+  const [seenOpen, setSeenOpen] = useState(open);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  if (open !== seenOpen) {
+    setSeenOpen(open);
+    if (open) setPane("materials");
+  }
 
   useEffect(() => {
     if (!open) return;
-    setPane("materials");
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") onCloseRef.current();
     }
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
