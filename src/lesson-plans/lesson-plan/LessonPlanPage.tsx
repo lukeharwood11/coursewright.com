@@ -8,6 +8,7 @@ import { Button, ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { coursePath } from "@/courses/model/paths";
+import { TOUR_ANCHORS } from "@/tours/model/anchors";
 import { lessonPlanEditPath } from "@/lesson-plans/model/paths";
 import { lessonPlanDaysToShow, weekdayDateLabel } from "@/lesson-plans/model/validate";
 import { lessonPlanIsPublished } from "@/lesson-plans/model/visibility";
@@ -144,6 +145,7 @@ export function LessonPlanPage() {
         canEdit={page.canEdit}
         pending={page.setVisibility.isPending}
         onPublish={() => page.setVisibility.mutate("published")}
+        publishDataTour={page.canEdit ? TOUR_ANCHORS.publishLessonPlan : undefined}
       />
 
       {page.plan.weekNote ? (

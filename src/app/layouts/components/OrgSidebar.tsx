@@ -9,6 +9,7 @@ import { chromeAccentVars } from "@/organizations/model/brand";
 import { Mark, WordmarkText } from "@/ui/Wordmark";
 import { useAppShell } from "../OrgShellContext";
 import { useSidebarStore } from "../stores/sidebar";
+import { useMinMd } from "@/tours/hooks/useMinMd";
 import { SidebarNav } from "./SidebarNav";
 
 export function OrgSidebar() {
@@ -17,7 +18,9 @@ export function OrgSidebar() {
   const toggleCollapsed = useSidebarStore((state) => state.toggleCollapsed);
   const setMobileOpen = useSidebarStore((state) => state.setMobileOpen);
   const { pathname } = useLocation();
-  const { organization } = useAppShell();
+  const { organization, role } = useAppShell();
+  const desktop = useMinMd();
+  const owner = role === "owner";
   const chromeStyle = chromeAccentVars(organization?.accentColor) as CSSProperties | undefined;
 
   useEffect(() => {
@@ -44,6 +47,7 @@ export function OrgSidebar() {
         <SidebarPanel
           collapsed={collapsed}
           onCollapseToggle={toggleCollapsed}
+          settingsTourAnchor={owner && desktop}
         />
       </aside>
 
@@ -59,6 +63,7 @@ export function OrgSidebar() {
             <SidebarPanel
               collapsed={false}
               onClose={() => setMobileOpen(false)}
+              settingsTourAnchor={owner && !desktop}
             />
           </aside>
         </div>
@@ -71,10 +76,12 @@ function SidebarPanel({
   collapsed,
   onClose,
   onCollapseToggle,
+  settingsTourAnchor,
 }: {
   collapsed: boolean;
   onClose?: () => void;
   onCollapseToggle?: () => void;
+  settingsTourAnchor: boolean;
 }) {
   const { brandLabel, brandHref, organization } = useAppShell();
 
@@ -127,7 +134,11 @@ function SidebarPanel({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <SidebarNav collapsed={collapsed} onNavigate={() => onClose?.()} />
+        <SidebarNav
+          collapsed={collapsed}
+          onNavigate={() => onClose?.()}
+          settingsTourAnchor={settingsTourAnchor}
+        />
       </div>
 
       {onCollapseToggle ? (

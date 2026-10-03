@@ -1,4 +1,6 @@
 import type { OrgRole } from "@/organizations/model/role";
+import { TOUR_ANCHORS } from "@/tours/model/anchors";
+import { useMinMd } from "@/tours/hooks/useMinMd";
 import {
   availableStaffViewModes,
   parseStaffViewMode,
@@ -13,15 +15,21 @@ export function StaffViewToggle({
   isParent,
   isStudent,
   staffRole,
+  previewTourAnchor = false,
 }: {
   mode: StaffViewMode;
   onChange: (mode: StaffViewMode) => void;
   isParent: boolean;
   isStudent: boolean;
   staffRole: OrgRole;
+  /** Lesson-plan tour. Only the visible control gets the anchor. */
+  previewTourAnchor?: boolean;
 }) {
   const options = availableStaffViewModes({ isParent, isStudent, staffRole });
   const useMobileSelect = options.length >= 3;
+  const desktop = useMinMd();
+  const anchorOnSelect = previewTourAnchor && useMobileSelect && !desktop;
+  const anchorOnGroup = previewTourAnchor && !anchorOnSelect;
 
   return (
     <>
@@ -32,6 +40,7 @@ export function StaffViewToggle({
             wrapperClassName="min-w-[7.5rem]"
             value={mode}
             aria-label="How you see this organization"
+            data-tour={anchorOnSelect ? TOUR_ANCHORS.previewAsFamily : undefined}
             onChange={(event) => {
               const next = parseStaffViewMode(event.target.value);
               if (options.some((option) => option.mode === next)) {
@@ -50,6 +59,7 @@ export function StaffViewToggle({
       <div
         role="radiogroup"
         aria-label="How you see this organization"
+        data-tour={anchorOnGroup ? TOUR_ANCHORS.previewAsFamily : undefined}
         className={[
           "inline-flex shrink-0 rounded-[6px] border border-[var(--line)] bg-[var(--paper)] p-0.5",
           useMobileSelect ? "hidden md:inline-flex" : "",

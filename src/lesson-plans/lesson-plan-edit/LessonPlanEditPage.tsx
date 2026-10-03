@@ -4,6 +4,7 @@ import { PageFormActions } from "@/ui/PageFormActions";
 import { PageLoading } from "@/ui/PageLoading";
 import { PublishedBadge } from "@/ui/PublishedBadge";
 import { coursePath } from "@/courses/model/paths";
+import { TOUR_ANCHORS } from "@/tours/model/anchors";
 import {
   UnpublishControl,
   VisibilityBanner,
@@ -83,6 +84,7 @@ export function LessonPlanEditPage() {
           hasChanges={page.hasChanges}
           cancelTo={page.cancelTo}
           saveLabel={page.isNew ? "Save lesson plan" : "Save lesson plan"}
+          saveDataTour={TOUR_ANCHORS.saveLessonPlan}
         />
       </div>
 

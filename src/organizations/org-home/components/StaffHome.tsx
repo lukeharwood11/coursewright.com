@@ -1,6 +1,7 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
 import type { StaffDashboard } from "@/organizations/model/staffDashboard";
 import { newCoursePath } from "@/courses/model/paths";
+import { TOUR_ANCHORS } from "@/tours/model/anchors";
 import { ButtonLink } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
 import {
@@ -38,7 +39,7 @@ export function StaffHome({
           </p>
         </div>
         {canCreate ? (
-          <ButtonLink to={newCoursePath(orgSlug)}>
+          <ButtonLink to={newCoursePath(orgSlug)} dataTour={TOUR_ANCHORS.createCourse}>
             <PlusIcon className="h-5 w-5" aria-hidden />
             Create course
           </ButtonLink>

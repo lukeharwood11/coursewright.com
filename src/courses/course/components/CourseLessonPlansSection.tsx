@@ -7,6 +7,7 @@ import type { LessonPlanListItem } from "@/lesson-plans/databridge/lessonPlans";
 import { lessonPlanPath, newLessonPlanPath } from "@/lesson-plans/model/paths";
 import { weekdayDateLabel } from "@/lesson-plans/model/validate";
 import { lessonPlanIsPublished } from "@/lesson-plans/model/visibility";
+import { TOUR_ANCHORS } from "@/tours/model/anchors";
 
 const LESSON_PLAN_HINT =
   "A week’s plan for students, with the materials that go with each day.";
@@ -91,7 +92,12 @@ export function CourseLessonPlansSection({
 
       {canEdit ? (
         <div className="mt-3">
-          <ButtonLink variant="ghost" fullWidth to={newLessonPlanPath(orgSlug, courseId)}>
+          <ButtonLink
+            variant="ghost"
+            fullWidth
+            to={newLessonPlanPath(orgSlug, courseId)}
+            dataTour={TOUR_ANCHORS.addLessonPlan}
+          >
             <PlusIcon className="h-5 w-5" aria-hidden />
             Add lesson plan
           </ButtonLink>

@@ -10,17 +10,20 @@ export function WeekdayCircleToggles({
   disabled,
   ariaLabel,
   onToggle,
+  dataTour,
 }: {
   selectedDays: ReadonlySet<SchoolDay>;
   disabled?: boolean;
   ariaLabel: string;
   onToggle: (day: SchoolDay) => void;
+  dataTour?: string;
 }) {
   return (
     <div
       className="grid grid-cols-7 gap-1 sm:gap-2"
       role="group"
       aria-label={ariaLabel}
+      data-tour={dataTour}
     >
       {WEEKDAYS.map((day) => {
         const selected = selectedDays.has(day);

@@ -20,6 +20,7 @@ export function PageFormActions({
   closeWhenUnchanged = false,
   saveLabel = "Save",
   saveAndCloseLabel = "Save & close",
+  saveDataTour,
 }: {
   formId: string;
   saving: boolean;
@@ -39,6 +40,7 @@ export function PageFormActions({
   closeWhenUnchanged?: boolean;
   saveLabel?: string;
   saveAndCloseLabel?: string;
+  saveDataTour?: string;
 }) {
   const navigate = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -81,6 +83,7 @@ export function PageFormActions({
           form={formId}
           variant={onSaveAndClose ? "secondary" : "primary"}
           disabled={saveDisabled}
+          data-tour={saveDataTour}
         >
           <CheckIcon className="h-4 w-4" aria-hidden />
           {saving ? "Saving…" : saveLabel}
