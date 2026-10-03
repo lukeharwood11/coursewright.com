@@ -143,10 +143,10 @@ export function ResourcesPage() {
   }
 
   function createForm() {
-    if (page.createForm.isPending) return;
-    void page.createForm
-      .mutateAsync("Untitled form")
+    void page
+      .createUntitledForm()
       .then((item) => {
+        if (!item) return;
         navigate(resourceItemEditPath(page.organization.slug, item.id));
       })
       .catch(() => undefined);

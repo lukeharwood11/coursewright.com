@@ -23,7 +23,7 @@ import {
   isPublishedResource,
   resourceItemTypeLabel,
 } from "@/resources/model/kinds";
-import { FormFill } from "./components/FormFill";
+import { FormFill } from "@/resources/form/FormFill";
 import {
   resourceBrowsePath,
   resourceItemEditPath,

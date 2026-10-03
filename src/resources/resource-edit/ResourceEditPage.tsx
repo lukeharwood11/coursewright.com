@@ -13,7 +13,7 @@ import { ResourceEditHeaderActions } from "./components/ResourceEditHeaderAction
 import { resourceItemPath } from "@/resources/model/paths";
 import { MaterialVersionHistoryDialog } from "@/materials/material/components/MaterialVersionHistoryDialog";
 import { previewFromResourceSnapshot } from "@/resources/model/versionSnapshot";
-import { FormBuilder } from "./components/FormBuilder";
+import { FormBuilder } from "@/resources/form-edit/FormBuilder";
 
 const PageContentEditor = lazy(async () => {
   const module = await import("@/materials/material/components/PageContentEditor");

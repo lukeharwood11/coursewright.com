@@ -218,3 +218,66 @@ export function formatFormAnswer(field: FormField, value: unknown): string {
   if (typeof value === "boolean") return value ? "Yes" : "No";
   return "—";
 }
+
+export function formAnswerText(value: FormAnswerValue | undefined): string {
+  return typeof value === "string" ? value : "";
+}
+
+export function subjectStudentIdFromChoice(value: string): number | null {
+  if (!value) return null;
+  const id = Number(value);
+  return Number.isFinite(id) ? id : null;
+}
+
+export function submissionsVisibleToActor<T extends { submittedBy: string }>(
+  rows: T[],
+  actor: { canEdit: boolean; userId: string },
+): T[] {
+  if (actor.canEdit) return rows;
+  return rows.filter((row) => row.submittedBy === actor.userId);
+}
+
+export function patchFormField(
+  schema: OrgFormSchema,
+  id: string,
+  patch: Partial<FormField>,
+): OrgFormSchema {
+  return {
+    ...schema,
+    fields: schema.fields.map((field) => (field.id === id ? { ...field, ...patch } : field)),
+  };
+}
+
+export function removeFormField(schema: OrgFormSchema, id: string): OrgFormSchema {
+  return { ...schema, fields: schema.fields.filter((field) => field.id !== id) };
+}
+
+export function appendFormField(schema: OrgFormSchema): OrgFormSchema {
+  if (schema.fields.length >= 40) return schema;
+  return { ...schema, fields: [...schema.fields, blankFormField()] };
+}
+
+export function withFormSubject(schema: OrgFormSchema, subject: FormSubjectMode): OrgFormSchema {
+  return { ...schema, subject };
+}
+
+/** Swap with the neighbor. Out of range returns the same schema. */
+export function moveFormField(
+  schema: OrgFormSchema,
+  index: number,
+  direction: -1 | 1,
+): OrgFormSchema {
+  const target = index + direction;
+  if (target < 0 || target >= schema.fields.length) return schema;
+  const fields = [...schema.fields];
+  const current = fields[index];
+  const other = fields[target];
+  if (!current || !other) return schema;
+  fields[index] = other;
+  fields[target] = current;
+  return { ...schema, fields };
+}
+
+export function formFieldOptionsFromText(text: string): string[] {
+  return text.split("\n");
+}

@@ -353,6 +353,11 @@ export function useResourcesBrowse() {
     onError: (caught: Error) => setError(caughtErrorMessage(caught)),
   });
 
+  async function createUntitledForm() {
+    if (createForm.isPending) return null;
+    return createForm.mutateAsync("Untitled form");
+  }
+
   const createLink = useMutation({
     mutationFn: async (input: { title: string; url: string }) => {
       const message = validateNewResource({
@@ -425,6 +430,7 @@ export function useResourcesBrowse() {
     createFolder,
     createDocument,
     createForm,
+    createUntitledForm,
     createLink,
     moveFolder,
     moveItem,

@@ -4,8 +4,12 @@ import {
   blankFormField,
   emptyFormSchema,
   formAnswersPayload,
+  moveFormField,
   normalizeFormSchema,
   parseFormSchema,
+  patchFormField,
+  subjectStudentIdFromChoice,
+  submissionsVisibleToActor,
   validateFormAnswers,
   validateFormSchema,
 } from "./formSchema.ts";
@@ -85,4 +89,28 @@ test("validateFormAnswers enforces required questions and student subject", () =
     note: "Hi",
     ok: false,
   });
+});
+
+test("move, patch, and actor-visible responses stay pure", () => {
+  const schema = {
+    subject: "none" as const,
+    fields: [
+      { id: "a", label: "A", kind: "short_text" as const, required: false, options: [] },
+      { id: "b", label: "B", kind: "short_text" as const, required: false, options: [] },
+    ],
+  };
+  assert.deepEqual(moveFormField(schema, 0, -1).fields.map((field) => field.id), ["a", "b"]);
+  assert.deepEqual(moveFormField(schema, 0, 1).fields.map((field) => field.id), ["b", "a"]);
+  assert.equal(patchFormField(schema, "a", { label: "Name" }).fields[0]?.label, "Name");
+  const rows = [
+    { id: 1, submittedBy: "me" },
+    { id: 2, submittedBy: "them" },
+  ];
+  assert.deepEqual(
+    submissionsVisibleToActor(rows, { canEdit: false, userId: "me" }).map((row) => row.id),
+    [1],
+  );
+  assert.equal(submissionsVisibleToActor(rows, { canEdit: true, userId: "me" }).length, 2);
+  assert.equal(subjectStudentIdFromChoice(""), null);
+  assert.equal(subjectStudentIdFromChoice("4"), 4);
 });
