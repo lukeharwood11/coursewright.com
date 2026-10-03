@@ -4,6 +4,7 @@ import {
   ArrowDownTrayIcon,
   ArrowRightIcon,
   ArrowUpTrayIcon,
+  ClipboardDocumentListIcon,
   Cog6ToothIcon,
   DocumentPlusIcon,
   DocumentTextIcon,
@@ -81,6 +82,7 @@ export function ResourceBrowser({
   onDownload,
   onCreateFolder,
   onCreateDocument,
+  onCreateForm,
   onCreateLink,
   onUpload,
   selectedKeys,
@@ -112,6 +114,7 @@ export function ResourceBrowser({
   onDownload: (item: ResourceItemRecord) => void;
   onCreateFolder: () => void;
   onCreateDocument: () => void;
+  onCreateForm: () => void;
   onCreateLink: () => void;
   onUpload: () => void;
   selectedKeys: Set<string>;
@@ -143,6 +146,12 @@ export function ResourceBrowser({
         label: "New document",
         icon: <DocumentPlusIcon className={iconClass} />,
         onSelect: onCreateDocument,
+      },
+      {
+        id: "form",
+        label: "New form",
+        icon: <ClipboardDocumentListIcon className={iconClass} />,
+        onSelect: onCreateForm,
       },
       {
         id: "link",
@@ -251,7 +260,7 @@ export function ResourceBrowser({
       onSelect: () =>
         isPublishedResource(item.visibility) ? onUnpublish(item) : onPublish(item),
     });
-    if (item.type !== "link") {
+    if (item.type === "document" || item.type === "file") {
       entries.push({
         id: "print",
         label: "Print",

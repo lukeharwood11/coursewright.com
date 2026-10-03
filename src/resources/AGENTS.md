@@ -1,6 +1,6 @@
 # AGENTS — `src/resources/`
 
-Org-scoped **Resources**: nested folders and document / link / file items. Not course materials.
+Org-scoped **Resources**: nested folders and document / link / file / form items. Not course materials.
 
 ## Scope
 
@@ -17,10 +17,12 @@ Org-scoped **Resources**: nested folders and document / link / file items. Not c
 - Parent and student browse lists a visible item or folder at the Resources root when its parent folder is not visible. Use those RLS rows as-is; do not add another access check.
 - Soft-archive via `archived_at`. Never hard-delete user content from the app.
 - Document / link / file edits are **versioned** (`org_resource_versions`); edit UI matches material **Version history** (who · when · restore).
-- Page folders: `resources/` (root + folder browse), `resource/` (view), `resource-edit/` (edit). Shared `model/` + `databridge/`.
+- Page folders: `resources/` (root + folder browse), `resource/` (view), `resource-edit/` (edit), `form/` (fill + responses), `form-edit/` (questions). Shared `model/` + `databridge/`.
+- Form views only render. Loading, submit rules, response filtering, and question edits live in `form/hooks` and `form-edit/hooks`.
 
 ## Don’t
 
 - Relax `materials` course⊕template XOR.
-- Add Forms (P1b) or calendar attachments in this slice.
+- Hang form rows off `materials` or add a second Forms nav.
+- Treat a form as a report card (US-85–87).
 - Put Resources CRUD in `organizations/` or `materials/`.

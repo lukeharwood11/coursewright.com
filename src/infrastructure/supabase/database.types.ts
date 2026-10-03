@@ -2871,6 +2871,110 @@ export type Database = {
           },
         ]
       }
+      org_form_submissions: {
+        Row: {
+          form_id: number
+          id: number
+          organization_id: number
+          payload_json: Json
+          subject_student_profile_id: number | null
+          submitted_at: string
+          submitted_by: string
+        }
+        Insert: {
+          form_id: number
+          id?: number
+          organization_id: number
+          payload_json: Json
+          subject_student_profile_id?: number | null
+          submitted_at?: string
+          submitted_by: string
+        }
+        Update: {
+          form_id?: number
+          id?: number
+          organization_id?: number
+          payload_json?: Json
+          subject_student_profile_id?: number | null
+          submitted_at?: string
+          submitted_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_form_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "org_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_form_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_form_submissions_subject_student_profile_id_fkey"
+            columns: ["subject_student_profile_id"]
+            isOneToOne: false
+            referencedRelation: "org_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_form_submissions_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_forms: {
+        Row: {
+          created_at: string
+          id: number
+          item_id: number
+          organization_id: number
+          schema_json: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          item_id: number
+          organization_id: number
+          schema_json?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          item_id?: number
+          organization_id?: number
+          schema_json?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_forms_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "org_resource_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_forms_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_resource_blocks: {
         Row: {
           body: Json

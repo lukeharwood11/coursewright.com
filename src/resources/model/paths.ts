@@ -35,10 +35,12 @@ export function parseResourcePrintItemIds(search: string): number[] {
     .filter((value) => Number.isFinite(value) && value > 0);
 }
 
-export type ResourceTypeFilter = "all" | "document" | "file" | "link";
+export type ResourceTypeFilter = "all" | "document" | "file" | "link" | "form";
 
 export function parseResourceTypeFilter(value: string | null): ResourceTypeFilter {
-  if (value === "document" || value === "file" || value === "link") return value;
+  if (value === "document" || value === "file" || value === "link" || value === "form") {
+    return value;
+  }
   return "all";
 }
 

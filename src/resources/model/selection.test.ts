@@ -36,6 +36,16 @@ const link: SelectedResource = {
   canEdit: false,
 };
 
+const form: SelectedResource = {
+  kind: "item",
+  id: 10,
+  folderId: null,
+  type: "form",
+  fileId: null,
+  title: "Emergency",
+  canEdit: true,
+};
+
 test("selection toggles and merges by kind and id", () => {
   assert.equal(selectionKey(folder), "folder:1");
   const once = toggleSelection([], folder);
@@ -47,7 +57,7 @@ test("selection toggles and merges by kind and id", () => {
 });
 
 test("selection actions ignore folders for print, publish, and download", () => {
-  const actions = selectionActions([folder, file, link]);
+  const actions = selectionActions([folder, file, link, form]);
   assert.equal(actions.canMove, false);
   assert.equal(actions.canPublish, true);
   assert.deepEqual(actions.printableIds, [8]);

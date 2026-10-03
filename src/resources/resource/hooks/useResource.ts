@@ -168,6 +168,7 @@ export function useResource() {
 
   return {
     organization,
+    userId: user.id,
     item,
     blocks: blocksQuery.data ?? [],
     blocksLoading: blocksQuery.isLoading,

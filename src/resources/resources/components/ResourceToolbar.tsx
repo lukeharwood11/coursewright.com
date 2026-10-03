@@ -2,6 +2,7 @@ import { useId, useRef, useState } from "react";
 import {
   ArrowUpTrayIcon,
   ChevronDownIcon,
+  ClipboardDocumentListIcon,
   DocumentTextIcon,
   FolderIcon,
   LinkIcon,
@@ -17,6 +18,7 @@ import {
 const FILTERS: Array<{ id: ResourceTypeFilter; label: string }> = [
   { id: "all", label: "All" },
   { id: "document", label: "Documents" },
+  { id: "form", label: "Forms" },
   { id: "file", label: "Files" },
   { id: "link", label: "Links" },
 ];
@@ -27,6 +29,7 @@ export function ResourceToolbar({
   onTypeFilter,
   onNewFolder,
   onNewDocument,
+  onNewForm,
   onNewLink,
   onUpload,
   documentPending,
@@ -36,6 +39,7 @@ export function ResourceToolbar({
   onTypeFilter: (next: ResourceTypeFilter) => void;
   onNewFolder: () => void;
   onNewDocument: () => void;
+  onNewForm: () => void;
   onNewLink: () => void;
   onUpload: () => void;
   documentPending: boolean;
@@ -57,6 +61,12 @@ export function ResourceToolbar({
       icon: <DocumentTextIcon className="h-4 w-4" />,
       separatorBefore: true,
       onSelect: onNewDocument,
+    },
+    {
+      id: "form",
+      label: "Form",
+      icon: <ClipboardDocumentListIcon className="h-4 w-4" />,
+      onSelect: onNewForm,
     },
     {
       id: "link",

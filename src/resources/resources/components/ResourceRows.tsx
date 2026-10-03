@@ -1,6 +1,7 @@
 import { useRef, useState, type MouseEvent } from "react";
 import { Link } from "react-router-dom";
 import {
+  ClipboardDocumentListIcon,
   DocumentTextIcon,
   EllipsisHorizontalIcon,
   FolderIcon,
@@ -241,7 +242,13 @@ function RowCheckbox({
 
 function ItemKindIcon({ type }: { type: ResourceItemRecord["type"] }) {
   const Icon =
-    type === "document" ? DocumentTextIcon : type === "link" ? LinkIcon : PaperClipIcon;
+    type === "document"
+      ? DocumentTextIcon
+      : type === "link"
+        ? LinkIcon
+        : type === "form"
+          ? ClipboardDocumentListIcon
+          : PaperClipIcon;
   return <Icon className="h-5 w-5 shrink-0 text-[var(--ink-faint)]" aria-hidden />;
 }
 

@@ -142,6 +142,16 @@ export function ResourcesPage() {
       .catch(() => undefined);
   }
 
+  function createForm() {
+    void page
+      .createUntitledForm()
+      .then((item) => {
+        if (!item) return;
+        navigate(resourceItemEditPath(page.organization.slug, item.id));
+      })
+      .catch(() => undefined);
+  }
+
   function openMoveFolder(folder: ResourceFolderRecord) {
     page.moveFolder.reset();
     setMove({
@@ -306,9 +316,10 @@ export function ResourcesPage() {
           onTypeFilter={page.setTypeFilter}
           onNewFolder={() => setFolderDialog(true)}
           onNewDocument={createDocument}
+          onNewForm={createForm}
           onNewLink={() => setLinkDialog(true)}
           onUpload={openFilePicker}
-          documentPending={page.createDocument.isPending}
+          documentPending={page.createDocument.isPending || page.createForm.isPending}
         />
       </div>
 
@@ -376,6 +387,7 @@ export function ResourcesPage() {
           }}
           onCreateFolder={() => setFolderDialog(true)}
           onCreateDocument={createDocument}
+          onCreateForm={createForm}
           onCreateLink={() => setLinkDialog(true)}
           onUpload={openFilePicker}
           selectedKeys={selectedKeys}

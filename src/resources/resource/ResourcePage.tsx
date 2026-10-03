@@ -1,8 +1,9 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { PencilSquareIcon, PrinterIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, PrinterIcon, ShareIcon } from "@heroicons/react/24/outline";
+import { toast } from "sonner";
 import { Badge } from "@/ui/Badge";
-import { ButtonLink } from "@/ui/Button";
+import { Button, ButtonLink } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { PageLoading } from "@/ui/PageLoading";
@@ -18,9 +19,11 @@ import { MoveResourceDialog } from "@/resources/resources/components/MoveResourc
 import { ResourceActionsMenu } from "./components/ResourceActionsMenu";
 import { useResource } from "./hooks/useResource";
 import {
+  isPrintableResourceType,
   isPublishedResource,
   resourceItemTypeLabel,
 } from "@/resources/model/kinds";
+import { FormFill } from "@/resources/form/FormFill";
 import {
   resourceBrowsePath,
   resourceItemEditPath,
@@ -84,7 +87,7 @@ export function ResourcePage() {
         title={page.item.title}
         titleTrailing={
           <div className="flex shrink-0 flex-nowrap items-center gap-2">
-            {page.item.type !== "link" ? (
+            {isPrintableResourceType(page.item.type) ? (
               <ButtonLink
                 variant="secondary"
                 className={[
@@ -98,6 +101,21 @@ export function ResourcePage() {
                 <PrinterIcon className="h-5 w-5" aria-hidden />
                 Print
               </ButtonLink>
+            ) : null}
+            {page.item.type === "form" && page.canEdit ? (
+              <Button
+                type="button"
+                variant="secondary"
+                className="shrink-0"
+                onClick={() => {
+                  void navigator.clipboard.writeText(window.location.href).then(() => {
+                    toast("Link copied. People still need access to this form.");
+                  });
+                }}
+              >
+                <ShareIcon className="h-5 w-5" aria-hidden />
+                Share
+              </Button>
             ) : null}
             {page.canEdit ? (
               <ButtonLink
@@ -180,6 +198,16 @@ export function ResourcePage() {
               fileDownloadUrl={page.fileDownloadUrl}
             />
           </div>
+        ) : null}
+
+        {page.item.type === "form" ? (
+          <FormFill
+            organizationId={page.organization.id}
+            itemId={page.item.id}
+            published={isPublishedResource(page.item.visibility)}
+            canEdit={page.canEdit}
+            userId={page.userId}
+          />
         ) : null}
 
         <UnpublishControl

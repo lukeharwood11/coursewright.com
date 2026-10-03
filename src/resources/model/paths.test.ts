@@ -29,4 +29,8 @@ test("resource paths nest under /resources", () => {
     resourcesPathWithType("coop", null, "file"),
     "/my/coop/resources?type=file",
   );
+  assert.equal(
+    resourcesPathWithType("coop", null, "form"),
+    "/my/coop/resources?type=form",
+  );
 });
