@@ -6,11 +6,16 @@ import {
   PaperAirplaneIcon,
   PaperClipIcon,
   PlusIcon,
+  RectangleStackIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { useToastOnError } from "@/ui/useToastOnError";
 import type { AttachableMaterial } from "@/discussions/databridge/discussions";
+import type {
+  ResourcePickerFolder,
+  ResourcePickerItem,
+} from "@/discussions/model/resourcePicker";
 import { plainTextFromLexical } from "@/discussions/model/messageBody";
 import type { MentionPerson } from "@/discussions/model/mentions";
 import { ComposerAttachModal } from "./ComposerAttachModal";
@@ -19,6 +24,7 @@ import { DiscussionLexicalEditor } from "./DiscussionLexicalEditor";
 export type PendingAttachment =
   | { key: string; kind: "file"; file: File; label: string }
   | { key: string; kind: "material"; materialId: number; label: string }
+  | { key: string; kind: "resource"; resourceItemId: number; label: string }
   | { key: string; kind: "url"; url: string; label: string };
 
 export type ComposerMode = "plain" | "lexical";
@@ -59,6 +65,8 @@ export function MessageComposer({
   attachments,
   onAttachments,
   materials,
+  resourceItems,
+  resourceFolders,
   canSubmit,
   submitting,
   submitLabel,
@@ -86,6 +94,8 @@ export function MessageComposer({
   attachments: PendingAttachment[];
   onAttachments: (next: PendingAttachment[]) => void;
   materials: AttachableMaterial[];
+  resourceItems: ResourcePickerItem[];
+  resourceFolders: ResourcePickerFolder[];
   canSubmit: boolean;
   submitting: boolean;
   submitLabel: string;
@@ -288,6 +298,11 @@ export function MessageComposer({
                     className="h-4 w-4 shrink-0 text-[var(--green)]"
                     aria-hidden
                   />
+                ) : attachment.kind === "resource" ? (
+                  <RectangleStackIcon
+                    className="h-4 w-4 shrink-0 text-[var(--green)]"
+                    aria-hidden
+                  />
                 ) : (
                   <LinkIcon
                     className="h-4 w-4 shrink-0 text-[var(--green)]"
@@ -297,7 +312,8 @@ export function MessageComposer({
                 <span className="truncate">
                   {attachment.kind === "file"
                     ? attachment.label
-                    : attachment.kind === "material"
+                    : attachment.kind === "material" ||
+                        attachment.kind === "resource"
                       ? attachment.label
                       : attachment.label || attachment.url}
                 </span>
@@ -323,6 +339,8 @@ export function MessageComposer({
         <ComposerAttachModal
           open={attachOpen}
           materials={materials}
+          resourceItems={resourceItems}
+          resourceFolders={resourceFolders}
           onClose={() => setAttachOpen(false)}
           onAddMaterial={(material) => {
             onAttachments([
@@ -332,6 +350,17 @@ export function MessageComposer({
                 kind: "material",
                 materialId: material.id,
                 label: material.title,
+              },
+            ]);
+          }}
+          onAddResource={(item) => {
+            onAttachments([
+              ...attachments,
+              {
+                key: newKey(),
+                kind: "resource",
+                resourceItemId: item.id,
+                label: item.title,
               },
             ]);
           }}

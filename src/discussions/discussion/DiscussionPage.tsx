@@ -251,6 +251,8 @@ export function DiscussionPage() {
             attachments={page.attachments}
             onAttachments={page.setAttachments}
             materials={page.materials}
+            resourceItems={page.resourceItems}
+            resourceFolders={page.resourceFolders}
             canSubmit={page.canSubmit}
             submitting={page.posting}
             submitLabel="Post"

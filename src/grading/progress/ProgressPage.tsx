@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { BetaPill } from "@/ui/BetaPill";
 import { PageLoading } from "@/ui/PageLoading";
 import { studentsHubTier } from "@/grading/model/access";
 import { formatGradeDisplay } from "@/grading/model/scale";
@@ -103,7 +104,10 @@ export function ProgressPage() {
       </section>
 
       <section>
-        <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Report cards</h2>
+        <h2 className="flex items-center gap-1.5 text-[15.5px] font-extrabold text-[var(--ink)]">
+          Report cards
+          <BetaPill />
+        </h2>
         {progress.cards.length === 0 ? (
           <p className="mt-2 text-[14px] text-[var(--ink-soft)]">No report cards yet.</p>
         ) : (

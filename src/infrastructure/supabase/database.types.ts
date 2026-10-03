@@ -728,6 +728,7 @@ export type Database = {
           material_id: number | null
           message_id: number
           position: number
+          resource_item_id: number | null
           url: string | null
         }
         Insert: {
@@ -739,6 +740,7 @@ export type Database = {
           material_id?: number | null
           message_id: number
           position?: number
+          resource_item_id?: number | null
           url?: string | null
         }
         Update: {
@@ -750,6 +752,7 @@ export type Database = {
           material_id?: number | null
           message_id?: number
           position?: number
+          resource_item_id?: number | null
           url?: string | null
         }
         Relationships: [
@@ -772,6 +775,13 @@ export type Database = {
             columns: ["message_id"]
             isOneToOne: false
             referencedRelation: "discussion_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discussion_message_attachments_resource_item_id_fkey"
+            columns: ["resource_item_id"]
+            isOneToOne: false
+            referencedRelation: "org_resource_items"
             referencedColumns: ["id"]
           },
         ]

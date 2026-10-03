@@ -9,7 +9,7 @@ export const STAFF_VIEW_MODES = ["teacher", "preview", "parent", "student"] as c
 export type StaffViewMode = (typeof STAFF_VIEW_MODES)[number];
 
 /** @deprecated Prefer {@link staffViewModeLabel} with a writer role. */
-export const TEACHER_VIEW_LABEL = "Teacher";
+export const TEACHER_VIEW_LABEL = "Instructor";
 export const PREVIEW_VIEW_LABEL = "Preview";
 export const PARENT_VIEW_LABEL = "Parent";
 export const STUDENT_VIEW_LABEL = "Student";

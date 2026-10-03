@@ -22,6 +22,7 @@ import {
   createDiscussion,
   discussionQueryKeys,
   listAttachableMaterials,
+  listAttachableResources,
   listCourseIdsTaughtBy,
   listDiscussionAudienceMembers,
   listParentDiscussionContext,
@@ -104,6 +105,10 @@ export function useDiscussionNew() {
         courseId: draft.courseId,
       }),
   });
+  const resourcesQuery = useQuery({
+    queryKey: discussionQueryKeys.resources(organization.id),
+    queryFn: () => listAttachableResources(organization.id),
+  });
   const mentionPeopleQuery = useQuery({
     queryKey: discussionQueryKeys.audienceMembers(
       organization.id,
@@ -122,6 +127,7 @@ export function useDiscussionNew() {
       }),
     enabled:
       draft.audience === "organization" ||
+      draft.audience === "instructors" ||
       (draft.audience === "course" && draft.courseId != null) ||
       (draft.audience === "class" && draft.classId != null),
   });
@@ -194,11 +200,17 @@ export function useDiscussionNew() {
             materialId: attachment.materialId,
             label: attachment.label,
           }
-        : {
-            kind: "url",
-            url: attachment.url,
-            label: attachment.label,
-          },
+        : attachment.kind === "resource"
+          ? {
+              kind: "resource",
+              resourceItemId: attachment.resourceItemId,
+              label: attachment.label,
+            }
+          : {
+              kind: "url",
+              url: attachment.url,
+              label: attachment.label,
+            },
   );
 
   const openingBody = composerStateToBody(lexical);
@@ -223,6 +235,7 @@ export function useDiscussionNew() {
   const canSave =
     Boolean(draft.audience) &&
     (draft.audience === "organization" ||
+      draft.audience === "instructors" ||
       (draft.audience === "course" && draft.courseId != null) ||
       (draft.audience === "class" && draft.classId != null)) &&
     Boolean(draft.title.trim()) &&
@@ -257,6 +270,11 @@ export function useDiscussionNew() {
         setFormError(message);
         throw new Error(message);
       }
+      if (draft.audience === "instructors" && !canEdit) {
+        const message = "Only staff can start an instructors-only discussion.";
+        setFormError(message);
+        throw new Error(message);
+      }
       if (draft.audience === "course" && draft.courseId == null) {
         const message = "Choose a course.";
         setFormError(message);
@@ -273,7 +291,7 @@ export function useDiscussionNew() {
         throw new Error(message);
       }
       if (!messageBodyHasContent(openingBody, attachmentContent)) {
-        const message = "Write a first post, or add a file, material, or link.";
+        const message = "Write a first post, or add a file, material, resource, or link.";
         setFormError(message);
         throw new Error(message);
       }
@@ -305,6 +323,13 @@ export function useDiscussionNew() {
             return {
               kind: "material" as const,
               materialId: attachment.materialId,
+              label: attachment.label,
+            };
+          }
+          if (attachment.kind === "resource") {
+            return {
+              kind: "resource" as const,
+              resourceItemId: attachment.resourceItemId,
               label: attachment.label,
             };
           }
@@ -356,7 +381,7 @@ export function useDiscussionNew() {
     courseId: draft.courseId,
     classId: draft.classId,
     showOrganization: canEdit,
-    showFamilyAudience: canEdit,
+    showFamilyAudience: canEdit && draft.audience !== "instructors",
     setTitle: (title: string) => setDraft((current) => ({ ...current, title })),
     setBody: (body: string) => setDraft((current) => ({ ...current, body })),
     setAudience,
@@ -379,6 +404,8 @@ export function useDiscussionNew() {
       ? "You can start a discussion for a class you are in."
       : "Choose a class.",
     materials: materialsQuery.data ?? [],
+    resourceItems: resourcesQuery.data?.items ?? [],
+    resourceFolders: resourcesQuery.data?.folders ?? [],
     mentionPeople: mentionPeopleQuery.data ?? [],
     mentionsLoading: mentionPeopleQuery.isFetching,
     userId: user.id,

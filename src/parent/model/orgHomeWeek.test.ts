@@ -6,10 +6,14 @@ import {
   parseOrgHomeWeekSearch,
   resolveOrgHomeWeek,
 } from "./orgHomeWeek.ts";
+import { DEFAULT_SCHOOL_DAYS } from "@/organizations/model/schoolDays.ts";
 import {
+  calendarWeekContainingForOrg,
   calendarWeekForIsoDate,
+  effectiveOrgHomeViewAsOfDate,
   effectiveViewAsOfDate,
   isCurrentCalendarWeek,
+  isOrgHomeCalendarWeek,
   shiftCalendarWeek,
 } from "./thisWeek.ts";
 
@@ -79,5 +83,26 @@ describe("resolveOrgHomeWeek", () => {
   it("falls back to current week when param invalid", () => {
     const week = resolveOrgHomeWeek("2026-09-14");
     assert.equal(week.start, resolveOrgHomeWeek(null).start);
+  });
+
+  it("advances to next week after the last school day", () => {
+    const now = new Date("2026-09-19T12:00:00");
+    const week = resolveOrgHomeWeek(null, DEFAULT_SCHOOL_DAYS, [], now);
+    assert.equal(week.start, "2026-09-20");
+    assert.equal(
+      week.start,
+      calendarWeekContainingForOrg(DEFAULT_SCHOOL_DAYS, [], now).start,
+    );
+    assert.equal(isOrgHomeCalendarWeek(week, DEFAULT_SCHOOL_DAYS, [], now), true);
+    assert.equal(
+      effectiveOrgHomeViewAsOfDate(week, DEFAULT_SCHOOL_DAYS, [], now),
+      "2026-09-19",
+    );
+  });
+
+  it("stays on the calendar week before the last school day", () => {
+    const now = new Date("2026-09-18T12:00:00");
+    const week = resolveOrgHomeWeek(null, DEFAULT_SCHOOL_DAYS, [], now);
+    assert.equal(week.start, "2026-09-13");
   });
 });

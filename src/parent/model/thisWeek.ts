@@ -1,4 +1,7 @@
 import { addIsoDays } from "@/calendar/model/dates";
+import type { HomeDay } from "@/organizations/model/homeDays";
+import { isPastOrgInstructionWeek } from "@/organizations/model/orgInstructionDays";
+import type { SchoolDay } from "@/organizations/model/schoolDays";
 
 function toIsoDate(date: Date): string {
   const year = date.getFullYear();
@@ -41,6 +44,23 @@ export function calendarWeekContaining(now = new Date()): CalendarWeek {
   return calendarWeekFromStart(start);
 }
 
+/**
+ * Org home “current week”: Sun–Sat week containing today, unless today is after
+ * the last configured school/home day in that week — then the following week.
+ */
+export function calendarWeekContainingForOrg(
+  schoolDays: readonly SchoolDay[],
+  homeDays: readonly HomeDay[],
+  now = new Date(),
+): CalendarWeek {
+  const today = localIsoDate(now);
+  let week = calendarWeekContaining(now);
+  if (isPastOrgInstructionWeek(week.start, schoolDays, homeDays, today)) {
+    week = calendarWeekForIsoDate(shiftCalendarWeek(week.start, 1));
+  }
+  return week;
+}
+
 /** Calendar week containing an ISO calendar date (local noon parse). */
 export function calendarWeekForIsoDate(isoDate: string): CalendarWeek {
   return calendarWeekContaining(new Date(`${isoDate}T12:00:00`));
@@ -54,9 +74,31 @@ export function isCurrentCalendarWeek(week: CalendarWeek, now = new Date()): boo
   return week.start === calendarWeekContaining(now).start;
 }
 
+export function isOrgHomeCalendarWeek(
+  week: CalendarWeek,
+  schoolDays: readonly SchoolDay[],
+  homeDays: readonly HomeDay[],
+  now = new Date(),
+): boolean {
+  return (
+    week.start === calendarWeekContainingForOrg(schoolDays, homeDays, now).start
+  );
+}
+
 /** “As-of” date for announcements and Coming up on the This week home. */
 export function effectiveViewAsOfDate(week: CalendarWeek, now = new Date()): string {
   return isCurrentCalendarWeek(week, now) ? localIsoDate(now) : week.start;
+}
+
+export function effectiveOrgHomeViewAsOfDate(
+  week: CalendarWeek,
+  schoolDays: readonly SchoolDay[],
+  homeDays: readonly HomeDay[],
+  now = new Date(),
+): string {
+  return isOrgHomeCalendarWeek(week, schoolDays, homeDays, now)
+    ? localIsoDate(now)
+    : week.start;
 }
 
 export function formatMaterialDate(isoDate: string): string {

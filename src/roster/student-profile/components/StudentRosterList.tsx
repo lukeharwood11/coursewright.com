@@ -16,6 +16,7 @@ export function StudentRosterList({
   onClearSelection,
   classLabel,
   variant = "list",
+  allMatchingIds,
 }: {
   students: StudentSummary[];
   orgSlug: string;
@@ -27,11 +28,16 @@ export function StudentRosterList({
   onSelectAll?: () => void;
   onClearSelection?: () => void;
   variant?: "list" | "directory";
+  /** When paginated, ids in the full filtered set (for select-all checkbox state). */
+  allMatchingIds?: number[];
 }) {
   const selectable = Boolean(onToggle);
   const selectedSet = new Set(selectedIds ?? []);
+  const selectionScope =
+    allMatchingIds ?? students.map((student) => student.id);
   const allSelected =
-    students.length > 0 && students.every((student) => selectedSet.has(student.id));
+    selectionScope.length > 0 &&
+    selectionScope.every((id) => selectedSet.has(id));
 
   if (students.length === 0) {
     return (

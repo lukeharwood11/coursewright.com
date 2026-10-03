@@ -64,7 +64,7 @@ export function UserProfileContent({
         <>
           <ProfileLinkList
             heading="Teaches"
-            empty="Not listed as a teacher on a course."
+            empty="Not listed as an instructor on a course."
             items={profile.teaches}
             hrefFor={(item) => coursePath(orgSlug, item.id)}
             compact={compact}

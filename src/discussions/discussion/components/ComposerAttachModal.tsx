@@ -1,46 +1,101 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { BookOpenIcon, LinkIcon } from "@heroicons/react/24/outline";
+import { BookOpenIcon, LinkIcon, RectangleStackIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
-import { Select } from "@/ui/Select";
+import { MaterialOutlinePickerModal } from "@/ui/MaterialOutlinePickerModal";
 import type { AttachableMaterial } from "@/discussions/databridge/discussions";
+import {
+  filterAttachableLayout,
+  layoutAttachableMaterials,
+} from "@/discussions/model/attachablePicker";
 import { isHttpUrl } from "@/discussions/model/validate";
+import type {
+  ResourcePickerFolder,
+  ResourcePickerItem,
+} from "@/discussions/model/resourcePicker";
+import { SelectResourceModal } from "./SelectResourceModal";
 
-type Step = "choose" | "material" | "link";
+type Step = "choose" | "material" | "resource" | "link";
+
+function attachablePickerModel(
+  layout: ReturnType<typeof filterAttachableLayout>,
+  catalog: AttachableMaterial[],
+) {
+  if (layout.mode === "multiCourse") {
+    return { kind: "courses" as const, courses: layout.courses };
+  }
+  const sample = catalog[0];
+  return {
+    kind: "courses" as const,
+    courses: [
+      {
+        courseId: sample?.courseId ?? 0,
+        courseTitle: sample?.courseTitle ?? "Course",
+        groups: layout.groups,
+      },
+    ],
+  };
+}
 
 export function ComposerAttachModal({
   open,
   materials,
+  resourceItems,
+  resourceFolders,
   onClose,
   onAddMaterial,
+  onAddResource,
   onAddLink,
 }: {
   open: boolean;
   materials: AttachableMaterial[];
+  resourceItems: ResourcePickerItem[];
+  resourceFolders: ResourcePickerFolder[];
   onClose: () => void;
   onAddMaterial: (material: AttachableMaterial) => void;
+  onAddResource: (item: ResourcePickerItem) => void;
   onAddLink: (args: { url: string; label: string }) => void;
 }) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<Step>("choose");
-  const [materialId, setMaterialId] = useState<number | "">("");
+  const [selectedMaterialId, setSelectedMaterialId] = useState<number | null>(
+    null,
+  );
+  const [selectedResourceId, setSelectedResourceId] = useState<number | null>(
+    null,
+  );
   const [linkUrl, setLinkUrl] = useState("");
   const [linkLabel, setLinkLabel] = useState("");
   const [linkError, setLinkError] = useState<string | null>(null);
 
+  const baseLayout = useMemo(
+    () => layoutAttachableMaterials(materials),
+    [materials],
+  );
+
+  const getFilteredModel = useCallback(
+    (query: string) =>
+      attachablePickerModel(
+        filterAttachableLayout(baseLayout, query),
+        materials,
+      ),
+    [baseLayout, materials],
+  );
+
   useEffect(() => {
     if (!open) return;
     setStep("choose");
-    setMaterialId("");
+    setSelectedMaterialId(null);
+    setSelectedResourceId(null);
     setLinkUrl("");
     setLinkLabel("");
     setLinkError(null);
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || step !== "choose") return;
     const focusable = panelRef.current?.querySelector<HTMLElement>(
       "button,input,select,textarea",
     );
@@ -53,20 +108,19 @@ export function ComposerAttachModal({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, onClose, step]);
 
-  if (!open) return null;
-
-  const title =
-    step === "choose"
-      ? "Add to message"
-      : step === "material"
-        ? "Add a material"
-        : "Add a link";
-
   function confirmMaterial() {
-    if (materialId === "") return;
-    const material = materials.find((row) => row.id === materialId);
+    if (selectedMaterialId == null) return;
+    const material = materials.find((row) => row.id === selectedMaterialId);
     if (!material) return;
     onAddMaterial(material);
+    onClose();
+  }
+
+  function confirmResource() {
+    if (selectedResourceId == null) return;
+    const item = resourceItems.find((row) => row.id === selectedResourceId);
+    if (!item) return;
+    onAddResource(item);
     onClose();
   }
 
@@ -78,6 +132,47 @@ export function ComposerAttachModal({
     onAddLink({ url: linkUrl.trim(), label: linkLabel.trim() });
     onClose();
   }
+
+  if (!open) return null;
+
+  if (step === "resource") {
+    return (
+      <SelectResourceModal
+        open
+        items={resourceItems}
+        folders={resourceFolders}
+        selectedId={selectedResourceId}
+        onSelect={setSelectedResourceId}
+        onClose={() => setStep("choose")}
+        onConfirm={confirmResource}
+      />
+    );
+  }
+
+  if (step === "material") {
+    return (
+      <MaterialOutlinePickerModal
+        open
+        title="Add a material"
+        description="Link a published page, file, or link from a course."
+        searchPlaceholder="Filter by material, unit, or course…"
+        catalogCount={materials.length}
+        getFilteredModel={getFilteredModel}
+        selectedIds={selectedMaterialId == null ? [] : [selectedMaterialId]}
+        onToggle={(materialId) => setSelectedMaterialId(materialId)}
+        selectionMode="single"
+        emptyCatalogMessage="No materials you can attach here yet."
+        onClose={() => setStep("choose")}
+        primaryAction={{
+          label: "Add material",
+          disabled: selectedMaterialId == null,
+          onClick: confirmMaterial,
+        }}
+      />
+    );
+  }
+
+  const title = step === "choose" ? "Add to message" : "Add a link";
 
   let body: ReactNode;
   if (step === "choose") {
@@ -101,6 +196,24 @@ export function ComposerAttachModal({
         <button
           type="button"
           className="flex items-center gap-3 rounded-[8px] border border-[var(--line-soft)] bg-[var(--paper)] px-3 py-3 text-left transition-colors hover:border-[var(--green)] hover:bg-[var(--green-tint)]"
+          onClick={() => setStep("resource")}
+        >
+          <RectangleStackIcon
+            className="h-5 w-5 shrink-0 text-[var(--green)]"
+            aria-hidden
+          />
+          <span>
+            <span className="block text-[14px] font-extrabold text-[var(--ink)]">
+              Resource
+            </span>
+            <span className="mt-0.5 block text-[12.5px] text-[var(--ink-soft)]">
+              Link a document, file, or link from Resources
+            </span>
+          </span>
+        </button>
+        <button
+          type="button"
+          className="flex items-center gap-3 rounded-[8px] border border-[var(--line-soft)] bg-[var(--paper)] px-3 py-3 text-left transition-colors hover:border-[var(--green)] hover:bg-[var(--green-tint)]"
           onClick={() => setStep("link")}
         >
           <LinkIcon className="h-5 w-5 shrink-0 text-[var(--green)]" aria-hidden />
@@ -114,33 +227,6 @@ export function ComposerAttachModal({
           </span>
         </button>
       </div>
-    );
-  } else if (step === "material") {
-    body = (
-      <label className="block">
-        <span className="text-[12.5px] font-bold text-[var(--ink-soft)]">
-          Material
-        </span>
-        <Select
-          wrapperClassName="mt-1 w-full"
-          value={materialId === "" ? "" : String(materialId)}
-          onChange={(event) =>
-            setMaterialId(event.target.value ? Number(event.target.value) : "")
-          }
-        >
-          <option value="">Choose a material</option>
-          {materials.map((material) => (
-            <option key={material.id} value={material.id}>
-              {material.courseTitle}: {material.title}
-            </option>
-          ))}
-        </Select>
-        {materials.length === 0 ? (
-          <p className="mt-2 text-[13px] text-[var(--ink-soft)]">
-            No materials you can attach here yet.
-          </p>
-        ) : null}
-      </label>
     );
   } else {
     body = (
@@ -204,7 +290,7 @@ export function ComposerAttachModal({
         </h2>
         <div className="mt-3">{body}</div>
         <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
-          {step !== "choose" ? (
+          {step === "link" ? (
             <Button
               type="button"
               variant="secondary"
@@ -216,15 +302,6 @@ export function ComposerAttachModal({
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          {step === "material" ? (
-            <Button
-              type="button"
-              disabled={materialId === ""}
-              onClick={confirmMaterial}
-            >
-              Add material
-            </Button>
-          ) : null}
           {step === "link" ? (
             <Button type="button" onClick={confirmLink}>
               Add link

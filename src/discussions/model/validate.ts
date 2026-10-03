@@ -30,6 +30,12 @@ export type MaterialAttachmentDraft = {
   label: string;
 };
 
+export type ResourceAttachmentDraft = {
+  kind: "resource";
+  resourceItemId: number;
+  label: string;
+};
+
 export type FileAttachmentMeta = {
   kind: "file";
   label: string;
@@ -38,6 +44,7 @@ export type FileAttachmentMeta = {
 export type AttachmentContent =
   | UrlAttachmentDraft
   | MaterialAttachmentDraft
+  | ResourceAttachmentDraft
   | FileAttachmentMeta;
 
 export function parseOptionalId(value: string | null | undefined): number | null {
@@ -62,6 +69,9 @@ export function draftFromSearchParams(params: URLSearchParams): Pick<
   }
   if (audience === "organization") {
     return { audience, courseId: null, classId: null, familyAudience };
+  }
+  if (audience === "instructors") {
+    return { audience, courseId: null, classId: null, familyAudience: "both" };
   }
   return { audience: null, courseId: null, classId: null, familyAudience };
 }
@@ -119,7 +129,7 @@ export function validateDiscussionDraft(
   }
   if (!draft.title.trim()) return "Add a title so people know what this is about.";
   if (!messageHasContent(draft.body, attachments)) {
-    return "Write a first post, or add a file, material, or link.";
+    return "Write a first post, or add a file, material, resource, or link.";
   }
   for (const attachment of attachments) {
     if (attachment.kind === "url") {
@@ -142,7 +152,7 @@ export function validatePost(
   attachments: AttachmentContent[],
 ): string | null {
   if (!messageBodyHasContent(body, attachments)) {
-    return "Write a message, or add a file, material, or link.";
+    return "Write a message, or add a file, material, resource, or link.";
   }
   for (const attachment of attachments) {
     if (attachment.kind === "url") {

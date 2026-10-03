@@ -121,7 +121,7 @@ test("staffViewModeLabel matches product labels", () => {
   assert.equal(staffViewModeLabel("teacher", "owner"), "Owner");
   assert.equal(staffViewModeLabel("teacher", "admin"), "Admin");
   assert.equal(staffViewModeLabel("teacher", "instructor"), "Instructor");
-  assert.equal(staffViewModeLabel("teacher"), "Teacher");
+  assert.equal(staffViewModeLabel("teacher"), "Instructor");
   assert.equal(staffViewModeLabel("preview"), "Preview");
   assert.equal(staffViewModeLabel("parent"), "Parent");
   assert.equal(staffViewModeLabel("student"), "Student");

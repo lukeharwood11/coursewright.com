@@ -1,3 +1,4 @@
+import { BetaPill } from "@/ui/BetaPill";
 import { BrandLogoLockup } from "@/organizations/components/BrandLogoLockup";
 import { brandAssetPublicUrl } from "@/organizations/model/brand";
 import type { ReportCardSnapshot } from "@/grading/databridge/reportCards";
@@ -32,8 +33,9 @@ export function ReportCardArtifactHeader({ snapshot }: { snapshot: ReportCardSna
           {orgName}
         </p>
       ) : null}
-      <p className="mt-2 text-[12.5px] font-bold uppercase tracking-wide text-[var(--ink-faint)]">
+      <p className="mt-2 flex items-center gap-1.5 text-[12.5px] font-bold uppercase tracking-wide text-[var(--ink-faint)]">
         Report card
+        <BetaPill className="print:hidden" />
       </p>
     </header>
   );

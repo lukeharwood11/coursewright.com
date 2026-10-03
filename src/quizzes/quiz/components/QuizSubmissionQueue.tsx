@@ -67,7 +67,7 @@ export function QuizSubmissionQueue({
             attempts={graded}
             timeZone={timeZone}
             onOpen={onOpen}
-            empty="No teacher grades yet."
+            empty="No instructor grades yet."
           />
         </div>
       )}

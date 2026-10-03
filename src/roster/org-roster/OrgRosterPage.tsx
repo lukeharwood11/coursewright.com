@@ -21,6 +21,7 @@ import { PageLoading } from "@/ui/PageLoading";
 import { Input } from "@/ui/Input";
 import { Select } from "@/ui/Select";
 import { Tab, TabList } from "@/ui/Tabs";
+import { PickerPaginationBar, slicePickerPage } from "@/ui/PickerPagination";
 import { BatchCreateStudentsForm } from "@/roster/student-profile/components/BatchCreateStudentsForm";
 import { StudentRosterList } from "@/roster/student-profile/components/StudentRosterList";
 import { AddStudentsDrawer } from "./components/AddStudentsDrawer";
@@ -38,6 +39,7 @@ export function OrgRosterPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = searchParams.get("tab") === "classes" ? "classes" : "students";
   const [classFilter, setClassFilter] = useState("");
+  const [studentPage, setStudentPage] = useState(1);
   const [pendingRemove, setPendingRemove] = useState<StudentSummary | null>(null);
   const membershipsQuery = useQuery({
     queryKey: ["class-membership-labels", roster.organization.id],
@@ -61,6 +63,26 @@ export function OrgRosterPage() {
       (row) => row.studentProfileId === student.id && String(row.classId) === classFilter,
     );
   });
+
+  const visibleStudentIds = useMemo(
+    () => visibleStudents.map((student) => student.id),
+    [visibleStudents],
+  );
+
+  const pagedStudents = useMemo(
+    () => slicePickerPage(visibleStudents, studentPage),
+    [visibleStudents, studentPage],
+  );
+
+  useEffect(() => {
+    setStudentPage(1);
+  }, [roster.query, classFilter]);
+
+  useEffect(() => {
+    if (studentPage > pagedStudents.pageCount) {
+      setStudentPage(pagedStudents.pageCount);
+    }
+  }, [studentPage, pagedStudents.pageCount]);
 
   useEffect(() => {
     document.title = `Students · ${roster.organization.name} · Course Wright`;
@@ -194,37 +216,50 @@ export function OrgRosterPage() {
                 or class.
               </p>
             ) : (
-              <StudentRosterList
-                students={visibleStudents}
-                orgSlug={roster.organization.slug}
-                emptyMessage={
-                  classFilter ? "No students in that class." : "No students match that search."
-                }
-                variant="directory"
-                classLabel={(id) => classNames.get(id)?.join(", ") ?? null}
-                selectedIds={canAct ? roster.selectedIds : undefined}
-                onToggle={canAct ? roster.onToggle : undefined}
-                onSelectAll={
-                  canAct
-                    ? () => roster.onSelectIds(visibleStudents.map((student) => student.id))
-                    : undefined
-                }
-                onClearSelection={canAct ? roster.onClearSelection : undefined}
-                trailing={
-                  canRemove
-                    ? (student) => (
-                        <Button
-                          variant="secondary"
-                          onClick={() => setPendingRemove(student)}
-                          disabled={roster.removingId === student.id}
-                        >
-                          <TrashIcon className="h-5 w-5" aria-hidden />
-                          {roster.removingId === student.id ? "Removing…" : "Remove"}
-                        </Button>
-                      )
-                    : undefined
-                }
-              />
+              <>
+                <StudentRosterList
+                  students={pagedStudents.items}
+                  orgSlug={roster.organization.slug}
+                  emptyMessage={
+                    classFilter ? "No students in that class." : "No students match that search."
+                  }
+                  variant="directory"
+                  classLabel={(id) => classNames.get(id)?.join(", ") ?? null}
+                  selectedIds={canAct ? roster.selectedIds : undefined}
+                  onToggle={canAct ? roster.onToggle : undefined}
+                  allMatchingIds={canAct ? visibleStudentIds : undefined}
+                  onSelectAll={
+                    canAct
+                      ? () => roster.onSelectIds(visibleStudentIds)
+                      : undefined
+                  }
+                  onClearSelection={canAct ? roster.onClearSelection : undefined}
+                  trailing={
+                    canRemove
+                      ? (student) => (
+                          <Button
+                            variant="secondary"
+                            onClick={() => setPendingRemove(student)}
+                            disabled={roster.removingId === student.id}
+                          >
+                            <TrashIcon className="h-5 w-5" aria-hidden />
+                            {roster.removingId === student.id ? "Removing…" : "Remove"}
+                          </Button>
+                        )
+                      : undefined
+                  }
+                />
+                {pagedStudents.needsPagination ? (
+                  <div className="mt-3 overflow-hidden rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)]">
+                    <PickerPaginationBar
+                      page={pagedStudents.page}
+                      pageCount={pagedStudents.pageCount}
+                      total={pagedStudents.total}
+                      onPage={setStudentPage}
+                    />
+                  </div>
+                ) : null}
+              </>
             )
           ) : null}
         </section>

@@ -1,4 +1,13 @@
+import { BetaPill } from "@/ui/BetaPill";
 import type { PublicPlan } from "../../model/pricingPlans";
+
+function capShowsBeta(cap: string): boolean {
+  return /gradebook|report card/i.test(cap);
+}
+
+function featureShowsBeta(title: string): boolean {
+  return /gradebook|report card/i.test(title);
+}
 
 export function PricingPlanDetails({ plans }: { plans: PublicPlan[] }) {
   return (
@@ -41,9 +50,10 @@ export function PricingPlanDetails({ plans }: { plans: PublicPlan[] }) {
                 {plan.caps.map((cap) => (
                   <li
                     key={cap}
-                    className="rounded-full bg-[var(--green-tint)] px-3 py-1.5 text-[12.5px] font-bold text-[var(--green-deep)]"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[var(--green-tint)] px-3 py-1.5 text-[12.5px] font-bold text-[var(--green-deep)]"
                   >
                     {cap}
+                    {capShowsBeta(cap) ? <BetaPill /> : null}
                   </li>
                 ))}
               </ul>
@@ -56,8 +66,9 @@ export function PricingPlanDetails({ plans }: { plans: PublicPlan[] }) {
               <dl className="mt-4 grid gap-x-8 gap-y-6 sm:grid-cols-2">
                 {plan.features.map((feature) => (
                   <div key={feature.title}>
-                    <dt className="text-[14.5px] font-extrabold text-[var(--ink)]">
+                    <dt className="flex items-center gap-1.5 text-[14.5px] font-extrabold text-[var(--ink)]">
                       {feature.title}
+                      {featureShowsBeta(feature.title) ? <BetaPill /> : null}
                     </dt>
                     <dd className="mt-1.5 text-[14px] leading-relaxed text-[var(--ink-soft)]">
                       {feature.description}

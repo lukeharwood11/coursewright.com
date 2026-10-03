@@ -56,6 +56,14 @@ export function draftFromSearchParams(params: URLSearchParams): Pick<
       studentIds: studentId != null ? [studentId] : [],
     };
   }
+  if (audience === "instructors") {
+    return {
+      audience,
+      courseIds: [],
+      classIds: [],
+      studentIds: [],
+    };
+  }
   return { audience: null, courseIds: [], classIds: [], studentIds: [] };
 }
 
@@ -82,6 +90,7 @@ export function announcementDraftHasTitleAndTargets(draft: AnnouncementDraft): b
   if (!draft.title.trim() || !draft.audience) return false;
   if (draft.audience === "course") return draft.courseIds.length > 0;
   if (draft.audience === "class") return draft.classIds.length > 0;
+  if (draft.audience === "instructors") return true;
   return draft.studentIds.length > 0;
 }
 

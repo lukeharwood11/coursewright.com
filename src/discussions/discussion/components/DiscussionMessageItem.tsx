@@ -199,6 +199,8 @@ export function DiscussionMessageItem({
               attachments={emptyAttachments}
               onAttachments={() => undefined}
               materials={[]}
+              resourceItems={[]}
+              resourceFolders={[]}
               canSubmit={editCanSave}
               submitting={editSaving}
               submitLabel="Save"

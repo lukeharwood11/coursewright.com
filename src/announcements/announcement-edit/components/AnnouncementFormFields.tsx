@@ -1,42 +1,45 @@
-import type { ComponentType, SVGProps } from "react";
 import {
   BookOpenIcon,
   UserGroupIcon,
   UserIcon,
+  AcademicCapIcon,
+  PlusIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { useMemo, useState } from "react";
+import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import {
+  ResponsiveSegmentPicker,
+  type ResponsiveSegmentOption,
+} from "@/ui/ResponsiveSegmentPicker";
+import {
   announcementAudienceLabel,
+  announcementAudienceVisibilityHint,
+  announcementAudienceVisibilityHintLabel,
   type AnnouncementAudience,
 } from "@/announcements/model/audience";
+import { WhoCanSeeHint } from "@/ui/WhoCanSeeHint";
 import type { CourseSummary } from "@/courses/databridge/courses";
 import type { ClassSummary } from "@/roster/databridge/classes";
 import type { StudentSummary } from "@/roster/databridge/students";
+import { SelectStudentsModal } from "./SelectStudentsModal";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
   "focus:border-[var(--green)] focus:shadow-[0_0_0_3px_var(--green-tint)]",
 ].join(" ");
 
-type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-
-const audienceOptions: Array<{
-  value: AnnouncementAudience;
-  Icon: IconComponent;
-}> = [
-  { value: "course", Icon: BookOpenIcon },
-  { value: "class", Icon: UserGroupIcon },
-  { value: "student", Icon: UserIcon },
+const audienceOptions: ResponsiveSegmentOption<AnnouncementAudience>[] = [
+  { value: "course", label: announcementAudienceLabel("course"), icon: BookOpenIcon },
+  { value: "class", label: announcementAudienceLabel("class"), icon: UserGroupIcon },
+  { value: "student", label: announcementAudienceLabel("student"), icon: UserIcon },
+  {
+    value: "instructors",
+    label: announcementAudienceLabel("instructors"),
+    icon: AcademicCapIcon,
+  },
 ];
-
-const segmentIdle =
-  "inline-flex flex-1 items-center justify-center gap-1.5 px-3 py-[9px] text-[13px] font-bold text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)] motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent disabled:hover:text-[var(--ink-soft)]";
-
-const segmentActive =
-  "inline-flex flex-1 items-center justify-center gap-1.5 px-3 py-[9px] text-[13px] font-bold bg-[var(--green-tint)] text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)] disabled:cursor-not-allowed disabled:opacity-60";
-
-const segmentGroupClass =
-  "mt-2 flex w-full overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--surface)]";
 
 function TargetChecklist({
   label,
@@ -132,38 +135,37 @@ export function AnnouncementFormFields({
   onEndDate: (value: string) => void;
   onSendNotification: (value: boolean) => void;
 }) {
+  const [studentsModalOpen, setStudentsModalOpen] = useState(false);
+  const studentsById = useMemo(
+    () => new Map(students.map((student) => [student.id, student])),
+    [students],
+  );
+  const selectedStudents = useMemo(
+    () =>
+      studentIds
+        .map((id) => studentsById.get(id))
+        .filter((student): student is StudentSummary => student != null),
+    [studentIds, studentsById],
+  );
+
   return (
     <>
       <fieldset>
         <legend className="text-[13px] font-bold text-[var(--ink-soft)]">
           Who is this for?
         </legend>
-        <div
-          className={segmentGroupClass}
-          role="group"
-          aria-label="Announcement audience"
-        >
-          {audienceOptions.map(({ value, Icon }, index) => {
-            const active = audience === value;
-            return (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={active}
-                disabled={!isNew}
-                className={`${active ? segmentActive : segmentIdle}${
-                  index < audienceOptions.length - 1
-                    ? " border-r border-[var(--line)]"
-                    : ""
-                }`}
-                onClick={() => onAudience(value)}
-              >
-                <Icon className="h-4 w-4 shrink-0" aria-hidden />
-                {announcementAudienceLabel(value)}
-              </button>
-            );
-          })}
-        </div>
+        <ResponsiveSegmentPicker
+          ariaLabel="Announcement audience"
+          value={audience}
+          onChange={onAudience}
+          options={audienceOptions}
+          disabled={!isNew}
+        />
+        {audience != null ? (
+          <WhoCanSeeHint hintLabel={announcementAudienceVisibilityHintLabel(audience)}>
+            {announcementAudienceVisibilityHint(audience)}
+          </WhoCanSeeHint>
+        ) : null}
       </fieldset>
 
       {audience === "course" ? (
@@ -194,16 +196,68 @@ export function AnnouncementFormFields({
       ) : null}
 
       {audience === "student" ? (
-        <TargetChecklist
-          label="Students"
-          options={students.map((student) => ({
-            id: student.id,
-            name: student.name,
-          }))}
-          selectedIds={studentIds}
-          disabled={!isNew}
-          onToggle={onToggleStudentId}
-        />
+        <fieldset className="mt-4">
+          <legend className="text-[13px] font-bold text-[var(--ink-soft)]">
+            Students
+          </legend>
+          {students.length === 0 ? (
+            <p className="mt-2 text-[12.5px] text-[var(--ink-faint)]">
+              Nothing to choose yet.
+            </p>
+          ) : (
+            <>
+              {selectedStudents.length > 0 ? (
+                <ul className="mt-2 flex max-h-40 flex-col gap-1.5 overflow-y-auto">
+                  {selectedStudents.map((student) => (
+                    <li
+                      key={student.id}
+                      className="flex items-center justify-between gap-2 rounded-[6px] border border-[var(--line-soft)] bg-[var(--surface)] px-2.5 py-1.5"
+                    >
+                      <span className="min-w-0 text-[13px] font-semibold text-[var(--ink)]">
+                        {student.name}
+                      </span>
+                      {isNew ? (
+                        <button
+                          type="button"
+                          className="shrink-0 rounded-[4px] p-0.5 text-[var(--ink-faint)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]"
+                          aria-label={`Remove ${student.name}`}
+                          onClick={() => onToggleStudentId(student.id)}
+                        >
+                          <XMarkIcon className="h-4 w-4" aria-hidden />
+                        </button>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-[12.5px] text-[var(--ink-faint)]">
+                  Choose at least one student.
+                </p>
+              )}
+              {isNew ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  fullWidth
+                  className="mt-2"
+                  onClick={() => setStudentsModalOpen(true)}
+                >
+                  <PlusIcon className="h-4 w-4" aria-hidden />
+                  {selectedStudents.length === 0
+                    ? "Choose students"
+                    : "Change selection"}
+                </Button>
+              ) : null}
+            </>
+          )}
+          <SelectStudentsModal
+            open={studentsModalOpen}
+            students={students}
+            selectedIds={studentIds}
+            onToggle={onToggleStudentId}
+            onClose={() => setStudentsModalOpen(false)}
+          />
+        </fieldset>
       ) : null}
 
       <label className="mt-4 flex flex-col gap-1">
@@ -250,8 +304,9 @@ export function AnnouncementFormFields({
         </label>
       </div>
       <p className="mt-2 text-[12.5px] text-[var(--ink-faint)]">
-        Leave dates blank to show this on home until you remove it. If you set
-        dates, students only see it between them.
+        {audience === "instructors"
+          ? "Leave dates blank to keep this on the staff list until you remove it."
+          : "Leave dates blank to show this on home until you remove it. If you set dates, students only see it between them."}
       </p>
       <label className="mt-5 flex cursor-pointer items-start gap-2">
         <input
@@ -265,7 +320,9 @@ export function AnnouncementFormFields({
             Send notification
           </span>
           <span className="mt-0.5 block text-[12.5px] text-[var(--ink-faint)]">
-            Email students who already have an account, and show it in their Activity.
+            {audience === "instructors"
+              ? "Email collaborators who already have an account, and show it in their Activity."
+              : "Email students who already have an account, and show it in their Activity."}
           </span>
         </span>
       </label>

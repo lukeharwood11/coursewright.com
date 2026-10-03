@@ -1,17 +1,44 @@
-export const ANNOUNCEMENT_AUDIENCES = ["course", "class", "student"] as const;
+export const ANNOUNCEMENT_AUDIENCES = ["course", "class", "student", "instructors"] as const;
 export type AnnouncementAudience = (typeof ANNOUNCEMENT_AUDIENCES)[number];
 
 export function parseAnnouncementAudience(
   value: string | null | undefined,
 ): AnnouncementAudience | null {
-  if (value === "course" || value === "class" || value === "student") return value;
+  if (
+    value === "course" ||
+    value === "class" ||
+    value === "student" ||
+    value === "instructors"
+  ) {
+    return value;
+  }
   return null;
 }
 
 export function announcementAudienceLabel(audience: AnnouncementAudience): string {
   if (audience === "course") return "Course";
   if (audience === "class") return "Class";
+  if (audience === "instructors") return "Instructors";
   return "Student";
+}
+
+export function announcementAudienceVisibilityHint(audience: AnnouncementAudience): string {
+  if (audience === "course") {
+    return "Parents and students enrolled in the courses you pick see this on home during the date window.";
+  }
+  if (audience === "class") {
+    return "Parents and students in the classes you pick see this on home during the date window.";
+  }
+  if (audience === "student") {
+    return "The students you pick and their linked parents see this on home during the date window.";
+  }
+  return "Only org collaborators — owners, admins, instructors, and observers. It does not appear on student home.";
+}
+
+export function announcementAudienceVisibilityHintLabel(
+  audience: AnnouncementAudience,
+): string {
+  return `Who can see a ${announcementAudienceLabel(audience).toLowerCase()} announcement`;
 }
 
 export function announcementTargetNames(item: {
@@ -22,6 +49,7 @@ export function announcementTargetNames(item: {
 }): string[] {
   if (item.audience === "course") return cleanTargetNames(item.courseTitles);
   if (item.audience === "class") return cleanTargetNames(item.classTitles);
+  if (item.audience === "instructors") return ["Instructors"];
   return cleanTargetNames(item.studentNames);
 }
 

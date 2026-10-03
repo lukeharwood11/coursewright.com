@@ -59,7 +59,7 @@ export function DiscussionNewPage() {
             New discussion
           </h1>
           <p className="mt-2 text-[14px] text-[var(--ink-soft)]">
-            Start a thread for a course, a class, or the whole organization.
+            Start a thread for a course, a class, your organization, or instructors only.
           </p>
           <p className="mt-3 text-[13px]">
             <Link
@@ -82,7 +82,7 @@ export function DiscussionNewPage() {
 
       <form
         id={DISCUSSION_FORM_ID}
-        className="mt-6 max-w-xl"
+        className="mt-6 max-w-3xl"
         onSubmit={page.onSubmit}
       >
         <div className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
@@ -122,6 +122,8 @@ export function DiscussionNewPage() {
             attachments={page.attachments}
             onAttachments={page.setAttachments}
             materials={page.materials}
+            resourceItems={page.resourceItems}
+            resourceFolders={page.resourceFolders}
             canSubmit={page.canSave}
             submitting={page.saving}
             submitLabel="Start discussion"

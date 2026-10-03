@@ -1,42 +1,57 @@
-import type { ComponentType, SVGProps } from "react";
 import {
   BookOpenIcon,
   BuildingOffice2Icon,
+  AcademicCapIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { Input } from "@/ui/Input";
 import { Select } from "@/ui/Select";
 import {
+  ResponsiveSegmentPicker,
+  type ResponsiveSegmentOption,
+} from "@/ui/ResponsiveSegmentPicker";
+import {
   discussionAudienceLabel,
+  discussionAudienceVisibilityHint,
+  discussionAudienceVisibilityHintLabel,
   discussionFamilyAudienceLabel,
+  discussionFamilyAudienceVisibilityHint,
+  discussionFamilyAudienceVisibilityHintLabel,
   DISCUSSION_FAMILY_AUDIENCES,
   type DiscussionAudience,
   type DiscussionFamilyAudience,
 } from "@/discussions/model/audience";
+import { WhoCanSeeHint } from "@/ui/WhoCanSeeHint";
 import type { CourseSummary } from "@/courses/databridge/courses";
 import type { ClassSummary } from "@/roster/databridge/classes";
 
-const segmentIdle =
-  "inline-flex flex-1 items-center justify-center gap-1.5 px-3 py-[9px] text-[13px] font-bold text-[var(--ink-soft)] transition-colors hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)] motion-reduce:transition-none";
-
-const segmentActive =
-  "inline-flex flex-1 items-center justify-center gap-1.5 px-3 py-[9px] text-[13px] font-bold bg-[var(--green-tint)] text-[var(--green-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--green)]";
-
-type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-
-function audienceOptionsFor(showOrganization: boolean): Array<{
-  value: DiscussionAudience;
-  Icon: IconComponent;
-}> {
-  const options: Array<{ value: DiscussionAudience; Icon: IconComponent }> = [
-    { value: "course", Icon: BookOpenIcon },
-    { value: "class", Icon: UserGroupIcon },
+function audienceOptionsFor(showStaffAudiences: boolean): Array<
+  ResponsiveSegmentOption<DiscussionAudience>
+> {
+  const options: Array<ResponsiveSegmentOption<DiscussionAudience>> = [
+    { value: "course", label: discussionAudienceLabel("course"), icon: BookOpenIcon },
+    { value: "class", label: discussionAudienceLabel("class"), icon: UserGroupIcon },
   ];
-  if (showOrganization) {
-    options.push({ value: "organization", Icon: BuildingOffice2Icon });
+  if (showStaffAudiences) {
+    options.push({
+      value: "organization",
+      label: discussionAudienceLabel("organization"),
+      icon: BuildingOffice2Icon,
+    });
+    options.push({
+      value: "instructors",
+      label: discussionAudienceLabel("instructors"),
+      icon: AcademicCapIcon,
+    });
   }
   return options;
 }
+
+const familyAudienceOptions: ResponsiveSegmentOption<DiscussionFamilyAudience>[] =
+  DISCUSSION_FAMILY_AUDIENCES.map((value) => ({
+    value,
+    label: discussionFamilyAudienceLabel(value),
+  }));
 
 export function DiscussionNewFormFields({
   audience,
@@ -86,66 +101,35 @@ export function DiscussionNewFormFields({
         <legend className="text-[13px] font-bold text-[var(--ink-soft)]">
           Who is this for?
         </legend>
-        <div
-          className="mt-2 flex w-full overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--surface)]"
-          role="group"
-          aria-label="Discussion audience"
-        >
-          {audienceOptions.map(({ value, Icon }, index) => {
-            const active = audience === value;
-            return (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={active}
-                className={`${active ? segmentActive : segmentIdle}${
-                  index < audienceOptions.length - 1
-                    ? " border-r border-[var(--line)]"
-                    : ""
-                }`}
-                onClick={() => onAudience(value)}
-              >
-                <Icon className="h-4 w-4 shrink-0" aria-hidden />
-                {discussionAudienceLabel(value)}
-              </button>
-            );
-          })}
-        </div>
+        <ResponsiveSegmentPicker
+          ariaLabel="Discussion audience"
+          value={audience}
+          onChange={onAudience}
+          options={audienceOptions}
+        />
+        {audience != null ? (
+          <WhoCanSeeHint hintLabel={discussionAudienceVisibilityHintLabel(audience)}>
+            {discussionAudienceVisibilityHint(audience)}
+          </WhoCanSeeHint>
+        ) : null}
       </fieldset>
 
-      {showFamilyAudience && audience != null ? (
+      {showFamilyAudience && audience != null && audience !== "instructors" ? (
         <fieldset className="mt-4">
           <legend className="text-[13px] font-bold text-[var(--ink-soft)]">
             Who in families can see this?
           </legend>
-          <div
-            className="mt-2 flex w-full overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--surface)]"
-            role="group"
-            aria-label="Family audience"
+          <ResponsiveSegmentPicker
+            ariaLabel="Family audience"
+            value={familyAudience}
+            onChange={onFamilyAudience}
+            options={familyAudienceOptions}
+          />
+          <WhoCanSeeHint
+            hintLabel={discussionFamilyAudienceVisibilityHintLabel(familyAudience)}
           >
-            {DISCUSSION_FAMILY_AUDIENCES.map((value, index) => {
-              const active = familyAudience === value;
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={active}
-                  className={`${active ? segmentActive : segmentIdle}${
-                    index < DISCUSSION_FAMILY_AUDIENCES.length - 1
-                      ? " border-r border-[var(--line)]"
-                      : ""
-                  }`}
-                  onClick={() => onFamilyAudience(value)}
-                >
-                  {discussionFamilyAudienceLabel(value)}
-                </button>
-              );
-            })}
-          </div>
-          <p className="mt-1.5 text-[12.5px] text-[var(--ink-faint)]">
-            Staff can always see and post. Choose parents only to keep student
-            accounts out of the thread.
-          </p>
+            {discussionFamilyAudienceVisibilityHint(familyAudience)}
+          </WhoCanSeeHint>
         </fieldset>
       ) : null}
 

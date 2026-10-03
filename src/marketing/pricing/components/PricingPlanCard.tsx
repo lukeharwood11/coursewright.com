@@ -1,4 +1,9 @@
+import { BetaPill } from "@/ui/BetaPill";
 import { contactEmails, mailto } from "../../model/contactEmails";
+
+function lineShowsBeta(line: string): boolean {
+  return /gradebook|report card/i.test(line);
+}
 import type { PricedPlan } from "../hooks/usePublicPricing";
 
 const contactClass = [
@@ -66,7 +71,10 @@ export function PricingPlanCard({ plan }: { plan: PricedPlan }) {
               className="mt-[0.55rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--green)]"
               aria-hidden
             />
-            <span>{line}</span>
+            <span className="inline-flex flex-wrap items-center gap-1.5">
+              {line}
+              {lineShowsBeta(line) ? <BetaPill /> : null}
+            </span>
           </li>
         ))}
       </ul>
@@ -79,7 +87,10 @@ export function PricingPlanCard({ plan }: { plan: PricedPlan }) {
                 className="mt-[0.55rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--green)]"
                 aria-hidden
               />
-              <span>{line}</span>
+              <span className="inline-flex flex-wrap items-center gap-1.5">
+                {line}
+                {lineShowsBeta(line) ? <BetaPill /> : null}
+              </span>
             </li>
           ))}
         </ul>

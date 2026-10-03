@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PrinterIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
+import { BetaPill } from "@/ui/BetaPill";
 import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
@@ -75,9 +76,10 @@ export function ReportCardPage() {
           {cardPage.canEdit ? (
             <Link
               to={gradebookPath(slug, card.courseId)}
-              className="text-[13px] font-bold text-[var(--green)]"
+              className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[var(--green)]"
             >
               Open gradebook
+              <BetaPill />
             </Link>
           ) : null}
         </div>

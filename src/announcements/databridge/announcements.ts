@@ -141,7 +141,7 @@ async function toAnnouncement(
     startDate: row.start_date,
     endDate: row.end_date,
     createdAt: row.created_at,
-    authorName: contacts.get(row.created_by)?.name ?? "Teacher",
+    authorName: contacts.get(row.created_by)?.name ?? "Instructor",
     deletedAt: row.deleted_at,
     courseTitles: labels.courseTitles,
     classTitles: labels.classTitles,

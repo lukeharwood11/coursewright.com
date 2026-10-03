@@ -51,7 +51,7 @@ export function AnnouncementPage() {
           This note isn’t available right now
         </h1>
         <p className="mt-2 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-          Your teacher set when this shows up. Check back during that window, or
+          Your instructor set when this shows up. Check back during that window, or
           go back to announcements.
         </p>
         <p className="mt-4 text-[13px]">

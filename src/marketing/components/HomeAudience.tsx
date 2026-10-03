@@ -29,7 +29,7 @@ export function HomeAudience() {
         </h2>
         <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-[var(--ink-soft)]">
           Course Wright is sized for families managing their own learning and for
-          directors, teachers, and volunteers running co-ops and small schools.
+          directors, instructors, and volunteers running co-ops and small schools.
           No one should need another complicated system to learn.
         </p>
 

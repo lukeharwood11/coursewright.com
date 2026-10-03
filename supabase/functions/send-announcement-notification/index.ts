@@ -135,7 +135,12 @@ Deno.serve(async (request) => {
 
     const names = await loadTargetNames(db, typed);
     const studentIds = await loadAffectedStudentIds(db, typed);
-    const emails = await loadRecipientEmails(db, typed.organization_id, studentIds);
+    const emails = await loadRecipientEmails(
+      db,
+      typed.organization_id,
+      studentIds,
+      typed.audience,
+    );
 
     const sender = (await loadProfile(db, user.id)) ?? {
       id: user.id,
@@ -226,6 +231,9 @@ async function canSendNotification(
     if (error) throw error;
     return (data ?? []).length === args.studentIds.length;
   }
+  if (args.audience === "instructors") {
+    return args.role === "owner" || args.role === "admin" || args.role === "instructor";
+  }
   return false;
 }
 
@@ -238,6 +246,9 @@ async function loadTargetNames(
   }
   if (announcement.audience === "class") {
     return loadOrderedLabels(db, "classes", "title", asIdList(announcement.class_ids), "Class");
+  }
+  if (announcement.audience === "instructors") {
+    return ["Instructors"];
   }
   return loadOrderedLabels(
     db,
@@ -271,6 +282,9 @@ async function loadAffectedStudentIds(
   db: ReturnType<typeof serviceClient>,
   announcement: AnnouncementRow,
 ): Promise<number[]> {
+  if (announcement.audience === "instructors") {
+    return [];
+  }
   if (announcement.audience === "student") {
     return uniqueIds(asIdList(announcement.student_profile_ids));
   }
@@ -299,7 +313,11 @@ async function loadRecipientEmails(
   db: ReturnType<typeof serviceClient>,
   organizationId: number,
   studentIds: number[],
+  audience: string,
 ): Promise<string[]> {
+  if (audience === "instructors") {
+    return loadStaffCollaboratorEmails(db, organizationId);
+  }
   if (studentIds.length === 0) return [];
 
   const { data, error } = await db
@@ -346,6 +364,33 @@ async function loadRecipientEmails(
     .from("profiles")
     .select("email")
     .in("id", activeIds);
+  if (accountError) throw accountError;
+
+  const emails = new Set<string>();
+  for (const row of accounts ?? []) addEmail(emails, row.email);
+  return [...emails];
+}
+
+async function loadStaffCollaboratorEmails(
+  db: ReturnType<typeof serviceClient>,
+  organizationId: number,
+): Promise<string[]> {
+  const { data: memberships, error: membershipError } = await db
+    .from("memberships")
+    .select("user_id")
+    .eq("organization_id", organizationId)
+    .eq("status", "active")
+    .in("role", ["owner", "admin", "instructor", "observer"]);
+  if (membershipError) throw membershipError;
+  const userIds = (memberships ?? [])
+    .map((row) => row.user_id as string)
+    .filter((id) => typeof id === "string" && id.length > 0);
+  if (userIds.length === 0) return [];
+
+  const { data: accounts, error: accountError } = await db
+    .from("profiles")
+    .select("email")
+    .in("id", userIds);
   if (accountError) throw accountError;
 
   const emails = new Set<string>();

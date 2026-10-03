@@ -65,8 +65,10 @@ export function useDiscussions() {
       return {
         ...item,
         unread: isDiscussionUnread(item),
-        forLabel:
-          item.audience === "organization" || !showStudent
+          forLabel:
+          item.audience === "organization" ||
+          item.audience === "instructors" ||
+          !showStudent
             ? null
             : forStudentsLabel(students),
         organizationName: organization.name,

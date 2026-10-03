@@ -4,10 +4,14 @@ import type { EventAudience } from "@/events/model/audience";
 import { lessonPlanIsPublished } from "@/lesson-plans/model/visibility";
 import { isAnnouncementAvailable } from "@/announcements/model/availability";
 import type { AnnouncementAudience } from "@/announcements/model/audience";
+import type { HomeDay } from "@/organizations/model/homeDays";
+import type { SchoolDay } from "@/organizations/model/schoolDays";
 import type { CalendarWeek } from "./thisWeek";
 import {
+  effectiveOrgHomeViewAsOfDate,
   effectiveViewAsOfDate,
   isCurrentCalendarWeek,
+  isOrgHomeCalendarWeek,
   isDueInCalendarWeek,
   isInCalendarWeek,
   localIsoDate,
@@ -142,6 +146,8 @@ export type ParentDashboard = {
 export type ParentDashboardSource = {
   week: CalendarWeek;
   today: string;
+  orgSchoolDays?: readonly SchoolDay[];
+  orgHomeDays?: readonly HomeDay[];
   students: Array<{ id: number; name: string; gradeLevel: string | null }>;
   enrollments: Array<{
     studentId: number;
@@ -262,8 +268,28 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
   );
   const today = source.today || localIsoDate();
   const asNow = new Date(`${today}T12:00:00`);
-  const viewAsOf = effectiveViewAsOfDate(source.week, asNow);
-  const showImportantNow = isCurrentCalendarWeek(source.week, asNow);
+  const orgSchedule = source.orgSchoolDays
+    ? {
+        schoolDays: source.orgSchoolDays,
+        homeDays: source.orgHomeDays ?? [],
+      }
+    : null;
+  const viewAsOf = orgSchedule
+    ? effectiveOrgHomeViewAsOfDate(
+        source.week,
+        orgSchedule.schoolDays,
+        orgSchedule.homeDays,
+        asNow,
+      )
+    : effectiveViewAsOfDate(source.week, asNow);
+  const showImportantNow = orgSchedule
+    ? isOrgHomeCalendarWeek(
+        source.week,
+        orgSchedule.schoolDays,
+        orgSchedule.homeDays,
+        asNow,
+      )
+    : isCurrentCalendarWeek(source.week, asNow);
 
   const students = [...source.students]
     .sort((a, b) => a.name.localeCompare(b.name))

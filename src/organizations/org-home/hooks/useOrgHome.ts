@@ -19,7 +19,7 @@ import {
   parseOrgHomeWeekSearch,
   resolveOrgHomeWeek,
 } from "@/parent/model/orgHomeWeek";
-import { isCurrentCalendarWeek, shiftCalendarWeek } from "@/parent/model/thisWeek";
+import { isOrgHomeCalendarWeek, shiftCalendarWeek } from "@/parent/model/thisWeek";
 import { useMemo } from "react";
 
 function familyScopeForMode(
@@ -42,11 +42,12 @@ export function useOrgHome() {
   const scope = familyScopeForMode(staffViewMode, parentPresentation, staffView);
   const [search, setSearch] = useSearchParams();
   const weekStartParam = parseOrgHomeWeekSearch(search.toString());
+  const { schoolDays, homeDays } = organization;
   const week = useMemo(
-    () => resolveOrgHomeWeek(weekStartParam),
-    [weekStartParam],
+    () => resolveOrgHomeWeek(weekStartParam, schoolDays, homeDays),
+    [weekStartParam, schoolDays, homeDays],
   );
-  const isCurrentWeek = isCurrentCalendarWeek(week);
+  const isCurrentWeek = isOrgHomeCalendarWeek(week, schoolDays, homeDays);
 
   function setWeekStart(next: string | null) {
     const params = new URLSearchParams(search);
@@ -72,7 +73,7 @@ export function useOrgHome() {
       weekStartParam,
     ),
     queryFn: () => {
-      const options = { weekStart: weekStartParam };
+      const options = { weekStart: weekStartParam, schoolDays, homeDays };
       if (staffView && parentPresentation) {
         return loadDashboardForStaffViewMode(
           organization.id,

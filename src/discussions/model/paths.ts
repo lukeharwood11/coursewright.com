@@ -21,7 +21,7 @@ export function discussionMessageElementId(messageId: number): string {
 import type { DiscussionFamilyAudience } from "./audience";
 
 export type NewDiscussionParams = {
-  audience?: "course" | "class" | "organization";
+  audience?: "course" | "class" | "organization" | "instructors";
   courseId?: number;
   classId?: number;
   familyAudience?: DiscussionFamilyAudience;

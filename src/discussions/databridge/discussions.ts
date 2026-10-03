@@ -10,6 +10,12 @@ import {
   type DiscussionFamilyAudience,
 } from "@/discussions/model/audience";
 import type { DiscussionDraft } from "@/discussions/model/validate";
+import type {
+  ResourcePickerFolder,
+  ResourcePickerItem,
+} from "@/discussions/model/resourcePicker";
+import { listOrgResourceFolders } from "@/resources/databridge/folders";
+import { listOrgResourceItems } from "@/resources/databridge/items";
 import { requireSupabase } from "./client";
 import { orgContactsByUserId } from "@/organizations/databridge/orgNames";
 import { loadFamilyStudentIds } from "@/parent/databridge/dashboard";
@@ -36,9 +42,10 @@ export type DiscussionRecord = {
 
 export type DiscussionAttachmentRecord = {
   id: number;
-  kind: "file" | "material" | "url";
+  kind: "file" | "material" | "url" | "resource";
   fileId: number | null;
   materialId: number | null;
+  resourceItemId: number | null;
   url: string | null;
   label: string;
   position: number;
@@ -50,6 +57,11 @@ export type DiscussionAttachmentRecord = {
     title: string;
     courseId: number;
     unitId: number | null;
+  } | null;
+  resource: {
+    id: number;
+    title: string;
+    type: string;
   } | null;
 };
 
@@ -81,12 +93,15 @@ export type AttachableMaterial = {
   courseId: number;
   unitId: number | null;
   courseTitle: string;
+  unitTitle: string | null;
+  kind: string;
 };
 
 export type AttachmentInsert = {
-  kind: "file" | "material" | "url";
+  kind: "file" | "material" | "url" | "resource";
   fileId?: number | null;
   materialId?: number | null;
+  resourceItemId?: number | null;
   url?: string | null;
   label?: string;
 };
@@ -97,7 +112,7 @@ const DISCUSSION_COLUMNS =
 const DISCUSSION_LIST_EMBED = `${DISCUSSION_COLUMNS}, author:profiles!discussions_created_by_fkey(name), course:courses!discussions_course_id_fkey(title), class:classes!discussions_class_id_fkey(title), discussion_reads(user_id, last_read_at), discussion_messages(id, deleted_at)`;
 
 const MESSAGE_EMBED =
-  "id, discussion_id, author_id, body, created_at, updated_at, deleted_at, author:profiles!discussion_messages_author_id_fkey(name), attachments:discussion_message_attachments(id, kind, file_id, material_id, url, label, position, file:files(id, organization_id, filename, storage_ref, mime_type, size_bytes, current_version), material:materials(id, title, course_id, unit_id))";
+  "id, discussion_id, author_id, body, created_at, updated_at, deleted_at, author:profiles!discussion_messages_author_id_fkey(name), attachments:discussion_message_attachments(id, kind, file_id, material_id, resource_item_id, url, label, position, file:files(id, organization_id, filename, storage_ref, mime_type, size_bytes, current_version), material:materials(id, title, course_id, unit_id))";
 
 type ProfileName = { name: string } | { name: string }[] | null | undefined;
 
@@ -136,6 +151,7 @@ type AttachmentRow = {
   kind: string;
   file_id: number | null;
   material_id: number | null;
+  resource_item_id: number | null;
   url: string | null;
   label: string;
   position: number;
@@ -165,6 +181,8 @@ export const discussionQueryKeys = {
     ["discussions", "detail", id, userId] as const,
   materials: (organizationId: number, courseId: number | null) =>
     ["discussions", "materials", organizationId, courseId] as const,
+  resources: (organizationId: number) =>
+    ["discussions", "resources", organizationId] as const,
   parentContext: (organizationId: number, userId: string) =>
     ["discussions", "parentContext", organizationId, userId] as const,
   members: (discussionId: number) =>
@@ -263,8 +281,17 @@ function toDiscussion(row: DiscussionRow, userId?: string): DiscussionRecord | n
   };
 }
 
-function parseAttachmentKind(value: string): "file" | "material" | "url" | null {
-  if (value === "file" || value === "material" || value === "url") return value;
+function parseAttachmentKind(
+  value: string,
+): "file" | "material" | "url" | "resource" | null {
+  if (
+    value === "file" ||
+    value === "material" ||
+    value === "url" ||
+    value === "resource"
+  ) {
+    return value;
+  }
   return null;
 }
 
@@ -278,6 +305,7 @@ function toAttachment(row: AttachmentRow): DiscussionAttachmentRecord | null {
     kind,
     fileId: row.file_id,
     materialId: row.material_id,
+    resourceItemId: row.resource_item_id,
     url: row.url,
     label: row.label ?? "",
     position: row.position,
@@ -291,6 +319,14 @@ function toAttachment(row: AttachmentRow): DiscussionAttachmentRecord | null {
             title: materialRow.title,
             courseId: materialRow.course_id,
             unitId: materialRow.unit_id,
+          }
+        : null,
+    resource:
+      row.resource_item_id != null
+        ? {
+            id: row.resource_item_id,
+            title: row.label?.trim() || "Resource",
+            type: "document",
           }
         : null,
   };
@@ -340,6 +376,45 @@ async function withSignedUrls(
       ),
     })),
   );
+}
+
+async function hydrateAttachmentResources(
+  messages: DiscussionMessageRecord[],
+): Promise<DiscussionMessageRecord[]> {
+  const ids = new Set<number>();
+  for (const message of messages) {
+    for (const attachment of message.attachments) {
+      if (attachment.kind === "resource" && attachment.resourceItemId != null) {
+        ids.add(attachment.resourceItemId);
+      }
+    }
+  }
+  if (ids.size === 0) return messages;
+
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from("org_resource_items")
+    .select("id, title, type")
+    .in("id", [...ids]);
+  if (error) throw new Error(error.message);
+
+  const byId = new Map(
+    (data ?? []).map((row) => [
+      row.id,
+      { id: row.id, title: row.title, type: row.type },
+    ]),
+  );
+
+  return messages.map((message) => ({
+    ...message,
+    attachments: message.attachments.map((attachment) => {
+      if (attachment.kind !== "resource" || attachment.resourceItemId == null) {
+        return attachment;
+      }
+      const resource = byId.get(attachment.resourceItemId);
+      return resource ? { ...attachment, resource } : attachment;
+    }),
+  }));
 }
 
 export async function listDiscussionsForOrganization(
@@ -397,14 +472,16 @@ export async function getDiscussion(
     ...discussion,
     authorName: contacts.get(discussion.createdBy)?.name ?? "Someone",
   };
-  const messages = await withSignedUrls(
-    (messageRows ?? []).map((row) => {
-      const message = toMessage(row as MessageRow);
-      return {
-        ...message,
-        authorName: contacts.get(message.authorId)?.name ?? "Someone",
-      };
-    }),
+  const messages = await hydrateAttachmentResources(
+    await withSignedUrls(
+      (messageRows ?? []).map((row) => {
+        const message = toMessage(row as MessageRow);
+        return {
+          ...message,
+          authorName: contacts.get(message.authorId)?.name ?? "Someone",
+        };
+      }),
+    ),
   );
 
   return { ...named, messages };
@@ -503,6 +580,10 @@ export async function createDiscussionMessage(args: {
     file_id: attachment.kind === "file" ? (attachment.fileId ?? null) : null,
     material_id:
       attachment.kind === "material" ? (attachment.materialId ?? null) : null,
+    resource_item_id:
+      attachment.kind === "resource"
+        ? (attachment.resourceItemId ?? null)
+        : null,
     url: attachment.kind === "url" ? (attachment.url?.trim() ?? null) : null,
     label: attachment.label?.trim() ?? "",
     position: index,
@@ -694,7 +775,9 @@ export async function listAttachableMaterials(args: {
   const db = requireSupabase();
   let query = db
     .from("materials")
-    .select("id, title, course_id, unit_id, course:courses(title)")
+    .select(
+      "id, title, kind, course_id, unit_id, course:courses(title), unit:units(title)",
+    )
     .eq("organization_id", args.organizationId)
     .eq("visibility", "published")
     .is("deleted_at", null)
@@ -710,6 +793,7 @@ export async function listAttachableMaterials(args: {
   return (data ?? []).flatMap((row) => {
     if (row.course_id == null) return [];
     const course = one(row.course);
+    const unit = one(row.unit);
     return [
       {
         id: row.id,
@@ -717,9 +801,35 @@ export async function listAttachableMaterials(args: {
         courseId: row.course_id,
         unitId: row.unit_id,
         courseTitle: course?.title?.trim() || "Course",
+        unitTitle: unit?.title?.trim() ?? null,
+        kind: row.kind ?? "page",
       },
     ];
   });
+}
+
+export async function listAttachableResources(organizationId: number): Promise<{
+  items: ResourcePickerItem[];
+  folders: ResourcePickerFolder[];
+}> {
+  const [items, folders] = await Promise.all([
+    listOrgResourceItems(organizationId),
+    listOrgResourceFolders(organizationId),
+  ]);
+  return {
+    items: items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      folderId: item.folderId,
+      type: item.type,
+      visibility: item.visibility,
+    })),
+    folders: folders.map((folder) => ({
+      id: folder.id,
+      parentId: folder.parentId,
+      name: folder.name,
+    })),
+  };
 }
 
 export async function uploadDiscussionFile(args: {

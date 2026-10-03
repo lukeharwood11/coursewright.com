@@ -9,6 +9,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
+import { BetaPill } from "@/ui/BetaPill";
 import { ButtonLink } from "@/ui/Button";
 import { AnchoredPopup } from "@/ui/AnchoredPopup";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
@@ -120,7 +121,10 @@ export function ReportCardListActions({
                   onClick={() => setOpen(false)}
                 >
                   <TableCellsIcon className="h-4 w-4 shrink-0" aria-hidden />
-                  Open gradebook
+                  <span className="flex min-w-0 flex-1 items-center gap-1.5">
+                    Open gradebook
+                    <BetaPill />
+                  </span>
                 </Link>
                 {isDraft ? (
                   <>

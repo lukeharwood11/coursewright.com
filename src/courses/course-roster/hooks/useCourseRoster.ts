@@ -218,7 +218,7 @@ export function useCourseRoster() {
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.instructors(courseId),
       });
-      toast("Teacher added.");
+      toast("Instructor added.");
     },
     onError: (error: Error) => {
       if (isNetworkError(error)) toastCheckNetworkConnection();
@@ -232,7 +232,7 @@ export function useCourseRoster() {
       await queryClient.invalidateQueries({
         queryKey: courseQueryKeys.instructors(courseId),
       });
-      toast("Teacher removed.");
+      toast("Instructor removed.");
     },
     onError: (error: Error) => {
       toastCaughtError(error);

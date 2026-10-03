@@ -122,6 +122,8 @@ export function usePrint() {
                   staffViewMode,
                   studentIds: urlOptions.studentIds,
                   weekStart: urlOptions.weekStart,
+                  schoolDays: organization.schoolDays,
+                  homeDays: organization.homeDays,
                   refs: deferredRefs,
                 })
               : grain === "resource"

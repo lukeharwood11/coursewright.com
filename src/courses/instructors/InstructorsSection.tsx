@@ -33,14 +33,14 @@ export function InstructorsSection({
 }) {
   return (
     <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-      <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Teachers</h2>
+      <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Instructors</h2>
       <p className="mt-1 max-w-xl text-[13.5px] text-[var(--ink-soft)]">
         People who teach this course. You can assign someone before they claim
-        their account. A course can have more than one teacher.
+        their account. A course can have more than one instructor.
       </p>
       {instructors.length === 0 ? (
         <p className="mt-3 text-[13.5px] text-[var(--ink-faint)]">
-          No teachers listed yet.
+          No instructors listed yet.
         </p>
       ) : (
         <ul className="mt-3 flex flex-col gap-1">
@@ -77,7 +77,7 @@ export function InstructorsSection({
             value={addOrgProfileId}
             onChange={(event) => onAddOrgProfileId(event.target.value)}
           >
-            <option value="">Add a teacher</option>
+            <option value="">Add an instructor</option>
             {staff.map((person) => (
               <option key={person.orgProfileId} value={String(person.orgProfileId)}>
                 {person.pending ? `${person.name} (pending)` : person.name}

@@ -119,6 +119,7 @@ export function useResource() {
   });
 
   function invalidateAll() {
+    void queryClient.invalidateQueries({ queryKey: ["org-resources"] });
     void queryClient.invalidateQueries({
       queryKey: resourceItemQueryKeys.detail(itemId),
     });

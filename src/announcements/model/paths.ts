@@ -11,7 +11,7 @@ export function announcementEditPath(orgSlug: string, announcementId: number): s
 }
 
 export type NewAnnouncementParams = {
-  audience?: "course" | "class" | "student";
+  audience?: "course" | "class" | "student" | "instructors";
   courseId?: number;
   classId?: number;
   studentId?: number;

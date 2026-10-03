@@ -32,7 +32,7 @@ export function AnnouncementsPage() {
           Announcements
         </h1>
         <p className="mt-1 max-w-xl text-[14px] leading-relaxed text-[var(--ink-soft)]">
-          Notes from your teachers. Opening one marks it as seen.
+          Notes from your instructors. Opening one marks it as seen.
         </p>
         <ParentAnnouncementsList
           orgSlug={page.organization.slug}

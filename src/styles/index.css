@@ -181,6 +181,12 @@ body {
   border-radius: 6px 6px 0 0;
 }
 
+.cw-editor-toolbar-discussion {
+  flex-wrap: wrap;
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
 .cw-editor-view {
   max-width: 42rem;
 }

@@ -1,4 +1,5 @@
 import { ButtonLink } from "@/ui/Button";
+import { BetaPill } from "@/ui/BetaPill";
 import { UserCard } from "@/organizations/user-card/UserCard";
 import { Avatar } from "@/ui/Avatar";
 import { courseRosterPath } from "@/courses/model/paths";
@@ -21,10 +22,10 @@ export function CourseSidebar({
 }) {
   return (
     <aside className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
-      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Teachers</h2>
+      <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Instructors</h2>
       {instructors.length === 0 ? (
         <p className="mt-2 text-[13.5px] text-[var(--ink-soft)]">
-          No teachers listed yet.
+          No instructors listed yet.
         </p>
       ) : (
         <ul className="mt-3 flex flex-col gap-1">
@@ -66,6 +67,7 @@ export function CourseSidebar({
             fullWidth
           >
             Gradebook
+            <BetaPill />
           </ButtonLink>
           <ButtonLink
             variant="secondary"

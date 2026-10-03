@@ -47,7 +47,7 @@ export function LessonPlanPage() {
           This plan isn’t ready yet
         </h1>
         <p className="mt-2 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-          Your teacher is still working on this week’s plan. Check back after they
+          Your instructor is still working on this week’s plan. Check back after they
           publish it.
         </p>
         <p className="mt-4 text-[13px]">

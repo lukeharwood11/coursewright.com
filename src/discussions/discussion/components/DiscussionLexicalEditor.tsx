@@ -182,7 +182,10 @@ export function DiscussionLexicalEditor({
         {editable ? (
           <PageEditorActionsProvider>
             {simple ? null : (
-              <PageEditorToolbar textDefaults={DISCUSSION_EDITOR_TEXT_DEFAULTS} />
+              <PageEditorToolbar
+                variant="discussion"
+                textDefaults={DISCUSSION_EDITOR_TEXT_DEFAULTS}
+              />
             )}
             <div className={endSlot ? "flex items-end gap-0.5" : "relative"}>
               <div className={endSlot ? "relative min-w-0 flex-1" : undefined}>

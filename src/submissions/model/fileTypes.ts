@@ -108,7 +108,7 @@ export function fileAllowedForSubmission(
 
 export function describeAllowedFiles(allowed: readonly SubmissionFileType[]): string {
   const phrases = allowed.map((kind) => SENTENCE[kind]);
-  if (phrases.length === 0) return "a file the teacher allowed";
+  if (phrases.length === 0) return "a file the instructor allowed";
   if (phrases.length === 1) return phrases[0];
   if (phrases.length === 2) return `${phrases[0]} or ${phrases[1]}`;
   return `${phrases.slice(0, -1).join(", ")}, or ${phrases[phrases.length - 1]}`;

@@ -114,6 +114,7 @@ function ReorderableRow<T>({
       value={item}
       dragListener={false}
       dragControls={controls}
+      layout="position"
       className={className}
       onDragEnd={() => {
         const nextKeys = orderRef.current.map(getKey).join("|");

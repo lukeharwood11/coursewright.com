@@ -137,7 +137,7 @@ export const helpDocTopics: HelpDocTopic[] = [
         items: [
           "Open Courses in the sidebar and create a course (from scratch, or by copying another course).",
           "Set dates, status, instructors, and grade metadata in course settings when you need them.",
-          "Add co-teachers from course settings so more than one instructor can build the same course.",
+          "Add co-instructors from course settings so more than one instructor can build the same course.",
         ],
       },
       { type: "h2", text: "Units and materials" },
@@ -280,10 +280,10 @@ export const helpDocTopics: HelpDocTopic[] = [
           "Parent — membership for someone linked to a student. They see the student experience (view and print shared content for linked, enrolled students) after claiming an invite. A parent who created an organization is an owner for that org, not the parent role.",
         ],
       },
-      { type: "h2", text: "Teacher / Preview / Parent / Student" },
+      { type: "h2", text: "Instructor / Preview / Parent / Student" },
       {
         type: "p",
-        text: "Owners, admins, and instructors can switch most organization pages with Teacher / Preview in the header. Preview shows courses you teach as a student would see them. If you are also a parent or student in the org, Parent and Student tabs show your real family or self. Parent-only accounts do not see that control — they always see the student experience.",
+        text: "Owners, admins, and instructors can switch most organization pages with Instructor / Preview in the header. Preview shows courses you teach as a student would see them. If you are also a parent or student in the org, Parent and Student tabs show your real family or self. Parent-only accounts do not see that control — they always see the student experience.",
       },
     ],
   },
@@ -324,7 +324,7 @@ export const helpDocTopics: HelpDocTopic[] = [
       },
       {
         type: "p",
-        text: "Activity is the bell to the right of your avatar. It shows unread notices when a teacher wants you to see a discussion post. Open one to mark it read, or choose View all activity.",
+        text: "Activity is the bell to the right of your avatar. It shows unread notices when an instructor wants you to see a discussion post. Open one to mark it read, or choose View all activity.",
       },
       {
         type: "p",

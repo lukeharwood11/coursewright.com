@@ -61,7 +61,7 @@ export function AddTeacherModal({
           className="text-[20px] font-semibold text-[var(--ink)]"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          Add a teacher
+          Add an instructor
         </h2>
         <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
           Search staff and choose someone to lead this class.
@@ -86,7 +86,7 @@ export function AddTeacherModal({
           {staff.length === 0 ? (
             <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">
               No one left to add. Owners, admins, and instructors can be class
-              teachers, including people who have not claimed yet.
+              instructors, including people who have not claimed yet.
             </p>
           ) : matches.length === 0 ? (
             <p className="px-2 py-3 text-[13.5px] text-[var(--ink-soft)]">

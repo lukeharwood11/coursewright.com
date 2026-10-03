@@ -3,6 +3,8 @@ import { parseAnnouncementAudience } from "@/announcements/model/audience";
 import { familyVisibleMaterials } from "@/app/layouts/model/viewMode";
 import { listLessonPlansInRange } from "@/lesson-plans/databridge/lessonPlans";
 import { isPublished } from "@/materials/model/visibility";
+import type { HomeDay } from "@/organizations/model/homeDays";
+import type { SchoolDay } from "@/organizations/model/schoolDays";
 import { localIsoDate } from "@/parent/model/thisWeek";
 import { resolveOrgHomeWeek } from "@/parent/model/orgHomeWeek";
 import { listEventsOverlapping } from "@/events/databridge/events";
@@ -33,7 +35,7 @@ function announcementAuthorName(
 ): string {
   const profile = one(author);
   const name = profile?.name?.trim();
-  return name || "Teacher";
+  return name || "Instructor";
 }
 
 export type FamilyDashboardScope = "family" | "parent" | "student" | "preview";
@@ -41,10 +43,24 @@ export type FamilyDashboardScope = "family" | "parent" | "student" | "preview";
 export type ParentDashboardLoadOptions = {
   /** Sunday ISO; omit or null = real current week. */
   weekStart?: string | null;
+  schoolDays?: readonly SchoolDay[];
+  homeDays?: readonly HomeDay[];
 };
 
 function resolveDashboardWeek(options?: ParentDashboardLoadOptions) {
-  return resolveOrgHomeWeek(options?.weekStart ?? null);
+  return resolveOrgHomeWeek(
+    options?.weekStart ?? null,
+    options?.schoolDays,
+    options?.homeDays,
+  );
+}
+
+function orgScheduleFields(options?: ParentDashboardLoadOptions) {
+  if (!options?.schoolDays) return {};
+  return {
+    orgSchoolDays: options.schoolDays,
+    orgHomeDays: options.homeDays ?? [],
+  };
 }
 
 export const parentQueryKeys = {
@@ -186,6 +202,7 @@ async function loadDashboardForStudentIds(
     return buildParentDashboard({
       week,
       today,
+      ...orgScheduleFields(options),
       students: [],
       enrollments: [],
       materials: [],
@@ -274,6 +291,7 @@ async function loadDashboardForStudentIds(
   return buildParentDashboard({
     week,
     today,
+    ...orgScheduleFields(options),
     students: (studentsResult.data ?? []).map((row) => ({
       id: row.id,
       name: row.name,
@@ -338,8 +356,8 @@ export async function loadInstructorPreviewDashboard(
   const courses = await listTaughtPublishedCourses(organizationId, userId);
 
   if (courses.length === 0) {
-    return buildParentDashboard(
-      buildInstructorPreviewSource({
+    return buildParentDashboard({
+      ...buildInstructorPreviewSource({
         week,
         today,
         studentName,
@@ -350,7 +368,8 @@ export async function loadInstructorPreviewDashboard(
         announcements: [],
         events: [],
       }),
-    );
+      ...orgScheduleFields(options),
+    });
   }
 
   const db = requireSupabase();
@@ -391,8 +410,8 @@ export async function loadInstructorPreviewDashboard(
   );
   const eventRows = await listEventsOverlapping(organizationId, week.start, week.end);
 
-  return buildParentDashboard(
-    buildInstructorPreviewSource({
+  return buildParentDashboard({
+    ...buildInstructorPreviewSource({
       week,
       today,
       studentName,
@@ -414,7 +433,8 @@ export async function loadInstructorPreviewDashboard(
         classIds: event.classIds,
       })),
     }),
-  );
+    ...orgScheduleFields(options),
+  });
 }
 
 async function loadPublishedMaterialsForCourses(

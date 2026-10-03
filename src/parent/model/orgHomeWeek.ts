@@ -1,5 +1,8 @@
+import type { HomeDay } from "@/organizations/model/homeDays";
+import type { SchoolDay } from "@/organizations/model/schoolDays";
 import {
   calendarWeekContaining,
+  calendarWeekContainingForOrg,
   calendarWeekForIsoDate,
   type CalendarWeek,
 } from "./thisWeek";
@@ -19,10 +22,18 @@ export function parseOrgHomeWeekSearch(search: string): string | null {
   return parseOrgHomeWeekParam(params.get("week"));
 }
 
-export function resolveOrgHomeWeek(weekStart: string | null | undefined): CalendarWeek {
+export function resolveOrgHomeWeek(
+  weekStart: string | null | undefined,
+  schoolDays?: readonly SchoolDay[],
+  homeDays?: readonly HomeDay[],
+  now = new Date(),
+): CalendarWeek {
   const sunday = parseOrgHomeWeekParam(weekStart ?? null);
   if (sunday) return calendarWeekForIsoDate(sunday);
-  return calendarWeekContaining();
+  if (schoolDays) {
+    return calendarWeekContainingForOrg(schoolDays, homeDays ?? [], now);
+  }
+  return calendarWeekContaining(now);
 }
 
 export function orgHomePath(orgSlug: string, args?: { weekStart?: string | null }): string {

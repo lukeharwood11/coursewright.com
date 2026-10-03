@@ -6,6 +6,7 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { Badge } from "@/ui/Badge";
+import { BetaPill } from "@/ui/BetaPill";
 import { Button, ButtonLink } from "@/ui/Button";
 import { formatGradeDisplay } from "@/grading/model/scale";
 import { ReportCardListActions } from "@/grading/report-card/components/ReportCardListActions";
@@ -65,6 +66,7 @@ export function StudentGradesSection({ studentId }: { studentId: number }) {
                     <ButtonLink variant="secondary" to={gradebookPath(slug, grade.courseId)}>
                       <TableCellsIcon className="h-5 w-5" aria-hidden />
                       Gradebook
+                      <BetaPill />
                     </ButtonLink>
                     {draftByCourseId.has(grade.courseId) ? (
                       <ButtonLink
@@ -82,9 +84,14 @@ export function StudentGradesSection({ studentId }: { studentId: number }) {
                         onClick={() => grades.generateForEnrollment(grade.enrollmentId)}
                       >
                         <ClipboardDocumentCheckIcon className="h-5 w-5" aria-hidden />
-                        {grades.generatingEnrollmentId === grade.enrollmentId
-                          ? "Generating…"
-                          : "Report card"}
+                        {grades.generatingEnrollmentId === grade.enrollmentId ? (
+                          "Generating…"
+                        ) : (
+                          <>
+                            Report card
+                            <BetaPill />
+                          </>
+                        )}
                       </Button>
                     )}
                   </span>
@@ -97,7 +104,10 @@ export function StudentGradesSection({ studentId }: { studentId: number }) {
 
       {grades.canAct ? (
         <section className="rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5">
-          <h2 className="text-[13px] font-bold text-[var(--ink-soft)]">Report cards</h2>
+          <h2 className="flex items-center gap-1.5 text-[13px] font-bold text-[var(--ink-soft)]">
+            Report cards
+            <BetaPill />
+          </h2>
           <p className="mt-1 text-[13px] text-[var(--ink-faint)]">
             Draft one course at a time from a grade row above.
           </p>

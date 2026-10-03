@@ -19,7 +19,11 @@ import {
   quizKeyModeForQuiz,
   type QuizKeyPrintMode,
 } from "@/print/model/quizKeyPrintMode";
-import { loadDashboardForStaffViewMode, loadParentDashboard } from "@/parent/databridge/dashboard";
+import {
+  loadDashboardForStaffViewMode,
+  loadParentDashboard,
+  type ParentDashboardLoadOptions,
+} from "@/parent/databridge/dashboard";
 import {
   thisWeekPrintRefs,
   printMaterialFromLessonPlan,
@@ -298,10 +302,16 @@ export async function loadWeekPrintPacket(args: {
   staffViewMode?: "teacher" | "preview" | "parent" | "student";
   studentIds?: number[] | null;
   weekStart?: string | null;
+  schoolDays?: ParentDashboardLoadOptions["schoolDays"];
+  homeDays?: ParentDashboardLoadOptions["homeDays"];
   refs?: ThisWeekPrintRef[];
 }): Promise<PrintPacket> {
   const mode = args.staffViewMode ?? "teacher";
-  const loadOptions = { weekStart: args.weekStart ?? null };
+  const loadOptions = {
+    weekStart: args.weekStart ?? null,
+    schoolDays: args.schoolDays,
+    homeDays: args.homeDays,
+  };
   const dashboard =
     args.parentPresentation && mode !== "teacher"
       ? await loadDashboardForStaffViewMode(

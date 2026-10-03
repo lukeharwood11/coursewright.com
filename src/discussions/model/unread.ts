@@ -56,7 +56,7 @@ export function countUnreadDiscussions<
 export function studentsForDiscussion<
   T extends { id: number; name: string },
 >(args: {
-  audience: "course" | "class" | "organization";
+  audience: "course" | "class" | "organization" | "instructors";
   courseId: number | null;
   classId: number | null;
   students: T[];

@@ -121,11 +121,15 @@ export function PageEditorToolbar({
   onVersionHistory,
   versionHistoryDisabled = false,
   textDefaults = PAGE_EDITOR_TEXT_DEFAULTS,
+  variant = "page",
 }: {
   onVersionHistory?: () => void;
   versionHistoryDisabled?: boolean;
   textDefaults?: EditorTextDefaults;
+  /** Discussion composer: fewer controls; typography via floating bar and `/`. */
+  variant?: "page" | "discussion";
 } = {}) {
+  const compact = variant === "discussion";
   const [editor] = useLexicalComposerContext();
   const actions = usePageEditorActions();
   const { settings: savedSettings, patchSettings } = usePageEditorSettings();
@@ -251,7 +255,11 @@ export function PageEditorToolbar({
     "Align text";
 
   return (
-    <div className="cw-editor-toolbar">
+    <div
+      className={
+        compact ? "cw-editor-toolbar cw-editor-toolbar-discussion" : "cw-editor-toolbar"
+      }
+    >
       <ToolbarIconButton
         disabled={!canUndo}
         label={`Undo (${modKey("Z")})`}
@@ -281,82 +289,86 @@ export function PageEditorToolbar({
           );
         })}
       </ToolbarDropdown>
-      <ToolbarDropdown label={alignmentLabel} icon={<AlignIcon className="h-4 w-4" />}>
-        {TEXT_ALIGNMENT_OPTIONS.map((item) => {
-          const Icon = ALIGNMENT_ICONS[item.value] ?? Bars3BottomLeftIcon;
-          return (
-            <DropdownItem
-              key={item.value}
-              icon={<Icon className="h-4 w-4" />}
-              label={item.label}
-              active={textAlign === item.value}
-              onClick={() =>
-                applyTextAlignmentAndSettings(editor, item.value, patchSettings)
-              }
-            />
-          );
-        })}
-      </ToolbarDropdown>
-      <ToolbarLabelDropdown
-        label={`Font: ${fontFamilyMenuLabel(fontFamily, textDefaults)}`}
-        display={fontFamilyMenuLabel(fontFamily, textDefaults)}
-        displayStyle={fontFamilyPreviewStyle(fontFamily)}
-      >
-        {fontFamilyOptions(textDefaults).map((item) => (
-          <DropdownItem
-            key={item.label}
-            icon={<FormatMark letter="A" />}
-            label={item.label}
-            labelStyle={fontFamilyPreviewStyle(item.value)}
-            active={fontFamily === item.value}
-            onClick={() =>
-              applyFontFamilyAndSettings(editor, item.value, patchSettings)
-            }
-          />
-        ))}
-      </ToolbarLabelDropdown>
-      <ToolbarLabelDropdown
-        label={`Font size: ${fontSizeMenuLabel(fontSize, textDefaults)}`}
-        display={fontSizeMenuLabel(fontSize, textDefaults)}
-      >
-        {fontSizeOptions(textDefaults).map((item) => (
-          <DropdownItem
-            key={`${item.label}-${item.value}`}
-            icon={
-              <FormatMark
-                letter={
-                  item.value === "" ? textDefaults.fontSizeLabel : item.label
+      {compact ? null : (
+        <>
+          <ToolbarDropdown label={alignmentLabel} icon={<AlignIcon className="h-4 w-4" />}>
+            {TEXT_ALIGNMENT_OPTIONS.map((item) => {
+              const Icon = ALIGNMENT_ICONS[item.value] ?? Bars3BottomLeftIcon;
+              return (
+                <DropdownItem
+                  key={item.value}
+                  icon={<Icon className="h-4 w-4" />}
+                  label={item.label}
+                  active={textAlign === item.value}
+                  onClick={() =>
+                    applyTextAlignmentAndSettings(editor, item.value, patchSettings)
+                  }
+                />
+              );
+            })}
+          </ToolbarDropdown>
+          <ToolbarLabelDropdown
+            label={`Font: ${fontFamilyMenuLabel(fontFamily, textDefaults)}`}
+            display={fontFamilyMenuLabel(fontFamily, textDefaults)}
+            displayStyle={fontFamilyPreviewStyle(fontFamily)}
+          >
+            {fontFamilyOptions(textDefaults).map((item) => (
+              <DropdownItem
+                key={item.label}
+                icon={<FormatMark letter="A" />}
+                label={item.label}
+                labelStyle={fontFamilyPreviewStyle(item.value)}
+                active={fontFamily === item.value}
+                onClick={() =>
+                  applyFontFamilyAndSettings(editor, item.value, patchSettings)
                 }
               />
-            }
-            label={`${item.label} px`}
-            active={fontSize === item.value}
-            onClick={() =>
-              applyFontSizeAndSettings(editor, item.value, patchSettings)
-            }
-          />
-        ))}
-      </ToolbarLabelDropdown>
-      <ToolbarLabelDropdown
-        label={`Line spacing: ${lineHeightMenuLabel(lineHeight, textDefaults)}`}
-        display={lineHeightMenuLabel(lineHeight, textDefaults)}
-      >
-        {lineHeightOptions(textDefaults).map((item) => (
-          <DropdownItem
-            key={`${item.label}-${item.value}`}
-            icon={<ArrowsUpDownIcon className="h-4 w-4" />}
-            label={
-              item.value === ""
-                ? `Line ${textDefaults.lineHeightLabel}`
-                : `Line ${item.label}`
-            }
-            active={lineHeight === item.value}
-            onClick={() =>
-              applyLineHeightAndSettings(editor, item.value, patchSettings)
-            }
-          />
-        ))}
-      </ToolbarLabelDropdown>
+            ))}
+          </ToolbarLabelDropdown>
+          <ToolbarLabelDropdown
+            label={`Font size: ${fontSizeMenuLabel(fontSize, textDefaults)}`}
+            display={fontSizeMenuLabel(fontSize, textDefaults)}
+          >
+            {fontSizeOptions(textDefaults).map((item) => (
+              <DropdownItem
+                key={`${item.label}-${item.value}`}
+                icon={
+                  <FormatMark
+                    letter={
+                      item.value === "" ? textDefaults.fontSizeLabel : item.label
+                    }
+                  />
+                }
+                label={`${item.label} px`}
+                active={fontSize === item.value}
+                onClick={() =>
+                  applyFontSizeAndSettings(editor, item.value, patchSettings)
+                }
+              />
+            ))}
+          </ToolbarLabelDropdown>
+          <ToolbarLabelDropdown
+            label={`Line spacing: ${lineHeightMenuLabel(lineHeight, textDefaults)}`}
+            display={lineHeightMenuLabel(lineHeight, textDefaults)}
+          >
+            {lineHeightOptions(textDefaults).map((item) => (
+              <DropdownItem
+                key={`${item.label}-${item.value}`}
+                icon={<ArrowsUpDownIcon className="h-4 w-4" />}
+                label={
+                  item.value === ""
+                    ? `Line ${textDefaults.lineHeightLabel}`
+                    : `Line ${item.label}`
+                }
+                active={lineHeight === item.value}
+                onClick={() =>
+                  applyLineHeightAndSettings(editor, item.value, patchSettings)
+                }
+              />
+            ))}
+          </ToolbarLabelDropdown>
+        </>
+      )}
       <ToolbarDivider />
       <ToolbarIconButton
         pressed={bold}
@@ -379,13 +391,15 @@ export function PageEditorToolbar({
       >
         <FormatMark letter="U" style="underline" />
       </ToolbarIconButton>
-      <ToolbarIconButton
-        pressed={strikethrough}
-        label={`Strikethrough (${IS_APPLE ? "⇧⌘S" : "Ctrl+Shift+S"})`}
-        onClick={() => format("strikethrough")}
-      >
-        <FormatMark letter="S" style="strike" />
-      </ToolbarIconButton>
+      {compact ? null : (
+        <ToolbarIconButton
+          pressed={strikethrough}
+          label={`Strikethrough (${IS_APPLE ? "⇧⌘S" : "Ctrl+Shift+S"})`}
+          onClick={() => format("strikethrough")}
+        >
+          <FormatMark letter="S" style="strike" />
+        </ToolbarIconButton>
+      )}
       <ToolbarIconButton
         pressed={isLink}
         label={`Link (${modKey("K")})`}
@@ -401,17 +415,21 @@ export function PageEditorToolbar({
           hint="/table"
           onClick={actions.openTableDialog}
         />
-        <DropdownItem
-          icon={<LinkIcon className="h-4 w-4" />}
-          label="Link"
-          hint={modKey("K")}
-          onClick={() => actions.openLinkDialog(linkUrl)}
-        />
-        <DropdownItem
-          icon={<VideoCameraIcon className="h-4 w-4" />}
-          label="Video"
-          onClick={actions.openVideoDialog}
-        />
+        {compact ? null : (
+          <>
+            <DropdownItem
+              icon={<LinkIcon className="h-4 w-4" />}
+              label="Link"
+              hint={modKey("K")}
+              onClick={() => actions.openLinkDialog(linkUrl)}
+            />
+            <DropdownItem
+              icon={<VideoCameraIcon className="h-4 w-4" />}
+              label="Video"
+              onClick={actions.openVideoDialog}
+            />
+          </>
+        )}
         {actions.canAttachFile ? (
           <>
             <DropdownItem

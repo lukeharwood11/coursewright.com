@@ -5,6 +5,6 @@ export function classMemberLabel(count: number): string {
 }
 
 export function classTeacherRosterLabel(names: string[]): string {
-  if (names.length === 0) return "No teachers";
+  if (names.length === 0) return "No instructors";
   return names.join(", ");
 }

@@ -18,9 +18,11 @@ import {
 } from "./dayPreset.ts";
 import {
   filterPickerGroups,
+  flattenPickerGroups,
   groupMaterialsForPicker,
   toggleMaterialId,
 } from "./materials.ts";
+import { slicePickerPage } from "../../ui/PickerPagination.tsx";
 
 test("weekDates lists Sunday through Saturday", () => {
   assert.deepEqual(weekDates("2026-09-13"), [
@@ -185,4 +187,30 @@ test("filterPickerGroups matches material or unit titles", () => {
   assert.equal(filterPickerGroups(groups, "cells")[0]?.materials.length, 2);
   assert.equal(filterPickerGroups(groups, "syllabus")[0]?.unitId, null);
   assert.deepEqual(filterPickerGroups(groups, "  "), groups);
+});
+
+test("flattenPickerGroups preserves unit order for paginated picker", () => {
+  const groups = groupMaterialsForPicker(
+    [
+      { id: 1, title: "A", unitId: null, visibility: "published" },
+      { id: 2, title: "B", unitId: 10, visibility: "published" },
+      { id: 3, title: "C", unitId: 10, visibility: "published" },
+    ],
+    [{ id: 10, title: "Unit 1" }],
+  );
+  const flat = flattenPickerGroups(groups);
+  assert.deepEqual(
+    flat.map((row) => row.material.id),
+    [1, 2, 3],
+  );
+  assert.equal(flat[1]?.unitTitle, "Unit 1");
+});
+
+test("slicePickerPage returns ten items per page when over the limit", () => {
+  const items = Array.from({ length: 25 }, (_, index) => index + 1);
+  assert.equal(slicePickerPage(items, 1).items.length, 10);
+  assert.equal(slicePickerPage(items, 1).needsPagination, true);
+  assert.equal(slicePickerPage(items, 3).items.length, 5);
+  assert.equal(slicePickerPage(items.slice(0, 8), 1).needsPagination, false);
+  assert.equal(slicePickerPage(items.slice(0, 8), 1).items.length, 8);
 });

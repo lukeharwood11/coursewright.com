@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BetaPill } from "@/ui/BetaPill";
 import { DetailPageHeader } from "@/ui/DetailPageHeader";
 import { Button } from "@/ui/Button";
 import { PageLoading } from "@/ui/PageLoading";
@@ -54,6 +55,7 @@ export function CourseGradebookPage() {
         backTo={coursePath(slug, course.id)}
         backLabel="Back to course"
         title={`${course.title} gradebook`}
+        titleAccessory={<BetaPill />}
       />
       <div className="space-y-6 px-5 py-4 md:px-8">
         {book.bandsChanged ? (
@@ -206,7 +208,10 @@ export function CourseGradebookPage() {
         </section>
 
         <section>
-          <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Report cards</h2>
+          <h2 className="flex items-center gap-1.5 text-[15.5px] font-extrabold text-[var(--ink)]">
+            Report cards
+            <BetaPill />
+          </h2>
           <p className="mt-1 text-[13.5px] text-[var(--ink-soft)]">
             Draft one student at a time for this course. Send each card from its review page.
           </p>
@@ -257,9 +262,14 @@ export function CourseGradebookPage() {
                           disabled={book.draftingEnrollmentId === row.enrollmentId}
                           onClick={() => book.draftForEnrollment(row.enrollmentId)}
                         >
-                          {book.draftingEnrollmentId === row.enrollmentId
-                            ? "Drafting…"
-                            : "Draft report card"}
+                          {book.draftingEnrollmentId === row.enrollmentId ? (
+                            "Drafting…"
+                          ) : (
+                            <>
+                              Draft report card
+                              <BetaPill />
+                            </>
+                          )}
                         </Button>
                       ) : (
                         <span className="text-[14px] text-[var(--ink-soft)]">No draft</span>

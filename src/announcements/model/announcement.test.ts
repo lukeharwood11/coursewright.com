@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   announcementAudienceLabel,
+  announcementAudienceVisibilityHint,
   announcementTargetList,
   announcementTargetName,
   announcementTargetNames,
@@ -19,10 +20,11 @@ import {
   announcementDraftHasTitleAndTargets,
 } from "./validate.ts";
 
-test("parseAnnouncementAudience accepts course, class, and student", () => {
+test("parseAnnouncementAudience accepts course, class, student, and instructors", () => {
   assert.equal(parseAnnouncementAudience("course"), "course");
   assert.equal(parseAnnouncementAudience("class"), "class");
   assert.equal(parseAnnouncementAudience("student"), "student");
+  assert.equal(parseAnnouncementAudience("instructors"), "instructors");
   assert.equal(parseAnnouncementAudience("org"), null);
 });
 
@@ -30,6 +32,12 @@ test("announcementAudienceLabel is sentence-case product words", () => {
   assert.equal(announcementAudienceLabel("course"), "Course");
   assert.equal(announcementAudienceLabel("class"), "Class");
   assert.equal(announcementAudienceLabel("student"), "Student");
+  assert.equal(announcementAudienceLabel("instructors"), "Instructors");
+});
+
+test("announcementAudienceVisibilityHint describes each audience", () => {
+  assert.match(announcementAudienceVisibilityHint("instructors"), /student home/i);
+  assert.match(announcementAudienceVisibilityHint("student"), /linked parents/i);
 });
 
 test("announcementTargetName joins matching audience names", () => {
@@ -59,6 +67,15 @@ test("announcementTargetName joins matching audience names", () => {
       studentNames: ["Maya", "Eli", "Sam"],
     }),
     "Maya, Eli, and Sam",
+  );
+  assert.equal(
+    announcementTargetName({
+      audience: "instructors",
+      courseTitles: [],
+      classTitles: [],
+      studentNames: [],
+    }),
+    "Instructors",
   );
 });
 

@@ -35,7 +35,7 @@ export function ClassLeadsSection({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex items-center gap-1.5">
           <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">
-            Teachers
+            Instructors
           </h2>
           <InfoHint label="What is a class lead?">
             Optional class leads. They’re notified in Activity when someone posts
@@ -46,13 +46,13 @@ export function ClassLeadsSection({
         {canManage ? (
           <Button type="button" onClick={onOpenAdd}>
             <UserPlusIcon className="h-5 w-5" aria-hidden />
-            Add teacher
+            Add instructor
           </Button>
         ) : null}
       </div>
       {leads.length === 0 ? (
         <p className="mt-4 max-w-xl text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
-          No teachers assigned yet.
+          No instructors assigned yet.
         </p>
       ) : (
         <ul className="mt-4 flex flex-wrap gap-2">

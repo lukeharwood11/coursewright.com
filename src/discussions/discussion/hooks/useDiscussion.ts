@@ -21,6 +21,7 @@ import {
   discussionQueryKeys,
   getDiscussion,
   listAttachableMaterials,
+  listAttachableResources,
   listDiscussionMembers,
   markDiscussionRead,
   setDiscussionAnswered,
@@ -113,6 +114,12 @@ export function useDiscussion() {
     enabled: belongsHere,
   });
 
+  const resourcesQuery = useQuery({
+    queryKey: discussionQueryKeys.resources(organization.id),
+    queryFn: () => listAttachableResources(organization.id),
+    enabled: belongsHere,
+  });
+
   const membersQuery = useQuery({
     queryKey: discussionQueryKeys.members(discussionId),
     queryFn: () => listDiscussionMembers(discussionId),
@@ -170,11 +177,17 @@ export function useDiscussion() {
             materialId: attachment.materialId,
             label: attachment.label,
           }
-        : {
-            kind: "url",
-            url: attachment.url,
-            label: attachment.label,
-          },
+        : attachment.kind === "resource"
+          ? {
+              kind: "resource",
+              resourceItemId: attachment.resourceItemId,
+              label: attachment.label,
+            }
+          : {
+              kind: "url",
+              url: attachment.url,
+              label: attachment.label,
+            },
   );
 
   const draftBody = composerStateToBody(lexical);
@@ -205,6 +218,13 @@ export function useDiscussion() {
             return {
               kind: "material" as const,
               materialId: attachment.materialId,
+              label: attachment.label,
+            };
+          }
+          if (attachment.kind === "resource") {
+            return {
+              kind: "resource" as const,
+              resourceItemId: attachment.resourceItemId,
               label: attachment.label,
             };
           }
@@ -287,7 +307,13 @@ export function useDiscussion() {
             materialId: attachment.materialId ?? 0,
             label: attachment.label,
           }
-        : {
+        : attachment.kind === "resource"
+          ? {
+              kind: "resource" as const,
+              resourceItemId: attachment.resourceItemId ?? 0,
+              label: attachment.label,
+            }
+          : {
             kind: "url" as const,
             url: attachment.url ?? "",
             label: attachment.label,
@@ -424,6 +450,8 @@ export function useDiscussion() {
     attachments,
     setAttachments,
     materials: materialsQuery.data ?? [],
+    resourceItems: resourcesQuery.data?.items ?? [],
+    resourceFolders: resourcesQuery.data?.folders ?? [],
     canSubmit: validatePost(draftBody, attachmentContent) == null,
     formError: formOrMutationError(formError, post.error),
     posting: post.isPending,

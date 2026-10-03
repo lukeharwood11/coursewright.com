@@ -76,3 +76,19 @@ export function filterPickerGroups(
     })
     .filter((group) => group.materials.length > 0);
 }
+
+export type FlatPickerMaterialRow = {
+  material: LessonPlanPickerMaterial;
+  unitTitle: string | null;
+};
+
+/** Display order for picker modals (unit groups, then materials within each). */
+export function flattenPickerGroups(groups: LessonPlanPickerGroup[]): FlatPickerMaterialRow[] {
+  const rows: FlatPickerMaterialRow[] = [];
+  for (const group of groups) {
+    for (const material of group.materials) {
+      rows.push({ material, unitTitle: group.unitTitle });
+    }
+  }
+  return rows;
+}

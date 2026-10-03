@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   discussionAudienceLabel,
+  discussionAudienceVisibilityHint,
   discussionFilterLabel,
   discussionStatusLabel,
   discussionTargetName,
@@ -42,10 +43,11 @@ import {
   validateUrlAttachment,
 } from "./validate.ts";
 
-test("parseDiscussionAudience accepts course, class, or organization", () => {
+test("parseDiscussionAudience accepts course, class, organization, or instructors", () => {
   assert.equal(parseDiscussionAudience("course"), "course");
   assert.equal(parseDiscussionAudience("class"), "class");
   assert.equal(parseDiscussionAudience("organization"), "organization");
+  assert.equal(parseDiscussionAudience("instructors"), "instructors");
   assert.equal(parseDiscussionAudience("student"), null);
 });
 
@@ -53,6 +55,7 @@ test("discussion labels use product words", () => {
   assert.equal(discussionAudienceLabel("course"), "Course");
   assert.equal(discussionAudienceLabel("class"), "Class");
   assert.equal(discussionAudienceLabel("organization"), "Organization");
+  assert.equal(discussionAudienceLabel("instructors"), "Instructors");
   assert.equal(discussionStatusLabel(null), "Open");
   assert.equal(discussionStatusLabel("2026-01-01T00:00:00Z"), "Resolved");
   assert.equal(discussionFilterLabel("all"), "All");
@@ -60,6 +63,11 @@ test("discussion labels use product words", () => {
   assert.equal(discussionFilterLabel("answered"), "Resolved");
   assert.equal(parseDiscussionFilter("open"), "open");
   assert.equal(parseDiscussionFilter("nope"), "all");
+});
+
+test("discussionAudienceVisibilityHint describes each audience", () => {
+  assert.match(discussionAudienceVisibilityHint("instructors"), /collaborators/i);
+  assert.match(discussionAudienceVisibilityHint("course"), /enrolled/i);
 });
 
 test("discussionTargetName uses the matching audience title", () => {
