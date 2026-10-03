@@ -2,6 +2,9 @@ import {
   orgSettingsTabs,
   type OrgSettingsTabId,
 } from "../orgSettingsTabConfig";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { TOUR_ANCHORS } from "@/tours/model/anchors";
+import { useMinMd } from "@/tours/hooks/useMinMd";
 import { NewPill } from "@/ui/NewPill";
 import { Select } from "@/ui/Select";
 
@@ -25,6 +28,8 @@ export function OrgSettingsNav({
   onSelect: (tab: OrgSettingsTabId) => void;
 }) {
   const tabs = orgSettingsTabs({ showBilling });
+  const ownerTourAnchors = useOrgShell().role === "owner";
+  const desktop = useMinMd();
 
   return (
     <nav aria-label="Settings sections">
@@ -41,6 +46,9 @@ export function OrgSettingsNav({
               if (isOrgSettingsTabId(next, tabs)) onSelect(next);
             }}
             aria-label="Settings section"
+            data-tour={
+              ownerTourAnchors && !desktop ? TOUR_ANCHORS.peopleTab : undefined
+            }
           >
             {tabs.map((tab) => (
               <option key={tab.id} value={tab.id}>
@@ -66,6 +74,11 @@ export function OrgSettingsNav({
                 type="button"
                 role="tab"
                 aria-selected={selected}
+                data-tour={
+                  ownerTourAnchors && desktop && tab.id === "people"
+                    ? TOUR_ANCHORS.peopleTab
+                    : undefined
+                }
                 onClick={() => onSelect(tab.id)}
                 className={[
                   "flex w-full items-center gap-2 border-r-2 px-3 py-2 text-left text-[13.5px] font-semibold transition-colors",

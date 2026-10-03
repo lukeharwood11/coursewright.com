@@ -1,5 +1,7 @@
 import type { FormEvent } from "react";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { TOUR_ANCHORS } from "@/tours/model/anchors";
 import { Button } from "@/ui/Button";
 import { Input } from "@/ui/Input";
 import { Select } from "@/ui/Select";
@@ -29,9 +31,11 @@ export function InviteStaffForm({
   onRoleChange: (value: StaffInviteRole) => void;
   onSubmit: (event: FormEvent) => void;
 }) {
+  const ownerTourAnchors = useOrgShell().role === "owner";
   return (
     <form
       onSubmit={onSubmit}
+      data-tour={ownerTourAnchors ? TOUR_ANCHORS.inviteCollaborator : undefined}
             className="grid gap-3 lg:grid-cols-[1fr_1fr_10rem_auto]"
     >
       <label className="flex flex-col gap-1">

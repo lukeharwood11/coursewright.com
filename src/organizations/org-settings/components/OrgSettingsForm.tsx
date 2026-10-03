@@ -20,6 +20,8 @@ import {
 } from "@/organizations/model/orgType";
 import { GRADE_SCHEMES } from "@/organizations/model/gradeScheme";
 import { WeekdayCircleToggles } from "@/organizations/components/WeekdayCircleToggles";
+import { useOrgShell } from "@/app/layouts/OrgShellContext";
+import { TOUR_ANCHORS } from "@/tours/model/anchors";
 import { normalizeHomeDays, type HomeDay } from "@/organizations/model/homeDays";
 import { type SchoolDay } from "@/organizations/model/schoolDays";
 import { NewPill } from "@/ui/NewPill";
@@ -97,16 +99,18 @@ function SectionSave({
   hasChanges,
   saving,
   label,
+  dataTour,
 }: {
   canEdit: boolean;
   hasChanges: boolean;
   saving: boolean;
   label: string;
+  dataTour?: string;
 }) {
   if (!canEdit) return null;
   return (
     <div className="mt-5">
-      <Button type="submit" disabled={!hasChanges || saving}>
+      <Button type="submit" disabled={!hasChanges || saving} data-tour={dataTour}>
         <CheckIcon className="h-4 w-4" aria-hidden />
         {saving ? "Saving…" : label}
       </Button>
@@ -136,6 +140,7 @@ function OrganizationSection({
   onToggleHomeDay,
   onConfirmPermalinkChange,
 }: OrgSettingsFormProps) {
+  const ownerTourAnchors = useOrgShell().role === "owner";
   const [weekdayTab, setWeekdayTab] = useState<WeekdayScheduleTab>("school");
   const parsedOrgType = parseOrgType(orgType);
   const orgTypeHintText = parsedOrgType ? orgTypeHint(parsedOrgType) : null;
@@ -258,6 +263,7 @@ function OrganizationSection({
               selectedDays={selectedSchoolDays}
               disabled={!canEdit}
               onToggle={onToggleSchoolDay}
+              dataTour={ownerTourAnchors ? TOUR_ANCHORS.schoolDays : undefined}
             />
           ) : (
             <WeekdayCircleToggles
@@ -327,6 +333,7 @@ function OrganizationSection({
         hasChanges={hasChanges}
         saving={saving}
         label="Save organization"
+        dataTour={ownerTourAnchors ? TOUR_ANCHORS.saveOrganization : undefined}
       />
     </section>
   );

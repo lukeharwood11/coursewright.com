@@ -59,6 +59,7 @@ export function ButtonLink({
   className,
   to,
   state,
+  dataTour,
 }: {
   variant?: Variant;
   fullWidth?: boolean;
@@ -66,6 +67,7 @@ export function ButtonLink({
   className?: string;
   to: string;
   state?: unknown;
+  dataTour?: string;
 }) {
   const classes = buttonClassName(variant, fullWidth, className);
   // Router links cancel the click and set the hash without scrolling.
@@ -78,7 +80,7 @@ export function ButtonLink({
     );
   }
   return (
-    <Link to={to} state={state} className={classes}>
+    <Link to={to} state={state} className={classes} data-tour={dataTour}>
       {children}
     </Link>
   );

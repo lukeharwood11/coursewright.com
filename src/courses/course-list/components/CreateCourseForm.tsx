@@ -4,6 +4,7 @@ import { Input } from "@/ui/Input";
 import { CourseIconPicker } from "@/courses/components/CourseIconPicker";
 import type { CourseSummary } from "@/courses/databridge/courses";
 import type { CourseIconValue } from "@/courses/model/courseIcon";
+import { TOUR_ANCHORS } from "@/tours/model/anchors";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -72,6 +73,7 @@ export function CreateCourseForm({
   return (
     <form
       onSubmit={onSubmit}
+      data-tour={TOUR_ANCHORS.createCourseForm}
       className="mt-6 rounded-[10px] border border-[var(--line-soft)] bg-[var(--surface)] p-5"
     >
       <h2 className="text-[15.5px] font-extrabold text-[var(--ink)]">Create course</h2>

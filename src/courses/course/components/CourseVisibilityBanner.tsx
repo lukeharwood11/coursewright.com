@@ -11,11 +11,14 @@ export function CourseVisibilityBanner({
   canEdit,
   pending,
   onPublish,
+  publishDataTour,
 }: {
   visibility: CourseVisibility;
   canEdit: boolean;
   pending?: boolean;
   onPublish: () => void;
+  /** Course page only. Settings reuses this banner without a tour anchor. */
+  publishDataTour?: string;
 }) {
   if (!canEdit || isCoursePublished(visibility)) return null;
 
@@ -24,7 +27,7 @@ export function CourseVisibilityBanner({
       <p className="text-[13.5px] text-[var(--amber-deep)]">
         Unpublished. Families can’t see this course until you publish it.
       </p>
-      <Button type="button" disabled={pending} onClick={onPublish}>
+      <Button type="button" disabled={pending} onClick={onPublish} data-tour={publishDataTour}>
         <GlobeAltIcon className="h-5 w-5" aria-hidden />
         Publish
       </Button>

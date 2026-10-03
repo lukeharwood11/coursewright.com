@@ -9,6 +9,7 @@ import { Input } from "@/ui/Input";
 import { useToastOnError } from "@/ui/useToastOnError";
 import { useOrgShell } from "@/app/layouts/OrgShellContext";
 import { CourseHeader } from "./components/CourseHeader";
+import { TOUR_ANCHORS } from "@/tours/model/anchors";
 import { CourseVisibilityBanner } from "./components/CourseVisibilityBanner";
 import {
   CourseOutline,
@@ -136,6 +137,7 @@ export function CoursePage() {
         canEdit={canEdit}
         pending={setVisibility.isPending}
         onPublish={() => setVisibility.mutate("published")}
+        publishDataTour={canEdit ? TOUR_ANCHORS.publishCourse : undefined}
       />
       {!outlineOpen ? (
         <div className="mt-6">
@@ -252,7 +254,12 @@ export function CoursePage() {
                 </form>
               ) : (
                 <div className="mt-3">
-                  <Button variant="ghost" fullWidth onClick={() => setAddingUnit(true)}>
+                  <Button
+                    variant="ghost"
+                    fullWidth
+                    data-tour={TOUR_ANCHORS.addUnit}
+                    onClick={() => setAddingUnit(true)}
+                  >
                     <PlusIcon className="h-5 w-5" aria-hidden />
                     Add unit
                   </Button>

@@ -78,6 +78,7 @@ export function OrgShellHeader() {
             isParent={isParent}
             isStudent={isStudent}
             staffRole={role}
+            previewTourAnchor={Boolean(organization?.features.lessonPlans)}
           />
         ) : null}
         <div className="flex shrink-0 items-center gap-1.5">

@@ -6,6 +6,7 @@ import {
   DocumentTextIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
+import { TOUR_ANCHORS } from "@/tours/model/anchors";
 import { AnchoredPopup } from "@/ui/AnchoredPopup";
 import { AddMaterialForm } from "@/materials/material/components/AddMaterialForm";
 import { AddQuizForm } from "@/quizzes/quiz/components/AddQuizForm";
@@ -86,6 +87,7 @@ export function UnitAddMenu({
         aria-haspopup="menu"
         aria-expanded={menuOpen}
         aria-controls={menuOpen ? menuId : undefined}
+        data-tour={TOUR_ANCHORS.addMaterial}
         onClick={() => setMenuOpen((open) => !open)}
       >
         <PlusIcon className="h-4 w-4" aria-hidden />

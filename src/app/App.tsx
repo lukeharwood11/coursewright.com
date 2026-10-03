@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { AppErrorBoundary } from "@/app/error/AppErrorBoundary";
 import { AppRoutes } from "@/app/router";
 import { ScrollToTop } from "@/app/ScrollToTop";
+import { ProductTourProvider } from "@/tours";
 import { initPostHog } from "@/infrastructure/posthog/client";
 import { queryClient } from "@/infrastructure/query-client";
 
@@ -18,6 +19,7 @@ export function App() {
         <AppErrorBoundary>
           <AppRoutes />
         </AppErrorBoundary>
+        <ProductTourProvider />
         <Toaster
           position="top-center"
           closeButton

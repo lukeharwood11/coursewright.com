@@ -10,11 +10,13 @@ export function VisibilityBanner({
   canEdit,
   pending,
   onPublish,
+  publishDataTour,
 }: {
   visibility: MaterialVisibility;
   canEdit: boolean;
   pending?: boolean;
   onPublish: () => void;
+  publishDataTour?: string;
 }) {
   if (!canEdit || isPublished(visibility)) return null;
 
@@ -23,7 +25,7 @@ export function VisibilityBanner({
       <p className="text-[13.5px] text-[var(--amber-deep)]">
         Unpublished. Families can’t see this until you publish it.
       </p>
-      <Button type="button" disabled={pending} onClick={onPublish}>
+      <Button type="button" disabled={pending} onClick={onPublish} data-tour={publishDataTour}>
         Publish
       </Button>
     </div>

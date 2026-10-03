@@ -26,6 +26,7 @@ import {
   UserCircleIcon as UserCircleSolidIcon,
   UsersIcon as UsersSolidIcon,
 } from "@heroicons/react/24/solid";
+import { TOUR_ANCHORS } from "@/tours/model/anchors";
 import { NewPill } from "@/ui/NewPill";
 import { toastNotImplemented } from "@/ui/toast";
 import { useAppShell } from "../OrgShellContext";
@@ -58,9 +59,12 @@ const itemClass =
 export function SidebarNav({
   collapsed,
   onNavigate,
+  settingsTourAnchor = false,
 }: {
   collapsed: boolean;
   onNavigate: () => void;
+  /** Owner-only, and only on the sidebar copy that is actually visible. */
+  settingsTourAnchor?: boolean;
 }) {
   const { navSections, navLabel } = useAppShell();
   const { pathname } = useLocation();
@@ -79,6 +83,7 @@ export function SidebarNav({
             collapsed={collapsed}
             pathname={pathname}
             onNavigate={onNavigate}
+            settingsTourAnchor={settingsTourAnchor}
           />
         ))}
       </nav>
@@ -100,6 +105,7 @@ export function SidebarNav({
                 collapsed={collapsed}
                 pathname={pathname}
                 onNavigate={onNavigate}
+                settingsTourAnchor={settingsTourAnchor}
               />
             ))}
           </nav>
@@ -114,11 +120,13 @@ function SidebarSection({
   collapsed,
   pathname,
   onNavigate,
+  settingsTourAnchor,
 }: {
   section: NavSection;
   collapsed: boolean;
   pathname: string;
   onNavigate: () => void;
+  settingsTourAnchor: boolean;
 }) {
   const icons = sectionIcons[section.id] ?? sectionIcons.home;
   const sectionActive =
@@ -141,6 +149,11 @@ function SidebarSection({
         icon={Icon}
         badgeCount={section.badgeCount}
         onNavigate={onNavigate}
+        dataTour={
+          settingsTourAnchor && section.id === "settings"
+            ? TOUR_ANCHORS.navSettings
+            : undefined
+        }
       />
       {showChildren ? (
         <ul className="mb-1 ml-4 mt-0.5 border-l border-[var(--line-soft)] pl-2">
@@ -208,6 +221,7 @@ function SidebarRow({
   icon: Icon,
   badgeCount,
   onNavigate,
+  dataTour,
 }: {
   label: string;
   href: string | null;
@@ -218,6 +232,7 @@ function SidebarRow({
   icon: IconComponent;
   badgeCount?: number;
   onNavigate: () => void;
+  dataTour?: string;
 }) {
   const showBadge = badgeCount != null && badgeCount > 0;
   const className = `${itemClass} ${collapsed ? "relative justify-center px-0" : ""} ${
@@ -287,7 +302,7 @@ function SidebarRow({
   }
 
   return (
-    <NavLink to={href} title={title} onClick={onNavigate} className={className}>
+    <NavLink to={href} title={title} onClick={onNavigate} className={className} data-tour={dataTour}>
       {content}
     </NavLink>
   );
