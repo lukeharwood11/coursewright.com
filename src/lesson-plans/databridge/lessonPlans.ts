@@ -1,4 +1,12 @@
 import { requireSupabase } from "./client";
+import { listOrgResourceFolders } from "@/resources/databridge/folders";
+import type { FolderAclSource } from "@/resources/model/access";
+import {
+  lessonPlanDayResourceInserts,
+  lessonPlanDayResourcesFromEmbeds,
+  type LessonPlanDayResourceEmbed,
+  type LessonPlanDayResourceRecord,
+} from "@/lesson-plans/model/dayResources";
 import { parseMaterialKind, type MaterialKind } from "@/materials/model/kind";
 import {
   parseMaterialVisibility,
@@ -31,6 +39,7 @@ export type LessonPlanDayRecord = {
   date: string;
   body: string;
   materials: LessonPlanMaterialRecord[];
+  resources: LessonPlanDayResourceRecord[];
 };
 
 export type LessonPlanRecord = {
@@ -120,6 +129,11 @@ function toPlanMaterial(row: MaterialEmbed): LessonPlanMaterialRecord | null {
   };
 }
 
+const DAY_RESOURCE_EMBED =
+  "lesson_plan_day_resources(position, folder_id, item_id, folder:org_resource_folders(id, name, parent_id, archived_at, parents_can_view, students_can_view, acl_inherit), item:org_resource_items(id, title, type, visibility, folder_id, archived_at, parents_can_view, students_can_view, acl_inherit))";
+
+const DAY_DETAIL_EMBED = `id, day_date, body, lesson_plan_day_materials(position, material:materials(id, title, description, kind, unit_id, visibility, deleted_at)), ${DAY_RESOURCE_EMBED}`;
+
 type DayEmbed = {
   id: number;
   day_date: string;
@@ -128,9 +142,13 @@ type DayEmbed = {
     position: number;
     material: MaterialEmbed | MaterialEmbed[] | null;
   }>;
+  lesson_plan_day_resources?: LessonPlanDayResourceEmbed[];
 };
 
-function toDays(days: DayEmbed[] | null | undefined): LessonPlanDayRecord[] {
+function toDays(
+  days: DayEmbed[] | null | undefined,
+  foldersById: Map<number, FolderAclSource>,
+): LessonPlanDayRecord[] {
   return [...(days ?? [])]
     .sort((a, b) => a.day_date.localeCompare(b.day_date))
     .map((day) => {
@@ -147,8 +165,27 @@ function toDays(days: DayEmbed[] | null | undefined): LessonPlanDayRecord[] {
           const mapped = toPlanMaterial(material);
           return mapped ? [mapped] : [];
         }),
+        resources: lessonPlanDayResourcesFromEmbeds(
+          day.lesson_plan_day_resources,
+          foldersById,
+        ),
       };
     });
+}
+
+async function folderAclMap(organizationId: number): Promise<Map<number, FolderAclSource>> {
+  const folders = await listOrgResourceFolders(organizationId);
+  const foldersById = new Map<number, FolderAclSource>();
+  for (const folder of folders) {
+    foldersById.set(folder.id, {
+      id: folder.id,
+      parentId: folder.parentId,
+      parentsCanView: folder.parentsCanView,
+      studentsCanView: folder.studentsCanView,
+      aclInherit: folder.aclInherit,
+    });
+  }
+  return foldersById;
 }
 
 function materialCountFromDays(
@@ -185,7 +222,7 @@ export async function listLessonPlansForCourse(
   const { data, error } = await db
     .from("lesson_plans")
     .select(
-      `${PLAN_COLUMNS}, course:courses(title, color_key), lesson_plan_days(id, lesson_plan_day_materials(id))`,
+      `${PLAN_COLUMNS}, course:courses(title, color_key), lesson_plan_days(id, lesson_plan_day_materials(id), lesson_plan_day_resources(position, folder_id, item_id))`,
     )
     .eq("course_id", courseId)
     .is("deleted_at", null)
@@ -205,7 +242,7 @@ export async function listLessonPlansInRange(
   const { data, error } = await db
     .from("lesson_plans")
     .select(
-      `${PLAN_COLUMNS}, course:courses(title, color_key), lesson_plan_days(id, day_date, body, lesson_plan_day_materials(position, material:materials(id, title, description, kind, unit_id, visibility, deleted_at)))`,
+      `${PLAN_COLUMNS}, course:courses(title, color_key), lesson_plan_days(${DAY_DETAIL_EMBED})`,
     )
     .eq("organization_id", organizationId)
     .is("deleted_at", null)
@@ -213,6 +250,7 @@ export async function listLessonPlansInRange(
     .gte("week_start", addDays(rangeStart, -6));
 
   if (error) throw new Error(error.message);
+  const foldersById = await folderAclMap(organizationId);
   return (data ?? []).flatMap((row) => {
     const course = one(row.course);
     const weekEnd = addDays(row.week_start, 6);
@@ -222,7 +260,7 @@ export async function listLessonPlansInRange(
         ...toPlan(row),
         courseTitle: course?.title ?? "",
         colorKey: parseCourseColorKey(course?.color_key),
-        days: toDays(row.lesson_plan_days),
+        days: toDays(row.lesson_plan_days, foldersById),
       },
     ];
   });
@@ -250,7 +288,7 @@ export async function getLessonPlan(id: number): Promise<LessonPlanDetail | null
   const { data, error } = await db
     .from("lesson_plans")
     .select(
-      `${PLAN_COLUMNS}, course:courses(title, color_key), lesson_plan_days(id, day_date, body, lesson_plan_day_materials(position, material:materials(id, title, description, kind, unit_id, visibility, deleted_at)))`,
+      `${PLAN_COLUMNS}, course:courses(title, color_key), lesson_plan_days(${DAY_DETAIL_EMBED})`,
     )
     .eq("id", id)
     .maybeSingle();
@@ -258,11 +296,12 @@ export async function getLessonPlan(id: number): Promise<LessonPlanDetail | null
   if (error) throw new Error(error.message);
   if (!data) return null;
   const course = one(data.course);
+  const foldersById = await folderAclMap(data.organization_id);
   return {
     ...toPlan(data),
     courseTitle: course?.title ?? "",
     colorKey: parseCourseColorKey(course?.color_key),
-    days: toDays(data.lesson_plan_days),
+    days: toDays(data.lesson_plan_days, foldersById),
   };
 }
 
@@ -288,15 +327,23 @@ async function replaceDays(planId: number, days: LessonPlanDayDraft[]): Promise<
       .select("id")
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!data || day.materialIds.length === 0) continue;
-    const { error: linkError } = await db.from("lesson_plan_day_materials").insert(
-      day.materialIds.map((materialId, index) => ({
-        lesson_plan_day_id: data.id,
-        material_id: materialId,
-        position: index,
-      })),
-    );
-    if (linkError) throw new Error(linkError.message);
+    if (!data) continue;
+    if (day.materialIds.length > 0) {
+      const { error: linkError } = await db.from("lesson_plan_day_materials").insert(
+        day.materialIds.map((materialId, index) => ({
+          lesson_plan_day_id: data.id,
+          material_id: materialId,
+          position: index,
+        })),
+      );
+      if (linkError) throw new Error(linkError.message);
+    }
+    if (day.resources.length > 0) {
+      const { error: resourceError } = await db
+        .from("lesson_plan_day_resources")
+        .insert(lessonPlanDayResourceInserts(data.id, day.resources));
+      if (resourceError) throw new Error(resourceError.message);
+    }
   }
 }
 
@@ -371,6 +418,10 @@ export function draftFromDetail(
     date: day.date,
     body: day.body,
     materialIds: day.materials.map((material) => material.id),
+    resources: day.resources.map((resource) => ({
+      kind: resource.kind,
+      id: resource.id,
+    })),
   }));
   return {
     title: detail.title,

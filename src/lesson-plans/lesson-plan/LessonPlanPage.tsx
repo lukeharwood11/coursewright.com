@@ -16,6 +16,7 @@ import {
   VisibilityBanner,
 } from "@/materials/material/components/VisibilityBanner";
 import { LessonPlanMaterialList } from "./components/LessonPlanMaterialList";
+import { LessonPlanResourceList } from "./components/LessonPlanResourceList";
 import { OrgDayTypeIcons } from "@/organizations/components/OrgDayTypeIcons";
 import { useLessonPlan } from "./hooks/useLessonPlan";
 import { useToastOnError } from "@/ui/useToastOnError";
@@ -180,6 +181,16 @@ export function LessonPlanPage() {
                     courseId={course.id}
                     materials={day.materials}
                     showUnpublished={page.canEdit}
+                  />
+                </>
+              ) : null}
+              {day.resources.length > 0 ? (
+                <>
+                  <div className="my-3 border-t border-[var(--line)]" />
+                  <LessonPlanResourceList
+                    orgSlug={page.organization.slug}
+                    resources={day.resources}
+                    showWarning={page.canEdit}
                   />
                 </>
               ) : null}

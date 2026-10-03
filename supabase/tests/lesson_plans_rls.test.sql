@@ -1,6 +1,6 @@
 -- Lesson plans: staff manage; enrolled parents read published non-deleted rows.
 begin;
-select plan(8);
+select plan(13);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -80,6 +80,85 @@ from organizations o
 join courses c on c.organization_id = o.id
 where o.name = 'Plan Co-op' and c.title = 'Art';
 
+insert into org_resource_folders (organization_id, parent_id, name, acl_inherit, created_by)
+select id, null, 'Handouts', false, 'cccc3333-3333-3333-3333-333333333333'
+from organizations
+where name = 'Plan Co-op';
+
+insert into org_resource_folders (organization_id, parent_id, name, acl_inherit, created_by)
+select o.id, parent.id, 'Week 1', true, 'cccc3333-3333-3333-3333-333333333333'
+from organizations o
+join org_resource_folders parent
+  on parent.organization_id = o.id
+ and parent.name = 'Handouts'
+where o.name = 'Plan Co-op';
+
+insert into org_resource_folders (organization_id, parent_id, name, acl_inherit, created_by)
+select o.id, parent.id, 'Monday', true, 'cccc3333-3333-3333-3333-333333333333'
+from organizations o
+join org_resource_folders parent
+  on parent.organization_id = o.id
+ and parent.name = 'Week 1'
+where o.name = 'Plan Co-op';
+
+insert into org_resource_folders (organization_id, parent_id, name, acl_inherit, created_by)
+select id, null, 'Other', false, 'cccc3333-3333-3333-3333-333333333333'
+from organizations
+where name = 'Plan Co-op';
+
+insert into org_resource_items (
+  organization_id, folder_id, type, title, visibility, acl_inherit, created_by
+)
+select o.id, null, 'document', 'Lab guide', 'published', false,
+  'cccc3333-3333-3333-3333-333333333333'
+from organizations o
+where o.name = 'Plan Co-op';
+
+insert into org_resource_items (
+  organization_id, folder_id, type, title, visibility, acl_inherit, created_by
+)
+select o.id, f.id, 'document', 'Nested sheet', 'published', true,
+  'cccc3333-3333-3333-3333-333333333333'
+from organizations o
+join org_resource_folders f
+  on f.organization_id = o.id
+ and f.name = 'Week 1'
+where o.name = 'Plan Co-op';
+
+insert into org_resource_items (
+  organization_id, folder_id, type, title, visibility, acl_inherit, created_by
+)
+select o.id, f.id, 'document', 'Loose sheet', 'published', true,
+  'cccc3333-3333-3333-3333-333333333333'
+from organizations o
+join org_resource_folders f
+  on f.organization_id = o.id
+ and f.name = 'Other'
+where o.name = 'Plan Co-op';
+
+insert into org_resource_items (
+  organization_id, folder_id, type, title, visibility, acl_inherit, archived_at, created_by
+)
+select o.id, f.id, 'document', 'Old sheet', 'published', true, now(),
+  'cccc3333-3333-3333-3333-333333333333'
+from organizations o
+join org_resource_folders f
+  on f.organization_id = o.id
+ and f.name = 'Handouts'
+where o.name = 'Plan Co-op';
+
+insert into course_resource_links (course_id, organization_id, item_id, sort_order)
+select c.id, c.organization_id, i.id, 0
+from courses c
+join org_resource_items i on i.organization_id = c.organization_id
+where c.title = 'Science' and i.title = 'Lab guide';
+
+insert into course_resource_links (course_id, organization_id, folder_id, sort_order)
+select c.id, c.organization_id, f.id, 1
+from courses c
+join org_resource_folders f on f.organization_id = c.organization_id
+where c.title = 'Science' and f.name = 'Handouts';
+
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'cccc3333-3333-3333-3333-333333333333', true);
 select set_config(
@@ -136,6 +215,70 @@ select throws_ok(
   '23514',
   'Those materials need to be in the same course as this lesson plan.',
   'cannot attach a material from another course'
+);
+
+select lives_ok(
+  $$
+    insert into lesson_plan_day_resources (lesson_plan_day_id, item_id, position)
+    select d.id, i.id, 0
+    from lesson_plan_days d
+    join lesson_plans lp on lp.id = d.lesson_plan_id
+    join org_resource_items i on i.title = 'Lab guide'
+    where lp.title = 'Week 3'
+  $$,
+  'owner can attach an item the course already links'
+);
+
+select throws_ok(
+  $$
+    insert into lesson_plan_day_resources (lesson_plan_day_id, item_id, position)
+    select d.id, i.id, 1
+    from lesson_plan_days d
+    join lesson_plans lp on lp.id = d.lesson_plan_id
+    join org_resource_items i on i.title = 'Loose sheet'
+    where lp.title = 'Week 3'
+  $$,
+  '23514',
+  'Link that resource on the course before adding it to a lesson plan.',
+  'cannot attach an item that is only somewhere in the org'
+);
+
+select lives_ok(
+  $$
+    insert into lesson_plan_day_resources (lesson_plan_day_id, item_id, position)
+    select d.id, i.id, 2
+    from lesson_plan_days d
+    join lesson_plans lp on lp.id = d.lesson_plan_id
+    join org_resource_items i on i.title = 'Nested sheet'
+    where lp.title = 'Week 3'
+  $$,
+  'owner can attach an item inside a folder the course links'
+);
+
+select lives_ok(
+  $$
+    insert into lesson_plan_day_resources (lesson_plan_day_id, folder_id, position)
+    select d.id, f.id, 3
+    from lesson_plan_days d
+    join lesson_plans lp on lp.id = d.lesson_plan_id
+    join org_resource_folders f on f.name = 'Monday'
+    where lp.title = 'Week 3'
+  $$,
+  'owner can attach a nested folder under a folder the course links'
+);
+
+select throws_ok(
+  $$
+    insert into lesson_plan_day_resources (lesson_plan_day_id, item_id, position)
+    select d.id, i.id, 4
+    from lesson_plan_days d
+    join lesson_plans lp on lp.id = d.lesson_plan_id
+    join org_resource_items i on i.title = 'Old sheet'
+    where lp.title = 'Week 3'
+  $$,
+  '23514',
+  'That resource isn’t available.',
+  'cannot attach an archived resource'
 );
 
 select throws_ok(

@@ -1645,6 +1645,55 @@ export type Database = {
           },
         ]
       }
+      lesson_plan_day_resources: {
+        Row: {
+          created_at: string
+          folder_id: number | null
+          id: number
+          item_id: number | null
+          lesson_plan_day_id: number
+          position: number
+        }
+        Insert: {
+          created_at?: string
+          folder_id?: number | null
+          id?: number
+          item_id?: number | null
+          lesson_plan_day_id: number
+          position?: number
+        }
+        Update: {
+          created_at?: string
+          folder_id?: number | null
+          id?: number
+          item_id?: number | null
+          lesson_plan_day_id?: number
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plan_day_resources_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "org_resource_folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_day_resources_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "org_resource_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_day_resources_lesson_plan_day_id_fkey"
+            columns: ["lesson_plan_day_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plan_days"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_plan_days: {
         Row: {
           body: string

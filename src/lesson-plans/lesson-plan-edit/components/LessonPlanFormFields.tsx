@@ -17,8 +17,15 @@ import {
   type LessonPlanDaysPreset,
 } from "@/lesson-plans/model/dayPreset";
 import { SegmentButton, SegmentGroup } from "@/ui/Tabs";
+import {
+  dayResourceKey,
+  type LessonPlanDayResourceRecord,
+  type LessonPlanDayResourceRef,
+  type LessonPlanResourcePickerNode,
+} from "@/lesson-plans/model/dayResources";
 import { AddDayModal } from "./AddDayModal";
 import { LinkMaterialsModal } from "./LinkMaterialsModal";
+import { LinkResourcesModal } from "./LinkResourcesModal";
 
 const controlClass = [
   "w-full rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-[13px] py-[11px] text-[14.5px] text-[var(--ink)] outline-none",
@@ -37,6 +44,11 @@ export function LessonPlanFormFields({
   onWeekStart,
   onDayBody,
   onToggleMaterial,
+  onToggleResource,
+  resourceCatalog,
+  resourceNodes,
+  courseHasResourceLinks,
+  resourcesLoading,
   onAddDay,
   dayPreset,
   onDayPreset,
@@ -54,6 +66,11 @@ export function LessonPlanFormFields({
   onWeekStart: (value: string) => void;
   onDayBody: (date: string, body: string) => void;
   onToggleMaterial: (date: string, materialId: number) => void;
+  onToggleResource: (date: string, resource: LessonPlanDayResourceRef) => void;
+  resourceCatalog: LessonPlanDayResourceRecord[];
+  resourceNodes: LessonPlanResourcePickerNode[];
+  courseHasResourceLinks: boolean;
+  resourcesLoading: boolean;
   onAddDay: (date: string) => void;
   dayPreset: LessonPlanDaysPreset;
   onDayPreset: (preset: LessonPlanDaysPreset) => void;
@@ -62,12 +79,17 @@ export function LessonPlanFormFields({
 }) {
   const [addDayOpen, setAddDayOpen] = useState(false);
   const [linkDay, setLinkDay] = useState<string | null>(null);
+  const [resourceDay, setResourceDay] = useState<string | null>(null);
   const materialsById = new Map(materials.map((material) => [material.id, material]));
+  const resourcesByKey = new Map(
+    resourceCatalog.map((resource) => [dayResourceKey(resource), resource]),
+  );
   const remaining = remainingDaysForWeek(
     weekStart,
     days.map((day) => day.date),
   );
   const linkDayDraft = days.find((day) => day.date === linkDay) ?? null;
+  const resourceDayDraft = days.find((day) => day.date === resourceDay) ?? null;
 
   return (
     <>
@@ -191,6 +213,55 @@ export function LessonPlanFormFields({
                 <PlusIcon className="h-4 w-4" aria-hidden />
                 Link materials
               </Button>
+              <div className="my-3 border-t border-[var(--line)]" />
+              <p className="text-[12px] font-bold text-[var(--ink-soft)]">Resources</p>
+              {day.resources.length > 0 ? (
+                <ul className="mt-2 flex flex-col gap-1.5">
+                  {day.resources.map((resource) => {
+                    const record = resourcesByKey.get(dayResourceKey(resource));
+                    if (!record) return null;
+                    return (
+                      <li
+                        key={dayResourceKey(resource)}
+                        className="flex items-start justify-between gap-2 rounded-[6px] border border-[var(--line-soft)] bg-[var(--surface)] px-2.5 py-1.5"
+                      >
+                        <span className="min-w-0">
+                          <span className="block text-[12.5px] font-semibold text-[var(--ink)]">
+                            {record.title}
+                          </span>
+                          {record.familyAccessWarning ? (
+                            <span className="text-[11.5px] font-bold text-[var(--amber-deep)]">
+                              {record.familyAccessWarning}
+                            </span>
+                          ) : null}
+                        </span>
+                        <button
+                          type="button"
+                          className="shrink-0 rounded-[4px] p-0.5 text-[var(--ink-faint)] hover:bg-[var(--green-tint)] hover:text-[var(--green-deep)]"
+                          aria-label={`Remove ${record.title}`}
+                          onClick={() => onToggleResource(day.date, resource)}
+                        >
+                          <XMarkIcon className="h-4 w-4" aria-hidden />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="mt-1 text-[12px] text-[var(--ink-faint)]">
+                  No resources linked yet.
+                </p>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                fullWidth
+                className="mt-2"
+                onClick={() => setResourceDay(day.date)}
+              >
+                <PlusIcon className="h-4 w-4" aria-hidden />
+                Link resources
+              </Button>
             </section>
           );
         })}
@@ -220,6 +291,18 @@ export function LessonPlanFormFields({
           if (linkDay) onToggleMaterial(linkDay, materialId);
         }}
         onClose={() => setLinkDay(null)}
+      />
+      <LinkResourcesModal
+        open={resourceDay != null}
+        dayLabel={resourceDay ? weekdayDateLabel(resourceDay) : ""}
+        nodes={resourceNodes}
+        selected={resourceDayDraft?.resources ?? []}
+        courseHasLinks={courseHasResourceLinks}
+        loading={resourcesLoading}
+        onToggle={(resource) => {
+          if (resourceDay) onToggleResource(resourceDay, resource);
+        }}
+        onClose={() => setResourceDay(null)}
       />
     </>
   );

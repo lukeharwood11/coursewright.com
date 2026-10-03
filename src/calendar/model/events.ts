@@ -18,6 +18,12 @@ export type CalendarMaterialChip = {
   unpublished: boolean;
 };
 
+export type CalendarLessonPlanResource = {
+  kind: "folder" | "item";
+  id: number;
+  title: string;
+};
+
 export type CalendarLessonPlanDay = {
   planId: number;
   courseId: number;
@@ -33,6 +39,7 @@ export type CalendarLessonPlanDay = {
     assigned: boolean;
     due: boolean;
   }>;
+  resources?: CalendarLessonPlanResource[];
 };
 
 export type CalendarWeekNote = {
@@ -329,6 +336,7 @@ export type WeekClassCard = {
   unpublished: boolean;
   body: string;
   materials: CalendarLessonPlanDay["materials"];
+  resources: CalendarLessonPlanResource[];
   chips: CalendarMaterialChip[];
 };
 
@@ -353,6 +361,7 @@ export function weekClassCards(
         planId: plan.planId,
         unpublished: plan.unpublished,
         body: plan.body,
+        resources: plan.resources ?? [],
         materials: mergeDayMaterials(
           plan.materials.map((material) => ({
             id: material.id,
@@ -385,6 +394,7 @@ export function weekClassCards(
         unpublished: false,
         body: "",
         materials: [],
+        resources: [],
         chips: group,
       });
     }
@@ -394,7 +404,7 @@ export function weekClassCards(
   return cards;
 }
 
-/** A day belongs on This week when it has plan text, attached materials, or assigned/due chips. */
+/** A day belongs on This week when it has plan text, materials, linked resources, or assigned/due chips. */
 export function dayHasCalendarContent(
   date: string,
   lessonDays: CalendarLessonPlanDay[],
@@ -405,6 +415,7 @@ export function dayHasCalendarContent(
     if (day.date !== date) continue;
     if (day.body.trim()) return true;
     if (day.materials.length > 0) return true;
+    if ((day.resources?.length ?? 0) > 0) return true;
   }
   if (chips.some((chip) => chip.date === date)) return true;
   return events.some((event) => event.date === date);

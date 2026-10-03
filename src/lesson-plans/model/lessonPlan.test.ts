@@ -68,13 +68,13 @@ test("validateLessonPlanDraft requires a title and a Sunday", () => {
 
 test("daysToPersist keeps days with text or materials only", () => {
   const kept = daysToPersist([
-    { date: "2026-09-13", body: "  ", materialIds: [] },
-    { date: "2026-09-14", body: "Lab", materialIds: [] },
-    { date: "2026-09-15", body: "", materialIds: [3, 3] },
+    { date: "2026-09-13", body: "  ", materialIds: [], resources: [] },
+    { date: "2026-09-14", body: "Lab", materialIds: [], resources: [] },
+    { date: "2026-09-15", body: "", materialIds: [3, 3], resources: [] },
   ]);
   assert.deepEqual(kept, [
-    { date: "2026-09-14", body: "Lab", materialIds: [] },
-    { date: "2026-09-15", body: "", materialIds: [3] },
+    { date: "2026-09-14", body: "Lab", materialIds: [], resources: [] },
+    { date: "2026-09-15", body: "", materialIds: [3], resources: [] },
   ]);
 });
 
@@ -92,7 +92,7 @@ test("lessonPlanDaysToShow omits empty days and sorts by date", () => {
 
 test("remapDaysToWeek keeps weekday content when the week changes", () => {
   const remapped = remapDaysToWeek(
-    [{ date: "2026-09-14", body: "Monday", materialIds: [1] }],
+    [{ date: "2026-09-14", body: "Monday", materialIds: [1], resources: [] }],
     "2026-09-20",
   );
   assert.equal(remapped[1]?.date, "2026-09-21");
@@ -107,7 +107,7 @@ test("visibleDaysForWeek defaults to Mon–Fri and keeps content extras", () => 
     ["2026-09-14", "2026-09-15", "2026-09-16", "2026-09-17", "2026-09-18"],
   );
   const withSunday = visibleDaysForWeek("2026-09-13", [1, 2, 3, 4, 5], {
-    existingDays: [{ date: "2026-09-13", body: "Sunday note", materialIds: [] }],
+    existingDays: [{ date: "2026-09-13", body: "Sunday note", materialIds: [], resources: [] }],
   });
   assert.equal(withSunday[0]?.date, "2026-09-13");
   assert.equal(withSunday[0]?.body, "Sunday note");
@@ -133,7 +133,7 @@ test("remainingDaysForWeek lists hidden weekdays", () => {
 test("extraDatesFromDays remaps non-school weekdays onto a new week", () => {
   assert.deepEqual(
     extraDatesFromDays(
-      [{ date: "2026-09-19", body: "", materialIds: [] }],
+      [{ date: "2026-09-19", body: "", materialIds: [], resources: [] }],
       "2026-09-20",
       [1, 2, 3, 4, 5],
     ),
@@ -142,7 +142,7 @@ test("extraDatesFromDays remaps non-school weekdays onto a new week", () => {
 });
 
 test("mergeDaysToFullWeek keeps notes when toggling day presets", () => {
-  const visible = [{ date: "2026-09-14", body: "Lab", materialIds: [2] }];
+  const visible = [{ date: "2026-09-14", body: "Lab", materialIds: [2], resources: [] }];
   const full = mergeDaysToFullWeek("2026-09-13", visible);
   assert.equal(full.length, 7);
   assert.equal(full[1]?.body, "Lab");
@@ -151,7 +151,7 @@ test("mergeDaysToFullWeek keeps notes when toggling day presets", () => {
   const shown = visibleDaysForWeek("2026-09-13", base, { existingDays: full });
   assert.deepEqual(
     shown.map((day) => day.date),
-    ["2026-09-14"],
+    ["2026-09-14", "2026-09-19"],
   );
   const school = weekdaysForLessonPlanPreset("school", [1, 2, 3, 4, 5], homeDays);
   const back = visibleDaysForWeek("2026-09-13", school, {
@@ -185,4 +185,75 @@ test("filterPickerGroups matches material or unit titles", () => {
   assert.equal(filterPickerGroups(groups, "cells")[0]?.materials.length, 2);
   assert.equal(filterPickerGroups(groups, "syllabus")[0]?.unitId, null);
   assert.deepEqual(filterPickerGroups(groups, "  "), groups);
+});
+
+test("daysToPersist keeps a day that only links resources and dedupes folder and item ids apart", () => {
+  const kept = daysToPersist([
+    {
+      date: "2026-09-13",
+      body: "",
+      materialIds: [],
+      resources: [
+        { kind: "folder", id: 4 },
+        { kind: "item", id: 4 },
+        { kind: "folder", id: 4 },
+        { kind: "item", id: 9 },
+      ],
+    },
+    { date: "2026-09-14", body: "  ", materialIds: [], resources: [] },
+  ]);
+  assert.deepEqual(kept, [
+    {
+      date: "2026-09-13",
+      body: "",
+      materialIds: [],
+      resources: [
+        { kind: "folder", id: 4 },
+        { kind: "item", id: 4 },
+        { kind: "item", id: 9 },
+      ],
+    },
+  ]);
+});
+
+test("visibleDaysForWeek keeps a non-school day that only has a resource", () => {
+  const shown = visibleDaysForWeek("2026-09-13", [1, 2, 3, 4, 5], {
+    existingDays: [
+      {
+        date: "2026-09-13",
+        body: "",
+        materialIds: [],
+        resources: [{ kind: "item", id: 8 }],
+      },
+    ],
+  });
+  assert.equal(shown[0]?.date, "2026-09-13");
+  assert.deepEqual(shown[0]?.resources, [{ kind: "item", id: 8 }]);
+});
+
+test("lessonPlanDaysToShow keeps a day that only has resources", () => {
+  const shown = lessonPlanDaysToShow([
+    { date: "2026-09-14", body: "", materials: [], resources: [] },
+    { date: "2026-09-15", body: "", materials: [], resources: [{ id: 8 }] },
+  ]);
+  assert.deepEqual(
+    shown.map((day) => day.date),
+    ["2026-09-15"],
+  );
+});
+
+test("remapDaysToWeek keeps resource links on the same weekday", () => {
+  const remapped = remapDaysToWeek(
+    [
+      {
+        date: "2026-09-14",
+        body: "",
+        materialIds: [],
+        resources: [{ kind: "folder", id: 2 }],
+      },
+    ],
+    "2026-09-20",
+  );
+  assert.equal(remapped[1]?.date, "2026-09-21");
+  assert.deepEqual(remapped[1]?.resources, [{ kind: "folder", id: 2 }]);
 });

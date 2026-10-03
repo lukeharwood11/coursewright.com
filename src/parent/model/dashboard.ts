@@ -54,6 +54,7 @@ export type ParentLessonPlanDay = {
   date: string;
   body: string;
   materials: Array<{ id: number; title: string; unitId: number | null }>;
+  resources?: Array<{ kind: "folder" | "item"; id: number; title: string }>;
 };
 
 export type ParentLessonPlanItem = {
@@ -185,6 +186,7 @@ export type ParentDashboardSource = {
       date: string;
       body: string;
       materials: Array<{ id: number; title: string; unitId: number | null }>;
+      resources?: Array<{ kind: "folder" | "item"; id: number; title: string }>;
     }>;
   }>;
   classMemberships?: Array<{ classId: number; studentId: number }>;
@@ -330,6 +332,7 @@ export function buildParentDashboard(source: ParentDashboardSource): ParentDashb
           date: day.date,
           body: day.body,
           materials: day.materials,
+          resources: day.resources ?? [],
         })),
     }))
     .sort((a, b) => {

@@ -44,6 +44,7 @@ Runtime tables are snake_case of the entities below. Applied by [supabase/migrat
 | LessonPlan | `lesson_plans` | Weekly course plan; published / unpublished |
 | LessonPlanDay | `lesson_plan_days` | Optional note for one day in that week |
 | LessonPlanDayMaterial | `lesson_plan_day_materials` | Materials listed under a day |
+| LessonPlanDayResource | `lesson_plan_day_resources` | Course-linked org Resources listed under a day |
 | Event | `events` | One course, several classes, or the whole organization. Required location |
 | EventBlock | `event_blocks` | Lexical write-up on an event (`rich_text` · `video`). Not a course material |
 | EventMaterial | `event_materials` | Existing course materials linked from an event |
@@ -939,7 +940,7 @@ One calendar day inside a lesson plan.
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
-Unique `(lesson_plan_id, day_date)`. Persist only days that have body text or materials.
+Unique `(lesson_plan_id, day_date)`. Persist only days that have body text, materials, or resource links.
 
 ### LessonPlanDayMaterial
 
@@ -954,6 +955,27 @@ Join: materials listed under a lesson-plan day, ordered.
 | created_at | timestamptz | |
 
 Unique `(lesson_plan_day_id, material_id)`. Families only follow links to **published** materials (same material RLS). Attaching a material does **not** change `scheduled_date` or `due_date`. Soft-deleting a plan leaves join rows; the app path does not hard-delete lesson plans.
+
+### LessonPlanDayResource
+
+Join: an org Resource folder or item listed under a lesson-plan day, ordered. Not a course material, and not a copy of the course’s resource links.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| lesson_plan_day_id | bigint | FK → LessonPlanDay |
+| folder_id | bigint | FK → OrgResourceFolder, nullable |
+| item_id | bigint | FK → OrgResourceItem, nullable |
+| position | int | order under that day, picker order |
+| created_at | timestamptz | |
+
+Exactly one of `folder_id` or `item_id` is set. Unique per day for each folder and each item.
+
+**Same-course-link rule:** the target must be in the plan’s organization, not archived, and already linked on that course — either a `course_resource_links` row for the item or folder, or the item/folder sits inside a folder the course links. Descendants of a linked folder are eligible, including a nested folder. A course link to a folder does **not** insert child rows; children are only eligible.
+
+**Who can read:** same as the lesson plan (org staff, or a parent who can view the course when the plan is published and not deleted).
+
+**Who can write:** someone who can manage the plan’s course. The on-course check is the write trigger, not a second ACL. Opening the folder or item still follows `org_resource_*` RLS. This join does not publish or share anything. The family-access warning is display-only and does not grant access.
 
 ### Event
 
@@ -1285,6 +1307,7 @@ Course / CourseTemplate.grade_levels (catalog metadata)
 Course ──< CourseInstructor >── org_profiles (user_id filled on claim)  ← many
 Course ──< ImportantNow
 Course ──< LessonPlan ──< LessonPlanDay ──< LessonPlanDayMaterial >── Material
+LessonPlanDay ──< LessonPlanDayResource >── OrgResourceFolder | OrgResourceItem
 Organization ──< Announcement (course(s) | class(es) | student(s)) ──< AnnouncementRead >── User
 Course ──< ShareLink
 ```

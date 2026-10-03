@@ -46,6 +46,7 @@ export function parentWeekCalendar(dashboard: ParentDashboard): ParentWeekCalend
         assigned: false,
         due: false,
       })),
+      resources: day.resources ?? [],
     })),
   );
 
