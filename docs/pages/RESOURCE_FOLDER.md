@@ -25,7 +25,7 @@ Same screen as [RESOURCES](./RESOURCES.md) scoped to this folder.
 
 Empty: same as root, scoped to the folder.
 
-Not found: no access or missing folder → back to Resources.
+Not found: a missing id or another organization stays “We couldn’t find that folder”, then back to Resources. A folder in this organization the viewer cannot open says “You do not have permission to view this resource.”
 
 ## Data shown
 

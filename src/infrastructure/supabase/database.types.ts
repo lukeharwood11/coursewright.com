@@ -4010,6 +4010,10 @@ export type Database = {
         Args: { p_delivery_id: number }
         Returns: undefined
       }
+      resource_open_state: {
+        Args: { p_id: number; p_kind: string; p_organization_id: number }
+        Returns: string
+      }
       save_material_page: {
         Args: { p_blocks?: Json; p_material_id: number; p_placement?: Json }
         Returns: number

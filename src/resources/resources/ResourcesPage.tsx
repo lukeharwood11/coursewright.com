@@ -14,6 +14,7 @@ import { isNetworkError } from "@/ui/networkError";
 import type { ResourceFolderRecord } from "@/resources/databridge/folders";
 import type { ResourceItemRecord } from "@/resources/databridge/items";
 import type { ResourceAudience } from "@/resources/model/access";
+import { RESOURCE_OPEN_PERMISSION_MESSAGE } from "@/resources/model/openState";
 import {
   resourceBrowsePath,
   resourceItemEditPath,
@@ -102,6 +103,27 @@ export function ResourcesPage() {
 
   if (page.loading) {
     return <PageLoading label="Loading resources…" />;
+  }
+
+  if (page.forbidden) {
+    return (
+      <div className="px-5 py-4 md:px-8">
+        <h1
+          className="text-[24px] font-semibold text-[var(--ink)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {RESOURCE_OPEN_PERMISSION_MESSAGE}
+        </h1>
+        <p className="mt-4 text-[13px]">
+          <Link
+            to={resourceBrowsePath(page.organization.slug, null)}
+            className="font-bold text-[var(--green)] hover:text-[var(--green-deep)]"
+          >
+            Back to Resources
+          </Link>
+        </p>
+      </div>
+    );
   }
 
   if (page.notFound) {

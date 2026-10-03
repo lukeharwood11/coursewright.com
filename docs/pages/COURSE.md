@@ -50,7 +50,7 @@ Course builder home — structure units/materials for this offering; jump to ros
 - Top-level materials list (above units) with **title**, **description**, kind, **Print** when any exist; add material into a unit
 - Units list (ordered) → [UNIT](./UNIT.md); add unit
 - Materials under units: **title**, **description**, kind/badge, dates, print affordance
-- **Resources** unit: resource materials link an org [RESOURCES](./RESOURCES.md) folder or item. Staff link them from that unit’s Add menu. There is no separate course-page link list. Publishing the material does not share the file
+- **Resources** unit: resource materials link an org [RESOURCES](./RESOURCES.md) folder or item. Staff link them from that unit’s Add menu. There is no separate course-page link list. Publishing the material does not share the file. Staff who can edit see the previous access line under the row title when families cannot open it
 - Sidebar / secondary: teachers, link to [COURSE_ROSTER](./COURSE_ROSTER.md)
 - Actions: Add unit then **Add** (Material / Quiz) on the unit, **Add lesson plan**, Create Announcement / **Start a discussion** (**P1**) / Settings (header on `md+`; those three also under **More** on small screens), **More** menu (Share / Duplicate), Print entry points; **Create course from this course** (copy → new independent course)
 - Versioning / soft-delete awareness for dangerous actions (TBD exact UX)

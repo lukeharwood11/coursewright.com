@@ -790,6 +790,8 @@ Unfiled items that inherit have no folder ACL — only staff (and item-level gra
 
 **Who can view:** editors always (including unpublished). Others only when `visibility = published` **and** the effective preset or a read/write grant allows them. Course enrollment is **not** consulted.
 
+**Open state:** `resource_open_state(organization_id, kind, id)` returns `ok`, `forbidden`, or `missing` only. Same org and the row exists but the viewer cannot open it is `forbidden`. Another org, a non-member, a missing id, or a soft-archived row they cannot open is `missing`. It does not return a title or file.
+
 ### OrgResourceBlock
 
 Ordered content on a **document** item (`org_resource_items.type = document`). Same Lexical shape as material `blocks` (`rich_text` · `video`; `body.lexical`).

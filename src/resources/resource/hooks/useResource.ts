@@ -20,6 +20,8 @@ import {
   resourceItemQueryKeys,
   updateResourceItem,
 } from "@/resources/databridge/items";
+import { fetchResourceOpenState } from "@/resources/databridge/openState";
+import { resourceOpenView } from "@/resources/model/openState";
 import {
   listResourceVersions,
   resourceVersionQueryKeys,
@@ -43,6 +45,28 @@ export function useResource() {
     enabled: Number.isFinite(itemId),
   });
   const item = itemQuery.data ?? null;
+  const itemMissing =
+    Number.isFinite(itemId) && !itemQuery.isLoading && itemQuery.isFetched && !item;
+  const openProbeQuery = useQuery({
+    queryKey: ["org-resources", "open-state", organization.id, "item", itemId] as const,
+    queryFn: () =>
+      fetchResourceOpenState({
+        organizationId: organization.id,
+        kind: "item",
+        id: itemId,
+      }),
+    enabled: itemMissing,
+  });
+  const openView = resourceOpenView({
+    rowLoaded: item != null,
+    probe: !itemMissing
+      ? "ok"
+      : openProbeQuery.isError
+        ? "missing"
+        : openProbeQuery.isSuccess
+          ? openProbeQuery.data
+          : null,
+  });
 
   const blocksQuery = useQuery({
     queryKey: resourceBlockQueryKeys.list(itemId),
@@ -179,8 +203,9 @@ export function useResource() {
     canEdit: caps.canEdit,
     isStaff,
     versions: versionsQuery.data ?? [],
-    loading: itemQuery.isLoading || folderPending,
-    notFound: !itemQuery.isLoading && !item,
+    loading: itemQuery.isLoading || (item != null && folderPending) || openView === "loading",
+    notFound: openView === "missing",
+    forbidden: openView === "forbidden",
     error:
       itemQuery.error?.message ??
       folderQuery.error?.message ??

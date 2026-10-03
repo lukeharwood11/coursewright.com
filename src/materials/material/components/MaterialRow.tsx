@@ -2,7 +2,7 @@ import {
   ClipboardDocumentListIcon,
   DocumentIcon,
   DocumentTextIcon,
-  EyeIcon,
+  ExclamationTriangleIcon,
   FolderIcon,
   LinkIcon,
   PrinterIcon,
@@ -54,7 +54,7 @@ export function MaterialRow({
   visibility: MaterialVisibility;
   /** Resource rows open the org library instead of the material editor. */
   href?: string;
-  /** Staff-only family-access hint. Shown as an eye icon, not a paragraph. */
+  /** Staff-only family-access line. The model already chose the sentence. */
   familyAccessWarning?: string | null;
   /** Use `div` when already inside an outer `<li>` (e.g. unit reorder row). */
   as?: "li" | "div";
@@ -120,17 +120,13 @@ export function MaterialRow({
             </span>
           ) : null}
         </span>
+        {kind === "resource" && familyAccessWarning ? (
+          <span className="mt-1 inline-flex items-center gap-1 text-[12px] font-bold text-[var(--amber-deep)]">
+            <ExclamationTriangleIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            {familyAccessWarning}
+          </span>
+        ) : null}
       </Link>
-      {familyAccessWarning ? (
-        <span
-          role="img"
-          title={familyAccessWarning}
-          aria-label={familyAccessWarning}
-          className="inline-flex shrink-0 text-[var(--ink-faint)]"
-        >
-          <EyeIcon className="h-4 w-4" aria-hidden />
-        </span>
-      ) : null}
       {kind === "resource" ? null : (
         <ButtonLink
           variant="secondary"

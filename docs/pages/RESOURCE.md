@@ -33,7 +33,7 @@ Word-like layout: compact header chrome; the document editor fills most of the p
 - Document: Lexical editor for the body (majority of the viewport). **Version history** in the editor toolbar (labeled on desktop; **⋯** on small screens). Link and file types expose it in the edit header instead. Each version lists change type, **who saved**, and when; preview and **Restore this version** match course materials.
 - Cancel with unsaved changes confirms.
 
-Not found: back to Resources.
+Not found: a missing id or another organization stays “We couldn’t find that resource”, then back to Resources. A resource in this organization the viewer cannot open says “You do not have permission to view this resource.”
 
 ## Data shown
 
