@@ -8,6 +8,15 @@ export type MissingPolicy =
   | { kind: "skip"; afterMs: number }
   | { kind: "skip-on-lesson-plan-page"; afterMs: number };
 
+/**
+ * next: point something out. The user is not supposed to click it to advance.
+ * click: the spotlighted control is the move. Wait for that click.
+ * submit: the spotlight is a form. Wait for submit, not for field clicks.
+ * material: wait for the Material menu item (the click that starts the material).
+ * next-anchor: wait until the taught action reveals the next step's target.
+ */
+export type StepAdvance = "next" | "click" | "submit" | "material" | "next-anchor";
+
 export type TourStep = {
   anchor: TourAnchor;
   title: string;
@@ -17,6 +26,8 @@ export type TourStep = {
   /** Settings lives in the sidebar, which is a drawer below the md breakpoint. */
   openMobileNav: boolean;
   missing: MissingPolicy;
+  /** When "next", the tooltip keeps Next. Otherwise Next is hidden. */
+  advance: StepAdvance;
 };
 
 const ROUTE_WAIT: MissingPolicy = { kind: "skip", afterMs: 8000 };
@@ -36,6 +47,7 @@ export function stepsForTour(
         route: `/my/${slug}`,
         openMobileNav: true,
         missing: ROUTE_WAIT,
+        advance: "next",
       },
       {
         anchor: TOUR_ANCHORS.schoolDays,
@@ -44,6 +56,7 @@ export function stepsForTour(
         route: `/my/${slug}/settings`,
         openMobileNav: false,
         missing: ROUTE_WAIT,
+        advance: "next",
       },
       {
         anchor: TOUR_ANCHORS.saveOrganization,
@@ -52,6 +65,7 @@ export function stepsForTour(
         route: `/my/${slug}/settings`,
         openMobileNav: false,
         missing: ROUTE_WAIT,
+        advance: "click",
       },
       {
         anchor: TOUR_ANCHORS.peopleTab,
@@ -60,6 +74,7 @@ export function stepsForTour(
         route: `/my/${slug}/settings?tab=people`,
         openMobileNav: false,
         missing: ROUTE_WAIT,
+        advance: "next",
       },
       {
         anchor: TOUR_ANCHORS.inviteCollaborator,
@@ -68,6 +83,7 @@ export function stepsForTour(
         route: `/my/${slug}/settings?tab=people`,
         openMobileNav: false,
         missing: ROUTE_WAIT,
+        advance: "submit",
       },
     ];
   }
@@ -76,43 +92,48 @@ export function stepsForTour(
     return [
       {
         anchor: TOUR_ANCHORS.createCourse,
-        title: "Create a course",
-        body: "Start here. You’ll add a unit and a material next.",
+        title: "Create your first course!",
+        body: "Start here. You’ll add a unit and a material next, and we’ll stay with you.",
         route: `/my/${slug}`,
         openMobileNav: false,
         missing: ROUTE_WAIT,
+        advance: "click",
       },
       {
         anchor: TOUR_ANCHORS.createCourseForm,
-        title: "New course",
-        body: "Fill this in and create the course. You’ll land on the course page.",
+        title: "Make it yours",
+        body: "Fill this in and create your course. You’ll land on the course page.",
         route: newCoursePath(slug),
         openMobileNav: false,
         missing: ROUTE_WAIT,
+        advance: "next-anchor",
       },
       {
         anchor: TOUR_ANCHORS.addUnit,
-        title: "Add a unit",
-        body: "Create a new unit to start adding material.",
+        title: "Add your first unit",
+        body: "A unit is home for the material. Create one and we’ll move on with you.",
         route: null,
         openMobileNav: false,
         missing: { kind: "wait" },
+        advance: "next-anchor",
       },
       {
         anchor: TOUR_ANCHORS.addMaterial,
-        title: "Add material",
+        title: "Add your first material",
         body: "Open Add and choose Material. Assignments and quizzes can wait.",
         route: null,
         openMobileNav: false,
         missing: { kind: "wait" },
+        advance: "material",
       },
       {
         anchor: TOUR_ANCHORS.publishCourse,
-        title: "Publish the course",
-        body: "Families cannot see the course until this is published.",
+        title: "Share it when you want",
+        body: "Families can’t see this course until you publish it. There’s no rush.",
         route: null,
         openMobileNav: false,
         missing: PUBLISH_WAIT,
+        advance: "next",
       },
     ];
   }
@@ -126,6 +147,7 @@ export function stepsForTour(
       route: courseId == null ? null : coursePath(slug, courseId),
       openMobileNav: false,
       missing: ROUTE_WAIT,
+      advance: "next",
     },
     {
       anchor: TOUR_ANCHORS.saveLessonPlan,
@@ -134,6 +156,7 @@ export function stepsForTour(
       route: courseId == null ? null : newLessonPlanPath(slug, courseId),
       openMobileNav: false,
       missing: ROUTE_WAIT,
+      advance: "next",
     },
     {
       anchor: TOUR_ANCHORS.publishLessonPlan,
@@ -142,6 +165,7 @@ export function stepsForTour(
       route: null,
       openMobileNav: false,
       missing: { kind: "skip-on-lesson-plan-page", afterMs: 1200 },
+      advance: "next",
     },
     {
       anchor: TOUR_ANCHORS.previewAsFamily,
@@ -150,6 +174,7 @@ export function stepsForTour(
       route: null,
       openMobileNav: false,
       missing: ROUTE_WAIT,
+      advance: "next",
     },
   ];
 }
@@ -168,4 +193,33 @@ export function decideStep(
   const onDetail = /^\/my\/[^/]+\/courses\/\d+\/lesson-plans\/\d+$/.test(input.pathname);
   if (onDetail && input.elapsedMs >= step.missing.afterMs) return "skip";
   return "wait";
+}
+
+export type TourAction =
+  | { kind: "anchor-click" }
+  | { kind: "anchor-submit" }
+  | { kind: "menu-item"; label: string }
+  | { kind: "next-anchor-visible" };
+
+/** True when this action is the one the step is waiting on. Next steps never auto-advance. */
+export function shouldAdvanceFromAction(step: TourStep, action: TourAction): boolean {
+  switch (step.advance) {
+    case "next":
+      return false;
+    case "click":
+      return action.kind === "anchor-click";
+    case "submit":
+      return action.kind === "anchor-submit";
+    case "material":
+      return action.kind === "menu-item" && action.label === "Material";
+    case "next-anchor":
+      return action.kind === "next-anchor-visible";
+    default:
+      return false;
+  }
+}
+
+/** Visible label and accessible name for a Next button that remains. */
+export function primaryButtonName(isLastStep: boolean): "Next" | "Done" {
+  return isLastStep ? "Done" : "Next";
 }

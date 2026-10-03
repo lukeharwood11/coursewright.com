@@ -14,9 +14,9 @@ import {
   getMembershipByOrgSlug,
   orgQueryKeys,
 } from "@/organizations/databridge/memberships";
-import { tourSelector, type TourAnchor } from "@/tours/model/anchors";
+import { TOUR_ANCHORS, tourSelector, type TourAnchor } from "@/tours/model/anchors";
 import { selectActiveTour } from "@/tours/model/eligibility";
-import type { TourKey, TourStatus } from "@/tours/model/keys";
+import { TOUR_KEYS, type TourKey, type TourStatus } from "@/tours/model/keys";
 import { courseIdFromPath, locationMatches, orgSlugFromPath } from "@/tours/model/location";
 import {
   clearTourStep,
@@ -25,7 +25,12 @@ import {
   writeTourLater,
   writeTourStep,
 } from "@/tours/model/sessionStep";
-import { decideStep, stepsForTour, type TourStep } from "@/tours/model/steps";
+import {
+  decideStep,
+  shouldAdvanceFromAction,
+  stepsForTour,
+  type TourStep,
+} from "@/tours/model/steps";
 import {
   listMyTourProgress,
   productTourQueryKeys,
@@ -121,6 +126,13 @@ export function useProductTour() {
   const [domTick, setDomTick] = useState(0);
   const [laterRevision, setLaterRevision] = useState(0);
 
+  const pathCourseId = orgSlug ? courseIdFromPath(location.pathname, orgSlug) : null;
+  const lessonCourseId = pathCourseId ?? coursesQuery.data?.[0]?.id ?? null;
+  const hasCourse = (coursesQuery.data?.length ?? 0) > 0 || pathCourseId != null;
+  const firstCourseInProgress =
+    trackedKey === TOUR_KEYS.firstCourse ||
+    Boolean(userId && readTourStep(userId, TOUR_KEYS.firstCourse) != null);
+
   const ready =
     session.status === "ready" &&
     Boolean(userId && orgSlug) &&
@@ -129,9 +141,6 @@ export function useProductTour() {
     coursesQuery.isSuccess &&
     progressQuery.isSuccess;
 
-  const pathCourseId = orgSlug ? courseIdFromPath(location.pathname, orgSlug) : null;
-  const lessonCourseId = pathCourseId ?? coursesQuery.data?.[0]?.id ?? null;
-  const hasCourse = (coursesQuery.data?.length ?? 0) > 0 || pathCourseId != null;
   const seen = useMemo(() => {
     const keys = new Set((progressQuery.data ?? []).map((row) => row.tourKey));
     for (const key of dismissed) keys.add(key);
@@ -144,6 +153,7 @@ export function useProductTour() {
         parentPresentation,
         lessonPlansEnabled: Boolean(featuresQuery.data?.lessonPlans),
         hasCourse,
+        firstCourseInProgress,
         seen,
       })
     : null;
@@ -348,9 +358,70 @@ export function useProductTour() {
     target: tourSelector(step.anchor),
     title: step.title,
     content: step.body,
-    placement: "auto",
-    data: { anchor: step.anchor },
+    placement: step.advance === "material" ? "top" : "auto",
+    disableFocusTrap: step.advance !== "next",
+    hideOverlay: step.advance === "material",
+    blockTargetInteraction: step.anchor === TOUR_ANCHORS.previewAsFamily,
+    data: { anchor: step.anchor, showNext: step.advance === "next" },
   }));
+
+  useEffect(() => {
+    const step = specs[stepIndex];
+    if (!selected || deferred || !step || step.advance === "next") return;
+
+    if (step.advance === "next-anchor") {
+      const next = specs[stepIndex + 1];
+      if (
+        next &&
+        anchorIsVisible(next.anchor) &&
+        shouldAdvanceFromAction(step, { kind: "next-anchor-visible" })
+      ) {
+        advance(stepIndex);
+      }
+      return;
+    }
+
+    function onClick(event: MouseEvent) {
+      const node = event.target;
+      if (!(node instanceof Node)) return;
+      const element = node instanceof Element ? node : node.parentElement;
+      if (!element || !step) return;
+      if (step.advance === "click") {
+        const anchor = document.querySelector(tourSelector(step.anchor));
+        if (!anchor?.contains(element)) return;
+        if (!shouldAdvanceFromAction(step, { kind: "anchor-click" })) return;
+        // Let the control's own click and the form's submit finish first.
+        queueMicrotask(() => advance(stepIndex));
+        return;
+      }
+      if (step.advance === "material") {
+        const item = element.closest("[role='menuitem']");
+        if (!item) return;
+        const label = (item.textContent ?? "").replace(/\s+/g, " ").trim();
+        if (!shouldAdvanceFromAction(step, { kind: "menu-item", label })) return;
+        queueMicrotask(() => advance(stepIndex));
+      }
+    }
+
+    function onSubmit(event: Event) {
+      if (!step || step.advance !== "submit") return;
+      const form = event.target;
+      if (!(form instanceof Element)) return;
+      const anchor = document.querySelector(tourSelector(step.anchor));
+      if (!anchor?.contains(form)) return;
+      if (!shouldAdvanceFromAction(step, { kind: "anchor-submit" })) return;
+      queueMicrotask(() => advance(stepIndex));
+    }
+
+    document.addEventListener("click", onClick);
+    document.addEventListener("submit", onSubmit);
+    return () => {
+      document.removeEventListener("click", onClick);
+      document.removeEventListener("submit", onSubmit);
+    };
+    // advance reads refs. Rebinding on every identity change would drop clicks.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, deferred, stepIndex, specs, domTick]);
 
   const current = specs[stepIndex];
   const anchorVisible = domTick >= 0 && current != null && anchorIsVisible(current.anchor);

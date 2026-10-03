@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import type { CSSProperties } from "react";
 import type { TooltipRenderProps } from "react-joyride";
+import { primaryButtonName } from "@/tours/model/steps";
 import { TourAdvanceContext, TourLaterContext } from "./tourAdvance";
 
 const tooltipStyle: CSSProperties = {
@@ -44,12 +45,19 @@ const nextStyle: CSSProperties = {
   padding: "8px 14px",
 };
 
+function showsNext(data: unknown): boolean {
+  if (!data || typeof data !== "object") return true;
+  return (data as { showNext?: boolean }).showNext !== false;
+}
+
 /** Renders the tooltip only. Next, skip, and close are handled by the tour hook. */
 export function ProductTourTooltip(props: TooltipRenderProps) {
   const advance = useContext(TourAdvanceContext);
   const later = useContext(TourLaterContext);
   const { closeProps, index, isLastStep, primaryProps, skipProps, size, step, tooltipProps } =
     props;
+  const showNext = showsNext(step.data);
+  const primaryLabel = primaryButtonName(isLastStep);
 
   return (
     <div {...tooltipProps} style={tooltipStyle}>
@@ -80,17 +88,21 @@ export function ProductTourTooltip(props: TooltipRenderProps) {
             Skip
           </button>
         </div>
-        <button
-          type="button"
-          {...primaryProps}
-          style={nextStyle}
-          onClick={(event) => {
-            event.preventDefault();
-            advance(index);
-          }}
-        >
-          {isLastStep ? "Done" : "Next"}
-        </button>
+        {showNext ? (
+          <button
+            type="button"
+            {...primaryProps}
+            style={nextStyle}
+            aria-label={primaryLabel}
+            title={primaryLabel}
+            onClick={(event) => {
+              event.preventDefault();
+              advance(index);
+            }}
+          >
+            {primaryLabel}
+          </button>
+        ) : null}
       </div>
       <p style={{ color: "#78716c", fontSize: 12, margin: "8px 0 0" }}>
         {index + 1} of {size}
