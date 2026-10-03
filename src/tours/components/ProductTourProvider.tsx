@@ -1,7 +1,7 @@
 import { Joyride } from "react-joyride";
 import { useProductTour } from "@/tours/hooks/useProductTour";
 import { ProductTourTooltip } from "./ProductTourTooltip";
-import { TourAdvanceContext } from "./tourAdvance";
+import { TourAdvanceContext, TourLaterContext } from "./tourAdvance";
 
 /** One controlled Joyride for every keyed tour. Step definitions stay in model/. */
 export function ProductTourProvider() {
@@ -10,6 +10,7 @@ export function ProductTourProvider() {
 
   return (
     <TourAdvanceContext.Provider value={tour.advance}>
+      <TourLaterContext.Provider value={tour.later}>
       <Joyride
         continuous={false}
         run={tour.run}
@@ -18,6 +19,7 @@ export function ProductTourProvider() {
         onEvent={tour.onEvent}
         tooltipComponent={ProductTourTooltip}
         scrollToFirstStep
+        locale={{ skip: "Skip" }}
         options={{
           buttons: ["close", "skip", "primary"],
           closeButtonAction: "skip",
@@ -30,6 +32,7 @@ export function ProductTourProvider() {
           zIndex: 80,
         }}
       />
+      </TourLaterContext.Provider>
     </TourAdvanceContext.Provider>
   );
 }

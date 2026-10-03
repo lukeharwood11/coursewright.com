@@ -10,7 +10,7 @@ import {
   orgSlugFromPath,
 } from "./location.ts";
 import { decideStep, stepsForTour } from "./steps.ts";
-import { tourSessionKey } from "./sessionStep.ts";
+import { tourLaterKey, tourSessionKey } from "./sessionStep.ts";
 
 const unseen = new Set<string>();
 
@@ -224,4 +224,12 @@ test("path helpers ignore account settings and match search exactly", () => {
     false,
   );
   assert.equal(tourSessionKey("user-1", TOUR_KEYS.ownerSetup), "cw-product-tour-step:user-1:owner-setup-v1");
+  assert.equal(
+    tourLaterKey("user-1", TOUR_KEYS.ownerSetup),
+    "cw-product-tour-later:user-1:owner-setup-v1",
+  );
+  assert.notEqual(
+    tourLaterKey("user-1", TOUR_KEYS.ownerSetup),
+    tourSessionKey("user-1", TOUR_KEYS.ownerSetup),
+  );
 });

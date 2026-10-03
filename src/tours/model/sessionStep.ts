@@ -32,3 +32,26 @@ export function clearTourStep(userId: string, tourKey: TourKey): void {
     /* ignore */
   }
 }
+
+const LATER_PREFIX = "cw-product-tour-later:";
+
+/** Session-only hide. Not a product_tour_progress row. Not cleared on finish or skip. */
+export function tourLaterKey(userId: string, tourKey: TourKey): string {
+  return `${LATER_PREFIX}${userId}:${tourKey}`;
+}
+
+export function readTourLater(userId: string, tourKey: TourKey): boolean {
+  try {
+    return sessionStorage.getItem(tourLaterKey(userId, tourKey)) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function writeTourLater(userId: string, tourKey: TourKey): void {
+  try {
+    sessionStorage.setItem(tourLaterKey(userId, tourKey), "1");
+  } catch {
+    /* private mode / quota */
+  }
+}

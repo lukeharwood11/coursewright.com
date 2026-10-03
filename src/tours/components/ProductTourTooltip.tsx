@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import type { CSSProperties } from "react";
 import type { TooltipRenderProps } from "react-joyride";
-import { TourAdvanceContext } from "./tourAdvance";
+import { TourAdvanceContext, TourLaterContext } from "./tourAdvance";
 
 const tooltipStyle: CSSProperties = {
   background: "#fff",
@@ -47,6 +47,7 @@ const nextStyle: CSSProperties = {
 /** Renders the tooltip only. Next, skip, and close are handled by the tour hook. */
 export function ProductTourTooltip(props: TooltipRenderProps) {
   const advance = useContext(TourAdvanceContext);
+  const later = useContext(TourLaterContext);
   const { closeProps, index, isLastStep, primaryProps, skipProps, size, step, tooltipProps } =
     props;
 
@@ -64,9 +65,21 @@ export function ProductTourTooltip(props: TooltipRenderProps) {
       </div>
       <div style={{ fontSize: 14, lineHeight: 1.45, marginTop: 8 }}>{step.content}</div>
       <div style={{ alignItems: "center", display: "flex", justifyContent: "space-between", marginTop: 14 }}>
-        <button type="button" {...skipProps} style={skipStyle}>
-          Skip
-        </button>
+        <div style={{ display: "flex", gap: 12 }}>
+          <button
+            type="button"
+            style={skipStyle}
+            onClick={(event) => {
+              event.preventDefault();
+              later();
+            }}
+          >
+            Later
+          </button>
+          <button type="button" {...skipProps} style={skipStyle}>
+            Skip
+          </button>
+        </div>
         <button
           type="button"
           {...primaryProps}

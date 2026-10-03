@@ -18,7 +18,13 @@ import { tourSelector, type TourAnchor } from "@/tours/model/anchors";
 import { selectActiveTour } from "@/tours/model/eligibility";
 import type { TourKey, TourStatus } from "@/tours/model/keys";
 import { courseIdFromPath, locationMatches, orgSlugFromPath } from "@/tours/model/location";
-import { clearTourStep, readTourStep, writeTourStep } from "@/tours/model/sessionStep";
+import {
+  clearTourStep,
+  readTourLater,
+  readTourStep,
+  writeTourLater,
+  writeTourStep,
+} from "@/tours/model/sessionStep";
 import { decideStep, stepsForTour, type TourStep } from "@/tours/model/steps";
 import {
   listMyTourProgress,
@@ -113,6 +119,7 @@ export function useProductTour() {
   const [trackedKey, setTrackedKey] = useState<TourKey | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [domTick, setDomTick] = useState(0);
+  const [laterRevision, setLaterRevision] = useState(0);
 
   const ready =
     session.status === "ready" &&
@@ -149,18 +156,24 @@ export function useProductTour() {
     [selected, orgSlug, lessonCourseId],
   );
 
+  const deferred =
+    laterRevision >= 0 &&
+    selected != null &&
+    userId != null &&
+    readTourLater(userId, selected);
+
   const pendingNav = useRef<number | null>(null);
   if (selected !== trackedKey) {
     setTrackedKey(selected);
-    if (selected && userId && orgSlug) {
+    if (selected && userId && orgSlug && !readTourLater(userId, selected)) {
       const count = stepsForTour(selected, { orgSlug, courseId: lessonCourseId }).length;
       const saved = readTourStep(userId, selected);
       const start = saved != null && saved < count ? saved : 0;
       setStepIndex(start);
       pendingNav.current = start;
     } else {
-      setStepIndex(0);
       pendingNav.current = null;
+      if (!selected) setStepIndex(0);
     }
   }
 
@@ -195,19 +208,19 @@ export function useProductTour() {
   }
 
   useEffect(() => {
-    if (!selected || pendingNav.current == null) return;
+    if (!selected || deferred || pendingNav.current == null) return;
     const step = specs[pendingNav.current];
     pendingNav.current = null;
     if (step) prepare(step);
     // prepare reads the latest location ref; re-running on every location change would fight the user.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected, specs, stepIndex]);
+  }, [selected, deferred, specs, stepIndex]);
 
   useEffect(() => {
-    if (!userId || !selected) return;
+    if (!userId || !selected || deferred) return;
     if (stepIndex < 0 || stepIndex >= specs.length) return;
     writeTourStep(userId, selected, stepIndex);
-  }, [userId, selected, stepIndex, specs.length]);
+  }, [userId, selected, deferred, stepIndex, specs.length]);
 
   useEffect(() => {
     return () => {
@@ -238,11 +251,11 @@ export function useProductTour() {
 
   useEffect(() => {
     const step = specs[stepIndex];
-    if (!selected || !step?.openMobileNav) return;
+    if (!selected || deferred || !step?.openMobileNav) return;
     if (!window.matchMedia("(max-width: 767px)").matches) return;
     if (anchorIsVisible(step.anchor)) return;
     useSidebarStore.getState().setMobileOpen(true);
-  }, [selected, stepIndex, specs, location.pathname, domTick]);
+  }, [selected, deferred, stepIndex, specs, location.pathname, domTick]);
 
   async function persist(status: TourStatus) {
     const key = selectedRef.current;
@@ -278,6 +291,16 @@ export function useProductTour() {
     // persist closes over the latest refs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, stepIndex, specs.length]);
+
+  function later() {
+    const key = selectedRef.current;
+    const user = userIdRef.current;
+    if (!key || !user) return;
+    writeTourLater(user, key);
+    tokenRef.current += 1;
+    advancing.current = false;
+    setLaterRevision((revision) => revision + 1);
+  }
 
   function advance(index: number) {
     const current = specsRef.current;
@@ -331,7 +354,7 @@ export function useProductTour() {
 
   const current = specs[stepIndex];
   const anchorVisible = domTick >= 0 && current != null && anchorIsVisible(current.anchor);
-  const run = Boolean(selected) && stepIndex < specs.length && anchorVisible;
+  const run = Boolean(selected) && !deferred && stepIndex < specs.length && anchorVisible;
 
-  return { run, steps, stepIndex, advance, onEvent };
+  return { run, steps, stepIndex, advance, later, onEvent };
 }

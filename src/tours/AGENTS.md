@@ -13,6 +13,7 @@ Product tours (react-joyride). One provider, three keyed tours.
 
 - `product_tour_progress` is the seen record. No localStorage source of truth. No per-tour migration.
 - Upsert only when a tour finishes or is skipped (close counts as skipped). Do not write on step changes.
+- Later hides that tour for this browser session only (`cw-product-tour-later:`). It does not upsert. Do not treat it as a seen row. Close stays skipped.
 - In-progress `stepIndex` may sit in sessionStorage. That is ephemeral.
 - Tour keys and `data-tour` anchors are constants. A redesigned tour bumps the key suffix (`-v2`).
 - One tour at a time, in `TOUR_ORDER`. Do not spotlight a stand-in when a target is gone.
